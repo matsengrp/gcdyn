@@ -6,18 +6,18 @@ from jax.scipy.special import expit
 import ete3
 import matplotlib as mp
 import matplotlib.pyplot as plt
+
 # import mushi.optimization as opt
 
 
 class GC_tree:
-
     def __init__(self, T, key, θ, μ, m, ρ):
         key, _ = random.split(key)
         self.θ = θ
         self.μ = μ
         self.m = m
         self.ρ = ρ
-        
+
         while True:
             # initialize root
             tree = ete3.Tree(name=0, dist=0)
@@ -46,13 +46,18 @@ class GC_tree:
             child = ete3.Tree(name=tree.name + 1, dist=t)
             child.add_feature("x", tree.x)
             child.add_feature("t", tree.t + t)
-            child.add_feature("event", "sampled" if random.uniform(event_key) < self.ρ else "unsampled")
+            child.add_feature(
+                "event",
+                "sampled" if random.uniform(event_key) < self.ρ else "unsampled",
+            )
             tree.add_child(child)
             return
 
         possible_events = ["birth", "death", "mutation"]
         event_probabilities = np.array([λ_x, self.μ, self.m]) / Λ
-        event = possible_events[random.choice(event_key, len(possible_events), p=event_probabilities)]
+        event = possible_events[
+            random.choice(event_key, len(possible_events), p=event_probabilities)
+        ]
 
         child = ete3.Tree(name=tree.name + 1, dist=τ)
         child.add_feature("t", tree.t + τ)
@@ -78,10 +83,13 @@ class GC_tree:
 
         # define the minimum and maximum values for our colormap
         # normalizer = mp.colors.Normalize(vmin=-10, vmax=10)
-        normalizer = mp.colors.CenteredNorm(vcenter=0,
-                                            halfrange=max(abs(node.x) for node in self.tree.traverse()))
-        colormap = {node.name: mp.colors.to_hex(cmap(normalizer(node.x)))
-                    for node in self.tree.traverse()}
+        normalizer = mp.colors.CenteredNorm(
+            vcenter=0, halfrange=max(abs(node.x) for node in self.tree.traverse())
+        )
+        colormap = {
+            node.name: mp.colors.to_hex(cmap(normalizer(node.x)))
+            for node in self.tree.traverse()
+        }
 
         ts = ete3.TreeStyle()
         ts.scale = 100
@@ -101,7 +109,7 @@ class GC_tree:
             node.set_style(nstyle)
 
         self.tree.render(file_name, tree_style=ts)
-    
+
     def log_likelihood(self):
         result = 0
         for node in self.tree.children[0].traverse():
@@ -112,7 +120,9 @@ class GC_tree:
             logΛ = np.log(Λ)
             if node.event in ("sampled", "unsampled"):
                 # exponential survival function (no event before sampling time), then sampling probability
-                result += - Λ * Δt + np.log(self.ρ if node.event == "sampled" else 1 - self.ρ)
+                result += -Λ * Δt + np.log(
+                    self.ρ if node.event == "sampled" else 1 - self.ρ
+                )
             else:
                 # exponential density for event time
                 result += logΛ - Λ * Δt

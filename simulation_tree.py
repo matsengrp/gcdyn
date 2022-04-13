@@ -23,7 +23,7 @@ def main():
     for i in range(n_trees):
         key, _ = random.split(key)
         tree = gc_tree.GC_tree(T, key, θ, μ, m, ρ)
-        tree.draw_tree(f'tree {i + 1}.svg')
+        tree.draw_tree(f"tree {i + 1}.svg")
 
 
 if __name__ == "__main__":
