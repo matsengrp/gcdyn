@@ -2,6 +2,7 @@ import jax.numpy as np
 from jax import random
 
 import gc_tree
+import parameters
 
 
 def main():
@@ -18,11 +19,13 @@ def main():
     # sampling efficiency
     ρ = 0.5
 
+    params = parameters.Parameters(θ, μ, m, ρ)
+
     n_trees = 10
 
     for i in range(n_trees):
         key, _ = random.split(key)
-        tree = gc_tree.GC_tree(T, key, θ, μ, m, ρ)
+        tree = gc_tree.GC_tree(T, key, params)
         tree.draw_tree(f"tree {i + 1}.svg")
 
 

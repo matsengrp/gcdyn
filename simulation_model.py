@@ -1,13 +1,11 @@
 import jax.numpy as np
-from jax import random
 
-import gc_forest
+import gc_model
+import parameters
 
 
 def main():
     T = 3
-    seed = 0
-    key = random.PRNGKey(seed)
 
     # response function parameters
     θ = np.array([3, 1, 0], dtype=float)
@@ -18,9 +16,11 @@ def main():
     # sampling efficiency
     ρ = 0.5
 
-    n_trees = 10
+    params = parameters.Parameters(θ, μ, m, ρ)
 
-    forest = gc_forest.GC_forest(T, key, θ, μ, m, ρ, n_trees)
+    model = gc_model.GC_model(params)
+    model.simulate(T, 3)
+    print(model.log_likelihood())
 
 
 if __name__ == "__main__":

@@ -9,14 +9,13 @@ import matplotlib.pyplot as plt
 
 # import mushi.optimization as opt
 
+import parameters
+
 
 class GC_tree:
-    def __init__(self, T, key, θ, μ, m, ρ):
+    def __init__(self, T, key, params):
         key, _ = random.split(key)
-        self.θ = θ
-        self.μ = μ
-        self.m = m
-        self.ρ = ρ
+        self.params = params
 
         while True:
             # initialize root
@@ -34,12 +33,12 @@ class GC_tree:
 
     def λ(self, x):
         r"""Birth rate of phenotype x"""
-        return self.θ[0] * expit(self.θ[1] * (x - self.θ[2]))
+        return self.params.θ[0] * expit(self.params.θ[1] * (x - self.params.θ[2]))
 
     def evolve(self, tree, t, key):
         r"""Evolve an ETE Tree node with a phenotype attribute for time t"""
         λ_x = self.λ(tree.x)
-        Λ = λ_x + self.μ + self.m
+        Λ = λ_x + self.params.μ + self.params.m
         time_key, event_key = random.split(key)
         τ = random.exponential(time_key) / Λ
         if τ > t:
@@ -48,13 +47,13 @@ class GC_tree:
             child.add_feature("t", tree.t + t)
             child.add_feature(
                 "event",
-                "sampled" if random.uniform(event_key) < self.ρ else "unsampled",
+                "sampled" if random.uniform(event_key) < self.params.ρ else "unsampled",
             )
             tree.add_child(child)
             return
 
         possible_events = ["birth", "death", "mutation"]
-        event_probabilities = np.array([λ_x, self.μ, self.m]) / Λ
+        event_probabilities = np.array([λ_x, self.params.μ, self.params.m]) / Λ
         event = possible_events[
             random.choice(event_key, len(possible_events), p=event_probabilities)
         ]
@@ -77,7 +76,7 @@ class GC_tree:
             raise ValueError(f"unknown event")
         tree.add_child(child)
 
-    def draw_tree(self, file_name):
+    def decorate(self):
         cmap = "coolwarm_r"
         cmap = mp.cm.get_cmap(cmap)
 
@@ -91,12 +90,6 @@ class GC_tree:
             for node in self.tree.traverse()
         }
 
-        ts = ete3.TreeStyle()
-        ts.scale = 100
-        ts.branch_vertical_margin = 3
-        ts.show_leaf_name = False
-        ts.show_scale = False
-
         for node in self.tree.traverse():
             nstyle = ete3.NodeStyle()
             nstyle["hz_line_color"] = colormap[node.name]
@@ -108,32 +101,14 @@ class GC_tree:
                 nstyle["size"] = 0
             node.set_style(nstyle)
 
-        self.tree.render(file_name, tree_style=ts)
-
-    def log_likelihood(self):
-        result = 0
-        for node in self.tree.children[0].traverse():
-            x = node.up.x
-            Δt = node.dist
-            λ_x = self.λ(x)
-            Λ = λ_x + self.μ + self.m
-            logΛ = np.log(Λ)
-            if node.event in ("sampled", "unsampled"):
-                # exponential survival function (no event before sampling time), then sampling probability
-                result += -Λ * Δt + np.log(
-                    self.ρ if node.event == "sampled" else 1 - self.ρ
-                )
-            else:
-                # exponential density for event time
-                result += logΛ - Λ * Δt
-                # multinomial event probability
-                if node.event == "birth":
-                    result += np.log(λ_x) - logΛ
-                elif node.event == "death":
-                    result += np.log(self.μ) - logΛ
-                elif node.event == "mutation":
-                    Δx = node.x - x
-                    result += np.log(self.m) - logΛ + norm.logpdf(Δx)
-                else:
-                    raise ValueError(f"unknown event {node.event}")
-        return result
+    def draw_tree(self, output_file=None):
+        self.decorate()
+        ts = ete3.TreeStyle()
+        ts.scale = 100
+        ts.branch_vertical_margin = 3
+        ts.show_leaf_name = False
+        ts.show_scale = False
+        if output_file is None:
+            display(self.tree.render("%%inline", tree_style=ts))
+        else:
+            self.tree.render(output_file, tree_style=ts)
