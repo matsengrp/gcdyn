@@ -2,8 +2,8 @@ import jax.numpy as np
 from jax import random
 from jax.scipy.stats import norm
 
-import gc_tree
-import parameters
+import gcdyn.gc_tree
+import gcdyn.parameters
 
 
 class GC_model:

@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 # import mushi.optimization as opt
 
-import parameters
+import gcdyn.parameters
 
 
 class GC_tree:

@@ -1,6 +1,6 @@
 from jax import random
 
-import gc_tree
+import gcdyn.gc_tree
 
 
 class GC_forest:
