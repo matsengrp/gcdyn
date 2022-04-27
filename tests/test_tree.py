@@ -25,4 +25,4 @@ def test_tree():
 
     for i in range(n_trees):
         key, _ = random.split(key)
-        tree = GC_tree(T, key, params)
+        GC_tree(T, key, params)
