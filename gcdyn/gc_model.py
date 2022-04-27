@@ -3,6 +3,7 @@ from jax import random
 from jax.scipy.stats import norm
 
 from gcdyn.gc_tree import GC_tree
+
 # from gcdyn.parameters import Parameters
 
 
