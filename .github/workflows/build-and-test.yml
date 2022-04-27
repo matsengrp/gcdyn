@@ -18,9 +18,9 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v2
-
-      - name: Install Pandoc
-        uses: r-lib/actions/setup-pandoc@v2
+      # 
+      # - name: Install Pandoc
+      #   uses: r-lib/actions/setup-pandoc@v2
 
       - name: Install
         run: make install
