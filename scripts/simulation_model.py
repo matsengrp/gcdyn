@@ -1,7 +1,7 @@
 import jax.numpy as np
 
-import gc_model
-import parameters
+from gcdyn.gc_model import GC_model
+from gcdyn.parameters import Parameters
 
 
 def main():
@@ -16,9 +16,9 @@ def main():
     # sampling efficiency
     ρ = 0.5
 
-    params = parameters.Parameters(θ, μ, m, ρ)
+    params = Parameters(θ, μ, m, ρ)
 
-    model = gc_model.GC_model(params)
+    model = GC_model(params)
     model.simulate(T, 3)
     print(model.log_likelihood())
 

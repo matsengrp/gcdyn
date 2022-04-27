@@ -1,6 +1,6 @@
 from jax import random
 
-import gcdyn.gc_tree
+from gcdyn.gc_tree import GC_tree
 
 
 class GC_forest:
@@ -14,7 +14,7 @@ class GC_forest:
     def create_trees(self, T, key, n_trees):
         for i in range(n_trees):
             key, _ = random.split(key)
-            tree = gc_tree.GC_tree(T, key, self.params)
+            tree = GC_tree(T, key, self.params)
             self.trees.append(tree)
 
     def draw_forest(self):

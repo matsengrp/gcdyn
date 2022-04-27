@@ -2,8 +2,8 @@ import jax.numpy as np
 from jax import random
 from jax.scipy.stats import norm
 
-import gcdyn.gc_tree
-import gcdyn.parameters
+from gcdyn.gc_tree import GC_tree
+# from gcdyn.parameters import Parameters
 
 
 class GC_model:
@@ -20,7 +20,7 @@ class GC_model:
         trees = []
         for i in range(n_trees):
             key, _ = random.split(key)
-            tree = gc_tree.GC_tree(T, key, self.params)
+            tree = GC_tree(T, key, self.params)
             trees.append(tree)
         self.trees = trees
 
