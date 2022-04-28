@@ -1,0 +1,26 @@
+gcdyn.gc\_forest.GC\_forest
+===========================
+
+.. currentmodule:: gcdyn.gc_forest
+
+.. autoclass:: GC_forest
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~GC_forest.create_trees
+      ~GC_forest.draw_forest
+   
+   
+
+   
+   
+   

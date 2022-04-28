@@ -1,0 +1,32 @@
+﻿gcdyn.parameters
+================
+
+.. automodule:: gcdyn.parameters
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+   
+      Parameters
+   
+   
+
+   
+   
+   
+
+
+

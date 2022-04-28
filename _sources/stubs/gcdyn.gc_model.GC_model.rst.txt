@@ -1,0 +1,27 @@
+gcdyn.gc\_model.GC\_model
+=========================
+
+.. currentmodule:: gcdyn.gc_model
+
+.. autoclass:: GC_model
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~GC_model.fit
+      ~GC_model.log_likelihood
+      ~GC_model.simulate
+   
+   
+
+   
+   
+   

@@ -1,0 +1,28 @@
+gcdyn.gc\_tree.GC\_tree
+=======================
+
+.. currentmodule:: gcdyn.gc_tree
+
+.. autoclass:: GC_tree
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~GC_tree.decorate
+      ~GC_tree.draw_tree
+      ~GC_tree.evolve
+      ~GC_tree.λ
+   
+   
+
+   
+   
+   
