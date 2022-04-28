@@ -1,6 +1,5 @@
 # gcdyn
 
-## Setting up the environment
+A package for modeling affinity-fitness response in germinal centers.
 
-    conda env create -f environment.yml
-    conda activate gcdyn
+Documentation: https://matsengrp.github.io/gcdyn/

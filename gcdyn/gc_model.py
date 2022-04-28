@@ -2,8 +2,9 @@ import jax.numpy as np
 from jax import random
 from jax.scipy.stats import norm
 
-import gc_tree
-import parameters
+from gcdyn.gc_tree import GC_tree
+
+# from gcdyn.parameters import Parameters
 
 
 class GC_model:
@@ -12,9 +13,7 @@ class GC_model:
         self.trees = None
 
     def simulate(self, T, n_trees):
-        """
-        Creates a collection of GC_tree given a key
-        """
+        """Creates a collection of GC_tree given a key."""
         # call GC_tree constructor
         # evolve the tree -- call method in tree class
         seed = 0
@@ -22,14 +21,12 @@ class GC_model:
         trees = []
         for i in range(n_trees):
             key, _ = random.split(key)
-            tree = gc_tree.GC_tree(T, key, self.params)
+            tree = GC_tree(T, key, self.params)
             trees.append(tree)
         self.trees = trees
 
     def log_likelihood(self):
-        """
-        Find log likelihood of simulated trees
-        """
+        """Find log likelihood of simulated trees."""
         result = 0
         for tree in self.trees:
             for node in tree.tree.children[0].traverse():
@@ -59,7 +56,5 @@ class GC_model:
         return result
 
     def fit(self):
-        """
-        Given a collection of GC_trees, fit the parameters of the model
-        """
+        """Given a collection of GC_trees, fit the parameters of the model."""
         pass

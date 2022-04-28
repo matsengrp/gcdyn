@@ -1,15 +1,17 @@
 import jax.numpy as np
 from jax import random
-from jax.scipy.stats import norm
-from jax import jit, grad
+
+# from jax.scipy.stats import norm
+# from jax import jit, grad
 from jax.scipy.special import expit
 import ete3
 import matplotlib as mp
-import matplotlib.pyplot as plt
+
+# import matplotlib.pyplot as plt
 
 # import mushi.optimization as opt
 
-import parameters
+# from gcdyn.parameters import Parameters
 
 
 class GC_tree:
@@ -73,7 +75,7 @@ class GC_tree:
             child.x += random.normal(mutation_key)
             self.evolve(child, t - τ, child_key)
         else:
-            raise ValueError(f"unknown event")
+            raise ValueError("unknown event")
         tree.add_child(child)
 
     def decorate(self):
@@ -109,6 +111,6 @@ class GC_tree:
         ts.show_leaf_name = False
         ts.show_scale = False
         if output_file is None:
-            display(self.tree.render("%%inline", tree_style=ts))
+            self.tree.render("%%inline", tree_style=ts)
         else:
             self.tree.render(output_file, tree_style=ts)
