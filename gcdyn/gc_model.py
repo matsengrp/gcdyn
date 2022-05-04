@@ -4,16 +4,26 @@ from jax.scipy.stats import norm
 
 from gcdyn.gc_tree import GC_tree
 
-# from gcdyn.parameters import Parameters
+from gcdyn.parameters import Parameters
 
 
 class GC_model:
-    def __init__(self, params):
+    r"""A class that represents a GC model
+
+    Args:
+        params (Parameters): model parameters
+    """
+    def __init__(self, params: Parameters):
         self.params = params
         self.trees = None
 
-    def simulate(self, T, n_trees):
-        """Creates a collection of GC_tree given a key."""
+    def simulate(self, T: float, n_trees: int):
+        r"""Creates a collection of GC_tree given a key.
+
+        Args:
+            T (float): simulation sampling time
+            n_trees (int): number of GC trees in the model
+        """
         # call GC_tree constructor
         # evolve the tree -- call method in tree class
         seed = 0
@@ -26,7 +36,14 @@ class GC_model:
         self.trees = trees
 
     def log_likelihood(self):
-        """Find log likelihood of simulated trees."""
+        r"""Find log likelihood of simulated trees.
+
+        Raises:
+            ValueError: raised when an unknown event occurred
+
+        Returns:
+            float: log likelihood of the GC tree in the model
+        """
         result = 0
         for tree in self.trees:
             for node in tree.tree.children[0].traverse():
@@ -56,5 +73,9 @@ class GC_model:
         return result
 
     def fit(self):
-        """Given a collection of GC_trees, fit the parameters of the model."""
-        pass
+        r"""Given a collection of GC_trees, fit the parameters of the model.
+
+        Raises:
+            NotImplementedError: not yet implemented
+        """
+        raise NotImplementedError("not yet implemented")
