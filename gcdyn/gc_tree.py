@@ -140,6 +140,6 @@ class GC_tree:
         ts.show_leaf_name = False
         ts.show_scale = False
         if output_file is None:
-            display(self.tree.render("%%inline", tree_style=ts))
+            self.tree.render("%%inline", tree_style=ts)
         else:
             self.tree.render(output_file, tree_style=ts)
