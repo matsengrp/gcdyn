@@ -16,6 +16,7 @@ class GC_tree:
         key (int): seed to generate random key
         params (Parameters): model parameters
     """
+
     def __init__(self, T: float, key: int, params: Parameters):
         key, _ = random.split(key)
         self.params: Parameters = params
@@ -124,7 +125,7 @@ class GC_tree:
                 nstyle["size"] = 0
             node.set_style(nstyle)
 
-    def draw_tree(self, output_file: str=None):
+    def draw_tree(self, output_file: str = None):
         r"""Visualizes the tree
 
         If output file is given, tree visualization is saved to the file.

@@ -13,6 +13,7 @@ class Parameters:
         m (float): mutation rate
         ρ (float): sampling efficiency
     """
+
     def __init__(self, θ: np.array, μ: float, m: float, ρ: float):
         self.θ = θ
         self.μ = μ

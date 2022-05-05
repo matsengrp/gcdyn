@@ -13,6 +13,7 @@ class GC_model:
     Args:
         params (Parameters): model parameters
     """
+
     def __init__(self, params: Parameters):
         self.params = params
         self.trees = None

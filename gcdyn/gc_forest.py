@@ -13,6 +13,7 @@ class GC_forest:
         params (Parameters): model parameters
         n_trees (int): number of GC trees in GC forest
     """
+
     def __init__(self, T: float, key: int, params: Parameters, n_trees: int):
         key, _ = random.split(key)
         self.params = params
@@ -33,7 +34,7 @@ class GC_forest:
             tree = GC_tree(T, key, self.params)
             self.forest.append(tree)
 
-    def draw_forest(self, folder_name: str=None):
+    def draw_forest(self, folder_name: str = None):
         r"""Visualizes the forest
 
         If folder_name is given, tree visualizations are saved in the folder.
