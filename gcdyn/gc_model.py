@@ -11,7 +11,7 @@ class GC_model:
     r"""A class that represents a GC model
 
     Args:
-        params (Parameters): model parameters
+        params: model parameters
     """
 
     def __init__(self, params: Parameters):
@@ -22,8 +22,8 @@ class GC_model:
         r"""Creates a collection of GC_tree given a key.
 
         Args:
-            T (float): simulation sampling time
-            n_trees (int): number of GC trees in the model
+            T: simulation sampling time
+            n_trees: number of GC trees in the model
         """
         # call GC_tree constructor
         # evolve the tree -- call method in tree class

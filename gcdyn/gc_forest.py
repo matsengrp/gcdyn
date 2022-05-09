@@ -8,10 +8,10 @@ class GC_forest:
     r"""A class that represents a collection of GC tree
 
     Args:
-        T (float): simulation sampling time
-        key (int): seed to generate random key
-        params (Parameters): model parameters
-        n_trees (int): number of GC trees in GC forest
+        T: simulation sampling time
+        key: seed to generate random key
+        params: model parameters
+        n_trees: number of GC trees in GC forest
     """
 
     def __init__(self, T: float, key: int, params: Parameters, n_trees: int):
@@ -25,9 +25,9 @@ class GC_forest:
         r"""Create n_Trees number of GC tree
 
         Args:
-            T (float): simulation sampling time
-            key (int): seed to generate random key
-            n_trees (int): number of GC trees to create
+            T: simulation sampling time
+            key: seed to generate random key
+            n_trees: number of GC trees to create
         """
         for i in range(n_trees):
             key, _ = random.split(key)
@@ -38,10 +38,10 @@ class GC_forest:
         r"""Visualizes the forest
 
         If folder_name is given, tree visualizations are saved in the folder.
-        If not, tree visualizations are randered to the notebook.
+        If not, tree visualizations are rendered to the notebook.
 
         Args:
-            folder_name (str): name of the output folder of the tree visualizations. Defaults to None.
+            folder_name: name of the output folder of the tree visualizations. Defaults to None.
         """
         for i, tree in enumerate(self.forest, 1):
             if folder_name is None:

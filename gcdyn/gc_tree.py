@@ -12,9 +12,9 @@ class GC_tree:
     r"""A class that represents one complete GC tree
 
     Args:
-        T (float): simulation sampling time
-        key (int): seed to generate random key
-        params (Parameters): model parameters
+        T: simulation sampling time
+        key: seed to generate random key
+        params: model parameters
     """
 
     def __init__(self, T: float, key: int, params: Parameters):
@@ -39,7 +39,7 @@ class GC_tree:
         r"""Birth rate of phenotype x
 
         Args:
-            x (float): phenotype
+            x: phenotype
 
         Returns:
             float: birth rate
@@ -50,9 +50,9 @@ class GC_tree:
         r"""Evolve an ETE Tree node with a phenotype attribute for time t
 
         Args:
-            tree (ete3.Tree):initial tree to evolve
-            t (float): sampling time
-            key (int): seed to generate random key
+            tree:initial tree to evolve
+            t: sampling time
+            key: seed to generate random key
 
         Raises:
             ValueError: raised when an unknown event occurred
@@ -132,7 +132,7 @@ class GC_tree:
         If not, tree visualization is rendered to the notebook.
 
         Args:
-            output_file (str): name of the output file of the tree visualization. Defaults to None.
+            output_file: name of the output file of the tree visualization. Defaults to None.
         """
         self.decorate()
         ts = ete3.TreeStyle()
