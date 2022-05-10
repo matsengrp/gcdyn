@@ -1,23 +1,25 @@
 import jax.numpy as np
 from jax import random
 
-# from jax.scipy.stats import norm
-# from jax import jit, grad
 from jax.scipy.special import expit
 import ete3
 import matplotlib as mp
 
-# import matplotlib.pyplot as plt
-
-# import mushi.optimization as opt
-
-# from gcdyn.parameters import Parameters
+from gcdyn.parameters import Parameters
 
 
 class GC_tree:
-    def __init__(self, T, key, params):
+    r"""A class that represents one complete GC tree
+
+    Args:
+        T: simulation sampling time
+        key: seed to generate random key
+        params: model parameters
+    """
+
+    def __init__(self, T: float, key: int, params: Parameters):
         key, _ = random.split(key)
-        self.params = params
+        self.params: Parameters = params
 
         while True:
             # initialize root
@@ -31,14 +33,27 @@ class GC_tree:
             if 50 < len(tree) < 96:
                 print(f"size {len(tree)}")
                 break
-        self.tree = tree
+        self.tree: ete3.Tree = tree
 
-    def λ(self, x):
-        r"""Birth rate of phenotype x"""
+    def λ(self, x: float):
+        r"""Birth rate of phenotype x
+
+        Args:
+            x: phenotype
+
+        Returns:
+            float: birth rate
+        """
         return self.params.θ[0] * expit(self.params.θ[1] * (x - self.params.θ[2]))
 
-    def evolve(self, tree, t, key):
-        r"""Evolve an ETE Tree node with a phenotype attribute for time t"""
+    def evolve(self, tree: ete3.Tree, t: float, key: int):
+        r"""Evolve an ETE Tree node with a phenotype attribute for time t
+
+        Args:
+            tree:initial tree to evolve
+            t: sampling time
+            key: seed to generate random key
+        """
         λ_x = self.λ(tree.x)
         Λ = λ_x + self.params.μ + self.params.m
         time_key, event_key = random.split(key)
@@ -79,6 +94,10 @@ class GC_tree:
         tree.add_child(child)
 
     def decorate(self):
+        r"""Add node style to the tree
+
+        Leaf node that is sampled is indicated as green
+        """
         cmap = "coolwarm_r"
         cmap = mp.cm.get_cmap(cmap)
 
@@ -103,7 +122,15 @@ class GC_tree:
                 nstyle["size"] = 0
             node.set_style(nstyle)
 
-    def draw_tree(self, output_file=None):
+    def draw_tree(self, output_file: str = None):
+        r"""Visualizes the tree
+
+        If output file is given, tree visualization is saved to the file.
+        If not, tree visualization is rendered to the notebook.
+
+        Args:
+            output_file: name of the output file of the tree visualization. Defaults to None.
+        """
         self.decorate()
         ts = ete3.TreeStyle()
         ts.scale = 100

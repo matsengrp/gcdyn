@@ -1,10 +1,19 @@
+import jax.numpy as np
+
 from dataclasses import dataclass
 
 
 @dataclass
 class Parameters:
-    def __init__(self, θ, μ, m, ρ):
-        self.θ = θ
-        self.μ = μ
-        self.m = m
-        self.ρ = ρ
+    r"""A dataclass that represents model parameter for GC tree and GC forest
+
+    Attributes:
+        θ: response function parameters used to find birth rate
+        μ: death rate
+        m: mutation rate
+        ρ: sampling efficiency
+    """
+    θ: np.array
+    μ: float
+    m: float
+    ρ: float
