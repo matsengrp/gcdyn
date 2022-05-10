@@ -93,6 +93,16 @@
 <dt class="sig sig-object py" id="gcdyn.gc_tree.GC_tree">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.gc_tree.</span></span><span class="sig-name descname"><span class="pre">GC_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gc_tree.html#GC_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gc_tree.GC_tree" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A class that represents one complete GC tree</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – simulation sampling time</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – seed to generate random key</p></li>
+<li><p><strong>params</strong> (<a class="reference internal" href="gcdyn.parameters.Parameters.html#gcdyn.parameters.Parameters" title="gcdyn.parameters.Parameters"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameters</span></code></a>) – model parameters</p></li>
+</ul>
+</dd>
+</dl>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <colgroup>
@@ -100,11 +110,11 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">decorate</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.gc_tree.GC_tree.decorate" title="gcdyn.gc_tree.GC_tree.decorate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decorate</span></code></a></p></td>
+<td><p>Add node style to the tree</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">draw_tree</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.gc_tree.GC_tree.draw_tree" title="gcdyn.gc_tree.GC_tree.draw_tree"><code class="xref py py-obj docutils literal notranslate"><span class="pre">draw_tree</span></code></a></p></td>
+<td><p>Visualizes the tree</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.gc_tree.GC_tree.evolve" title="gcdyn.gc_tree.GC_tree.evolve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evolve</span></code></a></p></td>
 <td><p>Evolve an ETE Tree node with a phenotype attribute for time t</p></td>
@@ -118,12 +128,52 @@
 <dt class="sig sig-object py" id="gcdyn.gc_tree.GC_tree.">
 <span id="gcdyn.gc_tree.GC_tree.λ"></span><span class="sig-name descname"><span class="pre">λ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gc_tree.html#GC_tree.λ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gc_tree.GC_tree." title="Permalink to this definition"></a></dt>
 <dd><p>Birth rate of phenotype x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – phenotype</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>birth rate</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.gc_tree.GC_tree.evolve">
 <span class="sig-name descname"><span class="pre">evolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gc_tree.html#GC_tree.evolve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gc_tree.GC_tree.evolve" title="Permalink to this definition"></a></dt>
 <dd><p>Evolve an ETE Tree node with a phenotype attribute for time t</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tree</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code>) – initial tree to evolve</p></li>
+<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – sampling time</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – seed to generate random key</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.gc_tree.GC_tree.decorate">
+<span class="sig-name descname"><span class="pre">decorate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gc_tree.html#GC_tree.decorate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gc_tree.GC_tree.decorate" title="Permalink to this definition"></a></dt>
+<dd><p>Add node style to the tree</p>
+<p>Leaf node that is sampled is indicated as green</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.gc_tree.GC_tree.draw_tree">
+<span class="sig-name descname"><span class="pre">draw_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gc_tree.html#GC_tree.draw_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gc_tree.GC_tree.draw_tree" title="Permalink to this definition"></a></dt>
+<dd><p>Visualizes the tree</p>
+<p>If output file is given, tree visualization is saved to the file.
+If not, tree visualization is rendered to the notebook.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – name of the output file of the tree visualization. Defaults to None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

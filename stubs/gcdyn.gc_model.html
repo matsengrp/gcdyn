@@ -96,10 +96,60 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.gc_model.GC_model.html#gcdyn.gc_model.GC_model" title="gcdyn.gc_model.GC_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GC_model</span></code></a></p></td>
-<td><p></p></td>
+<td><p>A class that represents a GC model</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py class">
+<dt class="sig sig-object py" id="gcdyn.gc_model.GC_model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.gc_model.</span></span><span class="sig-name descname"><span class="pre">GC_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gc_model.html#GC_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gc_model.GC_model" title="Permalink to this definition"></a></dt>
+<dd><p>A class that represents a GC model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference internal" href="gcdyn.parameters.Parameters.html#gcdyn.parameters.Parameters" title="gcdyn.parameters.Parameters"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameters</span></code></a>) – model parameters</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.gc_model.GC_model.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gc_model.html#GC_model.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gc_model.GC_model.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.gc_model.GC_model.simulate">
+<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_trees</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gc_model.html#GC_model.simulate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gc_model.GC_model.simulate" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a collection of GC_tree given a key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – simulation sampling time</p></li>
+<li><p><strong>n_trees</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – number of GC trees in the model</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.gc_model.GC_model.log_likelihood">
+<span class="sig-name descname"><span class="pre">log_likelihood</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gc_model.html#GC_model.log_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gc_model.GC_model.log_likelihood" title="Permalink to this definition"></a></dt>
+<dd><p>Find log likelihood of simulated trees.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>log likelihood of the GC tree in the model</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.gc_model.GC_model.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gc_model.html#GC_model.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gc_model.GC_model.fit" title="Permalink to this definition"></a></dt>
+<dd><p>Given a collection of GC_trees, fit the parameters of the model.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 

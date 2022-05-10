@@ -96,16 +96,61 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.parameters.Parameters.html#gcdyn.parameters.Parameters" title="gcdyn.parameters.Parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Parameters</span></code></a></p></td>
-<td><p></p></td>
+<td><p>A dataclass that represents model parameter for GC tree and GC forest</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.parameters.Parameters">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.parameters.</span></span><span class="sig-name descname"><span class="pre">Parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">θ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">μ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ρ</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/parameters.html#Parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.parameters.Parameters" title="Permalink to this definition"></a></dt>
-<dd><dl class="py method">
+<dd><p>A dataclass that represents model parameter for GC tree and GC forest</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gcdyn.parameters.Parameters.">
+<span id="gcdyn.parameters.Parameters.θ"></span><span class="sig-name descname"><span class="pre">θ</span></span><a class="headerlink" href="#gcdyn.parameters.Parameters." title="Permalink to this definition"></a></dt>
+<dd><p>response function parameters used to find birth rate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>jax._src.numpy.lax_numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span id="gcdyn.parameters.Parameters.μ"></span><span class="sig-name descname"><span class="pre">μ</span></span><a class="headerlink" href="#id0" title="Permalink to this definition"></a></dt>
+<dd><p>death rate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gcdyn.parameters.Parameters.m">
+<span class="sig-name descname"><span class="pre">m</span></span><a class="headerlink" href="#gcdyn.parameters.Parameters.m" title="Permalink to this definition"></a></dt>
+<dd><p>mutation rate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id1">
+<span id="gcdyn.parameters.Parameters.ρ"></span><span class="sig-name descname"><span class="pre">ρ</span></span><a class="headerlink" href="#id1" title="Permalink to this definition"></a></dt>
+<dd><p>sampling efficiency</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.parameters.Parameters.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">θ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">μ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ρ</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/parameters.html#Parameters.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.parameters.Parameters.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">θ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">μ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ρ</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.parameters.Parameters.__init__" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

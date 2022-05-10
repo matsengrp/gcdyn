@@ -93,6 +93,17 @@
 <dt class="sig sig-object py" id="gcdyn.gc_forest.GC_forest">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.gc_forest.</span></span><span class="sig-name descname"><span class="pre">GC_forest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_trees</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gc_forest.html#GC_forest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gc_forest.GC_forest" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A class that represents a collection of GC tree</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – simulation sampling time</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – seed to generate random key</p></li>
+<li><p><strong>params</strong> (<a class="reference internal" href="gcdyn.parameters.Parameters.html#gcdyn.parameters.Parameters" title="gcdyn.parameters.Parameters"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameters</span></code></a>) – model parameters</p></li>
+<li><p><strong>n_trees</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – number of GC trees in GC forest</p></li>
+</ul>
+</dd>
+</dl>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <colgroup>
@@ -100,14 +111,42 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_trees</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.gc_forest.GC_forest.create_trees" title="gcdyn.gc_forest.GC_forest.create_trees"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_trees</span></code></a></p></td>
+<td><p>Create n_Trees number of GC tree</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">draw_forest</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.gc_forest.GC_forest.draw_forest" title="gcdyn.gc_forest.GC_forest.draw_forest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">draw_forest</span></code></a></p></td>
+<td><p>Visualizes the forest</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.gc_forest.GC_forest.create_trees">
+<span class="sig-name descname"><span class="pre">create_trees</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_trees</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gc_forest.html#GC_forest.create_trees"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gc_forest.GC_forest.create_trees" title="Permalink to this definition"></a></dt>
+<dd><p>Create n_Trees number of GC tree</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – simulation sampling time</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – seed to generate random key</p></li>
+<li><p><strong>n_trees</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – number of GC trees to create</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.gc_forest.GC_forest.draw_forest">
+<span class="sig-name descname"><span class="pre">draw_forest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gc_forest.html#GC_forest.draw_forest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gc_forest.GC_forest.draw_forest" title="Permalink to this definition"></a></dt>
+<dd><p>Visualizes the forest</p>
+<p>If folder_name is given, tree visualizations are saved in the folder.
+If not, tree visualizations are rendered to the notebook.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>folder_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – name of the output folder of the tree visualizations. Defaults to None.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>

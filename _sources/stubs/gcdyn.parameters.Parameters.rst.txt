@@ -21,4 +21,13 @@ gcdyn.parameters.Parameters
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Parameters.θ
+      ~Parameters.μ
+      ~Parameters.m
+      ~Parameters.ρ
+   
    
