@@ -39,9 +39,6 @@ class GC_model:
     def log_likelihood(self):
         r"""Find log likelihood of simulated trees.
 
-        Raises:
-            ValueError: raised when an unknown event occurred
-
         Returns:
             float: log likelihood of the GC tree in the model
         """
@@ -74,9 +71,5 @@ class GC_model:
         return result
 
     def fit(self):
-        r"""Given a collection of GC_trees, fit the parameters of the model.
-
-        Raises:
-            NotImplementedError: not yet implemented
-        """
+        r"""Given a collection of GC_trees, fit the parameters of the model."""
         raise NotImplementedError("not yet implemented")

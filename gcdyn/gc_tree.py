@@ -53,9 +53,6 @@ class GC_tree:
             tree:initial tree to evolve
             t: sampling time
             key: seed to generate random key
-
-        Raises:
-            ValueError: raised when an unknown event occurred
         """
         λ_x = self.λ(tree.x)
         Λ = λ_x + self.params.μ + self.params.m
