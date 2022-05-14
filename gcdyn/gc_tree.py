@@ -4,6 +4,7 @@ from jax import random
 from jax.scipy.special import expit
 import ete3
 import matplotlib as mp
+from IPython.display import display
 
 from gcdyn.parameters import Parameters
 
@@ -93,7 +94,7 @@ class GC_tree:
             raise ValueError("unknown event")
         tree.add_child(child)
 
-    def decorate(self):
+    def _decorate(self):
         r"""Add node style to the tree
 
         Leaf node that is sampled is indicated as green
@@ -131,13 +132,34 @@ class GC_tree:
         Args:
             output_file: name of the output file of the tree visualization. Defaults to None.
         """
-        self.decorate()
+        self._decorate()
         ts = ete3.TreeStyle()
         ts.scale = 100
         ts.branch_vertical_margin = 3
         ts.show_leaf_name = False
         ts.show_scale = False
         if output_file is None:
-            self.tree.render("%%inline", tree_style=ts)
+            display(self.tree.render("%%inline", tree_style=ts))
         else:
             self.tree.render(output_file, tree_style=ts)
+
+    def prune_tree(self):
+        # select all nodes where it has descendant sampled node
+        event_cache = self.tree.get_cached_content(store_attr="event")
+        self.tree.prune(
+            [node for node, events in event_cache.items() if "sampled" in events],
+            preserve_branch_length=True,
+        )
+        # select the sampled and mutation nodes -- prune method preserves additional nodes to maintain the structure
+        self.tree.prune(
+            [
+                node
+                for node in self.tree.traverse()
+                if node.event == "sampled" or node.event == "mutation"
+            ],
+            preserve_branch_length=True,
+        )
+        # eliminate the birth node with one child
+        for node in self.tree.traverse():
+            if not node.is_leaf() and node.event == "birth" and len(node.children) == 1:
+                node.delete(preserve_branch_length=True)
