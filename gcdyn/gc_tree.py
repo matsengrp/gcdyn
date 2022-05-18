@@ -21,19 +21,15 @@ class GC_tree:
     def __init__(self, T: float, key: int, params: Parameters):
         key, _ = random.split(key)
         self.params: Parameters = params
-
-        while True:
-            # initialize root
-            tree = ete3.Tree(name=0, dist=0)
-            tree.add_feature("t", 0)
-            tree.add_feature("x", 0)
-            tree.add_feature("event", None)
-            # get new seed
-            key, _ = random.split(key)
-            self.evolve(tree, T, key)
-            if 50 < len(tree) < 96:
-                print(f"size {len(tree)}")
-                break
+        # initialize root
+        tree = ete3.Tree(name=0, dist=0)
+        tree.add_feature("t", 0)
+        tree.add_feature("x", 0)
+        tree.add_feature("event", None)
+        # get new seed
+        key, _ = random.split(key)
+        self.evolve(tree, T, key)
+        print(f"size {len(tree)}")
         self.tree: ete3.Tree = tree
 
     def λ(self, x: float):
