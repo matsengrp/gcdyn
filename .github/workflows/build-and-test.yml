@@ -28,7 +28,9 @@ jobs:
         run: make lint
 
       - name: Check format with black
-        run: black --check gcdyn
+        run: |
+          black --check gcdyn
+          docformatter --check gcdyn/*.py
 
       - name: Test
         run: make test
