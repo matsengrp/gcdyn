@@ -99,7 +99,6 @@ class GC_tree:
         cmap = mp.cm.get_cmap(cmap)
 
         # define the minimum and maximum values for our colormap
-        # normalizer = mp.colors.Normalize(vmin=-10, vmax=10)
         normalizer = mp.colors.CenteredNorm(
             vcenter=0, halfrange=max(abs(node.x) for node in self.tree.traverse())
         )
@@ -112,11 +111,18 @@ class GC_tree:
             nstyle = ete3.NodeStyle()
             nstyle["hz_line_color"] = colormap[node.name]
             nstyle["hz_line_width"] = 2
-            if node.is_leaf() and node.event == "sampled":
-                nstyle["fgcolor"] = "green"
-                nstyle["size"] = 3
-            else:
+
+            if node.is_root() or node.event in set(["birth", "death", "mutation"]):
                 nstyle["size"] = 0
+            elif node.event == "sampled":
+                nstyle["fgcolor"] = "green"
+                nstyle["size"] = 5
+            elif node.event == "unsampled":
+                nstyle["fgcolor"] = "grey"
+                nstyle["size"] = 5
+            else:
+                raise ValueError(f"unknown event {node.event}")
+
             node.set_style(nstyle)
 
     def draw_tree(self, output_file: str = None):
@@ -132,7 +138,7 @@ class GC_tree:
         ts = ete3.TreeStyle()
         ts.scale = 100
         ts.branch_vertical_margin = 3
-        ts.show_leaf_name = False
+        ts.show_leaf_name = True
         ts.show_scale = False
         if output_file is None:
             display(self.tree.render("%%inline", tree_style=ts))
