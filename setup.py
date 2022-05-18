@@ -11,7 +11,7 @@ setuptools.setup(
     cmdclass=versioneer.get_cmdclass(),
     author="Erick Matsen",
     author_email="ematsen@gmail.com",
-    description="inference affinity-fitness response functions",
+    description="inference of affinity-fitness response functions",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/matsengrp/gcdyn",
@@ -23,6 +23,7 @@ setuptools.setup(
     ],
     python_requires=">=3.7",
     install_requires=[
+        "PyQt5",
         "ete3",
         "biopython",
         "matplotlib",
