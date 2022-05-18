@@ -61,7 +61,9 @@ class GC_tree:
             child = ete3.Tree(name=self._name, dist=t)
             child.x = tree.x
             child.t = tree.t + t
-            child.event = "sampled" if random.uniform(event_key) < self.params.ρ else "unsampled"
+            child.event = (
+                "sampled" if random.uniform(event_key) < self.params.ρ else "unsampled"
+            )
             tree.add_child(child)
             return
 
