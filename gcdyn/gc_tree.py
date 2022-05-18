@@ -19,13 +19,14 @@ class GC_tree:
     """
 
     def __init__(self, T: float, key: int, params: Parameters):
-        key, _ = random.split(key)
         self.params: Parameters = params
+        # store most recently used node name so we can ensure unique node names
+        self._name = 0
         # initialize root
-        tree = ete3.Tree(name=0, dist=0)
-        tree.add_feature("t", 0)
-        tree.add_feature("x", 0)
-        tree.add_feature("event", None)
+        tree = ete3.Tree(name=self._name, dist=0)
+        tree.t = 0
+        tree.x = 0
+        tree.event = None
         # get new seed
         key, _ = random.split(key)
         self.evolve(tree, T, key)
@@ -56,13 +57,11 @@ class GC_tree:
         time_key, event_key = random.split(key)
         τ = random.exponential(time_key) / Λ
         if τ > t:
-            child = ete3.Tree(name=tree.name + 1, dist=t)
-            child.add_feature("x", tree.x)
-            child.add_feature("t", tree.t + t)
-            child.add_feature(
-                "event",
-                "sampled" if random.uniform(event_key) < self.params.ρ else "unsampled",
-            )
+            self._name += 1
+            child = ete3.Tree(name=self._name, dist=t)
+            child.x = tree.x
+            child.t = tree.t + t
+            child.event = "sampled" if random.uniform(event_key) < self.params.ρ else "unsampled"
             tree.add_child(child)
             return
 
@@ -71,11 +70,11 @@ class GC_tree:
         event = possible_events[
             random.choice(event_key, len(possible_events), p=event_probabilities)
         ]
-
-        child = ete3.Tree(name=tree.name + 1, dist=τ)
-        child.add_feature("t", tree.t + τ)
-        child.add_feature("x", tree.x)
-        child.add_feature("event", event)
+        self._name += 1
+        child = ete3.Tree(name=self._name, dist=τ)
+        child.t = tree.t + τ
+        child.x = tree.x
+        child.event = event
         if event == "birth":
             child1_key, child2_key = random.split(event_key)
             self.evolve(child, t - τ, child1_key)
