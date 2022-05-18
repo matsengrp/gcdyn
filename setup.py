@@ -25,11 +25,7 @@ setuptools.setup(
     install_requires=[
         "PyQt5",
         "ete3",
-        "biopython",
         "matplotlib",
-        "pandas",
-        "scipy",
-        "seaborn",
         "jaxlib",
         "jax",
     ],
