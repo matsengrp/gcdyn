@@ -1,4 +1,4 @@
-import jax.numpy as np
+import numpy as np
 from gcdyn.tree import Tree
 from gcdyn.parameters import Parameters
 import unittest
@@ -6,7 +6,7 @@ import unittest
 
 class TestTree(unittest.TestCase):
     def setUp(self):
-        T = 3
+        T = 2
         seed = 0
 
         # response function parameters
@@ -21,27 +21,34 @@ class TestTree(unittest.TestCase):
         params = Parameters(θ, μ, m, ρ)
 
         self.tree = Tree(T, seed, params)
+        self.assertTrue(len(self.tree.tree) > 10)
 
     def test_prune(self):
         original_sampled = set(
             [node for node in self.tree.tree.traverse() if node.event == "sampled"]
         )
         self.tree.prune()
-
-        assert all(
-            node.event == "sampled"
-            for node in self.tree.tree.traverse()
-            if node.is_leaf()
+        self.assertTrue(all(node.event == "sampled" for node in self.tree.tree))
+        self.assertTrue(
+            all(
+                len(node.children) == 2
+                for node in self.tree.tree.traverse()
+                if node.event == "birth"
+            )
         )
-        assert all(
-            len(node.children) == 2
-            for node in self.tree.tree.traverse()
-            if node.event == "birth"
+        self.assertEqual(
+            set(
+                [node for node in self.tree.tree.traverse() if node.event == "sampled"]
+            ),
+            original_sampled,
         )
-        assert (
-            set([node for node in self.tree.tree.traverse() if node.event == "sampled"])
-            == original_sampled
+        mean_root_to_tip_distance = np.mean(
+            np.array([self.tree.tree.get_distance(leaf) for leaf in self.tree.tree])
         )
+        for leaf in self.tree.tree:
+            self.assertAlmostEqual(
+                self.tree.tree.get_distance(leaf), mean_root_to_tip_distance, places=5
+            )
 
 
 if __name__ == "__main__":
