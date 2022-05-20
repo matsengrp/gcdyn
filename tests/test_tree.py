@@ -1,6 +1,4 @@
 import jax.numpy as np
-from jax import random
-
 from gcdyn.tree import Tree
 from gcdyn.parameters import Parameters
 import unittest
@@ -25,12 +23,26 @@ class TestTree(unittest.TestCase):
         self.tree = Tree(T, seed, params)
 
     def test_prune(self):
-        original_sampled = set([node for node in self.tree.tree.traverse() if node.event == "sampled"])
+        original_sampled = set(
+            [node for node in self.tree.tree.traverse() if node.event == "sampled"]
+        )
         self.tree.prune_tree()
 
-        assert(all(node.event == "sampled" for node in self.tree.tree.traverse() if node.is_leaf()))
-        assert(all(len(node.children) == 2 for node in self.tree.tree.traverse() if node.event == "birth"))
-        assert(set([node for node in self.tree.tree.traverse() if node.event == "sampled"]) == original_sampled)
+        assert all(
+            node.event == "sampled"
+            for node in self.tree.tree.traverse()
+            if node.is_leaf()
+        )
+        assert all(
+            len(node.children) == 2
+            for node in self.tree.tree.traverse()
+            if node.event == "birth"
+        )
+        assert (
+            set([node for node in self.tree.tree.traverse() if node.event == "sampled"])
+            == original_sampled
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
