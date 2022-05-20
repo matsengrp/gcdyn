@@ -1,3 +1,5 @@
+r"""Model classes"""
+
 import jax.numpy as np
 from jax import random
 from jax.scipy.stats import norm

@@ -1,3 +1,5 @@
+r"""Forests of GC trees"""
+
 from jax import random
 
 from gcdyn.tree import Tree
