@@ -48,6 +48,6 @@ class Forest:
             else:
                 tree.draw_tree(folder_name + f"tree {i}")
 
-    def prune_forest(self):
+    def prune(self):
         for tree in self.forest:
-            tree.prune_tree()
+            tree.prune()

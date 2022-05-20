@@ -144,7 +144,7 @@ class Tree:
         else:
             self.tree.render(output_file, tree_style=ts)
 
-    def prune_tree(self):
+    def prune(self):
         # select all nodes where it has descendant sampled node
         event_cache = self.tree.get_cached_content(store_attr="event")
         self.tree.prune(

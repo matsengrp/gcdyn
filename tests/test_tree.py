@@ -26,7 +26,7 @@ class TestTree(unittest.TestCase):
         original_sampled = set(
             [node for node in self.tree.tree.traverse() if node.event == "sampled"]
         )
-        self.tree.prune_tree()
+        self.tree.prune()
 
         assert all(
             node.event == "sampled"
