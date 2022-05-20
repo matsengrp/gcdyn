@@ -144,22 +144,16 @@ class Tree:
             self.tree.render(output_file, tree_style=ts)
 
     def prune(self):
-        # select all nodes where it has descendant sampled node
+        """Prune the tree to the subtree induced by the sampled leaves."""
         event_cache = self.tree.get_cached_content(store_attr="event")
-        self.tree.prune(
-            [node for node, events in event_cache.items() if "sampled" in events],
-            preserve_branch_length=True,
-        )
-        # select the sampled and mutation nodes -- prune method preserves additional nodes to maintain the structure
-        self.tree.prune(
-            [
-                node
-                for node in self.tree.traverse()
-                if node.event == "sampled" or node.event == "mutation"
-            ],
-            preserve_branch_length=True,
-        )
-        # eliminate the birth node with one child
-        for node in self.tree.traverse():
-            if not node.is_leaf() and node.event == "birth" and len(node.children) == 1:
-                node.delete(preserve_branch_length=True)
+        for node in self.tree.iter_descendants(
+            is_leaf_fn=lambda node: "sampled" not in event_cache[node]
+        ):
+            if "sampled" not in event_cache[node]:
+                parent = node.up
+                parent.remove_child(node)
+                if parent.event == "birth" and len(parent.children) == 1:
+                    parent.children[0].dist += parent.dist
+                    parent.delete(
+                        prevent_nondicotomic=False, preserve_branch_length=False
+                    )
