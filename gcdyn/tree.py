@@ -28,7 +28,6 @@ class Tree:
         tree.x = 0
         tree.event = None
         self.evolve(tree, T, random.PRNGKey(seed))
-        print(f"size {len(tree)}")
         self.tree: ete3.Tree = tree
 
     def λ(self, x: float):
