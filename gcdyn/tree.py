@@ -9,16 +9,16 @@ from IPython.display import display
 from gcdyn.parameters import Parameters
 
 
-class GC_tree:
+class Tree:
     r"""A class that represents one complete GC tree
 
     Args:
         T: simulation sampling time
-        key: seed to generate random key
+        seed: random seed
         params: model parameters
     """
 
-    def __init__(self, T: float, key: int, params: Parameters):
+    def __init__(self, T: float, seed: int, params: Parameters):
         self.params: Parameters = params
         # store most recently used node name so we can ensure unique node names
         self._name = 0
@@ -27,9 +27,7 @@ class GC_tree:
         tree.t = 0
         tree.x = 0
         tree.event = None
-        # get new seed
-        key, _ = random.split(key)
-        self.evolve(tree, T, key)
+        self.evolve(tree, T, random.PRNGKey(seed))
         print(f"size {len(tree)}")
         self.tree: ete3.Tree = tree
 
@@ -44,13 +42,13 @@ class GC_tree:
         """
         return self.params.θ[0] * expit(self.params.θ[1] * (x - self.params.θ[2]))
 
-    def evolve(self, tree: ete3.Tree, t: float, key: int):
+    def evolve(self, tree: ete3.Tree, t: float, key: random.PRNGKeyArray):
         r"""Evolve an ETE Tree node with a phenotype attribute for time t
 
         Args:
             tree:initial tree to evolve
             t: sampling time
-            key: seed to generate random key
+            key: random key
         """
         λ_x = self.λ(tree.x)
         Λ = λ_x + self.params.μ + self.params.m

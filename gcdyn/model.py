@@ -2,12 +2,12 @@ import jax.numpy as np
 from jax import random
 from jax.scipy.stats import norm
 
-from gcdyn.gc_tree import GC_tree
+from gcdyn.tree import Tree
 
 from gcdyn.parameters import Parameters
 
 
-class GC_model:
+class Model:
     r"""A class that represents a GC model
 
     Args:
@@ -18,21 +18,21 @@ class GC_model:
         self.params = params
         self.trees = None
 
-    def simulate(self, T: float, n_trees: int):
-        r"""Creates a collection of GC_tree given a key.
+    def simulate(self, T: float, n_trees: int, seed: int):
+        r"""Creates a collection of ``Tree`` given a key.
 
         Args:
             T: simulation sampling time
             n_trees: number of GC trees in the model
+            seef: random seed
         """
-        # call GC_tree constructor
+        # call tree.Tree constructor
         # evolve the tree -- call method in tree class
-        seed = 0
         key = random.PRNGKey(seed)
         trees = []
         for i in range(n_trees):
             key, _ = random.split(key)
-            tree = GC_tree(T, key, self.params)
+            tree = Tree(T, key, self.params)
             trees.append(tree)
         self.trees = trees
 
@@ -71,5 +71,5 @@ class GC_model:
         return result
 
     def fit(self):
-        r"""Given a collection of GC_trees, fit the parameters of the model."""
+        r"""Given a collection of `tree.Tree`, fit the parameters of the model."""
         raise NotImplementedError("not yet implemented")

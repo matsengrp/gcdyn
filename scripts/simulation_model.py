@@ -1,6 +1,6 @@
 import jax.numpy as np
 
-from gcdyn.gc_model import GC_model
+from gcdyn.model import Model
 from gcdyn.parameters import Parameters
 
 
@@ -18,7 +18,7 @@ def main():
 
     params = Parameters(θ, μ, m, ρ)
 
-    model = GC_model(params)
+    model = Model(params)
     model.simulate(T, 3)
     print(model.log_likelihood())
 

@@ -1,7 +1,7 @@
 import jax.numpy as np
 from jax import random
 
-from gcdyn.gc_tree import GC_tree
+from gcdyn.tree import Tree
 from gcdyn.parameters import Parameters
 
 
@@ -25,7 +25,7 @@ def main():
 
     for i in range(n_trees):
         key, _ = random.split(key)
-        tree = GC_tree(T, key, params)
+        tree = Tree(T, key, params)
         tree.draw_tree(f"tree {i + 1}.svg")
 
 
