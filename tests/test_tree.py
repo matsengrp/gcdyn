@@ -6,7 +6,7 @@ import unittest
 
 class TestTree(unittest.TestCase):
     def setUp(self):
-        T = 2
+        T = 4
         seed = 0
 
         # response function parameters

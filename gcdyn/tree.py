@@ -155,7 +155,6 @@ class Tree:
                 parent = node.up
                 parent.remove_child(node)
                 if parent.event == "birth":
-                    parent.children[0].dist += parent.dist
                     parent.delete(
-                        prevent_nondicotomic=False, preserve_branch_length=False
+                        prevent_nondicotomic=False, preserve_branch_length=True
                     )
