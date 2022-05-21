@@ -1,9 +1,9 @@
-gcdyn.gc\_model.GC\_model
-=========================
+gcdyn.model.Model
+=================
 
-.. currentmodule:: gcdyn.gc_model
+.. currentmodule:: gcdyn.model
 
-.. autoclass:: GC_model
+.. autoclass:: Model
    :members:
    :show-inheritance:
    :inherited-members:
@@ -16,9 +16,9 @@ gcdyn.gc\_model.GC\_model
    .. autosummary::
       :nosignatures:
    
-      ~GC_model.fit
-      ~GC_model.log_likelihood
-      ~GC_model.simulate
+      ~Model.fit
+      ~Model.log_likelihood
+      ~Model.simulate
    
    
 

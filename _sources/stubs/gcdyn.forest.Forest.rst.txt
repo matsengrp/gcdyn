@@ -1,9 +1,9 @@
-gcdyn.gc\_forest.GC\_forest
-===========================
+gcdyn.forest.Forest
+===================
 
-.. currentmodule:: gcdyn.gc_forest
+.. currentmodule:: gcdyn.forest
 
-.. autoclass:: GC_forest
+.. autoclass:: Forest
    :members:
    :show-inheritance:
    :inherited-members:
@@ -16,8 +16,9 @@ gcdyn.gc\_forest.GC\_forest
    .. autosummary::
       :nosignatures:
    
-      ~GC_forest.create_trees
-      ~GC_forest.draw_forest
+      ~Forest.create_trees
+      ~Forest.draw_forest
+      ~Forest.prune
    
    
 

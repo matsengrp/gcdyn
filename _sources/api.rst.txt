@@ -16,7 +16,7 @@ Modules
     :toctree: stubs
     :template: custom-module-template.rst
 
-    gc_forest
-    gc_model
-    gc_tree
+    tree
+    forest
     parameters
+    model

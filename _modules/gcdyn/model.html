@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gcdyn.gc_model &mdash; gcdyn  documentation</title>
+  <title>gcdyn.model &mdash; gcdyn  documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -65,7 +65,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>gcdyn.gc_model</li>
+      <li>gcdyn.model</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -74,46 +74,48 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for gcdyn.gc_model</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
+  <h1>Source code for gcdyn.model</h1><div class="highlight"><pre>
+<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Model classes&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">random</span>
 <span class="kn">from</span> <span class="nn">jax.scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
 
-<span class="kn">from</span> <span class="nn">gcdyn.gc_tree</span> <span class="kn">import</span> <span class="n">GC_tree</span>
+<span class="kn">from</span> <span class="nn">gcdyn.tree</span> <span class="kn">import</span> <span class="n">Tree</span>
 
 <span class="kn">from</span> <span class="nn">gcdyn.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span>
 
 
-<div class="viewcode-block" id="GC_model"><a class="viewcode-back" href="../../stubs/gcdyn.gc_model.GC_model.html#gcdyn.gc_model.GC_model">[docs]</a><span class="k">class</span> <span class="nc">GC_model</span><span class="p">:</span>
+<div class="viewcode-block" id="Model"><a class="viewcode-back" href="../../stubs/gcdyn.model.Model.html#gcdyn.model.Model">[docs]</a><span class="k">class</span> <span class="nc">Model</span><span class="p">:</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;A class that represents a GC model</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        params: model parameters</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="GC_model.__init__"><a class="viewcode-back" href="../../stubs/gcdyn.gc_model.html#gcdyn.gc_model.GC_model.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.__init__"><a class="viewcode-back" href="../../stubs/gcdyn.model.html#gcdyn.model.Model.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">trees</span> <span class="o">=</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="GC_model.simulate"><a class="viewcode-back" href="../../stubs/gcdyn.gc_model.GC_model.html#gcdyn.gc_model.GC_model.simulate">[docs]</a>    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">n_trees</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Creates a collection of GC_tree given a key.</span>
+<div class="viewcode-block" id="Model.simulate"><a class="viewcode-back" href="../../stubs/gcdyn.model.Model.html#gcdyn.model.Model.simulate">[docs]</a>    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">n_trees</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Creates a collection of ``Tree`` given a key.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            T: simulation sampling time</span>
 <span class="sd">            n_trees: number of GC trees in the model</span>
+<span class="sd">            seef: random seed</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># call GC_tree constructor</span>
+        <span class="c1"># call tree.Tree constructor</span>
         <span class="c1"># evolve the tree -- call method in tree class</span>
-        <span class="n">seed</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">key</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
         <span class="n">trees</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_trees</span><span class="p">):</span>
             <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-            <span class="n">tree</span> <span class="o">=</span> <span class="n">GC_tree</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+            <span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
             <span class="n">trees</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">trees</span> <span class="o">=</span> <span class="n">trees</span></div>
 
-<div class="viewcode-block" id="GC_model.log_likelihood"><a class="viewcode-back" href="../../stubs/gcdyn.gc_model.GC_model.html#gcdyn.gc_model.GC_model.log_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.log_likelihood"><a class="viewcode-back" href="../../stubs/gcdyn.model.Model.html#gcdyn.model.Model.log_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Find log likelihood of simulated trees.</span>
 
 <span class="sd">        Returns:</span>
@@ -147,8 +149,8 @@
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown event </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">event</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="GC_model.fit"><a class="viewcode-back" href="../../stubs/gcdyn.gc_model.GC_model.html#gcdyn.gc_model.GC_model.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Given a collection of GC_trees, fit the parameters of the model.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Model.fit"><a class="viewcode-back" href="../../stubs/gcdyn.model.Model.html#gcdyn.model.Model.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Given a collection of `tree.Tree`, fit the parameters of the model.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;not yet implemented&quot;</span><span class="p">)</span></div></div>
 </pre></div>
 

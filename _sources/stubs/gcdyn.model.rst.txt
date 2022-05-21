@@ -1,7 +1,7 @@
-﻿gcdyn.gc\_model
-===============
+﻿gcdyn.model
+===========
 
-.. automodule:: gcdyn.gc_model
+.. automodule:: gcdyn.model
 
    
    
@@ -20,7 +20,7 @@
       :template: custom-class-template.rst
       :nosignatures:
    
-      GC_model
+      Model
    
    
 

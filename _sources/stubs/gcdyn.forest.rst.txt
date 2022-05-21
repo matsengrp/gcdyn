@@ -1,7 +1,7 @@
-﻿gcdyn.gc\_tree
-==============
+﻿gcdyn.forest
+============
 
-.. automodule:: gcdyn.gc_tree
+.. automodule:: gcdyn.forest
 
    
    
@@ -20,7 +20,7 @@
       :template: custom-class-template.rst
       :nosignatures:
    
-      GC_tree
+      Forest
    
    
 

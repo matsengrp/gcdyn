@@ -1,9 +1,9 @@
-gcdyn.gc\_tree.GC\_tree
-=======================
+gcdyn.tree.Tree
+===============
 
-.. currentmodule:: gcdyn.gc_tree
+.. currentmodule:: gcdyn.tree
 
-.. autoclass:: GC_tree
+.. autoclass:: Tree
    :members:
    :show-inheritance:
    :inherited-members:
@@ -16,10 +16,10 @@ gcdyn.gc\_tree.GC\_tree
    .. autosummary::
       :nosignatures:
    
-      ~GC_tree.decorate
-      ~GC_tree.draw_tree
-      ~GC_tree.evolve
-      ~GC_tree.λ
+      ~Tree.draw_tree
+      ~Tree.evolve
+      ~Tree.prune
+      ~Tree.λ
    
    
 
