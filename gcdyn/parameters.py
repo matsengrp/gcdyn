@@ -1,3 +1,5 @@
+r"""Model parameter classes"""
+
 import jax.numpy as np
 
 from dataclasses import dataclass

@@ -1,37 +1,39 @@
+r"""Forests of GC trees"""
+
+import jax.numpy as np
 from jax import random
 
-from gcdyn.gc_tree import GC_tree
+from gcdyn.tree import Tree
 from gcdyn.parameters import Parameters
 
 
-class GC_forest:
+class Forest:
     r"""A class that represents a collection of GC tree
 
     Args:
         T: simulation sampling time
-        key: seed to generate random key
+        seed: random seed
         params: model parameters
         n_trees: number of GC trees in GC forest
     """
 
-    def __init__(self, T: float, key: int, params: Parameters, n_trees: int):
-        key, _ = random.split(key)
+    def __init__(self, T: float, seed: int, params: Parameters, n_trees: int):
         self.params = params
 
-        self.forest: list[GC_tree] = []
-        self.create_trees(T, key, n_trees)
+        self.forest: list[Tree] = []
+        self.create_trees(T, random.PRNGKey(seed), n_trees)
 
-    def create_trees(self, T: float, key: int, n_trees: int):
+    def create_trees(self, T: float, key: np.ndarray, n_trees: int):
         r"""Create n_Trees number of GC tree
 
         Args:
             T: simulation sampling time
-            key: seed to generate random key
+            key: random key, i.e. generated with :meth:`jax.random.PRNGKey()` or :meth:`jax.random.split()`
             n_trees: number of GC trees to create
         """
         for i in range(n_trees):
             key, _ = random.split(key)
-            tree = GC_tree(T, key, self.params)
+            tree = Tree(T, key, self.params)
             self.forest.append(tree)
 
     def draw_forest(self, folder_name: str = None):
@@ -48,3 +50,7 @@ class GC_forest:
                 tree.draw_tree()
             else:
                 tree.draw_tree(folder_name + f"tree {i}")
+
+    def prune(self):
+        for tree in self.forest:
+            tree.prune()

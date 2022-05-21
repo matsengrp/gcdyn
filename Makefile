@@ -8,7 +8,7 @@ test:
 	pytest
 
 format:
-	black gcdyn
+	black gcdyn tests
 	docformatter --in-place gcdyn/*.py
 
 lint:

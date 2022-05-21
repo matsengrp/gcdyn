@@ -62,6 +62,7 @@ intersphinx_mapping = {
     'numpy': ('https://docs.scipy.org/doc/numpy/', None),
     'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
     'ete3': ('http://etetoolkit.org/docs/latest/', None),
+    'jax': ('https://jax.readthedocs.io/en/latest/', None),
 }
 
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
