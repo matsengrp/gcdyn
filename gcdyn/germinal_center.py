@@ -1,6 +1,7 @@
 import copy
 import numpy as np
 from enum import Enum
+from gcdyn.event_sampler import EventSampler
 
 
 class EventType(Enum):
@@ -22,60 +23,77 @@ class GerminalCenter:
     """
 
     def __init__(self, starting_population: list):
+        self.time = 0.0
+        self.population = []
         self.trees = copy.deepcopy(starting_population)
         self.sampler = EventSampler()
-        self.time = 0.0
 
-        for cell in population:
+        for cell in self.trees:
             self.add_cell(cell)
+
+    def print_trees(self):
+        for tree in self.trees:
+            print(tree)  # .get_ascii(attributes=["name"]))
 
     def add_cell(self, cell):
         """
         Add the cell to the population and the sampler.
         """
-        population.append(cell)
-        sampler.append(np.array([cell.birth_rate, cell.death_rate, cell.mutation_rate]))
+        self.population.append(cell)
+        self.sampler.append(np.array([cell.λ, cell.μ, cell.m]))
 
-    def make_child_cell(cell):
-        child = copy.deepcopy(cell)
-        # TODO set branch length to zero
-        # TODO make cell the parent of mutated cell
-        # XXX Could this be "make and add child cell"?
+    def make_and_add_child_cell(self, parent):
+        child = copy.deepcopy(parent)
+        parent.add_child(child, dist=0.0)
+        self.add_cell(child)
+        return child
 
-    def step(self):
+    def mutate_cell(self, cell):
+        # TODO something not-dumb
+        cell.λ = rng.uniform()
+        cell.μ = rng.uniform()
+        cell.m = rng.uniform()
+
+    def implement_step(self, time_to_event, event_type, cell_idx):
         """
-        Draw the next event in the simulation.
+        Implement the next event in the simulation.
 
-        First draw the time to the next event.
-        Then draw the impacted cell.
         Loop through the cells.
         If it's not the impacted cell, extend branch length, and if it is, implement the event.
         """
 
-        time_to_next_event = self.sampler.sample_time_to_next_event()
-        (cell_idx, event_type) = self.sampler.sample_next_event()
-        self.time += time_to_next_event
-
-        cell = population.pop(cell_idx)
+        self.time += time_to_event
+        cell = self.population.pop(cell_idx)
         self.sampler.drop(cell_idx)
-        # TODO add branch length to cell
 
-        if event_type == BIRTH:
-            child1 = self.make_child_cell(cell)
-            child2 = self.make_child_cell(cell)
-            self.add_cell(child1)
-            self.add_cell(child2)
-            # TODO connect nodes
-        elif event_type == DEATH:
+        for bystander_cell in self.population:
+            bystander_cell.dist += time_to_event
+
+        if event_type == EventType.BIRTH.value:
+            for _ in range(2):
+                child = self.make_and_add_child_cell(cell)
+        elif event_type == EventType.DEATH.value:
             # TODO do we care about marking a cell as dead? Other cells that are not in
             # the population are also "dead".
             cell.dead = True
-        elif event_type == MUTATION:
-            mutated_cell = copy.make_child_cell(cell)
-            # TODO modify rates
-            self.add_cell(mutated_cell)
+        elif event_type == EventType.MUTATION.value:
+            mutated_cell = cell.make_and_add_child_cell(cell)
+            mutated_cell.mutate_cell()
         else:
             assert False
+
+    def step(self):
+        """
+        Draw and implement the next event in the simulation.
+
+        Draw the time to the next event, the event type and the the impacted cell and
+        implement the modification.
+        """
+
+        time_to_event = self.sampler.sample_time_to_next_event()
+        (event_type, cell_idx) = self.sampler.sample_next_event()
+
+        self.implement_step(time_to_event, event_type, cell_idx)
 
     def run(self, stopping_time):
         while self.time < stopping_time:
