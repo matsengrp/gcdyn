@@ -68,7 +68,6 @@ class GerminalCenter:
         """
         Implement the next event in the simulation.
         """
-
         self.time += time_to_event
         cell = self.population.pop(cell_idx)
         assert not cell.children
@@ -97,15 +96,18 @@ class GerminalCenter:
         Draw the time to the next event, the event type and the the impacted cell and
         implement the modification.
         """
-
         time_to_event = self.sampler.sample_time_to_next_event()
         (event_idx, cell_idx) = self.sampler.sample_next_event()
-
         self.implement_step(time_to_event, EventType(event_idx), cell_idx)
 
     def run(self, stopping_time):
+        """
+        Run until we have achieved the sampling time or all the cells are dead.
+        """
         while self.time < stopping_time:
+            if not self.population:
+                break
             self.step()
 
-        # TODO mark sampled cells as sampled
+        # TODO mark sampled cells as sampled?
         # TODO cut down branch lengths to sampled time
