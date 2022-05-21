@@ -43,13 +43,13 @@ class Tree:
         """
         return self.params.θ[0] * expit(self.params.θ[1] * (x - self.params.θ[2]))
 
-    def evolve(self, tree: ete3.Tree, t: float, key: random.PRNGKeyArray):
+    def evolve(self, tree: ete3.Tree, t: float, key: np.ndarray):
         r"""Evolve an ETE Tree node with a phenotype attribute for time t
 
         Args:
             tree:initial tree to evolve
             t: sampling time
-            key: random key
+            key: random key, i.e. generated with :py:func:`jax.random.PRNGKey()` or :py:func:`jax.random.split()`
         """
         λ_x = self.λ(tree.x)
         Λ = λ_x + self.params.μ + self.params.m

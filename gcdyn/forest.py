@@ -22,12 +22,12 @@ class Forest:
         self.forest: list[Tree] = []
         self.create_trees(T, random.PRNGKey(seed), n_trees)
 
-    def create_trees(self, T: float, key: random.PRNGKeyArray, n_trees: int):
+    def create_trees(self, T: float, key: np.ndarray, n_trees: int):
         r"""Create n_Trees number of GC tree
 
         Args:
             T: simulation sampling time
-            key: random key
+            key: random key, i.e. generated with :meth:`jax.random.PRNGKey()` or :meth:`jax.random.split()`
             n_trees: number of GC trees to create
         """
         for i in range(n_trees):
