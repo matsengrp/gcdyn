@@ -34,8 +34,8 @@ class EventSampler:
     things on the columns.
     """
 
-    def __init__(self):
-        self.rng = np.random.default_rng()
+    def __init__(self, rng):
+        self.rng = rng
         self.rates = np.array([])
 
     def sample_time_to_next_event(self):

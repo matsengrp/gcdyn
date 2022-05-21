@@ -1,6 +1,7 @@
 import numpy as np
 import ete3
 import gcdyn.germinal_center as germinal_center
+from gcdyn.germinal_center import EventType
 
 
 def make_random_cell():
@@ -15,6 +16,8 @@ def make_random_cell():
 
 def test_build_germinal_center():
     gc = germinal_center.GerminalCenter([make_random_cell(), make_random_cell()])
-    gc.implement_step(0.3, 0, 1)
-    gc.implement_step(0.3, 0, 1)
+    gc.implement_step(0.3, EventType.BIRTH, 1)
+    for _ in range(8):
+        gc.implement_step(0.7, EventType.MUTATION, 2)
+    gc.implement_step(1.3, EventType.DEATH, 0)
     gc.print_trees()
