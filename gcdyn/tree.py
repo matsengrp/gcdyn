@@ -32,6 +32,10 @@ class Tree:
         self.evolve(tree, T, random.PRNGKey(seed))
         self.tree: ete3.Tree = tree
 
+    # TODO I'd love to restructure things somewhat so that this function is accessible
+    # by other parts of the code as a stand-alone static function taking in x and theta and
+    # spitting out lambda. Then natural place for this would be in the Model class,
+    # which it seems to me would motivate moving all of this simulation code there.
     def λ(self, x: float):
         r"""Birth rate of phenotype x
 
@@ -66,6 +70,7 @@ class Tree:
             tree.add_child(child)
             return
 
+        # TODO noting opportunity to unify code here
         possible_events = ["birth", "death", "mutation"]
         event_probabilities = np.array([λ_x, self.params.μ, self.params.m]) / Λ
         event = possible_events[
@@ -112,6 +117,8 @@ class Tree:
             nstyle["hz_line_color"] = colormap[node.name]
             nstyle["hz_line_width"] = 2
 
+            # TODO if we like Enums let's use them here. If not then let's move the
+            # other code to strings like this.
             if node.is_root() or node.event in set(["birth", "death", "mutation"]):
                 nstyle["size"] = 0
             elif node.event == "sampled":

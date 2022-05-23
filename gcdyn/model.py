@@ -21,7 +21,7 @@ class Model:
         self.trees = None
 
     def simulate(self, T: float, n_trees: int, seed: int):
-        r"""Creates a collection of ``Tree`` given a key.
+        r"""Creates a collection of ``Tree``s given a key.
 
         Args:
             T: simulation sampling time

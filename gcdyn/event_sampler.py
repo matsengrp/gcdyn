@@ -22,6 +22,11 @@ def sample_coordinates_from(rng, a):
     return get_kth_coordinates_of(a, rng.choice(m.flat, p=a.flat / a.sum()))
 
 
+# TODO it seems like this is going to have to get rewritten for any model that takes the
+# other cells into account when doing simulation. That is, we'll have to remake the
+# rates matrix every time step.
+
+
 class EventSampler:
     """Say we have a collection of entities, each of which can have a
     collection of events happen to them. These are rates of competing processes
