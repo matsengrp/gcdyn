@@ -30,10 +30,12 @@ def test_manual_simulation():
     for _ in range(8):
         gc.implement_step(0.7, EventType.MUTATION, 2)
     gc.implement_step(1.3, EventType.DEATH, 0)
+    # TODO actually assert some things?
     gc.print_trees()
 
 
 def test_simulation():
+    # TODO should this go into a "demo notebook"?
     gc = germinal_center.GerminalCenter([make_birthy_cell(), make_birthy_cell()])
     gc.run(2)
     gc.print_trees()
