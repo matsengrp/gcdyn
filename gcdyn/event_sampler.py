@@ -33,7 +33,7 @@ class EventSampler:
 
     def __init__(self, rng):
         self.rng = rng
-        self.rates = None
+        self.rates = np.array([])
 
     def sample_time_to_next_event(self):
         """Sample the time to the next event."""
@@ -56,7 +56,7 @@ class EventSampler:
         Return the index of the appended item.
         """
         to_add = rate_column.reshape(-1, 1)
-        if not self.rates.size:
+        if self.rates.size == 0:
             self.rates = to_add
         else:
             self.rates = np.hstack((self.rates, to_add))

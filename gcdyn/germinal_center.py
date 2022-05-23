@@ -48,11 +48,12 @@ class GerminalCenter:
     def pop_cell(self, cell_idx):
         """Remove the cell from the GC and return it."""
         cell = self.population.pop(cell_idx)
-        assert (
-            not cell.children
-        ), "We should only be dropping cells from the current generation, not ancestral"
-        " ones with descendants."
+        assert not cell.children, (
+            "We should only be dropping cells from the current generation, not ancestral"
+            " ones with descendants."
+        )
         self.sampler.drop(cell_idx)
+        return cell
 
     def make_and_add_child_cell(self, parent):
         """Make a new cell, connect it to its parent, and add it to the GC."""
