@@ -1,6 +1,9 @@
+"""Tests for the GerminalCenter class."""
+
+
 import numpy as np
 import ete3
-import gcdyn.germinal_center as germinal_center
+from gcdyn import germinal_center
 from gcdyn.germinal_center import EventType
 
 
@@ -15,7 +18,6 @@ def make_random_cell():
 
 
 def make_birthy_cell():
-    rng = np.random.default_rng()
     cell = ete3.Tree()
     # XXX Note that I'm not using add_feature... should I?
     cell.λ = 2.0

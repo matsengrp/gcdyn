@@ -1,6 +1,9 @@
+"""A class to simulate evolution of a germinal center."""
+
+
 import copy
-import numpy as np
 from enum import Enum
+import numpy as np
 from gcdyn.event_sampler import EventSampler
 
 
