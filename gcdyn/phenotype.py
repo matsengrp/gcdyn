@@ -1,5 +1,4 @@
-r"""Uses PyTorch for Deep Mutational Scanning (``torchdms``) model to predict
-affinity of Ig heavy and light chain DNA sequences to presented antigen."""
+r"""Uses PyTorch for Deep Mutational Scanning (``torchdms``) model to predict affinity of Ig heavy and light chain DNA sequences to presented antigen."""
 from __future__ import annotations
 import pandas as pd
 import torch
@@ -72,8 +71,7 @@ class DMSPhenotype:
         return aa_seqs
 
     def calculate_KD(self, nt_seqs: list[str]) -> list[float]:
-        r"""Produces KD values for a collection of sequences using ``torchdms``
-        model that can produce ``delta_log10_KD`` values.
+        r"""Produces KD values for a collection of sequences using ``torchdms`` model that can produce ``delta_log10_KD`` values.
 
         Args:
             nt_seqs: list of DNA sequences

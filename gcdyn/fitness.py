@@ -1,5 +1,4 @@
-r"""Uses phenotype to determine fitness of B cells in the germinal center light
-zone."""
+r"""Uses phenotype to determine fitness of B cells in the germinal center light zone"""
 from __future__ import annotations
 from typing import Callable
 from math import exp
@@ -7,7 +6,7 @@ import pandas as pd
 
 
 class Fitness:
-    r"""Class to determine fitness from phenotype for a collection of sequences.
+    r"""Class to determine fitness from phenotype for a collection of sequences
 
     Args:
         tfh_function: method to map from KD to T cell help, taking in a list of :math:`K_D` values and producing a list of absolute T cell help quantities
@@ -23,8 +22,7 @@ class Fitness:
         self.concentration_antigen = concentration_antigen
 
     def _frac_antigen_bound(self, sequence_KDs: list[float]) -> list[float]:
-        r"""Determine the fraction of antigen bound from a list of KD values
-        using the Hill equation.
+        r"""Determine the fraction of antigen bound from a list of KD values using the Hill equation.
 
         Args:
             sequence_KDs: list of KDs that will each be used to determine the fraction of antigen bound.
@@ -42,8 +40,8 @@ class Fitness:
     def linear_fitness(
         self, kd_values: list[float], y_intercept: float = 0, slope: float = 1
     ) -> list[float]:
-        r"""Combines methods to get the antigen bound and T cell help from the
-        KD using a linear model.
+        r"""Combines methods to get the antigen bound and T cell help
+        from the KD using a linear model.
 
         Args:
             kd_values: list with KD value for each sequence
@@ -60,7 +58,7 @@ class Fitness:
         return t_cell_help_values
 
     def uniform_fitness(self, kd_values: list[float]) -> list[float]:
-        r"""Sets normalized amount of T cell help to equal values.
+        r"""Sets normalized amount of T cell help to equal values
 
         Args:
             kd_values: list of length equivalent to number of sequences
@@ -77,8 +75,8 @@ class Fitness:
         curve_steepness: float = 10,
         midpoint_antigen_bound: float = 0.5,
     ) -> list[float]:
-        r"""Combines methods to get the antigen bound and T cell help from the
-        KD using a sigmoidal model.
+        r"""Combines methods to get the antigen bound and T cell help
+        from the KD using a sigmoidal model.
 
         Args:
             kd_values: list with KD value for each sequence
@@ -102,8 +100,7 @@ class Fitness:
         seq_list: list[str],
         calculate_KD: Callable[[list[str]], list[float]],
     ) -> pd.DataFrame:
-        r"""Produces a dataframe including the fitness of a series of sequences
-        given KD values.
+        r"""Produces a dataframe including the fitness of a series of sequences given KD values.
 
         Args:
             seq_list: list of DNA sequences

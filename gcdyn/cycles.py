@@ -20,8 +20,7 @@ class ExtinctionError(Exception):
 
 
 class Mutator(ABC):
-    r"""A class for GC mutators, which mutate a sequence over some period of
-    time."""
+    r"""A class for GC mutators, which mutate a sequence over some period of time."""
 
     def mutate(self, time: float, rng: np.random.Generator) -> str:
         pass
@@ -125,12 +124,8 @@ class FivemerMutator(Mutator):
 
 
 class Selector(ABC):
-    r"""A class for GC selectors, which determine the fitness for a list of
-    nucleotide sequences.
-
-    Selectors return a list of tuples that can be interpreted by a
-    proliferator method
-    """
+    r"""A class for GC selectors, which determine the fitness for a list of nucleotide sequences.
+    Selectors return a list of tuples that can be interpreted by a proliferator method"""
 
     def select(self, sequence_list: List[str], competition: bool = True) -> List[Tuple]:
         """Assigns the fitness for each sequence, with normalization depending
@@ -200,6 +195,8 @@ class ThreeStepSelector(Selector):
         total_t_cell_help: float = 50,
         max_help: float = 2,
         antigen_frac_limit: float = 0.2,
+        sigmoid_growth_rate: float = 10,
+        sigmoid_mid_competency: float = 0.5,
     ):
         """Initializes values for a DMSPhenotype to calculate KD based on
         sequence from torchDMS model if KDs are not provided, and sets antigen
@@ -216,6 +213,8 @@ class ThreeStepSelector(Selector):
             concentration_antigen: molar concentration of antigen to determine antigen bound
             total_t_cell_help: total units of T cell help to be distributed in germinal center
             antigen_frac_limit: lower limit (inclusive) for the fraction antigen bound to be returned.
+            sigmoid_growth_rate: logistic growth rate of signal in ``norm2_sigmoid``
+            sigmoid_mid_competency: value of input competency to set as midpoint  in ``norm2_sigmoid``
         """
         self.igh_frame = igh_frame
         self.igk_frame = igk_frame
@@ -228,6 +227,8 @@ class ThreeStepSelector(Selector):
         self.total_t_cell_help = total_t_cell_help
         self.max_help = max_help
         self.antigen_frac_limit = antigen_frac_limit
+        self.sigmoid_growth_rate = sigmoid_growth_rate
+        self.sigmoid_mid_competency = sigmoid_mid_competency
 
     def select(
         self,
@@ -261,9 +262,7 @@ class ThreeStepSelector(Selector):
             kd_list = phenotype.calculate_KD(sequence_list)
         competencies = self.norm1(kd_list)
         norm_signals = self.norm2_sigmoid(competencies, competition=competition)
-        selected_seqs = self._norm3_prob_distribution(
-            norm_signals, self.total_t_cell_help
-        )
+        selected_seqs = self._norm3_prob_distribution(norm_signals)
         return [tuple([float(selected_seq)]) for selected_seq in selected_seqs]
 
     def norm1(self, KD_list):
@@ -287,15 +286,11 @@ class ThreeStepSelector(Selector):
     def norm2_sigmoid(
         self,
         competencies: List[float],
-        curve_steepness: float = 10,
-        midpoint_competency: float = 0.5,
         competition: bool = True,
     ):
         """Maps the input competencies to a signal between 0 and 1 using a sigmoidal transformation.
         Args:
             competencies: list of competencies between 0 and 1
-            curve_steepness: logistic growth rate of signal
-            midpoint_competency: value of input competency to set as midpoint
             competition: presence of competition to determine whether signal is normalized
 
         Returns:
@@ -310,7 +305,11 @@ class ThreeStepSelector(Selector):
                     1
                     / (
                         1
-                        + exp(-1 * curve_steepness * (competency - midpoint_competency))
+                        + exp(
+                            -1
+                            * self.sigmoid_growth_rate
+                            * (competency - self.sigmoid_mid_competency)
+                        )
                     )
                 )
         sum_signals = sum(unnorm_signals)
@@ -336,8 +335,7 @@ class ThreeStepSelector(Selector):
 
     def _norm3_prob_distribution(
         self,
-        norm_signals,
-        total_t_cell_help,
+        norm_signals: List[float],
         rng: np.random.Generator = default_rng(),
     ):
         """Produces a list with integer T cell help values using
@@ -345,7 +343,6 @@ class ThreeStepSelector(Selector):
 
         Args:
             norm_signals: T cell help signal for each sequence (must add to 1).
-            total_t_cell_help: total units of T cell help to be distributed
             rng: random number generator
 
         Returns:
@@ -354,24 +351,48 @@ class ThreeStepSelector(Selector):
         indices = np.arange(len(norm_signals))
         amt_help = np.zeros(len(norm_signals), dtype=int)
 
-        # If T cell help available exceeds the number of non-zero signals, every non-zero signal produces ``max_help``.
-        if total_t_cell_help >= self.max_help * np.count_nonzero(norm_signals):
+        # If T cell help available exceeds the number of non-zero signals, every non-zero signal produces max_help.
+        if self.total_t_cell_help >= self.max_help * np.count_nonzero(norm_signals):
             for i in range(len(norm_signals)):
                 if norm_signals[i] > 0:
                     amt_help[i] = self.max_help
-        # Otherwise, sample with weighted probabilities ``norm_signals``, re-sampling to not exceed ``max_help``.
+        # Otherwise, sample with weighted probabilities norm_signals, re-sampling to not exceed max_help anywhere.
         else:
-            for _ in range(total_t_cell_help):
+            for _ in range(self.total_t_cell_help):
                 chosen_index = rng.choice(indices, p=norm_signals)
                 while amt_help[chosen_index] > self.max_help - 1:
                     chosen_index = rng.choice(indices, p=norm_signals)
                 amt_help[chosen_index] += 1
         return amt_help
 
+    def norm3_ranked(self, norm_signals: List[float], max_divisions: float = 6):
+        """
+
+        Args:
+            norm_signals:
+            max_divisions:
+
+        Returns:
+
+        """
+        help_left = self.total_t_cell_help
+        divisions = np.zeros(len(norm_signals))
+        norm_signal_sort = np.argsort(norm_signals)
+        signal_to_divisions = max_divisions / norm_signals[norm_signal_sort[-1]]
+        for signals_idx in reversed(norm_signal_sort):
+            division_count = signal_to_divisions * norm_signals[signals_idx]
+            help_left -= division_count
+            if help_left < 0:
+                break
+            else:
+                divisions[signals_idx] = division_count
+        return divisions
+
 
 class DMSSelector(Selector):
-    r"""A class for a GC selector which determines fitness for nucleotide
-    sequences by using DMS models of affinity."""
+    r"""A class for a GC selector which determines fitness for nucleotide sequences by using DMS models of
+    affinity.
+    """
 
     def __init__(
         self,
@@ -443,8 +464,7 @@ class DMSSelector(Selector):
 
 
 class GC:
-    r"""A class for simulating a germinal center with discrete LZ
-    :math:`\leftrightarrow` DZ cycles.
+    r"""A class for simulating a germinal center with discrete LZ :math:`\leftrightarrow` DZ cycles.
 
     Args:
         sequence: root nucleotide sequence
@@ -578,10 +598,9 @@ class GC:
 def binary_proliferator(
     treenode: TreeNode, p: float, *args, rng: np.random.Generator = default_rng()
 ):
-    r"""Binary dark zone step (Galton-Watson). With probability :math:`1-p` the
-    input's ``terminated`` attribute is set to ``True``, indicating extinction.
-    With probability :math:`p` add two children to the input with
-    ``terminated`` attributes set to ``False``, indicating birth.
+    r"""Binary dark zone step (Galton-Watson).
+    With probability :math:`1-p` the input's ``terminated`` attribute is set to ``True``, indicating extinction.
+    With probability :math:`p` add two children to the input with ``terminated`` attributes set to ``False``, indicating birth.
 
     Args:
         treenode: root node to simulate from
@@ -606,10 +625,8 @@ def simple_proliferator(
     dist: float = None,
     rng: np.random.Generator = default_rng(),
 ) -> None:
-    r"""Recursively populates descendants on a tree node based on the number of
-    integer cell divisions indicated. Branch lengths are set to
-    1/`cell_divisions`, such that the distance from the root to all leaves will
-    be 1.
+    r"""Recursively populates descendants on a tree node based on the number of integer cell divisions indicated.
+    Branch lengths are set to 1/`cell_divisions`, such that the distance from the root to all leaves will be 1.
 
     Args:
         treenode: root node to populate from
@@ -634,12 +651,8 @@ def cell_div_balanced_proliferator(
     cell_divisions: float,
     rng: np.random.Generator = default_rng(),
 ) -> None:
-    r"""Populates descendants on a tree node based on the number of cell
-    divisions indicated, producing the number of children expected by
-    :math:`2^{cell\_divisions}`, where ``cell_divisions`` is not necessarily an
-    integer value. A full binary tree is generated, then leaf nodes are removed
-    at random from the set of alternating leaf nodes until there are the
-    expected number of children.
+    r"""Populates descendants on a tree node based on the number of cell divisions indicated, producing the number of children expected by :math:`2^{cell\_divisions}`, where ``cell_divisions`` is not necessarily an integer value.
+    A full binary tree is generated, then leaf nodes are removed at random from the set of alternating leaf nodes until there are the expected number of children.
 
     Args:
         treenode: root node to populate from
