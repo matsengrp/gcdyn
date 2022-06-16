@@ -9,5 +9,4 @@ sphinx-autodoc-typehints
 pandoc
 jupyterlab
 pandas
-torch
 seaborn
