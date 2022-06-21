@@ -10,3 +10,4 @@ pandoc
 jupyterlab
 pandas
 seaborn
+torch
