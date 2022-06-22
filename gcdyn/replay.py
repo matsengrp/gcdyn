@@ -2,6 +2,7 @@ import pandas as pd
 import torch
 from Bio import SeqIO
 from Bio.Seq import Seq
+
 igh_frame = 1
 igk_frame = 1
 igk_idx = 336

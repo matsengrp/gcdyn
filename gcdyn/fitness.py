@@ -4,7 +4,7 @@ from math import exp
 
 
 class Fitness:
-    r"""Class to determine fitness from phenotype for sequences
+    r"""Class to determine fitness from phenotype for a collection of sequences
 
     Args:
         fasta_path: path to a list of DNA sequences to use for phenotype prediction
@@ -89,6 +89,12 @@ class Fitness:
         r"""Maps evaluation to unnormalized fitness
         Args:
             mapping_type: type of mapping function (defaults to linear)
+            log10_naive_KD: log of naive KD used to infer absolute KD
+            concentration_antigen: concentration used to infer antigen bound
+            slope: slope for linear mapping between antigen bound and fitness
+            maximum_Tfh: maximum Tfh help for sigmoidal mapping to fitness
+            curve_steepness: logistic growth rate for sigmoidal mapping to fitness
+            midpoint_antigen_bound: midpoint of antigen bound for sigmoidal mapping to fitness
         """
         if mapping_type == "linear":
             return self.linear_fitness(slope, log10_naive_KD, concentration_antigen)
