@@ -1,6 +1,7 @@
 r"""Mapping of sequence to phenotype."""
 
 import torch
+import pandas
 
 
 class Phenotype:
@@ -8,16 +9,15 @@ class Phenotype:
 
     Args:
         model_path: a path to a torchdms model
-        TODO phenotype_names: the names of the phenotypes
+        phenotype_names: the names of the phenotypes
     """
 
-    def __init__(self, model_path: str):
+    def __init__(self, model_path: str, phenotype_names: list[str]):
         self.model = torch.load(model_path)
+        self.names = phenotype_names
 
     def evaluate(self, seqs: list[str]):
         "Evaluate phenotype given a list of sequences."
         aa_seq_one_hot = torch.stack([self.model.seq_to_binary(seq) for seq in seqs])
-        # TODO: use the names as column labels in pandas, checking to make sure that the
-        # number of columns output by the model is the same as the length of
-        # phenotype_names .
-        return self.model(aa_seq_one_hot).detach().numpy()
+        labeled_evaluation = pandas.DataFrame(self.model(aa_seq_one_hot).detach().numpy(), columns=self.names)
+        return labeled_evaluation
