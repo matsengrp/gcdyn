@@ -8,14 +8,10 @@ igh_frame = 1
 igk_frame = 1
 igk_idx = 336
 naive_sites_path = "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv"
-model_path = "Linear.model"
+model_path = "../notebooks/Linear.model"
 model = torch.load(model_path)
 tdms_phenotypes = ['delta_log10_KD', 'expression']
-log10_naive_KD = -10.43
-α = 10
-β = .5
-k = 4
-c = 1
+
 
 # From gcreplay-tools (https://github.com/matsengrp/gcreplay/blob/main/nextflow/bin/gcreplay-tools.py):
 
@@ -47,11 +43,16 @@ def read_sites_file(naive_sites_path: str):
         )
     return pos_df
 
-
-def seq_df_tdms(fasta_path: str, igh_frame: int, igk_frame: int, igk_idx: int):
+def seq_df_tdms(igh_frame: int, igk_frame: int, igk_idx: int, fasta_path: str = None, seq_list: list[str] = None):
     """Make amino acid sequence predictions using chain information and return as a dataframe"""
-    # load the seqs from a fasta
-    seqs_df = fasta_to_df(fasta_path)
+
+    if fasta_path != None:
+        # load the seqs from a fasta
+        seqs_df = fasta_to_df(fasta_path)
+    elif seq_list != None:
+        seqs_df = pd.DataFrame({"seq":seqs})
+    else:
+        raise Exception("fasta path or list of sequences must be given")
 
     # make a prediction for each of the observed sequences
     for idx, row in seqs_df.iterrows():
@@ -61,6 +62,7 @@ def seq_df_tdms(fasta_path: str, igh_frame: int, igk_frame: int, igk_idx: int):
         igk_aa = aa(row.seq[igk_idx:], igk_frame)
 
         # Make the aa seq for tdms
+        pos_df = read_sites_file(naive_sites_path)
         aa_tdms = pos_df.amino_acid.copy()
         aa_tdms.iloc[pos_df.chain == "H"] = igh_aa
         # note: replay light chains are shorter than dms seq by one aa

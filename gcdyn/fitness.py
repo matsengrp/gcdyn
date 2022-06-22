@@ -6,92 +6,77 @@ class Fitness:
 
     Args:
         fasta_path: path to a list of DNA sequences to use for phenotype prediction
+        DNA_seq_list: list of DNA sequences to use for phenotype prediction (overridden if fasta provided)
     """
 
-    def __init__(self, fasta_path: str):
-        self.seqs_df = replay.seq_df_tdms(fasta_path, replay.igh_frame, replay.igk_frame, replay.igk_idx)
-        self.delta_log_KDs = replay.evaluate(replay.model, self.seqs_df["aa_sequence"], replay.tdms_phenotypes)
-        self.fitness_df = None
+    def __init__(self, fasta_path: str = None, DNA_seq_list: list[str] = None):
+        if fasta_path != None:
+            seqs_df = replay.seq_df_tdms(replay.igh_frame, replay.igk_frame, replay.igk_idx, fasta_path)
+        elif DNA_seq_list != None:
+            seqs_df = replay.seq_df_tdms(replay.igh_frame, replay.igk_frame, replay.igk_idx, DNA_seq_list)
+        else:
+            raise Exception("Must define a path to DNA sequences or a list of sequences")
+        delta_log_KDs = replay.evaluate(replay.model, self.seqs_df["aa_sequence"], replay.tdms_phenotypes)
+        self.all_info_df = seqs_df.merge(delta_log_KDs, left_index=True, right_index=True)
 
 
-    def frac_antigen_bound(delta_log_KD, log10_naive_KD: float, concentration_antigen: float):
-        """Uses the KD and concentration of antigen to calculate the fraction antigen bound via the Hill equation"""
-        log10_KD  = delta_log_KD + log10_naive_KD
-        KD = 10**log10_KD
-        # Hill equation with n = 1:
-        theta = concentration_antigen/(KD + concentration_antigen)
-        return theta
+    def frac_antigen_bound(self, delta_log_KD, log10_naive_KD: float, concentration_antigen: float):
+        """"""
+        delta_log_KDs = self.all_info_df["delta_log10_KD"]
+        thetas = []
+        for delta_log_KD in KDs:
+            log10_KD  = delta_log_KD + log10_naive_KD
+            KD = 10 ** log10_KD
+            # Hill equation with n = 1:
+            theta = concentration_antigen/(KD + concentration_antigen)
+            thetas.append(theta)
+        self.all_info_df["frac_antigen_bound"] = thetas
 
-    def linear_fitness(self, k: float, c: float, log10_naive_KD: float, concentration_antigen: float):
+
+    def linear_fitness(self, slope: float, log10_naive_KD: float, concentration_antigen: float):
         """Combines methods to get the antigen bound, Tfh help, and fitness from the KD using a linear model"""
-        fitness_df = pd.DataFrame({"id": self.seqs_df["id"]})
-        for idx, row in self.delta_log_KDs.iterrows():
+        for idx, row in self.all_info_df.iterrows():
             antigen_bound = self.frac_antigen_bound(row.delta_log_KD, log10_naive_KD, concentration_antigen)
-            Tfh_help = self.antigen_bound_Tfh_help_linear(antigen_bound, k)
-            fitness = self.fitness_from_Tfh_help(Tfh_help, c)
-            fitness_df.loc[idx, "fitness"] = fitness
-        self.fitness_df = fitness_df
+            Tfh_help = antigen_bound * slope
+            all_info_df.loc[idx, "fitness"] = Tfh_help
+        return all_info_df['fitness']
 
-    def sigmoidal_fitness(self, k: float, α: float, β: float, log10_naive_KD: float, concentration_antigen: float):
+    def sigmoidal_fitness(self, maximum_Tfh: float, curve_steepness: float,
+        midpoint_antigen_bound: float, log10_naive_KD: float,
+        concentration_antigen: float):
         """Combines methods to get the antigen bound, Tfh help, and fitness from the KD using a sigmoidal model"""
-        fitness_df = pd.DataFrame({"id": self.seqs_df["id"]})
-        for idx, row in self.delta_log_KDs.iterrows():
+        for idx, row in self.all_info_df.iterrows():
             antigen_bound = self.frac_antigen_bound(row.delta_log_KD, log10_naive_KD, concentration_antigen)
-            Tfh_help = self.antigen_bound_Tfh_help_sigmoid(antigen_bound, k, α, β)
-            fitness = self.fitness_from_Tfh_help(Tfh_help, c)
-            fitness_df.loc[idx, "fitness"] = fitness
-        self.fitness_df = fitness_df
+            Tfh_help = maximum_Tfh / (1 + exp(-1 * curve_steepness * (antigen_bound - midpoint_antigen_bound)))
+            fitness_df.loc[idx, "fitness"] = Tfh_help
+        return all_info_df['fitness']
 
 
-    def fitness(self, mapping_type: str = 'linear'):
+    def fitness(self, mapping_type: str = 'linear',
+        log10_naive_KD: float = -10.43, concentration_antigen: float = 10**(-9),
+        slope: float = 1, maximum_Tfh: float = 4, curve_steepness: float = 10,
+        midpoint_antigen_bound: float = 0.5):
         r"""Maps evaluation to unnormalized fitness
         Args:
             mapping_type: type of mapping function (defaults to linear)
         """
-        # TODO: variable-len parameters, finish calculating fitness
         if mapping_type == 'linear':
-            self.fitness = None
+            return self.linear_fitness(slope, log10_naive_KD, concentration_antigen)
         elif mapping_type == 'sigmoid':
-            self.fitness = None
+            return self.sigmoidal_fitness(maximum_Tfh, curve_steepness,
+                        midpoint_antigen_bound, log10_naive_KD, concentration_antigen)
         else:
             raise Exception('Only linear and sigmoid are acceptable mapping types')
 
-    def antigen_bound_Tfh_help_sigmoid(antigen_bound: float, k: float, α: float, β: float):
-        """Produce a transformation from antigen bound to Tfh help using parameters k, alpha, and beta"""
-        x = α * (antigen_bound - β)
-        Tfh = k/(1 + exp(-1 * x))
-        return Tfh
 
-    def antigen_bound_Tfh_help_linear(antigen_bound: float, k: float):
-        """Produce a transformation from antigen bound to Tfh help using slope k"""
-        Tfh = antigen_bound * k
-        return Tfh
-
-
-    def fitness_from_Tfh_help(Tfh_help: float, c: float):
-        """Produce a linear transformation from antigen bound to fitness using coefficient c"""
-        return c * Tfh_help
-
-
-    def map_antigen_bound(antigen_bound_fracs: list[float], k: float, α: float, β: float, c: float):
-        """Map a list of antigen bound values to fitnesses using the sigmoidal transformation"""
-        fitnesses = []
-        for antigen_bound_frac in antigen_bound_fracs:
-            Tfh_help = self.antigen_bound_Tfh_help_sigmoid(antigen_bound_frac, k, α, β)
-            fitnesses.append(fitness_from_Tfh_help(Tfh_help, c))
-        return fitnesses
-
-    def normalize_fitness(fitness_df):
+    def normalize_fitness(self):
         """Normalize fitness from a dataframe with a fitness column"""
-        min_fitness = fitness_df['fitness'].min()
-        max_fitness = fitness_df['fitness'].max()
-        normalized_fitness_df = fitness_df.copy()
-        normalized_fitness_df['normalized_fitness'] = (fitness_df['fitness'] - min_fitness) / (max_fitness - min_fitness)
-        return normalized_fitness_df
+        sum_fitness = self.all_info_df['fitness'].sum()
+        self.all_info_df['normalized_fitness'] = (self.all_info_df['fitness']) / (sum_fitness)
+        return self.all_info_df['normalized_fitness']
 
 
-    def map_cell_divisions(normalized_fitness_df, m: float):
-        """Map fitness linearly to the number of cell divisions using coefficient m"""
-        cell_divisions_df = normalized_fitness_df.copy()
-        cell_divisions_df['cell_divisions'] = normalized_fitness_df['normalized_fitness'] * m
-        return cell_divisions_df
+    def map_cell_divisions(self, slope: float = 1):
+        """Map fitness linearly to the number of cell divisions using slope"""
+        self.all_info_df['cell_divisions'] = self.all_info_df['normalized_fitness'] * slope
+        return self.all_info_df['cell_divisions']
