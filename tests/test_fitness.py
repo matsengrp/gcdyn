@@ -36,4 +36,4 @@ def test_normalized_fitness(seq_list):
     fit = Fitness(DNA_seq_list=seq_list)
     fit.fitness("sigmoid")
     normalized_fitness_vals = fit.normalize_fitness()
-    assert all(fitness < 1 for fitness in normalized_fitness_vals)
+    assert all(fitness < 1 and fitness > 0 for fitness in normalized_fitness_vals)

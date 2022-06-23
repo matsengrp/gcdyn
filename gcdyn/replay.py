@@ -19,11 +19,14 @@ tdms_phenotypes = ["delta_log10_KD", "expression"]
 def fasta_to_df(f):
     """simply convert a fasta to dataframe."""
     ids, seqs = [], []
-    with open(f) as fasta_file:
-        for seq_record in SeqIO.parse(fasta_file, "fasta"):  # (generator)
-            if str(seq_record.id) != "naive":
-                ids.append(seq_record.id)
-                seqs.append(str(seq_record.seq))
+    try:
+        with open(f) as fasta_file:
+            for seq_record in SeqIO.parse(fasta_file, "fasta"):  # (generator)
+                if str(seq_record.id) != "naive":
+                    ids.append(seq_record.id)
+                    seqs.append(str(seq_record.seq))
+    except OSError:
+        print("Unable to open {0}".format(f))
     return pd.DataFrame({"id": ids, "seq": seqs})
 
 

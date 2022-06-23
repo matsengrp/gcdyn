@@ -38,7 +38,7 @@ class Fitness:
         )
 
     def frac_antigen_bound(self, log10_naive_KD: float, concentration_antigen: float):
-        """"""
+        """Determine the fraction of antigen bound using the Hill equation."""
         delta_log_KDs = self.all_info_df["delta_log10_KD"]
         thetas = []
         for delta_log_KD in delta_log_KDs:
