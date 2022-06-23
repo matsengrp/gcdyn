@@ -1,4 +1,5 @@
 r"""Uses phenotype to determine fitness"""
+from __future__ import annotations
 import gcdyn.replay as replay
 from math import exp
 
