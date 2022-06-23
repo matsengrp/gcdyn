@@ -7,7 +7,8 @@ igh_frame = 1
 igk_frame = 1
 igk_idx = 336
 naive_sites_path = "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv"
-model_path = "../notebooks/Linear.model"
+# TODO: set other location/path for model files
+model_path = "notebooks/Linear.model"
 model = torch.load(model_path)
 tdms_phenotypes = ["delta_log10_KD", "expression"]
 
@@ -16,7 +17,7 @@ tdms_phenotypes = ["delta_log10_KD", "expression"]
 
 
 def fasta_to_df(f):
-    """simply convert a fasta to dataframe"""
+    """simply convert a fasta to dataframe."""
     ids, seqs = [], []
     with open(f) as fasta_file:
         for seq_record in SeqIO.parse(fasta_file, "fasta"):  # (generator)
@@ -34,7 +35,7 @@ def aa(sequence, frame):
 
 
 def read_sites_file(naive_sites_path: str):
-    """Read the sites file from csv"""
+    """Read the sites file from csv."""
     # collect the correct sites df from tylers repo
     pos_df = pd.read_csv(
         naive_sites_path,
@@ -51,7 +52,8 @@ def seq_df_tdms(
     fasta_path: str = None,
     seq_list: list[str] = None,
 ):
-    """Make amino acid sequence predictions using chain information and return as a dataframe"""
+    """Make amino acid sequence predictions using chain information and return
+    as a dataframe."""
 
     if fasta_path is not None:
         # load the seqs from a fasta
@@ -84,7 +86,8 @@ def seq_df_tdms(
 
 
 def evaluate(torchdms_model, seqs: list[str], phenotype_names: list[str]):
-    """Evaluate sequences using torchdms model and return the evaluation as a pandas dataframe"""
+    """Evaluate sequences using torchdms model and return the evaluation as a
+    pandas dataframe."""
     aa_seq_one_hot = torch.stack([torchdms_model.seq_to_binary(seq) for seq in seqs])
     try:
         labeled_evaluation = pd.DataFrame(

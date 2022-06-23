@@ -1,5 +1,5 @@
 r"""Uses phenotype to determine fitness"""
-import replay
+import gcdyn.replay as replay
 from math import exp
 
 
@@ -14,26 +14,30 @@ class Fitness:
     def __init__(self, fasta_path: str = None, DNA_seq_list: list[str] = None):
         if fasta_path is not None:
             seqs_df = replay.seq_df_tdms(
-                replay.igh_frame, replay.igk_frame, replay.igk_idx, fasta_path
+                replay.igh_frame,
+                replay.igk_frame,
+                replay.igk_idx,
+                fasta_path=fasta_path,
             )
         elif DNA_seq_list is not None:
             seqs_df = replay.seq_df_tdms(
-                replay.igh_frame, replay.igk_frame, replay.igk_idx, DNA_seq_list
+                replay.igh_frame,
+                replay.igk_frame,
+                replay.igk_idx,
+                seq_list=DNA_seq_list,
             )
         else:
             raise Exception(
                 "Must define a path to DNA sequences or a list of sequences"
             )
         delta_log_KDs = replay.evaluate(
-            replay.model, self.seqs_df["aa_sequence"], replay.tdms_phenotypes
+            replay.model, seqs_df["aa_sequence"], replay.tdms_phenotypes
         )
         self.all_info_df = seqs_df.merge(
             delta_log_KDs, left_index=True, right_index=True
         )
 
-    def frac_antigen_bound(
-        self, delta_log_KD, log10_naive_KD: float, concentration_antigen: float
-    ):
+    def frac_antigen_bound(self, log10_naive_KD: float, concentration_antigen: float):
         """"""
         delta_log_KDs = self.all_info_df["delta_log10_KD"]
         thetas = []
@@ -48,13 +52,10 @@ class Fitness:
     def linear_fitness(
         self, slope: float, log10_naive_KD: float, concentration_antigen: float
     ):
-        """Combines methods to get the antigen bound, Tfh help, and fitness from the KD using a linear model"""
-        for idx, row in self.all_info_df.iterrows():
-            antigen_bound = self.frac_antigen_bound(
-                row.delta_log_KD, log10_naive_KD, concentration_antigen
-            )
-            Tfh_help = antigen_bound * slope
-            self.all_info_df.loc[idx, "fitness"] = Tfh_help
+        """Combines methods to get the antigen bound, Tfh help, and fitness
+        from the KD using a linear model."""
+        self.frac_antigen_bound(log10_naive_KD, concentration_antigen)
+        self.all_info_df["fitness"] = self.all_info_df["frac_antigen_bound"] * slope
         return self.all_info_df["fitness"]
 
     def sigmoidal_fitness(
@@ -65,11 +66,11 @@ class Fitness:
         log10_naive_KD: float,
         concentration_antigen: float,
     ):
-        """Combines methods to get the antigen bound, Tfh help, and fitness from the KD using a sigmoidal model"""
+        """Combines methods to get the antigen bound, Tfh help, and fitness
+        from the KD using a sigmoidal model."""
+        self.frac_antigen_bound(log10_naive_KD, concentration_antigen)
         for idx, row in self.all_info_df.iterrows():
-            antigen_bound = self.frac_antigen_bound(
-                row.delta_log_KD, log10_naive_KD, concentration_antigen
-            )
+            antigen_bound = row.frac_antigen_bound
             Tfh_help = maximum_Tfh / (
                 1 + exp(-1 * curve_steepness * (antigen_bound - midpoint_antigen_bound))
             )
@@ -110,7 +111,7 @@ class Fitness:
             raise Exception("Only linear and sigmoid are acceptable mapping types")
 
     def normalize_fitness(self):
-        """Normalize fitness from a dataframe with a fitness column"""
+        """Normalize fitness from a dataframe with a fitness column."""
         sum_fitness = self.all_info_df["fitness"].sum()
         self.all_info_df["normalized_fitness"] = (self.all_info_df["fitness"]) / (
             sum_fitness
@@ -118,7 +119,7 @@ class Fitness:
         return self.all_info_df["normalized_fitness"]
 
     def map_cell_divisions(self, slope: float = 1):
-        """Map fitness linearly to the number of cell divisions using slope"""
+        """Map fitness linearly to the number of cell divisions using slope."""
         self.all_info_df["cell_divisions"] = (
             self.all_info_df["normalized_fitness"] * slope
         )
