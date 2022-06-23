@@ -11,3 +11,4 @@ jupyterlab
 pandas
 seaborn
 torch
+biopython
