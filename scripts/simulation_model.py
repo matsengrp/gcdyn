@@ -22,17 +22,23 @@ def main():
     params = Parameters(θ, μ, m, ρ)
 
     n_models = 3
-    n_trees = 10
+    n_trees = 2
 
-    # compare log likelihood before and after pruning trees
+    # # compare log likelihood before and after pruning trees
+    # model = Model(params)
+    # for i in range(n_models):
+    #     key, _ = random.split(key)
+    #     model.simulate(T, n_trees, key[0])
+    #     print("before:", model.log_likelihood())
+    #     for tree in model.trees:
+    #         tree.prune()
+    #     print("after:", model.log_likelihood())
+
     model = Model(params)
-    for i in range(n_models):
-        key, _ = random.split(key)
-        model.simulate(T, n_trees, key[0])
-        print("before:", model.log_likelihood())
-        for tree in model.trees:
-            tree.prune()
-        print("after:", model.log_likelihood())
+    model.simulate(T, n_trees, seed)
+    for tree in model.trees:
+        print(len(tree.tree))
+    model.fit()
 
 
 if __name__ == "__main__":

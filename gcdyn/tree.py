@@ -29,66 +29,66 @@ class Tree:
         tree.t = 0
         tree.x = 0
         tree.event = None
-        self.evolve(tree, T, random.PRNGKey(seed))
+        # self.evolve(tree, T, random.PRNGKey(seed))
         self.tree: ete3.Tree = tree
 
-    def λ(self, x: float):
-        r"""Birth rate of phenotype x
+    # def λ(self, x: float):
+    #     r"""Birth rate of phenotype x
 
-        Args:
-            x: phenotype
+    #     Args:
+    #         x: phenotype
 
-        Returns:
-            float: birth rate
-        """
-        return self.params.θ[0] * expit(self.params.θ[1] * (x - self.params.θ[2]))
+    #     Returns:
+    #         float: birth rate
+    #     """
+    #     return self.params.θ[0] * expit(self.params.θ[1] * (x - self.params.θ[2]))
 
-    def evolve(self, tree: ete3.Tree, t: float, key: np.ndarray):
-        r"""Evolve an ETE Tree node with a phenotype attribute for time t
+    # def evolve(self, tree: ete3.Tree, t: float, key: np.ndarray):
+    #     r"""Evolve an ETE Tree node with a phenotype attribute for time t
 
-        Args:
-            tree:initial tree to evolve
-            t: sampling time
-            key: random key, i.e. generated with :py:func:`jax.random.PRNGKey()` or :py:func:`jax.random.split()`
-        """
-        λ_x = self.λ(tree.x)
-        Λ = λ_x + self.params.μ + self.params.m
-        time_key, event_key = random.split(key)
-        τ = random.exponential(time_key) / Λ
-        if τ > t:
-            self._name += 1
-            child = ete3.Tree(name=self._name, dist=t)
-            child.x = tree.x
-            child.t = tree.t + t
-            child.event = (
-                "sampled" if random.uniform(event_key) < self.params.ρ else "unsampled"
-            )
-            tree.add_child(child)
-            return
+    #     Args:
+    #         tree:initial tree to evolve
+    #         t: sampling time
+    #         key: random key, i.e. generated with :py:func:`jax.random.PRNGKey()` or :py:func:`jax.random.split()`
+    #     """
+    #     λ_x = self.λ(tree.x)
+    #     Λ = λ_x + self.params.μ + self.params.m
+    #     time_key, event_key = random.split(key)
+    #     τ = random.exponential(time_key) / Λ
+    #     if τ > t:
+    #         self._name += 1
+    #         child = ete3.Tree(name=self._name, dist=t)
+    #         child.x = tree.x
+    #         child.t = tree.t + t
+    #         child.event = (
+    #             "sampled" if random.uniform(event_key) < self.params.ρ else "unsampled"
+    #         )
+    #         tree.add_child(child)
+    #         return
 
-        possible_events = ["birth", "death", "mutation"]
-        event_probabilities = np.array([λ_x, self.params.μ, self.params.m]) / Λ
-        event = possible_events[
-            random.choice(event_key, len(possible_events), p=event_probabilities)
-        ]
-        self._name += 1
-        child = ete3.Tree(name=self._name, dist=τ)
-        child.t = tree.t + τ
-        child.x = tree.x
-        child.event = event
-        if event == "birth":
-            child1_key, child2_key = random.split(event_key)
-            self.evolve(child, t - τ, child1_key)
-            self.evolve(child, t - τ, child2_key)
-        elif event == "death":
-            pass
-        elif event == "mutation":
-            mutation_key, child_key = random.split(event_key)
-            child.x += random.normal(mutation_key)
-            self.evolve(child, t - τ, child_key)
-        else:
-            raise ValueError("unknown event")
-        tree.add_child(child)
+    #     possible_events = ["birth", "death", "mutation"]
+    #     event_probabilities = np.array([λ_x, self.params.μ, self.params.m]) / Λ
+    #     event = possible_events[
+    #         random.choice(event_key, len(possible_events), p=event_probabilities)
+    #     ]
+    #     self._name += 1
+    #     child = ete3.Tree(name=self._name, dist=τ)
+    #     child.t = tree.t + τ
+    #     child.x = tree.x
+    #     child.event = event
+    #     if event == "birth":
+    #         child1_key, child2_key = random.split(event_key)
+    #         self.evolve(child, t - τ, child1_key)
+    #         self.evolve(child, t - τ, child2_key)
+    #     elif event == "death":
+    #         pass
+    #     elif event == "mutation":
+    #         mutation_key, child_key = random.split(event_key)
+    #         child.x += random.normal(mutation_key)
+    #         self.evolve(child, t - τ, child_key)
+    #     else:
+    #         raise ValueError("unknown event")
+    #     tree.add_child(child)
 
     def _decorate(self):
         r"""Add node style to the tree

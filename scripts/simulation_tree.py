@@ -25,7 +25,7 @@ def main():
 
     for i in range(n_trees):
         key, _ = random.split(key)
-        tree = Tree(T, key, params)
+        tree = Tree(T, key[0], params)
         tree.draw_tree(f"tree {i + 1}.svg")
 
 
