@@ -3,7 +3,6 @@ r"""Germinal center light zone / dark-zone cycles simulator.
 Borrowing from `gctree <https://github.com/matsengrp/gctree/blob/master/gctree/mutation_model.py>`_
 """
 
-from collections.abc import Iterable
 from typing import Callable, List, Any
 from ete3 import TreeNode
 import numpy as np
@@ -26,7 +25,7 @@ class GC:
         sequence: str,
         proliferator: Callable[[TreeNode, float, np.random.Generator], None],
         mutator: Callable[[str, float, np.random.Generator], str],
-        selector: Callable[[Iterable[str]], List[Any]],
+        selector: Callable[[List[str]], List[Any]],
         N0: int = 1,
     ):
         self.tree = TreeNode(dist=0)
