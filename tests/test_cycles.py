@@ -1,4 +1,5 @@
 import unittest
+import numpy as np
 from numpy.random import default_rng
 
 from gcdyn.cycles import GC, binary_proliferator, uniform_mutator
@@ -15,20 +16,14 @@ class TestGC(unittest.TestCase):
         def neutral_selector(seqs):
             return [(0.9,)] * len(seqs)
 
-        success = False
-        while not success:
-            try:
-                self.gc = GC(
-                    sequence,
-                    binary_proliferator,
-                    uniform_mutator,
-                    neutral_selector,
-                    N0=self.N0,
-                )
-                self.gc.simulate(self.T)
-                success = True
-            except RuntimeError:
-                pass
+        self.gc = GC(
+            sequence,
+            binary_proliferator,
+            uniform_mutator,
+            neutral_selector,
+            N0=self.N0,
+        )
+        self.gc.simulate(self.T, max_tries=np.inf)
 
         print(self.gc.tree)
 

@@ -9,6 +9,10 @@ import numpy as np
 from numpy.random import default_rng
 
 
+class ExtinctionError(Exception):
+    """The simulation has resulted in extintion of all lineages."""
+
+
 class GC:
     r"""A class for simulating a germinal center with discrete LZ :math:`\leftrightarrow` DZ cycles.
 
@@ -77,23 +81,36 @@ class GC:
             return False not in event_cache[node]
 
         if is_leaf_fn(self.tree):
-            raise RuntimeError("extinct")
+            raise ExtinctionError()
 
         for node in self.tree.traverse(is_leaf_fn=is_leaf_fn):
             if is_leaf_fn(node):
                 node.detach()
 
-    def simulate(self, T: int, prune: bool = True) -> None:
+    def simulate(self, T: int, prune: bool = True, max_tries: int = 100) -> None:
         r"""Simulate.
 
         Args:
             T: number of cycles to simulate
             prune: prune to the tree induced by the surviving lineages
+            max_tries: try this many times to simulate a tree that doesn't go extinct
         """
-        for _ in range(T):
-            self.step()
-        if prune:
-            self.prune()
+        success = False
+        n_tries = 0
+        while not success:
+            try:
+                for _ in range(T):
+                    self.step()
+                if prune:
+                    self.prune()
+                success = True
+            except ExtinctionError as err:
+                n_tries += 1
+                if n_tries == max_tries:
+                    raise err
+                for child in self.tree.children:
+                    self.tree.remove_child(child)
+                self.tree.terminated = False
 
 
 def binary_proliferator(
