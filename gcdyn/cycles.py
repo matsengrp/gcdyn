@@ -57,9 +57,7 @@ class GC:
         for leaf, args in zip(self.alive_leaves, fitnesses):
             self.proliferator(leaf, *args, rng=self.rng)
             for node in leaf.iter_descendants():
-                node.sequence = self.mutator(
-                    node.up.sequence, node.dist, rng=self.rng
-                    )
+                node.sequence = self.mutator(node.up.sequence, node.dist, rng=self.rng)
         self.alive_leaves = set([leaf for leaf in self.tree if not leaf.terminated])
 
         if self.Nmax:
