@@ -55,18 +55,18 @@ class GC:
 
         self.alive_leaves = set([leaf for leaf in self.tree])
 
-    def step(self, enforce_ultrametricity: bool = True) -> None:
+    def step(self, enforce_timescale: bool = True) -> None:
         r"""Simulate one cycle.
 
         Args:
-            enforce_ultrametricity: if ``True``, the time scale of the DZ proliferation tree must be consistent with the global timescale (one unit per step)
+            enforce_timescale: if ``True``, the time scale of the DZ proliferation tree must be consistent with the global timescale (one unit per step)
         """
         fitnesses = self.selector([leaf.sequence for leaf in self.alive_leaves])
         for leaf, args in zip(self.alive_leaves, fitnesses):
             self.proliferator(leaf, *args, rng=self.rng)
             for node in leaf.iter_descendants():
                 node.sequence = self.mutator(node.up.sequence, node.dist, rng=self.rng)
-            if enforce_ultrametricity:
+            if enforce_timescale:
                 for subleaf in leaf:
                     if not subleaf.terminated and leaf.get_distance(subleaf) != 1:
                         raise ValueError(
@@ -102,7 +102,7 @@ class GC:
         T: int,
         prune: bool = True,
         max_tries: int = 100,
-        enforce_ultrametricity: bool = True,
+        enforce_timescale: bool = True,
     ) -> None:
         r"""Simulate.
 
@@ -110,14 +110,14 @@ class GC:
             T: number of cycles to simulate
             prune: prune to the tree induced by the surviving lineages
             max_tries: try this many times to simulate a tree that doesn't go extinct
-            enforce_ultrametricity: if ``True``, the time scale of the DZ proliferation trees must be consistent with the global timescale
+            enforce_timescale: if ``True``, the time scale of the DZ proliferation trees must be consistent with the global timescale
         """
         success = False
         n_tries = 0
         while not success:
             try:
                 for _ in range(T):
-                    self.step(enforce_ultrametricity=enforce_ultrametricity)
+                    self.step(enforce_timescale=enforce_timescale)
                 if prune:
                     self.prune()
                 success = True
