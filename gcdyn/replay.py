@@ -4,15 +4,6 @@ import torch
 from Bio import SeqIO
 from Bio.Seq import Seq
 
-igh_frame = 1
-igk_frame = 1
-igk_idx = 336
-naive_sites_path = "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv"
-# TODO: set other location/path for model files
-model_path = "notebooks/Linear.model"
-model = torch.load(model_path)
-tdms_phenotypes = ["delta_log10_KD", "expression"]
-
 
 # From gcreplay-tools (https://github.com/matsengrp/gcreplay/blob/main/nextflow/bin/gcreplay-tools.py):
 
@@ -49,54 +40,79 @@ def read_sites_file(naive_sites_path: str):
     return pos_df
 
 
-def seq_df_tdms(
-    igh_frame: int,
-    igk_frame: int,
-    igk_idx: int,
-    fasta_path: str = None,
-    seq_list: list[str] = None,
-):
-    """Make amino acid sequence predictions using chain information and return
-    as a dataframe."""
-
-    if fasta_path is not None:
-        # load the seqs from a fasta
-        seqs_df = fasta_to_df(fasta_path)
-    elif seq_list is not None:
-        seqs_df = pd.DataFrame({"seq": seq_list})
-    else:
-        raise Exception("fasta path or list of sequences must be given")
-
-    # make a prediction for each of the observed sequences
-    for idx, row in seqs_df.iterrows():
-
-        # translate heavy and light chains
-        igh_aa = aa(row.seq[:igk_idx], igh_frame)
-        igk_aa = aa(row.seq[igk_idx:], igk_frame)
-
-        # Make the aa seq for tdms
-        pos_df = read_sites_file(naive_sites_path)
-        aa_tdms = pos_df.amino_acid.copy()
-        aa_tdms.iloc[pos_df.chain == "H"] = igh_aa
-        # note: replay light chains are shorter than dms seq by one aa
-        aa_tdms.iloc[(pos_df.chain == "L") & (pos_df.index < pos_df.index[-1])] = igk_aa
-        aa_tdms_seq = "".join(aa_tdms)
-        seqs_df.loc[idx, "aa_sequence"] = aa_tdms_seq
-
-    return seqs_df
-
-
 # phenotype evaluation:
 
 
-def evaluate(torchdms_model, seqs: list[str], phenotype_names: list[str]):
-    """Evaluate sequences using torchdms model and return the evaluation as a
-    pandas dataframe."""
-    aa_seq_one_hot = torch.stack([torchdms_model.seq_to_binary(seq) for seq in seqs])
-    try:
-        labeled_evaluation = pd.DataFrame(
-            torchdms_model(aa_seq_one_hot).detach().numpy(), columns=phenotype_names
+class ReplayPhenotype:
+    """Defines a set of parameters used to go from sequence to KD values."""
+
+    def __init__(
+        self,
+        igh_frame: int,
+        igk_frame: int,
+        igk_idx: int,
+        naive_sites_path: str,
+        model_path: str,
+        tdms_phenotypes: list[str],
+        log10_naive_KD: float
+    ):
+        self.igh_frame = igh_frame
+        self.igk_frame = igk_frame
+        self.igk_idx = igk_idx
+        self.naive_sites_path = naive_sites_path
+        self.model_path = model_path
+        self.tdms_phenotypes = tdms_phenotypes
+        self.log10_naive_KD = log10_naive_KD
+
+        model = torch.load(model_path)
+
+    def seq_df_tdms(self, fasta_path: str = None, seq_list: list[str] = None):
+        if fasta_path is not None:
+            # load the seqs from a fasta
+            seqs_df = fasta_to_df(fasta_path)
+        elif seq_list is not None:
+            seqs_df = pd.DataFrame({"seq": seq_list})
+        else:
+            raise Exception("fasta path or list of sequences must be given")
+
+        # make a prediction for each of the observed sequences
+        for idx, row in seqs_df.iterrows():
+
+            # translate heavy and light chains
+            igh_aa = aa(row.seq[:self.igk_idx], self.igh_frame)
+            igk_aa = aa(row.seq[self.igk_idx:], self.igk_frame)
+
+            # Make the aa seq for tdms
+            pos_df = read_sites_file(self.naive_sites_path)
+            aa_tdms = pos_df.amino_acid.copy()
+            aa_tdms.iloc[pos_df.chain == "H"] = igh_aa
+            # note: replay light chains are shorter than dms seq by one aa
+            aa_tdms.iloc[(pos_df.chain == "L") & (pos_df.index < pos_df.index[-1])] = igk_aa
+            aa_tdms_seq = "".join(aa_tdms)
+            seqs_df.loc[idx, "aa_sequence"] = aa_tdms_seq
+
+        return seqs_df
+
+    def calculate_KD_df(self, fasta_path: str = None, seq_list: list[str] = None):
+        """Defines KD values for given sequences"""
+        seqs_df = self.seq_df_tdms(fasta_path, seq_list)
+        seqs = seqs_df["aa_sequence"]
+        torchdms_model = torch.load(self.model_path)
+        aa_seq_one_hot = torch.stack([torchdms_model.seq_to_binary(seq) for seq in seqs])
+        try:
+            labeled_evaluation = pd.DataFrame(
+                torchdms_model(aa_seq_one_hot).detach().numpy(), columns=self.tdms_phenotypes
+            )
+        except ValueError:
+            print("Incorrect number of column labels for phenotype data")
+        labeled_evaluation["KD"] = 10 ** (
+            labeled_evaluation["delta_log10_KD"] + self.log10_naive_KD
         )
-    except ValueError:
-        print("Incorrect number of column labels for phenotype data")
-    return labeled_evaluation
+        seqs_df = seqs_df.merge(
+            labeled_evaluation, left_index=True, right_index=True
+        )
+        return seqs_df
+
+    def return_KD(self, fasta_path: str = None, seq_list: list[str] = None):
+        seqs_df = calculate_KD(fasta_path, seq_list)
+        return seqs_df["KD"]

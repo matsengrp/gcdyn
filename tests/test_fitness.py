@@ -21,19 +21,20 @@ def fasta_seq_path():
 
 
 def test_fitness(seq_list):
-    fit = Fitness(DNA_seq_list=seq_list)
-    linear_fitness_vals = fit.fitness("linear")
-    assert all(fitness > 0 for fitness in linear_fitness_vals)
+    fit = Fitness("linear")
+    linear_fitness_df = fit.fitness_df(seq_list=seq_list)
+    print(linear_fitness_df)
+    assert all(fitness > 0 for fitness in linear_fitness_df["fitness"])
 
 
 def test_fitness_fasta(fasta_seq_path):
-    fit = Fitness(fasta_path=fasta_seq_path)
-    linear_fitness_vals = fit.fitness("linear")
-    assert all(fitness > 0 for fitness in linear_fitness_vals)
+    fit = Fitness("linear")
+    linear_fitness_df = fit.fitness_df(fasta_path=fasta_seq_path)
+    assert all(fitness > 0 for fitness in linear_fitness_df["fitness"])
 
 
 def test_normalized_fitness(seq_list):
-    fit = Fitness(DNA_seq_list=seq_list)
-    fit.fitness("sigmoid")
-    normalized_fitness_vals = fit.normalize_fitness()
+    fit = Fitness("sigmoid")
+    sig_fitness_vals = fit.fitness_df(seq_list=seq_list)
+    normalized_fitness_vals = fit.normalize_fitness(sig_fitness_vals)
     assert all(fitness < 1 and fitness > 0 for fitness in normalized_fitness_vals)

@@ -1,6 +1,6 @@
 r"""Uses phenotype to determine fitness"""
 from __future__ import annotations
-import gcdyn.replay as replay
+from gcdyn.replay import ReplayPhenotype, fasta_to_df, aa, read_sites_file
 from math import exp
 
 
@@ -8,120 +8,95 @@ class Fitness:
     r"""Class to determine fitness from phenotype for a collection of sequences
 
     Args:
+        mapping_type: type of mapping function (defaults to linear)
+        log10_naive_KD: log of naive KD used to infer absolute KD
+        concentration_antigen: concentration used to infer antigen bound
+        slope: slope for linear mapping between antigen bound and fitness
+        maximum_Tfh: maximum Tfh help for sigmoidal mapping to fitness
+        curve_steepness: logistic growth rate for sigmoidal mapping to fitness
+        midpoint_antigen_bound: midpoint of antigen bound for sigmoidal mapping to fitness
         fasta_path: path to a list of DNA sequences to use for phenotype prediction
         DNA_seq_list: list of DNA sequences to use for phenotype prediction (overridden if fasta provided)
     """
 
-    def __init__(self, fasta_path: str = None, DNA_seq_list: list[str] = None):
-        if fasta_path is not None:
-            seqs_df = replay.seq_df_tdms(
-                replay.igh_frame,
-                replay.igk_frame,
-                replay.igk_idx,
-                fasta_path=fasta_path,
-            )
-        elif DNA_seq_list is not None:
-            seqs_df = replay.seq_df_tdms(
-                replay.igh_frame,
-                replay.igk_frame,
-                replay.igk_idx,
-                seq_list=DNA_seq_list,
-            )
-        else:
-            raise Exception(
-                "Must define a path to DNA sequences or a list of sequences"
-            )
-        delta_log_KDs = replay.evaluate(
-            replay.model, seqs_df["aa_sequence"], replay.tdms_phenotypes
-        )
-        self.all_info_df = seqs_df.merge(
-            delta_log_KDs, left_index=True, right_index=True
-        )
-
-    def frac_antigen_bound(self, log10_naive_KD: float, concentration_antigen: float):
-        """Determine the fraction of antigen bound using the Hill equation."""
-        delta_log_KDs = self.all_info_df["delta_log10_KD"]
-        thetas = []
-        for delta_log_KD in delta_log_KDs:
-            log10_KD = delta_log_KD + log10_naive_KD
-            KD = 10**log10_KD
-            # Hill equation with n = 1:
-            theta = concentration_antigen / (KD + concentration_antigen)
-            thetas.append(theta)
-        self.all_info_df["frac_antigen_bound"] = thetas
-
-    def linear_fitness(
-        self, slope: float, log10_naive_KD: float, concentration_antigen: float
-    ):
-        """Combines methods to get the antigen bound, Tfh help, and fitness
-        from the KD using a linear model."""
-        self.frac_antigen_bound(log10_naive_KD, concentration_antigen)
-        self.all_info_df["fitness"] = self.all_info_df["frac_antigen_bound"] * slope
-        return self.all_info_df["fitness"]
-
-    def sigmoidal_fitness(
-        self,
-        maximum_Tfh: float,
-        curve_steepness: float,
-        midpoint_antigen_bound: float,
-        log10_naive_KD: float,
-        concentration_antigen: float,
-    ):
-        """Combines methods to get the antigen bound, Tfh help, and fitness
-        from the KD using a sigmoidal model."""
-        self.frac_antigen_bound(log10_naive_KD, concentration_antigen)
-        for idx, row in self.all_info_df.iterrows():
-            antigen_bound = row.frac_antigen_bound
-            Tfh_help = maximum_Tfh / (
-                1 + exp(-1 * curve_steepness * (antigen_bound - midpoint_antigen_bound))
-            )
-            self.all_info_df.loc[idx, "fitness"] = Tfh_help
-        return self.all_info_df["fitness"]
-
-    def fitness(
+    def __init__(
         self,
         mapping_type: str = "linear",
-        log10_naive_KD: float = -10.43,
-        concentration_antigen: float = 10 ** (-9),
-        slope: float = 1,
+        linfit_slope: float = 1,
         maximum_Tfh: float = 4,
         curve_steepness: float = 10,
         midpoint_antigen_bound: float = 0.5,
+        concentration_antigen: float = 10 ** (-9),
     ):
-        r"""Maps evaluation to unnormalized fitness
-        Args:
-            mapping_type: type of mapping function (defaults to linear)
-            log10_naive_KD: log of naive KD used to infer absolute KD
-            concentration_antigen: concentration used to infer antigen bound
-            slope: slope for linear mapping between antigen bound and fitness
-            maximum_Tfh: maximum Tfh help for sigmoidal mapping to fitness
-            curve_steepness: logistic growth rate for sigmoidal mapping to fitness
-            midpoint_antigen_bound: midpoint of antigen bound for sigmoidal mapping to fitness
-        """
-        if mapping_type == "linear":
-            return self.linear_fitness(slope, log10_naive_KD, concentration_antigen)
-        elif mapping_type == "sigmoid":
-            return self.sigmoidal_fitness(
-                maximum_Tfh,
-                curve_steepness,
-                midpoint_antigen_bound,
-                log10_naive_KD,
-                concentration_antigen,
+        self.mapping_type = mapping_type
+        self.linfit_slope = linfit_slope
+        self.maximum_Tfh = maximum_Tfh
+        self.curve_steepness = curve_steepness
+        self.midpoint_antigen_bound = midpoint_antigen_bound
+        self.concentration_antigen = concentration_antigen
+
+    def frac_antigen_bound(self, KD_values: list[float]):
+        r"""Determine the fraction of antigen bound using the Hill equation."""
+        thetas = []
+        for KD in KD_values:
+            # Hill equation with n = 1:
+            theta = self.concentration_antigen / (KD + self.concentration_antigen)
+            thetas.append(theta)
+        return thetas
+
+    def linear_fitness(self, seq_df: pd.DataFrame):
+        r"""Combines methods to get the antigen bound, Tfh help, and fitness
+        from the KD using a linear model."""
+        seq_df["frac_antigen_bound"] = self.frac_antigen_bound(seq_df["KD"])
+        seq_df["fitness"] = seq_df["frac_antigen_bound"] * self.linfit_slope
+        return seq_df
+
+    def sigmoidal_fitness(self, seq_df: pd.DataFrame):
+        r"""Combines methods to get the antigen bound, Tfh help, and fitness
+        from the KD using a sigmoidal model."""
+        seq_df["frac_antigen_bound"] = self.frac_antigen_bound(seq_df["KD"])
+        for idx, row in seq_df.iterrows():
+            antigen_bound = row.frac_antigen_bound
+            Tfh_help = self.maximum_Tfh / (
+                1 + exp(-1 * self.curve_steepness * (antigen_bound - self.midpoint_antigen_bound))
             )
+            seq_df.loc[idx, "fitness"] = Tfh_help
+        return seq_df
+
+    def fitness(self, fasta_path: str = None, seq_list: list[str] = None):
+        seq_df = fitness_df(fasta_path, seq_list)
+        return seq_df["fitness"]
+
+    def fitness_df(self, fasta_path: str = None, seq_list: list[str] = None):
+        r"""Maps evaluation to unnormalized fitness"""
+        replay_phenotype = ReplayPhenotype(
+            1,
+            1,
+            336,
+            "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
+            "notebooks/Linear.model",
+            ["delta_log10_KD", "expression"],
+            -10.43,
+        )
+        seq_df = replay_phenotype.calculate_KD_df(fasta_path, seq_list)
+        if self.mapping_type == "linear":
+            return self.linear_fitness(seq_df)
+        elif self.mapping_type == "sigmoid":
+            return self.sigmoidal_fitness(seq_df)
         else:
             raise Exception("Only linear and sigmoid are acceptable mapping types")
 
-    def normalize_fitness(self):
+    def normalize_fitness(self, seq_df: pd.DataFrame):
         """Normalize fitness from a dataframe with a fitness column."""
-        sum_fitness = self.all_info_df["fitness"].sum()
-        self.all_info_df["normalized_fitness"] = (self.all_info_df["fitness"]) / (
+        sum_fitness = seq_df["fitness"].sum()
+        seq_df["normalized_fitness"] = (seq_df["fitness"]) / (
             sum_fitness
         )
-        return self.all_info_df["normalized_fitness"]
+        return seq_df["normalized_fitness"]
 
-    def map_cell_divisions(self, slope: float = 1):
+    def map_cell_divisions(self, seq_df: pd.DataFrame, slope: float = 1):
         """Map fitness linearly to the number of cell divisions using slope."""
-        self.all_info_df["cell_divisions"] = (
-            self.all_info_df["normalized_fitness"] * slope
+        seq_df["cell_divisions"] = (
+            seq_df["normalized_fitness"] * slope
         )
-        return self.all_info_df["cell_divisions"]
+        return seq_df["cell_divisions"]
