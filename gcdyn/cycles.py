@@ -3,7 +3,7 @@ r"""Germinal center light zone / dark-zone cycles simulator.
 Borrowing from `gctree <https://github.com/matsengrp/gctree/blob/master/gctree/mutation_model.py>`_
 """
 
-from typing import Callable, List, Any
+from typing import Callable, List, Any, Optional
 from ete3 import TreeNode
 import numpy as np
 from numpy.random import default_rng
@@ -18,6 +18,8 @@ class GC:
         mutator: mutation generator that takes a starting sequence and an exposure time and returns a mutated sequence
         selector: takes a list of sequences and returns their fitness parameters
         N0: initial naive abundance
+        Nmax: population capacity
+        rng: random number generator
     """
 
     def __init__(
@@ -27,6 +29,8 @@ class GC:
         mutator: Callable[[str, float, np.random.Generator], str],
         selector: Callable[[List[str]], List[Any]],
         N0: int = 1,
+        Nmax: Optional[int] = None,
+        rng: np.random.Generator = default_rng()
     ):
         self.tree = TreeNode(dist=0)
         self.tree.sequence = sequence
@@ -34,6 +38,8 @@ class GC:
         self.proliferator = proliferator
         self.mutator = mutator
         self.selector = selector
+        self.Nmax = Nmax
+        self.rng = rng
 
         if N0 > 1:
             for _ in range(N0):
@@ -43,15 +49,22 @@ class GC:
                 child.terminated = False
                 self.tree.add_child(child)
 
+        self.alive_leaves = set([leaf for leaf in self.tree])
+
     def step(self) -> None:
         r"""Simulate one cycle."""
-        alive_leaves = [leaf for leaf in self.tree if not leaf.terminated]
-        fitnesses = self.selector([leaf.sequence for leaf in alive_leaves])
-        for leaf, args in zip(alive_leaves, fitnesses):
-            self.proliferator(leaf, *args)
+        fitnesses = self.selector([leaf.sequence for leaf in self.alive_leaves])
+        for leaf, args in zip(self.alive_leaves, fitnesses):
+            self.proliferator(leaf, *args, rng=self.rng)
             if self.mutator:
                 for node in leaf.iter_descendants():
-                    node.sequence = self.mutator(node.up.sequence, node.dist)
+                    node.sequence = self.mutator(node.up.sequence, node.dist, rng=self.rng)
+        self.alive_leaves = set([leaf for leaf in self.tree if not leaf.terminated])
+
+        if self.Nmax:
+            for leaf in self.rng.choice(list(self.alive_leaves), size=max(0, len(self.alive_leaves) - self.Nmax), replace=False):
+                leaf.terminated = True
+                self.alive_leaves.remove(leaf)
 
     def prune(self) -> None:
         r"""Prune the tree to the subtree induced by the alive leaves."""
