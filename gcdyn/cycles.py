@@ -30,7 +30,7 @@ class GC:
         selector: Callable[[List[str]], List[Any]],
         N0: int = 1,
         Nmax: Optional[int] = None,
-        rng: np.random.Generator = default_rng()
+        rng: np.random.Generator = default_rng(),
     ):
         self.tree = TreeNode(dist=0)
         self.tree.sequence = sequence
@@ -58,11 +58,17 @@ class GC:
             self.proliferator(leaf, *args, rng=self.rng)
             if self.mutator:
                 for node in leaf.iter_descendants():
-                    node.sequence = self.mutator(node.up.sequence, node.dist, rng=self.rng)
+                    node.sequence = self.mutator(
+                        node.up.sequence, node.dist, rng=self.rng
+                    )
         self.alive_leaves = set([leaf for leaf in self.tree if not leaf.terminated])
 
         if self.Nmax:
-            for leaf in self.rng.choice(list(self.alive_leaves), size=max(0, len(self.alive_leaves) - self.Nmax), replace=False):
+            for leaf in self.rng.choice(
+                list(self.alive_leaves),
+                size=max(0, len(self.alive_leaves) - self.Nmax),
+                replace=False,
+            ):
                 leaf.terminated = True
                 self.alive_leaves.remove(leaf)
 
