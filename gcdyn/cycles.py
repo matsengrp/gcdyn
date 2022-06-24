@@ -69,7 +69,9 @@ class GC:
             if enforce_ultrametricity:
                 for subleaf in leaf:
                     if not subleaf.terminated and leaf.get_distance(subleaf) != 1:
-                        raise ValueError("DZ subtree timescale is not consistent with simulation time")
+                        raise ValueError(
+                            "DZ subtree timescale is not consistent with simulation time"
+                        )
         self.alive_leaves = set([leaf for leaf in self.tree if not leaf.terminated])
 
         if self.Nmax:
@@ -95,7 +97,13 @@ class GC:
             if is_leaf_fn(node):
                 node.detach()
 
-    def simulate(self, T: int, prune: bool = True, max_tries: int = 100, enforce_ultrametricity: bool = True) -> None:
+    def simulate(
+        self,
+        T: int,
+        prune: bool = True,
+        max_tries: int = 100,
+        enforce_ultrametricity: bool = True,
+    ) -> None:
         r"""Simulate.
 
         Args:
