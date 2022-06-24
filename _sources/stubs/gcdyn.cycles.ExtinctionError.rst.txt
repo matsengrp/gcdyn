@@ -1,0 +1,6 @@
+gcdyn.cycles.ExtinctionError
+============================
+
+.. currentmodule:: gcdyn.cycles
+
+.. autoexception:: ExtinctionError

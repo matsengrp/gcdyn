@@ -1,0 +1,6 @@
+gcdyn.cycles.binary\_proliferator
+=================================
+
+.. currentmodule:: gcdyn.cycles
+
+.. autofunction:: binary_proliferator

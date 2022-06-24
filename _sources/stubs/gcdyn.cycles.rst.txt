@@ -1,0 +1,48 @@
+﻿gcdyn.cycles
+============
+
+.. automodule:: gcdyn.cycles
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :nosignatures:
+   
+      binary_proliferator
+      uniform_mutator
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+   
+      GC
+   
+   
+
+   
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+      :toctree:
+   
+      ExtinctionError
+   
+   
+
+
+

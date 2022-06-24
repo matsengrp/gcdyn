@@ -1,0 +1,27 @@
+gcdyn.cycles.GC
+===============
+
+.. currentmodule:: gcdyn.cycles
+
+.. autoclass:: GC
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~GC.prune
+      ~GC.simulate
+      ~GC.step
+   
+   
+
+   
+   
+   

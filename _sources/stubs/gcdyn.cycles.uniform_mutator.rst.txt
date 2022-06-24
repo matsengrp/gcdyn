@@ -1,0 +1,6 @@
+gcdyn.cycles.uniform\_mutator
+=============================
+
+.. currentmodule:: gcdyn.cycles
+
+.. autofunction:: uniform_mutator
