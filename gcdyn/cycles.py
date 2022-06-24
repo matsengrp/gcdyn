@@ -14,11 +14,11 @@ class GC:
 
     Args:
         sequence: root nucleotide sequence
-        proliferator: neutral tree generator for DZ proliferation and mutation. This tree is assumed to run for exactly one unit of simulation time, but this is not enforced (if not, you may generate non-ultrametric trees). If it produces dead leaves, they should be marked with a node attribute ``node.terminated = True``.
+        proliferator: neutral tree generator for DZ proliferation and mutation. This tree is assumed to run for exactly one unit of simulation time, but this is not enforced (if not, you may generate non-ultrametric trees). If it produces extinct leaves, they should be marked with a node attribute ``node.terminated = True``.
         mutator: mutation generator that takes a starting sequence and an exposure time and returns a mutated sequence
         selector: takes a list of sequences and returns their fitness parameters
         N0: initial naive abundance
-        Nmax: population capacity
+        Nmax: population capacity. If not ``None`` and the number of alive cells exceeds ``Nmax`` in any cycle, the population will be randomly downsampled to size ``Nmax``.
         rng: random number generator
     """
 
@@ -56,10 +56,9 @@ class GC:
         fitnesses = self.selector([leaf.sequence for leaf in self.alive_leaves])
         for leaf, args in zip(self.alive_leaves, fitnesses):
             self.proliferator(leaf, *args, rng=self.rng)
-            if self.mutator:
-                for node in leaf.iter_descendants():
-                    node.sequence = self.mutator(
-                        node.up.sequence, node.dist, rng=self.rng
+            for node in leaf.iter_descendants():
+                node.sequence = self.mutator(
+                    node.up.sequence, node.dist, rng=self.rng
                     )
         self.alive_leaves = set([leaf for leaf in self.tree if not leaf.terminated])
 
@@ -80,7 +79,7 @@ class GC:
             return False not in event_cache[node]
 
         if is_leaf_fn(self.tree):
-            raise RuntimeError("dead")
+            raise RuntimeError("extinct")
 
         for node in self.tree.traverse(is_leaf_fn=is_leaf_fn):
             if is_leaf_fn(node):
@@ -102,7 +101,9 @@ class GC:
 def binary_proliferator(
     treenode: TreeNode, p: float, rng: np.random.Generator = default_rng()
 ):
-    r"""binary dark zone simulation (Galton-Watson)
+    r"""Binary dark zone step (Galton-Watson).
+    With probability :math:`1-p` the input's ``terminated`` attribute is set to ``True``, indicating extinction.
+    With probability :math:`p` add two children to the the input with ``terminated`` attributes set to ``False``, indicating birth.
 
     Args:
         treenode: root node to simulate from
