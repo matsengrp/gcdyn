@@ -54,7 +54,7 @@ class ReplayPhenotype:
         naive_sites_path: str,
         model_path: str,
         tdms_phenotypes: list[str],
-        log10_naive_KD: float
+        log10_naive_KD: float,
     ):
         self.igh_frame = igh_frame
         self.igk_frame = igk_frame
@@ -63,8 +63,6 @@ class ReplayPhenotype:
         self.model_path = model_path
         self.tdms_phenotypes = tdms_phenotypes
         self.log10_naive_KD = log10_naive_KD
-
-        model = torch.load(model_path)
 
     def seq_df_tdms(self, fasta_path: str = None, seq_list: list[str] = None):
         if fasta_path is not None:
@@ -79,40 +77,52 @@ class ReplayPhenotype:
         for idx, row in seqs_df.iterrows():
 
             # translate heavy and light chains
-            igh_aa = aa(row.seq[:self.igk_idx], self.igh_frame)
-            igk_aa = aa(row.seq[self.igk_idx:], self.igk_frame)
+            igh_aa = aa(row.seq[: self.igk_idx], self.igh_frame)
+            igk_aa = aa(row.seq[self.igk_idx :], self.igk_frame)
 
             # Make the aa seq for tdms
             pos_df = read_sites_file(self.naive_sites_path)
             aa_tdms = pos_df.amino_acid.copy()
             aa_tdms.iloc[pos_df.chain == "H"] = igh_aa
             # note: replay light chains are shorter than dms seq by one aa
-            aa_tdms.iloc[(pos_df.chain == "L") & (pos_df.index < pos_df.index[-1])] = igk_aa
+            aa_tdms.iloc[
+                (pos_df.chain == "L") & (pos_df.index < pos_df.index[-1])
+            ] = igk_aa
             aa_tdms_seq = "".join(aa_tdms)
             seqs_df.loc[idx, "aa_sequence"] = aa_tdms_seq
 
         return seqs_df
 
     def calculate_KD_df(self, fasta_path: str = None, seq_list: list[str] = None):
-        """Defines KD values for given sequences"""
+        r"""Builds a `DataFrame` with KD values for a collection of sequences
+
+        Args:
+            fasta_path: path to a fasta file of DNA sequences
+            seq_list: list of DNA sequences
+        Returns:
+            seqs_df: a `DataFrame` with columns for `aa_sequence`, each of `tdms_phenotypes`, `KD`
+        """
+
         seqs_df = self.seq_df_tdms(fasta_path, seq_list)
         seqs = seqs_df["aa_sequence"]
         torchdms_model = torch.load(self.model_path)
-        aa_seq_one_hot = torch.stack([torchdms_model.seq_to_binary(seq) for seq in seqs])
+        aa_seq_one_hot = torch.stack(
+            [torchdms_model.seq_to_binary(seq) for seq in seqs]
+        )
         try:
             labeled_evaluation = pd.DataFrame(
-                torchdms_model(aa_seq_one_hot).detach().numpy(), columns=self.tdms_phenotypes
+                torchdms_model(aa_seq_one_hot).detach().numpy(),
+                columns=self.tdms_phenotypes,
             )
         except ValueError:
             print("Incorrect number of column labels for phenotype data")
         labeled_evaluation["KD"] = 10 ** (
             labeled_evaluation["delta_log10_KD"] + self.log10_naive_KD
         )
-        seqs_df = seqs_df.merge(
-            labeled_evaluation, left_index=True, right_index=True
-        )
+        seqs_df = seqs_df.merge(labeled_evaluation, left_index=True, right_index=True)
         return seqs_df
 
     def return_KD(self, fasta_path: str = None, seq_list: list[str] = None):
-        seqs_df = calculate_KD(fasta_path, seq_list)
+        """Returns a list of KD values for a collection of sequences."""
+        seqs_df = self.calculate_KD_df(fasta_path, seq_list)
         return seqs_df["KD"]

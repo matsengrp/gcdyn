@@ -1,7 +1,8 @@
 r"""Uses phenotype to determine fitness"""
 from __future__ import annotations
-from gcdyn.replay import ReplayPhenotype, fasta_to_df, aa, read_sites_file
+from typing import Callable
 from math import exp
+import pandas as pd
 
 
 class Fitness:
@@ -11,12 +12,10 @@ class Fitness:
         mapping_type: type of mapping function (defaults to linear)
         log10_naive_KD: log of naive KD used to infer absolute KD
         concentration_antigen: concentration used to infer antigen bound
-        slope: slope for linear mapping between antigen bound and fitness
+        linfit_slope: slope for linear mapping between antigen bound and fitness
         maximum_Tfh: maximum Tfh help for sigmoidal mapping to fitness
         curve_steepness: logistic growth rate for sigmoidal mapping to fitness
         midpoint_antigen_bound: midpoint of antigen bound for sigmoidal mapping to fitness
-        fasta_path: path to a list of DNA sequences to use for phenotype prediction
-        DNA_seq_list: list of DNA sequences to use for phenotype prediction (overridden if fasta provided)
     """
 
     def __init__(
@@ -36,7 +35,7 @@ class Fitness:
         self.concentration_antigen = concentration_antigen
 
     def frac_antigen_bound(self, KD_values: list[float]):
-        r"""Determine the fraction of antigen bound using the Hill equation."""
+        r"""Determine the fraction of antigen bound from a list of values using the Hill equation."""
         thetas = []
         for KD in KD_values:
             # Hill equation with n = 1:
@@ -58,27 +57,51 @@ class Fitness:
         for idx, row in seq_df.iterrows():
             antigen_bound = row.frac_antigen_bound
             Tfh_help = self.maximum_Tfh / (
-                1 + exp(-1 * self.curve_steepness * (antigen_bound - self.midpoint_antigen_bound))
+                1
+                + exp(
+                    -1
+                    * self.curve_steepness
+                    * (antigen_bound - self.midpoint_antigen_bound)
+                )
             )
             seq_df.loc[idx, "fitness"] = Tfh_help
         return seq_df
 
-    def fitness(self, fasta_path: str = None, seq_list: list[str] = None):
-        seq_df = fitness_df(fasta_path, seq_list)
+    def fitness(
+        self,
+        fasta_path: str = None,
+        seq_list: list[str] = None,
+        KD_calculator: Callable[..., list[float]] = None,
+    ):
+        r"""Produces the fitness of a series of sequences given KD values.
+
+        Args:
+            fasta_path: path to a fasta file of DNA sequences
+            seq_list: list of DNA sequences
+            KD_calculator: method that produces a KD value for each sequence in the list/file
+        Returns:
+            DataFrame with columns `frac_antigen_bound`, `KD`, and `fitness`
+        """
+        seq_df = self.fitness_df(fasta_path, seq_list, KD_calculator)
         return seq_df["fitness"]
 
-    def fitness_df(self, fasta_path: str = None, seq_list: list[str] = None):
-        r"""Maps evaluation to unnormalized fitness"""
-        replay_phenotype = ReplayPhenotype(
-            1,
-            1,
-            336,
-            "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
-            "notebooks/Linear.model",
-            ["delta_log10_KD", "expression"],
-            -10.43,
-        )
-        seq_df = replay_phenotype.calculate_KD_df(fasta_path, seq_list)
+    def fitness_df(
+        self,
+        fasta_path: str = None,
+        seq_list: list[str] = None,
+        KD_calculator: Callable[..., list[float]] = None,
+    ):
+        r"""Produces a dataframe including the fitness of a series of sequences given KD values.
+
+        Args:
+            fasta_path: path to a fasta file of DNA sequences
+            seq_list: list of DNA sequences
+            KD_calculator: method that produces a KD value for each sequence in the list/file
+        Returns:
+            DataFrame with columns `frac_antigen_bound`, `KD`, and `fitness`
+        """
+        KD_values = KD_calculator(fasta_path, seq_list)
+        seq_df = pd.DataFrame({"KD": KD_values})
         if self.mapping_type == "linear":
             return self.linear_fitness(seq_df)
         elif self.mapping_type == "sigmoid":
@@ -89,14 +112,10 @@ class Fitness:
     def normalize_fitness(self, seq_df: pd.DataFrame):
         """Normalize fitness from a dataframe with a fitness column."""
         sum_fitness = seq_df["fitness"].sum()
-        seq_df["normalized_fitness"] = (seq_df["fitness"]) / (
-            sum_fitness
-        )
+        seq_df["normalized_fitness"] = (seq_df["fitness"]) / (sum_fitness)
         return seq_df["normalized_fitness"]
 
     def map_cell_divisions(self, seq_df: pd.DataFrame, slope: float = 1):
         """Map fitness linearly to the number of cell divisions using slope."""
-        seq_df["cell_divisions"] = (
-            seq_df["normalized_fitness"] * slope
-        )
+        seq_df["cell_divisions"] = seq_df["normalized_fitness"] * slope
         return seq_df["cell_divisions"]
