@@ -22,7 +22,6 @@ class Model:
 
     def simulate(self, T: float, n_trees: int, seed: int):
         r"""Creates a collection of ``Tree`` given a key.
-        Simulation retries to ensure 50 < len(tree) < 96
 
         Args:
             T: simulation sampling time
@@ -34,12 +33,9 @@ class Model:
         key = random.PRNGKey(seed)
         trees = []
         for i in range(n_trees):
-            while True:
-                key, _ = random.split(key)
-                tree = Tree(T, key[0], self.params)
-                if 50 < len(tree.tree) < 96:
-                    trees.append(tree)
-                    break
+            key, _ = random.split(key)
+            tree = Tree(T, key[0], self.params)
+            trees.append(tree)
         self.trees = trees
 
     def log_likelihood(self):
