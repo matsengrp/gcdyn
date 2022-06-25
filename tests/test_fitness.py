@@ -1,4 +1,5 @@
 from gcdyn.fitness import Fitness
+from gcdyn.replay import ReplayPhenotype
 import pytest
 
 
@@ -20,21 +21,40 @@ def fasta_seq_path():
     return path
 
 
-def test_fitness(seq_list):
+@pytest.fixture
+def replay_phenotype():
+    replay_phenotype = ReplayPhenotype(
+        1,
+        1,
+        336,
+        "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
+        "notebooks/Linear.model",
+        ["delta_log10_KD", "expression"],
+        -10.43,
+    )
+    return replay_phenotype
+
+
+def test_fitness(seq_list, replay_phenotype):
     fit = Fitness("linear")
-    linear_fitness_df = fit.fitness_df(seq_list=seq_list)
-    print(linear_fitness_df)
+    linear_fitness_df = fit.fitness_df(
+        seq_list=seq_list, KD_calculator=replay_phenotype.return_KD
+    )
     assert all(fitness > 0 for fitness in linear_fitness_df["fitness"])
 
 
-def test_fitness_fasta(fasta_seq_path):
+def test_fitness_fasta(fasta_seq_path, replay_phenotype):
     fit = Fitness("linear")
-    linear_fitness_df = fit.fitness_df(fasta_path=fasta_seq_path)
+    linear_fitness_df = fit.fitness_df(
+        fasta_path=fasta_seq_path, KD_calculator=replay_phenotype.return_KD
+    )
     assert all(fitness > 0 for fitness in linear_fitness_df["fitness"])
 
 
-def test_normalized_fitness(seq_list):
+def test_normalized_fitness(seq_list, replay_phenotype):
     fit = Fitness("sigmoid")
-    sig_fitness_vals = fit.fitness_df(seq_list=seq_list)
+    sig_fitness_vals = fit.fitness_df(
+        seq_list=seq_list, KD_calculator=replay_phenotype.return_KD
+    )
     normalized_fitness_vals = fit.normalize_fitness(sig_fitness_vals)
     assert all(fitness < 1 and fitness > 0 for fitness in normalized_fitness_vals)
