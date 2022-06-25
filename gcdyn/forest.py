@@ -33,7 +33,7 @@ class Forest:
         """
         for i in range(n_trees):
             key, _ = random.split(key)
-            tree = Tree(T, key, self.params)
+            tree = Tree(T, key[0], self.params)
             self.forest.append(tree)
 
     def draw_forest(self, folder_name: str = None):

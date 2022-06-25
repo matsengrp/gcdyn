@@ -34,7 +34,7 @@ class Model:
         trees = []
         for i in range(n_trees):
             key, _ = random.split(key)
-            tree = Tree(T, key, self.params)
+            tree = Tree(T, key[0], self.params)
             trees.append(tree)
         self.trees = trees
 
