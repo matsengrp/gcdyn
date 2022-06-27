@@ -40,21 +40,15 @@ def test_fitness(seq_list, replay_phenotype):
     linear_fitness_df = fit.fitness_df(
         seq_list=seq_list, KD_calculator=replay_phenotype.return_KD
     )
-    assert all(fitness > 0 for fitness in linear_fitness_df["fitness"])
-
-
-def test_fitness_fasta(fasta_seq_path, replay_phenotype):
-    fit = Fitness("linear")
-    linear_fitness_df = fit.fitness_df(
-        fasta_path=fasta_seq_path, KD_calculator=replay_phenotype.return_KD
-    )
+    print(linear_fitness_df)
     assert all(fitness > 0 for fitness in linear_fitness_df["fitness"])
 
 
 def test_normalized_fitness(seq_list, replay_phenotype):
     fit = Fitness("sigmoid")
-    sig_fitness_vals = fit.fitness_df(
+    sig_fitness_df = fit.fitness_df(
         seq_list=seq_list, KD_calculator=replay_phenotype.return_KD
     )
-    normalized_fitness_vals = fit.normalize_fitness(sig_fitness_vals)
+    normalized_fitness_vals = fit.normalize_fitness(sig_fitness_df)
+    print(sig_fitness_df)
     assert all(fitness < 1 and fitness > 0 for fitness in normalized_fitness_vals)

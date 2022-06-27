@@ -21,6 +21,7 @@ def fasta_to_df(f):
         print("Unable to open {0}".format(f))
     return pd.DataFrame({"id": ids, "seq": seqs})
 
+
 def fasta_to_seq_list(f):
     """simply convert a fasta to dataframe."""
     seqs = []
