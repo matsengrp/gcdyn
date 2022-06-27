@@ -10,12 +10,11 @@ class Fitness:
 
     Args:
         mapping_type: type of mapping function (defaults to linear)
-        log10_naive_KD: log of naive KD used to infer absolute KD
-        concentration_antigen: concentration used to infer antigen bound
         linfit_slope: slope for linear mapping between antigen bound and fitness
         maximum_Tfh: maximum Tfh help for sigmoidal mapping to fitness
         curve_steepness: logistic growth rate for sigmoidal mapping to fitness
         midpoint_antigen_bound: midpoint of antigen bound for sigmoidal mapping to fitness
+        concentration_antigen: molar concentration of antigen to determine antigen bound
     """
 
     def __init__(
@@ -27,7 +26,12 @@ class Fitness:
         midpoint_antigen_bound: float = 0.5,
         concentration_antigen: float = 10 ** (-9),
     ):
-        self.mapping_type = mapping_type
+        if mapping_type.lower() == "linear":
+            self.fitness_func = self.linear_fitness
+        elif mapping_type.lower() == "sigmoid":
+            self.fitness_func = self.sigmoidal_fitness
+        else:
+            raise Exception("Only linear and sigmoid are acceptable mapping types")
         self.linfit_slope = linfit_slope
         self.maximum_Tfh = maximum_Tfh
         self.curve_steepness = curve_steepness
@@ -69,45 +73,37 @@ class Fitness:
 
     def fitness(
         self,
-        fasta_path: str = None,
         seq_list: list[str] = None,
-        KD_calculator: Callable[..., list[float]] = None,
+        KD_calculator: Callable[list[str], list[float]] = None,
     ):
         r"""Produces the fitness of a series of sequences given KD values.
 
         Args:
-            fasta_path: path to a fasta file of DNA sequences
             seq_list: list of DNA sequences
-            KD_calculator: method that produces a KD value for each sequence in the list/file
+            KD_calculator: method that produces a KD value for each sequence in the list
         Returns:
-            DataFrame with columns `frac_antigen_bound`, `KD`, and `fitness`
+            list of fitness values based on function determined by `mapping_type`
         """
-        seq_df = self.fitness_df(fasta_path, seq_list, KD_calculator)
+        seq_df = self.fitness_df(seq_list, KD_calculator)
         return seq_df["fitness"]
 
     def fitness_df(
         self,
-        fasta_path: str = None,
         seq_list: list[str] = None,
-        KD_calculator: Callable[..., list[float]] = None,
+        KD_calculator: Callable[list[str], list[float]] = None,
     ):
         r"""Produces a dataframe including the fitness of a series of sequences given KD values.
 
         Args:
-            fasta_path: path to a fasta file of DNA sequences
             seq_list: list of DNA sequences
             KD_calculator: method that produces a KD value for each sequence in the list/file
         Returns:
-            DataFrame with columns `frac_antigen_bound`, `KD`, and `fitness`
+            DataFrame with columns `frac_antigen_bound`, `KD`, and `fitness`,
+            with fitness values based on function determined by `mapping_type`
         """
-        KD_values = KD_calculator(fasta_path, seq_list)
-        seq_df = pd.DataFrame({"KD": KD_values})
-        if self.mapping_type == "linear":
-            return self.linear_fitness(seq_df)
-        elif self.mapping_type == "sigmoid":
-            return self.sigmoidal_fitness(seq_df)
-        else:
-            raise Exception("Only linear and sigmoid are acceptable mapping types")
+        KD_values = KD_calculator(seq_list)
+        seq_df = pd.DataFrame({"seq": seq_list, "KD": KD_values})
+        return self.fitness_func(seq_df)
 
     def normalize_fitness(self, seq_df: pd.DataFrame):
         """Normalize fitness from a dataframe with a fitness column."""

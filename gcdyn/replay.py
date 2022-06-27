@@ -21,6 +21,18 @@ def fasta_to_df(f):
         print("Unable to open {0}".format(f))
     return pd.DataFrame({"id": ids, "seq": seqs})
 
+def fasta_to_seq_list(f):
+    """simply convert a fasta to dataframe."""
+    seqs = []
+    try:
+        with open(f) as fasta_file:
+            for seq_record in SeqIO.parse(fasta_file, "fasta"):  # (generator)
+                if str(seq_record.id) != "naive":
+                    seqs.append(str(seq_record.seq))
+    except OSError:
+        print("Unable to open {0}".format(f))
+    return seqs
+
 
 def aa(sequence, frame):
     """Amino acid translation of nucleotide sequence in frame 1, 2, or 3."""
@@ -64,14 +76,11 @@ class ReplayPhenotype:
         self.tdms_phenotypes = tdms_phenotypes
         self.log10_naive_KD = log10_naive_KD
 
-    def seq_df_tdms(self, fasta_path: str = None, seq_list: list[str] = None):
-        if fasta_path is not None:
-            # load the seqs from a fasta
-            seqs_df = fasta_to_df(fasta_path)
-        elif seq_list is not None:
+    def seq_df_tdms(self, seq_list: list[str] = None):
+        if seq_list is not None:
             seqs_df = pd.DataFrame({"seq": seq_list})
         else:
-            raise Exception("fasta path or list of sequences must be given")
+            raise Exception("list of sequences must be given")
 
         # make a prediction for each of the observed sequences
         for idx, row in seqs_df.iterrows():
@@ -93,17 +102,16 @@ class ReplayPhenotype:
 
         return seqs_df
 
-    def calculate_KD_df(self, fasta_path: str = None, seq_list: list[str] = None):
+    def calculate_KD_df(self, seq_list: list[str] = None):
         r"""Builds a `DataFrame` with KD values for a collection of sequences
 
         Args:
-            fasta_path: path to a fasta file of DNA sequences
             seq_list: list of DNA sequences
         Returns:
             seqs_df: a `DataFrame` with columns for `aa_sequence`, each of `tdms_phenotypes`, `KD`
         """
 
-        seqs_df = self.seq_df_tdms(fasta_path, seq_list)
+        seqs_df = self.seq_df_tdms(seq_list)
         seqs = seqs_df["aa_sequence"]
         torchdms_model = torch.load(self.model_path)
         aa_seq_one_hot = torch.stack(
@@ -122,7 +130,7 @@ class ReplayPhenotype:
         seqs_df = seqs_df.merge(labeled_evaluation, left_index=True, right_index=True)
         return seqs_df
 
-    def return_KD(self, fasta_path: str = None, seq_list: list[str] = None):
+    def return_KD(self, seq_list: list[str] = None):
         """Returns a list of KD values for a collection of sequences."""
-        seqs_df = self.calculate_KD_df(fasta_path, seq_list)
+        seqs_df = self.calculate_KD_df(seq_list)
         return seqs_df["KD"]
