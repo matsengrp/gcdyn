@@ -177,3 +177,45 @@ def uniform_mutator(
         else:
             break
     return "".join(sequence)
+
+
+def cell_div_selector(sequence_list) -> list(tuple):
+    r"""Determines the number of cell divisions based on a list of sequences
+
+    Args:
+        sequence_list: list of nucleotide sequences to use to predict the number of cell divisions
+
+    Returns:
+        cell_divs: list of tuples containing the predicted number of cell divisions
+    """
+
+    test_fit = Fitness(Fitness.sigmoidal_fitness)
+    test_fitness_df = test_fit.fitness_df(
+        sequence_list, calculate_KD=replay_phenotype.calculate_KD
+    )
+    cell_divs = [
+        tuple([cell_div])
+        for cell_div in test_fit.map_cell_divisions_sigmoidal(
+            test_fitness_df, curve_steepness=1
+        )
+    ]
+    return cell_divs
+
+
+def cell_div_populate_proliferator(
+    treenode: TreeNode, cell_divisions: float, rng: np.random.Generator = default_rng()
+) -> None:
+    r"""Populates descendants on a tree node based on the number of cell divisions indicated.
+
+    Args:
+        treenode: TreeNode from which to populate from
+        cell_divisons: number of cell divisions from the cell represented by `treenode`
+        rng: random number generator
+    """
+    num_descendants = floor(2**cell_divisions)
+    treenode.populate(num_descendants)
+    for child in treenode.iter_descendants():
+        child.dist = 1
+        child.sequence = treenode.sequence
+        child.terminated = False
+    treenode.convert_to_ultrametric(tree_length=1)

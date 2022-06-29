@@ -8,22 +8,14 @@ from Bio.Seq import Seq
 # From gcreplay-tools (https://github.com/matsengrp/gcreplay/blob/main/nextflow/bin/gcreplay-tools.py):
 
 
-def fasta_to_df(f):
-    """simply convert a fasta to dataframe."""
-    ids, seqs = [], []
-    try:
-        with open(f) as fasta_file:
-            for seq_record in SeqIO.parse(fasta_file, "fasta"):  # (generator)
-                if str(seq_record.id) != "naive":
-                    ids.append(seq_record.id)
-                    seqs.append(str(seq_record.seq))
-    except OSError:
-        print("Unable to open {0}".format(f))
-    return pd.DataFrame({"id": ids, "seq": seqs})
+def fasta_to_seq_list(f: str) -> list(str):
+    """simply convert a fasta to a list of sequences.
 
-
-def fasta_to_seq_list(f):
-    """simply convert a fasta to dataframe."""
+    Args:
+        f: path to fasta file
+    Returns:
+        seqs: list of sequences from fasta, excluding any with id 'naive'
+    """
     seqs = []
     try:
         with open(f) as fasta_file:
@@ -35,16 +27,31 @@ def fasta_to_seq_list(f):
     return seqs
 
 
-def aa(sequence, frame):
-    """Amino acid translation of nucleotide sequence in frame 1, 2, or 3."""
+def aa(sequence: str, frame: int) -> Seq:
+    """Amino acid translation of nucleotide sequence in frame 1, 2, or 3.
+
+    Args:
+        sequence: DNA sequence
+        frame: frame for translation
+
+    Returns:
+        aa_seq: translated sequence
+    """
     return Seq(
         sequence[(frame - 1) : (frame - 1 + (3 * ((len(sequence) - (frame - 1)) // 3)))]
     ).translate()
 
 
-def read_sites_file(naive_sites_path: str):
-    """Read the sites file from csv."""
-    # collect the correct sites df from tylers repo
+def read_sites_file(naive_sites_path: str) -> pd.DataFrame:
+    """Read the sites file from csv.
+
+    Args:
+        naive_sites_path: path to naive sites CSV with `site_scFv` column
+
+    Returns:
+        DataFrame of positions for heavy and light chains
+    """
+    # collect the correct sites df
     pos_df = pd.read_csv(
         naive_sites_path,
         dtype=dict(site=pd.Int16Dtype()),
@@ -57,7 +64,18 @@ def read_sites_file(naive_sites_path: str):
 
 
 class ReplayPhenotype:
-    """Defines a set of parameters used to go from sequence to KD values."""
+    """Defines a set of parameters used to go from DNA sequence of antibody
+    sequences to KD values.
+
+    Args:
+        igh_frame: frame for translation of Ig heavy chain
+        igk_frame: frame for translation of Ig light chain
+        igk_idx: index of Ig light chain starting position
+        naive_sites_path: path to CSV lookup table for converting from scFv CDS indexed site numbering to heavy/light chain IMGT numbering
+        model_path: path to `torchdms` model for antibody sequences
+        tdms_phenotypes: names of phenotype values produced by passed-in `torchdms` model (`delta_log10_KD` expected as a phenotype)
+        log10_naive_KD: KD of naive Ig
+    """
 
     def __init__(
         self,
@@ -77,15 +95,24 @@ class ReplayPhenotype:
         self.tdms_phenotypes = tdms_phenotypes
         self.log10_naive_KD = log10_naive_KD
 
-    def seq_df_tdms(self, seq_list: list[str] = None):
+    def seq_df_tdms(self, seq_list: list[str] = None) -> pd.DataFrame:
+        """Produces DataFrame with amino acid sequence from a list of DNA
+        sequences.
+
+        Args:
+            seq_list: list of DNA sequences of length of 657 nt
+        Returns:
+            seqs_df: DataFrame with columns for DNA sequence (`seq`), and amino acid sequence (`aa_sequence`)
+        """
         if seq_list is not None:
-            seqs_df = pd.DataFrame({"seq": seq_list})
+            seqs_df = pd.DataFrame({"seq": seq_list, "aa_sequence": ""})
         else:
             raise Exception("list of sequences must be given")
 
         # make a prediction for each of the observed sequences
         for idx, row in seqs_df.iterrows():
-
+            if len(row.seq) != 657:
+                raise Exception("all sequences must be 657 nt")
             # translate heavy and light chains
             igh_aa = aa(row.seq[: self.igk_idx], self.igh_frame)
             igk_aa = aa(row.seq[self.igk_idx :], self.igk_frame)
@@ -103,13 +130,13 @@ class ReplayPhenotype:
 
         return seqs_df
 
-    def calculate_KD_df(self, seq_list: list[str] = None):
-        r"""Builds a `DataFrame` with KD values for a collection of sequences
+    def calculate_KD(self, seq_list: list[str] = None) -> pd.DataFrame:
+        r"""Produces KD values for a collection of sequences using `torchdms` model.
 
         Args:
             seq_list: list of DNA sequences
         Returns:
-            seqs_df: a `DataFrame` with columns for `aa_sequence`, each of `tdms_phenotypes`, `KD`
+            seqs_df: a `DataFrame` with columns for `aa_sequence`, each of `tdms_phenotypes`, and `KD`
         """
 
         seqs_df = self.seq_df_tdms(seq_list)
@@ -128,10 +155,4 @@ class ReplayPhenotype:
         labeled_evaluation["KD"] = 10 ** (
             labeled_evaluation["delta_log10_KD"] + self.log10_naive_KD
         )
-        seqs_df = seqs_df.merge(labeled_evaluation, left_index=True, right_index=True)
-        return seqs_df
-
-    def return_KD(self, seq_list: list[str] = None):
-        """Returns a list of KD values for a collection of sequences."""
-        seqs_df = self.calculate_KD_df(seq_list)
-        return seqs_df["KD"]
+        return labeled_evaluation["KD"]
