@@ -3,7 +3,7 @@ r"""Germinal center light zone / dark-zone cycles simulator.
 Borrowing from `gctree <https://github.com/matsengrp/gctree/blob/master/gctree/mutation_model.py>`_
 """
 
-from typing import Callable, List, Any, Optional
+from typing import Callable, List, Any, Optional, Tuple
 from ete3 import TreeNode
 import numpy as np
 from numpy.random import default_rng
@@ -182,7 +182,7 @@ def uniform_mutator(
     return "".join(sequence)
 
 
-def cell_div_selector(sequence_list) -> list[tuple]:
+def cell_div_selector(sequence_list) -> List[Tuple]:
     r"""Determines the number of cell divisions based on a list of sequences
 
     Args:
