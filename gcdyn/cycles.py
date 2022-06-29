@@ -7,6 +7,9 @@ from typing import Callable, List, Any, Optional
 from ete3 import TreeNode
 import numpy as np
 from numpy.random import default_rng
+from gcdyn.fitness import Fitness
+from gcdyn.replay import ReplayPhenotype
+from math import floor
 
 
 class ExtinctionError(Exception):
@@ -179,7 +182,7 @@ def uniform_mutator(
     return "".join(sequence)
 
 
-def cell_div_selector(sequence_list) -> list(tuple):
+def cell_div_selector(sequence_list) -> list[tuple]:
     r"""Determines the number of cell divisions based on a list of sequences
 
     Args:
@@ -190,6 +193,15 @@ def cell_div_selector(sequence_list) -> list(tuple):
     """
 
     test_fit = Fitness(Fitness.sigmoidal_fitness)
+    replay_phenotype = ReplayPhenotype(
+        1,
+        1,
+        336,
+        "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
+        "Linear.model",
+        ["delta_log10_KD", "expression"],
+        -10.43,
+    )
     test_fitness_df = test_fit.fitness_df(
         sequence_list, calculate_KD=replay_phenotype.calculate_KD
     )
