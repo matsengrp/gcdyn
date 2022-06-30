@@ -21,10 +21,10 @@ def main():
 
     params = Parameters(θ, μ, m, ρ)
 
-    n_models = 3
     n_trees = 2
 
     # # compare log likelihood before and after pruning trees
+    # n_models = 3
     # model = Model(params)
     # for i in range(n_models):
     #     key, _ = random.split(key)
@@ -38,7 +38,8 @@ def main():
     model.simulate(T, n_trees, seed)
     for tree in model.trees:
         print(len(tree.tree))
-    model.fit()
+    θ_inferred = model.fit()
+    print(θ_inferred)
 
 
 if __name__ == "__main__":
