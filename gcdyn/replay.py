@@ -46,7 +46,7 @@ def read_sites_file(naive_sites_path: str) -> pd.DataFrame:
     """Read the sites file from csv.
 
     Args:
-        naive_sites_path: path to naive sites CSV with `site_scFv` column
+        naive_sites_path: path to naive sites CSV with ``site_scFv`` column
 
     Returns:
         DataFrame of positions for heavy and light chains
@@ -72,8 +72,8 @@ class ReplayPhenotype:
         igk_frame: frame for translation of Ig light chain
         igk_idx: index of Ig light chain starting position
         naive_sites_path: path to CSV lookup table for converting from scFv CDS indexed site numbering to heavy/light chain IMGT numbering
-        model_path: path to `torchdms` model for antibody sequences
-        tdms_phenotypes: names of phenotype values produced by passed-in `torchdms` model (`delta_log10_KD` expected as a phenotype)
+        model_path: path to ``torchdms`` model for antibody sequences
+        tdms_phenotypes: names of phenotype values produced by passed-in ``torchdms`` model (``delta_log10_KD`` expected as a phenotype)
         log10_naive_KD: KD of naive Ig
     """
 
@@ -101,8 +101,9 @@ class ReplayPhenotype:
 
         Args:
             seq_list: list of DNA sequences of length of 657 nt
+
         Returns:
-            seqs_df: DataFrame with columns for DNA sequence (`seq`), and amino acid sequence (`aa_sequence`)
+            seqs_df: DataFrame with columns for DNA sequence (``seq``), and amino acid sequence (``aa_sequence``)
         """
         if seq_list is not None:
             seqs_df = pd.DataFrame({"seq": seq_list, "aa_sequence": ""})
@@ -131,12 +132,13 @@ class ReplayPhenotype:
         return seqs_df
 
     def calculate_KD(self, seq_list: list[str] = None) -> pd.DataFrame:
-        r"""Produces KD values for a collection of sequences using `torchdms` model.
+        r"""Produces KD values for a collection of sequences using ``torchdms`` model.
 
         Args:
             seq_list: list of DNA sequences
+
         Returns:
-            seqs_df: a `DataFrame` with columns for `aa_sequence`, each of `tdms_phenotypes`, and `KD`
+            seqs_df: a ``DataFrame`` with columns for ``aa_sequence``, each of ``tdms_phenotypes``, and ``KD``
         """
 
         seqs_df = self.seq_df_tdms(seq_list)

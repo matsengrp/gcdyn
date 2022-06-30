@@ -9,7 +9,7 @@ import numpy as np
 from numpy.random import default_rng
 from gcdyn.fitness import Fitness
 from gcdyn.replay import ReplayPhenotype
-from math import floor
+from math import floor, ceil
 
 
 class ExtinctionError(Exception):
@@ -207,9 +207,7 @@ def cell_div_selector(sequence_list) -> List[Tuple]:
     )
     cell_divs = [
         tuple([cell_div])
-        for cell_div in test_fit.map_cell_divisions_sigmoidal(
-            test_fitness_df, curve_steepness=1
-        )
+        for cell_div in test_fit.map_cell_divisions(test_fitness_df, slope=5.5)
     ]
     return cell_divs
 
@@ -220,14 +218,55 @@ def cell_div_populate_proliferator(
     r"""Populates descendants on a tree node based on the number of cell divisions indicated.
 
     Args:
-        treenode: TreeNode from which to populate from
-        cell_divisons: number of cell divisions from the cell represented by `treenode`
+        treenode: root node to populate from
+        cell_divisons: number of cell divisions from the cell represented by ``treenode``
         rng: random number generator
     """
     num_descendants = floor(2**cell_divisions)
-    treenode.populate(num_descendants)
+    treenode.populate(num_descendants, names_library=[""], reuse_names=True)
     for child in treenode.iter_descendants():
         child.dist = 1
         child.sequence = treenode.sequence
         child.terminated = False
     treenode.convert_to_ultrametric(tree_length=1)
+
+
+def simple_proliferator(treenode: TreeNode, cell_divisions: int, dist: float) -> None:
+    r"""Recursively populates descendants on a tree node based on the number of integer cell divisions indicated.
+
+    Args:
+        treenode: root node to populate from
+        cell_divisons: number of cell divisions from the cell represented by ``treenode``
+        dist: distance between each parent and child node
+    """
+    if cell_divisions > 0:
+        for _ in range(2):
+            child = TreeNode()
+            child.dist = dist
+            child.sequence = treenode.sequence
+            child.terminated = False
+            treenode.add_child(child)
+            simple_proliferator(child, cell_divisions - 1, dist)
+
+
+def cell_div_balanced_proliferator(
+    treenode: TreeNode, cell_divisions: float, rng: np.random.Generator = default_rng()
+) -> None:
+    r"""Populates descendants on a tree node based on the number of cell divisions indicated, producing the number of children expected by :math:`2^cell_divisions`.
+
+    Args:
+        treenode: root node to populate from
+        cell_divisons: number of cell divisions from the cell represented by ``treenode``
+        rng: random number generator
+    """
+    int_cell_divisions = ceil(cell_divisions)
+    dist = 1 / int_cell_divisions
+    simple_proliferator(treenode, int_cell_divisions, dist)
+    num_descendants = floor(2**cell_divisions)
+    leaves_to_remove = 2**int_cell_divisions - num_descendants
+    for leaf in rng.choice(
+        list(treenode.get_leaves()), size=leaves_to_remove, replace=False
+    ):
+        leaf.terminated = True
+        # extend branch length of nodes that have become leaves:
+        leaf.delete(preserve_branch_length=True)
