@@ -71,9 +71,15 @@ class GC:
                 node.sequence = self.mutator(node.up.sequence, node.dist, rng=self.rng)
             if enforce_timescale:
                 for subleaf in leaf:
-                    if not subleaf.terminated and leaf.get_distance(subleaf) != 1:
+                    if (
+                        not subleaf.terminated
+                        and subleaf != leaf
+                        and round(leaf.get_distance(subleaf)) != 1
+                    ):
                         raise ValueError(
-                            "DZ subtree timescale is not consistent with simulation time"
+                            "DZ subtree timescale is not consistent with simulation time, val = {0}".format(
+                                leaf.get_distance(subleaf)
+                            )
                         )
         self.alive_leaves = set([leaf for leaf in self.tree if not leaf.terminated])
 
@@ -267,6 +273,9 @@ def cell_div_balanced_proliferator(
     for leaf in rng.choice(
         list(treenode.get_leaves()), size=leaves_to_remove, replace=False
     ):
-        leaf.terminated = True
+        parent = leaf.up
+        child_dist = leaf.dist
+        leaf.delete(preserve_branch_length=False, prevent_nondicotomic=False)
         # extend branch length of nodes that have become leaves:
-        leaf.delete(preserve_branch_length=True)
+        if len(parent.children) == 0:
+            parent.dist = parent.dist + child_dist
