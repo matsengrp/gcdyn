@@ -1,5 +1,4 @@
 import numpy as np
-from gcdyn.tree import Tree
 from gcdyn.model import Model
 from gcdyn.parameters import Parameters
 import unittest

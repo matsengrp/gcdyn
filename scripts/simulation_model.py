@@ -1,5 +1,4 @@
 import jax.numpy as np
-from jax import random
 
 from gcdyn.model import Model
 from gcdyn.parameters import Parameters
@@ -25,6 +24,7 @@ def main():
     model = Model(params)
     model.simulate(T, n_trees, seed)
     for tree in model.trees:
+        tree.prune()
         print(len(tree.tree))
     θ_inferred = model.fit()
     print(θ_inferred)
