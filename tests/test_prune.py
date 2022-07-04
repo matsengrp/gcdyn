@@ -1,5 +1,6 @@
 import numpy as np
 from gcdyn.tree import Tree
+from gcdyn.model import Model
 from gcdyn.parameters import Parameters
 import unittest
 
@@ -20,7 +21,11 @@ class TestTree(unittest.TestCase):
 
         params = Parameters(θ, μ, m, ρ)
 
-        self.tree = Tree(T, seed, params)
+        n_trees = 1
+
+        self.model = Model(params)
+        self.model.simulate(T, n_trees, seed)
+        self.tree = self.model.trees[0]
         self.assertTrue(len(self.tree.tree) > 10)
 
     def test_prune(self):
