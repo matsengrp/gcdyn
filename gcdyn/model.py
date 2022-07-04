@@ -6,8 +6,6 @@ from jax.scipy.stats import norm
 from jax import jit, grad
 from jax.scipy.special import expit
 import ete3
-import matplotlib as mp
-import matplotlib.pyplot as plt
 import mushi.optimization as opt
 
 from gcdyn.tree import Tree

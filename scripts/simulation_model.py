@@ -8,7 +8,6 @@ from gcdyn.parameters import Parameters
 def main():
     T = 3
     seed = 0
-    key = random.PRNGKey(seed)
 
     # response function parameters
     θ = np.array([3, 1, 0], dtype=float)
@@ -21,18 +20,7 @@ def main():
 
     params = Parameters(θ, μ, m, ρ)
 
-    n_trees = 2
-
-    # # compare log likelihood before and after pruning trees
-    # n_models = 3
-    # model = Model(params)
-    # for i in range(n_models):
-    #     key, _ = random.split(key)
-    #     model.simulate(T, n_trees, key[0])
-    #     print("before:", model.log_likelihood())
-    #     for tree in model.trees:
-    #         tree.prune()
-    #     print("after:", model.log_likelihood())
+    n_trees = 10
 
     model = Model(params)
     model.simulate(T, n_trees, seed)
