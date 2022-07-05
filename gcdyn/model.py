@@ -7,6 +7,7 @@ from jax import jit, grad
 from jax.scipy.special import expit
 import ete3
 import mushi.optimization as opt
+from functools import partial
 
 from gcdyn.tree import Tree
 
@@ -102,57 +103,54 @@ class Model:
 
     def fit(self):
         r"""Given a collection of `tree.Tree`, fit the parameters of the model."""
-
-        @jit
-        def log_likelihood(θ):
-            r"""Find log likelihood of simulated trees.
-
-            Returns:
-                float: log likelihood of the GC tree in the model
-            """
-            result = 0
-            for tree in self.trees:
-                for node in tree.tree.children[0].traverse():
-                    x = node.up.x
-                    Δt = node.dist
-                    λ_x = self.λ(x, θ)
-                    Λ = λ_x + self.params.μ + self.params.m
-                    logΛ = np.log(Λ)
-                    if node.event in ("sampled", "unsampled"):
-                        # exponential survival function (no event before sampling time), then sampling probability
-                        result += -Λ * Δt + np.log(
-                            self.params.ρ
-                            if node.event == "sampled"
-                            else 1 - self.params.ρ
-                        )
-                    else:
-                        # exponential density for event time
-                        result += logΛ - Λ * Δt
-                        # multinomial event probability
-                        if node.event == "birth":
-                            result += np.log(λ_x) - logΛ
-                        elif node.event == "death":
-                            result += np.log(self.params.μ) - logΛ
-                        elif node.event == "mutation":
-                            Δx = node.x - x
-                            result += np.log(self.params.m) - logΛ + norm.logpdf(Δx)
-                        else:
-                            raise ValueError(f"unknown event {node.event}")
-            return result
-
-        @jit
-        def g(θ):
-            return -log_likelihood(θ)
-
-        @jit
-        def h(θ):
-            return 0
-
-        @jit
-        def prox(θ, s):
-            return np.clip(θ, np.array([1e-1, -np.inf, -np.inf]))
-
-        grad_g = jit(grad(g))
-        optimizer = opt.AccProxGrad(g, grad_g, h, prox, verbose=True)
+        grad_g = jit(grad(self.g))
+        optimizer = opt.AccProxGrad(self.g, grad_g, self.h, self.prox, verbose=True)
         θ_inferred = optimizer.run(np.array([3.0, 1.0, 0.0]), max_iter=1000, tol=0)
         return θ_inferred
+
+    @partial(jit, static_argnums=(0,))
+    def log_likelihood(self, θ):
+        r"""Find log likelihood of simulated trees.
+
+        Returns:
+            float: log likelihood of the GC tree in the model
+        """
+        result = 0
+        for tree in self.trees:
+            for node in tree.tree.children[0].traverse():
+                x = node.up.x
+                Δt = node.dist
+                λ_x = self.λ(x, θ)
+                Λ = λ_x + self.params.μ + self.params.m
+                logΛ = np.log(Λ)
+                if node.event in ("sampled", "unsampled"):
+                    # exponential survival function (no event before sampling time), then sampling probability
+                    result += -Λ * Δt + np.log(
+                        self.params.ρ if node.event == "sampled" else 1 - self.params.ρ
+                    )
+                else:
+                    # exponential density for event time
+                    result += logΛ - Λ * Δt
+                    # multinomial event probability
+                    if node.event == "birth":
+                        result += np.log(λ_x) - logΛ
+                    elif node.event == "death":
+                        result += np.log(self.params.μ) - logΛ
+                    elif node.event == "mutation":
+                        Δx = node.x - x
+                        result += np.log(self.params.m) - logΛ + norm.logpdf(Δx)
+                    else:
+                        raise ValueError(f"unknown event {node.event}")
+        return result
+
+    @partial(jit, static_argnums=(0,))
+    def g(self, θ):
+        return -self.log_likelihood(θ)
+
+    @partial(jit, static_argnums=(0,))
+    def h(self, θ):
+        return 0
+
+    @partial(jit, static_argnums=(0,))
+    def prox(self, θ, s):
+        return np.clip(θ, np.array([1e-1, -np.inf, -np.inf]))
