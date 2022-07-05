@@ -54,3 +54,13 @@ def test_normalized_fitness(seq_list, replay_phenotype):
         fitness < 1 and fitness > 0
         for fitness in sig_fitness_df["normalized_t_cell_help"]
     )
+
+
+def test_uniform_fitness(seq_list, replay_phenotype):
+    fit = Fitness(Fitness.uniform_fitness)
+    uniform_fitness_df = fit.uniform_fitness(seq_list=seq_list)
+    print(uniform_fitness_df)
+    assert all(
+        fitness < 1 and fitness > 0
+        for fitness in uniform_fitness_df["normalized_t_cell_help"]
+    )

@@ -55,6 +55,19 @@ class Fitness:
         seq_df["t_cell_help"] = seq_df["frac_antigen_bound"] * slope
         return seq_df
 
+    def uniform_fitness(self, seq_list: list[str] = None) -> pd.DataFrame:
+        r"""Sets T cell help to uniform amounts of T cell help
+
+        Args:
+            seq_df: DataFrame with correct number of sequences
+
+        Returns:
+            seq_df: DataFrame with fitness (normalized T-cell help) column
+        """
+        seq_df = pd.DataFrame({"seq": seq_list})
+        seq_df["normalized_t_cell_help"] = 1 / len(seq_list)
+        return seq_df
+
     def sigmoidal_fitness(
         self,
         seq_df: pd.DataFrame,
