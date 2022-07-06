@@ -15,7 +15,7 @@ class Fitness:
 
     def __init__(
         self,
-        tfh_function: Callable[..., pd.DataFrame],
+        tfh_function: Callable[pd.DataFrame],
         concentration_antigen: float = 10 ** (-9),
     ):
         self.tfh_function = tfh_function
@@ -56,10 +56,10 @@ class Fitness:
         return seq_df
 
     def uniform_fitness(self, seq_list: list[str] = None) -> pd.DataFrame:
-        r"""Sets T cell help to uniform amounts of T cell help
+        r"""Sets normalized amount of T cell help to equal values
 
         Args:
-            seq_df: DataFrame with correct number of sequences
+            seq_list: list of sequences
 
         Returns:
             seq_df: DataFrame with fitness (normalized T-cell help) column
@@ -98,8 +98,8 @@ class Fitness:
 
     def fitness_df(
         self,
-        seq_list: list[str] = None,
-        calculate_KD: Callable[list[str], list[float]] = None,
+        seq_list: list[str],
+        calculate_KD: Callable[list[str], list[float]],
     ) -> pd.DataFrame:
         r"""Produces a dataframe including the fitness of a series of sequences given KD values.
 
@@ -118,7 +118,7 @@ class Fitness:
         seq_df["normalized_t_cell_help"] = (seq_df["t_cell_help"]) / (sum_fitness)
         return seq_df
 
-    def map_cell_divisions(
+    def cell_divisions_from_tfh_linear(
         self, seq_df: pd.DataFrame, slope: float = 1, y_intercept: float = 0
     ) -> list[float]:
         """Map T cell help linearly to the number of cell divisions using
@@ -137,7 +137,7 @@ class Fitness:
         ) + y_intercept
         return seq_df["cell_divisions"]
 
-    def map_cell_divisions_sigmoidal(
+    def cell_divisions_from_tfh_sigmoidal(
         self,
         seq_df: pd.DataFrame,
         maximum_cell_divisions: float = 6,

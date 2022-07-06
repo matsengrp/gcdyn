@@ -188,8 +188,8 @@ def uniform_mutator(
     return "".join(sequence)
 
 
-def cell_div_selector(sequence_list) -> List[Tuple]:
-    r"""Determines the number of cell divisions based on a list of sequences
+def replay_cell_div_selector(sequence_list) -> List[Tuple]:
+    r"""Determines the number of cell divisions based on a list of sequences using Replay
 
     Args:
         sequence_list: list of nucleotide sequences to use to predict the number of cell divisions
@@ -213,28 +213,11 @@ def cell_div_selector(sequence_list) -> List[Tuple]:
     )
     cell_divs = [
         tuple([cell_div])
-        for cell_div in test_fit.map_cell_divisions(test_fitness_df, slope=5.5)
+        for cell_div in test_fit.cell_divisions_from_tfh_linear(
+            test_fitness_df, slope=5.5
+        )
     ]
     return cell_divs
-
-
-def cell_div_populate_proliferator(
-    treenode: TreeNode, cell_divisions: float, rng: np.random.Generator = default_rng()
-) -> None:
-    r"""Populates descendants on a tree node based on the number of cell divisions indicated.
-
-    Args:
-        treenode: root node to populate from
-        cell_divisons: number of cell divisions from the cell represented by ``treenode``
-        rng: random number generator
-    """
-    num_descendants = floor(2**cell_divisions)
-    treenode.populate(num_descendants, names_library=[""], reuse_names=True)
-    for child in treenode.iter_descendants():
-        child.dist = 1
-        child.sequence = treenode.sequence
-        child.terminated = False
-    treenode.convert_to_ultrametric(tree_length=1)
 
 
 def simple_proliferator(treenode: TreeNode, cell_divisions: int, dist: float) -> None:
@@ -258,21 +241,21 @@ def simple_proliferator(treenode: TreeNode, cell_divisions: int, dist: float) ->
 def cell_div_balanced_proliferator(
     treenode: TreeNode, cell_divisions: float, rng: np.random.Generator = default_rng()
 ) -> None:
-    r"""Populates descendants on a tree node based on the number of cell divisions indicated, producing the number of children expected by :math:`2^cell_divisions`.
+    r"""Populates descendants on a tree node based on the number of cell divisions indicated, producing the number of children expected by :math:`2^cell_divisions`, where ``cell_divisions`` is not necessarily an integer value.
+    A full binary tree is generated, then leaf nodes are removed at random from the set of alternating leaf nodes until there are the expected number of children.
 
     Args:
         treenode: root node to populate from
         cell_divisons: number of cell divisions from the cell represented by ``treenode``
         rng: random number generator
     """
-    int_cell_divisions = ceil(cell_divisions)
-    dist = 1 / int_cell_divisions
-    simple_proliferator(treenode, int_cell_divisions, dist)
+    ceil_cell_divisions = ceil(cell_divisions)
+    dist = 1 / ceil_cell_divisions
+    simple_proliferator(treenode, ceil_cell_divisions, dist)
     num_descendants = floor(2**cell_divisions)
-    leaves_to_remove = 2**int_cell_divisions - num_descendants
-    for leaf in rng.choice(
-        list(treenode.get_leaves()), size=leaves_to_remove, replace=False
-    ):
+    num_leaves_to_remove = 2**ceil_cell_divisions - num_descendants
+    every_other_leaf = treenode.get_leaves()[::2]
+    for leaf in rng.choice(every_other_leaf, size=num_leaves_to_remove, replace=False):
         parent = leaf.up
         child_dist = leaf.dist
         leaf.delete(preserve_branch_length=False, prevent_nondicotomic=False)

@@ -95,7 +95,7 @@ class ReplayPhenotype:
         self.tdms_phenotypes = tdms_phenotypes
         self.log10_naive_KD = log10_naive_KD
 
-    def seq_df_tdms(self, seq_list: list[str] = None) -> pd.DataFrame:
+    def seq_df_tdms(self, seq_list: list[str]) -> pd.DataFrame:
         """Produces DataFrame with amino acid sequence from a list of DNA
         sequences.
 
