@@ -90,7 +90,7 @@ class ReplayPhenotype:
         self.igh_frame = igh_frame
         self.igk_frame = igk_frame
         self.igk_idx = igk_idx
-        self.naive_sites_path = naive_sites_path
+        self.pos_df = read_sites_file(naive_sites_path)
         self.model_path = model_path
         self.tdms_phenotypes = tdms_phenotypes
         self.log10_naive_KD = log10_naive_KD
@@ -119,19 +119,18 @@ class ReplayPhenotype:
             igk_aa = aa(row.seq[self.igk_idx :], self.igk_frame)
 
             # Make the aa seq for tdms
-            pos_df = read_sites_file(self.naive_sites_path)
-            aa_tdms = pos_df.amino_acid.copy()
-            aa_tdms.iloc[pos_df.chain == "H"] = igh_aa
+            aa_tdms = self.pos_df.amino_acid.copy()
+            aa_tdms.iloc[self.pos_df.chain == "H"] = igh_aa
             # note: replay light chains are shorter than dms seq by one aa
             aa_tdms.iloc[
-                (pos_df.chain == "L") & (pos_df.index < pos_df.index[-1])
+                (self.pos_df.chain == "L") & (self.pos_df.index < self.pos_df.index[-1])
             ] = igk_aa
             aa_tdms_seq = "".join(aa_tdms)
             seqs_df.loc[idx, "aa_sequence"] = aa_tdms_seq
 
         return seqs_df
 
-    def calculate_KD(self, seq_list: list[str] = None) -> pd.DataFrame:
+    def calculate_KD(self, seq_list: list[str]) -> pd.DataFrame:
         r"""Produces KD values for a collection of sequences using ``torchdms`` model.
 
         Args:

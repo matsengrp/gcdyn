@@ -1,3 +1,4 @@
+import gcdyn.replay
 from gcdyn.fitness import Fitness
 from gcdyn.replay import ReplayPhenotype
 import pytest
@@ -15,8 +16,15 @@ def seq_list():
 
 
 @pytest.fixture
+def seq_list_big():
+    seqs = gcdyn.replay.fasta_to_seq_list(
+        "notebooks/gcreplay_samples/gctree_PR1.2-5-LP-78-GC.fasta"
+    )
+    return seqs
+
+
+@pytest.fixture
 def fasta_seq_path():
-    # TODO: set better path for test files
     path = "notebooks/sample.fasta"
     return path
 
@@ -50,10 +58,7 @@ def test_normalized_fitness(seq_list, replay_phenotype):
         seq_list=seq_list, calculate_KD=replay_phenotype.calculate_KD
     )
     print(sig_fitness_df)
-    assert all(
-        fitness < 1 and fitness > 0
-        for fitness in sig_fitness_df["normalized_t_cell_help"]
-    )
+    assert all(1 > fitness > 0 for fitness in sig_fitness_df["normalized_t_cell_help"])
 
 
 def test_uniform_fitness(seq_list, replay_phenotype):
@@ -61,6 +66,13 @@ def test_uniform_fitness(seq_list, replay_phenotype):
     uniform_fitness_df = fit.uniform_fitness(seq_list=seq_list)
     print(uniform_fitness_df)
     assert all(
-        fitness < 1 and fitness > 0
-        for fitness in uniform_fitness_df["normalized_t_cell_help"]
+        1 > fitness > 0 for fitness in uniform_fitness_df["normalized_t_cell_help"]
     )
+
+
+def test_normalized_fitness_big(seq_list_big, replay_phenotype):
+    fit = Fitness(Fitness.sigmoidal_fitness)
+    sig_fitness_df = fit.fitness_df(
+        seq_list=seq_list_big, calculate_KD=replay_phenotype.calculate_KD
+    )
+    assert all(1 > fitness > 0 for fitness in sig_fitness_df["normalized_t_cell_help"])

@@ -13,7 +13,7 @@ from math import floor, ceil
 
 
 class ExtinctionError(Exception):
-    """The simulation has resulted in extintion of all lineages."""
+    """The simulation has resulted in extinction of all lineages."""
 
 
 class GC:
@@ -198,24 +198,22 @@ def replay_cell_div_selector(sequence_list) -> List[Tuple]:
         cell_divs: list of tuples containing the predicted number of cell divisions
     """
 
-    test_fit = Fitness(Fitness.sigmoidal_fitness)
+    sig_fit = Fitness(Fitness.sigmoidal_fitness)
     replay_phenotype = ReplayPhenotype(
         1,
         1,
         336,
         "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
-        "Linear.model",
+        "notebooks/Linear.model",
         ["delta_log10_KD", "expression"],
         -10.43,
     )
-    test_fitness_df = test_fit.fitness_df(
+    sig_fit_df = sig_fit.fitness_df(
         sequence_list, calculate_KD=replay_phenotype.calculate_KD
     )
     cell_divs = [
         tuple([cell_div])
-        for cell_div in test_fit.cell_divisions_from_tfh_linear(
-            test_fitness_df, slope=5.5
-        )
+        for cell_div in sig_fit.cell_divisions_from_tfh_linear(sig_fit_df, slope=5.5)
     ]
     return cell_divs
 
