@@ -203,7 +203,7 @@ def uniform_selector(sequence_list) -> List[Tuple]:
 
 
 def replay_cell_div_selector(
-    sequence_list: list[str], slope: float = 3.47, y_intercept: float = 1.3
+    sequence_list: List[str], slope: float = 3.47, y_intercept: float = 1.3
 ) -> List[Tuple]:
     r"""Determines the number of cell divisions based on a list of sequences using Replay
 
