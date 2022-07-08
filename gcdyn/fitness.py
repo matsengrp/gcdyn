@@ -15,7 +15,7 @@ class Fitness:
 
     def __init__(
         self,
-        tfh_function: Callable[pd.DataFrame],
+        tfh_function: Callable[..., pd.DataFrame],
         concentration_antigen: float = 10 ** (-9),
     ):
         self.tfh_function = tfh_function
@@ -52,20 +52,19 @@ class Fitness:
             seq_df: DataFrame with KD column, frac_antigen_bound column, and fitness (T-cell help) column
         """
         seq_df["frac_antigen_bound"] = self.frac_antigen_bound(seq_df["KD"])
-        seq_df["t_cell_help"] = seq_df["frac_antigen_bound"] * slope
+        seq_df["t_cell_help"] = y_intercept + seq_df["frac_antigen_bound"] * slope
         return seq_df
 
-    def uniform_fitness(self, seq_list: list[str] = None) -> pd.DataFrame:
+    def uniform_fitness(self, seq_df: pd.DataFrame) -> pd.DataFrame:
         r"""Sets normalized amount of T cell help to equal values
 
         Args:
-            seq_list: list of sequences
+            seq_df: DataFrame of sequences with column `seq`
 
         Returns:
             seq_df: DataFrame with fitness (normalized T-cell help) column
         """
-        seq_df = pd.DataFrame({"seq": seq_list})
-        seq_df["normalized_t_cell_help"] = 1 / len(seq_list)
+        seq_df["t_cell_help"] = 1 / len(seq_df["seq"])
         return seq_df
 
     def sigmoidal_fitness(
@@ -96,7 +95,7 @@ class Fitness:
             seq_df.loc[idx, "t_cell_help"] = t_cell_help
         return seq_df
 
-    def fitness_df(
+    def normalized_fitness_df(
         self,
         seq_list: list[str],
         calculate_KD: Callable[list[str], list[float]],
@@ -109,13 +108,13 @@ class Fitness:
 
         Returns:
             DataFrame with columns ``frac_antigen_bound``, ``KD``, ``t_cell_help``, and ``normalized_t_cell_help``
-            with t_cell_help values based on ``tfh_function`` set on initialization
+            with ``t_cell_help values`` based on ``tfh_function`` set on initialization
         """
-        KD_values = calculate_KD(seq_list)
-        seq_df = pd.DataFrame({"seq": seq_list, "KD": KD_values})
+        kd_values = calculate_KD(seq_list)
+        seq_df = pd.DataFrame({"seq": seq_list, "KD": kd_values})
         seq_df = self.tfh_function(self, seq_df=seq_df)
         sum_fitness = seq_df["t_cell_help"].sum()
-        seq_df["normalized_t_cell_help"] = (seq_df["t_cell_help"]) / (sum_fitness)
+        seq_df["normalized_t_cell_help"] = (seq_df["t_cell_help"]) / sum_fitness
         return seq_df
 
     def cell_divisions_from_tfh_linear(

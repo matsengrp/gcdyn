@@ -45,7 +45,7 @@ def replay_phenotype():
 
 def test_fitness(seq_list, replay_phenotype):
     fit = Fitness(Fitness.linear_fitness)
-    linear_fitness_df = fit.fitness_df(
+    linear_fitness_df = fit.normalized_fitness_df(
         seq_list=seq_list, calculate_KD=replay_phenotype.calculate_KD
     )
     print(linear_fitness_df)
@@ -54,7 +54,7 @@ def test_fitness(seq_list, replay_phenotype):
 
 def test_normalized_fitness(seq_list, replay_phenotype):
     fit = Fitness(Fitness.sigmoidal_fitness)
-    sig_fitness_df = fit.fitness_df(
+    sig_fitness_df = fit.normalized_fitness_df(
         seq_list=seq_list, calculate_KD=replay_phenotype.calculate_KD
     )
     print(sig_fitness_df)
@@ -63,7 +63,9 @@ def test_normalized_fitness(seq_list, replay_phenotype):
 
 def test_uniform_fitness(seq_list, replay_phenotype):
     fit = Fitness(Fitness.uniform_fitness)
-    uniform_fitness_df = fit.uniform_fitness(seq_list=seq_list)
+    uniform_fitness_df = fit.normalized_fitness_df(
+        seq_list=seq_list, calculate_KD=replay_phenotype.calculate_KD
+    )
     print(uniform_fitness_df)
     assert all(
         1 > fitness > 0 for fitness in uniform_fitness_df["normalized_t_cell_help"]
@@ -72,7 +74,7 @@ def test_uniform_fitness(seq_list, replay_phenotype):
 
 def test_normalized_fitness_big(seq_list_big, replay_phenotype):
     fit = Fitness(Fitness.sigmoidal_fitness)
-    sig_fitness_df = fit.fitness_df(
+    sig_fitness_df = fit.normalized_fitness_df(
         seq_list=seq_list_big, calculate_KD=replay_phenotype.calculate_KD
     )
     assert all(1 > fitness > 0 for fitness in sig_fitness_df["normalized_t_cell_help"])

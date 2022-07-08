@@ -91,7 +91,7 @@ class ReplayPhenotype:
         self.igk_frame = igk_frame
         self.igk_idx = igk_idx
         self.pos_df = read_sites_file(naive_sites_path)
-        self.model_path = model_path
+        self.model = torch.load(model_path)
         self.tdms_phenotypes = tdms_phenotypes
         self.log10_naive_KD = log10_naive_KD
 
@@ -113,7 +113,9 @@ class ReplayPhenotype:
         # make a prediction for each of the observed sequences
         for idx, row in seqs_df.iterrows():
             if len(row.seq) != 657:
-                raise Exception("all sequences must be 657 nt")
+                raise Exception(
+                    "all sequences must be 657 nt, len = {0}".format(len(row.seq))
+                )
             # translate heavy and light chains
             igh_aa = aa(row.seq[: self.igk_idx], self.igh_frame)
             igk_aa = aa(row.seq[self.igk_idx :], self.igk_frame)
@@ -142,13 +144,10 @@ class ReplayPhenotype:
 
         seqs_df = self.seq_df_tdms(seq_list)
         seqs = seqs_df["aa_sequence"]
-        torchdms_model = torch.load(self.model_path)
-        aa_seq_one_hot = torch.stack(
-            [torchdms_model.seq_to_binary(seq) for seq in seqs]
-        )
+        aa_seq_one_hot = torch.stack([self.model.seq_to_binary(seq) for seq in seqs])
         try:
             labeled_evaluation = pd.DataFrame(
-                torchdms_model(aa_seq_one_hot).detach().numpy(),
+                self.model(aa_seq_one_hot).detach().numpy(),
                 columns=self.tdms_phenotypes,
             )
         except ValueError:

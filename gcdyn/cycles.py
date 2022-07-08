@@ -119,7 +119,7 @@ class GC:
             T: number of cycles to simulate
             prune: prune to the tree induced by the surviving lineages
             max_tries: try this many times to simulate a tree that doesn't go extinct
-            enforce_timescale: if ``True``, the time scale of the DZ proliferation trees must be consistent with the global timescale
+            enforce_timescale: if ``True``, the timescale of the DZ proliferation trees must be consistent with the global timescale
         """
         success = False
         n_tries = 0
@@ -144,7 +144,7 @@ def binary_proliferator(
 ):
     r"""Binary dark zone step (Galton-Watson).
     With probability :math:`1-p` the input's ``terminated`` attribute is set to ``True``, indicating extinction.
-    With probability :math:`p` add two children to the the input with ``terminated`` attributes set to ``False``, indicating birth.
+    With probability :math:`p` add two children to the input with ``terminated`` attributes set to ``False``, indicating birth.
 
     Args:
         treenode: root node to simulate from
@@ -188,7 +188,23 @@ def uniform_mutator(
     return "".join(sequence)
 
 
-def replay_cell_div_selector(sequence_list) -> List[Tuple]:
+def uniform_selector(sequence_list) -> List[Tuple]:
+    """Uniform selector assigning normalized fitness of each sequence to
+    1/`len(sequence_list)`
+
+    Args:
+        sequence_list: list of sequences for fitness assignment
+
+    Returns:
+        fitness_values: list of tuples containing the assigned fitness (equal values)
+    """
+    fitness_values = [tuple([1 / len(sequence_list)]) for seq in sequence_list]
+    return fitness_values
+
+
+def replay_cell_div_selector(
+    sequence_list: list[str], slope: float = 3.47, y_intercept: float = 1.3
+) -> List[Tuple]:
     r"""Determines the number of cell divisions based on a list of sequences using Replay
 
     Args:
@@ -204,28 +220,39 @@ def replay_cell_div_selector(sequence_list) -> List[Tuple]:
         1,
         336,
         "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
-        "notebooks/Linear.model",
+        "Linear.model",
         ["delta_log10_KD", "expression"],
         -10.43,
     )
-    sig_fit_df = sig_fit.fitness_df(
+    sig_fit_df = sig_fit.normalized_fitness_df(
         sequence_list, calculate_KD=replay_phenotype.calculate_KD
     )
     cell_divs = [
         tuple([cell_div])
-        for cell_div in sig_fit.cell_divisions_from_tfh_linear(sig_fit_df, slope=5.5)
+        for cell_div in sig_fit.cell_divisions_from_tfh_linear(
+            sig_fit_df, slope, y_intercept
+        )
     ]
     return cell_divs
 
 
-def simple_proliferator(treenode: TreeNode, cell_divisions: int, dist: float) -> None:
+def simple_proliferator(
+    treenode: TreeNode,
+    cell_divisions: int,
+    dist: float = None,
+    rng: np.random.Generator = default_rng(),
+) -> None:
     r"""Recursively populates descendants on a tree node based on the number of integer cell divisions indicated.
+    Branch lengths are set to 1/`cell_divisions`, such that the distance from the root to all leaves will be 1.
 
     Args:
         treenode: root node to populate from
-        cell_divisons: number of cell divisions from the cell represented by ``treenode``
-        dist: distance between each parent and child node
+        cell_divisions: number of cell divisions from the cell represented by ``treenode``
+        dist: distance from each parent to child node
+        rng: random number generator
     """
+    if dist is None:
+        dist = 1 / cell_divisions
     if cell_divisions > 0:
         for _ in range(2):
             child = TreeNode()
@@ -244,12 +271,11 @@ def cell_div_balanced_proliferator(
 
     Args:
         treenode: root node to populate from
-        cell_divisons: number of cell divisions from the cell represented by ``treenode``
+        cell_divisions: number of cell divisions from the cell represented by ``treenode``
         rng: random number generator
     """
     ceil_cell_divisions = ceil(cell_divisions)
-    dist = 1 / ceil_cell_divisions
-    simple_proliferator(treenode, ceil_cell_divisions, dist)
+    simple_proliferator(treenode, ceil_cell_divisions, 1 / ceil_cell_divisions)
     num_descendants = floor(2**cell_divisions)
     num_leaves_to_remove = 2**ceil_cell_divisions - num_descendants
     every_other_leaf = treenode.get_leaves()[::2]
