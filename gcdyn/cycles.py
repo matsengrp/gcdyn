@@ -253,11 +253,28 @@ def simple_proliferator(
     """
     if dist is None:
         dist = 1 / cell_divisions
+    replay_phenotype = ReplayPhenotype(
+        1,
+        1,
+        336,
+        "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
+        "Linear.model",
+        ["delta_log10_KD", "expression"],
+        -10.43,
+    )
+    fit = Fitness(Fitness.sigmoidal_fitness)
+    fit_df = fit.normalized_fitness_df(
+        [treenode.sequence], calculate_KD=replay_phenotype.calculate_KD
+    )
+    treenode.KD = fit_df["KD"][0]
+    treenode.fitness = fit_df["t_cell_help"][0]
     if cell_divisions > 0:
         for _ in range(2):
             child = TreeNode()
             child.dist = dist
             child.sequence = treenode.sequence
+            child.KD = treenode.KD
+            child.fitness = treenode.fitness
             child.terminated = False
             treenode.add_child(child)
             simple_proliferator(child, cell_divisions - 1, dist)
