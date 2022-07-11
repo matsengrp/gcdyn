@@ -24,11 +24,35 @@ class Selector(ABC):
         pass
 
 
+class UniformSelector(Selector):
+    def select(self, sequence_list: List[str]):
+        """Uniform selector assigning normalized fitness of each sequence to
+        1/`len(sequence_list)`
+
+        Args:
+            sequence_list: list of sequences for fitness assignment
+
+        Returns:
+            fitness_values: list of tuples containing the assigned fitness (equal values)
+        """
+        cell_tuples = []
+        for i in range(len(sequence_list)):
+            KD = 0
+            fitness = 1 / len(sequence_list)
+            cell_tuples.append([1 / len(sequence_list), KD, fitness])
+        return cell_tuples
+
+
 class ReplaySelector(Selector):
     r"""A class for a GC selector which determines fitness for nucleotide sequences by using GC Replay models of
-    affinity."""
+    affinity.
 
-    def __init__(self):
+    Args:
+        slope: slope of relationship between T-cell help and cell divisions
+        y_intercept: y-intercept of relationship between T-cell help and cell divisions
+    """
+
+    def __init__(self, slope: float = 3, y_intercept: float = 1):
         self.phenotype = ReplayPhenotype(
             1,
             1,
@@ -39,30 +63,30 @@ class ReplaySelector(Selector):
             -10.43,
         )
         self.fitness = Fitness(Fitness.sigmoidal_fitness)
+        self.slope = slope
+        self.y_intercept = y_intercept
 
-    def select(
-        self, sequence_list: List[str], slope: float = 3.47, y_intercept: float = 1.13
-    ):
+    def select(self, sequence_list: List[str]):
         """
 
         Args:
             sequence_list: list of DNA sequences
-            slope: slope of relationship between T-cell help and cell divisions
-            y_intercept: y-intercept of relationship between T-cell help and cell divisions
 
         Returns:
-            cell_divs: a list containing the number of cell divisions (non-integer) for each sequence
+            cell_divs: a list containing a tuple with the number of cell divisions (non-integer), KD, and T cell help for each sequence
         """
         sig_fit_df = self.fitness.normalized_fitness_df(
             sequence_list, calculate_KD=self.phenotype.calculate_KD
         )
-        cell_divs = [
-            tuple([cell_div])
-            for cell_div in self.fitness.cell_divisions_from_tfh_linear(
-                sig_fit_df, slope, y_intercept
-            )
-        ]
-        return cell_divs
+        cell_divs = self.fitness.cell_divisions_from_tfh_linear(
+            sig_fit_df, self.slope, self.y_intercept
+        )
+        cell_tuples = []
+        for i in range(len(cell_divs)):
+            KD = sig_fit_df["KD"][i]
+            fitness = sig_fit_df["t_cell_help"][i]
+            cell_tuples.append([cell_divs[i], KD, fitness])
+        return cell_tuples
 
 
 class GC:
@@ -189,7 +213,7 @@ class GC:
 
 
 def binary_proliferator(
-    treenode: TreeNode, p: float, rng: np.random.Generator = default_rng()
+    treenode: TreeNode, p: float, *args, rng: np.random.Generator = default_rng()
 ):
     r"""Binary dark zone step (Galton-Watson).
     With probability :math:`1-p` the input's ``terminated`` attribute is set to ``True``, indicating extinction.
@@ -237,58 +261,11 @@ def uniform_mutator(
     return "".join(sequence)
 
 
-def uniform_selector(sequence_list) -> List[Tuple]:
-    """Uniform selector assigning normalized fitness of each sequence to
-    1/`len(sequence_list)`
-
-    Args:
-        sequence_list: list of sequences for fitness assignment
-
-    Returns:
-        fitness_values: list of tuples containing the assigned fitness (equal values)
-    """
-    fitness_values = [tuple([1 / len(sequence_list)]) for seq in sequence_list]
-    return fitness_values
-
-
-def replay_cell_div_selector(
-    sequence_list: List[str], slope: float = 3.47, y_intercept: float = 1.3
-) -> List[Tuple]:
-    r"""Determines the number of cell divisions based on a list of sequences using Replay
-
-    Args:
-        sequence_list: list of nucleotide sequences to use to predict the number of cell divisions
-
-    Returns:
-        cell_divs: list of tuples containing the predicted number of cell divisions
-    """
-
-    sig_fit = Fitness(Fitness.sigmoidal_fitness)
-    replay_phenotype = ReplayPhenotype(
-        1,
-        1,
-        336,
-        "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
-        "Linear.model",
-        ["delta_log10_KD", "expression"],
-        -10.43,
-    )
-    sig_fit_df = sig_fit.normalized_fitness_df(
-        sequence_list, calculate_KD=replay_phenotype.calculate_KD
-    )
-    cell_divs = [
-        tuple([cell_div])
-        for cell_div in sig_fit.cell_divisions_from_tfh_linear(
-            sig_fit_df, slope, y_intercept
-        )
-    ]
-    return cell_divs
-
-
-# TODO: take in KD, etc from selector
 def simple_proliferator(
     treenode: TreeNode,
     cell_divisions: int,
+    kd: float,
+    fitness: float,
     dist: float = None,
     rng: np.random.Generator = default_rng(),
 ) -> None:
@@ -298,26 +275,15 @@ def simple_proliferator(
     Args:
         treenode: root node to populate from
         cell_divisions: number of cell divisions from the cell represented by ``treenode``
+        kd: calculated KD value for sequence
+        fitness: calculated fitness for sequence
         dist: distance from each parent to child node
         rng: random number generator
     """
     if dist is None:
         dist = 1 / cell_divisions
-    replay_phenotype = ReplayPhenotype(
-        1,
-        1,
-        336,
-        "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
-        "Linear.model",
-        ["delta_log10_KD", "expression"],
-        -10.43,
-    )
-    fit = Fitness(Fitness.sigmoidal_fitness)
-    fit_df = fit.normalized_fitness_df(
-        [treenode.sequence], calculate_KD=replay_phenotype.calculate_KD
-    )
-    treenode.KD = fit_df["KD"][0]
-    treenode.fitness = fit_df["t_cell_help"][0]
+    treenode.KD = kd
+    treenode.fitness = fitness
     if cell_divisions > 0:
         for _ in range(2):
             child = TreeNode()
@@ -327,22 +293,30 @@ def simple_proliferator(
             child.fitness = treenode.fitness
             child.terminated = False
             treenode.add_child(child)
-            simple_proliferator(child, cell_divisions - 1, dist)
+            simple_proliferator(child, cell_divisions - 1, kd, fitness, dist)
 
 
 def cell_div_balanced_proliferator(
-    treenode: TreeNode, cell_divisions: float, rng: np.random.Generator = default_rng()
+    treenode: TreeNode,
+    cell_divisions: float,
+    kd: float,
+    fitness: float,
+    rng: np.random.Generator = default_rng(),
 ) -> None:
-    r"""Populates descendants on a tree node based on the number of cell divisions indicated, producing the number of children expected by :math:`2^cell_divisions`, where ``cell_divisions`` is not necessarily an integer value.
+    r"""Populates descendants on a tree node based on the number of cell divisions indicated, producing the number of children expected by :math:`2^{cell\_divisions}`, where ``cell_divisions`` is not necessarily an integer value.
     A full binary tree is generated, then leaf nodes are removed at random from the set of alternating leaf nodes until there are the expected number of children.
 
     Args:
         treenode: root node to populate from
         cell_divisions: number of cell divisions from the cell represented by ``treenode``
+        kd: calculated KD value for sequence
+        fitness: calculated fitness for sequence
         rng: random number generator
     """
     ceil_cell_divisions = ceil(cell_divisions)
-    simple_proliferator(treenode, ceil_cell_divisions, 1 / ceil_cell_divisions)
+    simple_proliferator(
+        treenode, ceil_cell_divisions, kd, fitness, 1 / ceil_cell_divisions
+    )
     num_descendants = floor(2**cell_divisions)
     num_leaves_to_remove = 2**ceil_cell_divisions - num_descendants
     every_other_leaf = treenode.get_leaves()[::2]
