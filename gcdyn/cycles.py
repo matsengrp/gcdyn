@@ -3,17 +3,66 @@ r"""Germinal center light zone / dark-zone cycles simulator.
 Borrowing from `gctree <https://github.com/matsengrp/gctree/blob/master/gctree/mutation_model.py>`_
 """
 
-from typing import Callable, List, Any, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 from ete3 import TreeNode
 import numpy as np
 from numpy.random import default_rng
 from gcdyn.fitness import Fitness
 from gcdyn.replay import ReplayPhenotype
 from math import floor, ceil
+from abc import ABC
 
 
 class ExtinctionError(Exception):
     """The simulation has resulted in extinction of all lineages."""
+
+
+class Selector(ABC):
+    r"""A class for GC selectors, which determine the fitness for a list of nucleotide sequences"""
+
+    def select(self, sequence_list: List[str]) -> List[Tuple]:
+        pass
+
+
+class ReplaySelector(Selector):
+    r"""A class for a GC selector which determines fitness for nucleotide sequences by using GC Replay models of
+    affinity."""
+
+    def __init__(self):
+        self.phenotype = ReplayPhenotype(
+            1,
+            1,
+            336,
+            "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
+            "Linear.model",
+            ["delta_log10_KD", "expression"],
+            -10.43,
+        )
+        self.fitness = Fitness(Fitness.sigmoidal_fitness)
+
+    def select(
+        self, sequence_list: List[str], slope: float = 3.47, y_intercept: float = 1.13
+    ):
+        """
+
+        Args:
+            sequence_list: list of DNA sequences
+            slope: slope of relationship between T-cell help and cell divisions
+            y_intercept: y-intercept of relationship between T-cell help and cell divisions
+
+        Returns:
+            cell_divs: a list containing the number of cell divisions (non-integer) for each sequence
+        """
+        sig_fit_df = self.fitness.normalized_fitness_df(
+            sequence_list, calculate_KD=self.phenotype.calculate_KD
+        )
+        cell_divs = [
+            tuple([cell_div])
+            for cell_div in self.fitness.cell_divisions_from_tfh_linear(
+                sig_fit_df, slope, y_intercept
+            )
+        ]
+        return cell_divs
 
 
 class GC:
@@ -34,7 +83,7 @@ class GC:
         sequence: str,
         proliferator: Callable[[TreeNode, float, np.random.Generator], None],
         mutator: Callable[[str, float, np.random.Generator], str],
-        selector: Callable[[List[str]], List[Any]],
+        selector: Selector,
         N0: int = 1,
         Nmax: Optional[int] = None,
         rng: np.random.Generator = default_rng(),
@@ -64,7 +113,7 @@ class GC:
         Args:
             enforce_timescale: if ``True``, the time scale of the DZ proliferation tree must be consistent with the global timescale (one unit per step)
         """
-        fitnesses = self.selector([leaf.sequence for leaf in self.alive_leaves])
+        fitnesses = self.selector.select([leaf.sequence for leaf in self.alive_leaves])
         for leaf, args in zip(self.alive_leaves, fitnesses):
             self.proliferator(leaf, *args, rng=self.rng)
             for node in leaf.iter_descendants():
@@ -236,6 +285,7 @@ def replay_cell_div_selector(
     return cell_divs
 
 
+# TODO: take in KD, etc from selector
 def simple_proliferator(
     treenode: TreeNode,
     cell_divisions: int,
