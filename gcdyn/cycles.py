@@ -67,8 +67,7 @@ class ReplaySelector(Selector):
         self.y_intercept = y_intercept
 
     def select(self, sequence_list: List[str]):
-        """
-
+        """Produce the predicted number of cell divisions, KD, and T cell help for a list of sequences
         Args:
             sequence_list: list of DNA sequences
 
@@ -130,15 +129,23 @@ class GC:
                 self.tree.add_child(child)
 
         self.alive_leaves = set([leaf for leaf in self.tree])
+        self.all_leaves = self.alive_leaves
 
-    def step(self, enforce_timescale: bool = True) -> None:
+    def step(
+        self, enforce_timescale: bool = True, capture_full_tree: bool = False
+    ) -> None:
         r"""Simulate one cycle.
 
         Args:
             enforce_timescale: if ``True``, the time scale of the DZ proliferation tree must be consistent with the global timescale (one unit per step)
+            capture_full_tree: if ``True``, terminated leaves are marked as terminated but still retained in the `alive_leaves` set, allowing further proliferation to be visualized
         """
-        fitnesses = self.selector.select([leaf.sequence for leaf in self.alive_leaves])
-        for leaf, args in zip(self.alive_leaves, fitnesses):
+        if capture_full_tree:
+            leaf_set = self.all_leaves
+        else:
+            leaf_set = self.alive_leaves
+        fitnesses = self.selector.select([leaf.sequence for leaf in leaf_set])
+        for leaf, args in zip(leaf_set, fitnesses):
             self.proliferator(leaf, *args, rng=self.rng)
             for node in leaf.iter_descendants():
                 node.sequence = self.mutator(node.up.sequence, node.dist, rng=self.rng)
@@ -155,6 +162,7 @@ class GC:
                             )
                         )
         self.alive_leaves = set([leaf for leaf in self.tree if not leaf.terminated])
+        self.all_leaves = set([leaf for leaf in self.tree])
 
         if self.Nmax:
             for leaf in self.rng.choice(
@@ -185,6 +193,7 @@ class GC:
         prune: bool = True,
         max_tries: int = 100,
         enforce_timescale: bool = True,
+        capture_full_tree: bool = False,
     ) -> None:
         r"""Simulate.
 
@@ -193,13 +202,17 @@ class GC:
             prune: prune to the tree induced by the surviving lineages
             max_tries: try this many times to simulate a tree that doesn't go extinct
             enforce_timescale: if ``True``, the timescale of the DZ proliferation trees must be consistent with the global timescale
+            capture_full_tree: if ``True``, terminated leaves are marked as terminated but still retained in the `alive_leaves` set
         """
         success = False
         n_tries = 0
         while not success:
             try:
                 for _ in range(T):
-                    self.step(enforce_timescale=enforce_timescale)
+                    self.step(
+                        enforce_timescale=enforce_timescale,
+                        capture_full_tree=capture_full_tree,
+                    )
                 if prune:
                     self.prune()
                 success = True
@@ -232,7 +245,7 @@ def binary_proliferator(
             child = TreeNode()
             child.dist = 1
             child.sequence = treenode.sequence
-            child.terminated = False
+            child.terminated = treenode.terminated
             treenode.add_child(child)
 
 
@@ -291,7 +304,7 @@ def simple_proliferator(
             child.sequence = treenode.sequence
             child.KD = treenode.KD
             child.fitness = treenode.fitness
-            child.terminated = False
+            child.terminated = treenode.terminated
             treenode.add_child(child)
             simple_proliferator(child, cell_divisions - 1, kd, fitness, dist)
 
