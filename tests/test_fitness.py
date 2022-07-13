@@ -1,6 +1,6 @@
-import gcdyn.replay
 from gcdyn.fitness import Fitness
 from gcdyn.replay import ReplayPhenotype
+from Bio import SeqIO
 import pytest
 
 
@@ -17,9 +17,13 @@ def seq_list():
 
 @pytest.fixture
 def seq_list_big():
-    seqs = gcdyn.replay.fasta_to_seq_list(
-        "notebooks/gcreplay_samples/gctree_PR1.2-5-LP-78-GC.fasta"
-    )
+    seqs = [
+        str(seq_record.seq)
+        for seq_record in SeqIO.parse(
+            "notebooks/gcreplay_samples/gctree_PR1.2-5-LP-78-GC.fasta", "fasta"
+        )
+        if seq_record.id != "naive"
+    ]
     return seqs
 
 

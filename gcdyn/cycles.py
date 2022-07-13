@@ -9,8 +9,9 @@ import numpy as np
 from numpy.random import default_rng
 from gcdyn.fitness import Fitness
 from gcdyn.replay import ReplayPhenotype
-from math import floor, ceil
+from math import floor, ceil, isclose
 from abc import ABC
+import pandas as pd
 
 
 class ExtinctionError(Exception):
@@ -25,7 +26,7 @@ class Selector(ABC):
 
 
 class UniformSelector(Selector):
-    def select(self, sequence_list: List[str]):
+    def select(self, sequence_list: List[str]) -> List[Tuple[float, float, float]]:
         """Uniform selector assigning normalized fitness of each sequence to
         1/`len(sequence_list)`
 
@@ -46,31 +47,53 @@ class UniformSelector(Selector):
 class ReplaySelector(Selector):
     r"""A class for a GC selector which determines fitness for nucleotide sequences by using GC Replay models of
     affinity.
-
-    Args:
-        slope: slope of relationship between T-cell help and cell divisions
-        y_intercept: y-intercept of relationship between T-cell help and cell divisions
     """
 
-    def __init__(self, slope: float = 3, y_intercept: float = 1):
+    def __init__(
+        self,
+        slope: float = 3,
+        y_intercept: float = 1,
+        igh_frame: int = 1,
+        igk_frame: int = 1,
+        igk_idx: int = 336,
+        naive_sites_path: str = "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
+        model_path: str = "Linear.model",
+        tdms_phenotypes: List[str] = ["delta_log10_KD", "delta_expression"],
+        log10_naive_KD: float = -10.43,
+        fitness_method: Callable[
+            [List[float], ...], List[float]
+        ] = Fitness.sigmoidal_fitness,
+    ):
+        """
+        Args:
+            slope: coefficient of relationship between normalized T cell help and cell divisions
+            y_intercept: cell divisions per cycle with no T cell help
+            igh_frame: frame for translation of Ig heavy chain
+            igk_frame: frame for translation of Ig light chain
+            igk_idx: index of Ig light chain starting position
+            naive_sites_path: path to CSV lookup table for converting from scFv CDS indexed site numbering to heavy/light chain IMGT numbering
+            model_path: path to ``torchdms`` model for antibody sequences
+            tdms_phenotypes: names of phenotype values produced by passed-in ``torchdms`` model (``delta_log10_KD`` expected as a phenotype)
+            log10_naive_KD: KD of naive Ig
+            fitness_method: method to map from KD to T cell help, taking in a list of :math:`K_D` values and producing a list of absolute T cell help quantities
+        """
         self.phenotype = ReplayPhenotype(
-            1,
-            1,
-            336,
-            "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
-            "Linear.model",
-            ["delta_log10_KD", "expression"],
-            -10.43,
+            igh_frame,
+            igk_frame,
+            igk_idx,
+            naive_sites_path,
+            model_path,
+            tdms_phenotypes,
+            log10_naive_KD,
         )
-        self.fitness = Fitness(Fitness.sigmoidal_fitness)
+        self.fitness = Fitness(fitness_method)
         self.slope = slope
         self.y_intercept = y_intercept
 
-    def select(self, sequence_list: List[str]):
-        """Produce the predicted number of cell divisions, KD, and T cell help for a list of sequences
+    def select(self, sequence_list: List[str]) -> List[Tuple[float, float, float]]:
+        """Produce the predicted number of cell divisions, KD, and T cell help for a list of sequences using a sigmoidal relationship between T cell help and fitness
         Args:
             sequence_list: list of DNA sequences
-
         Returns:
             cell_divs: a list containing a tuple with the number of cell divisions (non-integer), KD, and T cell help for each sequence
         """
@@ -78,7 +101,7 @@ class ReplaySelector(Selector):
             sequence_list, calculate_KD=self.phenotype.calculate_KD
         )
         cell_divs = self.fitness.cell_divisions_from_tfh_linear(
-            sig_fit_df, self.slope, self.y_intercept
+            sig_fit_df["normalized_t_cell_help"], self.slope, self.y_intercept
         )
         cell_tuples = []
         for i in range(len(cell_divs)):
@@ -129,7 +152,6 @@ class GC:
                 self.tree.add_child(child)
 
         self.alive_leaves = set([leaf for leaf in self.tree])
-        self.all_leaves = self.alive_leaves
 
     def step(
         self, enforce_timescale: bool = True, capture_full_tree: bool = False
@@ -137,15 +159,9 @@ class GC:
         r"""Simulate one cycle.
 
         Args:
-            enforce_timescale: if ``True``, the time scale of the DZ proliferation tree must be consistent with the global timescale (one unit per step)
-            capture_full_tree: if ``True``, terminated leaves are marked as terminated but still retained in the `alive_leaves` set, allowing further proliferation to be visualized
-        """
-        if capture_full_tree:
-            leaf_set = self.all_leaves
-        else:
-            leaf_set = self.alive_leaves
-        fitnesses = self.selector.select([leaf.sequence for leaf in leaf_set])
-        for leaf, args in zip(leaf_set, fitnesses):
+            enforce_timescale: if ``True``, the timescale of the DZ proliferation tree must be consistent with the global timescale (one unit per step)"""
+        fitnesses = self.selector.select([leaf.sequence for leaf in self.alive_leaves])
+        for leaf, args in zip(self.alive_leaves, fitnesses):
             self.proliferator(leaf, *args, rng=self.rng)
             for node in leaf.iter_descendants():
                 node.sequence = self.mutator(node.up.sequence, node.dist, rng=self.rng)
@@ -154,15 +170,12 @@ class GC:
                     if (
                         not subleaf.terminated
                         and subleaf != leaf
-                        and round(leaf.get_distance(subleaf)) != 1
+                        and not isclose(leaf.get_distance(subleaf), 1)
                     ):
                         raise ValueError(
-                            "DZ subtree timescale is not consistent with simulation time, val = {0}".format(
-                                leaf.get_distance(subleaf)
-                            )
+                            f"DZ subtree timescale is not consistent with simulation time, val = {leaf.get_distance(subleaf)}"
                         )
         self.alive_leaves = set([leaf for leaf in self.tree if not leaf.terminated])
-        self.all_leaves = set([leaf for leaf in self.tree])
 
         if self.Nmax:
             for leaf in self.rng.choice(
@@ -193,7 +206,6 @@ class GC:
         prune: bool = True,
         max_tries: int = 100,
         enforce_timescale: bool = True,
-        capture_full_tree: bool = False,
     ) -> None:
         r"""Simulate.
 
@@ -202,17 +214,13 @@ class GC:
             prune: prune to the tree induced by the surviving lineages
             max_tries: try this many times to simulate a tree that doesn't go extinct
             enforce_timescale: if ``True``, the timescale of the DZ proliferation trees must be consistent with the global timescale
-            capture_full_tree: if ``True``, terminated leaves are marked as terminated but still retained in the `alive_leaves` set
         """
         success = False
         n_tries = 0
         while not success:
             try:
                 for _ in range(T):
-                    self.step(
-                        enforce_timescale=enforce_timescale,
-                        capture_full_tree=capture_full_tree,
-                    )
+                    self.step(enforce_timescale=enforce_timescale)
                 if prune:
                     self.prune()
                 success = True
@@ -245,13 +253,13 @@ def binary_proliferator(
             child = TreeNode()
             child.dist = 1
             child.sequence = treenode.sequence
-            child.terminated = treenode.terminated
+            child.terminated = False
             treenode.add_child(child)
 
 
 def uniform_mutator(
     sequence: str, time: float, rng: np.random.Generator = default_rng()
-):
+) -> str:
     r"""Uniform mutation process at rate 1.
 
     Args:
@@ -272,6 +280,44 @@ def uniform_mutator(
         else:
             break
     return "".join(sequence)
+
+
+def mutate_S5F(
+    sequence: str,
+    mutability_csv: str,
+    substitution_csv: str,
+    igk_idx: int = 336,
+    rng: np.random.Generator = default_rng(),
+) -> str:
+    """AID hotspot-aware mutation model using mutability values at each
+    nucleotide 5mer and substitution probabilities.
+
+    Args:
+        sequence: initial sequence, consisting of characters ``ACGT``
+        mutability_csv: path to CSV with rows representing 5mers and mutability value
+        substitution_csv: path to CSV with rows representing 5mers and probability of substitution to each nucleotide in columns
+        igk_idx: index of Ig light chain starting position
+        rng:  random number generator
+
+    Returns:
+        sequence: sequence with mutations based on given mutabilities and substitutions
+    """
+    sequence_H = "NN" + sequence[:igk_idx] + "NN"
+    sequence_K = "NN" + sequence[igk_idx:] + "NN"
+    mutability = pd.read_csv(mutability_csv, sep=" ", index_col=0).squeeze("columns")
+    substitution = pd.read_csv(substitution_csv, sep=" ", index_col=0)
+    # mutabilities of each nucleotide
+    contexts = [
+        sequence_H[(i - 2) : (i + 3)] for i in range(2, len(sequence_H) - 2)
+    ] + [sequence_K[(i - 2) : (i + 3)] for i in range(2, len(sequence_K) - 2)]
+    mutabilities = np.array([mutability[context] for context in contexts])
+    i = rng.choice(len(mutabilities), p=mutabilities / sum(mutabilities))
+    sequence = (
+        sequence[:i]
+        + rng.choice(substitution.columns, p=substitution.loc[contexts[i]].fillna(0))
+        + sequence[(i + 1) :]
+    )
+    return sequence
 
 
 def simple_proliferator(
@@ -304,7 +350,7 @@ def simple_proliferator(
             child.sequence = treenode.sequence
             child.KD = treenode.KD
             child.fitness = treenode.fitness
-            child.terminated = treenode.terminated
+            child.terminated = False
             treenode.add_child(child)
             simple_proliferator(child, cell_divisions - 1, kd, fitness, dist)
 
