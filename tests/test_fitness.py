@@ -1,5 +1,5 @@
 from gcdyn.fitness import Fitness
-from gcdyn.replay import ReplayPhenotype
+from gcdyn.replay import DMSPhenotype
 from Bio import SeqIO
 import pytest
 
@@ -35,7 +35,7 @@ def fasta_seq_path():
 
 @pytest.fixture
 def replay_phenotype():
-    replay_phenotype = ReplayPhenotype(
+    replay_phenotype = DMSPhenotype(
         1,
         1,
         336,

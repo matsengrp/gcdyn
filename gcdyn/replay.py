@@ -25,7 +25,7 @@ def __aa__(sequence: str, frame: int) -> Seq:
 # phenotype evaluation:
 
 
-class ReplayPhenotype:
+class DMSPhenotype:
     """Defines a set of parameters used to go from DNA sequence of antibody
     sequences to KD values.
 

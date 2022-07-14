@@ -8,7 +8,7 @@ from ete3 import TreeNode
 import numpy as np
 from numpy.random import default_rng
 from gcdyn.fitness import Fitness
-from gcdyn.replay import ReplayPhenotype
+from gcdyn.replay import DMSPhenotype
 from math import floor, ceil, isclose
 from abc import ABC
 import pandas as pd
@@ -19,7 +19,8 @@ class ExtinctionError(Exception):
 
 
 class Selector(ABC):
-    r"""A class for GC selectors, which determine the fitness for a list of nucleotide sequences"""
+    r"""A class for GC selectors, which determine the fitness for a list of nucleotide sequences.
+    Selectors return a list of tuples that can be interpreted by a proliferator method"""
 
     def select(self, sequence_list: List[str]) -> List[Tuple]:
         pass
@@ -34,18 +35,19 @@ class UniformSelector(Selector):
             sequence_list: list of sequences for fitness assignment
 
         Returns:
-            fitness_values: list of tuples containing the assigned fitness (equal values)
+            fitness_values: list of tuples containing the assigned number of cell divisions (equal values), KD of 0,
+            and T cell help equivalent to the number of cell divisions for each sequence
         """
         cell_tuples = []
         for i in range(len(sequence_list)):
             KD = 0
             fitness = 1 / len(sequence_list)
-            cell_tuples.append([1 / len(sequence_list), KD, fitness])
+            cell_tuples.append((1 / len(sequence_list), KD, fitness))
         return cell_tuples
 
 
-class ReplaySelector(Selector):
-    r"""A class for a GC selector which determines fitness for nucleotide sequences by using GC Replay models of
+class DMSSelector(Selector):
+    r"""A class for a GC selector which determines fitness for nucleotide sequences by using DMS models of
     affinity.
     """
 
@@ -61,7 +63,7 @@ class ReplaySelector(Selector):
         tdms_phenotypes: List[str] = ["delta_log10_KD", "delta_expression"],
         log10_naive_KD: float = -10.43,
         fitness_method: Callable[
-            [List[float], ...], List[float]
+            [List[float]], List[float]
         ] = Fitness.sigmoidal_fitness,
     ):
         """
@@ -77,7 +79,7 @@ class ReplaySelector(Selector):
             log10_naive_KD: KD of naive Ig
             fitness_method: method to map from KD to T cell help, taking in a list of :math:`K_D` values and producing a list of absolute T cell help quantities
         """
-        self.phenotype = ReplayPhenotype(
+        self.phenotype = DMSPhenotype(
             igh_frame,
             igk_frame,
             igk_idx,
@@ -107,7 +109,7 @@ class ReplaySelector(Selector):
         for i in range(len(cell_divs)):
             KD = sig_fit_df["KD"][i]
             fitness = sig_fit_df["t_cell_help"][i]
-            cell_tuples.append([cell_divs[i], KD, fitness])
+            cell_tuples.append((cell_divs[i], KD, fitness))
         return cell_tuples
 
 
