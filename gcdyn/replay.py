@@ -4,24 +4,6 @@ import torch
 from Bio.Seq import Seq
 
 
-# From gcreplay-tools (https://github.com/matsengrp/gcreplay/blob/main/nextflow/bin/gcreplay-tools.py):
-
-
-def __aa__(sequence: str, frame: int) -> Seq:
-    """Amino acid translation of nucleotide sequence in frame 1, 2, or 3.
-
-    Args:
-        sequence: DNA sequence
-        frame: frame for translation
-
-    Returns:
-        aa_seq: translated sequence
-    """
-    return Seq(
-        sequence[(frame - 1) : (frame - 1 + (3 * ((len(sequence) - (frame - 1)) // 3)))]
-    ).translate()
-
-
 # phenotype evaluation:
 
 
@@ -61,7 +43,7 @@ class DMSPhenotype:
         self.tdms_phenotypes = tdms_phenotypes
         self.log10_naive_KD = log10_naive_KD
 
-    def __seq_aa_tdms__(self, nt_seqs: list[str]) -> list[str]:
+    def __seq_aa_tdms(self, nt_seqs: list[str]) -> list[str]:
         """Produces tdms-inferred Igh and Igk amino acid sequence from a list
         of DNA sequences.
 
@@ -76,8 +58,8 @@ class DMSPhenotype:
         for nt_seq in nt_seqs:
             if len(nt_seq) != 657:
                 raise Exception(f"all sequences must be 657 nt, len = {len(nt_seq)}")
-            igh_aa = __aa__(nt_seq[: self.igk_idx], self.igh_frame)
-            igk_aa = __aa__(nt_seq[self.igk_idx :], self.igk_frame)
+            igh_aa = self.__aa(nt_seq[: self.igk_idx], self.igh_frame)
+            igk_aa = self.__aa(nt_seq[self.igk_idx :], self.igk_frame)
             aa_tdms = self.pos_df.amino_acid.copy()
             aa_tdms.iloc[self.pos_df.chain == "H"] = igh_aa
             # note: replay light chains are shorter than dms seq by one aa
@@ -97,7 +79,7 @@ class DMSPhenotype:
             kd_values: predicted KD based on ``torchdms`` model for each sequence
         """
 
-        seqs = self.__seq_aa_tdms__(nt_seqs)
+        seqs = self.__seq_aa_tdms(nt_seqs)
         aa_seq_one_hot = torch.stack([self.model.seq_to_binary(seq) for seq in seqs])
         try:
             labeled_evaluation = pd.DataFrame(
@@ -112,3 +94,20 @@ class DMSPhenotype:
             for delta_log10_KD in labeled_evaluation["delta_log10_KD"]
         )
         return kd_values
+
+    @staticmethod
+    def __aa(sequence: str, frame: int) -> Seq:
+        """Amino acid translation of nucleotide sequence in frame 1, 2, or 3.
+
+        Args:
+            sequence: DNA sequence
+            frame: frame for translation
+
+        Returns:
+            aa_seq: translated sequence
+        """
+        return Seq(
+            sequence[
+                (frame - 1) : (frame - 1 + (3 * ((len(sequence) - (frame - 1)) // 3)))
+            ]
+        ).translate()

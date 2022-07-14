@@ -21,7 +21,7 @@ class Fitness:
         self.tfh_function = tfh_function
         self.concentration_antigen = concentration_antigen
 
-    def __frac_antigen_bound__(self, sequence_KDs: list[float]) -> list[float]:
+    def __frac_antigen_bound(self, sequence_KDs: list[float]) -> list[float]:
         r"""Determine the fraction of antigen bound from a list of KD values using the Hill equation.
 
         Args:
@@ -51,7 +51,7 @@ class Fitness:
         Returns:
             t_cell_help_values: list with non-normalized T cell help value for each sequence
         """
-        fracs_antigen_bound = self.__frac_antigen_bound__(kd_values)
+        fracs_antigen_bound = self.__frac_antigen_bound(kd_values)
         t_cell_help_values = list(
             antigen_bound * slope + y_intercept for antigen_bound in fracs_antigen_bound
         )
@@ -87,7 +87,7 @@ class Fitness:
         Returns:
             t_cell_help_values: list with non-normalized T cell help value for each sequence
         """
-        fracs_antigen_bound = self.__frac_antigen_bound__(kd_values)
+        fracs_antigen_bound = self.__frac_antigen_bound(kd_values)
         t_cell_help_values = list(
             maximum_Tfh
             / (1 + exp(-1 * curve_steepness * (antigen_bound - midpoint_antigen_bound)))

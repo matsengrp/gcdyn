@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 from numpy.random import default_rng
 
-from gcdyn.cycles import GC, binary_proliferator, uniform_mutator, Selector
+from gcdyn.cycles import GC, binary_proliferator, Selector, UniformMutator
 
 rng = default_rng()
 
@@ -18,6 +18,7 @@ class TestGC(unittest.TestCase):
         self.N0 = 10
         sequence = "AAAA"
         neutral_selector = NeutralSelector()
+        uniform_mutator = UniformMutator()
 
         self.gc = GC(
             sequence,
