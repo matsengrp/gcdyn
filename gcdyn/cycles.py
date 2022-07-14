@@ -286,8 +286,9 @@ def uniform_mutator(
 
 def mutate_S5F(
     sequence: str,
-    mutability_csv: str,
-    substitution_csv: str,
+    time: float,
+    mutability_csv: str = "MK_RS5NF_mutability.csv",
+    substitution_csv: str = "MK_RS5NF_substitution.csv",
     igk_idx: int = 336,
     rng: np.random.Generator = default_rng(),
 ) -> str:
@@ -304,6 +305,7 @@ def mutate_S5F(
     Returns:
         sequence: sequence with mutations based on given mutabilities and substitutions
     """
+
     sequence_H = "NN" + sequence[:igk_idx] + "NN"
     sequence_K = "NN" + sequence[igk_idx:] + "NN"
     mutability = pd.read_csv(mutability_csv, sep=" ", index_col=0).squeeze("columns")
@@ -313,12 +315,20 @@ def mutate_S5F(
         sequence_H[(i - 2) : (i + 3)] for i in range(2, len(sequence_H) - 2)
     ] + [sequence_K[(i - 2) : (i + 3)] for i in range(2, len(sequence_K) - 2)]
     mutabilities = np.array([mutability[context] for context in contexts])
-    i = rng.choice(len(mutabilities), p=mutabilities / sum(mutabilities))
-    sequence = (
-        sequence[:i]
-        + rng.choice(substitution.columns, p=substitution.loc[contexts[i]].fillna(0))
-        + sequence[(i + 1) :]
-    )
+    t = 0
+    while True:
+        t += rng.exponential()
+        if t < time:
+            i = rng.choice(len(mutabilities), p=mutabilities / sum(mutabilities))
+            sequence = (
+                sequence[:i]
+                + rng.choice(
+                    substitution.columns, p=substitution.loc[contexts[i]].fillna(0)
+                )
+                + sequence[(i + 1) :]
+            )
+        else:
+            break
     return sequence
 
 
