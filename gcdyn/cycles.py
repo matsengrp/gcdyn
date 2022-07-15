@@ -120,27 +120,54 @@ class Selector(ABC):
     r"""A class for GC selectors, which determine the fitness for a list of nucleotide sequences.
     Selectors return a list of tuples that can be interpreted by a proliferator method"""
 
-    def select(self, sequence_list: List[str]) -> List[Tuple]:
+    def select(self, sequence_list: List[str], competition: bool = True) -> List[Tuple]:
+        """Assigns the fitness for each sequence, with normalization depending
+        on whether competition is considered.
+
+        Args:
+            sequence_list: list of nucleotide sequences
+            competition: presence of competition in the light zone
+
+        Returns:
+            cell_tuples: list of tuples to be interpreted by a proliferator method
+        """
         pass
 
 
 class UniformSelector(Selector):
-    def select(self, sequence_list: List[str]) -> List[Tuple[float, float, float]]:
-        """Uniform selector assigning normalized fitness of each sequence to
-        1/`len(sequence_list)`
+    """Uniform selector assigning fitness of each sequence to an equal
+    value."""
+
+    def __init__(self, fitness_value: float = None):
+        """
+        Args:
+            fitness_value: fitness value for each sequence if normalization (``competition``) is off
+        """
+        if fitness_value is not None:
+            self.fitness_value = fitness_value
+
+    def select(
+        self, sequence_list: List[str], competition: bool = True
+    ) -> List[Tuple[float]]:
+        """Uniform selector assigning fitness of each sequence to an equal
+        value.
 
         Args:
             sequence_list: list of sequences for fitness assignment
+            competition: if ``True``, competition for T cell help in the light zone is expected,
+            and the fitness is set to 1/`len(sequence_list)`. Otherwise, fitness is set to `fitness_value`
 
         Returns:
-            fitness_values: list of tuples containing the assigned number of cell divisions (equal values), KD of 0,
-            and T cell help equivalent to the number of cell divisions for each sequence
+            fitness_values: list of tuples containing the assigned number of cell divisions (equal values)
         """
-        cell_tuples = []
-        for i in range(len(sequence_list)):
-            KD = 0
-            fitness = 1 / len(sequence_list)
-            cell_tuples.append((1 / len(sequence_list), KD, fitness))
+        if competition:
+            cell_tuples = [
+                tuple([1 / len(sequence_list)]) for _ in range(len(sequence_list))
+            ]
+        else:
+            cell_tuples = [
+                tuple([self.fitness_value]) for _ in range(len(sequence_list))
+            ]
         return cell_tuples
 
 
@@ -190,24 +217,28 @@ class DMSSelector(Selector):
         self.slope = slope
         self.y_intercept = y_intercept
 
-    def select(self, sequence_list: List[str]) -> List[Tuple[float, float, float]]:
+    def select(
+        self, sequence_list: List[str], competition: bool = True
+    ) -> List[Tuple[float]]:
         """Produce the predicted number of cell divisions, KD, and T cell help for a list of sequences using a sigmoidal relationship between T cell help and fitness
         Args:
             sequence_list: list of DNA sequences
+            competition: if ``True``, competition for T cell help in the light zone is expected, and the cell divisions
+            are determined from only the sequence's predicted amount of antigen bound
         Returns:
-            cell_divs: a list containing a tuple with the number of cell divisions (non-integer), KD, and T cell help for each sequence
+            cell_divs: a list containing a tuple with the number of cell divisions (non-integer) for each sequence
         """
         sig_fit_df = self.fitness.normalized_fitness_df(
             sequence_list, calculate_KD=self.phenotype.calculate_KD
         )
+        if competition:
+            t_cell_help_col = "normalized_t_cell_help"
+        else:
+            t_cell_help_col = "t_cell_help"
         cell_divs = self.fitness.cell_divisions_from_tfh_linear(
-            sig_fit_df["normalized_t_cell_help"], self.slope, self.y_intercept
+            sig_fit_df[t_cell_help_col], self.slope, self.y_intercept
         )
-        cell_tuples = []
-        for i in range(len(cell_divs)):
-            KD = sig_fit_df["KD"][i]
-            fitness = sig_fit_df["t_cell_help"][i]
-            cell_tuples.append((cell_divs[i], KD, fitness))
+        cell_tuples = [tuple([cell_div]) for cell_div in cell_divs]
         return cell_tuples
 
 
@@ -253,14 +284,16 @@ class GC:
 
         self.alive_leaves = set([leaf for leaf in self.tree])
 
-    def step(
-        self, enforce_timescale: bool = True, capture_full_tree: bool = False
-    ) -> None:
+    def step(self, enforce_timescale: bool = True, competition: bool = True) -> None:
         r"""Simulate one cycle.
 
         Args:
-            enforce_timescale: if ``True``, the timescale of the DZ proliferation tree must be consistent with the global timescale (one unit per step)"""
-        fitnesses = self.selector.select([leaf.sequence for leaf in self.alive_leaves])
+            enforce_timescale: if ``True``, the timescale of the DZ proliferation tree must be consistent with the global timescale (one unit per step)
+            competition: if ``True``, competition in the LZ is expected (affects Selector output)
+        """
+        fitnesses = self.selector.select(
+            [leaf.sequence for leaf in self.alive_leaves], competition
+        )
         for leaf, args in zip(self.alive_leaves, fitnesses):
             self.proliferator(leaf, *args, rng=self.rng)
             for node in leaf.iter_descendants():
@@ -308,6 +341,7 @@ class GC:
         prune: bool = True,
         max_tries: int = 100,
         enforce_timescale: bool = True,
+        competition: bool = True,
     ) -> None:
         r"""Simulate.
 
@@ -316,13 +350,16 @@ class GC:
             prune: prune to the tree induced by the surviving lineages
             max_tries: try this many times to simulate a tree that doesn't go extinct
             enforce_timescale: if ``True``, the timescale of the DZ proliferation trees must be consistent with the global timescale
+            competition: if ``True``, competition in the LZ is expected (affects Selector output)
         """
         success = False
         n_tries = 0
         while not success:
             try:
                 for _ in range(T):
-                    self.step(enforce_timescale=enforce_timescale)
+                    self.step(
+                        enforce_timescale=enforce_timescale, competition=competition
+                    )
                 if prune:
                     self.prune()
                 success = True
@@ -362,8 +399,6 @@ def binary_proliferator(
 def simple_proliferator(
     treenode: TreeNode,
     cell_divisions: int,
-    kd: float,
-    fitness: float,
     dist: float = None,
     rng: np.random.Generator = default_rng(),
 ) -> None:
@@ -373,32 +408,24 @@ def simple_proliferator(
     Args:
         treenode: root node to populate from
         cell_divisions: number of cell divisions from the cell represented by ``treenode``
-        kd: calculated KD value for sequence
-        fitness: calculated fitness for sequence
         dist: distance from each parent to child node
         rng: random number generator
     """
     if dist is None:
         dist = 1 / cell_divisions
-    treenode.KD = kd
-    treenode.fitness = fitness
     if cell_divisions > 0:
         for _ in range(2):
             child = TreeNode()
             child.dist = dist
             child.sequence = treenode.sequence
-            child.KD = treenode.KD
-            child.fitness = treenode.fitness
             child.terminated = False
             treenode.add_child(child)
-            simple_proliferator(child, cell_divisions - 1, kd, fitness, dist)
+            simple_proliferator(child, cell_divisions - 1, dist)
 
 
 def cell_div_balanced_proliferator(
     treenode: TreeNode,
     cell_divisions: float,
-    kd: float,
-    fitness: float,
     rng: np.random.Generator = default_rng(),
 ) -> None:
     r"""Populates descendants on a tree node based on the number of cell divisions indicated, producing the number of children expected by :math:`2^{cell\_divisions}`, where ``cell_divisions`` is not necessarily an integer value.
@@ -412,9 +439,7 @@ def cell_div_balanced_proliferator(
         rng: random number generator
     """
     ceil_cell_divisions = ceil(cell_divisions)
-    simple_proliferator(
-        treenode, ceil_cell_divisions, kd, fitness, 1 / ceil_cell_divisions
-    )
+    simple_proliferator(treenode, ceil_cell_divisions, 1 / ceil_cell_divisions)
     num_descendants = floor(2**cell_divisions)
     num_leaves_to_remove = 2**ceil_cell_divisions - num_descendants
     every_other_leaf = treenode.get_leaves()[::2]

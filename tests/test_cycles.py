@@ -8,7 +8,7 @@ rng = default_rng()
 
 
 class NeutralSelector(Selector):
-    def select(self, sequence_list):
+    def select(self, sequence_list, competition):
         return [(0.9,)] * len(sequence_list)
 
 
