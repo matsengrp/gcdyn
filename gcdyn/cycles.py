@@ -8,7 +8,7 @@ from ete3 import TreeNode
 import numpy as np
 from numpy.random import default_rng
 from gcdyn.fitness import Fitness
-from gcdyn.replay import DMSPhenotype
+from gcdyn.phenotype import DMSPhenotype
 from math import floor, ceil, isclose
 from abc import ABC
 import pandas as pd
@@ -103,14 +103,20 @@ class FivemerMutator(Mutator):
             t += rng.exponential()
             if t < time:
                 i = rng.choice(len(mutabilities), p=mutabilities / sum(mutabilities))
-                sequence = (
-                    sequence[:i]
-                    + rng.choice(
-                        self.substitution.columns,
-                        p=self.substitution.loc[contexts[i]].fillna(0),
-                    )
-                    + sequence[(i + 1) :]
+                sub_nt = rng.choice(
+                    self.substitution.columns,
+                    p=self.substitution.loc[contexts[i]].fillna(0),
                 )
+                sequence = sequence[:i] + sub_nt + sequence[(i + 1) :]
+                # update contexts and mutabilities
+                for j in range(i - 2, i + 3):
+                    if 0 <= j < len(sequence):
+                        contexts[j] = (
+                            contexts[j][: 2 + (i - j)]
+                            + sub_nt
+                            + contexts[j][3 + (i - j) :]
+                        )
+                        mutabilities[j] = self.mutability[contexts[j]]
             else:
                 break
         return sequence

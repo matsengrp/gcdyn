@@ -1,5 +1,5 @@
 from gcdyn.fitness import Fitness
-from gcdyn.replay import DMSPhenotype
+from gcdyn.phenotype import DMSPhenotype
 from Bio import SeqIO
 import pytest
 

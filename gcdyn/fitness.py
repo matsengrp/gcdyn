@@ -15,13 +15,13 @@ class Fitness:
 
     def __init__(
         self,
-        tfh_function: Callable[[list[float], ...], list[float]],
+        tfh_function: Callable[[list[float]], list[float]],
         concentration_antigen: float = 10 ** (-9),
     ):
         self.tfh_function = tfh_function
         self.concentration_antigen = concentration_antigen
 
-    def __frac_antigen_bound(self, sequence_KDs: list[float]) -> list[float]:
+    def _frac_antigen_bound(self, sequence_KDs: list[float]) -> list[float]:
         r"""Determine the fraction of antigen bound from a list of KD values using the Hill equation.
 
         Args:
@@ -51,22 +51,22 @@ class Fitness:
         Returns:
             t_cell_help_values: list with non-normalized T cell help value for each sequence
         """
-        fracs_antigen_bound = self.__frac_antigen_bound(kd_values)
+        fracs_antigen_bound = self._frac_antigen_bound(kd_values)
         t_cell_help_values = list(
             antigen_bound * slope + y_intercept for antigen_bound in fracs_antigen_bound
         )
         return t_cell_help_values
 
-    def uniform_fitness(self, sequence_values: list[float]) -> list[float]:
+    def uniform_fitness(self, kd_values: list[float]) -> list[float]:
         r"""Sets normalized amount of T cell help to equal values
 
         Args:
-            sequence_values: list of length equivalent to number of sequences
+            kd_values: list of length equivalent to number of sequences
 
         Returns:
             normalized_t_cell_help: T cell help for each sequence assuming uniform distribution
         """
-        return [1 / len(sequence_values)] * len(sequence_values)
+        return [1 / len(kd_values)] * len(kd_values)
 
     def sigmoidal_fitness(
         self,
@@ -87,7 +87,7 @@ class Fitness:
         Returns:
             t_cell_help_values: list with non-normalized T cell help value for each sequence
         """
-        fracs_antigen_bound = self.__frac_antigen_bound(kd_values)
+        fracs_antigen_bound = self._frac_antigen_bound(kd_values)
         t_cell_help_values = list(
             maximum_Tfh
             / (1 + exp(-1 * curve_steepness * (antigen_bound - midpoint_antigen_bound)))
@@ -112,7 +112,7 @@ class Fitness:
         """
         kd_values = calculate_KD(seq_list)
         seq_df = pd.DataFrame({"seq": seq_list, "KD": kd_values})
-        seq_df["t_cell_help"] = self.tfh_function(self, kd_values)
+        seq_df["t_cell_help"] = self.tfh_function(self, kd_values=kd_values)
         sum_fitness = seq_df["t_cell_help"].sum()
         seq_df["normalized_t_cell_help"] = (seq_df["t_cell_help"]) / sum_fitness
         return seq_df

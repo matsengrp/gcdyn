@@ -1,3 +1,4 @@
+r"""Uses PyTorch for Deep Mutational Scanning (``torchdms``) model to predict affinity of Ig heavy and light chain DNA sequences to presented antigen."""
 from __future__ import annotations
 import pandas as pd
 import torch
@@ -8,15 +9,15 @@ from Bio.Seq import Seq
 
 
 class DMSPhenotype:
-    """Defines a set of parameters used to go from DNA sequence of antibody
-    sequences to KD values.
+    """Defines a set of parameters used to go from DNA sequence of heavy and
+    light chain to KD values.
 
     Args:
         igh_frame: frame for translation of Ig heavy chain
         igk_frame: frame for translation of Ig light chain
         igk_idx: index of Ig light chain starting position
         naive_sites_path: path to CSV lookup table for converting from scFv CDS indexed site numbering to heavy/light chain IMGT numbering
-        model_path: path to ``torchdms`` model for antibody sequences
+        model_path: path to ``torchdms`` model for heavy and light chain
         tdms_phenotypes: names of phenotype values produced by passed-in ``torchdms`` model (``delta_log10_KD`` expected as a phenotype)
         log10_naive_KD: KD of naive Ig
     """
@@ -43,9 +44,9 @@ class DMSPhenotype:
         self.tdms_phenotypes = tdms_phenotypes
         self.log10_naive_KD = log10_naive_KD
 
-    def __seq_aa_tdms(self, nt_seqs: list[str]) -> list[str]:
-        """Produces tdms-inferred Igh and Igk amino acid sequence from a list
-        of DNA sequences.
+    def _seq_aa_tdms(self, nt_seqs: list[str]) -> list[str]:
+        """Produces ``torchdms``-inferred Igh and Igk amino acid sequence from
+        a list of DNA sequences.
 
         Args:
             nt_seqs: list of DNA sequences of length of 657 nt
@@ -58,8 +59,8 @@ class DMSPhenotype:
         for nt_seq in nt_seqs:
             if len(nt_seq) != 657:
                 raise Exception(f"all sequences must be 657 nt, len = {len(nt_seq)}")
-            igh_aa = self.__aa(nt_seq[: self.igk_idx], self.igh_frame)
-            igk_aa = self.__aa(nt_seq[self.igk_idx :], self.igk_frame)
+            igh_aa = self._aa(nt_seq[: self.igk_idx], self.igh_frame)
+            igk_aa = self._aa(nt_seq[self.igk_idx :], self.igk_frame)
             aa_tdms = self.pos_df.amino_acid.copy()
             aa_tdms.iloc[self.pos_df.chain == "H"] = igh_aa
             # note: replay light chains are shorter than dms seq by one aa
@@ -79,7 +80,7 @@ class DMSPhenotype:
             kd_values: predicted KD based on ``torchdms`` model for each sequence
         """
 
-        seqs = self.__seq_aa_tdms(nt_seqs)
+        seqs = self._seq_aa_tdms(nt_seqs)
         aa_seq_one_hot = torch.stack([self.model.seq_to_binary(seq) for seq in seqs])
         try:
             labeled_evaluation = pd.DataFrame(
@@ -96,7 +97,7 @@ class DMSPhenotype:
         return kd_values
 
     @staticmethod
-    def __aa(sequence: str, frame: int) -> Seq:
+    def _aa(sequence: str, frame: int) -> Seq:
         """Amino acid translation of nucleotide sequence in frame 1, 2, or 3.
 
         Args:
