@@ -72,8 +72,8 @@ class Fitness:
         self,
         kd_values: list[float],
         maximum_Tfh: float = 4,
-        curve_steepness: float = 10,
-        midpoint_antigen_bound: float = 0.5,
+        curve_steepness: float = 30,
+        midpoint_antigen_bound: float = 0.9,
     ) -> list[float]:
         r"""Combines methods to get the antigen bound and T cell help
         from the KD using a sigmoidal model.
