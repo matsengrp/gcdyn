@@ -34,10 +34,10 @@ class Model:
         Returns:
             float: birth rate
         """
-        return θ[0] * expit(θ[1] * (x - θ[2]))
+        return θ[0] * expit(θ[1] * (x - θ[2])) + θ[3]
 
-    def simulate(self, T: float, n_trees: int, seed: int):
-        r"""Creates a collection of ``Tree`` given a key.
+    def simulate(self, T: float, n_trees: int, seed: int, min_size: int, max_size: int):
+        r"""Creates a collection of pruned ``Tree`` given a key.
 
         Args:
             T: simulation sampling time
@@ -49,11 +49,14 @@ class Model:
         for i in range(n_trees):
             while True:
                 key, _ = random.split(key)
-                tree = Tree(T, key[0], self.params)
+                tree = Tree()
                 self._evolve(tree.tree, T, key)
-                if 50 < len(tree.tree) < 96:
-                    trees.append(tree)
-                    break
+                if len(tree.tree) >= min_size:
+                    tree.prune()
+                    if min_size <= len(tree.tree) <= max_size:
+                        trees.append(tree)
+                        # print(f"tree {i}", flush=True)
+                        break
         self.trees = trees
 
     def _evolve(self, tree: ete3.Tree, t: float, key: np.ndarray):
@@ -105,7 +108,7 @@ class Model:
         r"""Given a collection of `tree.Tree`, fit the parameters of the model."""
         grad_g = jit(grad(self.g))
         optimizer = opt.AccProxGrad(self.g, grad_g, self.h, self.prox, verbose=True)
-        θ_inferred = optimizer.run(np.array([3.0, 1.0, 0.0]), max_iter=1000, tol=0)
+        θ_inferred = optimizer.run(self.params.θ, max_iter=1000, tol=0)
         return θ_inferred
 
     @partial(jit, static_argnums=(0,))
@@ -153,4 +156,4 @@ class Model:
 
     @partial(jit, static_argnums=(0,))
     def prox(self, θ, s):
-        return np.clip(θ, np.array([1e-1, -np.inf, -np.inf]))
+        return np.clip(θ, np.array([1e-1, -np.inf, -np.inf, 0]))

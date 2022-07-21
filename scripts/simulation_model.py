@@ -1,4 +1,5 @@
 import jax.numpy as np
+from jax.scipy.special import expit
 
 from gcdyn.model import Model
 from gcdyn.parameters import Parameters
@@ -19,13 +20,12 @@ def main():
 
     params = Parameters(θ, μ, m, ρ)
 
-    n_trees = 10
+    n_trees = 50
 
     model = Model(params)
-    model.simulate(T, n_trees, seed)
-    for tree in model.trees:
-        tree.prune()
-        print(len(tree.tree))
+    model.simulate(T, n_trees, seed, 25, 50)
+    # for tree in model.trees:
+    #     print(len(tree.tree))
     θ_inferred = model.fit()
     print(θ_inferred)
 

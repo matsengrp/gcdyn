@@ -8,16 +8,9 @@ from gcdyn.parameters import Parameters
 
 
 class Tree:
-    r"""A class that represents one complete GC tree
+    r"""A class that represents one complete GC tree"""
 
-    Args:
-        T: simulation sampling time
-        seed: random seed
-        params: model parameters
-    """
-
-    def __init__(self, T: float, seed: int, params: Parameters):
-        self.params: Parameters = params
+    def __init__(self):
         # store most recently used node name so we can ensure unique node names
         self._name = 0
         # initialize root
