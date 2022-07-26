@@ -10,7 +10,7 @@ def main():
     seed = 0
 
     # response function parameters
-    θ = np.array([3, 1, 0], dtype=float)
+    θ = np.array([3, 1, 0, 0], dtype=float)
     # death rate
     μ = 1
     # mutation rate
@@ -20,10 +20,10 @@ def main():
 
     params = Parameters(θ, μ, m, ρ)
 
-    n_trees = 50
+    n_trees = 10
 
     model = Model(params)
-    model.simulate(T, n_trees, seed, 25, 50)
+    model.simulate(T, n_trees, seed, True, 50, 96)
     # for tree in model.trees:
     #     print(len(tree.tree))
     θ_inferred = model.fit()

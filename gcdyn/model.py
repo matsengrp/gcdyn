@@ -36,7 +36,7 @@ class Model:
         """
         return θ[0] * expit(θ[1] * (x - θ[2])) + θ[3]
 
-    def simulate(self, T: float, n_trees: int, seed: int, min_size: int, max_size: int):
+    def simulate(self, T: float, n_trees: int, seed: int, prune: bool, min_size: int, max_size: int):
         r"""Creates a collection of pruned ``Tree`` given a key.
 
         Args:
@@ -51,12 +51,12 @@ class Model:
                 key, _ = random.split(key)
                 tree = Tree()
                 self._evolve(tree.tree, T, key)
-                if len(tree.tree) >= min_size:
+                if prune:
                     tree.prune()
-                    if min_size <= len(tree.tree) <= max_size:
-                        trees.append(tree)
-                        # print(f"tree {i}", flush=True)
-                        break
+                if min_size <= len(tree.tree) <= max_size:
+                    trees.append(tree)
+                    print(f"tree {i}", end="\r")
+                    break
         self.trees = trees
 
     def _evolve(self, tree: ete3.Tree, t: float, key: np.ndarray):
