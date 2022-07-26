@@ -89,9 +89,8 @@ class DMSPhenotype:
             )
         except ValueError:
             print("Incorrect number of column labels for phenotype data")
-
         kd_values = list(
-            10 ** (delta_log10_KD + self.log10_naive_KD)
+            10 ** (self.log10_naive_KD - delta_log10_KD)
             for delta_log10_KD in labeled_evaluation["delta_log10_KD"]
         )
         return kd_values

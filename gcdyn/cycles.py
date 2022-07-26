@@ -12,6 +12,8 @@ from gcdyn.phenotype import DMSPhenotype
 from math import floor, ceil, isclose
 from abc import ABC
 import pandas as pd
+from line_profiler_pycharm import profile
+from math import exp
 
 
 class ExtinctionError(Exception):
@@ -27,7 +29,7 @@ class Mutator(ABC):
 
 class UniformMutator(Mutator):
     def mutate(
-        self, sequence: str, time: float, rng: np.random.Generator = default_rng()
+            self, sequence: str, time: float, rng: np.random.Generator = default_rng()
     ) -> str:
         r"""Uniform mutation process at rate 1.
 
@@ -53,10 +55,10 @@ class UniformMutator(Mutator):
 
 class FivemerMutator(Mutator):
     def __init__(
-        self,
-        mutability_csv: str,
-        substitution_csv: str,
-        igk_idx: int = 336,
+            self,
+            mutability_csv: str,
+            substitution_csv: str,
+            igk_idx: int = 336,
     ):
         """AID hotspot-aware mutation model using mutability values at each
         nucleotide 5mer and substitution probabilities.
@@ -76,8 +78,9 @@ class FivemerMutator(Mutator):
         self.substitution = pd.read_csv(substitution_csv, sep=" ", index_col=0)
         self.igk_idx = igk_idx
 
+    @profile
     def mutate(
-        self, sequence: str, time: float, rng: np.random.Generator = default_rng()
+            self, sequence: str, time: float, rng: np.random.Generator = default_rng()
     ) -> str:
         """AID hotspot-aware mutation model using mutability values at each
         nucleotide 5mer and substitution probabilities.
@@ -92,11 +95,11 @@ class FivemerMutator(Mutator):
         """
 
         sequence_H = "NN" + sequence[: self.igk_idx] + "NN"
-        sequence_K = "NN" + sequence[self.igk_idx :] + "NN"
+        sequence_K = "NN" + sequence[self.igk_idx:] + "NN"
         # mutabilities of each nucleotide
         contexts = [
-            sequence_H[(i - 2) : (i + 3)] for i in range(2, len(sequence_H) - 2)
-        ] + [sequence_K[(i - 2) : (i + 3)] for i in range(2, len(sequence_K) - 2)]
+                       sequence_H[(i - 2): (i + 3)] for i in range(2, len(sequence_H) - 2)
+                   ] + [sequence_K[(i - 2): (i + 3)] for i in range(2, len(sequence_K) - 2)]
         mutabilities = np.array([self.mutability[context] for context in contexts])
         t = 0
         while True:
@@ -107,14 +110,14 @@ class FivemerMutator(Mutator):
                     self.substitution.columns,
                     p=self.substitution.loc[contexts[i]].fillna(0),
                 )
-                sequence = sequence[:i] + sub_nt + sequence[(i + 1) :]
+                sequence = sequence[:i] + sub_nt + sequence[(i + 1):]
                 # update contexts and mutabilities
                 for j in range(i - 2, i + 3):
                     if 0 <= j < len(sequence):
                         contexts[j] = (
-                            contexts[j][: 2 + (i - j)]
-                            + sub_nt
-                            + contexts[j][3 + (i - j) :]
+                                contexts[j][: 2 + (i - j)]
+                                + sub_nt
+                                + contexts[j][3 + (i - j):]
                         )
                         mutabilities[j] = self.mutability[contexts[j]]
             else:
@@ -152,8 +155,9 @@ class UniformSelector(Selector):
         if fitness_value is not None:
             self.fitness_value = fitness_value
 
+    @profile
     def select(
-        self, sequence_list: List[str], competition: bool = True
+            self, sequence_list: List[str], competition: bool = True
     ) -> List[Tuple[float]]:
         """Uniform selector assigning fitness of each sequence to an equal
         value.
@@ -177,25 +181,112 @@ class UniformSelector(Selector):
         return cell_tuples
 
 
+class ThreeNormSelector(Selector):
+    def __init__(
+            self,
+            igh_frame: int = 1,
+            igk_frame: int = 1,
+            igk_idx: int = 336,
+            naive_sites_path: str = "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
+            model_path: str = "Linear.model",
+            tdms_phenotypes: List[str] = ["delta_log10_KD", "delta_expression"],
+            log10_naive_KD: float = -10.43,
+            concentration_antigen: float = 10 ** (-9)):
+        self.phenotype = DMSPhenotype(
+            igh_frame,
+            igk_frame,
+            igk_idx,
+            naive_sites_path,
+            model_path,
+            tdms_phenotypes,
+            log10_naive_KD,
+        )
+        self.concentration_antigen = concentration_antigen
+
+    def select(self,sequence_list: List[str], competition: bool = True, kd_list: List[float] = None, num_T_cells: int = 50) -> List[Tuple[float]]:
+        if kd_list is None:
+            kd_list = self.phenotype.calculate_KD(sequence_list)
+        competencies = self.norm1(kd_list)
+        norm_signals = self.norm2_sigmoid(competencies)
+        selected_seqs = self._norm3_prob_distribution(norm_signals, num_T_cells)
+        return [tuple([float(selected_seq)]) for selected_seq in selected_seqs]
+
+    def norm1(self, KD_list, antigen_frac_limit=0.3):
+        competencies = []
+        for KD in KD_list:
+            theta = self.concentration_antigen / (KD + self.concentration_antigen)
+            if theta < antigen_frac_limit:
+                competencies.append(0)
+            else:
+                competencies.append(theta)
+        return competencies
+
+    def norm2_sigmoid(self,
+        competencies: List[float],
+        curve_steepness: float = 10,
+        midpoint_competency: float = 0.5,):
+        unnorm_signals = []
+        for competency in competencies:
+            if competency == 0:
+                unnorm_signals.append(0)
+            else:
+                unnorm_signals.append(1 / (1+exp(-1 * curve_steepness * (competency - midpoint_competency))))
+        sum_signals = sum(unnorm_signals)
+        norm_signals = [signal/sum_signals for signal in unnorm_signals]
+        return norm_signals
+
+    def _norm2_quartile(self, competencies: List[float]):
+        quartile_competency = np.quantile(competencies, [0.25])[0]
+        norm_signals = []
+        for competency in competencies:
+            norm_signals.append(max(0,competency-quartile_competency))
+        return norm_signals
+
+    def _norm3_prob_distribution(self, norm_signals, num_T_cells, max_help: int = 2, rng: np.random.Generator = default_rng()):
+        indices = np.arange(len(norm_signals))
+        amt_help = np.zeros(len(norm_signals),dtype=int)
+        for _ in range(min(num_T_cells, max_help*np.count_nonzero(norm_signals))):
+            chosen_index = rng.choice(indices, p=norm_signals)
+            while amt_help[chosen_index] > max_help - 1:
+                chosen_index = rng.choice(indices, p=norm_signals)
+            amt_help[chosen_index] += 1
+        return amt_help
+
+
+    @staticmethod
+    def random_choice_max_repeats(a: int, size, p, max_replacements=0, rng: np.random.Generator = default_rng()):
+        indices = np.arange(a)
+        amt_help = np.zeros(a)
+        for _ in range(size):
+            chosen_index = rng.choice(indices, p=p)
+            while amt_help[chosen_index] > max_replacements:
+                chosen_index = rng.choice(indices, p=p)
+            amt_help[chosen_index] += 1
+        return amt_help
+
+    # def _norm3_ranked(self, ):
+
+
 class DMSSelector(Selector):
     r"""A class for a GC selector which determines fitness for nucleotide sequences by using DMS models of
     affinity.
     """
 
+    @profile
     def __init__(
-        self,
-        slope: float = 3,
-        y_intercept: float = 1,
-        igh_frame: int = 1,
-        igk_frame: int = 1,
-        igk_idx: int = 336,
-        naive_sites_path: str = "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
-        model_path: str = "Linear.model",
-        tdms_phenotypes: List[str] = ["delta_log10_KD", "delta_expression"],
-        log10_naive_KD: float = -10.43,
-        fitness_method: Callable[
-            [List[float]], List[float]
-        ] = Fitness.sigmoidal_fitness,
+            self,
+            slope: float = 3,
+            y_intercept: float = 1,
+            igh_frame: int = 1,
+            igk_frame: int = 1,
+            igk_idx: int = 336,
+            naive_sites_path: str = "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
+            model_path: str = "Linear.model",
+            tdms_phenotypes: List[str] = ["delta_log10_KD", "delta_expression"],
+            log10_naive_KD: float = -10.43,
+            fitness_method: Callable[
+                [List[float]], List[float]
+            ] = Fitness.sigmoidal_fitness,
     ):
         """
         Args:
@@ -223,8 +314,9 @@ class DMSSelector(Selector):
         self.slope = slope
         self.y_intercept = y_intercept
 
+    @profile
     def select(
-        self, sequence_list: List[str], competition: bool = True
+            self, sequence_list: List[str], competition: bool = True
     ) -> List[Tuple[float]]:
         """Produce the predicted number of cell divisions, KD, and T cell help for a list of sequences using a sigmoidal relationship between T cell help and fitness
         Args:
@@ -261,15 +353,16 @@ class GC:
         rng: random number generator
     """
 
+    @profile
     def __init__(
-        self,
-        sequence: str,
-        proliferator: Callable[[TreeNode, float, np.random.Generator], None],
-        mutator: Mutator,
-        selector: Selector,
-        N0: int = 1,
-        Nmax: Optional[int] = None,
-        rng: np.random.Generator = default_rng(),
+            self,
+            sequence: str,
+            proliferator: Callable[[TreeNode, float, np.random.Generator], None],
+            mutator: Mutator,
+            selector: Selector,
+            N0: int = 1,
+            Nmax: Optional[int] = None,
+            rng: np.random.Generator = default_rng(),
     ):
         self.tree = TreeNode(dist=0)
         self.tree.sequence = sequence
@@ -290,6 +383,7 @@ class GC:
 
         self.alive_leaves = set([leaf for leaf in self.tree])
 
+    @profile
     def step(self, enforce_timescale: bool = True, competition: bool = True) -> None:
         r"""Simulate one cycle.
 
@@ -306,12 +400,14 @@ class GC:
                 node.sequence = self.mutator.mutate(
                     node.up.sequence, node.dist, rng=self.rng
                 )
+            if leaf.is_leaf():
+                leaf.terminated = True
             if enforce_timescale:
                 for subleaf in leaf:
                     if (
-                        not subleaf.terminated
-                        and subleaf != leaf
-                        and not isclose(leaf.get_distance(subleaf), 1)
+                            not subleaf.terminated
+                            and subleaf != leaf
+                            and not isclose(leaf.get_distance(subleaf), 1)
                     ):
                         raise ValueError(
                             f"DZ subtree timescale is not consistent with simulation time, val = {leaf.get_distance(subleaf)}"
@@ -320,13 +416,14 @@ class GC:
 
         if self.Nmax:
             for leaf in self.rng.choice(
-                list(self.alive_leaves),
-                size=max(0, len(self.alive_leaves) - self.Nmax),
-                replace=False,
+                    list(self.alive_leaves),
+                    size=max(0, len(self.alive_leaves) - self.Nmax),
+                    replace=False,
             ):
                 leaf.terminated = True
                 self.alive_leaves.remove(leaf)
 
+    @profile
     def prune(self) -> None:
         r"""Prune the tree to the subtree induced by the alive leaves."""
         event_cache = self.tree.get_cached_content(store_attr="terminated")
@@ -341,13 +438,14 @@ class GC:
             if is_leaf_fn(node):
                 node.detach()
 
+    @profile
     def simulate(
-        self,
-        T: int,
-        prune: bool = True,
-        max_tries: int = 100,
-        enforce_timescale: bool = True,
-        competition: bool = True,
+            self,
+            T: int,
+            prune: bool = True,
+            max_tries: int = 100,
+            enforce_timescale: bool = True,
+            competition: bool = True,
     ) -> None:
         r"""Simulate.
 
@@ -378,8 +476,9 @@ class GC:
                 self.tree.terminated = False
 
 
+@profile
 def binary_proliferator(
-    treenode: TreeNode, p: float, *args, rng: np.random.Generator = default_rng()
+        treenode: TreeNode, p: float, *args, rng: np.random.Generator = default_rng()
 ):
     r"""Binary dark zone step (Galton-Watson).
     With probability :math:`1-p` the input's ``terminated`` attribute is set to ``True``, indicating extinction.
@@ -402,11 +501,12 @@ def binary_proliferator(
             treenode.add_child(child)
 
 
+@profile
 def simple_proliferator(
-    treenode: TreeNode,
-    cell_divisions: int,
-    dist: float = None,
-    rng: np.random.Generator = default_rng(),
+        treenode: TreeNode,
+        cell_divisions: int,
+        dist: float = None,
+        rng: np.random.Generator = default_rng(),
 ) -> None:
     r"""Recursively populates descendants on a tree node based on the number of integer cell divisions indicated.
     Branch lengths are set to 1/`cell_divisions`, such that the distance from the root to all leaves will be 1.
@@ -429,10 +529,11 @@ def simple_proliferator(
             simple_proliferator(child, cell_divisions - 1, dist)
 
 
+@profile
 def cell_div_balanced_proliferator(
-    treenode: TreeNode,
-    cell_divisions: float,
-    rng: np.random.Generator = default_rng(),
+        treenode: TreeNode,
+        cell_divisions: float,
+        rng: np.random.Generator = default_rng(),
 ) -> None:
     r"""Populates descendants on a tree node based on the number of cell divisions indicated, producing the number of children expected by :math:`2^{cell\_divisions}`, where ``cell_divisions`` is not necessarily an integer value.
     A full binary tree is generated, then leaf nodes are removed at random from the set of alternating leaf nodes until there are the expected number of children.
@@ -445,10 +546,11 @@ def cell_div_balanced_proliferator(
         rng: random number generator
     """
     ceil_cell_divisions = ceil(cell_divisions)
-    simple_proliferator(treenode, ceil_cell_divisions, 1 / ceil_cell_divisions)
-    num_descendants = floor(2**cell_divisions)
-    num_leaves_to_remove = 2**ceil_cell_divisions - num_descendants
+    simple_proliferator(treenode, ceil_cell_divisions, 1 / max(1, ceil_cell_divisions))
+    num_descendants = floor(2 ** cell_divisions)
+    num_leaves_to_remove = 2 ** ceil_cell_divisions - num_descendants
     every_other_leaf = treenode.get_leaves()[::2]
+    # print(f"descendants: {num_descendants}, removing: {num_leaves_to_remove}, alternating_leaves:{len(every_other_leaf)}")
     for leaf in rng.choice(every_other_leaf, size=num_leaves_to_remove, replace=False):
         parent = leaf.up
         child_dist = leaf.dist
