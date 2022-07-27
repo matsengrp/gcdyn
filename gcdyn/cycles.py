@@ -192,7 +192,9 @@ class ThreeStepSelector(Selector):
         tdms_phenotypes: List[str] = ["delta_log10_KD", "delta_expression"],
         log10_naive_KD: float = -10.43,
         concentration_antigen: float = 10 ** (-9),
-        total_t_cell_help: int = 50,
+        total_t_cell_help: float = 50,
+        max_help: float = 2,
+        antigen_frac_limit: float = 0.2,
     ):
         """Initializes values for a DMSPhenotype to calculate KD based on
         sequence from torchDMS model if KDs are not provided, and sets antigen
@@ -208,6 +210,7 @@ class ThreeStepSelector(Selector):
             log10_naive_KD: KD of naive Ig
             concentration_antigen: molar concentration of antigen to determine antigen bound
             total_t_cell_help: total units of T cell help to be distributed in germinal center
+            antigen_frac_limit: lower limit (inclusive) for the fraction antigen bound to be returned.
         """
         self.igh_frame = igh_frame
         self.igk_frame = igk_frame
@@ -218,6 +221,8 @@ class ThreeStepSelector(Selector):
         self.log10_naive_KD = log10_naive_KD
         self.concentration_antigen = concentration_antigen
         self.total_t_cell_help = total_t_cell_help
+        self.max_help = max_help
+        self.antigen_frac_limit = antigen_frac_limit
 
     def select(
         self,
@@ -256,12 +261,11 @@ class ThreeStepSelector(Selector):
         )
         return [tuple([float(selected_seq)]) for selected_seq in selected_seqs]
 
-    def norm1(self, KD_list, antigen_frac_limit: float = 0.2):
+    def norm1(self, KD_list):
         """For each KD value in ``KD_list``, determines the fraction of antigen bound using the Hill equation and
         returns a list containing that value or 0, if the fraction is below ``antigen_frac_limit``.
         Args:
             KD_list: list of KD values to use (with the concentration antigen) to determine the amount of antigen bound.
-            antigen_frac_limit: lower limit (inclusive) for the fraction antigen bound to be returned.
 
         Returns:
             competencies: a list with the competency (fraction antigen bound or 0) for each KD in the ``KD_list``.
@@ -269,7 +273,7 @@ class ThreeStepSelector(Selector):
         competencies = []
         for KD in KD_list:
             theta = self.concentration_antigen / (KD + self.concentration_antigen)
-            if theta < antigen_frac_limit:
+            if theta < self.antigen_frac_limit:
                 competencies.append(0)
             else:
                 competencies.append(theta)
@@ -329,7 +333,6 @@ class ThreeStepSelector(Selector):
         self,
         norm_signals,
         total_t_cell_help,
-        max_help: int = 2,
         rng: np.random.Generator = default_rng(),
     ):
         """Produces a list with integer T cell help values using
@@ -338,24 +341,24 @@ class ThreeStepSelector(Selector):
         Args:
             norm_signals: T cell help signal for each sequence (must add to 1).
             total_t_cell_help: total units of T cell help to be distributed
-            max_help: maximum amount of help to assign to a single sequence
             rng: random number generator
 
         Returns:
+            amt_help: list with the integer amount of help for each signal
         """
         indices = np.arange(len(norm_signals))
         amt_help = np.zeros(len(norm_signals), dtype=int)
 
         # If T cell help available exceeds the number of non-zero signals, every non-zero signal produces ``max_help``.
-        if total_t_cell_help >= max_help * np.count_nonzero(norm_signals):
+        if total_t_cell_help >= self.max_help * np.count_nonzero(norm_signals):
             for i in range(len(norm_signals)):
                 if norm_signals[i] > 0:
-                    amt_help[i] = max_help
+                    amt_help[i] = self.max_help
         # Otherwise, sample with weighted probabilities ``norm_signals``, re-sampling to not exceed ``max_help``.
         else:
             for _ in range(total_t_cell_help):
                 chosen_index = rng.choice(indices, p=norm_signals)
-                while amt_help[chosen_index] > max_help - 1:
+                while amt_help[chosen_index] > self.max_help - 1:
                     chosen_index = rng.choice(indices, p=norm_signals)
                 amt_help[chosen_index] += 1
         return amt_help
