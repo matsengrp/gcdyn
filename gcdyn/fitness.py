@@ -16,7 +16,7 @@ class Fitness:
     def __init__(
         self,
         tfh_function: Callable[[list[float]], list[float]],
-        concentration_antigen: float = 10 ** (-9),
+        concentration_antigen: float = 10 ** (-10),
     ):
         self.tfh_function = tfh_function
         self.concentration_antigen = concentration_antigen
@@ -73,7 +73,7 @@ class Fitness:
         kd_values: list[float],
         maximum_Tfh: float = 4,
         curve_steepness: float = 10,
-        midpoint_antigen_bound: float = 0.75,
+        midpoint_antigen_bound: float = 0.5,
     ) -> list[float]:
         r"""Combines methods to get the antigen bound and T cell help
         from the KD using a sigmoidal model.
