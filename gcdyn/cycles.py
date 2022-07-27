@@ -192,6 +192,7 @@ class ThreeStepSelector(Selector):
         tdms_phenotypes: List[str] = ["delta_log10_KD", "delta_expression"],
         log10_naive_KD: float = -10.43,
         concentration_antigen: float = 10 ** (-9),
+        total_t_cell_help: int = 50,
     ):
         """Initializes values for a DMSPhenotype to calculate KD based on
         sequence from torchDMS model if KDs are not provided, and sets antigen
@@ -206,6 +207,7 @@ class ThreeStepSelector(Selector):
             tdms_phenotypes: names of phenotype values produced by passed-in ``torchdms`` model (``delta_log10_KD`` expected as a phenotype)
             log10_naive_KD: KD of naive Ig
             concentration_antigen: molar concentration of antigen to determine antigen bound
+            total_t_cell_help: total units of T cell help to be distributed in germinal center
         """
         self.igh_frame = igh_frame
         self.igk_frame = igk_frame
@@ -215,13 +217,13 @@ class ThreeStepSelector(Selector):
         self.tdms_phenotypes = tdms_phenotypes
         self.log10_naive_KD = log10_naive_KD
         self.concentration_antigen = concentration_antigen
+        self.total_t_cell_help = total_t_cell_help
 
     def select(
         self,
         sequence_list: List[str],
         competition: bool = True,
         kd_list: List[float] = None,
-        total_t_cell_help: int = 50,
     ) -> List[Tuple[float]]:
         """Produce the predicted number of cell divisions for a list of
         sequences with discrete units of T cell help. T cell help is
@@ -232,7 +234,6 @@ class ThreeStepSelector(Selector):
             sequence_list: list of nucleotide sequences
             competition: presence of competition to determine whether signal is normalized
             kd_list: list of KD values to use instead of calculating KD values using DMSPhenotype
-            total_t_cell_help: total units of T cell help to be distributed in germinal center
 
         Returns:
             fitnesses: tuple with number of cell divisions for each sequence
@@ -250,7 +251,9 @@ class ThreeStepSelector(Selector):
             kd_list = phenotype.calculate_KD(sequence_list)
         competencies = self.norm1(kd_list)
         norm_signals = self.norm2_sigmoid(competencies, competition=competition)
-        selected_seqs = self._norm3_prob_distribution(norm_signals, total_t_cell_help)
+        selected_seqs = self._norm3_prob_distribution(
+            norm_signals, self.total_t_cell_help
+        )
         return [tuple([float(selected_seq)]) for selected_seq in selected_seqs]
 
     def norm1(self, KD_list, antigen_frac_limit: float = 0.2):
@@ -301,9 +304,9 @@ class ThreeStepSelector(Selector):
                         + exp(-1 * curve_steepness * (competency - midpoint_competency))
                     )
                 )
-        if not competition:
-            return unnorm_signals
         sum_signals = sum(unnorm_signals)
+        if not competition or sum_signals == 0:
+            return unnorm_signals
         norm_signals = [signal / sum_signals for signal in unnorm_signals]
         return norm_signals
 
