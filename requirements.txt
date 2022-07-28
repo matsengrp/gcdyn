@@ -10,3 +10,6 @@ pandoc
 jupyterlab
 pandas
 seaborn
+torch
+biopython
+git+https://github.com/matsengrp/torchdms

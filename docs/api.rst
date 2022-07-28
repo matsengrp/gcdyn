@@ -21,3 +21,5 @@ Modules
     parameters
     model
     cycles
+    replay
+    fitness
