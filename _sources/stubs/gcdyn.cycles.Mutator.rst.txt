@@ -1,0 +1,25 @@
+gcdyn.cycles.Mutator
+====================
+
+.. currentmodule:: gcdyn.cycles
+
+.. autoclass:: Mutator
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~Mutator.mutate
+   
+   
+
+   
+   
+   

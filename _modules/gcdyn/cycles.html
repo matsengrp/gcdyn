@@ -81,14 +81,439 @@
 <span class="sd">Borrowing from `gctree &lt;https://github.com/matsengrp/gctree/blob/master/gctree/mutation_model.py&gt;`_</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 <span class="kn">from</span> <span class="nn">ete3</span> <span class="kn">import</span> <span class="n">TreeNode</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">default_rng</span>
+<span class="kn">from</span> <span class="nn">gcdyn.fitness</span> <span class="kn">import</span> <span class="n">Fitness</span>
+<span class="kn">from</span> <span class="nn">gcdyn.phenotype</span> <span class="kn">import</span> <span class="n">DMSPhenotype</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">floor</span><span class="p">,</span> <span class="n">ceil</span><span class="p">,</span> <span class="n">isclose</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">exp</span>
 
 
 <div class="viewcode-block" id="ExtinctionError"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.ExtinctionError.html#gcdyn.cycles.ExtinctionError">[docs]</a><span class="k">class</span> <span class="nc">ExtinctionError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The simulation has resulted in extintion of all lineages.&quot;&quot;&quot;</span></div>
+    <span class="sd">&quot;&quot;&quot;The simulation has resulted in extinction of all lineages.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="Mutator"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.Mutator.html#gcdyn.cycles.Mutator">[docs]</a><span class="k">class</span> <span class="nc">Mutator</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;A class for GC mutators, which mutate a sequence over some period of time.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">mutate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="UniformMutator"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.UniformMutator.html#gcdyn.cycles.UniformMutator">[docs]</a><span class="k">class</span> <span class="nc">UniformMutator</span><span class="p">(</span><span class="n">Mutator</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformMutator.mutate"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.UniformMutator.html#gcdyn.cycles.UniformMutator.mutate">[docs]</a>    <span class="k">def</span> <span class="nf">mutate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">()</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Uniform mutation process at rate 1.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sequence: initial sequence, consisting of characters ``ACGT``</span>
+<span class="sd">            time: exposure time</span>
+<span class="sd">            rng: random number generator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">alphabet</span> <span class="o">=</span> <span class="s2">&quot;ACGT&quot;</span>
+        <span class="n">sequence</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">+=</span> <span class="n">rng</span><span class="o">.</span><span class="n">exponential</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">time</span><span class="p">:</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sequence</span><span class="p">))</span>
+                <span class="n">sequence</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">base</span> <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">alphabet</span> <span class="k">if</span> <span class="n">base</span> <span class="o">!=</span> <span class="n">sequence</span><span class="p">[</span><span class="n">idx</span><span class="p">]]</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="FivemerMutator"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.FivemerMutator.html#gcdyn.cycles.FivemerMutator">[docs]</a><span class="k">class</span> <span class="nc">FivemerMutator</span><span class="p">(</span><span class="n">Mutator</span><span class="p">):</span>
+<div class="viewcode-block" id="FivemerMutator.__init__"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.html#gcdyn.cycles.FivemerMutator.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mutability_csv</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">substitution_csv</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">igk_idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">336</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;AID hotspot-aware mutation model using mutability values at each</span>
+<span class="sd">        nucleotide 5mer and substitution probabilities.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mutability_csv: path to CSV with rows representing 5mers and mutability value</span>
+<span class="sd">            substitution_csv: path to CSV with rows representing 5mers and probability of substitution to each nucleotide in columns</span>
+<span class="sd">            igk_idx: index of Ig light chain starting position</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            sequence: sequence with mutations based on given mutabilities and substitutions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mutability</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">mutability_csv</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span>
+            <span class="s2">&quot;columns&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">substitution</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">substitution_csv</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">igk_idx</span> <span class="o">=</span> <span class="n">igk_idx</span></div>
+
+<div class="viewcode-block" id="FivemerMutator.mutate"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.FivemerMutator.html#gcdyn.cycles.FivemerMutator.mutate">[docs]</a>    <span class="k">def</span> <span class="nf">mutate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">()</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;AID hotspot-aware mutation model using mutability values at each</span>
+<span class="sd">        nucleotide 5mer and substitution probabilities.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sequence: initial sequence, consisting of characters ``ACGT``</span>
+<span class="sd">            time: exposure time</span>
+<span class="sd">            rng:  random number generator</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            sequence: sequence with mutations based on given mutabilities and substitutions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sequence_H</span> <span class="o">=</span> <span class="s2">&quot;NN&quot;</span> <span class="o">+</span> <span class="n">sequence</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">igk_idx</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;NN&quot;</span>
+        <span class="n">sequence_K</span> <span class="o">=</span> <span class="s2">&quot;NN&quot;</span> <span class="o">+</span> <span class="n">sequence</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">igk_idx</span> <span class="p">:]</span> <span class="o">+</span> <span class="s2">&quot;NN&quot;</span>
+        <span class="c1"># mutabilities of each nucleotide</span>
+        <span class="n">contexts</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">sequence_H</span><span class="p">[(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequence_H</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">sequence_K</span><span class="p">[(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequence_K</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)]</span>
+        <span class="n">mutabilities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">mutability</span><span class="p">[</span><span class="n">context</span><span class="p">]</span> <span class="k">for</span> <span class="n">context</span> <span class="ow">in</span> <span class="n">contexts</span><span class="p">])</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">+=</span> <span class="n">rng</span><span class="o">.</span><span class="n">exponential</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">time</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mutabilities</span><span class="p">),</span> <span class="n">p</span><span class="o">=</span><span class="n">mutabilities</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="n">mutabilities</span><span class="p">))</span>
+                <span class="n">sub_nt</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">substitution</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
+                    <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">substitution</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">contexts</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+                <span class="p">)</span>
+                <span class="n">sequence</span> <span class="o">=</span> <span class="n">sequence</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">sub_nt</span> <span class="o">+</span> <span class="n">sequence</span><span class="p">[(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:]</span>
+                <span class="c1"># update contexts and mutabilities</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">3</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span>
+                        <span class="n">contexts</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">contexts</span><span class="p">[</span><span class="n">j</span><span class="p">][:</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">j</span><span class="p">)]</span>
+                            <span class="o">+</span> <span class="n">sub_nt</span>
+                            <span class="o">+</span> <span class="n">contexts</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">3</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">j</span><span class="p">)</span> <span class="p">:]</span>
+                        <span class="p">)</span>
+                        <span class="n">mutabilities</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mutability</span><span class="p">[</span><span class="n">contexts</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="n">sequence</span></div></div>
+
+
+<div class="viewcode-block" id="Selector"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.Selector.html#gcdyn.cycles.Selector">[docs]</a><span class="k">class</span> <span class="nc">Selector</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;A class for GC selectors, which determine the fitness for a list of nucleotide sequences.</span>
+<span class="sd">    Selectors return a list of tuples that can be interpreted by a proliferator method&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Selector.select"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.Selector.html#gcdyn.cycles.Selector.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">competition</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Assigns the fitness for each sequence, with normalization depending</span>
+<span class="sd">        on whether competition is considered.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sequence_list: list of nucleotide sequences</span>
+<span class="sd">            competition: presence of competition in the light zone</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            cell_tuples: list of tuples to be interpreted by a proliferator method</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="UniformSelector"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.UniformSelector.html#gcdyn.cycles.UniformSelector">[docs]</a><span class="k">class</span> <span class="nc">UniformSelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Uniform selector assigning fitness of each sequence to an equal</span>
+<span class="sd">    value.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="UniformSelector.__init__"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.html#gcdyn.cycles.UniformSelector.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fitness_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            fitness_value: fitness value for each sequence if normalization (``competition``) is off</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">fitness_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitness_value</span> <span class="o">=</span> <span class="n">fitness_value</span></div>
+
+<div class="viewcode-block" id="UniformSelector.select"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.UniformSelector.html#gcdyn.cycles.UniformSelector.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">sequence_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">competition</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Uniform selector assigning fitness of each sequence to an equal</span>
+<span class="sd">        value.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sequence_list: list of sequences for fitness assignment</span>
+<span class="sd">            competition: if ``True``, competition for T cell help in the light zone is expected,</span>
+<span class="sd">            and the fitness is set to 1/`len(sequence_list)`. Otherwise, fitness is set to `fitness_value`</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            fitness_values: list of tuples containing the assigned number of cell divisions (equal values)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">competition</span><span class="p">:</span>
+            <span class="n">cell_tuples</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="nb">tuple</span><span class="p">([</span><span class="mi">1</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequence_list</span><span class="p">)])</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sequence_list</span><span class="p">))</span>
+            <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cell_tuples</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="nb">tuple</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">fitness_value</span><span class="p">])</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sequence_list</span><span class="p">))</span>
+            <span class="p">]</span>
+        <span class="k">return</span> <span class="n">cell_tuples</span></div></div>
+
+
+<div class="viewcode-block" id="ThreeStepSelector"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.ThreeStepSelector.html#gcdyn.cycles.ThreeStepSelector">[docs]</a><span class="k">class</span> <span class="nc">ThreeStepSelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A Selector that uses DMS data as well as a discrete amount of T cell</span>
+<span class="sd">    help that is assigned.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ThreeStepSelector.__init__"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.html#gcdyn.cycles.ThreeStepSelector.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">igh_frame</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">igk_frame</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">igk_idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">336</span><span class="p">,</span>
+        <span class="n">naive_sites_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv&quot;</span><span class="p">,</span>
+        <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Linear.model&quot;</span><span class="p">,</span>
+        <span class="n">tdms_phenotypes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;delta_log10_KD&quot;</span><span class="p">,</span> <span class="s2">&quot;delta_expression&quot;</span><span class="p">],</span>
+        <span class="n">log10_naive_KD</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">10.43</span><span class="p">,</span>
+        <span class="n">concentration_antigen</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">9</span><span class="p">),</span>
+        <span class="n">total_t_cell_help</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+        <span class="n">max_help</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">antigen_frac_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes values for a DMSPhenotype to calculate KD based on</span>
+<span class="sd">        sequence from torchDMS model if KDs are not provided, and sets antigen</span>
+<span class="sd">        concentration for determining antigen bound.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            igh_frame: frame for translation of Ig heavy chain</span>
+<span class="sd">            igk_frame: frame for translation of Ig light chain</span>
+<span class="sd">            igk_idx: index of Ig light chain starting position</span>
+<span class="sd">            naive_sites_path: path to CSV lookup table for converting from scFv CDS indexed site numbering to heavy/light chain IMGT numbering</span>
+<span class="sd">            model_path: path to ``torchdms`` model for heavy and light chain</span>
+<span class="sd">            tdms_phenotypes: names of phenotype values produced by passed-in ``torchdms`` model (``delta_log10_KD`` expected as a phenotype)</span>
+<span class="sd">            log10_naive_KD: KD of naive Ig</span>
+<span class="sd">            concentration_antigen: molar concentration of antigen to determine antigen bound</span>
+<span class="sd">            total_t_cell_help: total units of T cell help to be distributed in germinal center</span>
+<span class="sd">            antigen_frac_limit: lower limit (inclusive) for the fraction antigen bound to be returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">igh_frame</span> <span class="o">=</span> <span class="n">igh_frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">igk_frame</span> <span class="o">=</span> <span class="n">igk_frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">igk_idx</span> <span class="o">=</span> <span class="n">igk_idx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">naive_sites_path</span> <span class="o">=</span> <span class="n">naive_sites_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span> <span class="o">=</span> <span class="n">model_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tdms_phenotypes</span> <span class="o">=</span> <span class="n">tdms_phenotypes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log10_naive_KD</span> <span class="o">=</span> <span class="n">log10_naive_KD</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">concentration_antigen</span> <span class="o">=</span> <span class="n">concentration_antigen</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_t_cell_help</span> <span class="o">=</span> <span class="n">total_t_cell_help</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_help</span> <span class="o">=</span> <span class="n">max_help</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">antigen_frac_limit</span> <span class="o">=</span> <span class="n">antigen_frac_limit</span></div>
+
+<div class="viewcode-block" id="ThreeStepSelector.select"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.ThreeStepSelector.html#gcdyn.cycles.ThreeStepSelector.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">sequence_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">competition</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">kd_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Produce the predicted number of cell divisions for a list of</span>
+<span class="sd">        sequences with discrete units of T cell help. T cell help is</span>
+<span class="sd">        distributed semi-randomly, with probabilites based on normalized signal</span>
+<span class="sd">        from antigen bound.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sequence_list: list of nucleotide sequences</span>
+<span class="sd">            competition: presence of competition to determine whether signal is normalized</span>
+<span class="sd">            kd_list: list of KD values to use instead of calculating KD values using DMSPhenotype</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            fitnesses: tuple with number of cell divisions for each sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">kd_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">phenotype</span> <span class="o">=</span> <span class="n">DMSPhenotype</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">igh_frame</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">igk_frame</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">igk_idx</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">naive_sites_path</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tdms_phenotypes</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log10_naive_KD</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">kd_list</span> <span class="o">=</span> <span class="n">phenotype</span><span class="o">.</span><span class="n">calculate_KD</span><span class="p">(</span><span class="n">sequence_list</span><span class="p">)</span>
+        <span class="n">competencies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm1</span><span class="p">(</span><span class="n">kd_list</span><span class="p">)</span>
+        <span class="n">norm_signals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm2_sigmoid</span><span class="p">(</span><span class="n">competencies</span><span class="p">,</span> <span class="n">competition</span><span class="o">=</span><span class="n">competition</span><span class="p">)</span>
+        <span class="n">selected_seqs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_norm3_prob_distribution</span><span class="p">(</span>
+            <span class="n">norm_signals</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_t_cell_help</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">selected_seq</span><span class="p">)])</span> <span class="k">for</span> <span class="n">selected_seq</span> <span class="ow">in</span> <span class="n">selected_seqs</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ThreeStepSelector.norm1"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.ThreeStepSelector.html#gcdyn.cycles.ThreeStepSelector.norm1">[docs]</a>    <span class="k">def</span> <span class="nf">norm1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">KD_list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;For each KD value in ``KD_list``, determines the fraction of antigen bound using the Hill equation and</span>
+<span class="sd">        returns a list containing that value or 0, if the fraction is below ``antigen_frac_limit``.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            KD_list: list of KD values to use (with the concentration antigen) to determine the amount of antigen bound.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            competencies: a list with the competency (fraction antigen bound or 0) for each KD in the ``KD_list``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">competencies</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">KD</span> <span class="ow">in</span> <span class="n">KD_list</span><span class="p">:</span>
+            <span class="n">theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">concentration_antigen</span> <span class="o">/</span> <span class="p">(</span><span class="n">KD</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">concentration_antigen</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">theta</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">antigen_frac_limit</span><span class="p">:</span>
+                <span class="n">competencies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">competencies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">competencies</span></div>
+
+<div class="viewcode-block" id="ThreeStepSelector.norm2_sigmoid"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.ThreeStepSelector.html#gcdyn.cycles.ThreeStepSelector.norm2_sigmoid">[docs]</a>    <span class="k">def</span> <span class="nf">norm2_sigmoid</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">competencies</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+        <span class="n">curve_steepness</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">midpoint_competency</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">competition</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Maps the input competencies to a signal between 0 and 1 using a sigmoidal transformation.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            competencies: list of competencies between 0 and 1</span>
+<span class="sd">            curve_steepness: logistic growth rate of signal</span>
+<span class="sd">            midpoint_competency: value of input competency to set as midpoint</span>
+<span class="sd">            competition: presence of competition to determine whether signal is normalized</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            signals: normalized or unnormalized signals between 0 and 1 based on sigmoidal transformation of competencies.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">unnorm_signals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">competency</span> <span class="ow">in</span> <span class="n">competencies</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">competency</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">unnorm_signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">unnorm_signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="mi">1</span>
+                    <span class="o">/</span> <span class="p">(</span>
+                        <span class="mi">1</span>
+                        <span class="o">+</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">curve_steepness</span> <span class="o">*</span> <span class="p">(</span><span class="n">competency</span> <span class="o">-</span> <span class="n">midpoint_competency</span><span class="p">))</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+        <span class="n">sum_signals</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">unnorm_signals</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">competition</span> <span class="ow">or</span> <span class="n">sum_signals</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">unnorm_signals</span>
+        <span class="n">norm_signals</span> <span class="o">=</span> <span class="p">[</span><span class="n">signal</span> <span class="o">/</span> <span class="n">sum_signals</span> <span class="k">for</span> <span class="n">signal</span> <span class="ow">in</span> <span class="n">unnorm_signals</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">norm_signals</span></div>
+
+    <span class="k">def</span> <span class="nf">_norm2_quartile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">competencies</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;Determines signal based on competency based on the distance from the</span>
+<span class="sd">        quartile value.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            competencies: list of competencies between 0 and 1</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            signals: signals between 0 and 1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">quartile_competency</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">competencies</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.25</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">signals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">competency</span> <span class="ow">in</span> <span class="n">competencies</span><span class="p">:</span>
+            <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">competency</span> <span class="o">-</span> <span class="n">quartile_competency</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">signals</span>
+
+    <span class="k">def</span> <span class="nf">_norm3_prob_distribution</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">norm_signals</span><span class="p">,</span>
+        <span class="n">total_t_cell_help</span><span class="p">,</span>
+        <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">(),</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Produces a list with integer T cell help values using</span>
+<span class="sd">        ``norm_signals`` as the probability of receiving help.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            norm_signals: T cell help signal for each sequence (must add to 1).</span>
+<span class="sd">            total_t_cell_help: total units of T cell help to be distributed</span>
+<span class="sd">            rng: random number generator</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            amt_help: list with the integer amount of help for each signal</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">norm_signals</span><span class="p">))</span>
+        <span class="n">amt_help</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">norm_signals</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="c1"># If T cell help available exceeds the number of non-zero signals, every non-zero signal produces ``max_help``.</span>
+        <span class="k">if</span> <span class="n">total_t_cell_help</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_help</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">norm_signals</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">norm_signals</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">norm_signals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">amt_help</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_help</span>
+        <span class="c1"># Otherwise, sample with weighted probabilities ``norm_signals``, re-sampling to not exceed ``max_help``.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">total_t_cell_help</span><span class="p">):</span>
+                <span class="n">chosen_index</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">norm_signals</span><span class="p">)</span>
+                <span class="k">while</span> <span class="n">amt_help</span><span class="p">[</span><span class="n">chosen_index</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_help</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">chosen_index</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">norm_signals</span><span class="p">)</span>
+                <span class="n">amt_help</span><span class="p">[</span><span class="n">chosen_index</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">amt_help</span></div>
+
+
+<div class="viewcode-block" id="DMSSelector"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.DMSSelector.html#gcdyn.cycles.DMSSelector">[docs]</a><span class="k">class</span> <span class="nc">DMSSelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;A class for a GC selector which determines fitness for nucleotide sequences by using DMS models of</span>
+<span class="sd">    affinity.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DMSSelector.__init__"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.html#gcdyn.cycles.DMSSelector.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">slope</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">y_intercept</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">igh_frame</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">igk_frame</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">igk_idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">336</span><span class="p">,</span>
+        <span class="n">naive_sites_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv&quot;</span><span class="p">,</span>
+        <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Linear.model&quot;</span><span class="p">,</span>
+        <span class="n">tdms_phenotypes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;delta_log10_KD&quot;</span><span class="p">,</span> <span class="s2">&quot;delta_expression&quot;</span><span class="p">],</span>
+        <span class="n">log10_naive_KD</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">10.43</span><span class="p">,</span>
+        <span class="n">fitness_method</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">Fitness</span><span class="o">.</span><span class="n">sigmoidal_fitness</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            slope: coefficient of relationship between normalized T cell help and cell divisions</span>
+<span class="sd">            y_intercept: cell divisions per cycle with no T cell help</span>
+<span class="sd">            igh_frame: frame for translation of Ig heavy chain</span>
+<span class="sd">            igk_frame: frame for translation of Ig light chain</span>
+<span class="sd">            igk_idx: index of Ig light chain starting position</span>
+<span class="sd">            naive_sites_path: path to CSV lookup table for converting from scFv CDS indexed site numbering to heavy/light chain IMGT numbering</span>
+<span class="sd">            model_path: path to ``torchdms`` model for antibody sequences</span>
+<span class="sd">            tdms_phenotypes: names of phenotype values produced by passed-in ``torchdms`` model (``delta_log10_KD`` expected as a phenotype)</span>
+<span class="sd">            log10_naive_KD: KD of naive Ig</span>
+<span class="sd">            fitness_method: method to map from KD to T cell help, taking in a list of :math:`K_D` values and producing a list of absolute T cell help quantities</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phenotype</span> <span class="o">=</span> <span class="n">DMSPhenotype</span><span class="p">(</span>
+            <span class="n">igh_frame</span><span class="p">,</span>
+            <span class="n">igk_frame</span><span class="p">,</span>
+            <span class="n">igk_idx</span><span class="p">,</span>
+            <span class="n">naive_sites_path</span><span class="p">,</span>
+            <span class="n">model_path</span><span class="p">,</span>
+            <span class="n">tdms_phenotypes</span><span class="p">,</span>
+            <span class="n">log10_naive_KD</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span> <span class="o">=</span> <span class="n">Fitness</span><span class="p">(</span><span class="n">fitness_method</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">slope</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_intercept</span> <span class="o">=</span> <span class="n">y_intercept</span></div>
+
+<div class="viewcode-block" id="DMSSelector.select"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.DMSSelector.html#gcdyn.cycles.DMSSelector.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">sequence_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">competition</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Produce the predicted number of cell divisions for a list of</span>
+<span class="sd">        sequences using a sigmoidal relationship between T cell help and</span>
+<span class="sd">        fitness.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sequence_list: list of DNA sequences</span>
+<span class="sd">            competition: if ``True``, competition for T cell help in the light zone is expected, and the cell divisions</span>
+<span class="sd">            are determined from only the sequence&#39;s predicted amount of antigen bound</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            cell_divs: a list containing a tuple with the number of cell divisions (non-integer) for each sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sig_fit_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">normalized_fitness_df</span><span class="p">(</span>
+            <span class="n">sequence_list</span><span class="p">,</span> <span class="n">calculate_KD</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">phenotype</span><span class="o">.</span><span class="n">calculate_KD</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">competition</span><span class="p">:</span>
+            <span class="n">t_cell_help_col</span> <span class="o">=</span> <span class="s2">&quot;normalized_t_cell_help&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">t_cell_help_col</span> <span class="o">=</span> <span class="s2">&quot;t_cell_help&quot;</span>
+        <span class="n">cell_divs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">cell_divisions_from_tfh_linear</span><span class="p">(</span>
+            <span class="n">sig_fit_df</span><span class="p">[</span><span class="n">t_cell_help_col</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">slope</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_intercept</span>
+        <span class="p">)</span>
+        <span class="n">cell_tuples</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">([</span><span class="n">cell_div</span><span class="p">])</span> <span class="k">for</span> <span class="n">cell_div</span> <span class="ow">in</span> <span class="n">cell_divs</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">cell_tuples</span></div></div>
 
 
 <div class="viewcode-block" id="GC"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.GC.html#gcdyn.cycles.GC">[docs]</a><span class="k">class</span> <span class="nc">GC</span><span class="p">:</span>
@@ -108,8 +533,8 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">sequence</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">proliferator</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">TreeNode</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">],</span> <span class="kc">None</span><span class="p">],</span>
-        <span class="n">mutator</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
-        <span class="n">selector</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+        <span class="n">mutator</span><span class="p">:</span> <span class="n">Mutator</span><span class="p">,</span>
+        <span class="n">selector</span><span class="p">:</span> <span class="n">Selector</span><span class="p">,</span>
         <span class="n">N0</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">Nmax</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">(),</span>
@@ -133,22 +558,33 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">alive_leaves</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">leaf</span> <span class="k">for</span> <span class="n">leaf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="GC.step"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.GC.html#gcdyn.cycles.GC.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enforce_timescale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="GC.step"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.GC.html#gcdyn.cycles.GC.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enforce_timescale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">competition</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Simulate one cycle.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            enforce_timescale: if ``True``, the time scale of the DZ proliferation tree must be consistent with the global timescale (one unit per step)</span>
+<span class="sd">            enforce_timescale: if ``True``, the timescale of the DZ proliferation tree must be consistent with the global timescale (one unit per step)</span>
+<span class="sd">            competition: if ``True``, competition in the LZ is expected (affects Selector output)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">fitnesses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selector</span><span class="p">([</span><span class="n">leaf</span><span class="o">.</span><span class="n">sequence</span> <span class="k">for</span> <span class="n">leaf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alive_leaves</span><span class="p">])</span>
+        <span class="n">fitnesses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">leaf</span><span class="o">.</span><span class="n">sequence</span> <span class="k">for</span> <span class="n">leaf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alive_leaves</span><span class="p">],</span> <span class="n">competition</span>
+        <span class="p">)</span>
         <span class="k">for</span> <span class="n">leaf</span><span class="p">,</span> <span class="n">args</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alive_leaves</span><span class="p">,</span> <span class="n">fitnesses</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">proliferator</span><span class="p">(</span><span class="n">leaf</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">leaf</span><span class="o">.</span><span class="n">iter_descendants</span><span class="p">():</span>
-                <span class="n">node</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mutator</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">up</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">dist</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mutator</span><span class="o">.</span><span class="n">mutate</span><span class="p">(</span>
+                    <span class="n">node</span><span class="o">.</span><span class="n">up</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">dist</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">leaf</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">():</span>
+                <span class="n">leaf</span><span class="o">.</span><span class="n">terminated</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">if</span> <span class="n">enforce_timescale</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">subleaf</span> <span class="ow">in</span> <span class="n">leaf</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">subleaf</span><span class="o">.</span><span class="n">terminated</span> <span class="ow">and</span> <span class="n">leaf</span><span class="o">.</span><span class="n">get_distance</span><span class="p">(</span><span class="n">subleaf</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="ow">not</span> <span class="n">subleaf</span><span class="o">.</span><span class="n">terminated</span>
+                        <span class="ow">and</span> <span class="n">subleaf</span> <span class="o">!=</span> <span class="n">leaf</span>
+                        <span class="ow">and</span> <span class="ow">not</span> <span class="n">isclose</span><span class="p">(</span><span class="n">leaf</span><span class="o">.</span><span class="n">get_distance</span><span class="p">(</span><span class="n">subleaf</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="p">):</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                            <span class="s2">&quot;DZ subtree timescale is not consistent with simulation time&quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;DZ subtree timescale is not consistent with simulation time, val = </span><span class="si">{</span><span class="n">leaf</span><span class="o">.</span><span class="n">get_distance</span><span class="p">(</span><span class="n">subleaf</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
                         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alive_leaves</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">leaf</span> <span class="k">for</span> <span class="n">leaf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">leaf</span><span class="o">.</span><span class="n">terminated</span><span class="p">])</span>
 
@@ -181,6 +617,7 @@
         <span class="n">prune</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">max_tries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
         <span class="n">enforce_timescale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">competition</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Simulate.</span>
 
@@ -188,14 +625,17 @@
 <span class="sd">            T: number of cycles to simulate</span>
 <span class="sd">            prune: prune to the tree induced by the surviving lineages</span>
 <span class="sd">            max_tries: try this many times to simulate a tree that doesn&#39;t go extinct</span>
-<span class="sd">            enforce_timescale: if ``True``, the time scale of the DZ proliferation trees must be consistent with the global timescale</span>
+<span class="sd">            enforce_timescale: if ``True``, the timescale of the DZ proliferation trees must be consistent with the global timescale</span>
+<span class="sd">            competition: if ``True``, competition in the LZ is expected (affects Selector output)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">n_tries</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">while</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">enforce_timescale</span><span class="o">=</span><span class="n">enforce_timescale</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span>
+                        <span class="n">enforce_timescale</span><span class="o">=</span><span class="n">enforce_timescale</span><span class="p">,</span> <span class="n">competition</span><span class="o">=</span><span class="n">competition</span>
+                    <span class="p">)</span>
                 <span class="k">if</span> <span class="n">prune</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">prune</span><span class="p">()</span>
                 <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
@@ -209,11 +649,11 @@
 
 
 <div class="viewcode-block" id="binary_proliferator"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.binary_proliferator.html#gcdyn.cycles.binary_proliferator">[docs]</a><span class="k">def</span> <span class="nf">binary_proliferator</span><span class="p">(</span>
-    <span class="n">treenode</span><span class="p">:</span> <span class="n">TreeNode</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">()</span>
+    <span class="n">treenode</span><span class="p">:</span> <span class="n">TreeNode</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">()</span>
 <span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Binary dark zone step (Galton-Watson).</span>
 <span class="sd">    With probability :math:`1-p` the input&#39;s ``terminated`` attribute is set to ``True``, indicating extinction.</span>
-<span class="sd">    With probability :math:`p` add two children to the the input with ``terminated`` attributes set to ``False``, indicating birth.</span>
+<span class="sd">    With probability :math:`p` add two children to the input with ``terminated`` attributes set to ``False``, indicating birth.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        treenode: root node to simulate from</span>
@@ -232,29 +672,65 @@
             <span class="n">treenode</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">child</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="uniform_mutator"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.uniform_mutator.html#gcdyn.cycles.uniform_mutator">[docs]</a><span class="k">def</span> <span class="nf">uniform_mutator</span><span class="p">(</span>
-    <span class="n">sequence</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">()</span>
-<span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Uniform mutation process at rate 1.</span>
+<div class="viewcode-block" id="simple_proliferator"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.simple_proliferator.html#gcdyn.cycles.simple_proliferator">[docs]</a><span class="k">def</span> <span class="nf">simple_proliferator</span><span class="p">(</span>
+    <span class="n">treenode</span><span class="p">:</span> <span class="n">TreeNode</span><span class="p">,</span>
+    <span class="n">cell_divisions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">(),</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Recursively populates descendants on a tree node based on the number of integer cell divisions indicated.</span>
+<span class="sd">    Branch lengths are set to 1/`cell_divisions`, such that the distance from the root to all leaves will be 1.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        sequence: initial sequence, consisting of characters ``ACGT``</span>
-<span class="sd">        time: exposure time</span>
+<span class="sd">        treenode: root node to populate from</span>
+<span class="sd">        cell_divisions: number of cell divisions from the cell represented by ``treenode``</span>
+<span class="sd">        dist: distance from each parent to child node</span>
 <span class="sd">        rng: random number generator</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">alphabet</span> <span class="o">=</span> <span class="s2">&quot;ACGT&quot;</span>
-    <span class="n">sequence</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">t</span> <span class="o">+=</span> <span class="n">rng</span><span class="o">.</span><span class="n">exponential</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">time</span><span class="p">:</span>
-            <span class="n">idx</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sequence</span><span class="p">))</span>
-            <span class="n">sequence</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
-                <span class="p">[</span><span class="n">base</span> <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">alphabet</span> <span class="k">if</span> <span class="n">base</span> <span class="o">!=</span> <span class="n">sequence</span><span class="p">[</span><span class="n">idx</span><span class="p">]]</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">break</span>
-    <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="n">cell_divisions</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dist</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">cell_divisions</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+            <span class="n">child</span> <span class="o">=</span> <span class="n">TreeNode</span><span class="p">()</span>
+            <span class="n">child</span><span class="o">.</span><span class="n">dist</span> <span class="o">=</span> <span class="n">dist</span>
+            <span class="n">child</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="n">treenode</span><span class="o">.</span><span class="n">sequence</span>
+            <span class="n">child</span><span class="o">.</span><span class="n">terminated</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">treenode</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+            <span class="n">simple_proliferator</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">cell_divisions</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dist</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cell_div_balanced_proliferator"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.cell_div_balanced_proliferator.html#gcdyn.cycles.cell_div_balanced_proliferator">[docs]</a><span class="k">def</span> <span class="nf">cell_div_balanced_proliferator</span><span class="p">(</span>
+    <span class="n">treenode</span><span class="p">:</span> <span class="n">TreeNode</span><span class="p">,</span>
+    <span class="n">cell_divisions</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">(),</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Populates descendants on a tree node based on the number of cell divisions indicated, producing the number of children expected by :math:`2^{cell\_divisions}`, where ``cell_divisions`` is not necessarily an integer value.</span>
+<span class="sd">    A full binary tree is generated, then leaf nodes are removed at random from the set of alternating leaf nodes until there are the expected number of children.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        treenode: root node to populate from</span>
+<span class="sd">        cell_divisions: number of cell divisions from the cell represented by ``treenode``</span>
+<span class="sd">        kd: calculated KD value for sequence</span>
+<span class="sd">        fitness: calculated fitness for sequence</span>
+<span class="sd">        rng: random number generator</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">cell_divisions</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ceil_cell_divisions</span> <span class="o">=</span> <span class="n">ceil</span><span class="p">(</span><span class="n">cell_divisions</span><span class="p">)</span>
+        <span class="n">simple_proliferator</span><span class="p">(</span>
+            <span class="n">treenode</span><span class="p">,</span> <span class="n">ceil_cell_divisions</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ceil_cell_divisions</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">num_descendants</span> <span class="o">=</span> <span class="n">floor</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">cell_divisions</span><span class="p">)</span>
+        <span class="n">num_leaves_to_remove</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="n">ceil_cell_divisions</span> <span class="o">-</span> <span class="n">num_descendants</span>
+        <span class="n">every_other_leaf</span> <span class="o">=</span> <span class="n">treenode</span><span class="o">.</span><span class="n">get_leaves</span><span class="p">()[::</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">leaf</span> <span class="ow">in</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+            <span class="n">every_other_leaf</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">num_leaves_to_remove</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">):</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">leaf</span><span class="o">.</span><span class="n">up</span>
+            <span class="n">child_dist</span> <span class="o">=</span> <span class="n">leaf</span><span class="o">.</span><span class="n">dist</span>
+            <span class="n">leaf</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">preserve_branch_length</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">prevent_nondicotomic</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="c1"># extend branch length of nodes that have become leaves:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">parent</span><span class="o">.</span><span class="n">dist</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">dist</span> <span class="o">+</span> <span class="n">child_dist</span></div>
 </pre></div>
 
            </div>

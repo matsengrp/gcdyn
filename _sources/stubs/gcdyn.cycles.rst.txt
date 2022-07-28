@@ -16,7 +16,8 @@
       :nosignatures:
    
       binary_proliferator
-      uniform_mutator
+      cell_div_balanced_proliferator
+      simple_proliferator
    
    
 
@@ -29,7 +30,14 @@
       :template: custom-class-template.rst
       :nosignatures:
    
+      DMSSelector
+      FivemerMutator
       GC
+      Mutator
+      Selector
+      ThreeStepSelector
+      UniformMutator
+      UniformSelector
    
    
 

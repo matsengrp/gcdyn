@@ -1,0 +1,6 @@
+gcdyn.cycles.cell\_div\_balanced\_proliferator
+==============================================
+
+.. currentmodule:: gcdyn.cycles
+
+.. autofunction:: cell_div_balanced_proliferator

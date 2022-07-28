@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gcdyn.cycles.ThreeStepSelector &mdash; gcdyn  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="gcdyn.cycles.UniformMutator" href="gcdyn.cycles.UniformMutator.html" />
+    <link rel="prev" title="gcdyn.cycles.Selector" href="gcdyn.cycles.Selector.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> gcdyn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cite.html">Citing <code class="docutils literal notranslate"><span class="pre">gcdyn</span></code></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.tree.html">gcdyn.tree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.forest.html">gcdyn.forest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.parameters.html">gcdyn.parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.model.html">gcdyn.model</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="gcdyn.cycles.html">gcdyn.cycles</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.binary_proliferator.html">gcdyn.cycles.binary_proliferator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.cell_div_balanced_proliferator.html">gcdyn.cycles.cell_div_balanced_proliferator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.simple_proliferator.html">gcdyn.cycles.simple_proliferator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.DMSSelector.html">gcdyn.cycles.DMSSelector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.FivemerMutator.html">gcdyn.cycles.FivemerMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.GC.html">gcdyn.cycles.GC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.Mutator.html">gcdyn.cycles.Mutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.Selector.html">gcdyn.cycles.Selector</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.cycles.ThreeStepSelector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.UniformMutator.html">gcdyn.cycles.UniformMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.UniformSelector.html">gcdyn.cycles.UniformSelector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.ExtinctionError.html">gcdyn.cycles.ExtinctionError</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.fitness.html">gcdyn.fitness</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">Open source code repository</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html#developer-tools">Developer tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html#todo-list">Todo list</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">gcdyn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html">Modules</a> &raquo;</li>
+          <li><a href="gcdyn.cycles.html">gcdyn.cycles</a> &raquo;</li>
+      <li>gcdyn.cycles.ThreeStepSelector</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="gcdyn-cycles-threestepselector">
+<h1>gcdyn.cycles.ThreeStepSelector<a class="headerlink" href="#gcdyn-cycles-threestepselector" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="gcdyn.cycles.ThreeStepSelector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.cycles.</span></span><span class="sig-name descname"><span class="pre">ThreeStepSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">igh_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">igk_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">igk_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">336</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naive_sites_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Linear.model'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tdms_phenotypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['delta_log10_KD',</span> <span class="pre">'delta_expression']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log10_naive_KD</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.43</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concentration_antigen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-09</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_t_cell_help</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_help</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antigen_frac_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#ThreeStepSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.ThreeStepSelector" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="gcdyn.cycles.Selector.html#gcdyn.cycles.Selector" title="gcdyn.cycles.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Selector</span></code></a></p>
+<p>A Selector that uses DMS data as well as a discrete amount of T cell
+help that is assigned.</p>
+<p>Initializes values for a DMSPhenotype to calculate KD based on
+sequence from torchDMS model if KDs are not provided, and sets antigen
+concentration for determining antigen bound.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>igh_frame</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – frame for translation of Ig heavy chain</p></li>
+<li><p><strong>igk_frame</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – frame for translation of Ig light chain</p></li>
+<li><p><strong>igk_idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – index of Ig light chain starting position</p></li>
+<li><p><strong>naive_sites_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – path to CSV lookup table for converting from scFv CDS indexed site numbering to heavy/light chain IMGT numbering</p></li>
+<li><p><strong>model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – path to <code class="docutils literal notranslate"><span class="pre">torchdms</span></code> model for heavy and light chain</p></li>
+<li><p><strong>tdms_phenotypes</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – names of phenotype values produced by passed-in <code class="docutils literal notranslate"><span class="pre">torchdms</span></code> model (<code class="docutils literal notranslate"><span class="pre">delta_log10_KD</span></code> expected as a phenotype)</p></li>
+<li><p><strong>log10_naive_KD</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – KD of naive Ig</p></li>
+<li><p><strong>concentration_antigen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – molar concentration of antigen to determine antigen bound</p></li>
+<li><p><strong>total_t_cell_help</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – total units of T cell help to be distributed in germinal center</p></li>
+<li><p><strong>antigen_frac_limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – lower limit (inclusive) for the fraction antigen bound to be returned.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.cycles.ThreeStepSelector.norm1" title="gcdyn.cycles.ThreeStepSelector.norm1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">norm1</span></code></a></p></td>
+<td><p>For each KD value in <code class="docutils literal notranslate"><span class="pre">KD_list</span></code>, determines the fraction of antigen bound using the Hill equation and returns a list containing that value or 0, if the fraction is below <code class="docutils literal notranslate"><span class="pre">antigen_frac_limit</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.cycles.ThreeStepSelector.norm2_sigmoid" title="gcdyn.cycles.ThreeStepSelector.norm2_sigmoid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">norm2_sigmoid</span></code></a></p></td>
+<td><p>Maps the input competencies to a signal between 0 and 1 using a sigmoidal transformation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.cycles.ThreeStepSelector.select" title="gcdyn.cycles.ThreeStepSelector.select"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select</span></code></a></p></td>
+<td><p>Produce the predicted number of cell divisions for a list of sequences with discrete units of T cell help.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.cycles.ThreeStepSelector.select">
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">competition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kd_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#ThreeStepSelector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.ThreeStepSelector.select" title="Permalink to this definition"></a></dt>
+<dd><p>Produce the predicted number of cell divisions for a list of
+sequences with discrete units of T cell help. T cell help is
+distributed semi-randomly, with probabilites based on normalized signal
+from antigen bound.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequence_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – list of nucleotide sequences</p></li>
+<li><p><strong>competition</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – presence of competition to determine whether signal is normalized</p></li>
+<li><p><strong>kd_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]]) – list of KD values to use instead of calculating KD values using DMSPhenotype</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple with number of cell divisions for each sequence</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>fitnesses</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.cycles.ThreeStepSelector.norm1">
+<span class="sig-name descname"><span class="pre">norm1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">KD_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#ThreeStepSelector.norm1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.ThreeStepSelector.norm1" title="Permalink to this definition"></a></dt>
+<dd><p>For each KD value in <code class="docutils literal notranslate"><span class="pre">KD_list</span></code>, determines the fraction of antigen bound using the Hill equation and
+returns a list containing that value or 0, if the fraction is below <code class="docutils literal notranslate"><span class="pre">antigen_frac_limit</span></code>.
+:param KD_list: list of KD values to use (with the concentration antigen) to determine the amount of antigen bound.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a list with the competency (fraction antigen bound or 0) for each KD in the <code class="docutils literal notranslate"><span class="pre">KD_list</span></code>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>competencies</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.cycles.ThreeStepSelector.norm2_sigmoid">
+<span class="sig-name descname"><span class="pre">norm2_sigmoid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">competencies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curve_steepness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">midpoint_competency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">competition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#ThreeStepSelector.norm2_sigmoid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.ThreeStepSelector.norm2_sigmoid" title="Permalink to this definition"></a></dt>
+<dd><p>Maps the input competencies to a signal between 0 and 1 using a sigmoidal transformation.
+:type competencies: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]
+:param competencies: list of competencies between 0 and 1
+:type curve_steepness: <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>
+:param curve_steepness: logistic growth rate of signal
+:type midpoint_competency: <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>
+:param midpoint_competency: value of input competency to set as midpoint
+:type competition: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>
+:param competition: presence of competition to determine whether signal is normalized</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>normalized or unnormalized signals between 0 and 1 based on sigmoidal transformation of competencies.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>signals</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="gcdyn.cycles.Selector.html" class="btn btn-neutral float-left" title="gcdyn.cycles.Selector" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gcdyn.cycles.UniformMutator.html" class="btn btn-neutral float-right" title="gcdyn.cycles.UniformMutator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Erick Matsen.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
