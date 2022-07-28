@@ -256,9 +256,7 @@ class ThreeStepSelector(Selector):
             kd_list = phenotype.calculate_KD(sequence_list)
         competencies = self.norm1(kd_list)
         norm_signals = self.norm2_sigmoid(competencies, competition=competition)
-        selected_seqs = self._norm3_prob_distribution(
-            norm_signals, self.total_t_cell_help
-        )
+        selected_seqs = self._norm3_prob_distribution(norm_signals)
         return [tuple([float(selected_seq)]) for selected_seq in selected_seqs]
 
     def norm1(self, KD_list):
@@ -331,8 +329,7 @@ class ThreeStepSelector(Selector):
 
     def _norm3_prob_distribution(
         self,
-        norm_signals,
-        total_t_cell_help,
+        norm_signals: List[float],
         rng: np.random.Generator = default_rng(),
     ):
         """Produces a list with integer T cell help values using
@@ -340,7 +337,6 @@ class ThreeStepSelector(Selector):
 
         Args:
             norm_signals: T cell help signal for each sequence (must add to 1).
-            total_t_cell_help: total units of T cell help to be distributed
             rng: random number generator
 
         Returns:
@@ -349,19 +345,42 @@ class ThreeStepSelector(Selector):
         indices = np.arange(len(norm_signals))
         amt_help = np.zeros(len(norm_signals), dtype=int)
 
-        # If T cell help available exceeds the number of non-zero signals, every non-zero signal produces ``max_help``.
-        if total_t_cell_help >= self.max_help * np.count_nonzero(norm_signals):
+        # If T cell help available exceeds the number of non-zero signals, every non-zero signal produces max_help.
+        if self.total_t_cell_help >= self.max_help * np.count_nonzero(norm_signals):
             for i in range(len(norm_signals)):
                 if norm_signals[i] > 0:
                     amt_help[i] = self.max_help
-        # Otherwise, sample with weighted probabilities ``norm_signals``, re-sampling to not exceed ``max_help``.
+        # Otherwise, sample with weighted probabilities norm_signals, re-sampling to not exceed max_help anywhere.
         else:
-            for _ in range(total_t_cell_help):
+            for _ in range(self.total_t_cell_help):
                 chosen_index = rng.choice(indices, p=norm_signals)
                 while amt_help[chosen_index] > self.max_help - 1:
                     chosen_index = rng.choice(indices, p=norm_signals)
                 amt_help[chosen_index] += 1
         return amt_help
+
+    def norm3_ranked(self, norm_signals: List[float], max_divisions: float = 6):
+        """
+
+        Args:
+            norm_signals:
+            max_divisions:
+
+        Returns:
+
+        """
+        help_left = self.total_t_cell_help
+        divisions = np.zeros(len(norm_signals))
+        norm_signal_sort = np.argsort(norm_signals)
+        signal_to_divisions = max_divisions / norm_signals[norm_signal_sort[-1]]
+        for signals_idx in reversed(norm_signal_sort):
+            division_count = signal_to_divisions * norm_signals[signals_idx]
+            help_left -= division_count
+            if help_left < 0:
+                break
+            else:
+                divisions[signals_idx] = division_count
+        return divisions
 
 
 class DMSSelector(Selector):

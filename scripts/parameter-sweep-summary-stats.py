@@ -15,12 +15,12 @@ parser.add_argument("--naivefasta", type=str, help="fasta with naive BCR sequenc
 parser.add_argument("--out", type=str, help="csv outfile prefix")
 parser.add_argument("--nsteps", type=int, help="number of times to simulate tree between minval and maxval")
 parser.add_argument(
-    "--numcycles", type=int, help="number of DZ/lZ cycles to simulate", default=5
+    "--numcycles", type=int, help="number of DZ/LZ cycles to simulate", default=5
 )
 parser.add_argument(
     "--nsamples",
     type=int,
-    help="number of resultant sequences to randomly sample for statistics",
+    help="number of resultant sequences to randomly sample for statistics (samples all by default)",
     default=None,
 )
 parser.add_argument("--parameter", type=str, help="parameter with varying value")
@@ -36,7 +36,7 @@ args = parser.parse_args()
 
 def simulate_cycle_seqs(
     naive_seq: str,
-    N0: int = 1,
+    N0: int = 50,
     Nmax: int = None,
     mutator: cycles.Mutator = cycles.FivemerMutator(
         mutability_csv="notebooks/MK_RS5NF_mutability.csv",
@@ -104,7 +104,10 @@ def simulated_summary_stats(
         nsamples: number of genotypes to sample
 
     Returns:
-
+        summary_stats: tuple of row values for output:
+        # of unique sequences, total # of sequences, # of sampled sequences, mean abundance mean distance,
+        median affinity, mean affinity, 1st quartile, 3rd quartile, min affinity, max affinity,
+        standard deviation of affinity
     """
     distances = []
     abundances = []
@@ -149,6 +152,8 @@ def simulated_summary_stats(
         np.mean(distances),
         np.median(affinities),
         np.mean(affinities),
+        np.quantile(affinities, 0.25),
+        np.quantile(affinities, 0.75),
         np.min(affinities),
         np.max(affinities),
         np.std(affinities),
@@ -166,7 +171,7 @@ assert len(seqs) == 1
 naive_sequence = seqs[0]
 
 if args.minval is None and args.maxval is None:
-    print("Todo")
+    param_vals = [1]
 else:
     param_vals = np.linspace(args.minval, args.maxval, args.nsteps)
 parameter = args.parameter
@@ -201,7 +206,9 @@ for param_val in param_vals:
 # write csv
 with open(args.out, "w") as fh:
     print(
-        "parameter,parameter value,total number of genotypes,number of sampled genotypes,number of samples,median abundance,mean abundance,mean number of substitutions,median affinity,mean affinity,min affinity,max affinity, affinity std",
+        "parameter,parameter value,total number of genotypes,number of sampled genotypes,number of samples,"
+        "median abundance,mean abundance,mean number of substitutions,median affinity,mean affinity, 25th percentile,"
+        "75th percentile,min affinity,max affinity, affinity std",
         file=fh,
     )
     for param_val, stats in stats_dict.items():
