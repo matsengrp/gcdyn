@@ -195,6 +195,8 @@ class ThreeStepSelector(Selector):
         total_t_cell_help: float = 50,
         max_help: float = 2,
         antigen_frac_limit: float = 0.2,
+        sigmoid_growth_rate: float = 10,
+        sigmoid_mid_competency: float = 0.5,
     ):
         """Initializes values for a DMSPhenotype to calculate KD based on
         sequence from torchDMS model if KDs are not provided, and sets antigen
@@ -211,6 +213,8 @@ class ThreeStepSelector(Selector):
             concentration_antigen: molar concentration of antigen to determine antigen bound
             total_t_cell_help: total units of T cell help to be distributed in germinal center
             antigen_frac_limit: lower limit (inclusive) for the fraction antigen bound to be returned.
+            sigmoid_growth_rate: logistic growth rate of signal in ``norm2_sigmoid``
+            sigmoid_mid_competency: value of input competency to set as midpoint  in ``norm2_sigmoid``
         """
         self.igh_frame = igh_frame
         self.igk_frame = igk_frame
@@ -223,6 +227,8 @@ class ThreeStepSelector(Selector):
         self.total_t_cell_help = total_t_cell_help
         self.max_help = max_help
         self.antigen_frac_limit = antigen_frac_limit
+        self.sigmoid_growth_rate = sigmoid_growth_rate
+        self.sigmoid_mid_competency = sigmoid_mid_competency
 
     def select(
         self,
@@ -280,15 +286,11 @@ class ThreeStepSelector(Selector):
     def norm2_sigmoid(
         self,
         competencies: List[float],
-        curve_steepness: float = 10,
-        midpoint_competency: float = 0.5,
         competition: bool = True,
     ):
         """Maps the input competencies to a signal between 0 and 1 using a sigmoidal transformation.
         Args:
             competencies: list of competencies between 0 and 1
-            curve_steepness: logistic growth rate of signal
-            midpoint_competency: value of input competency to set as midpoint
             competition: presence of competition to determine whether signal is normalized
 
         Returns:
@@ -303,7 +305,11 @@ class ThreeStepSelector(Selector):
                     1
                     / (
                         1
-                        + exp(-1 * curve_steepness * (competency - midpoint_competency))
+                        + exp(
+                            -1
+                            * self.sigmoid_growth_rate
+                            * (competency - self.sigmoid_mid_competency)
+                        )
                     )
                 )
         sum_signals = sum(unnorm_signals)

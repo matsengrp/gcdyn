@@ -13,7 +13,11 @@ from Bio import SeqIO
 parser = argparse.ArgumentParser()
 parser.add_argument("--naivefasta", type=str, help="fasta with naive BCR sequence")
 parser.add_argument("--out", type=str, help="csv outfile prefix")
-parser.add_argument("--nsteps", type=int, help="number of times to simulate tree between minval and maxval")
+parser.add_argument(
+    "--nsteps",
+    type=int,
+    help="number of times to simulate tree between minval and maxval",
+)
 parser.add_argument(
     "--numcycles", type=int, help="number of DZ/LZ cycles to simulate", default=5
 )
@@ -36,7 +40,7 @@ args = parser.parse_args()
 
 def simulate_cycle_seqs(
     naive_seq: str,
-    N0: int = 50,
+    N0: int = 10,
     Nmax: int = None,
     mutator: cycles.Mutator = cycles.FivemerMutator(
         mutability_csv="notebooks/MK_RS5NF_mutability.csv",
@@ -47,10 +51,12 @@ def simulate_cycle_seqs(
         [TreeNode, float, np.random.Generator], None
     ] = cycles.cell_div_balanced_proliferator,
     total_t_cell_help: float = 1000,
-    concentration_antigen: float = 1e-9,
-    max_help: float = 2,
+    concentration_antigen: float = 1e-10,
+    max_help: float = 6,
     antigen_frac_limit=0.2,
-    model_path: str = "notebooks/Linear.model",
+    model_path: str = "notebooks/tdms-linear.model",
+    sigmoid_growth_rate: float = 10,
+    sigmoid_mid_competency: float = 0.5,
 ):
     """
     Simulate a GC from the naive sequence for a number of cycles
@@ -66,6 +72,8 @@ def simulate_cycle_seqs(
         max_help: maximum amount of T cell help that may be attained by each cell
         antigen_frac_limit: the inclusive lower limit of antigen bound to have any division (for three step selector)
         model_path: path to model to determine KD
+        sigmoid_growth_rate: logistic growth rate of signal in selector
+        sigmoid_mid_competency: value of input competency to set as midpoint in selector
 
     Returns:
         genotypes: list of resultant BCR sequences from tree
@@ -77,6 +85,9 @@ def simulate_cycle_seqs(
             model_path=model_path,
             max_help=max_help,
             antigen_frac_limit=antigen_frac_limit,
+            sigmoid_mid_competency=sigmoid_mid_competency,
+            sigmoid_growth_rate=sigmoid_growth_rate,
+            tdms_phenotypes=["delta_log10_KD", "delta_expression", "delta_psr"],
         )
     gc = cycles.GC(
         naive_seq,
@@ -94,7 +105,9 @@ def simulate_cycle_seqs(
 
 
 def simulated_summary_stats(
-    naive_seq: str, sequences: List[str], nsamples: int = None
+    naive_seq: str,
+    sequences: List[str],
+    nsamples: int = None,
 ):
     """
     Sample from simulated trees and calculate statistics.
@@ -102,6 +115,7 @@ def simulated_summary_stats(
         naive_seq: original sequence to calculate hamming distance from descendants
         sequences: list of all alive B cell BCR sequences
         nsamples: number of genotypes to sample
+
 
     Returns:
         summary_stats: tuple of row values for output:
@@ -117,8 +131,8 @@ def simulated_summary_stats(
         1,
         336,
         "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
-        "notebooks/Linear.model",
-        ["delta_log10_KD", "delta_expression"],
+        "notebooks/tdms-linear.model",
+        ["delta_log10_KD", "delta_expression", "delta_psr"],
         -10.43,
     )
     kd_vals = phenotype.calculate_KD(sequences)
@@ -188,10 +202,12 @@ for param_val in param_vals:
         genotypes = simulate_cycle_seqs(naive_sequence, concentration_antigen=param_val)
     elif parameter == "max_help":
         genotypes = simulate_cycle_seqs(naive_sequence, max_help=param_val)
-    elif parameter == "midpoint_ag_bound":
-        genotypes = simulate_cycle_seqs(naive_sequence, midpoint_ag_bound=param_val)
-    elif parameter == "sigmoid_steepness":
-        genotypes = simulate_cycle_seqs(naive_sequence, sigmoid_steepness=param_val)
+    elif parameter == "sigmoid_growth_rate":
+        genotypes = simulate_cycle_seqs(naive_sequence, sigmoid_growth_rate=param_val)
+    elif parameter == "sigmoid_mid_competency":
+        genotypes = simulate_cycle_seqs(
+            naive_sequence, sigmoid_mid_competency=param_val
+        )
     elif parameter == "antigen_frac_limit":
         genotypes = simulate_cycle_seqs(naive_sequence, antigen_frac_limit=param_val)
     elif parameter == "divisions_help_slope":
@@ -212,7 +228,7 @@ with open(args.out, "w") as fh:
         file=fh,
     )
     for param_val, stats in stats_dict.items():
-        stat_str = ','.join(str(stat) for stat in stats)
+        stat_str = ",".join(str(stat) for stat in stats)
         print(
             f"{args.parameter},{param_val},{stat_str}",
             file=fh,
