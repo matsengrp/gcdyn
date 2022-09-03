@@ -104,11 +104,16 @@ class Model:
             raise ValueError("unknown event")
         tree.add_child(child)
 
-    def fit(self):
+    def fit(self, init_value = None, max_iter = 1000):
         r"""Given a collection of `tree.Tree`, fit the parameters of the model."""
+        if init_value is None:
+            init_value = self.params.θ
+        else:
+            init_value = np.array(init_value, dtype = float)
+
         grad_g = jit(grad(self.g))
         optimizer = opt.AccProxGrad(self.g, grad_g, self.h, self.prox, verbose=True)
-        θ_inferred = optimizer.run(self.params.θ, max_iter=1000, tol=0)
+        θ_inferred = optimizer.run(init_value, max_iter=max_iter, tol=0)
         return θ_inferred
 
     @partial(jit, static_argnums=(0,))
