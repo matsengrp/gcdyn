@@ -1,7 +1,7 @@
 import jax.numpy as np
 from jax import random
 
-from gcdyn.tree import Tree
+from gcdyn.bdms import Tree
 from gcdyn.parameters import Parameters
 
 
@@ -26,7 +26,7 @@ def main():
     for i in range(n_trees):
         key, _ = random.split(key)
         tree = Tree(T, key[0], params)
-        tree.draw_tree(f"tree {i + 1}.svg")
+        tree.render(f"tree {i + 1}.svg")
 
 
 if __name__ == "__main__":
