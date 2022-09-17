@@ -6,12 +6,10 @@ r"""BDMS inference.
 """
 
 import jax.numpy as np
-from jax import random
 from jax.scipy.stats import norm
-from jax import jit, grad
+from jax import jit
 from jax.scipy.special import expit
 from jaxopt import ScipyBoundedMinimize
-import ete3
 from functools import partial
 
 from gcdyn.bdms import TreeNode

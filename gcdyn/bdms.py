@@ -39,12 +39,11 @@ Abstract base class for defining generic mutation effect generators (:math:`\mat
 Some concrete child classes are included.
 """
 from abc import ABC, abstractmethod
-from random import random
 import ete3
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from typing import Any, Optional, Union, Callable
+from typing import Any, Optional, Union
 import itertools
 from scipy.special import expit
 from scipy.stats import norm

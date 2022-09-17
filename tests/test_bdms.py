@@ -1,5 +1,4 @@
 import numpy as np
-from gcdyn.model import Model
 from gcdyn import bdms
 import unittest
 
@@ -14,12 +13,14 @@ class TestTreeNode(unittest.TestCase):
             mutation_rate=bdms.ConstantResponse(1),
             mutator=bdms.GaussianMutator(-1, 1),
             min_survivors=20,
-            seed=0
-            )
+            seed=0,
+        )
 
     def test_sample(self):
         self.tree.sample(n=10)
-        self.assertTrue(all(leaf.event in ("survival", "sampling", "death") for leaf in self.tree))
+        self.assertTrue(
+            all(leaf.event in ("survival", "sampling", "death") for leaf in self.tree)
+        )
         self.assertTrue(
             all(
                 len(node.children) == 2
@@ -28,7 +29,13 @@ class TestTreeNode(unittest.TestCase):
             )
         )
         mean_root_to_tip_distance = np.mean(
-            np.array([self.tree.get_distance(leaf) for leaf in self.tree if leaf.event == "sampling"])
+            np.array(
+                [
+                    self.tree.get_distance(leaf)
+                    for leaf in self.tree
+                    if leaf.event == "sampling"
+                ]
+            )
         )
         for leaf in self.tree:
             if leaf.event == "sampling":
@@ -42,7 +49,7 @@ class TestTreeNode(unittest.TestCase):
             [node for node in self.tree.traverse() if node.event == "sampling"]
         )
         self.tree.prune()
-        self.assertTrue(all(leaf.event =="sampling" for leaf in self.tree))
+        self.assertTrue(all(leaf.event == "sampling" for leaf in self.tree))
         self.assertTrue(
             all(
                 len(node.children) == 2
@@ -51,15 +58,10 @@ class TestTreeNode(unittest.TestCase):
             )
         )
         self.assertTrue(
-            not any(
-                len(node.children) == 1
-                for node in self.tree.iter_descendants()
-            )
+            not any(len(node.children) == 1 for node in self.tree.iter_descendants())
         )
         self.assertEqual(
-            set(
-                [node for node in self.tree.traverse() if node.event == "sampling"]
-            ),
+            set([node for node in self.tree.traverse() if node.event == "sampling"]),
             original_sampled,
         )
         mean_root_to_tip_distance = np.mean(

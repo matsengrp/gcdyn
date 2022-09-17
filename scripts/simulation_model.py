@@ -1,5 +1,4 @@
 import jax.numpy as np
-from jax.scipy.special import expit
 
 from gcdyn.model import Model
 from gcdyn.parameters import Parameters
