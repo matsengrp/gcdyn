@@ -29,5 +29,8 @@ setuptools.setup(
         "jaxlib",
         "jax",
         "jaxopt",
+        "torch",
+        "biopython",
+        "git+https://github.com/matsengrp/torchdms",
     ],
 )
