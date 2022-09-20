@@ -41,18 +41,18 @@ class Model:
         """
         return θ[0] * expit(θ[1] * (x - θ[2])) + θ[3]
 
-    def fit(self):
+    def fit(self, init_value = None, lower_bounds = None, upper_bounds = None, maxiter = 500):
         r"""Given a collection of :py:class:`TreeNode`, fit the parameters of
         the model."""
 
         def f(θ):
             return -self.log_likelihood(θ)
 
-        optimizer = ScipyBoundedMinimize(fun=f)
-        init_value = np.array([2.0, 1.0, 0.0, 0.0])
+        optimizer = ScipyBoundedMinimize(fun=f, maxiter = maxiter)
+        init_value = np.array(init_value, dtype = float) if init_value else np.array([2.0, 1.0, 0.0, 0.0])
         bounds = (
-            np.array([0, 0, -np.inf, 0.0]),
-            np.array([np.inf, np.inf, np.inf, np.inf]),
+            np.array(lower_bounds, dtype = float) if lower_bounds else np.array([0, 0, -np.inf, 0.0]),
+            np.array(upper_bounds, dtype = float) if upper_bounds else np.array([np.inf, np.inf, np.inf, np.inf]),
         )
         θ_inferred = optimizer.run(init_value, bounds)
         return θ_inferred
