@@ -6,6 +6,7 @@ r"""BDMS inference.
 """
 
 import jax.numpy as np
+from numpy.typing import ArrayLike
 from jax.scipy.stats import norm
 from jax import jit
 from jax.scipy.special import expit
@@ -19,22 +20,26 @@ class Model:
     r"""A class that represents a GC model.
 
     Args:
-        μ (float): death rate
-        γ (float): mutation rate
-        ρ (float): sampling probability
+        trees: list of trees
+        μ: death rate
+        γ: mutation rate
+        ρ: sampling probability
+        opt_kwargs: keyword arguments to pass to :py:class:`jaxopt.ScipyBoundedMinimize`
     """
 
-    def __init__(self, trees: list[TreeNode], μ: float, γ: float, ρ: float):
+    def __init__(
+        self, trees: list[TreeNode], μ: float, γ: float, ρ: float, **opt_kwargs
+    ):
         self.trees = trees
         self.μ = μ
         self.γ = γ
         self.ρ = ρ
 
         self.optimizer = ScipyBoundedMinimize(
-            fun=jit(lambda θ: -self.log_likelihood(θ))
+            fun=jit(lambda θ: -self.log_likelihood(θ)), **opt_kwargs
         )
 
-    def λ(self, x: float, θ):
+    def λ(self, x: float, θ) -> float:
         r"""Birth rate of phenotype x.
 
         Args:
@@ -47,27 +52,27 @@ class Model:
 
     def fit(
         self,
-        init_value=(2, 1, 0, 0),
-        lower_bounds=(0, 0, -np.inf, 0),
-        upper_bounds=(np.inf, np.inf, np.inf, np.inf),
-    ):
+        init_value: ArrayLike = [2.0, 1.0, 0.0, 0.0],
+        lower_bounds: ArrayLike = [0.0, 0.0, -np.inf, 0.0],
+        upper_bounds: ArrayLike = [np.inf, np.inf, np.inf, np.inf],
+    ) -> ArrayLike:
         r"""Given a collection of :py:class:`TreeNode`, fit the parameters of
-        the model."""
+        the model.
 
-        init_value = np.array(init_value, dtype=float)
-        bounds = (
-            np.array(lower_bounds, dtype=float),
-            np.array(upper_bounds, dtype=float),
-        )
-        θ_inferred = self.optimizer.run(init_value, bounds)
-        return θ_inferred
+        Args:
+            init_value: initial value for the optimizer
+            lower_bounds: lower bounds for the optimizer
+            upper_bounds: upper bounds for the optimizer
+        """
+        return self.optimizer.run(np.array(init_value),
+                                  (np.array(lower_bounds), np.array(upper_bounds)))
 
     @partial(jit, static_argnums=(0,))
-    def log_likelihood(self, θ):
+    def log_likelihood(self, θ) -> float:
         r"""Compute log likelihood of parameters.
 
-        Returns:
-            float: log likelihood of the GC tree in the model
+        Args:
+            θ: parameters
         """
         result = 0
         for tree in self.trees:
