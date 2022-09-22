@@ -185,15 +185,15 @@ class GaussianMutator(Mutator):
     """
 
     def __init__(self, shift: float = 0.0, scale: float = 1.0):
-        self._dist = norm(loc=shift, scale=scale)
+        self._distribution = norm(loc=shift, scale=scale)
 
     def mutate(
         self, node: "TreeNode", seed: Optional[Union[int, np.random.Generator]] = None
     ) -> None:
-        node.x += self._dist.rvs(random_state=seed)
+        node.x += self._distribution.rvs(random_state=seed)
 
     def logprob(self, node1: "TreeNode", node2: "TreeNode") -> float:
-        return self._dist.logpdf(node2.x - node1.x)
+        return self._distribution.logpdf(node2.x - node1.x)
 
 
 class TreeNode(ete3.Tree):
