@@ -254,7 +254,7 @@ class TreeNode(ete3.Tree):
         t: float,
         birth_rate: Response = ConstantResponse(1),
         death_rate: Response = ConstantResponse(0),
-        mutation_rate: Response = ConstantResponse(0),
+        mutation_rate: Response = ConstantResponse(1),
         mutator: Mutator = GaussianMutator(shift=0, scale=1),
         birth_mutations: bool = False,
         min_survivors: int = 1,
