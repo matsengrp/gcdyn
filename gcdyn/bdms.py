@@ -252,12 +252,11 @@ class TreeNode(ete3.Tree):
     def evolve(
         self,
         t: float,
-        birth_rate: Response = SigmoidResponse(
-            xscale=1.0, xshift=0.0, yscale=2.0, yshift=0.0
-        ),
-        death_rate: Response = ConstantResponse(value=1),
-        mutation_rate: Response = ConstantResponse(value=1),
-        mutator: Mutator = GaussianMutator(shift=-1, scale=1),
+        birth_rate: Response = ConstantResponse(1),
+        death_rate: Response = ConstantResponse(0),
+        mutation_rate: Response = ConstantResponse(0),
+        mutator: Mutator = GaussianMutator(shift=0, scale=1),
+        birth_mutations: bool = False,
         min_survivors: int = 1,
         retry: Optional[int] = 1000,
         max_depth: int = 1000,
@@ -270,7 +269,8 @@ class TreeNode(ete3.Tree):
             birth_rate: Birth rate response function.
             death_rate: Death rate response function.
             mutation_rate: Mutation rate response function.
-            mutator: Generator of mutation effects.
+            mutator: Generator of mutation effects at mutation events (and on offspring of birth events if ``birth_mutations=True``).
+            birth_mutations: Flag to indicate whether mutations should occur at birth.
             min_survivors: Minimum number of survivors (ignored if ``retry`` is ``None``).
             retry: Number of times to retry if tree goes extinct. If ``int``, a ``RuntimeError`` is raised if it is exceeded during simulation. If ``None``, then no retries are made, and extinct trees are allowed.
             max_depth: Maximum topological node depth, to truncate exploding processes. A ``RuntimeError`` is raised if this is exceeded during simulation.
@@ -317,17 +317,32 @@ class TreeNode(ete3.Tree):
                     "death_rate": death_rate,
                     "mutation_rate": mutation_rate,
                     "mutator": mutator,
+                    "birth_mutations": birth_mutations,
                     "max_depth": max_depth,
                     "retry": None,
                     "seed": rng,
                 }
                 if child.event == self._BIRTH_EVENT:
-                    for _ in range(2):
-                        child.evolve(*evolve_args, **evolve_kwargs)
+                    if birth_mutations:
+                        for _ in range(2):
+                            grandchild = TreeNode(
+                                t=child.t,
+                                x=child.x,
+                                event=self._MUTATION_EVENT,
+                                dist=0,
+                                name=next(self._name_generator),
+                            )
+                            grandchild._depth = child._depth + 1
+                            mutator.mutate(grandchild, seed=rng)
+                            grandchild.evolve(*evolve_args, **evolve_kwargs)
+                            child.add_child(grandchild)
+                    else:
+                        for _ in range(2):
+                            child.evolve(*evolve_args, **evolve_kwargs)
                 elif child.event == self._DEATH_EVENT:
                     pass
                 elif child.event == self._MUTATION_EVENT:
-                    mutator.mutate(child, rng)
+                    mutator.mutate(child, seed=rng)
                     child.evolve(*evolve_args, **evolve_kwargs)
                 else:
                     raise ValueError(f"unknown event {child.event}")
@@ -431,9 +446,10 @@ class TreeNode(ete3.Tree):
             kwargs["tree_style"].show_scale = False
         cmap = "coolwarm_r"
         cmap = mpl.cm.get_cmap(cmap)
+        halfrange = max(abs(node.x - self.x) for node in self.traverse())
         norm = mpl.colors.CenteredNorm(
             vcenter=self.x,
-            halfrange=max(abs(node.x - self.x) for node in self.traverse()),
+            halfrange=halfrange if halfrange > 0 else 1,
         )
         colormap = {
             node.name: mpl.colors.to_hex(cmap(norm(node.x))) for node in self.traverse()
@@ -517,15 +533,19 @@ class TreeNode(ete3.Tree):
                     ρ if node.event == self._SAMPLING_EVENT else 1 - ρ
                 )
             else:
-                # exponential density for event time
-                result += logΛ - Λ * Δt
-                # multinomial event probability
-                if node.event == self._BIRTH_EVENT:
-                    result += np.log(λ) - logΛ
-                elif node.event == self._DEATH_EVENT:
-                    result += np.log(μ) - logΛ
-                elif node.event == self._MUTATION_EVENT:
-                    result += np.log(γ) - logΛ + mutator.logprob(node, node.up)
+                if self._MUTATION_EVENT and Δt == 0:
+                    # mutation in offspring from birth (simulation run with birth_mutations=True)
+                    result += mutator.logprob(node, node.up)
                 else:
-                    raise ValueError(f"unknown event {node.event}")
+                    # exponential density for event time
+                    result += logΛ - Λ * Δt
+                    # multinomial event probability
+                    if node.event == self._BIRTH_EVENT:
+                        result += np.log(λ) - logΛ
+                    elif node.event == self._DEATH_EVENT:
+                        result += np.log(μ) - logΛ
+                    elif node.event == self._MUTATION_EVENT:
+                        result += np.log(γ) - logΛ + mutator.logprob(node, node.up)
+                    else:
+                        raise ValueError(f"unknown event {node.event}")
         return result
