@@ -470,9 +470,12 @@ class TreeNode(ete3.Tree):
         r"""A thin wrapper around :py:func:`ete3.TreeNode.render` that adds some
         custom decoration and a color bar. As with the base class method, pass
         ``"%%inline"`` for the first argument to render inline in a notebook.
-        See also ETE's tree rendering `tutorial
-        <http://etetoolkit.org/docs/latest/tutorial/tutorial_drawing.html>`_
-        and linked API docs pages there. If tree is not pruned, then branches
+        See also ETE's tree rendering `tutorial`_ and linked API docs pages
+        there.
+
+        .. _tutorial: http://etetoolkit.org/docs/latest/tutorial/tutorial_drawing.html
+
+        If tree is not pruned, then branches
         are colored according to phenotype, extinct lineages are indicated as
         dotted branches, unsampled non-extint lineages are indicated as solid
         branches, and sampled lineages are indicated as thick solid branches
