@@ -6,13 +6,15 @@ The BDMS process is defined by the following parameters:
 * :math:`\lambda(x)`: birth rate of phenotype :math:`x`
 * :math:`\mu(x)`: death rate of phenotype :math:`x`
 * :math:`\gamma(x)`: mutation rate of phenotype :math:`x`
-* :math:`\mathcal{p}(x\mid x')`: phenotypic mutation transition density conditional on initial phenotype :math:`x'`, which we draw from to generate mutation effects when a mutation event occurs
+* :math:`\mathcal{p}(x\mid x')`: phenotypic mutation transition density conditional on initial phenotype :math:`x'`,
+  which we draw from to generate mutation effects when a mutation event occurs
 * :math:`\rho`: sampling probability of surviving lineages after :math:`\Delta t`
 
 Primary class :py:class:`TreeNode`
 ----------------------------------
 
-This module's primary class :py:class:`TreeNode` subclasses ETE's :py:class:`ete3.TreeNode`, with these notable differences:
+This module's primary class :py:class:`TreeNode` subclasses ETE's :py:class:`ete3.TreeNode`,
+with these notable differences:
 
 * Attribute :py:attr:`t`: the time :math:`t \in \mathbb{R}_{\ge 0}` of the event at the node
 * Attribute :py:attr:`x`: the phenotype :math:`x \in \mathbb{R}` of the node
@@ -20,7 +22,8 @@ This module's primary class :py:class:`TreeNode` subclasses ETE's :py:class:`ete
 * Attribute :py:attr:`n_mutations`: the number of mutations that occurred on the branch above the node
 * Method :py:meth:`TreeNode.evolve`: evolve the tree, adding nodes according a BDMS process
 * Method :py:meth:`TreeNode.sample`: sample a subset of surviving leaves from the tree
-* Method :py:meth:`TreeNode.prune`: prune the tree subtree induced by the sampled leaves (overrides ETE's :py:meth:`ete3.TreeNode.prune`)
+* Method :py:meth:`TreeNode.prune`: prune the tree subtree induced by the sampled leaves
+  (overrides ETE's :py:meth:`ete3.TreeNode.prune`)
 * Method :py:meth:`TreeNode.render`: visualizes the tree (overrides ETE's :py:meth:`ete3.TreeNode.render`)
 
 Additional classes:
@@ -29,13 +32,15 @@ Additional classes:
 Rate response functions :py:class:`Response`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Abstract base class for defining generic response functions (:math:`\lambda(x)`, :math:`\mu(x)`, :math:`x`, :math:`\gamma(x)`), with arbitrary :py:class:`TreeNode` attribute dependence.
+Abstract base class for defining generic response functions (:math:`\lambda(x)`, :math:`\mu(x)`, :math:`x`, :math:`\gamma(x)`),
+with arbitrary :py:class:`TreeNode` attribute dependence.
 Some concrete child classes are included.
 
 Mutation effects generators :py:class:`Mutator`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Abstract base class for defining generic mutation effect generators (:math:`\mathcal{p}(x\mid x')`), with arbitrary :py:class:`TreeNode` attribute dependence.
+Abstract base class for defining generic mutation effect generators (:math:`\mathcal{p}(x\mid x')`),
+with arbitrary :py:class:`TreeNode` attribute dependence.
 Some concrete child classes are included.
 """
 from abc import ABC, abstractmethod
@@ -157,7 +162,10 @@ class Mutator(ABC):
 
         Args:
             node: A :py:class:`TreeNode` to mutate.
-            seed: A seed to initialize the random number generation. If ``None``, then fresh, unpredictable entropy will be pulled from the OS. If an ``int``, then it will be used to derive the initial state. If a :py:class:`numpy.random.Generator`, then that will be used directly.
+            seed: A seed to initialize the random number generation. If ``None``, then fresh,
+                  unpredictable entropy will be pulled from the OS.
+                  If an ``int``, then it will be used to derive the initial state.
+                  If a :py:class:`numpy.random.Generator`, then that will be used directly.
         """
         pass
 
@@ -244,7 +252,8 @@ class TreeNode(ete3.Tree):
         self.event = event
         """Event at this node."""
         self.n_mutations = n_mutations
-        """Number of mutations on the branch above this node (zero unless the tree has been pruned above this node, removing mutation event nodes)."""
+        """Number of mutations on the branch above this node (zero unless the tree has been pruned above this node,
+        removing mutation event nodes)."""
         self._evolved = 0
         self._sampled = False
         self._pruned = False
@@ -269,12 +278,18 @@ class TreeNode(ete3.Tree):
             birth_rate: Birth rate response function.
             death_rate: Death rate response function.
             mutation_rate: Mutation rate response function.
-            mutator: Generator of mutation effects at mutation events (and on offspring of birth events if ``birth_mutations=True``).
+            mutator: Generator of mutation effects at mutation events
+                     (and on offspring of birth events if ``birth_mutations=True``).
             birth_mutations: Flag to indicate whether mutations should occur at birth.
             min_survivors: Minimum number of survivors.
-            retry: Number of times to retry if tree goes extinct. A ``RuntimeError`` is raised if it is exceeded during simulation.
-            max_leaves: Maximum number of active leaves, to truncate exploding processes. A ``RuntimeError`` is raised if this is exceeded during simulation.
-            seed: A seed to initialize the random number generation. If ``None``, then fresh, unpredictable entropy will be pulled from the OS. If an ``int``, then it will be used to derive the initial state. If a :py:class:`numpy.random.Generator`, then that will be used directly.
+            retry: Number of times to retry if tree goes extinct.
+                   A ``RuntimeError`` is raised if it is exceeded during simulation.
+            max_leaves: Maximum number of active leaves, to truncate exploding processes.
+                        A ``RuntimeError`` is raised if this is exceeded during simulation.
+            seed: A seed to initialize the random number generation.
+                  If ``None``, then fresh, unpredictable entropy will be pulled from the OS.
+                  If an ``int``, then it will be used to derive the initial state.
+                  If a :py:class:`numpy.random.Generator`, then that will be used directly.
         """
         if self._evolved - (self.event == self._BIRTH_EVENT) > 0:
             raise ValueError(
@@ -286,7 +301,8 @@ class TreeNode(ete3.Tree):
         attempt = 0
         while not success:
             unfinished_nodes = [self]
-            # NOTE: this key management is needed because the bisect.insort function does not have a key argument in python 3.9 (it gains one in 3.10)
+            # NOTE: this key management is needed because the bisect.insort function does not have a
+            #       key argument in python 3.9 (it gains one in 3.10)
             keys = [self.t]
             while unfinished_nodes:
                 Δt = t - unfinished_nodes[0].t
@@ -401,7 +417,10 @@ class TreeNode(ete3.Tree):
         Args:
             n: Number of leaves to sample.
             p: Probability of sampling a leaf.
-            seed: A seed to initialize the random number generation. If ``None``, then fresh, unpredictable entropy will be pulled from the OS. If an ``int``, then it will be used to derive the initial state. If a :py:class:`numpy.random.Generator`, then that will be used directly.
+            seed: A seed to initialize the random number generation.
+                  If ``None``, then fresh, unpredictable entropy will be pulled from the OS.
+                  If an ``int``, then it will be used to derive the initial state.
+                  If a :py:class:`numpy.random.Generator`, then that will be used directly.
         """
         if self._sampled:
             raise ValueError(f"tree has already been sampled below node {self.name}")
@@ -451,15 +470,16 @@ class TreeNode(ete3.Tree):
         r"""A thin wrapper around :py:func:`ete3.TreeNode.render` that adds some
         custom decoration and a color bar. As with the base class method, pass
         ``"%%inline"`` for the first argument to render inline in a notebook.
-        See also ETE's tree rendering `tutorial.
-
-        <http://etetoolkit.org/docs/latest/tutorial/tutorial_drawing.html>`_
+        See also ETE's tree rendering
+        `tutorial <http://etetoolkit.org/docs/latest/tutorial/tutorial_drawing.html>`_
         and linked API docs pages there.
-
-        If tree is not pruned, then branches are colored according to phenotype, extinct lineages are indicated as dotted branches, unsampled non-extint lineages are indicated as solid branches, and sampled lineages are indicated as thick solid branches with.
+        If tree is not pruned, then branches are colored according to phenotype,
+        extinct lineages are indicated as dotted branches, unsampled non-extint lineages are indicated as solid branches,
+        and sampled lineages are indicated as thick solid branches with.
         Sampled leaves are indicated with a circle.
 
-        If tree is pruned, then nodes are colored according to phenotype, branches are annotated above with branch length (in black text) and below with number of mutations (in green text).
+        If tree is pruned, then nodes are colored according to phenotype,
+        branches are annotated above with branch length (in black text) and below with number of mutations (in green text).
 
         Args:
             args: Arguments to pass to :py:func:`ete3.TreeNode.render`.
