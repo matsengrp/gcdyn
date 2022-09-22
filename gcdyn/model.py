@@ -64,8 +64,9 @@ class Model:
             lower_bounds: lower bounds for the optimizer
             upper_bounds: upper bounds for the optimizer
         """
-        return self.optimizer.run(np.array(init_value),
-                                  (np.array(lower_bounds), np.array(upper_bounds)))
+        return self.optimizer.run(
+            np.array(init_value), (np.array(lower_bounds), np.array(upper_bounds))
+        )
 
     @partial(jit, static_argnums=(0,))
     def log_likelihood(self, θ) -> float:
