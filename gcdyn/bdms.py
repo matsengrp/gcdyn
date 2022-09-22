@@ -21,7 +21,7 @@ with these notable differences:
 * Attribute :py:attr:`event`: the event that occurred at the node
 * Attribute :py:attr:`n_mutations`: the number of mutations that occurred on the branch above the node
 * Method :py:meth:`TreeNode.evolve`: evolve the tree, adding nodes according a BDMS process
-* Method :py:meth:`TreeNode.sample`: sample a subset of surviving leaves from the tree
+* Method :py:meth:`TreeNode.sample_survivors`: sample a subset of surviving leaves from the tree
 * Method :py:meth:`TreeNode.prune`: prune the tree subtree induced by the sampled leaves
   (overrides ETE's :py:meth:`ete3.TreeNode.prune`)
 * Method :py:meth:`TreeNode.render`: visualizes the tree (overrides ETE's :py:meth:`ete3.TreeNode.render`)
@@ -211,8 +211,6 @@ class TreeNode(ete3.Tree):
     Args:
         t: Time of this node.
         x: Phenotype of this node.
-        event: Event at this node.
-        n_mutations: Number of mutations that occurred on the branch above the node.
         kwargs: Keyword arguments passed to :py:class:`ete3.TreeNode` initializer.
     """
 
@@ -221,6 +219,8 @@ class TreeNode(ete3.Tree):
     _MUTATION_EVENT = "mutation"
     _SURVIVAL_EVENT = "survival"
     _SAMPLING_EVENT = "sampling"
+
+    _OFFSPRING_NUMBER = 2
 
     _name_generator = itertools.count()
 
@@ -235,8 +235,6 @@ class TreeNode(ete3.Tree):
         self,
         t: float = 0,
         x: float = 0,
-        event: Optional[str] = None,
-        n_mutations: int = 0,
         **kwargs: Any,
     ) -> None:
         if "dist" not in kwargs:
@@ -249,12 +247,11 @@ class TreeNode(ete3.Tree):
         """Time of the node."""
         self.x = x
         """Phenotype of the node."""
-        self.event = event
+        self.event = None
         """Event at this node."""
-        self.n_mutations = n_mutations
+        self.n_mutations = 0
         """Number of mutations on the branch above this node (zero unless the tree has been pruned above this node,
         removing mutation event nodes)."""
-        self._evolved = 0
         self._sampled = False
         self._pruned = False
 
@@ -291,9 +288,11 @@ class TreeNode(ete3.Tree):
                   If an ``int``, then it will be used to derive the initial state.
                   If a :py:class:`numpy.random.Generator`, then that will be used directly.
         """
-        if self._evolved - (self.event == self._BIRTH_EVENT) > 0:
+        if not self.is_root():
+            raise RuntimeError("Cannot evolve a non-root node")
+        if self.children:
             raise ValueError(
-                f"tree has already evolved at node {self.name} with event {self.event}"
+                f"tree has already evolved at node {self.name} with {len(self.children)} descendant lineages"
             )
         rng = np.random.default_rng(seed)
 
@@ -303,10 +302,10 @@ class TreeNode(ete3.Tree):
             unfinished_nodes = [self]
             # NOTE: this key management is needed because the bisect.insort function does not have a
             #       key argument in python 3.9 (it gains one in 3.10)
-            keys = [self.t]
+            time_keys = [self.t]
             while unfinished_nodes:
                 Δt = t - unfinished_nodes[0].t
-                new_event_node = unfinished_nodes[0]._event(
+                new_event_node = unfinished_nodes[0]._generate_event(
                     Δt,
                     birth_rate,
                     death_rate,
@@ -315,18 +314,20 @@ class TreeNode(ete3.Tree):
                     birth_mutations,
                     rng,
                 )
+                # We pop an element of unfinished_nodes after we're finished operating on it with _generate_event.
+                # The special case is that birth nodes must be operated on twice before they should be popped.
                 if (
                     unfinished_nodes[0].event != self._BIRTH_EVENT
-                    or len(unfinished_nodes[0].children) == 2
+                    or len(unfinished_nodes[0].children) == self._OFFSPRING_NUMBER
                 ):
                     unfinished_nodes.pop(0)
-                    keys.pop(0)
+                    time_keys.pop(0)
                 if new_event_node.event not in (
                     self._DEATH_EVENT,
                     self._SURVIVAL_EVENT,
                 ):
-                    idx = bisect.bisect(keys, new_event_node.t)
-                    keys.insert(idx, new_event_node.t)
+                    idx = bisect.bisect(time_keys, new_event_node.t)
+                    time_keys.insert(idx, new_event_node.t)
                     unfinished_nodes.insert(idx, new_event_node)
                 if len(unfinished_nodes) > max_leaves:
                     raise RuntimeError(
@@ -349,9 +350,7 @@ class TreeNode(ete3.Tree):
                     child.delete()
                 TreeNode._name_generator = itertools.count(start=self.name + 1)
 
-        self._evolved += 1
-
-    def _event(
+    def _generate_event(
         self,
         Δt: float,
         birth_rate: Response,
@@ -362,7 +361,11 @@ class TreeNode(ete3.Tree):
         rng: np.random.Generator,
     ) -> "TreeNode":
         r"""Simulate a single event, adding a new child TreeNode to self, and
-        returning it."""
+        returning it.
+
+        The Δt parameter is a boundary time: events that reach this time
+        are survivors.
+        """
         λ = birth_rate(self)
         μ = death_rate(self)
         γ = mutation_rate(self)
@@ -386,17 +389,16 @@ class TreeNode(ete3.Tree):
             child.event = rng.choice(possible_events, p=event_probabilities)
             if child.event == self._BIRTH_EVENT:
                 if birth_mutations:
-                    for _ in range(2):
+                    for _ in range(self._OFFSPRING_NUMBER):
                         grandchild = TreeNode(
                             t=child.t,
                             x=child.x,
-                            event=self._MUTATION_EVENT,
                             dist=0,
                             name=next(self._name_generator),
                         )
+                        grandchild.event = self._MUTATION_EVENT
                         mutator.mutate(grandchild, seed=rng)
                         child.add_child(grandchild)
-                        child._evolved += 1
             elif child.event == self._DEATH_EVENT:
                 pass
             elif child.event == self._MUTATION_EVENT:
@@ -405,14 +407,14 @@ class TreeNode(ete3.Tree):
                 raise ValueError(f"unknown event {child.event}")
         return self.add_child(child)
 
-    def sample(
+    def sample_survivors(
         self,
         n: Optional[int] = None,
         p: Optional[float] = 1.0,
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
-        """Sample :math:`n` leaves from the tree, or each leaf with probability
-        :math:`p`.
+        """Choose :math:`n` survivor leaves from the tree, or each survivor leaf with probability
+        :math:`p`, to mark as sampled (via the event attribute).
 
         Args:
             n: Number of leaves to sample.

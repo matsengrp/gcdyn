@@ -16,8 +16,8 @@ class TestTreeNode(unittest.TestCase):
             seed=0,
         )
 
-    def test_sample(self):
-        self.tree.sample(n=10)
+    def test_sample_survivors(self):
+        self.tree.sample_survivors(n=10)
         self.assertTrue(
             all(leaf.event in ("survival", "sampling", "death") for leaf in self.tree)
         )
@@ -44,7 +44,7 @@ class TestTreeNode(unittest.TestCase):
                 )
 
     def test_prune(self):
-        self.tree.sample(n=10)
+        self.tree.sample_survivors(n=10)
         original_sampled = set(
             [node for node in self.tree.traverse() if node.event == "sampling"]
         )
