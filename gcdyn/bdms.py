@@ -315,7 +315,10 @@ class TreeNode(ete3.Tree):
                     rng,
                 )
                 # We pop an element of unfinished_nodes after we're finished operating on it with _generate_event.
-                # The special case is that birth nodes must be operated on twice before they should be popped.
+                # The special case is that birth nodes must be operated on twice before they should be popped, if
+                # birth_mutations is False. We then insert newly created nodes that need to be operated on.
+                # If birth_mutations is True, we get a cherry returned from _generate_event,
+                # and need to insert both children
                 if (
                     unfinished_nodes[0].event != self._BIRTH_EVENT
                     or len(unfinished_nodes[0].children) == self._OFFSPRING_NUMBER
@@ -326,9 +329,15 @@ class TreeNode(ete3.Tree):
                     self._DEATH_EVENT,
                     self._SURVIVAL_EVENT,
                 ):
-                    idx = bisect.bisect(time_keys, new_event_node.t)
-                    time_keys.insert(idx, new_event_node.t)
-                    unfinished_nodes.insert(idx, new_event_node)
+                    if new_event_node.event == self._BIRTH_EVENT and birth_mutations:
+                        assert len(new_event_node.children) == self._OFFSPRING_NUMBER
+                        nodes_to_insert = new_event_node.children
+                    else:
+                        nodes_to_insert = [new_event_node]
+                    for node_to_insert in nodes_to_insert:
+                        idx = bisect.bisect(time_keys, node_to_insert.t)
+                        time_keys.insert(idx, node_to_insert.t)
+                        unfinished_nodes.insert(idx, node_to_insert)
                 if len(unfinished_nodes) > max_leaves:
                     raise RuntimeError(
                         f"maximum number of leaves {max_leaves} exceeded during simulation"
