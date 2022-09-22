@@ -212,7 +212,7 @@ class TreeNode(ete3.Tree):
         t: Time of this node.
         x: Phenotype of this node.
         event: Event at this node.
-        n_mutations: Number of mutations at this node.
+        n_mutations: Number of mutations that occurred on the branch above the node.
         kwargs: Keyword arguments passed to :py:class:`ete3.TreeNode` initializer.
     """
 
