@@ -1,61 +1,95 @@
-r"""Model classes"""
+r"""BDMS inference.
 
+.. todo::
+
+    Harmonize/integrate with :py:mod:`gcdyn.bdms` module.
+"""
 import jax.numpy as np
-from jax import random
+
+# NOTE: sphinx is currently unable to present this in condensed form, using a string type hint
+# of "array-like" in the docstring args for now, instead of ArrayLike hint in call signature
+# from numpy.typing import ArrayLike
+
 from jax.scipy.stats import norm
+from jax import jit
+from jax.scipy.special import expit
+from jaxopt import ScipyBoundedMinimize
+from functools import partial
 
-from gcdyn.tree import Tree
-
-from gcdyn.parameters import Parameters
+from gcdyn.bdms import TreeNode
 
 
 class Model:
-    r"""A class that represents a GC model
+    r"""A class that represents a GC model.
 
     Args:
-        params: model parameters
+        trees: list of trees
+        μ: death rate
+        γ: mutation rate
+        ρ: sampling probability
+        opt_kwargs: keyword arguments to pass to :py:class:`jaxopt.ScipyBoundedMinimize`
     """
 
-    def __init__(self, params: Parameters):
-        self.params = params
-        self.trees = None
+    def __init__(
+        self, trees: list[TreeNode], μ: float, γ: float, ρ: float, **opt_kwargs
+    ):
+        self.trees = trees
+        self.μ = μ
+        self.γ = γ
+        self.ρ = ρ
 
-    def simulate(self, T: float, n_trees: int, seed: int):
-        r"""Creates a collection of ``Tree`` given a key.
+        self.optimizer = ScipyBoundedMinimize(
+            fun=jit(lambda θ: -self.log_likelihood(θ)), **opt_kwargs
+        )
+
+    def λ(self, x: float, θ) -> float:
+        r"""Birth rate of phenotype x.
 
         Args:
-            T: simulation sampling time
-            n_trees: number of GC trees in the model
-            seef: random seed
-        """
-        # call tree.Tree constructor
-        # evolve the tree -- call method in tree class
-        key = random.PRNGKey(seed)
-        trees = []
-        for i in range(n_trees):
-            key, _ = random.split(key)
-            tree = Tree(T, key[0], self.params)
-            trees.append(tree)
-        self.trees = trees
-
-    def log_likelihood(self):
-        r"""Find log likelihood of simulated trees.
+            x: phenotype
 
         Returns:
-            float: log likelihood of the GC tree in the model
+            float: birth rate
+        """
+        return θ[0] * expit(θ[1] * (x - θ[2])) + θ[3]
+
+    def fit(
+        self,
+        init_value=[2.0, 1.0, 0.0, 0.0],
+        lower_bounds=[0.0, 0.0, -np.inf, 0.0],
+        upper_bounds=[np.inf, np.inf, np.inf, np.inf],
+    ) -> np.ndarray:
+        r"""Given a collection of :py:class:`TreeNode`, fit the parameters of
+        the model.
+
+        Args:
+            init_value (array-like): initial value for the optimizer
+            lower_bounds (array-like): lower bounds for the optimizer
+            upper_bounds (array-like): upper bounds for the optimizer
+        """
+        return self.optimizer.run(
+            np.array(init_value), (np.array(lower_bounds), np.array(upper_bounds))
+        )
+
+    @partial(jit, static_argnums=(0,))
+    def log_likelihood(self, θ) -> float:
+        r"""Compute log likelihood of parameters.
+
+        Args:
+            θ: parameters
         """
         result = 0
         for tree in self.trees:
-            for node in tree.tree.children[0].traverse():
+            for node in tree.children[0].traverse():
                 x = node.up.x
                 Δt = node.dist
-                λ_x = tree.λ(x)
-                Λ = λ_x + self.params.μ + self.params.m
+                λ_x = self.λ(x, θ)
+                Λ = λ_x + self.μ + self.γ
                 logΛ = np.log(Λ)
-                if node.event in ("sampled", "unsampled"):
+                if node.event in ("sampling", "survival"):
                     # exponential survival function (no event before sampling time), then sampling probability
                     result += -Λ * Δt + np.log(
-                        self.params.ρ if node.event == "sampled" else 1 - self.params.ρ
+                        self.ρ if node.event == "sampling" else 1 - self.ρ
                     )
                 else:
                     # exponential density for event time
@@ -64,14 +98,10 @@ class Model:
                     if node.event == "birth":
                         result += np.log(λ_x) - logΛ
                     elif node.event == "death":
-                        result += np.log(self.params.μ) - logΛ
+                        result += np.log(self.μ) - logΛ
                     elif node.event == "mutation":
                         Δx = node.x - x
-                        result += np.log(self.params.m) - logΛ + norm.logpdf(Δx)
+                        result += np.log(self.γ) - logΛ + norm.logpdf(Δx)
                     else:
                         raise ValueError(f"unknown event {node.event}")
         return result
-
-    def fit(self):
-        r"""Given a collection of `tree.Tree`, fit the parameters of the model."""
-        raise NotImplementedError("not yet implemented")

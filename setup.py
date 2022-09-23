@@ -28,5 +28,7 @@ setuptools.setup(
         "matplotlib",
         "jaxlib",
         "jax",
+        "jaxopt",
+        "biopython",
     ],
 )
