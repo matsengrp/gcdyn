@@ -335,11 +335,11 @@ class TreeNode(ete3.Tree):
                     birth_mutations,
                     rng,
                 )
-                # We pop an element of unfinished_nodes after we're finished operating on it with _generate_event.
-                # The special case is that birth nodes must be operated on twice before they should be popped, if
-                # birth_mutations is False. We then insert newly created nodes that need to be operated on.
-                # If birth_mutations is True, we get a cherry returned from _generate_event,
-                # and need to insert both children
+                # We pop the corresponding element of unfinished_nodes after we're finished operating on it with 
+                # _generate_event. The special case is that birth nodes must be operated on twice before they 
+                # should be popped, if birth_mutations is False. We then insert newly created nodes that need to 
+                # be operated on. If birth_mutations is True, we get a cherry returned from _generate_event,
+                # and need to insert both children.
                 if (
                     unfinished_nodes[0].event != self._BIRTH_EVENT
                     or len(unfinished_nodes[0].children) == self._OFFSPRING_NUMBER
