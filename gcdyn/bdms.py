@@ -49,6 +49,11 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from typing import Any, Optional, Union
+
+# NOTE: sphinx is currently unable to present this in condensed form, using a string type hint
+# of "array-like" in the docstring args for now, instead of ArrayLike hint in call signature
+# from numpy.typing import ArrayLike
+
 import itertools
 from scipy.special import expit
 from scipy.stats import norm
@@ -113,7 +118,15 @@ class ExponentialResponse(Response):
         self.yshift = yshift
 
     def __call__(self, node: "TreeNode") -> float:
-        return self.yscale * np.exp(self.xscale * (node.x - self.xshift)) + self.yshift
+        return self.f(node.x)
+
+    def f(self, x) -> float:
+        r"""Convenience method for computing :math:`f(x)` (e.g. for plotting).
+
+        Args:
+            x (array-like): Phenotype value.
+        """
+        return self.yscale * np.exp(self.xscale * (x - self.xshift)) + self.yshift
 
 
 class SigmoidResponse(Response):
@@ -143,7 +156,15 @@ class SigmoidResponse(Response):
         self.yshift = yshift
 
     def __call__(self, node: "TreeNode") -> float:
-        return self.yscale * expit(self.xscale * (node.x - self.xshift)) + self.yshift
+        return self.f(node.x)
+
+    def f(self, x) -> float:
+        r"""Convenience method for computing :math:`f(x)` (e.g. for plotting).
+
+        Args:
+            x (array-like): Phenotype value.
+        """
+        return self.yscale * expit(self.xscale * (x - self.xshift)) + self.yshift
 
 
 class Mutator(ABC):

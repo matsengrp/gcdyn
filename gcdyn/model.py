@@ -4,9 +4,12 @@ r"""BDMS inference.
 
     Harmonize/integrate with :py:mod:`gcdyn.bdms` module.
 """
-
 import jax.numpy as np
-from numpy.typing import ArrayLike
+
+# NOTE: sphinx is currently unable to present this in condensed form, using a string type hint
+# of "array-like" in the docstring args for now, instead of ArrayLike hint in call signature
+# from numpy.typing import ArrayLike
+
 from jax.scipy.stats import norm
 from jax import jit
 from jax.scipy.special import expit
@@ -52,17 +55,17 @@ class Model:
 
     def fit(
         self,
-        init_value: ArrayLike = [2.0, 1.0, 0.0, 0.0],
-        lower_bounds: ArrayLike = [0.0, 0.0, -np.inf, 0.0],
-        upper_bounds: ArrayLike = [np.inf, np.inf, np.inf, np.inf],
-    ) -> ArrayLike:
+        init_value=[2.0, 1.0, 0.0, 0.0],
+        lower_bounds=[0.0, 0.0, -np.inf, 0.0],
+        upper_bounds=[np.inf, np.inf, np.inf, np.inf],
+    ) -> np.ndarray:
         r"""Given a collection of :py:class:`TreeNode`, fit the parameters of
         the model.
 
         Args:
-            init_value: initial value for the optimizer
-            lower_bounds: lower bounds for the optimizer
-            upper_bounds: upper bounds for the optimizer
+            init_value (array-like): initial value for the optimizer
+            lower_bounds (array-like): lower bounds for the optimizer
+            upper_bounds (array-like): upper bounds for the optimizer
         """
         return self.optimizer.run(
             np.array(init_value), (np.array(lower_bounds), np.array(upper_bounds))
