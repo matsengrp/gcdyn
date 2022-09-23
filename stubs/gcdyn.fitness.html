@@ -47,10 +47,7 @@
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">Modules</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.tree.html">gcdyn.tree</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.forest.html">gcdyn.forest</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.parameters.html">gcdyn.parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.model.html">gcdyn.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.bdms.html">gcdyn.bdms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.cycles.html">gcdyn.cycles</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">gcdyn.fitness</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.fitness.Fitness.html">gcdyn.fitness.Fitness</a></li>
@@ -92,7 +89,8 @@
              
   <section id="module-gcdyn.fitness">
 <span id="gcdyn-fitness"></span><h1>gcdyn.fitness<a class="headerlink" href="#module-gcdyn.fitness" title="Permalink to this heading"></a></h1>
-<p>Uses phenotype to determine fitness of B cells in the germinal center light zone</p>
+<p>Uses phenotype to determine fitness of B cells in the germinal center light
+zone.</p>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <colgroup>
@@ -101,14 +99,14 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.fitness.Fitness.html#gcdyn.fitness.Fitness" title="gcdyn.fitness.Fitness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Fitness</span></code></a></p></td>
-<td><p>Class to determine fitness from phenotype for a collection of sequences</p></td>
+<td><p>Class to determine fitness from phenotype for a collection of sequences.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.fitness.Fitness">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.fitness.</span></span><span class="sig-name descname"><span class="pre">Fitness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tfh_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concentration_antigen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/fitness.html#Fitness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.fitness.Fitness" title="Permalink to this definition"></a></dt>
-<dd><p>Class to determine fitness from phenotype for a collection of sequences</p>
+<dd><p>Class to determine fitness from phenotype for a collection of sequences.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -118,15 +116,10 @@
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.fitness.Fitness.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tfh_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concentration_antigen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/fitness.html#Fitness.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.fitness.Fitness.__init__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.fitness.Fitness.linear_fitness">
 <span class="sig-name descname"><span class="pre">linear_fitness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kd_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_intercept</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/fitness.html#Fitness.linear_fitness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.fitness.Fitness.linear_fitness" title="Permalink to this definition"></a></dt>
-<dd><p>Combines methods to get the antigen bound and T cell help
-from the KD using a linear model.</p>
+<dd><p>Combines methods to get the antigen bound and T cell help from the
+KD using a linear model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -147,7 +140,7 @@ from the KD using a linear model.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.fitness.Fitness.uniform_fitness">
 <span class="sig-name descname"><span class="pre">uniform_fitness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kd_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/fitness.html#Fitness.uniform_fitness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.fitness.Fitness.uniform_fitness" title="Permalink to this definition"></a></dt>
-<dd><p>Sets normalized amount of T cell help to equal values</p>
+<dd><p>Sets normalized amount of T cell help to equal values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>kd_values</strong> – list of length equivalent to number of sequences</p>
@@ -164,8 +157,8 @@ from the KD using a linear model.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.fitness.Fitness.sigmoidal_fitness">
 <span class="sig-name descname"><span class="pre">sigmoidal_fitness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kd_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum_Tfh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curve_steepness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">midpoint_antigen_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/fitness.html#Fitness.sigmoidal_fitness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.fitness.Fitness.sigmoidal_fitness" title="Permalink to this definition"></a></dt>
-<dd><p>Combines methods to get the antigen bound and T cell help
-from the KD using a sigmoidal model.</p>
+<dd><p>Combines methods to get the antigen bound and T cell help from the
+KD using a sigmoidal model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -187,7 +180,8 @@ from the KD using a sigmoidal model.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.fitness.Fitness.normalized_fitness_df">
 <span class="sig-name descname"><span class="pre">normalized_fitness_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculate_KD</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/fitness.html#Fitness.normalized_fitness_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.fitness.Fitness.normalized_fitness_df" title="Permalink to this definition"></a></dt>
-<dd><p>Produces a dataframe including the fitness of a series of sequences given KD values.</p>
+<dd><p>Produces a dataframe including the fitness of a series of sequences
+given KD values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

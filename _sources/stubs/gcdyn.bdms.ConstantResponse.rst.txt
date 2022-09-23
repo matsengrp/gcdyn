@@ -1,9 +1,9 @@
-gcdyn.parameters.Parameters
+gcdyn.bdms.ConstantResponse
 ===========================
 
-.. currentmodule:: gcdyn.parameters
+.. currentmodule:: gcdyn.bdms
 
-.. autoclass:: Parameters
+.. autoclass:: ConstantResponse
    :members:
    :show-inheritance:
    :inherited-members:
@@ -20,14 +20,5 @@ gcdyn.parameters.Parameters
    
 
    
-   
-   .. rubric:: Attributes
-
-   .. autosummary::
-   
-      ~Parameters.θ
-      ~Parameters.μ
-      ~Parameters.m
-      ~Parameters.ρ
    
    

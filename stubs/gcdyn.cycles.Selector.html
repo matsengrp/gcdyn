@@ -46,10 +46,7 @@
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">Modules</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.tree.html">gcdyn.tree</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.forest.html">gcdyn.forest</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.parameters.html">gcdyn.parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.model.html">gcdyn.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.bdms.html">gcdyn.bdms</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="gcdyn.cycles.html">gcdyn.cycles</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.binary_proliferator.html">gcdyn.cycles.binary_proliferator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.cell_div_balanced_proliferator.html">gcdyn.cycles.cell_div_balanced_proliferator</a></li>
@@ -107,8 +104,10 @@
 <dt class="sig sig-object py" id="gcdyn.cycles.Selector">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.cycles.</span></span><span class="sig-name descname"><span class="pre">Selector</span></span><a class="reference internal" href="../_modules/gcdyn/cycles.html#Selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.Selector" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
-<p>A class for GC selectors, which determine the fitness for a list of nucleotide sequences.
-Selectors return a list of tuples that can be interpreted by a proliferator method</p>
+<p>A class for GC selectors, which determine the fitness for a list of
+nucleotide sequences.</p>
+<p>Selectors return a list of tuples that can be interpreted by a
+proliferator method</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <colgroup>

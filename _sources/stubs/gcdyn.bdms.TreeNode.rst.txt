@@ -1,0 +1,106 @@
+gcdyn.bdms.TreeNode
+===================
+
+.. currentmodule:: gcdyn.bdms
+
+.. autoclass:: TreeNode
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~TreeNode.add_child
+      ~TreeNode.add_face
+      ~TreeNode.add_feature
+      ~TreeNode.add_features
+      ~TreeNode.add_sister
+      ~TreeNode.check_monophyly
+      ~TreeNode.compare
+      ~TreeNode.convert_to_ultrametric
+      ~TreeNode.cophenetic_matrix
+      ~TreeNode.copy
+      ~TreeNode.del_feature
+      ~TreeNode.delete
+      ~TreeNode.describe
+      ~TreeNode.detach
+      ~TreeNode.evolve
+      ~TreeNode.expand_polytomies
+      ~TreeNode.from_parent_child_table
+      ~TreeNode.from_skbio
+      ~TreeNode.get_ancestors
+      ~TreeNode.get_ascii
+      ~TreeNode.get_cached_content
+      ~TreeNode.get_children
+      ~TreeNode.get_closest_leaf
+      ~TreeNode.get_common_ancestor
+      ~TreeNode.get_descendants
+      ~TreeNode.get_distance
+      ~TreeNode.get_edges
+      ~TreeNode.get_farthest_leaf
+      ~TreeNode.get_farthest_node
+      ~TreeNode.get_leaf_names
+      ~TreeNode.get_leaves
+      ~TreeNode.get_leaves_by_name
+      ~TreeNode.get_midpoint_outgroup
+      ~TreeNode.get_monophyletic
+      ~TreeNode.get_sisters
+      ~TreeNode.get_topology_id
+      ~TreeNode.get_tree_root
+      ~TreeNode.is_leaf
+      ~TreeNode.is_root
+      ~TreeNode.iter_ancestors
+      ~TreeNode.iter_descendants
+      ~TreeNode.iter_edges
+      ~TreeNode.iter_leaf_names
+      ~TreeNode.iter_leaves
+      ~TreeNode.iter_prepostorder
+      ~TreeNode.iter_search_nodes
+      ~TreeNode.ladderize
+      ~TreeNode.log_likelihood
+      ~TreeNode.phonehome
+      ~TreeNode.populate
+      ~TreeNode.prune
+      ~TreeNode.remove_child
+      ~TreeNode.remove_sister
+      ~TreeNode.render
+      ~TreeNode.resolve_polytomy
+      ~TreeNode.robinson_foulds
+      ~TreeNode.sample_survivors
+      ~TreeNode.search_nodes
+      ~TreeNode.set_outgroup
+      ~TreeNode.set_style
+      ~TreeNode.show
+      ~TreeNode.sort_descendants
+      ~TreeNode.standardize
+      ~TreeNode.swap_children
+      ~TreeNode.traverse
+      ~TreeNode.unroot
+      ~TreeNode.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~TreeNode.children
+      ~TreeNode.dist
+      ~TreeNode.faces
+      ~TreeNode.img_style
+      ~TreeNode.support
+      ~TreeNode.up
+      ~TreeNode.t
+      ~TreeNode.x
+      ~TreeNode.event
+      ~TreeNode.n_mutations
+   
+   

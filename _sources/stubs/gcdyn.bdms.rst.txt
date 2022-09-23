@@ -1,7 +1,7 @@
-﻿gcdyn.tree
+﻿gcdyn.bdms
 ==========
 
-.. automodule:: gcdyn.tree
+.. automodule:: gcdyn.bdms
 
    
    
@@ -20,7 +20,13 @@
       :template: custom-class-template.rst
       :nosignatures:
    
-      Tree
+      ConstantResponse
+      ExponentialResponse
+      GaussianMutator
+      Mutator
+      Response
+      SigmoidResponse
+      TreeNode
    
    
 

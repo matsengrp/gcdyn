@@ -1,9 +1,9 @@
-gcdyn.forest.Forest
+gcdyn.bdms.Response
 ===================
 
-.. currentmodule:: gcdyn.forest
+.. currentmodule:: gcdyn.bdms
 
-.. autoclass:: Forest
+.. autoclass:: Response
    :members:
    :show-inheritance:
    :inherited-members:
@@ -16,9 +16,6 @@ gcdyn.forest.Forest
    .. autosummary::
       :nosignatures:
    
-      ~Forest.create_trees
-      ~Forest.draw_forest
-      ~Forest.prune
    
    
 

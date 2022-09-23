@@ -1,9 +1,9 @@
-gcdyn.tree.Tree
-===============
+gcdyn.bdms.ExponentialResponse
+==============================
 
-.. currentmodule:: gcdyn.tree
+.. currentmodule:: gcdyn.bdms
 
-.. autoclass:: Tree
+.. autoclass:: ExponentialResponse
    :members:
    :show-inheritance:
    :inherited-members:
@@ -16,10 +16,7 @@ gcdyn.tree.Tree
    .. autosummary::
       :nosignatures:
    
-      ~Tree.draw_tree
-      ~Tree.evolve
-      ~Tree.prune
-      ~Tree.λ
+      ~ExponentialResponse.f
    
    
 

@@ -47,10 +47,7 @@
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">Modules</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.tree.html">gcdyn.tree</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.forest.html">gcdyn.forest</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.parameters.html">gcdyn.parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.model.html">gcdyn.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.bdms.html">gcdyn.bdms</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="gcdyn.cycles.html">gcdyn.cycles</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.binary_proliferator.html">gcdyn.cycles.binary_proliferator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.cell_div_balanced_proliferator.html">gcdyn.cycles.cell_div_balanced_proliferator</a></li>
@@ -108,8 +105,8 @@
 <dt class="sig sig-object py" id="gcdyn.cycles.DMSSelector">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.cycles.</span></span><span class="sig-name descname"><span class="pre">DMSSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">slope=3,</span> <span class="pre">y_intercept=1,</span> <span class="pre">igh_frame=1,</span> <span class="pre">igk_frame=1,</span> <span class="pre">igk_idx=336,</span> <span class="pre">naive_sites_path='https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv',</span> <span class="pre">model_path='Linear.model',</span> <span class="pre">tdms_phenotypes=['delta_log10_KD',</span> <span class="pre">'delta_expression'],</span> <span class="pre">log10_naive_KD=-10.43,</span> <span class="pre">fitness_method=&lt;function</span> <span class="pre">Fitness.sigmoidal_fitness&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#DMSSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.DMSSelector" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="gcdyn.cycles.Selector.html#gcdyn.cycles.Selector" title="gcdyn.cycles.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Selector</span></code></a></p>
-<p>A class for a GC selector which determines fitness for nucleotide sequences by using DMS models of
-affinity.</p>
+<p>A class for a GC selector which determines fitness for nucleotide
+sequences by using DMS models of affinity.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

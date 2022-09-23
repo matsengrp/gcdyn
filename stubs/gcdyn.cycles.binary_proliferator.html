@@ -47,10 +47,7 @@
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">Modules</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.tree.html">gcdyn.tree</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.forest.html">gcdyn.forest</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.parameters.html">gcdyn.parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.model.html">gcdyn.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.bdms.html">gcdyn.bdms</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="gcdyn.cycles.html">gcdyn.cycles</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.cycles.binary_proliferator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.cell_div_balanced_proliferator.html">gcdyn.cycles.cell_div_balanced_proliferator</a></li>
@@ -106,10 +103,11 @@
 <h1>gcdyn.cycles.binary_proliferator<a class="headerlink" href="#gcdyn-cycles-binary-proliferator" title="Permalink to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="gcdyn.cycles.binary_proliferator">
-<span class="sig-prename descclassname"><span class="pre">gcdyn.cycles.</span></span><span class="sig-name descname"><span class="pre">binary_proliferator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treenode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng=Generator(PCG64)</span> <span class="pre">at</span> <span class="pre">0x7F4628EDB2E0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#binary_proliferator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.binary_proliferator" title="Permalink to this definition"></a></dt>
-<dd><p>Binary dark zone step (Galton-Watson).
-With probability <span class="math notranslate nohighlight">\(1-p\)</span> the input’s <code class="docutils literal notranslate"><span class="pre">terminated</span></code> attribute is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, indicating extinction.
-With probability <span class="math notranslate nohighlight">\(p\)</span> add two children to the input with <code class="docutils literal notranslate"><span class="pre">terminated</span></code> attributes set to <code class="docutils literal notranslate"><span class="pre">False</span></code>, indicating birth.</p>
+<span class="sig-prename descclassname"><span class="pre">gcdyn.cycles.</span></span><span class="sig-name descname"><span class="pre">binary_proliferator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treenode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng=Generator(PCG64)</span> <span class="pre">at</span> <span class="pre">0x7FCFE5593820</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#binary_proliferator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.binary_proliferator" title="Permalink to this definition"></a></dt>
+<dd><p>Binary dark zone step (Galton-Watson). With probability <span class="math notranslate nohighlight">\(1-p\)</span> the
+input’s <code class="docutils literal notranslate"><span class="pre">terminated</span></code> attribute is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, indicating extinction.
+With probability <span class="math notranslate nohighlight">\(p\)</span> add two children to the input with
+<code class="docutils literal notranslate"><span class="pre">terminated</span></code> attributes set to <code class="docutils literal notranslate"><span class="pre">False</span></code>, indicating birth.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

@@ -76,7 +76,8 @@
            <div itemprop="articleBody">
              
   <h1>Source code for gcdyn.fitness</h1><div class="highlight"><pre>
-<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Uses phenotype to determine fitness of B cells in the germinal center light zone&quot;&quot;&quot;</span>
+<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Uses phenotype to determine fitness of B cells in the germinal center light</span>
+<span class="sd">zone.&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">exp</span>
@@ -84,23 +85,24 @@
 
 
 <div class="viewcode-block" id="Fitness"><a class="viewcode-back" href="../../stubs/gcdyn.fitness.Fitness.html#gcdyn.fitness.Fitness">[docs]</a><span class="k">class</span> <span class="nc">Fitness</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Class to determine fitness from phenotype for a collection of sequences</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Class to determine fitness from phenotype for a collection of sequences.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        tfh_function: method to map from KD to T cell help, taking in a list of :math:`K_D` values and producing a list of absolute T cell help quantities</span>
 <span class="sd">        concentration_antigen: molar concentration of antigen to determine antigen bound</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Fitness.__init__"><a class="viewcode-back" href="../../stubs/gcdyn.fitness.html#gcdyn.fitness.Fitness.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">tfh_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span>
         <span class="n">concentration_antigen</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">),</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tfh_function</span> <span class="o">=</span> <span class="n">tfh_function</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">concentration_antigen</span> <span class="o">=</span> <span class="n">concentration_antigen</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">concentration_antigen</span> <span class="o">=</span> <span class="n">concentration_antigen</span>
 
     <span class="k">def</span> <span class="nf">_frac_antigen_bound</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence_KDs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Determine the fraction of antigen bound from a list of KD values using the Hill equation.</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Determine the fraction of antigen bound from a list of KD values</span>
+<span class="sd">        using the Hill equation.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            sequence_KDs: list of KDs that will each be used to determine the fraction of antigen bound.</span>
@@ -118,8 +120,8 @@
 <div class="viewcode-block" id="Fitness.linear_fitness"><a class="viewcode-back" href="../../stubs/gcdyn.fitness.Fitness.html#gcdyn.fitness.Fitness.linear_fitness">[docs]</a>    <span class="k">def</span> <span class="nf">linear_fitness</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">kd_values</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">y_intercept</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">slope</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Combines methods to get the antigen bound and T cell help</span>
-<span class="sd">        from the KD using a linear model.</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Combines methods to get the antigen bound and T cell help from the</span>
+<span class="sd">        KD using a linear model.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            kd_values: list with KD value for each sequence</span>
@@ -136,7 +138,7 @@
         <span class="k">return</span> <span class="n">t_cell_help_values</span></div>
 
 <div class="viewcode-block" id="Fitness.uniform_fitness"><a class="viewcode-back" href="../../stubs/gcdyn.fitness.Fitness.html#gcdyn.fitness.Fitness.uniform_fitness">[docs]</a>    <span class="k">def</span> <span class="nf">uniform_fitness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kd_values</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sets normalized amount of T cell help to equal values</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sets normalized amount of T cell help to equal values.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            kd_values: list of length equivalent to number of sequences</span>
@@ -153,8 +155,8 @@
         <span class="n">curve_steepness</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
         <span class="n">midpoint_antigen_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Combines methods to get the antigen bound and T cell help</span>
-<span class="sd">        from the KD using a sigmoidal model.</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Combines methods to get the antigen bound and T cell help from the</span>
+<span class="sd">        KD using a sigmoidal model.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            kd_values: list with KD value for each sequence</span>
@@ -178,7 +180,8 @@
         <span class="n">seq_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">calculate_KD</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Produces a dataframe including the fitness of a series of sequences given KD values.</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Produces a dataframe including the fitness of a series of sequences</span>
+<span class="sd">        given KD values.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            seq_list: list of DNA sequences</span>

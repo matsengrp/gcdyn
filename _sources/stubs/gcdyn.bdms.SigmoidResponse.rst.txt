@@ -1,9 +1,9 @@
-gcdyn.model.Model
-=================
+gcdyn.bdms.SigmoidResponse
+==========================
 
-.. currentmodule:: gcdyn.model
+.. currentmodule:: gcdyn.bdms
 
-.. autoclass:: Model
+.. autoclass:: SigmoidResponse
    :members:
    :show-inheritance:
    :inherited-members:
@@ -16,9 +16,7 @@ gcdyn.model.Model
    .. autosummary::
       :nosignatures:
    
-      ~Model.fit
-      ~Model.log_likelihood
-      ~Model.simulate
+      ~SigmoidResponse.f
    
    
 
