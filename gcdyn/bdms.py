@@ -32,14 +32,14 @@ Additional classes:
 Rate response functions :py:class:`Response`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Abstract base class for defining generic response functions (:math:`\lambda(x)`, :math:`\mu(x)`, :math:`x`, :math:`\gamma(x)`),
+Abstract base class for defining generic response functions (i.e. :math:`\lambda(x)`, :math:`\mu(x)`, :math:`\gamma(x)`),
 with arbitrary :py:class:`TreeNode` attribute dependence.
 Some concrete child classes are included.
 
 Mutation effects generators :py:class:`Mutator`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Abstract base class for defining generic mutation effect generators (:math:`\mathcal{p}(x\mid x')`),
+Abstract base class for defining generic mutation effect generators (i.e. :math:`\mathcal{p}(x\mid x')`),
 with arbitrary :py:class:`TreeNode` attribute dependence.
 Some concrete child classes are included.
 """
