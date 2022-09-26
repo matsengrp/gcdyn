@@ -9,8 +9,8 @@ from Bio.Seq import Seq
 
 
 class DMSPhenotype:
-    """Defines a set of parameters used to go from DNA sequence of heavy and
-    light chain to KD values.
+    """Defines a set of parameters used to go from DNA sequence of heavy
+    and light chain to KD values.
 
     Args:
         igh_frame: frame for translation of Ig heavy chain
@@ -45,8 +45,8 @@ class DMSPhenotype:
         self.log10_naive_KD = log10_naive_KD
 
     def _seq_aa_tdms(self, nt_seqs: list[str]) -> list[str]:
-        """Produces ``torchdms``-inferred Igh and Igk amino acid sequence from
-        a list of DNA sequences.
+        """Produces ``torchdms``-inferred Igh and Igk amino acid
+        sequence from a list of DNA sequences.
 
         Args:
             nt_seqs: list of DNA sequences of length of 657 nt
@@ -97,7 +97,8 @@ class DMSPhenotype:
 
     @staticmethod
     def _aa(sequence: str, frame: int) -> Seq:
-        """Amino acid translation of nucleotide sequence in frame 1, 2, or 3.
+        """Amino acid translation of nucleotide sequence in frame 1, 2,
+        or 3.
 
         Args:
             sequence: DNA sequence

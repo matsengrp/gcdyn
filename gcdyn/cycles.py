@@ -59,8 +59,8 @@ class FivemerMutator(Mutator):
         substitution_csv: str,
         igk_idx: int = 336,
     ):
-        """AID hotspot-aware mutation model using mutability values at each
-        nucleotide 5mer and substitution probabilities.
+        """AID hotspot-aware mutation model using mutability values at
+        each nucleotide 5mer and substitution probabilities.
 
         Args:
             mutability_csv: path to CSV with rows representing 5mers and mutability value
@@ -80,8 +80,8 @@ class FivemerMutator(Mutator):
     def mutate(
         self, sequence: str, time: float, rng: np.random.Generator = default_rng()
     ) -> str:
-        """AID hotspot-aware mutation model using mutability values at each
-        nucleotide 5mer and substitution probabilities.
+        """AID hotspot-aware mutation model using mutability values at
+        each nucleotide 5mer and substitution probabilities.
 
         Args:
             sequence: initial sequence, consisting of characters ``ACGT``
@@ -128,8 +128,8 @@ class Selector(ABC):
     Selectors return a list of tuples that can be interpreted by a proliferator method"""
 
     def select(self, sequence_list: List[str], competition: bool = True) -> List[Tuple]:
-        """Assigns the fitness for each sequence, with normalization depending
-        on whether competition is considered.
+        """Assigns the fitness for each sequence, with normalization
+        depending on whether competition is considered.
 
         Args:
             sequence_list: list of nucleotide sequences
@@ -156,8 +156,8 @@ class UniformSelector(Selector):
     def select(
         self, sequence_list: List[str], competition: bool = True
     ) -> List[Tuple[float]]:
-        """Uniform selector assigning fitness of each sequence to an equal
-        value.
+        """Uniform selector assigning fitness of each sequence to an
+        equal value.
 
         Args:
             sequence_list: list of sequences for fitness assignment
@@ -179,8 +179,8 @@ class UniformSelector(Selector):
 
 
 class ThreeStepSelector(Selector):
-    """A Selector that uses DMS data as well as a discrete amount of T cell
-    help that is assigned."""
+    """A Selector that uses DMS data as well as a discrete amount of T
+    cell help that is assigned."""
 
     def __init__(
         self,
@@ -198,9 +198,9 @@ class ThreeStepSelector(Selector):
         sigmoid_growth_rate: float = 10,
         sigmoid_mid_competency: float = 0.5,
     ):
-        """Initializes values for a DMSPhenotype to calculate KD based on
-        sequence from torchDMS model if KDs are not provided, and sets antigen
-        concentration for determining antigen bound.
+        """Initializes values for a DMSPhenotype to calculate KD based
+        on sequence from torchDMS model if KDs are not provided, and
+        sets antigen concentration for determining antigen bound.
 
         Args:
             igh_frame: frame for translation of Ig heavy chain
@@ -238,8 +238,8 @@ class ThreeStepSelector(Selector):
     ) -> List[Tuple[float]]:
         """Produce the predicted number of cell divisions for a list of
         sequences with discrete units of T cell help. T cell help is
-        distributed semi-randomly, with probabilites based on normalized signal
-        from antigen bound.
+        distributed semi-randomly, with probabilites based on normalized
+        signal from antigen bound.
 
         Args:
             sequence_list: list of nucleotide sequences
@@ -319,8 +319,8 @@ class ThreeStepSelector(Selector):
         return norm_signals
 
     def _norm2_quartile(self, competencies: List[float]):
-        """Determines signal based on competency based on the distance from the
-        quartile value.
+        """Determines signal based on competency based on the distance
+        from the quartile value.
 
         Args:
             competencies: list of competencies between 0 and 1

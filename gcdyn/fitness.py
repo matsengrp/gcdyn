@@ -120,8 +120,8 @@ class Fitness:
     def cell_divisions_from_tfh_linear(
         self, norm_t_cell_help: list[float], slope: float = 1, y_intercept: float = 0
     ) -> list[float]:
-        """Map T cell help linearly to the number of cell divisions using
-        slope.
+        """Map T cell help linearly to the number of cell divisions
+        using slope.
 
         Args:
             norm_t_cell_help: list of normalized amounts of T cell help to correspond to each sequence of interest
