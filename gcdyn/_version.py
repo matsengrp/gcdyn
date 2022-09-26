@@ -50,8 +50,7 @@ def get_config():
 
 
 class NotThisMethod(Exception):
-    """Exception raised if a method is not valid for the current
-    scenario."""
+    """Exception raised if a method is not valid for the current scenario."""
 
 
 LONG_VERSION_PY: Dict[str, str] = {}
@@ -390,8 +389,7 @@ def plus_or_dot(pieces):
 
 
 def render_pep440(pieces):
-    """Build up version string, with post-release "local version
-    identifier".
+    """Build up version string, with post-release "local version identifier".
 
     Our goal: TAG[+DISTANCE.gHEX[.dirty]] . Note that if you
     get a tagged build and then dirty it, you'll get TAG+0.gHEX.dirty

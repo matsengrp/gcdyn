@@ -20,7 +20,8 @@ class ExtinctionError(Exception):
 
 
 class Mutator(ABC):
-    r"""A class for GC mutators, which mutate a sequence over some period of time."""
+    r"""A class for GC mutators, which mutate a sequence over some period of
+    time."""
 
     def mutate(self, time: float, rng: np.random.Generator) -> str:
         pass
@@ -124,8 +125,12 @@ class FivemerMutator(Mutator):
 
 
 class Selector(ABC):
-    r"""A class for GC selectors, which determine the fitness for a list of nucleotide sequences.
-    Selectors return a list of tuples that can be interpreted by a proliferator method"""
+    r"""A class for GC selectors, which determine the fitness for a list of
+    nucleotide sequences.
+
+    Selectors return a list of tuples that can be interpreted by a
+    proliferator method
+    """
 
     def select(self, sequence_list: List[str], competition: bool = True) -> List[Tuple]:
         """Assigns the fitness for each sequence, with normalization
@@ -464,7 +469,8 @@ class DMSSelector(Selector):
 
 
 class GC:
-    r"""A class for simulating a germinal center with discrete LZ :math:`\leftrightarrow` DZ cycles.
+    r"""A class for simulating a germinal center with discrete LZ
+    :math:`\leftrightarrow` DZ cycles.
 
     Args:
         sequence: root nucleotide sequence
@@ -598,9 +604,10 @@ class GC:
 def binary_proliferator(
     treenode: TreeNode, p: float, *args, rng: np.random.Generator = default_rng()
 ):
-    r"""Binary dark zone step (Galton-Watson).
-    With probability :math:`1-p` the input's ``terminated`` attribute is set to ``True``, indicating extinction.
-    With probability :math:`p` add two children to the input with ``terminated`` attributes set to ``False``, indicating birth.
+    r"""Binary dark zone step (Galton-Watson). With probability :math:`1-p` the
+    input's ``terminated`` attribute is set to ``True``, indicating extinction.
+    With probability :math:`p` add two children to the input with
+    ``terminated`` attributes set to ``False``, indicating birth.
 
     Args:
         treenode: root node to simulate from
@@ -625,8 +632,10 @@ def simple_proliferator(
     dist: float = None,
     rng: np.random.Generator = default_rng(),
 ) -> None:
-    r"""Recursively populates descendants on a tree node based on the number of integer cell divisions indicated.
-    Branch lengths are set to 1/`cell_divisions`, such that the distance from the root to all leaves will be 1.
+    r"""Recursively populates descendants on a tree node based on the number of
+    integer cell divisions indicated. Branch lengths are set to
+    1/`cell_divisions`, such that the distance from the root to all leaves will
+    be 1.
 
     Args:
         treenode: root node to populate from
@@ -651,8 +660,12 @@ def cell_div_balanced_proliferator(
     cell_divisions: float,
     rng: np.random.Generator = default_rng(),
 ) -> None:
-    r"""Populates descendants on a tree node based on the number of cell divisions indicated, producing the number of children expected by :math:`2^{cell\_divisions}`, where ``cell_divisions`` is not necessarily an integer value.
-    A full binary tree is generated, then leaf nodes are removed at random from the set of alternating leaf nodes until there are the expected number of children.
+    r"""Populates descendants on a tree node based on the number of cell
+    divisions indicated, producing the number of children expected by
+    :math:`2^{cell\_divisions}`, where ``cell_divisions`` is not necessarily an
+    integer value. A full binary tree is generated, then leaf nodes are removed
+    at random from the set of alternating leaf nodes until there are the
+    expected number of children.
 
     Args:
         treenode: root node to populate from
