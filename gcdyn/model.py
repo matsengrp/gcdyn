@@ -68,7 +68,7 @@ class Model:
             upper_bounds (array-like): upper bounds for the optimizer
         """
         return self.optimizer.run(
-            np.array(init_value), (np.array(lower_bounds), np.array(upper_bounds))
+            np.array(init_value, dtype=float), (np.array(lower_bounds, dtype=float), np.array(upper_bounds, dtype=float))
         )
 
     @partial(jit, static_argnums=(0,))
