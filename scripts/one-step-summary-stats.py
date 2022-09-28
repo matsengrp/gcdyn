@@ -1,7 +1,7 @@
 r"""Produce summary statistics for simulated sequences."""
 import argparse
 import os
-from typing import Callable, List
+from typing import Callable, List, Dict
 import numpy as np
 from Bio import SeqIO
 from ete3 import TreeNode
@@ -48,6 +48,7 @@ def simulate_cycle_seqs(
     model_path: str = "notebooks/tdms-linear.model",
     sigmoid_growth_rate: float = 10,
     sigmoid_mid_competency: float = 0.5,
+    kd_vals: List[float] = None
 ):
     """
     Simulate a GC from a list of sequences for one cycle
@@ -61,6 +62,9 @@ def simulate_cycle_seqs(
         max_help: maximum amount of T cell help that may be attained by each cell
         antigen_frac_limit: the inclusive lower limit of antigen bound to have any division (for three step selector)
         model_path: path to model to determine KD
+        sigmoid_growth_rate: logistic growth rate of sigmoid
+        sigmoid_mid_competency: competency at midpoint of sigmoid
+        kd_vals: list of KD values of sequences
 
     Returns:
         genotypes: list of resultant BCR sequences from tree
@@ -83,7 +87,7 @@ def simulate_cycle_seqs(
         )
     if proliferator is None:
         proliferator = cycles.cell_div_balanced_proliferator
-    fitnesses = selector.select(seqs)
+    fitnesses = selector.select(seqs, kd_list=kd_vals)
     alive_leaves = []
     for seq in seqs:
         leaf = TreeNode()
@@ -120,15 +124,6 @@ def simulated_summary_stats(
     distances = []
     abundances = []
     affinities = []
-    phenotype = DMSPhenotype(
-        1,
-        1,
-        336,
-        "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
-        "notebooks/Linear.model",
-        ["delta_log10_KD", "delta_expression"],
-        -10.43,
-    )
     kd_vals = phenotype.calculate_KD(sequences)
     seq_to_kd = dict(zip(sequences, kd_vals))
     rng = default_rng()
@@ -177,6 +172,7 @@ def sweep_param_vals(
     maxval: float = None,
     nsteps: int = 1,
     nsamples: int = None,
+    kd_vals: List[float] = None
 ):
     if minval is None and maxval is None:
         param_vals = [1]
@@ -186,22 +182,22 @@ def sweep_param_vals(
     for param_val in param_vals:
         if parameter == "total_t_cell_help":
             descendant_seqs = simulate_cycle_seqs(
-                seqs, total_t_cell_help=int(param_val)
+                seqs, total_t_cell_help=int(param_val), kd_vals=kd_vals
             )
         elif parameter == "concentration_antigen":
-            descendant_seqs = simulate_cycle_seqs(seqs, concentration_antigen=param_val)
+            descendant_seqs = simulate_cycle_seqs(seqs, concentration_antigen=param_val, kd_vals=kd_vals)
         elif parameter == "max_help":
-            descendant_seqs = simulate_cycle_seqs(seqs, max_help=param_val)
+            descendant_seqs = simulate_cycle_seqs(seqs, max_help=param_val, kd_vals=kd_vals)
         elif parameter == "sigmoid_growth_rate":
-            descendant_seqs = simulate_cycle_seqs(seqs, sigmoid_growth_rate=param_val)
+            descendant_seqs = simulate_cycle_seqs(seqs, sigmoid_growth_rate=param_val, kd_vals=kd_vals)
         elif parameter == "sigmoid_mid_competency":
             descendant_seqs = simulate_cycle_seqs(
                 seqs, sigmoid_mid_competency=param_val
             )
         elif parameter == "antigen_frac_limit":
-            descendant_seqs = simulate_cycle_seqs(seqs, antigen_frac_limit=param_val)
+            descendant_seqs = simulate_cycle_seqs(seqs, antigen_frac_limit=param_val, kd_vals=kd_vals)
         elif parameter == "divisions_help_slope":
-            descendant_seqs = simulate_cycle_seqs(seqs, divisions_help_slope=param_val)
+            descendant_seqs = simulate_cycle_seqs(seqs, divisions_help_slope=param_val, kd_vals=kd_vals)
         else:
             raise (ValueError(f"invalid parameter choice: {args.parameter}"))
         stats.append(
@@ -214,6 +210,15 @@ def sweep_param_vals(
 
 stats_dict = {}
 naive_seq = "GAGGTGCAGCTTCAGGAGTCAGGACCTAGCCTCGTGAAACCTTCTCAGACTCTGTCCCTCACCTGTTCTGTCACTGGCGACTCCATCACCAGTGGTTACTGGAACTGGATCCGGAAATTCCCAGGGAATAAACTTGAGTACATGGGGTACATAAGCTACAGTGGTAGCACTTACTACAATCCATCTCTCAAAAGTCGAATCTCCATCACTCGAGACACATCCAAGAACCAGTACTACCTGCAGTTGAATTCTGTGACTACTGAGGACACAGCCACATATTACTGTGCAAGGGACTTCGATGTCTGGGGCGCAGGGACCACGGTCACCGTCTCCTCAGACATTGTGATGACTCAGTCTCAAAAATTCATGTCCACATCAGTAGGAGACAGGGTCAGCGTCACCTGCAAGGCCAGTCAGAATGTGGGTACTAATGTAGCCTGGTATCAACAGAAACCAGGGCAATCTCCTAAAGCACTGATTTACTCGGCATCCTACAGGTACAGTGGAGTCCCTGATCGCTTCACAGGCAGTGGATCTGGGACAGATTTCACTCTCACCATCAGCAATGTGCAGTCTGAAGACTTGGCAGAGTATTTCTGTCAGCAATATAACAGCTATCCTCTCACGTTCGGCTCGGGGACTAAGCTAGAAATAAAA"
+phenotype = DMSPhenotype(
+        1,
+        1,
+        336,
+        "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
+        "notebooks/tdms-linear.model",
+        ["delta_log10_KD", "delta_expression", "delta_psr"],
+        -10.43,
+    )
 
 for file in os.listdir(args.fastadir):
     if file.endswith(".fasta"):
@@ -222,6 +227,7 @@ for file in os.listdir(args.fastadir):
             for seq_record in SeqIO.parse(f"{args.fastadir}/{file}", "fasta")
             if seq_record.id != "naive"
         ]
+        kd_vals = phenotype.calculate_KD(seqs)
         stats_dict[file] = sweep_param_vals(
             naive_seq=naive_seq,
             seqs=seqs,
@@ -230,6 +236,7 @@ for file in os.listdir(args.fastadir):
             maxval=args.maxval,
             nsteps=args.nsteps,
             nsamples=args.nsamples,
+            kd_vals=kd_vals
         )
 # write csv
 with open(args.out, "w") as fh:
