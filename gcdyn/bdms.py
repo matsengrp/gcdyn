@@ -111,7 +111,7 @@ class ConstantResponse(PhenotypeResponse):
         self.value = value
 
     def f(self, x) -> float:
-        return self.value
+        return self.value * np.ones_like(x)
 
 
 class ExponentialResponse(PhenotypeResponse):
