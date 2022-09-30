@@ -7,6 +7,7 @@ SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = .
 BUILDDIR      = _build
+AUTODOC_STUBS = ${SOURCEDIR}/_autosummary
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -23,5 +24,5 @@ help:
 # Convert .py to .ipynb (don't seem to need to --execute? perhaps sphinx-build does it...), then build html:
 %: Makefile
 	rm -rf ${BUILDDIR}
-	rm -rf ${SOURCEDIR}/_autosummary
+	rm -rf ${AUTODOC_STUBS}
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)

@@ -5,7 +5,7 @@ Modules
 -------
 
 .. autosummary::
-    :toctree: stubs
+    :toctree: _autosummary
     :template: custom-module-template.rst
 
     bdms
