@@ -45,6 +45,7 @@ Some concrete child classes are included.
 """
 from abc import ABC, abstractmethod
 import ete3
+from ete3.coretype.tree import TreeError
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -76,7 +77,29 @@ class Response(ABC):
         return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in self.__dict__.items())})"
 
 
-class ConstantResponse(Response):
+class PhenotypeResponse(Response):
+    r"""Abstract base class for response function mapping from a
+    :py:class:`TreeNode` object's phenotype attribute :math:`x\in\mathbb{R}` to real values given parameters.
+
+    .. math::
+        f: \mathbb{R} \to \mathbb{R}
+
+    """
+
+    def __call__(self, node: "TreeNode") -> float:
+        return self.f(node.x)
+
+    @abstractmethod
+    def f(self, x) -> float:
+        r"""Convenience method for computing :math:`f(x)` (e.g. for plotting).
+
+        Args:
+            x (array-like): Phenotype value.
+        """
+        pass
+
+
+class ConstantResponse(PhenotypeResponse):
     r"""Returns attribute :math:`\theta\in\mathbb{R}` when an instance is called
     on any :py:class:`TreeNode`.
 
@@ -87,11 +110,11 @@ class ConstantResponse(Response):
     def __init__(self, value: float = 1.0):
         self.value = value
 
-    def __call__(self, node: "TreeNode") -> float:
+    def f(self, x) -> float:
         return self.value
 
 
-class ExponentialResponse(Response):
+class ExponentialResponse(PhenotypeResponse):
     r"""Exponential response function on a :py:class:`TreeNode` object's
     phenotype attribute :math:`x`.
 
@@ -117,19 +140,11 @@ class ExponentialResponse(Response):
         self.yscale = yscale
         self.yshift = yshift
 
-    def __call__(self, node: "TreeNode") -> float:
-        return self.f(node.x)
-
     def f(self, x) -> float:
-        r"""Convenience method for computing :math:`f(x)` (e.g. for plotting).
-
-        Args:
-            x (array-like): Phenotype value.
-        """
         return self.yscale * np.exp(self.xscale * (x - self.xshift)) + self.yshift
 
 
-class SigmoidResponse(Response):
+class SigmoidResponse(PhenotypeResponse):
     r"""Sigmoid response function on a :py:class:`TreeNode` object's phenotype
     attribute :math:`x`.
 
@@ -310,9 +325,9 @@ class TreeNode(ete3.Tree):
                   If a :py:class:`numpy.random.Generator`, then that will be used directly.
         """
         if not self.is_root():
-            raise RuntimeError("Cannot evolve a non-root node")
+            raise TreeError("Cannot evolve a non-root node")
         if self.children:
-            raise ValueError(
+            raise TreeError(
                 f"tree has already evolved at node {self.name} with {len(self.children)} descendant lineages"
             )
         rng = np.random.default_rng(seed)
@@ -480,7 +495,10 @@ class TreeNode(ete3.Tree):
             raise ValueError(f"tree has already been pruned below node {self.name}")
         if not self._sampled:
             raise ValueError(f"tree has not been sampled below node {self.name}")
+
         event_cache = self.get_cached_content(store_attr="event")
+        if self._SAMPLING_EVENT not in event_cache[self]:
+            raise TreeError("cannot prune because no leaves were sampled")
 
         def is_leaf_fn(node):
             return self._SAMPLING_EVENT not in event_cache[node]
