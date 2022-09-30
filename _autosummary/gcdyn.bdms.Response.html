@@ -16,11 +16,12 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="gcdyn.bdms.SigmoidResponse" href="gcdyn.bdms.SigmoidResponse.html" />
-    <link rel="prev" title="gcdyn.bdms.Mutator" href="gcdyn.bdms.Mutator.html" /> 
+    <link rel="prev" title="gcdyn.bdms.PhenotypeResponse" href="gcdyn.bdms.PhenotypeResponse.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,11 +49,26 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">Modules</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="gcdyn.bdms.html">gcdyn.bdms</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#primary-class-treenode">Primary class <code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="gcdyn.bdms.html#additional-classes">Additional classes:</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="gcdyn.bdms.html#rate-response-functions-response">Rate response functions <code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="gcdyn.bdms.html#mutation-effects-generators-mutator">Mutation effects generators <code class="xref py py-class docutils literal notranslate"><span class="pre">Mutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#additional-classes">Additional classes:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.ConstantResponse.html">gcdyn.bdms.ConstantResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.ExponentialResponse.html">gcdyn.bdms.ExponentialResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.GaussianMutator.html">gcdyn.bdms.GaussianMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.Mutator.html">gcdyn.bdms.Mutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.PhenotypeResponse.html">gcdyn.bdms.PhenotypeResponse</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.bdms.Response</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.Response"><code class="docutils literal notranslate"><span class="pre">Response</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.SigmoidResponse.html">gcdyn.bdms.SigmoidResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.TreeNode.html">gcdyn.bdms.TreeNode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.Response"><code class="docutils literal notranslate"><span class="pre">Response</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.PhenotypeResponse"><code class="docutils literal notranslate"><span class="pre">PhenotypeResponse</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.ConstantResponse"><code class="docutils literal notranslate"><span class="pre">ConstantResponse</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.ExponentialResponse"><code class="docutils literal notranslate"><span class="pre">ExponentialResponse</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.SigmoidResponse"><code class="docutils literal notranslate"><span class="pre">SigmoidResponse</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.Mutator"><code class="docutils literal notranslate"><span class="pre">Mutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.GaussianMutator"><code class="docutils literal notranslate"><span class="pre">GaussianMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.TreeNode"><code class="docutils literal notranslate"><span class="pre">TreeNode</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.cycles.html">gcdyn.cycles</a></li>
@@ -128,7 +144,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="gcdyn.bdms.Mutator.html" class="btn btn-neutral float-left" title="gcdyn.bdms.Mutator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gcdyn.bdms.PhenotypeResponse.html" class="btn btn-neutral float-left" title="gcdyn.bdms.PhenotypeResponse" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="gcdyn.bdms.SigmoidResponse.html" class="btn btn-neutral float-right" title="gcdyn.bdms.SigmoidResponse" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

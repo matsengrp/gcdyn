@@ -15,6 +15,7 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -315,7 +316,7 @@
         <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">TreeError</span><span class="p">(</span><span class="s2">&quot;Node not found&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="TreeNode.__add__"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.__add__">[docs]</a>    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.__add__"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.__add__">[docs]</a>    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; This allows to sum two trees.&quot;&quot;&quot;</span>
         <span class="c1"># Should a make the sum with two copies of the original trees?</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">:</span>
@@ -347,21 +348,21 @@
         <span class="sd">&quot;&quot;&quot; Iterator over leaf nodes&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_leaves</span><span class="p">()</span>
 
-<div class="viewcode-block" id="TreeNode.add_feature"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.add_feature">[docs]</a>    <span class="k">def</span> <span class="nf">add_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pr_name</span><span class="p">,</span> <span class="n">pr_value</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.add_feature"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.add_feature">[docs]</a>    <span class="k">def</span> <span class="nf">add_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pr_name</span><span class="p">,</span> <span class="n">pr_value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add or update a node&#39;s feature.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pr_name</span><span class="p">,</span> <span class="n">pr_value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pr_name</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TreeNode.add_features"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.add_features">[docs]</a>    <span class="k">def</span> <span class="nf">add_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">features</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.add_features"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.add_features">[docs]</a>    <span class="k">def</span> <span class="nf">add_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">features</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add or update several features. &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">fname</span><span class="p">,</span> <span class="n">fvalue</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">features</span><span class="p">):</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">fvalue</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TreeNode.del_feature"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.del_feature">[docs]</a>    <span class="k">def</span> <span class="nf">del_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pr_name</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.del_feature"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.del_feature">[docs]</a>    <span class="k">def</span> <span class="nf">del_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pr_name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Permanently deletes a node&#39;s feature.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -370,7 +371,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">pr_name</span><span class="p">)</span></div>
 
     <span class="c1"># Topology management</span>
-<div class="viewcode-block" id="TreeNode.add_child"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.add_child">[docs]</a>    <span class="k">def</span> <span class="nf">add_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">support</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.add_child"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.add_child">[docs]</a>    <span class="k">def</span> <span class="nf">add_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">support</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a new child to this node. If child node is not suplied</span>
 <span class="sd">        as an argument, a new node instance will be created.</span>
@@ -397,7 +398,7 @@
         <span class="n">child</span><span class="o">.</span><span class="n">up</span> <span class="o">=</span> <span class="bp">self</span>
         <span class="k">return</span> <span class="n">child</span></div>
 
-<div class="viewcode-block" id="TreeNode.remove_child"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.remove_child">[docs]</a>    <span class="k">def</span> <span class="nf">remove_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.remove_child"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.remove_child">[docs]</a>    <span class="k">def</span> <span class="nf">remove_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Removes a child from this node (parent and child</span>
 <span class="sd">        nodes still exit but are no longer connected).</span>
@@ -410,7 +411,7 @@
             <span class="n">child</span><span class="o">.</span><span class="n">up</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">return</span> <span class="n">child</span></div>
 
-<div class="viewcode-block" id="TreeNode.add_sister"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.add_sister">[docs]</a>    <span class="k">def</span> <span class="nf">add_sister</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sister</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.add_sister"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.add_sister">[docs]</a>    <span class="k">def</span> <span class="nf">add_sister</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sister</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a sister to this node. If sister node is not supplied</span>
 <span class="sd">        as an argument, a new TreeNode instance will be created and</span>
@@ -421,7 +422,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">up</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">child</span><span class="o">=</span><span class="n">sister</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="n">dist</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TreeNode.remove_sister"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.remove_sister">[docs]</a>    <span class="k">def</span> <span class="nf">remove_sister</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sister</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.remove_sister"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.remove_sister">[docs]</a>    <span class="k">def</span> <span class="nf">remove_sister</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sister</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Removes a sister node. It has the same effect as</span>
 <span class="sd">        **`TreeNode.up.remove_child(sister)`**</span>
@@ -439,7 +440,7 @@
                 <span class="n">sister</span> <span class="o">=</span> <span class="n">sisters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">up</span><span class="o">.</span><span class="n">remove_child</span><span class="p">(</span><span class="n">sister</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TreeNode.delete"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prevent_nondicotomic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">preserve_branch_length</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.delete"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prevent_nondicotomic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">preserve_branch_length</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Deletes node from the tree structure. Notice that this method</span>
 <span class="sd">        makes &#39;disappear&#39; the node from the tree structure. This means</span>
@@ -494,7 +495,7 @@
                           <span class="n">preserve_branch_length</span><span class="o">=</span><span class="n">preserve_branch_length</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="TreeNode.detach"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.detach">[docs]</a>    <span class="k">def</span> <span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.detach"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.detach">[docs]</a>    <span class="k">def</span> <span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Detachs this node (and all its descendants) from its parent</span>
 <span class="sd">        and returns the referent to itself.</span>
@@ -647,7 +648,7 @@
                 <span class="n">n</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">prevent_nondicotomic</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="TreeNode.swap_children"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.swap_children">[docs]</a>    <span class="k">def</span> <span class="nf">swap_children</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.swap_children"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.swap_children">[docs]</a>    <span class="k">def</span> <span class="nf">swap_children</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Swaps current children order.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -660,13 +661,13 @@
     <span class="c1"># #####################</span>
 
 
-<div class="viewcode-block" id="TreeNode.get_children"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_children">[docs]</a>    <span class="k">def</span> <span class="nf">get_children</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.get_children"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_children">[docs]</a>    <span class="k">def</span> <span class="nf">get_children</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns an independent list of node&#39;s children.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">ch</span> <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="TreeNode.get_sisters"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_sisters">[docs]</a>    <span class="k">def</span> <span class="nf">get_sisters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.get_sisters"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_sisters">[docs]</a>    <span class="k">def</span> <span class="nf">get_sisters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns an independent list of sister nodes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -675,7 +676,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span></div>
 
-<div class="viewcode-block" id="TreeNode.iter_leaves"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.iter_leaves">[docs]</a>    <span class="k">def</span> <span class="nf">iter_leaves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.iter_leaves"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.iter_leaves">[docs]</a>    <span class="k">def</span> <span class="nf">iter_leaves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns an iterator over the leaves under this node.</span>
 
@@ -690,7 +691,7 @@
                 <span class="k">if</span> <span class="n">is_leaf_fn</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
                     <span class="k">yield</span> <span class="n">n</span></div>
 
-<div class="viewcode-block" id="TreeNode.get_leaves"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_leaves">[docs]</a>    <span class="k">def</span> <span class="nf">get_leaves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.get_leaves"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_leaves">[docs]</a>    <span class="k">def</span> <span class="nf">get_leaves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the list of terminal nodes (leaves) under this node.</span>
 
@@ -699,7 +700,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_leaves</span><span class="p">(</span><span class="n">is_leaf_fn</span><span class="o">=</span><span class="n">is_leaf_fn</span><span class="p">)]</span></div>
 
-<div class="viewcode-block" id="TreeNode.iter_leaf_names"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.iter_leaf_names">[docs]</a>    <span class="k">def</span> <span class="nf">iter_leaf_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.iter_leaf_names"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.iter_leaf_names">[docs]</a>    <span class="k">def</span> <span class="nf">iter_leaf_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns an iterator over the leaf names under this node.</span>
 
@@ -709,7 +710,7 @@
         <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_leaves</span><span class="p">(</span><span class="n">is_leaf_fn</span><span class="o">=</span><span class="n">is_leaf_fn</span><span class="p">):</span>
             <span class="k">yield</span> <span class="n">n</span><span class="o">.</span><span class="n">name</span></div>
 
-<div class="viewcode-block" id="TreeNode.get_leaf_names"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_leaf_names">[docs]</a>    <span class="k">def</span> <span class="nf">get_leaf_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.get_leaf_names"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_leaf_names">[docs]</a>    <span class="k">def</span> <span class="nf">get_leaf_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the list of terminal node names under the current</span>
 <span class="sd">        node.</span>
@@ -719,7 +720,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_leaf_names</span><span class="p">(</span><span class="n">is_leaf_fn</span><span class="o">=</span><span class="n">is_leaf_fn</span><span class="p">)]</span></div>
 
-<div class="viewcode-block" id="TreeNode.iter_descendants"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.iter_descendants">[docs]</a>    <span class="k">def</span> <span class="nf">iter_descendants</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;levelorder&quot;</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.iter_descendants"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.iter_descendants">[docs]</a>    <span class="k">def</span> <span class="nf">iter_descendants</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;levelorder&quot;</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns an iterator over all descendant nodes.</span>
 
@@ -730,7 +731,7 @@
             <span class="k">if</span> <span class="n">n</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">:</span>
                 <span class="k">yield</span> <span class="n">n</span></div>
 
-<div class="viewcode-block" id="TreeNode.get_descendants"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_descendants">[docs]</a>    <span class="k">def</span> <span class="nf">get_descendants</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;levelorder&quot;</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.get_descendants"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_descendants">[docs]</a>    <span class="k">def</span> <span class="nf">get_descendants</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;levelorder&quot;</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of all (leaves and internal) descendant nodes.</span>
 
@@ -740,7 +741,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_descendants</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="n">strategy</span><span class="p">,</span> \
                                                  <span class="n">is_leaf_fn</span><span class="o">=</span><span class="n">is_leaf_fn</span><span class="p">)]</span></div>
 
-<div class="viewcode-block" id="TreeNode.traverse"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.traverse">[docs]</a>    <span class="k">def</span> <span class="nf">traverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;levelorder&quot;</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.traverse"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.traverse">[docs]</a>    <span class="k">def</span> <span class="nf">traverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;levelorder&quot;</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns an iterator to traverse the tree structure under this</span>
 <span class="sd">        node.</span>
@@ -766,7 +767,7 @@
         <span class="k">elif</span> <span class="n">strategy</span><span class="o">==</span><span class="s2">&quot;postorder&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iter_descendants_postorder</span><span class="p">(</span><span class="n">is_leaf_fn</span><span class="o">=</span><span class="n">is_leaf_fn</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TreeNode.iter_prepostorder"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.iter_prepostorder">[docs]</a>    <span class="k">def</span> <span class="nf">iter_prepostorder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.iter_prepostorder"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.iter_prepostorder">[docs]</a>    <span class="k">def</span> <span class="nf">iter_prepostorder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Iterate over all nodes in a tree yielding every node in both</span>
 <span class="sd">        pre and post order. Each iteration returns a postorder flag</span>
@@ -841,7 +842,7 @@
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">node</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="TreeNode.iter_ancestors"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.iter_ancestors">[docs]</a>    <span class="k">def</span> <span class="nf">iter_ancestors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.iter_ancestors"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.iter_ancestors">[docs]</a>    <span class="k">def</span> <span class="nf">iter_ancestors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;versionadded: 2.2</span>
 
 <span class="sd">        Iterates over the list of all ancestor nodes from current node</span>
@@ -853,7 +854,7 @@
             <span class="k">yield</span> <span class="n">node</span><span class="o">.</span><span class="n">up</span>
             <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">up</span></div>
 
-<div class="viewcode-block" id="TreeNode.get_ancestors"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_ancestors">[docs]</a>    <span class="k">def</span> <span class="nf">get_ancestors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.get_ancestors"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_ancestors">[docs]</a>    <span class="k">def</span> <span class="nf">get_ancestors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;versionadded: 2.2</span>
 
 <span class="sd">        Returns the list of all ancestor nodes from current node to</span>
@@ -862,7 +863,7 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_ancestors</span><span class="p">()]</span></div>
 
-<div class="viewcode-block" id="TreeNode.describe"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.describe">[docs]</a>    <span class="k">def</span> <span class="nf">describe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.describe"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.describe">[docs]</a>    <span class="k">def</span> <span class="nf">describe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prints general information about this node and its</span>
 <span class="sd">        connections.</span>
@@ -881,7 +882,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Most distant node:</span><span class="se">\t</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">max_node</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Max. distance:</span><span class="se">\t</span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">max_dist</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TreeNode.write"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="TreeNode.write"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
               <span class="n">format_root_node</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dist_formatter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">support_formatter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
               <span class="n">name_formatter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quoted_node_names</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -929,7 +930,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">nw</span></div>
 
-<div class="viewcode-block" id="TreeNode.get_tree_root"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_tree_root">[docs]</a>    <span class="k">def</span> <span class="nf">get_tree_root</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.get_tree_root"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_tree_root">[docs]</a>    <span class="k">def</span> <span class="nf">get_tree_root</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the absolute root node of current tree structure.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -938,7 +939,7 @@
             <span class="n">root</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">up</span>
         <span class="k">return</span> <span class="n">root</span></div>
 
-<div class="viewcode-block" id="TreeNode.get_common_ancestor"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_common_ancestor">[docs]</a>    <span class="k">def</span> <span class="nf">get_common_ancestor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">target_nodes</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.get_common_ancestor"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_common_ancestor">[docs]</a>    <span class="k">def</span> <span class="nf">get_common_ancestor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">target_nodes</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the first common ancestor between this node and a given</span>
 <span class="sd">        list of &#39;target_nodes&#39;.</span>
@@ -1010,7 +1011,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">common</span></div>
 
-<div class="viewcode-block" id="TreeNode.iter_search_nodes"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.iter_search_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">iter_search_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">conditions</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.iter_search_nodes"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.iter_search_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">iter_search_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">conditions</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Search nodes in an iterative way. Matches are yielded as they</span>
 <span class="sd">        are being found. This avoids needing to scan the full tree</span>
@@ -1026,7 +1027,7 @@
             <span class="k">if</span> <span class="n">conditions_passed</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">conditions</span><span class="p">):</span>
                 <span class="k">yield</span> <span class="n">n</span></div>
 
-<div class="viewcode-block" id="TreeNode.search_nodes"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.search_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">search_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">conditions</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.search_nodes"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.search_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">search_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">conditions</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the list of nodes matching a given set of conditions.</span>
 
@@ -1042,19 +1043,19 @@
             <span class="n">matching_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">matching_nodes</span></div>
 
-<div class="viewcode-block" id="TreeNode.get_leaves_by_name"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_leaves_by_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_leaves_by_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.get_leaves_by_name"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_leaves_by_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_leaves_by_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of leaf nodes matching a given name.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_nodes</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="p">[])</span></div>
 
-<div class="viewcode-block" id="TreeNode.is_leaf"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.is_leaf">[docs]</a>    <span class="k">def</span> <span class="nf">is_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.is_leaf"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.is_leaf">[docs]</a>    <span class="k">def</span> <span class="nf">is_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return True if current node is a leaf.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span></div>
 
-<div class="viewcode-block" id="TreeNode.is_root"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.is_root">[docs]</a>    <span class="k">def</span> <span class="nf">is_root</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.is_root"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.is_root">[docs]</a>    <span class="k">def</span> <span class="nf">is_root</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns True if current node has no parent</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1066,7 +1067,7 @@
     <span class="c1"># ###########################</span>
     <span class="c1"># Distance related functions</span>
     <span class="c1"># ###########################</span>
-<div class="viewcode-block" id="TreeNode.get_distance"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_distance">[docs]</a>    <span class="k">def</span> <span class="nf">get_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">target2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">topology_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.get_distance"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_distance">[docs]</a>    <span class="k">def</span> <span class="nf">get_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">target2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">topology_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the distance between two nodes. If only one target is</span>
 <span class="sd">        specified, it returns the distance between the target and the</span>
@@ -1108,7 +1109,7 @@
                 <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">.</span><span class="n">up</span>
         <span class="k">return</span> <span class="n">dist</span></div>
 
-<div class="viewcode-block" id="TreeNode.get_farthest_node"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_farthest_node">[docs]</a>    <span class="k">def</span> <span class="nf">get_farthest_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topology_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.get_farthest_node"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_farthest_node">[docs]</a>    <span class="k">def</span> <span class="nf">get_farthest_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topology_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the node&#39;s farthest descendant or ancestor node, and the</span>
 <span class="sd">        distance to it.</span>
@@ -1180,7 +1181,7 @@
         <span class="k">return</span> <span class="n">min_node</span><span class="p">,</span> <span class="n">min_dist</span><span class="p">,</span> <span class="n">max_node</span><span class="p">,</span> <span class="n">max_dist</span>
 
 
-<div class="viewcode-block" id="TreeNode.get_farthest_leaf"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_farthest_leaf">[docs]</a>    <span class="k">def</span> <span class="nf">get_farthest_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topology_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.get_farthest_leaf"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_farthest_leaf">[docs]</a>    <span class="k">def</span> <span class="nf">get_farthest_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topology_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns node&#39;s farthest descendant node (which is always a leaf), and the</span>
 <span class="sd">        distance to it.</span>
@@ -1197,7 +1198,7 @@
         <span class="n">topology_only</span><span class="o">=</span><span class="n">topology_only</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="n">is_leaf_fn</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">max_node</span><span class="p">,</span> <span class="n">max_dist</span></div>
 
-<div class="viewcode-block" id="TreeNode.get_closest_leaf"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_closest_leaf">[docs]</a>    <span class="k">def</span> <span class="nf">get_closest_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topology_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.get_closest_leaf"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_closest_leaf">[docs]</a>    <span class="k">def</span> <span class="nf">get_closest_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topology_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_leaf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns node&#39;s closest descendant leaf and the distance to</span>
 <span class="sd">        it.</span>
 
@@ -1216,7 +1217,7 @@
         <span class="k">return</span> <span class="n">min_node</span><span class="p">,</span> <span class="n">min_dist</span></div>
 
 
-<div class="viewcode-block" id="TreeNode.get_midpoint_outgroup"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_midpoint_outgroup">[docs]</a>    <span class="k">def</span> <span class="nf">get_midpoint_outgroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.get_midpoint_outgroup"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_midpoint_outgroup">[docs]</a>    <span class="k">def</span> <span class="nf">get_midpoint_outgroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the node that divides the current tree into two distance-balanced</span>
 <span class="sd">        partitions.</span>
@@ -1243,7 +1244,7 @@
 
         <span class="k">return</span> <span class="n">current</span></div>
 
-<div class="viewcode-block" id="TreeNode.populate"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.populate">[docs]</a>    <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">names_library</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reuse_names</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<div class="viewcode-block" id="TreeNode.populate"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.populate">[docs]</a>    <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">names_library</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reuse_names</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                  <span class="n">random_branches</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">branch_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
                  <span class="n">support_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1318,7 +1319,7 @@
             <span class="n">n</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">tname</span></div>
 
 
-<div class="viewcode-block" id="TreeNode.set_outgroup"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.set_outgroup">[docs]</a>    <span class="k">def</span> <span class="nf">set_outgroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outgroup</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.set_outgroup"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.set_outgroup">[docs]</a>    <span class="k">def</span> <span class="nf">set_outgroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outgroup</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets a descendant node as the outgroup of a tree.  This function</span>
 <span class="sd">        can be used to root a tree or even an internal node.</span>
@@ -1403,7 +1404,7 @@
         <span class="n">outgroup2</span><span class="o">.</span><span class="n">dist</span> <span class="o">=</span> <span class="n">middist</span>
         <span class="n">outgroup2</span><span class="o">.</span><span class="n">support</span> <span class="o">=</span> <span class="n">outgroup</span><span class="o">.</span><span class="n">support</span></div>
 
-<div class="viewcode-block" id="TreeNode.unroot"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.unroot">[docs]</a>    <span class="k">def</span> <span class="nf">unroot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;legacy&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.unroot"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.unroot">[docs]</a>    <span class="k">def</span> <span class="nf">unroot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;legacy&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Unroots current node. This function is expected to be used on</span>
 <span class="sd">        the absolute tree root node, but it can be also be applied to</span>
@@ -1431,7 +1432,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">TreeError</span><span class="p">(</span><span class="s2">&quot;Cannot unroot a tree with only two leaves&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TreeNode.show"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tree_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ETE&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.show"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tree_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ETE&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Starts an interactive session to visualize current node</span>
 <span class="sd">        structure using provided layout and TreeStyle.</span>
@@ -1471,7 +1472,7 @@
                                     <span class="n">layout</span><span class="o">=</span><span class="n">layout</span><span class="p">,</span> <span class="n">tree_style</span><span class="o">=</span><span class="n">tree_style</span><span class="p">,</span>
                                       <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">)</span>
 
-<div class="viewcode-block" id="TreeNode.copy"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;cpickle&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.copy"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;cpickle&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;.. versionadded: 2.1</span>
 
 <span class="sd">        Returns a copy of the current node.</span>
@@ -1566,7 +1567,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">([</span><span class="n">char1</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="n">node_name</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
 
-<div class="viewcode-block" id="TreeNode.get_ascii"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_ascii">[docs]</a>    <span class="k">def</span> <span class="nf">get_ascii</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show_internal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">compact</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.get_ascii"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_ascii">[docs]</a>    <span class="k">def</span> <span class="nf">get_ascii</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show_internal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">compact</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a string containing an ascii drawing of the tree.</span>
 
@@ -1582,7 +1583,7 @@
         <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="TreeNode.ladderize"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.ladderize">[docs]</a>    <span class="k">def</span> <span class="nf">ladderize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.ladderize"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.ladderize">[docs]</a>    <span class="k">def</span> <span class="nf">ladderize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        .. versionadded: 2.1</span>
 
@@ -1640,7 +1641,7 @@
 
         <span class="k">return</span> <span class="n">size</span></div>
 
-<div class="viewcode-block" id="TreeNode.sort_descendants"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.sort_descendants">[docs]</a>    <span class="k">def</span> <span class="nf">sort_descendants</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.sort_descendants"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.sort_descendants">[docs]</a>    <span class="k">def</span> <span class="nf">sort_descendants</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        .. versionadded: 2.1</span>
 
@@ -1656,7 +1657,7 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">n</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">():</span>
                 <span class="n">n</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">node2content</span><span class="p">[</span><span class="n">x</span><span class="p">])))</span></div>
 
-<div class="viewcode-block" id="TreeNode.get_cached_content"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_cached_content">[docs]</a>    <span class="k">def</span> <span class="nf">get_cached_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">store_attr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">container_type</span><span class="o">=</span><span class="nb">set</span><span class="p">,</span> <span class="n">leaves_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">_store</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.get_cached_content"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_cached_content">[docs]</a>    <span class="k">def</span> <span class="nf">get_cached_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">store_attr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">container_type</span><span class="o">=</span><span class="nb">set</span><span class="p">,</span> <span class="n">leaves_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">_store</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        .. versionadded: 2.2</span>
 
@@ -1717,7 +1718,7 @@
 
         <span class="k">return</span> <span class="n">_store</span></div>
 
-<div class="viewcode-block" id="TreeNode.robinson_foulds"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.robinson_foulds">[docs]</a>    <span class="k">def</span> <span class="nf">robinson_foulds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">attr_t1</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">attr_t2</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
+<div class="viewcode-block" id="TreeNode.robinson_foulds"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.robinson_foulds">[docs]</a>    <span class="k">def</span> <span class="nf">robinson_foulds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">attr_t1</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">attr_t2</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
                         <span class="n">unrooted_trees</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">expand_polytomies</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                         <span class="n">polytomy_size_limit</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">skip_large_polytomies</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                         <span class="n">correct_by_polytomy_size</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">min_support_t1</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
@@ -1883,7 +1884,7 @@
 
 
 
-<div class="viewcode-block" id="TreeNode.compare"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.compare">[docs]</a>    <span class="k">def</span> <span class="nf">compare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_tree</span><span class="p">,</span> <span class="n">use_collateral</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">min_support_source</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">min_support_ref</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<div class="viewcode-block" id="TreeNode.compare"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.compare">[docs]</a>    <span class="k">def</span> <span class="nf">compare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_tree</span><span class="p">,</span> <span class="n">use_collateral</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">min_support_source</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">min_support_ref</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
                 <span class="n">has_duplications</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">expand_polytomies</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unrooted</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">max_treeko_splits_to_be_artifact</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">ref_tree_attr</span><span class="o">=</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">source_tree_attr</span><span class="o">=</span><span class="s1">&#39;name&#39;</span><span class="p">):</span>
 
@@ -2063,7 +2064,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">difftable</span>
 
-<div class="viewcode-block" id="TreeNode.iter_edges"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.iter_edges">[docs]</a>    <span class="k">def</span> <span class="nf">iter_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cached_content</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.iter_edges"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.iter_edges">[docs]</a>    <span class="k">def</span> <span class="nf">iter_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cached_content</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        .. versionadded:: 2.3</span>
 
@@ -2078,7 +2079,7 @@
         <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">side1</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">cached_content</span><span class="p">):</span>
             <span class="k">yield</span> <span class="p">(</span><span class="n">side1</span><span class="p">,</span> <span class="n">all_leaves</span><span class="o">-</span><span class="n">side1</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TreeNode.get_edges"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_edges">[docs]</a>    <span class="k">def</span> <span class="nf">get_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cached_content</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.get_edges"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_edges">[docs]</a>    <span class="k">def</span> <span class="nf">get_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cached_content</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        .. versionadded:: 2.3</span>
 
@@ -2089,7 +2090,7 @@
 
         <span class="k">return</span> <span class="p">[</span><span class="n">edge</span> <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_edges</span><span class="p">(</span><span class="n">cached_content</span><span class="p">)]</span></div>
 
-<div class="viewcode-block" id="TreeNode.standardize"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.standardize">[docs]</a>    <span class="k">def</span> <span class="nf">standardize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delete_orphan</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">preserve_branch_length</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.standardize"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.standardize">[docs]</a>    <span class="k">def</span> <span class="nf">standardize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delete_orphan</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">preserve_branch_length</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        .. versionadded:: 2.3</span>
 
@@ -2106,7 +2107,7 @@
                          <span class="n">preserve_branch_length</span><span class="o">=</span><span class="n">preserve_branch_length</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="TreeNode.get_topology_id"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_topology_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_topology_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.get_topology_id"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_topology_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_topology_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        .. versionadded:: 2.3</span>
 
@@ -2159,7 +2160,7 @@
     <span class="c1">#         all_partitions.add(p2)</span>
     <span class="c1">#     return all_partitions</span>
 
-<div class="viewcode-block" id="TreeNode.convert_to_ultrametric"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.convert_to_ultrametric">[docs]</a>    <span class="k">def</span> <span class="nf">convert_to_ultrametric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree_length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;balanced&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.convert_to_ultrametric"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.convert_to_ultrametric">[docs]</a>    <span class="k">def</span> <span class="nf">convert_to_ultrametric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree_length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;balanced&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        .. versionadded: 2.1</span>
 
@@ -2206,7 +2207,7 @@
                 <span class="n">node2dist</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">node2dist</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">up</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
             <span class="n">node</span><span class="o">.</span><span class="n">dist</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">dist</span></div>
 
-<div class="viewcode-block" id="TreeNode.check_monophyly"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.check_monophyly">[docs]</a>    <span class="k">def</span> <span class="nf">check_monophyly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">target_attr</span><span class="p">,</span> <span class="n">ignore_missing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<div class="viewcode-block" id="TreeNode.check_monophyly"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.check_monophyly">[docs]</a>    <span class="k">def</span> <span class="nf">check_monophyly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">target_attr</span><span class="p">,</span> <span class="n">ignore_missing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                         <span class="n">unrooted</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        .. versionadded: 2.2</span>
@@ -2300,7 +2301,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;paraphyletic&quot;</span><span class="p">,</span> <span class="n">foreign_leaves</span></div>
 
-<div class="viewcode-block" id="TreeNode.get_monophyletic"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_monophyletic">[docs]</a>    <span class="k">def</span> <span class="nf">get_monophyletic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">target_attr</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.get_monophyletic"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_monophyletic">[docs]</a>    <span class="k">def</span> <span class="nf">get_monophyletic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">target_attr</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        .. versionadded:: 2.2</span>
 
@@ -2328,7 +2329,7 @@
             <span class="k">if</span> <span class="n">is_monophyletic</span><span class="p">(</span><span class="n">match</span><span class="p">):</span>
                 <span class="k">yield</span> <span class="n">match</span></div>
 
-<div class="viewcode-block" id="TreeNode.expand_polytomies"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.expand_polytomies">[docs]</a>    <span class="k">def</span> <span class="nf">expand_polytomies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_attr</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">polytomy_size_limit</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<div class="viewcode-block" id="TreeNode.expand_polytomies"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.expand_polytomies">[docs]</a>    <span class="k">def</span> <span class="nf">expand_polytomies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_attr</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">polytomy_size_limit</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
                           <span class="n">skip_large_polytomies</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        .. versionadded:: 2.3</span>
@@ -2392,7 +2393,7 @@
             <span class="n">n2subtrees</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">subtrees</span>
         <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">;&quot;</span><span class="o">%</span><span class="nb">str</span><span class="p">(</span><span class="n">nw</span><span class="p">)</span> <span class="k">for</span> <span class="n">nw</span> <span class="ow">in</span> <span class="n">n2subtrees</span><span class="p">[</span><span class="bp">self</span><span class="p">]]</span> <span class="c1"># tuples are in newick format ^_^</span></div>
 
-<div class="viewcode-block" id="TreeNode.resolve_polytomy"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.resolve_polytomy">[docs]</a>    <span class="k">def</span> <span class="nf">resolve_polytomy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default_dist</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">default_support</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<div class="viewcode-block" id="TreeNode.resolve_polytomy"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.resolve_polytomy">[docs]</a>    <span class="k">def</span> <span class="nf">resolve_polytomy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default_dist</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">default_support</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
                          <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        .. versionadded: 2.2</span>
@@ -2435,7 +2436,7 @@
         <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">target</span><span class="p">:</span>
             <span class="n">_resolve</span><span class="p">(</span><span class="n">n</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TreeNode.cophenetic_matrix"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.cophenetic_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">cophenetic_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.cophenetic_matrix"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.cophenetic_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">cophenetic_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        .. versionadded: 3.1.1</span>
 
@@ -2537,7 +2538,7 @@
                     <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">leaf_distances</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="n">m</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">output</span><span class="p">,</span> <span class="n">allleaves</span></div>
 
-<div class="viewcode-block" id="TreeNode.add_face"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.add_face">[docs]</a>    <span class="k">def</span> <span class="nf">add_face</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">face</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s2">&quot;branch-right&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.add_face"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.add_face">[docs]</a>    <span class="k">def</span> <span class="nf">add_face</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">face</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s2">&quot;branch-right&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        .. versionadded: 2.1</span>
 
@@ -2563,7 +2564,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;not a Face instance&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TreeNode.set_style"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.set_style">[docs]</a>    <span class="k">def</span> <span class="nf">set_style</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_style</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode.set_style"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.set_style">[docs]</a>    <span class="k">def</span> <span class="nf">set_style</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_style</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        .. versionadded: 2.1</span>
 
@@ -2577,7 +2578,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Treeview module is disabled&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TreeNode.from_parent_child_table"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.from_parent_child_table">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TreeNode.from_parent_child_table"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.from_parent_child_table">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_parent_child_table</span><span class="p">(</span><span class="n">parent_child_table</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Converts a parent-child table into an ETE Tree instance.</span>
 
@@ -2619,7 +2620,7 @@
         <span class="n">root</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">get_tree_root</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">root</span></div>
 
-<div class="viewcode-block" id="TreeNode.from_skbio"><a class="viewcode-back" href="../../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.from_skbio">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TreeNode.from_skbio"><a class="viewcode-back" href="../../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.from_skbio">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_skbio</span><span class="p">(</span><span class="n">skbio_tree</span><span class="p">,</span> <span class="n">map_attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Converts a scikit-bio TreeNode object into ETE Tree object.</span>
 

@@ -15,6 +15,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -123,6 +124,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">import</span> <span class="nn">ete3</span>
+<span class="kn">from</span> <span class="nn">ete3.coretype.tree</span> <span class="kn">import</span> <span class="n">TreeError</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -138,7 +140,7 @@
 <span class="kn">import</span> <span class="nn">bisect</span>
 
 
-<div class="viewcode-block" id="Response"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.Response.html#gcdyn.bdms.Response">[docs]</a><span class="k">class</span> <span class="nc">Response</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="Response"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.Response.html#gcdyn.bdms.Response">[docs]</a><span class="k">class</span> <span class="nc">Response</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Abstract base class for response function mapping</span>
 <span class="sd">    :py:class:`TreeNode` objects to ``float`` values given parameters.&quot;&quot;&quot;</span>
 
@@ -146,7 +148,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">pass</span>
 
-<div class="viewcode-block" id="Response.__call__"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.Response.html#gcdyn.bdms.Response.__call__">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="Response.__call__"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.Response.html#gcdyn.bdms.Response.__call__">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">pass</span></div>
 
@@ -154,7 +156,29 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">())</span><span class="si">}</span><span class="s2">)&quot;</span></div>
 
 
-<div class="viewcode-block" id="ConstantResponse"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.ConstantResponse.html#gcdyn.bdms.ConstantResponse">[docs]</a><span class="k">class</span> <span class="nc">ConstantResponse</span><span class="p">(</span><span class="n">Response</span><span class="p">):</span>
+<div class="viewcode-block" id="PhenotypeResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.PhenotypeResponse.html#gcdyn.bdms.PhenotypeResponse">[docs]</a><span class="k">class</span> <span class="nc">PhenotypeResponse</span><span class="p">(</span><span class="n">Response</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Abstract base class for response function mapping from a</span>
+<span class="sd">    :py:class:`TreeNode` object&#39;s phenotype attribute :math:`x\in\mathbb{R}` to real values given parameters.</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        f: \mathbb{R} \to \mathbb{R}</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PhenotypeResponse.__call__"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.PhenotypeResponse.html#gcdyn.bdms.PhenotypeResponse.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">x</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PhenotypeResponse.f"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.PhenotypeResponse.html#gcdyn.bdms.PhenotypeResponse.f">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convenience method for computing :math:`f(x)` (e.g. for plotting).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (array-like): Phenotype value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="ConstantResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.ConstantResponse.html#gcdyn.bdms.ConstantResponse">[docs]</a><span class="k">class</span> <span class="nc">ConstantResponse</span><span class="p">(</span><span class="n">PhenotypeResponse</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Returns attribute :math:`\theta\in\mathbb{R}` when an instance is called</span>
 <span class="sd">    on any :py:class:`TreeNode`.</span>
 
@@ -165,11 +189,11 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
 
-<div class="viewcode-block" id="ConstantResponse.__call__"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.ConstantResponse.html#gcdyn.bdms.ConstantResponse.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span></div></div>
+<div class="viewcode-block" id="ConstantResponse.f"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.ConstantResponse.html#gcdyn.bdms.ConstantResponse.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="ExponentialResponse"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.ExponentialResponse.html#gcdyn.bdms.ExponentialResponse">[docs]</a><span class="k">class</span> <span class="nc">ExponentialResponse</span><span class="p">(</span><span class="n">Response</span><span class="p">):</span>
+<div class="viewcode-block" id="ExponentialResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.ExponentialResponse.html#gcdyn.bdms.ExponentialResponse">[docs]</a><span class="k">class</span> <span class="nc">ExponentialResponse</span><span class="p">(</span><span class="n">PhenotypeResponse</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Exponential response function on a :py:class:`TreeNode` object&#39;s</span>
 <span class="sd">    phenotype attribute :math:`x`.</span>
 
@@ -195,19 +219,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">=</span> <span class="n">yscale</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span> <span class="o">=</span> <span class="n">yshift</span>
 
-<div class="viewcode-block" id="ExponentialResponse.__call__"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.ExponentialResponse.html#gcdyn.bdms.ExponentialResponse.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">x</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="ExponentialResponse.f"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.ExponentialResponse.html#gcdyn.bdms.ExponentialResponse.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convenience method for computing :math:`f(x)` (e.g. for plotting).</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            x (array-like): Phenotype value.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ExponentialResponse.f"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.ExponentialResponse.html#gcdyn.bdms.ExponentialResponse.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span></div></div>
 
 
-<div class="viewcode-block" id="SigmoidResponse"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.SigmoidResponse.html#gcdyn.bdms.SigmoidResponse">[docs]</a><span class="k">class</span> <span class="nc">SigmoidResponse</span><span class="p">(</span><span class="n">Response</span><span class="p">):</span>
+<div class="viewcode-block" id="SigmoidResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.SigmoidResponse.html#gcdyn.bdms.SigmoidResponse">[docs]</a><span class="k">class</span> <span class="nc">SigmoidResponse</span><span class="p">(</span><span class="n">PhenotypeResponse</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sigmoid response function on a :py:class:`TreeNode` object&#39;s phenotype</span>
 <span class="sd">    attribute :math:`x`.</span>
 
@@ -233,10 +249,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">=</span> <span class="n">yscale</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span> <span class="o">=</span> <span class="n">yshift</span>
 
-<div class="viewcode-block" id="SigmoidResponse.__call__"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.SigmoidResponse.html#gcdyn.bdms.SigmoidResponse.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<div class="viewcode-block" id="SigmoidResponse.__call__"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.SigmoidResponse.html#gcdyn.bdms.SigmoidResponse.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">x</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SigmoidResponse.f"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.SigmoidResponse.html#gcdyn.bdms.SigmoidResponse.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<div class="viewcode-block" id="SigmoidResponse.f"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.SigmoidResponse.html#gcdyn.bdms.SigmoidResponse.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convenience method for computing :math:`f(x)` (e.g. for plotting).</span>
 
 <span class="sd">        Args:</span>
@@ -245,7 +261,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">*</span> <span class="n">expit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span></div></div>
 
 
-<div class="viewcode-block" id="Mutator"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.Mutator.html#gcdyn.bdms.Mutator">[docs]</a><span class="k">class</span> <span class="nc">Mutator</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="Mutator"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.Mutator.html#gcdyn.bdms.Mutator">[docs]</a><span class="k">class</span> <span class="nc">Mutator</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Abstract base class for generating mutation effects given</span>
 <span class="sd">    :py:class:`TreeNode` object, which is modified in place.&quot;&quot;&quot;</span>
 
@@ -253,7 +269,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">pass</span>
 
-<div class="viewcode-block" id="Mutator.mutate"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.Mutator.html#gcdyn.bdms.Mutator.mutate">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="Mutator.mutate"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.Mutator.html#gcdyn.bdms.Mutator.mutate">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">mutate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -268,7 +284,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="Mutator.logprob"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.Mutator.html#gcdyn.bdms.Mutator.logprob">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="Mutator.logprob"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.Mutator.html#gcdyn.bdms.Mutator.logprob">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">logprob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node1</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">,</span> <span class="n">node2</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the log probability that a mutation effect on ``node1``</span>
 <span class="sd">        gives ``node2``.</span>
@@ -283,7 +299,7 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">())</span><span class="si">}</span><span class="s2">)&quot;</span></div>
 
 
-<div class="viewcode-block" id="GaussianMutator"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.GaussianMutator.html#gcdyn.bdms.GaussianMutator">[docs]</a><span class="k">class</span> <span class="nc">GaussianMutator</span><span class="p">(</span><span class="n">Mutator</span><span class="p">):</span>
+<div class="viewcode-block" id="GaussianMutator"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.GaussianMutator.html#gcdyn.bdms.GaussianMutator">[docs]</a><span class="k">class</span> <span class="nc">GaussianMutator</span><span class="p">(</span><span class="n">Mutator</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Gaussian mutation effect on phenotype attribute :math:`x`.</span>
 
 <span class="sd">    Args:</span>
@@ -294,16 +310,16 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_distribution</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">)</span>
 
-<div class="viewcode-block" id="GaussianMutator.mutate"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.GaussianMutator.html#gcdyn.bdms.GaussianMutator.mutate">[docs]</a>    <span class="k">def</span> <span class="nf">mutate</span><span class="p">(</span>
+<div class="viewcode-block" id="GaussianMutator.mutate"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.GaussianMutator.html#gcdyn.bdms.GaussianMutator.mutate">[docs]</a>    <span class="k">def</span> <span class="nf">mutate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">node</span><span class="o">.</span><span class="n">x</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distribution</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="GaussianMutator.logprob"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.GaussianMutator.html#gcdyn.bdms.GaussianMutator.logprob">[docs]</a>    <span class="k">def</span> <span class="nf">logprob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node1</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">,</span> <span class="n">node2</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<div class="viewcode-block" id="GaussianMutator.logprob"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.GaussianMutator.html#gcdyn.bdms.GaussianMutator.logprob">[docs]</a>    <span class="k">def</span> <span class="nf">logprob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node1</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">,</span> <span class="n">node2</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distribution</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">node2</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">node1</span><span class="o">.</span><span class="n">x</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="TreeNode"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode">[docs]</a><span class="k">class</span> <span class="nc">TreeNode</span><span class="p">(</span><span class="n">ete3</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
+<div class="viewcode-block" id="TreeNode"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode">[docs]</a><span class="k">class</span> <span class="nc">TreeNode</span><span class="p">(</span><span class="n">ete3</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;A tree generated by a BDMS process. Subclasses</span>
 <span class="sd">    :py:class:`ete3.TreeNode`.</span>
 
@@ -354,7 +370,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_sampled</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pruned</span> <span class="o">=</span> <span class="kc">False</span>
 
-<div class="viewcode-block" id="TreeNode.evolve"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.evolve">[docs]</a>    <span class="k">def</span> <span class="nf">evolve</span><span class="p">(</span>
+<div class="viewcode-block" id="TreeNode.evolve"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.evolve">[docs]</a>    <span class="k">def</span> <span class="nf">evolve</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">birth_rate</span><span class="p">:</span> <span class="n">Response</span> <span class="o">=</span> <span class="n">ConstantResponse</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
@@ -388,9 +404,9 @@
 <span class="sd">                  If a :py:class:`numpy.random.Generator`, then that will be used directly.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_root</span><span class="p">():</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Cannot evolve a non-root node&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">TreeError</span><span class="p">(</span><span class="s2">&quot;Cannot evolve a non-root node&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="k">raise</span> <span class="n">TreeError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;tree has already evolved at node </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">)</span><span class="si">}</span><span class="s2"> descendant lineages&quot;</span>
             <span class="p">)</span>
         <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
@@ -515,7 +531,7 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown event </span><span class="si">{</span><span class="n">child</span><span class="o">.</span><span class="n">event</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
 
-<div class="viewcode-block" id="TreeNode.sample_survivors"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.sample_survivors">[docs]</a>    <span class="k">def</span> <span class="nf">sample_survivors</span><span class="p">(</span>
+<div class="viewcode-block" id="TreeNode.sample_survivors"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.sample_survivors">[docs]</a>    <span class="k">def</span> <span class="nf">sample_survivors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">n</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">p</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
@@ -548,7 +564,7 @@
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traverse</span><span class="p">():</span>
             <span class="n">node</span><span class="o">.</span><span class="n">_sampled</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="TreeNode.prune"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.prune">[docs]</a>    <span class="k">def</span> <span class="nf">prune</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="TreeNode.prune"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.prune">[docs]</a>    <span class="k">def</span> <span class="nf">prune</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Prune the tree to the subtree induced by the sampled leaves.</span>
 
 <span class="sd">        Also removes mutation events, and annotates mutation counts in</span>
@@ -558,7 +574,10 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;tree has already been pruned below node </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sampled</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;tree has not been sampled below node </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
         <span class="n">event_cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cached_content</span><span class="p">(</span><span class="n">store_attr</span><span class="o">=</span><span class="s2">&quot;event&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SAMPLING_EVENT</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">event_cache</span><span class="p">[</span><span class="bp">self</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">TreeError</span><span class="p">(</span><span class="s2">&quot;cannot prune because no leaves were sampled&quot;</span><span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">is_leaf_fn</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SAMPLING_EVENT</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">event_cache</span><span class="p">[</span><span class="n">node</span><span class="p">]</span>
@@ -576,7 +595,7 @@
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traverse</span><span class="p">():</span>
             <span class="n">node</span><span class="o">.</span><span class="n">_pruned</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="TreeNode.render"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.render">[docs]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">cbar_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<div class="viewcode-block" id="TreeNode.render"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.render">[docs]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">cbar_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;A thin wrapper around :py:func:`ete3.TreeNode.render` that adds some</span>
 <span class="sd">        custom decoration and a color bar. As with the base class method, pass</span>
 <span class="sd">        ``&quot;%%inline&quot;`` for the first argument to render inline in a notebook.</span>
@@ -651,7 +670,7 @@
 
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TreeNode.log_likelihood"><a class="viewcode-back" href="../../stubs/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.log_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">log_likelihood</span><span class="p">(</span>
+<div class="viewcode-block" id="TreeNode.log_likelihood"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.log_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">log_likelihood</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">birth_rate</span><span class="p">:</span> <span class="n">Response</span><span class="p">,</span>
         <span class="n">death_rate</span><span class="p">:</span> <span class="n">Response</span><span class="p">,</span>

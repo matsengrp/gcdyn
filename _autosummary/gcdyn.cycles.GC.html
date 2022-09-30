@@ -16,6 +16,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -54,13 +55,28 @@
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.simple_proliferator.html">gcdyn.cycles.simple_proliferator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.DMSSelector.html">gcdyn.cycles.DMSSelector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.FivemerMutator.html">gcdyn.cycles.FivemerMutator</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.cycles.GC</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.cycles.GC</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gcdyn.cycles.GC"><code class="docutils literal notranslate"><span class="pre">GC</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.Mutator.html">gcdyn.cycles.Mutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.Selector.html">gcdyn.cycles.Selector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.ThreeStepSelector.html">gcdyn.cycles.ThreeStepSelector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.UniformMutator.html">gcdyn.cycles.UniformMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.UniformSelector.html">gcdyn.cycles.UniformSelector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.ExtinctionError.html">gcdyn.cycles.ExtinctionError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.ExtinctionError"><code class="docutils literal notranslate"><span class="pre">ExtinctionError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.Mutator"><code class="docutils literal notranslate"><span class="pre">Mutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.UniformMutator"><code class="docutils literal notranslate"><span class="pre">UniformMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.FivemerMutator"><code class="docutils literal notranslate"><span class="pre">FivemerMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.Selector"><code class="docutils literal notranslate"><span class="pre">Selector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.UniformSelector"><code class="docutils literal notranslate"><span class="pre">UniformSelector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.ThreeStepSelector"><code class="docutils literal notranslate"><span class="pre">ThreeStepSelector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.DMSSelector"><code class="docutils literal notranslate"><span class="pre">DMSSelector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.GC"><code class="docutils literal notranslate"><span class="pre">GC</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.binary_proliferator"><code class="docutils literal notranslate"><span class="pre">binary_proliferator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.simple_proliferator"><code class="docutils literal notranslate"><span class="pre">simple_proliferator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.cell_div_balanced_proliferator"><code class="docutils literal notranslate"><span class="pre">cell_div_balanced_proliferator()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.fitness.html">gcdyn.fitness</a></li>
@@ -103,7 +119,7 @@
 <h1>gcdyn.cycles.GC<a class="headerlink" href="#gcdyn-cycles-gc" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.cycles.GC">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.cycles.</span></span><span class="sig-name descname"><span class="pre">GC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proliferator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N0=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nmax=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng=Generator(PCG64)</span> <span class="pre">at</span> <span class="pre">0x7F4AB9E73740</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#GC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.GC" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.cycles.</span></span><span class="sig-name descname"><span class="pre">GC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proliferator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N0=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nmax=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng=Generator(PCG64)</span> <span class="pre">at</span> <span class="pre">0x7F1B4F2AC120</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#GC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.GC" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A class for simulating a germinal center with discrete LZ
 <span class="math notranslate nohighlight">\(\leftrightarrow\)</span> DZ cycles.</p>

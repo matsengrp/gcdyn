@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gcdyn.cycles.UniformSelector &mdash; gcdyn  documentation</title>
+  <title>gcdyn.cycles.ExtinctionError &mdash; gcdyn  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -16,11 +16,12 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="gcdyn.cycles.ExtinctionError" href="gcdyn.cycles.ExtinctionError.html" />
-    <link rel="prev" title="gcdyn.cycles.UniformMutator" href="gcdyn.cycles.UniformMutator.html" /> 
+    <link rel="next" title="gcdyn.fitness" href="gcdyn.fitness.html" />
+    <link rel="prev" title="gcdyn.cycles.UniformSelector" href="gcdyn.cycles.UniformSelector.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -58,8 +59,23 @@
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.Selector.html">gcdyn.cycles.Selector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.ThreeStepSelector.html">gcdyn.cycles.ThreeStepSelector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.UniformMutator.html">gcdyn.cycles.UniformMutator</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.cycles.UniformSelector</a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.ExtinctionError.html">gcdyn.cycles.ExtinctionError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.UniformSelector.html">gcdyn.cycles.UniformSelector</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.cycles.ExtinctionError</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gcdyn.cycles.ExtinctionError"><code class="docutils literal notranslate"><span class="pre">ExtinctionError</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.ExtinctionError"><code class="docutils literal notranslate"><span class="pre">ExtinctionError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.Mutator"><code class="docutils literal notranslate"><span class="pre">Mutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.UniformMutator"><code class="docutils literal notranslate"><span class="pre">UniformMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.FivemerMutator"><code class="docutils literal notranslate"><span class="pre">FivemerMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.Selector"><code class="docutils literal notranslate"><span class="pre">Selector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.UniformSelector"><code class="docutils literal notranslate"><span class="pre">UniformSelector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.ThreeStepSelector"><code class="docutils literal notranslate"><span class="pre">ThreeStepSelector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.DMSSelector"><code class="docutils literal notranslate"><span class="pre">DMSSelector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.GC"><code class="docutils literal notranslate"><span class="pre">GC</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.binary_proliferator"><code class="docutils literal notranslate"><span class="pre">binary_proliferator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.simple_proliferator"><code class="docutils literal notranslate"><span class="pre">simple_proliferator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.cell_div_balanced_proliferator"><code class="docutils literal notranslate"><span class="pre">cell_div_balanced_proliferator()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.fitness.html">gcdyn.fitness</a></li>
@@ -89,7 +105,7 @@
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../api.html">Modules</a> &raquo;</li>
           <li><a href="gcdyn.cycles.html">gcdyn.cycles</a> &raquo;</li>
-      <li>gcdyn.cycles.UniformSelector</li>
+      <li>gcdyn.cycles.ExtinctionError</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -98,53 +114,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="gcdyn-cycles-uniformselector">
-<h1>gcdyn.cycles.UniformSelector<a class="headerlink" href="#gcdyn-cycles-uniformselector" title="Permalink to this heading"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="gcdyn.cycles.UniformSelector">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.cycles.</span></span><span class="sig-name descname"><span class="pre">UniformSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fitness_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#UniformSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.UniformSelector" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="gcdyn.cycles.Selector.html#gcdyn.cycles.Selector" title="gcdyn.cycles.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Selector</span></code></a></p>
-<p>Uniform selector assigning fitness of each sequence to an equal
-value.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>fitness_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]) – fitness value for each sequence if normalization (<code class="docutils literal notranslate"><span class="pre">competition</span></code>) is off</p>
-</dd>
-</dl>
-<p class="rubric">Methods</p>
-<table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.cycles.UniformSelector.select" title="gcdyn.cycles.UniformSelector.select"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select</span></code></a></p></td>
-<td><p>Uniform selector assigning fitness of each sequence to an equal value.</p></td>
-</tr>
-</tbody>
-</table>
-<dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.cycles.UniformSelector.select">
-<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">competition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#UniformSelector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.UniformSelector.select" title="Permalink to this definition"></a></dt>
-<dd><p>Uniform selector assigning fitness of each sequence to an equal
-value.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>sequence_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – list of sequences for fitness assignment</p></li>
-<li><p><strong>competition</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, competition for T cell help in the light zone is expected,</p></li>
-<li><p><strong>1/`len</strong> (<em>and the fitness is set to</em>) – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>list of tuples containing the assigned number of cell divisions (equal values)</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>fitness_values</p>
-</dd>
-</dl>
-</dd></dl>
-
+  <section id="gcdyn-cycles-extinctionerror">
+<h1>gcdyn.cycles.ExtinctionError<a class="headerlink" href="#gcdyn-cycles-extinctionerror" title="Permalink to this heading"></a></h1>
+<dl class="py exception">
+<dt class="sig sig-object py" id="gcdyn.cycles.ExtinctionError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.cycles.</span></span><span class="sig-name descname"><span class="pre">ExtinctionError</span></span><a class="reference internal" href="../_modules/gcdyn/cycles.html#ExtinctionError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.ExtinctionError" title="Permalink to this definition"></a></dt>
+<dd><p>The simulation has resulted in extinction of all lineages.</p>
 </dd></dl>
 
 </section>
@@ -153,8 +128,8 @@ value.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="gcdyn.cycles.UniformMutator.html" class="btn btn-neutral float-left" title="gcdyn.cycles.UniformMutator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="gcdyn.cycles.ExtinctionError.html" class="btn btn-neutral float-right" title="gcdyn.cycles.ExtinctionError" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="gcdyn.cycles.UniformSelector.html" class="btn btn-neutral float-left" title="gcdyn.cycles.UniformSelector" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gcdyn.fitness.html" class="btn btn-neutral float-right" title="gcdyn.fitness" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

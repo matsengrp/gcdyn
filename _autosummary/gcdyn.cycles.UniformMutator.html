@@ -16,6 +16,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -57,9 +58,24 @@
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.Mutator.html">gcdyn.cycles.Mutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.Selector.html">gcdyn.cycles.Selector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.ThreeStepSelector.html">gcdyn.cycles.ThreeStepSelector</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.cycles.UniformMutator</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.cycles.UniformMutator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gcdyn.cycles.UniformMutator"><code class="docutils literal notranslate"><span class="pre">UniformMutator</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.UniformSelector.html">gcdyn.cycles.UniformSelector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.ExtinctionError.html">gcdyn.cycles.ExtinctionError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.ExtinctionError"><code class="docutils literal notranslate"><span class="pre">ExtinctionError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.Mutator"><code class="docutils literal notranslate"><span class="pre">Mutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.UniformMutator"><code class="docutils literal notranslate"><span class="pre">UniformMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.FivemerMutator"><code class="docutils literal notranslate"><span class="pre">FivemerMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.Selector"><code class="docutils literal notranslate"><span class="pre">Selector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.UniformSelector"><code class="docutils literal notranslate"><span class="pre">UniformSelector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.ThreeStepSelector"><code class="docutils literal notranslate"><span class="pre">ThreeStepSelector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.DMSSelector"><code class="docutils literal notranslate"><span class="pre">DMSSelector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.GC"><code class="docutils literal notranslate"><span class="pre">GC</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.binary_proliferator"><code class="docutils literal notranslate"><span class="pre">binary_proliferator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.simple_proliferator"><code class="docutils literal notranslate"><span class="pre">simple_proliferator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.cell_div_balanced_proliferator"><code class="docutils literal notranslate"><span class="pre">cell_div_balanced_proliferator()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.fitness.html">gcdyn.fitness</a></li>
@@ -118,7 +134,7 @@
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.cycles.UniformMutator.mutate">
-<span class="sig-name descname"><span class="pre">mutate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng=Generator(PCG64)</span> <span class="pre">at</span> <span class="pre">0x7F4AB9F5BF20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#UniformMutator.mutate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.UniformMutator.mutate" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">mutate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng=Generator(PCG64)</span> <span class="pre">at</span> <span class="pre">0x7F1B4F32D900</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#UniformMutator.mutate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.UniformMutator.mutate" title="Permalink to this definition"></a></dt>
 <dd><p>Uniform mutation process at rate 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

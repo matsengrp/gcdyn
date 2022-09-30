@@ -15,6 +15,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -93,11 +94,11 @@
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">exp</span>
 
 
-<div class="viewcode-block" id="ExtinctionError"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.ExtinctionError.html#gcdyn.cycles.ExtinctionError">[docs]</a><span class="k">class</span> <span class="nc">ExtinctionError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="ExtinctionError"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.ExtinctionError.html#gcdyn.cycles.ExtinctionError">[docs]</a><span class="k">class</span> <span class="nc">ExtinctionError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;The simulation has resulted in extinction of all lineages.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="Mutator"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.Mutator.html#gcdyn.cycles.Mutator">[docs]</a><span class="k">class</span> <span class="nc">Mutator</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="Mutator"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.Mutator.html#gcdyn.cycles.Mutator">[docs]</a><span class="k">class</span> <span class="nc">Mutator</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;A class for GC mutators, which mutate a sequence over some period of</span>
 <span class="sd">    time.&quot;&quot;&quot;</span>
 
@@ -105,8 +106,8 @@
         <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="UniformMutator"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.UniformMutator.html#gcdyn.cycles.UniformMutator">[docs]</a><span class="k">class</span> <span class="nc">UniformMutator</span><span class="p">(</span><span class="n">Mutator</span><span class="p">):</span>
-<div class="viewcode-block" id="UniformMutator.mutate"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.UniformMutator.html#gcdyn.cycles.UniformMutator.mutate">[docs]</a>    <span class="k">def</span> <span class="nf">mutate</span><span class="p">(</span>
+<div class="viewcode-block" id="UniformMutator"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.UniformMutator.html#gcdyn.cycles.UniformMutator">[docs]</a><span class="k">class</span> <span class="nc">UniformMutator</span><span class="p">(</span><span class="n">Mutator</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformMutator.mutate"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.UniformMutator.html#gcdyn.cycles.UniformMutator.mutate">[docs]</a>    <span class="k">def</span> <span class="nf">mutate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">()</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Uniform mutation process at rate 1.</span>
@@ -131,7 +132,7 @@
         <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="FivemerMutator"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.FivemerMutator.html#gcdyn.cycles.FivemerMutator">[docs]</a><span class="k">class</span> <span class="nc">FivemerMutator</span><span class="p">(</span><span class="n">Mutator</span><span class="p">):</span>
+<div class="viewcode-block" id="FivemerMutator"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.FivemerMutator.html#gcdyn.cycles.FivemerMutator">[docs]</a><span class="k">class</span> <span class="nc">FivemerMutator</span><span class="p">(</span><span class="n">Mutator</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">mutability_csv</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -156,7 +157,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">substitution</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">substitution_csv</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">igk_idx</span> <span class="o">=</span> <span class="n">igk_idx</span>
 
-<div class="viewcode-block" id="FivemerMutator.mutate"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.FivemerMutator.html#gcdyn.cycles.FivemerMutator.mutate">[docs]</a>    <span class="k">def</span> <span class="nf">mutate</span><span class="p">(</span>
+<div class="viewcode-block" id="FivemerMutator.mutate"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.FivemerMutator.html#gcdyn.cycles.FivemerMutator.mutate">[docs]</a>    <span class="k">def</span> <span class="nf">mutate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">()</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;AID hotspot-aware mutation model using mutability values at each</span>
@@ -202,7 +203,7 @@
         <span class="k">return</span> <span class="n">sequence</span></div></div>
 
 
-<div class="viewcode-block" id="Selector"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.Selector.html#gcdyn.cycles.Selector">[docs]</a><span class="k">class</span> <span class="nc">Selector</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="Selector"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.Selector.html#gcdyn.cycles.Selector">[docs]</a><span class="k">class</span> <span class="nc">Selector</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;A class for GC selectors, which determine the fitness for a list of</span>
 <span class="sd">    nucleotide sequences.</span>
 
@@ -210,7 +211,7 @@
 <span class="sd">    proliferator method</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Selector.select"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.Selector.html#gcdyn.cycles.Selector.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">competition</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]:</span>
+<div class="viewcode-block" id="Selector.select"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.Selector.html#gcdyn.cycles.Selector.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">competition</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Assigns the fitness for each sequence, with normalization depending</span>
 <span class="sd">        on whether competition is considered.</span>
 
@@ -224,7 +225,7 @@
         <span class="k">pass</span></div></div>
 
 
-<div class="viewcode-block" id="UniformSelector"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.UniformSelector.html#gcdyn.cycles.UniformSelector">[docs]</a><span class="k">class</span> <span class="nc">UniformSelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">):</span>
+<div class="viewcode-block" id="UniformSelector"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.UniformSelector.html#gcdyn.cycles.UniformSelector">[docs]</a><span class="k">class</span> <span class="nc">UniformSelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Uniform selector assigning fitness of each sequence to an equal</span>
 <span class="sd">    value.&quot;&quot;&quot;</span>
 
@@ -236,7 +237,7 @@
         <span class="k">if</span> <span class="n">fitness_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fitness_value</span> <span class="o">=</span> <span class="n">fitness_value</span>
 
-<div class="viewcode-block" id="UniformSelector.select"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.UniformSelector.html#gcdyn.cycles.UniformSelector.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span>
+<div class="viewcode-block" id="UniformSelector.select"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.UniformSelector.html#gcdyn.cycles.UniformSelector.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">sequence_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">competition</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;Uniform selector assigning fitness of each sequence to an equal</span>
@@ -261,7 +262,7 @@
         <span class="k">return</span> <span class="n">cell_tuples</span></div></div>
 
 
-<div class="viewcode-block" id="ThreeStepSelector"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.ThreeStepSelector.html#gcdyn.cycles.ThreeStepSelector">[docs]</a><span class="k">class</span> <span class="nc">ThreeStepSelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">):</span>
+<div class="viewcode-block" id="ThreeStepSelector"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.ThreeStepSelector.html#gcdyn.cycles.ThreeStepSelector">[docs]</a><span class="k">class</span> <span class="nc">ThreeStepSelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A Selector that uses DMS data as well as a discrete amount of T cell</span>
 <span class="sd">    help that is assigned.&quot;&quot;&quot;</span>
 
@@ -307,7 +308,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">max_help</span> <span class="o">=</span> <span class="n">max_help</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">antigen_frac_limit</span> <span class="o">=</span> <span class="n">antigen_frac_limit</span>
 
-<div class="viewcode-block" id="ThreeStepSelector.select"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.ThreeStepSelector.html#gcdyn.cycles.ThreeStepSelector.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span>
+<div class="viewcode-block" id="ThreeStepSelector.select"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.ThreeStepSelector.html#gcdyn.cycles.ThreeStepSelector.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">sequence_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">competition</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -344,7 +345,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">selected_seq</span><span class="p">)])</span> <span class="k">for</span> <span class="n">selected_seq</span> <span class="ow">in</span> <span class="n">selected_seqs</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="ThreeStepSelector.norm1"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.ThreeStepSelector.html#gcdyn.cycles.ThreeStepSelector.norm1">[docs]</a>    <span class="k">def</span> <span class="nf">norm1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">KD_list</span><span class="p">):</span>
+<div class="viewcode-block" id="ThreeStepSelector.norm1"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.ThreeStepSelector.html#gcdyn.cycles.ThreeStepSelector.norm1">[docs]</a>    <span class="k">def</span> <span class="nf">norm1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">KD_list</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;For each KD value in ``KD_list``, determines the fraction of antigen bound using the Hill equation and</span>
 <span class="sd">        returns a list containing that value or 0, if the fraction is below ``antigen_frac_limit``.</span>
 <span class="sd">        Args:</span>
@@ -362,7 +363,7 @@
                 <span class="n">competencies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">competencies</span></div>
 
-<div class="viewcode-block" id="ThreeStepSelector.norm2_sigmoid"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.ThreeStepSelector.html#gcdyn.cycles.ThreeStepSelector.norm2_sigmoid">[docs]</a>    <span class="k">def</span> <span class="nf">norm2_sigmoid</span><span class="p">(</span>
+<div class="viewcode-block" id="ThreeStepSelector.norm2_sigmoid"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.ThreeStepSelector.html#gcdyn.cycles.ThreeStepSelector.norm2_sigmoid">[docs]</a>    <span class="k">def</span> <span class="nf">norm2_sigmoid</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">competencies</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
         <span class="n">curve_steepness</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
@@ -447,7 +448,7 @@
         <span class="k">return</span> <span class="n">amt_help</span></div>
 
 
-<div class="viewcode-block" id="DMSSelector"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.DMSSelector.html#gcdyn.cycles.DMSSelector">[docs]</a><span class="k">class</span> <span class="nc">DMSSelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">):</span>
+<div class="viewcode-block" id="DMSSelector"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.DMSSelector.html#gcdyn.cycles.DMSSelector">[docs]</a><span class="k">class</span> <span class="nc">DMSSelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;A class for a GC selector which determines fitness for nucleotide</span>
 <span class="sd">    sequences by using DMS models of affinity.&quot;&quot;&quot;</span>
 
@@ -492,7 +493,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">slope</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y_intercept</span> <span class="o">=</span> <span class="n">y_intercept</span>
 
-<div class="viewcode-block" id="DMSSelector.select"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.DMSSelector.html#gcdyn.cycles.DMSSelector.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span>
+<div class="viewcode-block" id="DMSSelector.select"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.DMSSelector.html#gcdyn.cycles.DMSSelector.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">sequence_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">competition</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;Produce the predicted number of cell divisions for a list of</span>
@@ -520,7 +521,7 @@
         <span class="k">return</span> <span class="n">cell_tuples</span></div></div>
 
 
-<div class="viewcode-block" id="GC"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.GC.html#gcdyn.cycles.GC">[docs]</a><span class="k">class</span> <span class="nc">GC</span><span class="p">:</span>
+<div class="viewcode-block" id="GC"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.GC.html#gcdyn.cycles.GC">[docs]</a><span class="k">class</span> <span class="nc">GC</span><span class="p">:</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;A class for simulating a germinal center with discrete LZ</span>
 <span class="sd">    :math:`\leftrightarrow` DZ cycles.</span>
 
@@ -563,7 +564,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">alive_leaves</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">leaf</span> <span class="k">for</span> <span class="n">leaf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">])</span>
 
-<div class="viewcode-block" id="GC.step"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.GC.html#gcdyn.cycles.GC.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enforce_timescale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">competition</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="GC.step"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.GC.html#gcdyn.cycles.GC.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enforce_timescale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">competition</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Simulate one cycle.</span>
 
 <span class="sd">        Args:</span>
@@ -602,7 +603,7 @@
                 <span class="n">leaf</span><span class="o">.</span><span class="n">terminated</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">alive_leaves</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">leaf</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="GC.prune"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.GC.html#gcdyn.cycles.GC.prune">[docs]</a>    <span class="k">def</span> <span class="nf">prune</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="GC.prune"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.GC.html#gcdyn.cycles.GC.prune">[docs]</a>    <span class="k">def</span> <span class="nf">prune</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Prune the tree to the subtree induced by the alive leaves.&quot;&quot;&quot;</span>
         <span class="n">event_cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">get_cached_content</span><span class="p">(</span><span class="n">store_attr</span><span class="o">=</span><span class="s2">&quot;terminated&quot;</span><span class="p">)</span>
 
@@ -616,7 +617,7 @@
             <span class="k">if</span> <span class="n">is_leaf_fn</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
                 <span class="n">node</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="GC.simulate"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.GC.html#gcdyn.cycles.GC.simulate">[docs]</a>    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span>
+<div class="viewcode-block" id="GC.simulate"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.GC.html#gcdyn.cycles.GC.simulate">[docs]</a>    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">T</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">prune</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -653,7 +654,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">terminated</span> <span class="o">=</span> <span class="kc">False</span></div></div>
 
 
-<div class="viewcode-block" id="binary_proliferator"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.binary_proliferator.html#gcdyn.cycles.binary_proliferator">[docs]</a><span class="k">def</span> <span class="nf">binary_proliferator</span><span class="p">(</span>
+<div class="viewcode-block" id="binary_proliferator"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.binary_proliferator.html#gcdyn.cycles.binary_proliferator">[docs]</a><span class="k">def</span> <span class="nf">binary_proliferator</span><span class="p">(</span>
     <span class="n">treenode</span><span class="p">:</span> <span class="n">TreeNode</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">()</span>
 <span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Binary dark zone step (Galton-Watson). With probability :math:`1-p` the</span>
@@ -678,7 +679,7 @@
             <span class="n">treenode</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">child</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="simple_proliferator"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.simple_proliferator.html#gcdyn.cycles.simple_proliferator">[docs]</a><span class="k">def</span> <span class="nf">simple_proliferator</span><span class="p">(</span>
+<div class="viewcode-block" id="simple_proliferator"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.simple_proliferator.html#gcdyn.cycles.simple_proliferator">[docs]</a><span class="k">def</span> <span class="nf">simple_proliferator</span><span class="p">(</span>
     <span class="n">treenode</span><span class="p">:</span> <span class="n">TreeNode</span><span class="p">,</span>
     <span class="n">cell_divisions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -707,7 +708,7 @@
             <span class="n">simple_proliferator</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">cell_divisions</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dist</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="cell_div_balanced_proliferator"><a class="viewcode-back" href="../../stubs/gcdyn.cycles.cell_div_balanced_proliferator.html#gcdyn.cycles.cell_div_balanced_proliferator">[docs]</a><span class="k">def</span> <span class="nf">cell_div_balanced_proliferator</span><span class="p">(</span>
+<div class="viewcode-block" id="cell_div_balanced_proliferator"><a class="viewcode-back" href="../../_autosummary/gcdyn.cycles.cell_div_balanced_proliferator.html#gcdyn.cycles.cell_div_balanced_proliferator">[docs]</a><span class="k">def</span> <span class="nf">cell_div_balanced_proliferator</span><span class="p">(</span>
     <span class="n">treenode</span><span class="p">:</span> <span class="n">TreeNode</span><span class="p">,</span>
     <span class="n">cell_divisions</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">(),</span>

@@ -16,6 +16,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -52,7 +53,10 @@
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.binary_proliferator.html">gcdyn.cycles.binary_proliferator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.cell_div_balanced_proliferator.html">gcdyn.cycles.cell_div_balanced_proliferator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.simple_proliferator.html">gcdyn.cycles.simple_proliferator</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.cycles.DMSSelector</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.cycles.DMSSelector</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gcdyn.cycles.DMSSelector"><code class="docutils literal notranslate"><span class="pre">DMSSelector</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.FivemerMutator.html">gcdyn.cycles.FivemerMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.GC.html">gcdyn.cycles.GC</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.Mutator.html">gcdyn.cycles.Mutator</a></li>
@@ -61,6 +65,18 @@
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.UniformMutator.html">gcdyn.cycles.UniformMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.UniformSelector.html">gcdyn.cycles.UniformSelector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.ExtinctionError.html">gcdyn.cycles.ExtinctionError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.ExtinctionError"><code class="docutils literal notranslate"><span class="pre">ExtinctionError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.Mutator"><code class="docutils literal notranslate"><span class="pre">Mutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.UniformMutator"><code class="docutils literal notranslate"><span class="pre">UniformMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.FivemerMutator"><code class="docutils literal notranslate"><span class="pre">FivemerMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.Selector"><code class="docutils literal notranslate"><span class="pre">Selector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.UniformSelector"><code class="docutils literal notranslate"><span class="pre">UniformSelector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.ThreeStepSelector"><code class="docutils literal notranslate"><span class="pre">ThreeStepSelector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.DMSSelector"><code class="docutils literal notranslate"><span class="pre">DMSSelector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.GC"><code class="docutils literal notranslate"><span class="pre">GC</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.binary_proliferator"><code class="docutils literal notranslate"><span class="pre">binary_proliferator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.simple_proliferator"><code class="docutils literal notranslate"><span class="pre">simple_proliferator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.cell_div_balanced_proliferator"><code class="docutils literal notranslate"><span class="pre">cell_div_balanced_proliferator()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.fitness.html">gcdyn.fitness</a></li>
@@ -146,7 +162,7 @@ fitness.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sequence_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – list of DNA sequences</p></li>
 <li><p><strong>competition</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, competition for T cell help in the light zone is expected, and the cell divisions</p></li>
-<li><p><strong>bound</strong> (<em>are determined from only the sequence's predicted amount of antigen</em>) – </p></li>
+<li><p><strong>bound</strong> (<em>are determined from only the sequence's predicted amount</em><em> of </em><em>antigen</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

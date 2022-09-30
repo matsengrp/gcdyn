@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gcdyn.cycles.simple_proliferator &mdash; gcdyn  documentation</title>
+  <title>gcdyn.cycles.cell_div_balanced_proliferator &mdash; gcdyn  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -16,11 +16,13 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="gcdyn.cycles.DMSSelector" href="gcdyn.cycles.DMSSelector.html" />
-    <link rel="prev" title="gcdyn.cycles.cell_div_balanced_proliferator" href="gcdyn.cycles.cell_div_balanced_proliferator.html" /> 
+    <link rel="next" title="gcdyn.cycles.simple_proliferator" href="gcdyn.cycles.simple_proliferator.html" />
+    <link rel="prev" title="gcdyn.cycles.binary_proliferator" href="gcdyn.cycles.binary_proliferator.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -49,8 +51,11 @@
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.bdms.html">gcdyn.bdms</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="gcdyn.cycles.html">gcdyn.cycles</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.binary_proliferator.html">gcdyn.cycles.binary_proliferator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.cell_div_balanced_proliferator.html">gcdyn.cycles.cell_div_balanced_proliferator</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.cycles.simple_proliferator</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.cycles.cell_div_balanced_proliferator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gcdyn.cycles.cell_div_balanced_proliferator"><code class="docutils literal notranslate"><span class="pre">cell_div_balanced_proliferator()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.simple_proliferator.html">gcdyn.cycles.simple_proliferator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.DMSSelector.html">gcdyn.cycles.DMSSelector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.FivemerMutator.html">gcdyn.cycles.FivemerMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.GC.html">gcdyn.cycles.GC</a></li>
@@ -60,6 +65,18 @@
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.UniformMutator.html">gcdyn.cycles.UniformMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.UniformSelector.html">gcdyn.cycles.UniformSelector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.ExtinctionError.html">gcdyn.cycles.ExtinctionError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.ExtinctionError"><code class="docutils literal notranslate"><span class="pre">ExtinctionError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.Mutator"><code class="docutils literal notranslate"><span class="pre">Mutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.UniformMutator"><code class="docutils literal notranslate"><span class="pre">UniformMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.FivemerMutator"><code class="docutils literal notranslate"><span class="pre">FivemerMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.Selector"><code class="docutils literal notranslate"><span class="pre">Selector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.UniformSelector"><code class="docutils literal notranslate"><span class="pre">UniformSelector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.ThreeStepSelector"><code class="docutils literal notranslate"><span class="pre">ThreeStepSelector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.DMSSelector"><code class="docutils literal notranslate"><span class="pre">DMSSelector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.GC"><code class="docutils literal notranslate"><span class="pre">GC</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.binary_proliferator"><code class="docutils literal notranslate"><span class="pre">binary_proliferator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.simple_proliferator"><code class="docutils literal notranslate"><span class="pre">simple_proliferator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.cell_div_balanced_proliferator"><code class="docutils literal notranslate"><span class="pre">cell_div_balanced_proliferator()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.fitness.html">gcdyn.fitness</a></li>
@@ -89,7 +106,7 @@
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../api.html">Modules</a> &raquo;</li>
           <li><a href="gcdyn.cycles.html">gcdyn.cycles</a> &raquo;</li>
-      <li>gcdyn.cycles.simple_proliferator</li>
+      <li>gcdyn.cycles.cell_div_balanced_proliferator</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -98,21 +115,24 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="gcdyn-cycles-simple-proliferator">
-<h1>gcdyn.cycles.simple_proliferator<a class="headerlink" href="#gcdyn-cycles-simple-proliferator" title="Permalink to this heading"></a></h1>
+  <section id="gcdyn-cycles-cell-div-balanced-proliferator">
+<h1>gcdyn.cycles.cell_div_balanced_proliferator<a class="headerlink" href="#gcdyn-cycles-cell-div-balanced-proliferator" title="Permalink to this heading"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="gcdyn.cycles.simple_proliferator">
-<span class="sig-prename descclassname"><span class="pre">gcdyn.cycles.</span></span><span class="sig-name descname"><span class="pre">simple_proliferator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treenode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_divisions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng=Generator(PCG64)</span> <span class="pre">at</span> <span class="pre">0x7F4AB9E73900</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#simple_proliferator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.simple_proliferator" title="Permalink to this definition"></a></dt>
-<dd><p>Recursively populates descendants on a tree node based on the number of
-integer cell divisions indicated. Branch lengths are set to
-1/<cite>cell_divisions</cite>, such that the distance from the root to all leaves will
-be 1.</p>
+<dt class="sig sig-object py" id="gcdyn.cycles.cell_div_balanced_proliferator">
+<span class="sig-prename descclassname"><span class="pre">gcdyn.cycles.</span></span><span class="sig-name descname"><span class="pre">cell_div_balanced_proliferator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treenode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_divisions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng=Generator(PCG64)</span> <span class="pre">at</span> <span class="pre">0x7F1B4F2AC3C0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#cell_div_balanced_proliferator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.cell_div_balanced_proliferator" title="Permalink to this definition"></a></dt>
+<dd><p>Populates descendants on a tree node based on the number of cell
+divisions indicated, producing the number of children expected by
+<span class="math notranslate nohighlight">\(2^{cell\_divisions}\)</span>, where <code class="docutils literal notranslate"><span class="pre">cell_divisions</span></code> is not necessarily an
+integer value. A full binary tree is generated, then leaf nodes are removed
+at random from the set of alternating leaf nodes until there are the
+expected number of children.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>treenode</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code>) – root node to populate from</p></li>
-<li><p><strong>cell_divisions</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – number of cell divisions from the cell represented by <code class="docutils literal notranslate"><span class="pre">treenode</span></code></p></li>
-<li><p><strong>dist</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]) – distance from each parent to child node</p></li>
+<li><p><strong>cell_divisions</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – number of cell divisions from the cell represented by <code class="docutils literal notranslate"><span class="pre">treenode</span></code></p></li>
+<li><p><strong>kd</strong> – calculated KD value for sequence</p></li>
+<li><p><strong>fitness</strong> – calculated fitness for sequence</p></li>
 <li><p><strong>rng</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>) – random number generator</p></li>
 </ul>
 </dd>
@@ -128,8 +148,8 @@ be 1.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="gcdyn.cycles.cell_div_balanced_proliferator.html" class="btn btn-neutral float-left" title="gcdyn.cycles.cell_div_balanced_proliferator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="gcdyn.cycles.DMSSelector.html" class="btn btn-neutral float-right" title="gcdyn.cycles.DMSSelector" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="gcdyn.cycles.binary_proliferator.html" class="btn btn-neutral float-left" title="gcdyn.cycles.binary_proliferator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gcdyn.cycles.simple_proliferator.html" class="btn btn-neutral float-right" title="gcdyn.cycles.simple_proliferator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

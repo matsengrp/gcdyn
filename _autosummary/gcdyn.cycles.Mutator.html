@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gcdyn.cycles.Selector &mdash; gcdyn  documentation</title>
+  <title>gcdyn.cycles.Mutator &mdash; gcdyn  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -16,11 +16,12 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="gcdyn.cycles.ThreeStepSelector" href="gcdyn.cycles.ThreeStepSelector.html" />
-    <link rel="prev" title="gcdyn.cycles.Mutator" href="gcdyn.cycles.Mutator.html" /> 
+    <link rel="next" title="gcdyn.cycles.Selector" href="gcdyn.cycles.Selector.html" />
+    <link rel="prev" title="gcdyn.cycles.GC" href="gcdyn.cycles.GC.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -54,12 +55,27 @@
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.DMSSelector.html">gcdyn.cycles.DMSSelector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.FivemerMutator.html">gcdyn.cycles.FivemerMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.GC.html">gcdyn.cycles.GC</a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.Mutator.html">gcdyn.cycles.Mutator</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.cycles.Selector</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.cycles.Mutator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gcdyn.cycles.Mutator"><code class="docutils literal notranslate"><span class="pre">Mutator</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.Selector.html">gcdyn.cycles.Selector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.ThreeStepSelector.html">gcdyn.cycles.ThreeStepSelector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.UniformMutator.html">gcdyn.cycles.UniformMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.UniformSelector.html">gcdyn.cycles.UniformSelector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.ExtinctionError.html">gcdyn.cycles.ExtinctionError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.ExtinctionError"><code class="docutils literal notranslate"><span class="pre">ExtinctionError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.Mutator"><code class="docutils literal notranslate"><span class="pre">Mutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.UniformMutator"><code class="docutils literal notranslate"><span class="pre">UniformMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.FivemerMutator"><code class="docutils literal notranslate"><span class="pre">FivemerMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.Selector"><code class="docutils literal notranslate"><span class="pre">Selector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.UniformSelector"><code class="docutils literal notranslate"><span class="pre">UniformSelector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.ThreeStepSelector"><code class="docutils literal notranslate"><span class="pre">ThreeStepSelector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.DMSSelector"><code class="docutils literal notranslate"><span class="pre">DMSSelector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.GC"><code class="docutils literal notranslate"><span class="pre">GC</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.binary_proliferator"><code class="docutils literal notranslate"><span class="pre">binary_proliferator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.simple_proliferator"><code class="docutils literal notranslate"><span class="pre">simple_proliferator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.cycles.html#gcdyn.cycles.cell_div_balanced_proliferator"><code class="docutils literal notranslate"><span class="pre">cell_div_balanced_proliferator()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.fitness.html">gcdyn.fitness</a></li>
@@ -89,7 +105,7 @@
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../api.html">Modules</a> &raquo;</li>
           <li><a href="gcdyn.cycles.html">gcdyn.cycles</a> &raquo;</li>
-      <li>gcdyn.cycles.Selector</li>
+      <li>gcdyn.cycles.Mutator</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -98,16 +114,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="gcdyn-cycles-selector">
-<h1>gcdyn.cycles.Selector<a class="headerlink" href="#gcdyn-cycles-selector" title="Permalink to this heading"></a></h1>
+  <section id="gcdyn-cycles-mutator">
+<h1>gcdyn.cycles.Mutator<a class="headerlink" href="#gcdyn-cycles-mutator" title="Permalink to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="gcdyn.cycles.Selector">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.cycles.</span></span><span class="sig-name descname"><span class="pre">Selector</span></span><a class="reference internal" href="../_modules/gcdyn/cycles.html#Selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.Selector" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="gcdyn.cycles.Mutator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.cycles.</span></span><span class="sig-name descname"><span class="pre">Mutator</span></span><a class="reference internal" href="../_modules/gcdyn/cycles.html#Mutator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.Mutator" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
-<p>A class for GC selectors, which determine the fitness for a list of
-nucleotide sequences.</p>
-<p>Selectors return a list of tuples that can be interpreted by a
-proliferator method</p>
+<p>A class for GC mutators, which mutate a sequence over some period of
+time.</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <colgroup>
@@ -115,32 +129,16 @@ proliferator method</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.cycles.Selector.select" title="gcdyn.cycles.Selector.select"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select</span></code></a></p></td>
-<td><p>Assigns the fitness for each sequence, with normalization depending on whether competition is considered.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mutate</span></code></p></td>
+<td><p><dl class="field-list simple">
+<dt class="field-odd">rtype</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
+</dd>
+</dl>
+</p></td>
 </tr>
 </tbody>
 </table>
-<dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.cycles.Selector.select">
-<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">competition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#Selector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.Selector.select" title="Permalink to this definition"></a></dt>
-<dd><p>Assigns the fitness for each sequence, with normalization depending
-on whether competition is considered.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>sequence_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – list of nucleotide sequences</p></li>
-<li><p><strong>competition</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – presence of competition in the light zone</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>list of tuples to be interpreted by a proliferator method</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>cell_tuples</p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 </section>
@@ -149,8 +147,8 @@ on whether competition is considered.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="gcdyn.cycles.Mutator.html" class="btn btn-neutral float-left" title="gcdyn.cycles.Mutator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="gcdyn.cycles.ThreeStepSelector.html" class="btn btn-neutral float-right" title="gcdyn.cycles.ThreeStepSelector" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="gcdyn.cycles.GC.html" class="btn btn-neutral float-left" title="gcdyn.cycles.GC" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gcdyn.cycles.Selector.html" class="btn btn-neutral float-right" title="gcdyn.cycles.Selector" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
