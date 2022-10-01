@@ -1,9 +1,9 @@
-gcdyn.bdms.GaussianMutator
-==========================
+gcdyn.bdms.PhenotypeMutator
+===========================
 
 .. currentmodule:: gcdyn.bdms
 
-.. autoclass:: GaussianMutator
+.. autoclass:: PhenotypeMutator
    :members:
    :show-inheritance:
    :inherited-members:
@@ -16,9 +16,9 @@ gcdyn.bdms.GaussianMutator
    .. autosummary::
       :nosignatures:
    
-      ~GaussianMutator.logprob
-      ~GaussianMutator.mutate
-      ~GaussianMutator.probx
+      ~PhenotypeMutator.logprob
+      ~PhenotypeMutator.mutate
+      ~PhenotypeMutator.probx
    
    
 

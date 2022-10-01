@@ -24,6 +24,7 @@
       ExponentialResponse
       GaussianMutator
       Mutator
+      PhenotypeMutator
       PhenotypeResponse
       Response
       SigmoidResponse

@@ -59,6 +59,7 @@
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.ExponentialResponse.html">gcdyn.bdms.ExponentialResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.GaussianMutator.html">gcdyn.bdms.GaussianMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.Mutator.html">gcdyn.bdms.Mutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.PhenotypeMutator.html">gcdyn.bdms.PhenotypeMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.PhenotypeResponse.html">gcdyn.bdms.PhenotypeResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.Response.html">gcdyn.bdms.Response</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.SigmoidResponse.html">gcdyn.bdms.SigmoidResponse</a></li>
@@ -85,9 +86,14 @@
 <li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.Mutator.logprob"><code class="docutils literal notranslate"><span class="pre">Mutator.logprob()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#gcdyn.bdms.PhenotypeMutator"><code class="docutils literal notranslate"><span class="pre">PhenotypeMutator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.PhenotypeMutator.logprob"><code class="docutils literal notranslate"><span class="pre">PhenotypeMutator.logprob()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.PhenotypeMutator.probx"><code class="docutils literal notranslate"><span class="pre">PhenotypeMutator.probx()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#gcdyn.bdms.GaussianMutator"><code class="docutils literal notranslate"><span class="pre">GaussianMutator</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.GaussianMutator.mutate"><code class="docutils literal notranslate"><span class="pre">GaussianMutator.mutate()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.GaussianMutator.logprob"><code class="docutils literal notranslate"><span class="pre">GaussianMutator.logprob()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.GaussianMutator.probx"><code class="docutils literal notranslate"><span class="pre">GaussianMutator.probx()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#gcdyn.bdms.TreeNode"><code class="docutils literal notranslate"><span class="pre">TreeNode</span></code></a><ul>
@@ -203,16 +209,19 @@ Some concrete child classes are included.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="gcdyn.bdms.Mutator.html#gcdyn.bdms.Mutator" title="gcdyn.bdms.Mutator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mutator</span></code></a></p></td>
 <td><p>Abstract base class for generating mutation effects given <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object, which is modified in place.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.bdms.PhenotypeResponse.html#gcdyn.bdms.PhenotypeResponse" title="gcdyn.bdms.PhenotypeResponse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PhenotypeResponse</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.bdms.PhenotypeMutator.html#gcdyn.bdms.PhenotypeMutator" title="gcdyn.bdms.PhenotypeMutator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PhenotypeMutator</span></code></a></p></td>
+<td><p>Abstract base class for mutators that mutate a <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object's phenotype attribute <span class="math notranslate nohighlight">\(x\)</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="gcdyn.bdms.PhenotypeResponse.html#gcdyn.bdms.PhenotypeResponse" title="gcdyn.bdms.PhenotypeResponse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PhenotypeResponse</span></code></a></p></td>
 <td><p>Abstract base class for response function mapping from a <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object's phenotype attribute <span class="math notranslate nohighlight">\(x\in\mathbb{R}\)</span> to real values given parameters.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="gcdyn.bdms.Response.html#gcdyn.bdms.Response" title="gcdyn.bdms.Response"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Response</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.bdms.Response.html#gcdyn.bdms.Response" title="gcdyn.bdms.Response"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Response</span></code></a></p></td>
 <td><p>Abstract base class for response function mapping <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> objects to <code class="docutils literal notranslate"><span class="pre">float</span></code> values given parameters.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.bdms.SigmoidResponse.html#gcdyn.bdms.SigmoidResponse" title="gcdyn.bdms.SigmoidResponse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SigmoidResponse</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="gcdyn.bdms.SigmoidResponse.html#gcdyn.bdms.SigmoidResponse" title="gcdyn.bdms.SigmoidResponse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SigmoidResponse</span></code></a></p></td>
 <td><p>Sigmoid response function on a <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object's phenotype attribute <span class="math notranslate nohighlight">\(x\)</span>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TreeNode</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TreeNode</span></code></a></p></td>
 <td><p>A tree generated by a BDMS process.</p></td>
 </tr>
 </tbody>
@@ -385,6 +394,52 @@ gives <code class="docutils literal notranslate"><span class="pre">node2</span><
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="gcdyn.bdms.PhenotypeMutator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.bdms.</span></span><span class="sig-name descname"><span class="pre">PhenotypeMutator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#PhenotypeMutator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.PhenotypeMutator" title="Permalink to this definition"></a></dt>
+<dd><p>Abstract base class for mutators that mutate a <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object’s phenotype attribute
+<span class="math notranslate nohighlight">\(x\)</span>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.bdms.PhenotypeMutator.logprob">
+<span class="sig-name descname"><span class="pre">logprob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#PhenotypeMutator.logprob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.PhenotypeMutator.logprob" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the log probability that a mutation effect on <code class="docutils literal notranslate"><span class="pre">node1</span></code>
+gives <code class="docutils literal notranslate"><span class="pre">node2</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node1</strong> (<a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a>) – Initial node.</p></li>
+<li><p><strong>node2</strong> (<a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a>) – Mutant node.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.bdms.PhenotypeMutator.probx">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">probx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#PhenotypeMutator.probx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.PhenotypeMutator.probx" title="Permalink to this definition"></a></dt>
+<dd><p>Convenience method to compute the probability density (if <span class="math notranslate nohighlight">\(x\)</span>
+is continuous) or mass (if <span class="math notranslate nohighlight">\(x\)</span> is discrete) that a mutation event
+on phenotype <span class="math notranslate nohighlight">\(x_1\)</span> gives phenotype <span class="math notranslate nohighlight">\(x_2\)</span> (e.g. for
+plotting).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x1</strong> (<em>array-like</em>) – Initial phenotype value.</p></li>
+<li><p><strong>x2</strong> (<em>array-like</em>) – Final phenotype value.</p></li>
+<li><p><strong>log</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, return the log probability density.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.bdms.GaussianMutator">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.bdms.</span></span><span class="sig-name descname"><span class="pre">GaussianMutator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#GaussianMutator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.GaussianMutator" title="Permalink to this definition"></a></dt>
 <dd><p>Gaussian mutation effect on phenotype attribute <span class="math notranslate nohighlight">\(x\)</span>.</p>
@@ -417,15 +472,18 @@ If a <a class="reference external" href="https://numpy.org/doc/stable/reference/
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.bdms.GaussianMutator.logprob">
-<span class="sig-name descname"><span class="pre">logprob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#GaussianMutator.logprob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.GaussianMutator.logprob" title="Permalink to this definition"></a></dt>
-<dd><p>Compute the log probability that a mutation effect on <code class="docutils literal notranslate"><span class="pre">node1</span></code>
-gives <code class="docutils literal notranslate"><span class="pre">node2</span></code>.</p>
+<dt class="sig sig-object py" id="gcdyn.bdms.GaussianMutator.probx">
+<span class="sig-name descname"><span class="pre">probx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#GaussianMutator.probx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.GaussianMutator.probx" title="Permalink to this definition"></a></dt>
+<dd><p>Convenience method to compute the probability density (if <span class="math notranslate nohighlight">\(x\)</span>
+is continuous) or mass (if <span class="math notranslate nohighlight">\(x\)</span> is discrete) that a mutation event
+on phenotype <span class="math notranslate nohighlight">\(x_1\)</span> gives phenotype <span class="math notranslate nohighlight">\(x_2\)</span> (e.g. for
+plotting).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>node1</strong> (<a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a>) – Initial node.</p></li>
-<li><p><strong>node2</strong> (<a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a>) – Mutant node.</p></li>
+<li><p><strong>x1</strong> (<em>array-like</em>) – Initial phenotype value.</p></li>
+<li><p><strong>x2</strong> (<em>array-like</em>) – Final phenotype value.</p></li>
+<li><p><strong>log</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, return the log probability density.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
