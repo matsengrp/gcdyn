@@ -96,7 +96,6 @@ class PhenotypeResponse(Response):
         Args:
             x (array-like): Phenotype value.
         """
-        pass
 
 
 class ConstantResponse(PhenotypeResponse):
@@ -203,7 +202,6 @@ class Mutator(ABC):
                   If an ``int``, then it will be used to derive the initial state.
                   If a :py:class:`numpy.random.Generator`, then that will be used directly.
         """
-        pass
 
     @abstractmethod
     def logprob(self, node1: "TreeNode", node2: "TreeNode") -> float:
@@ -214,13 +212,34 @@ class Mutator(ABC):
             node1: Initial node.
             node2: Mutant node.
         """
-        pass
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in self.__dict__.items())})"
 
 
-class GaussianMutator(Mutator):
+class PhenotypeMutator(Mutator):
+    r"""Abstract base class for mutators that mutate a :py:class:`TreeNode` object's phenotype attribute
+    :math:`x`.
+    """
+
+    def logprob(self, node1: "TreeNode", node2: "TreeNode") -> float:
+        return self.probx(node1.x, node2.x, log=True)
+
+    @abstractmethod
+    def probx(self, x1: float, x2: float, log: bool = False) -> float:
+        r"""Convenience method to compute the probability density (if :math:`x`
+        is continuous) or mass (if :math:`x` is discrete) that a mutation event
+        on phenotype :math:`x_1` gives phenotype :math:`x_2` (e.g. for
+        plotting).
+
+        Args:
+            x1 (array-like): Initial phenotype value.
+            x2 (array-like): Final phenotype value.
+            log: If ``True``, return the log probability density.
+        """
+
+
+class GaussianMutator(PhenotypeMutator):
     r"""Gaussian mutation effect on phenotype attribute :math:`x`.
 
     Args:
@@ -236,8 +255,9 @@ class GaussianMutator(Mutator):
     ) -> None:
         node.x += self._distribution.rvs(random_state=seed)
 
-    def logprob(self, node1: "TreeNode", node2: "TreeNode") -> float:
-        return self._distribution.logpdf(node2.x - node1.x)
+    def probx(self, x1, x2, log: bool = False) -> float:
+        Δx = np.array(x2) - np.array(x1)
+        return self._distribution.logpdf(Δx) if log else self._distribution.pdf(Δx)
 
 
 class TreeNode(ete3.Tree):
