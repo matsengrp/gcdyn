@@ -227,9 +227,10 @@ class PhenotypeMutator(Mutator):
 
     @abstractmethod
     def probx(self, x1: float, x2: float, log: bool = False) -> float:
-        r"""Convenience method to compute the probability density that a
-        mutation event on phenotype :math:`x_1` gives phenotype :math:`x_2`
-        (e.g. for plotting).
+        r"""Convenience method to compute the probability density (if :math:`x`
+        is continuous) or mass (if :math:`x` is discrete) that a mutation event
+        on phenotype :math:`x_1` gives phenotype :math:`x_2` (e.g. for
+        plotting).
 
         Args:
             x1 (array-like): Initial phenotype value.
