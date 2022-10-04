@@ -49,7 +49,7 @@ from ete3.coretype.tree import TreeError
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, List
 
 # NOTE: sphinx is currently unable to present this in condensed form, using a string type hint
 # of "array-like" in the docstring args for now, instead of ArrayLike hint in call signature
@@ -557,7 +557,7 @@ class TreeNode(ete3.Tree):
             node._sampled = True
 
     # NOTE: this could be generalized to take an ordered array-valued t, and made efficient via ordered traversal
-    def slice(self, t: float, attr: str = "x") -> list[Any]:
+    def slice(self, t: float, attr: str = "x") -> List[Any]:
         r"""Return a population list of attribute ``attr`` at time :math:`t`.
 
         Args:
