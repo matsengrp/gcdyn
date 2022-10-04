@@ -6,15 +6,21 @@ import unittest
 class TestTreeNode(unittest.TestCase):
     def setUp(self):
         self.tree = bdms.TreeNode()
-        self.tree.evolve(
-            5,
-            birth_rate=bdms.SigmoidResponse(1, 0, 2, 0),
-            death_rate=bdms.ConstantResponse(1),
-            mutation_rate=bdms.ConstantResponse(1),
-            mutator=bdms.GaussianMutator(-1, 1),
-            min_survivors=20,
-            seed=0,
-        )
+        for seed in range(1000):
+            try:
+                self.tree.evolve(
+                    5,
+                    birth_rate=bdms.SigmoidResponse(1, 0, 2, 0),
+                    death_rate=bdms.ConstantResponse(1),
+                    mutation_rate=bdms.ConstantResponse(1),
+                    mutator=bdms.GaussianMutator(-1, 1),
+                    min_survivors=20,
+                    seed=seed,
+                )
+                break
+            except bdms.TreeError:
+                continue
+
 
     def test_sample_survivors(self):
         self.tree.sample_survivors(n=10)
