@@ -528,6 +528,37 @@ class TreeNode(ete3.Tree):
         for node in self.traverse():
             node._sampled = True
 
+    # NOTE: this could be generalized to take an ordered array-valued t, and made efficient via ordered traversal
+    def slice(self, t: float, attr: str = "x") -> list[Any]:
+        r"""Return a population list of attribute ``attr`` at time :math:`t`.
+
+        Args:
+            t: Slice the tree at time :math:`t`.
+            attr: Attribute to extract from slice.
+        """
+        if self._pruned:
+            raise ValueError("Cannot slice a pruned tree")
+        if not self.children:
+            raise ValueError("Cannot slice an unevolved tree")
+        if t < self.t:
+            raise ValueError(f"Cannot slice at time {t} before root time {self.t}")
+        tree_end_time = max(node.t for node in self)
+        if t > tree_end_time:
+            raise ValueError(
+                f"cannot slice at time {t} after tree end time {tree_end_time}"
+            )
+
+        if self.t == t:
+            return [getattr(self, attr)]
+
+        def is_leaf_fn(node):
+            return node.t >= t and node.up.t < t
+
+        return [
+            (getattr(node, attr) if node.t == t else getattr(node.up, attr))
+            for node in self.iter_leaves(is_leaf_fn=is_leaf_fn)
+        ]
+
     def prune(self) -> None:
         r"""Prune the tree to the subtree induced by the sampled leaves.
 
