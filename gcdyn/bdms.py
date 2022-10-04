@@ -57,7 +57,7 @@ from typing import Any, Optional, Union
 
 import itertools
 from scipy.special import expit
-from scipy.stats import norm
+from scipy.stats import norm, gaussian_kde
 import bisect
 
 
@@ -285,7 +285,35 @@ class GaussianMutator(PhenotypeMutator):
     ) -> None:
         node.x += self._distribution.rvs(random_state=seed)
 
-    def probx(self, x1, x2, log: bool = False) -> float:
+    def probx(self, x1: float, x2: float, log: bool = False) -> float:
+        Δx = np.array(x2) - np.array(x1)
+        return self._distribution.logpdf(Δx) if log else self._distribution.pdf(Δx)
+
+
+class KdeMutator(PhenotypeMutator):
+    r"""Gaussian kernel density estimator (KDE) for mutation effect on phenotype
+    attribute :math:`x`.
+
+    Args:
+        dataset (array-like): Data to fit the KDE to.
+        bw_method: KDE bandwidth (see :py:class:`scipy.stats.gaussian_kde`).
+        weights (optional array-like): Weights of data points (see :py:class:`scipy.stats.gaussian_kde`).
+    """
+
+    def __init__(
+        self,
+        dataset,
+        bw_method: Optional[Union[str, float, callable]] = None,
+        weights=None,
+    ):
+        self._distribution = gaussian_kde(dataset, bw_method, weights)
+
+    def mutate(
+        self, node: "TreeNode", seed: Optional[Union[int, np.random.Generator]] = None
+    ) -> None:
+        node.x += self._distribution.resample(size=1, seed=seed)[0, 0]
+
+    def probx(self, x1: float, x2: float, log: bool = False) -> float:
         Δx = np.array(x2) - np.array(x1)
         return self._distribution.logpdf(Δx) if log else self._distribution.pdf(Δx)
 
