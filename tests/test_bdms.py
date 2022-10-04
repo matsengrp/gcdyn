@@ -21,7 +21,6 @@ class TestTreeNode(unittest.TestCase):
             except bdms.TreeError:
                 continue
 
-
     def test_sample_survivors(self):
         self.tree.sample_survivors(n=10)
         self.assertTrue(
