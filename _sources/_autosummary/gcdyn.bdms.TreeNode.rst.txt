@@ -77,6 +77,7 @@ gcdyn.bdms.TreeNode
       ~TreeNode.set_outgroup
       ~TreeNode.set_style
       ~TreeNode.show
+      ~TreeNode.slice
       ~TreeNode.sort_descendants
       ~TreeNode.standardize
       ~TreeNode.swap_children

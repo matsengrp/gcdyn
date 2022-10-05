@@ -1,0 +1,25 @@
+gcdyn.bdms.SoftReluResponse
+===========================
+
+.. currentmodule:: gcdyn.bdms
+
+.. autoclass:: SoftReluResponse
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~SoftReluResponse.f
+   
+   
+
+   
+   
+   

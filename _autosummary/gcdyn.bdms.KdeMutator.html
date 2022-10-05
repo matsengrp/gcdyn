@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gcdyn.bdms.GaussianMutator &mdash; gcdyn  documentation</title>
+  <title>gcdyn.bdms.KdeMutator &mdash; gcdyn  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -21,8 +21,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="gcdyn.bdms.KdeMutator" href="gcdyn.bdms.KdeMutator.html" />
-    <link rel="prev" title="gcdyn.bdms.ExponentialResponse" href="gcdyn.bdms.ExponentialResponse.html" /> 
+    <link rel="next" title="gcdyn.bdms.Mutator" href="gcdyn.bdms.Mutator.html" />
+    <link rel="prev" title="gcdyn.bdms.GaussianMutator" href="gcdyn.bdms.GaussianMutator.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -53,11 +53,11 @@
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#additional-classes">Additional classes:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.ConstantResponse.html">gcdyn.bdms.ConstantResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.ExponentialResponse.html">gcdyn.bdms.ExponentialResponse</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.bdms.GaussianMutator</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.GaussianMutator"><code class="docutils literal notranslate"><span class="pre">GaussianMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.GaussianMutator.html">gcdyn.bdms.GaussianMutator</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.bdms.KdeMutator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.KdeMutator"><code class="docutils literal notranslate"><span class="pre">KdeMutator</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.KdeMutator.html">gcdyn.bdms.KdeMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.Mutator.html">gcdyn.bdms.Mutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.PhenotypeMutator.html">gcdyn.bdms.PhenotypeMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.PhenotypeResponse.html">gcdyn.bdms.PhenotypeResponse</a></li>
@@ -106,7 +106,7 @@
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../api.html">Modules</a> &raquo;</li>
           <li><a href="gcdyn.bdms.html">gcdyn.bdms</a> &raquo;</li>
-      <li>gcdyn.bdms.GaussianMutator</li>
+      <li>gcdyn.bdms.KdeMutator</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -115,18 +115,20 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="gcdyn-bdms-gaussianmutator">
-<h1>gcdyn.bdms.GaussianMutator<a class="headerlink" href="#gcdyn-bdms-gaussianmutator" title="Permalink to this heading"></a></h1>
+  <section id="gcdyn-bdms-kdemutator">
+<h1>gcdyn.bdms.KdeMutator<a class="headerlink" href="#gcdyn-bdms-kdemutator" title="Permalink to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="gcdyn.bdms.GaussianMutator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.bdms.</span></span><span class="sig-name descname"><span class="pre">GaussianMutator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#GaussianMutator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.GaussianMutator" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="gcdyn.bdms.KdeMutator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.bdms.</span></span><span class="sig-name descname"><span class="pre">KdeMutator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bw_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#KdeMutator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.KdeMutator" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="gcdyn.bdms.PhenotypeMutator.html#gcdyn.bdms.PhenotypeMutator" title="gcdyn.bdms.PhenotypeMutator"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhenotypeMutator</span></code></a></p>
-<p>Gaussian mutation effect on phenotype attribute <span class="math notranslate nohighlight">\(x\)</span>.</p>
+<p>Gaussian kernel density estimator (KDE) for mutation effect on phenotype
+attribute <span class="math notranslate nohighlight">\(x\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>shift</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Mean shift wrt current phenotype.</p></li>
-<li><p><strong>scale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Standard deviation of mutation effect.</p></li>
+<li><p><strong>dataset</strong> (<em>array-like</em>) – Data to fit the KDE to.</p></li>
+<li><p><strong>bw_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">callable</span></code>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – KDE bandwidth (see <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html#scipy.stats.gaussian_kde" title="(in SciPy v1.9.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.stats.gaussian_kde</span></code></a>).</p></li>
+<li><p><strong>weights</strong> (<em>optional array-like</em>) – Weights of data points (see <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html#scipy.stats.gaussian_kde" title="(in SciPy v1.9.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.stats.gaussian_kde</span></code></a>).</p></li>
 </ul>
 </dd>
 </dl>
@@ -137,20 +139,20 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.GaussianMutator.logprob" title="gcdyn.bdms.GaussianMutator.logprob"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logprob</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.KdeMutator.logprob" title="gcdyn.bdms.KdeMutator.logprob"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logprob</span></code></a></p></td>
 <td><p>Compute the log probability that a mutation effect on <code class="docutils literal notranslate"><span class="pre">node1</span></code> gives <code class="docutils literal notranslate"><span class="pre">node2</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.GaussianMutator.mutate" title="gcdyn.bdms.GaussianMutator.mutate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mutate</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.KdeMutator.mutate" title="gcdyn.bdms.KdeMutator.mutate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mutate</span></code></a></p></td>
 <td><p>Mutate a <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object in place.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.GaussianMutator.probx" title="gcdyn.bdms.GaussianMutator.probx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">probx</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.KdeMutator.probx" title="gcdyn.bdms.KdeMutator.probx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">probx</span></code></a></p></td>
 <td><p>Convenience method to compute the probability density (if <span class="math notranslate nohighlight">\(x\)</span> is continuous) or mass (if <span class="math notranslate nohighlight">\(x\)</span> is discrete) that a mutation event on phenotype <span class="math notranslate nohighlight">\(x_1\)</span> gives phenotype <span class="math notranslate nohighlight">\(x_2\)</span> (e.g.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.bdms.GaussianMutator.mutate">
-<span class="sig-name descname"><span class="pre">mutate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#GaussianMutator.mutate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.GaussianMutator.mutate" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="gcdyn.bdms.KdeMutator.mutate">
+<span class="sig-name descname"><span class="pre">mutate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#KdeMutator.mutate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.KdeMutator.mutate" title="Permalink to this definition"></a></dt>
 <dd><p>Mutate a <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object in place.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -169,8 +171,8 @@ If a <a class="reference external" href="https://numpy.org/doc/stable/reference/
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.bdms.GaussianMutator.probx">
-<span class="sig-name descname"><span class="pre">probx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#GaussianMutator.probx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.GaussianMutator.probx" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="gcdyn.bdms.KdeMutator.probx">
+<span class="sig-name descname"><span class="pre">probx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#KdeMutator.probx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.KdeMutator.probx" title="Permalink to this definition"></a></dt>
 <dd><p>Convenience method to compute the probability density (if <span class="math notranslate nohighlight">\(x\)</span>
 is continuous) or mass (if <span class="math notranslate nohighlight">\(x\)</span> is discrete) that a mutation event
 on phenotype <span class="math notranslate nohighlight">\(x_1\)</span> gives phenotype <span class="math notranslate nohighlight">\(x_2\)</span> (e.g. for
@@ -190,8 +192,8 @@ plotting).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.bdms.GaussianMutator.logprob">
-<span class="sig-name descname"><span class="pre">logprob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.bdms.GaussianMutator.logprob" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="gcdyn.bdms.KdeMutator.logprob">
+<span class="sig-name descname"><span class="pre">logprob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.bdms.KdeMutator.logprob" title="Permalink to this definition"></a></dt>
 <dd><p>Compute the log probability that a mutation effect on <code class="docutils literal notranslate"><span class="pre">node1</span></code>
 gives <code class="docutils literal notranslate"><span class="pre">node2</span></code>.</p>
 <dl class="field-list simple">
@@ -215,8 +217,8 @@ gives <code class="docutils literal notranslate"><span class="pre">node2</span><
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="gcdyn.bdms.ExponentialResponse.html" class="btn btn-neutral float-left" title="gcdyn.bdms.ExponentialResponse" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="gcdyn.bdms.KdeMutator.html" class="btn btn-neutral float-right" title="gcdyn.bdms.KdeMutator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="gcdyn.bdms.GaussianMutator.html" class="btn btn-neutral float-left" title="gcdyn.bdms.GaussianMutator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gcdyn.bdms.Mutator.html" class="btn btn-neutral float-right" title="gcdyn.bdms.Mutator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

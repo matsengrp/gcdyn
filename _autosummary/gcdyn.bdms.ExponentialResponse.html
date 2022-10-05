@@ -57,20 +57,24 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.GaussianMutator.html">gcdyn.bdms.GaussianMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.KdeMutator.html">gcdyn.bdms.KdeMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.Mutator.html">gcdyn.bdms.Mutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.PhenotypeMutator.html">gcdyn.bdms.PhenotypeMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.PhenotypeResponse.html">gcdyn.bdms.PhenotypeResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.Response.html">gcdyn.bdms.Response</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.SigmoidResponse.html">gcdyn.bdms.SigmoidResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.SoftReluResponse.html">gcdyn.bdms.SoftReluResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.TreeNode.html">gcdyn.bdms.TreeNode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.Response"><code class="docutils literal notranslate"><span class="pre">Response</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.PhenotypeResponse"><code class="docutils literal notranslate"><span class="pre">PhenotypeResponse</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.ConstantResponse"><code class="docutils literal notranslate"><span class="pre">ConstantResponse</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.ExponentialResponse"><code class="docutils literal notranslate"><span class="pre">ExponentialResponse</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.SigmoidResponse"><code class="docutils literal notranslate"><span class="pre">SigmoidResponse</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.SoftReluResponse"><code class="docutils literal notranslate"><span class="pre">SoftReluResponse</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.Mutator"><code class="docutils literal notranslate"><span class="pre">Mutator</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.PhenotypeMutator"><code class="docutils literal notranslate"><span class="pre">PhenotypeMutator</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.GaussianMutator"><code class="docutils literal notranslate"><span class="pre">GaussianMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.KdeMutator"><code class="docutils literal notranslate"><span class="pre">KdeMutator</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.TreeNode"><code class="docutils literal notranslate"><span class="pre">TreeNode</span></code></a></li>
 </ul>
 </li>
@@ -120,13 +124,13 @@
 <p>Exponential response function on a <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object’s
 phenotype attribute <span class="math notranslate nohighlight">\(x\)</span>.</p>
 <div class="math notranslate nohighlight">
-\[f(x) = \theta_1 e^{\theta_2 (x - \theta_3)} + \theta_4\]</div>
+\[f(x) = \theta_3 e^{\theta_1 (x - \theta_2)} + \theta_4\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>xscale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_2\)</span></p></li>
-<li><p><strong>xshift</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_3\)</span></p></li>
-<li><p><strong>yscale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_1\)</span></p></li>
+<li><p><strong>xscale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_1\)</span></p></li>
+<li><p><strong>xshift</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_2\)</span></p></li>
+<li><p><strong>yscale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_3\)</span></p></li>
 <li><p><strong>yshift</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_4\)</span></p></li>
 </ul>
 </dd>
@@ -139,14 +143,14 @@ phenotype attribute <span class="math notranslate nohighlight">\(x\)</span>.</p>
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.ExponentialResponse.f" title="gcdyn.bdms.ExponentialResponse.f"><code class="xref py py-obj docutils literal notranslate"><span class="pre">f</span></code></a></p></td>
-<td><p>Convenience method for computing <span class="math notranslate nohighlight">\(f(x)\)</span> (e.g.</p></td>
+<td><p>Compute <span class="math notranslate nohighlight">\(f(x)\)</span>.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.ExponentialResponse.f">
 <span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#ExponentialResponse.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.ExponentialResponse.f" title="Permalink to this definition"></a></dt>
-<dd><p>Convenience method for computing <span class="math notranslate nohighlight">\(f(x)\)</span> (e.g. for plotting).</p>
+<dd><p>Compute <span class="math notranslate nohighlight">\(f(x)\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>x</strong> (<em>array-like</em>) – Phenotype value.</p>

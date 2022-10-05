@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gcdyn.bdms.Mutator &mdash; gcdyn  documentation</title>
+  <title>gcdyn.bdms.SoftReluResponse &mdash; gcdyn  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -17,11 +17,12 @@
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="gcdyn.bdms.PhenotypeMutator" href="gcdyn.bdms.PhenotypeMutator.html" />
-    <link rel="prev" title="gcdyn.bdms.KdeMutator" href="gcdyn.bdms.KdeMutator.html" /> 
+    <link rel="next" title="gcdyn.bdms.TreeNode" href="gcdyn.bdms.TreeNode.html" />
+    <link rel="prev" title="gcdyn.bdms.SigmoidResponse" href="gcdyn.bdms.SigmoidResponse.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -54,15 +55,15 @@
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.ExponentialResponse.html">gcdyn.bdms.ExponentialResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.GaussianMutator.html">gcdyn.bdms.GaussianMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.KdeMutator.html">gcdyn.bdms.KdeMutator</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.bdms.Mutator</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.Mutator"><code class="docutils literal notranslate"><span class="pre">Mutator</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.Mutator.html">gcdyn.bdms.Mutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.PhenotypeMutator.html">gcdyn.bdms.PhenotypeMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.PhenotypeResponse.html">gcdyn.bdms.PhenotypeResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.Response.html">gcdyn.bdms.Response</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.SigmoidResponse.html">gcdyn.bdms.SigmoidResponse</a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.SoftReluResponse.html">gcdyn.bdms.SoftReluResponse</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.bdms.SoftReluResponse</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.SoftReluResponse"><code class="docutils literal notranslate"><span class="pre">SoftReluResponse</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.TreeNode.html">gcdyn.bdms.TreeNode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.Response"><code class="docutils literal notranslate"><span class="pre">Response</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.PhenotypeResponse"><code class="docutils literal notranslate"><span class="pre">PhenotypeResponse</span></code></a></li>
@@ -105,7 +106,7 @@
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../api.html">Modules</a> &raquo;</li>
           <li><a href="gcdyn.bdms.html">gcdyn.bdms</a> &raquo;</li>
-      <li>gcdyn.bdms.Mutator</li>
+      <li>gcdyn.bdms.SoftReluResponse</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -114,14 +115,26 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="gcdyn-bdms-mutator">
-<h1>gcdyn.bdms.Mutator<a class="headerlink" href="#gcdyn-bdms-mutator" title="Permalink to this heading"></a></h1>
+  <section id="gcdyn-bdms-softreluresponse">
+<h1>gcdyn.bdms.SoftReluResponse<a class="headerlink" href="#gcdyn-bdms-softreluresponse" title="Permalink to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="gcdyn.bdms.Mutator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.bdms.</span></span><span class="sig-name descname"><span class="pre">Mutator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#Mutator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.Mutator" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
-<p>Abstract base class for generating mutation effects given
-<a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object, which is modified in place.</p>
+<dt class="sig sig-object py" id="gcdyn.bdms.SoftReluResponse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.bdms.</span></span><span class="sig-name descname"><span class="pre">SoftReluResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#SoftReluResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.SoftReluResponse" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="gcdyn.bdms.PhenotypeResponse.html#gcdyn.bdms.PhenotypeResponse" title="gcdyn.bdms.PhenotypeResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhenotypeResponse</span></code></a></p>
+<p>Soft ReLU response function on a <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object’s phenotype
+attribute <span class="math notranslate nohighlight">\(x\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[f(x) = \theta_3\log(1 + e^{\theta_1 (x - \theta_2)}) + \theta_4\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xscale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_1\)</span></p></li>
+<li><p><strong>xshift</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_2\)</span></p></li>
+<li><p><strong>yscale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_3\)</span></p></li>
+<li><p><strong>yshift</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_4\)</span></p></li>
+</ul>
+</dd>
+</dl>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <colgroup>
@@ -129,45 +142,29 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.Mutator.logprob" title="gcdyn.bdms.Mutator.logprob"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logprob</span></code></a></p></td>
-<td><p>Compute the log probability that a mutation effect on <code class="docutils literal notranslate"><span class="pre">node1</span></code> gives <code class="docutils literal notranslate"><span class="pre">node2</span></code>.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.Mutator.mutate" title="gcdyn.bdms.Mutator.mutate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mutate</span></code></a></p></td>
-<td><p>Mutate a <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object in place.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.SoftReluResponse.f" title="gcdyn.bdms.SoftReluResponse.f"><code class="xref py py-obj docutils literal notranslate"><span class="pre">f</span></code></a></p></td>
+<td><p>Compute <span class="math notranslate nohighlight">\(f(x)\)</span>.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.bdms.Mutator.mutate">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mutate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#Mutator.mutate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.Mutator.mutate" title="Permalink to this definition"></a></dt>
-<dd><p>Mutate a <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object in place.</p>
+<dt class="sig sig-object py" id="gcdyn.bdms.SoftReluResponse.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#SoftReluResponse.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.SoftReluResponse.__call__" title="Permalink to this definition"></a></dt>
+<dd><p>Call self as a function.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>node</strong> (<a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a>) – A <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> to mutate.</p></li>
-<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – A seed to initialize the random number generation. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then fresh,
-unpredictable entropy will be pulled from the OS.
-If an <code class="docutils literal notranslate"><span class="pre">int</span></code>, then it will be used to derive the initial state.
-If a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a>, then that will be used directly.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.bdms.Mutator.logprob">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logprob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#Mutator.logprob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.Mutator.logprob" title="Permalink to this definition"></a></dt>
-<dd><p>Compute the log probability that a mutation effect on <code class="docutils literal notranslate"><span class="pre">node1</span></code>
-gives <code class="docutils literal notranslate"><span class="pre">node2</span></code>.</p>
+<dt class="sig sig-object py" id="gcdyn.bdms.SoftReluResponse.f">
+<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#SoftReluResponse.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.SoftReluResponse.f" title="Permalink to this definition"></a></dt>
+<dd><p>Compute <span class="math notranslate nohighlight">\(f(x)\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>node1</strong> (<a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a>) – Initial node.</p></li>
-<li><p><strong>node2</strong> (<a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a>) – Mutant node.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>x</strong> (<em>array-like</em>) – Phenotype value.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
@@ -183,8 +180,8 @@ gives <code class="docutils literal notranslate"><span class="pre">node2</span><
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="gcdyn.bdms.KdeMutator.html" class="btn btn-neutral float-left" title="gcdyn.bdms.KdeMutator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="gcdyn.bdms.PhenotypeMutator.html" class="btn btn-neutral float-right" title="gcdyn.bdms.PhenotypeMutator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="gcdyn.bdms.SigmoidResponse.html" class="btn btn-neutral float-left" title="gcdyn.bdms.SigmoidResponse" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gcdyn.bdms.TreeNode.html" class="btn btn-neutral float-right" title="gcdyn.bdms.TreeNode" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

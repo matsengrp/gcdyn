@@ -128,7 +128,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
 
 <span class="c1"># NOTE: sphinx is currently unable to present this in condensed form, using a string type hint</span>
 <span class="c1"># of &quot;array-like&quot; in the docstring args for now, instead of ArrayLike hint in call signature</span>
@@ -136,7 +136,7 @@
 
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">expit</span>
-<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span><span class="p">,</span> <span class="n">gaussian_kde</span>
 <span class="kn">import</span> <span class="nn">bisect</span>
 
 
@@ -170,7 +170,7 @@
 
 <div class="viewcode-block" id="PhenotypeResponse.f"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.PhenotypeResponse.html#gcdyn.bdms.PhenotypeResponse.f">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convenience method for computing :math:`f(x)` (e.g. for plotting).</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute :math:`f(x)`.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            x (array-like): Phenotype value.</span>
@@ -197,12 +197,12 @@
 <span class="sd">    phenotype attribute :math:`x`.</span>
 
 <span class="sd">    .. math::</span>
-<span class="sd">        f(x) = \theta_1 e^{\theta_2 (x - \theta_3)} + \theta_4</span>
+<span class="sd">        f(x) = \theta_3 e^{\theta_1 (x - \theta_2)} + \theta_4</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        xscale: :math:`\theta_2`</span>
-<span class="sd">        xshift: :math:`\theta_3`</span>
-<span class="sd">        yscale: :math:`\theta_1`</span>
+<span class="sd">        xscale: :math:`\theta_1`</span>
+<span class="sd">        xshift: :math:`\theta_2`</span>
+<span class="sd">        yscale: :math:`\theta_3`</span>
 <span class="sd">        yshift: :math:`\theta_4`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -227,12 +227,12 @@
 <span class="sd">    attribute :math:`x`.</span>
 
 <span class="sd">    .. math::</span>
-<span class="sd">        f(x) = \frac{\theta_1}{1 + e^{-\theta_2 (x - \theta_3)}} + \theta_4</span>
+<span class="sd">        f(x) = \frac{\theta_3}{1 + e^{-\theta_1 (x - \theta_2)}} + \theta_4</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        xscale: :math:`\theta_2`</span>
-<span class="sd">        xshift: :math:`\theta_3`</span>
-<span class="sd">        yscale: :math:`\theta_1`</span>
+<span class="sd">        xscale: :math:`\theta_1`</span>
+<span class="sd">        xshift: :math:`\theta_2`</span>
+<span class="sd">        yscale: :math:`\theta_3`</span>
 <span class="sd">        yshift: :math:`\theta_4`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -252,12 +252,42 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">x</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SigmoidResponse.f"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.SigmoidResponse.html#gcdyn.bdms.SigmoidResponse.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convenience method for computing :math:`f(x)` (e.g. for plotting).</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            x (array-like): Phenotype value.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">*</span> <span class="n">expit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span></div></div>
+
+
+<div class="viewcode-block" id="SoftReluResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.SoftReluResponse.html#gcdyn.bdms.SoftReluResponse">[docs]</a><span class="k">class</span> <span class="nc">SoftReluResponse</span><span class="p">(</span><span class="n">PhenotypeResponse</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Soft ReLU response function on a :py:class:`TreeNode` object&#39;s phenotype</span>
+<span class="sd">    attribute :math:`x`.</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        f(x) = \theta_3\log(1 + e^{\theta_1 (x - \theta_2)}) + \theta_4</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        xscale: :math:`\theta_1`</span>
+<span class="sd">        xshift: :math:`\theta_2`</span>
+<span class="sd">        yscale: :math:`\theta_3`</span>
+<span class="sd">        yshift: :math:`\theta_4`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">xscale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">xshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">yscale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">yshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">=</span> <span class="n">xscale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span> <span class="o">=</span> <span class="n">xshift</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">=</span> <span class="n">yscale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span> <span class="o">=</span> <span class="n">yshift</span>
+
+<div class="viewcode-block" id="SoftReluResponse.__call__"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.SoftReluResponse.html#gcdyn.bdms.SoftReluResponse.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">x</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SoftReluResponse.f"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.SoftReluResponse.html#gcdyn.bdms.SoftReluResponse.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">logaddexp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span>
+        <span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="Mutator"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.Mutator.html#gcdyn.bdms.Mutator">[docs]</a><span class="k">class</span> <span class="nc">Mutator</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
@@ -334,7 +364,35 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">node</span><span class="o">.</span><span class="n">x</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distribution</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="GaussianMutator.probx"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.GaussianMutator.html#gcdyn.bdms.GaussianMutator.probx">[docs]</a>    <span class="k">def</span> <span class="nf">probx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">log</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<div class="viewcode-block" id="GaussianMutator.probx"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.GaussianMutator.html#gcdyn.bdms.GaussianMutator.probx">[docs]</a>    <span class="k">def</span> <span class="nf">probx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x2</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">log</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">Δx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distribution</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">Δx</span><span class="p">)</span> <span class="k">if</span> <span class="n">log</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distribution</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">Δx</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="KdeMutator"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.KdeMutator.html#gcdyn.bdms.KdeMutator">[docs]</a><span class="k">class</span> <span class="nc">KdeMutator</span><span class="p">(</span><span class="n">PhenotypeMutator</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Gaussian kernel density estimator (KDE) for mutation effect on phenotype</span>
+<span class="sd">    attribute :math:`x`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dataset (array-like): Data to fit the KDE to.</span>
+<span class="sd">        bw_method: KDE bandwidth (see :py:class:`scipy.stats.gaussian_kde`).</span>
+<span class="sd">        weights (optional array-like): Weights of data points (see :py:class:`scipy.stats.gaussian_kde`).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="p">,</span>
+        <span class="n">bw_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">callable</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_distribution</span> <span class="o">=</span> <span class="n">gaussian_kde</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">bw_method</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+
+<div class="viewcode-block" id="KdeMutator.mutate"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.KdeMutator.html#gcdyn.bdms.KdeMutator.mutate">[docs]</a>    <span class="k">def</span> <span class="nf">mutate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">x</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distribution</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="KdeMutator.probx"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.KdeMutator.html#gcdyn.bdms.KdeMutator.probx">[docs]</a>    <span class="k">def</span> <span class="nf">probx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x2</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">log</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="n">Δx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distribution</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">Δx</span><span class="p">)</span> <span class="k">if</span> <span class="n">log</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distribution</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">Δx</span><span class="p">)</span></div></div>
 
@@ -399,7 +457,6 @@
         <span class="n">mutator</span><span class="p">:</span> <span class="n">Mutator</span> <span class="o">=</span> <span class="n">GaussianMutator</span><span class="p">(</span><span class="n">shift</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
         <span class="n">birth_mutations</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">min_survivors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">retry</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
         <span class="n">max_leaves</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
         <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -413,11 +470,10 @@
 <span class="sd">            mutator: Generator of mutation effects at mutation events</span>
 <span class="sd">                     (and on offspring of birth events if ``birth_mutations=True``).</span>
 <span class="sd">            birth_mutations: Flag to indicate whether mutations should occur at birth.</span>
-<span class="sd">            min_survivors: Minimum number of survivors.</span>
-<span class="sd">            retry: Number of times to retry if tree goes extinct.</span>
-<span class="sd">                   A ``RuntimeError`` is raised if it is exceeded during simulation.</span>
-<span class="sd">            max_leaves: Maximum number of active leaves, to truncate exploding processes.</span>
-<span class="sd">                        A ``RuntimeError`` is raised if this is exceeded during simulation.</span>
+<span class="sd">            min_survivors: Minimum number of survivors. If the simulation finishes with fewer than this number of</span>
+<span class="sd">                           survivors, then a :py:class:`TreeError` is raised.</span>
+<span class="sd">            max_leaves: Maximum number of active leaves, to truncate exploding processes. If exceeded, then a</span>
+<span class="sd">                        :py:class:`TreeError` is raised.</span>
 <span class="sd">            seed: A seed to initialize the random number generation.</span>
 <span class="sd">                  If ``None``, then fresh, unpredictable entropy will be pulled from the OS.</span>
 <span class="sd">                  If an ``int``, then it will be used to derive the initial state.</span>
@@ -431,68 +487,63 @@
             <span class="p">)</span>
         <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
 
-        <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">attempt</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">while</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
-            <span class="n">unfinished_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
-            <span class="c1"># NOTE: this key management is needed because the bisect.insort function does not have a</span>
-            <span class="c1">#       key argument in python 3.9 (it gains one in 3.10)</span>
-            <span class="n">time_keys</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">]</span>
-            <span class="k">while</span> <span class="n">unfinished_nodes</span><span class="p">:</span>
-                <span class="n">Δt</span> <span class="o">=</span> <span class="n">t</span> <span class="o">-</span> <span class="n">unfinished_nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">t</span>
-                <span class="n">new_event_node</span> <span class="o">=</span> <span class="n">unfinished_nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_generate_event</span><span class="p">(</span>
-                    <span class="n">Δt</span><span class="p">,</span>
-                    <span class="n">birth_rate</span><span class="p">,</span>
-                    <span class="n">death_rate</span><span class="p">,</span>
-                    <span class="n">mutation_rate</span><span class="p">,</span>
-                    <span class="n">mutator</span><span class="p">,</span>
-                    <span class="n">birth_mutations</span><span class="p">,</span>
-                    <span class="n">rng</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="c1"># We pop the corresponding element of unfinished_nodes after we&#39;re finished operating on it with</span>
-                <span class="c1"># _generate_event. The special case is that birth nodes must be operated on twice before they</span>
-                <span class="c1"># should be popped, if birth_mutations is False. We then insert newly created nodes that need to</span>
-                <span class="c1"># be operated on. If birth_mutations is True, we get a cherry returned from _generate_event,</span>
-                <span class="c1"># and need to insert both children.</span>
-                <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">unfinished_nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">event</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_BIRTH_EVENT</span>
-                    <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">unfinished_nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_OFFSPRING_NUMBER</span>
-                <span class="p">):</span>
-                    <span class="n">unfinished_nodes</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-                    <span class="n">time_keys</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">new_event_node</span><span class="o">.</span><span class="n">event</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_DEATH_EVENT</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_SURVIVAL_EVENT</span><span class="p">,</span>
-                <span class="p">):</span>
-                    <span class="k">if</span> <span class="n">new_event_node</span><span class="o">.</span><span class="n">event</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_BIRTH_EVENT</span> <span class="ow">and</span> <span class="n">birth_mutations</span><span class="p">:</span>
-                        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_event_node</span><span class="o">.</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_OFFSPRING_NUMBER</span>
-                        <span class="n">nodes_to_insert</span> <span class="o">=</span> <span class="n">new_event_node</span><span class="o">.</span><span class="n">children</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">nodes_to_insert</span> <span class="o">=</span> <span class="p">[</span><span class="n">new_event_node</span><span class="p">]</span>
-                    <span class="k">for</span> <span class="n">node_to_insert</span> <span class="ow">in</span> <span class="n">nodes_to_insert</span><span class="p">:</span>
-                        <span class="n">idx</span> <span class="o">=</span> <span class="n">bisect</span><span class="o">.</span><span class="n">bisect</span><span class="p">(</span><span class="n">time_keys</span><span class="p">,</span> <span class="n">node_to_insert</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
-                        <span class="n">time_keys</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">node_to_insert</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
-                        <span class="n">unfinished_nodes</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">node_to_insert</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unfinished_nodes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_leaves</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;maximum number of leaves </span><span class="si">{</span><span class="n">max_leaves</span><span class="si">}</span><span class="s2"> exceeded during simulation&quot;</span>
-                    <span class="p">)</span>
+        <span class="n">unfinished_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+        <span class="c1"># NOTE: this key management is needed because the bisect.insort function does not have a</span>
+        <span class="c1">#       key argument in python 3.9 (it gains one in 3.10)</span>
+        <span class="n">time_keys</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">]</span>
 
-            <span class="n">attempt</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="n">attempt</span> <span class="o">==</span> <span class="n">retry</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;less than </span><span class="si">{</span><span class="n">min_survivors</span><span class="si">}</span><span class="s2"> survivors in all </span><span class="si">{</span><span class="n">retry</span><span class="si">}</span><span class="s2"> tries&quot;</span>
-                <span class="p">)</span>
+        <span class="k">while</span> <span class="n">unfinished_nodes</span><span class="p">:</span>
+            <span class="n">Δt</span> <span class="o">=</span> <span class="n">t</span> <span class="o">-</span> <span class="n">unfinished_nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">t</span>
+            <span class="n">new_event_node</span> <span class="o">=</span> <span class="n">unfinished_nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_generate_event</span><span class="p">(</span>
+                <span class="n">Δt</span><span class="p">,</span>
+                <span class="n">birth_rate</span><span class="p">,</span>
+                <span class="n">death_rate</span><span class="p">,</span>
+                <span class="n">mutation_rate</span><span class="p">,</span>
+                <span class="n">mutator</span><span class="p">,</span>
+                <span class="n">birth_mutations</span><span class="p">,</span>
+                <span class="n">rng</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="c1"># We pop the corresponding element of unfinished_nodes after we&#39;re finished operating on it with</span>
+            <span class="c1"># _generate_event. The special case is that birth nodes must be operated on twice before they</span>
+            <span class="c1"># should be popped, if birth_mutations is False. We then insert newly created nodes that need to</span>
+            <span class="c1"># be operated on. If birth_mutations is True, we get a cherry returned from _generate_event,</span>
+            <span class="c1"># and need to insert both children.</span>
             <span class="k">if</span> <span class="p">(</span>
-                <span class="nb">sum</span><span class="p">(</span><span class="n">leaf</span><span class="o">.</span><span class="n">event</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SURVIVAL_EVENT</span> <span class="k">for</span> <span class="n">leaf</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">)</span>
-                <span class="o">&gt;=</span> <span class="n">min_survivors</span>
+                <span class="n">unfinished_nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">event</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_BIRTH_EVENT</span>
+                <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">unfinished_nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_OFFSPRING_NUMBER</span>
             <span class="p">):</span>
-                <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">remove_child</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
-                    <span class="n">child</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-                <span class="n">TreeNode</span><span class="o">.</span><span class="n">_name_generator</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span></div>
+                <span class="n">unfinished_nodes</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">time_keys</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">new_event_node</span><span class="o">.</span><span class="n">event</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_DEATH_EVENT</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_SURVIVAL_EVENT</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="k">if</span> <span class="n">new_event_node</span><span class="o">.</span><span class="n">event</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_BIRTH_EVENT</span> <span class="ow">and</span> <span class="n">birth_mutations</span><span class="p">:</span>
+                    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_event_node</span><span class="o">.</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_OFFSPRING_NUMBER</span>
+                    <span class="n">nodes_to_insert</span> <span class="o">=</span> <span class="n">new_event_node</span><span class="o">.</span><span class="n">children</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">nodes_to_insert</span> <span class="o">=</span> <span class="p">[</span><span class="n">new_event_node</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">node_to_insert</span> <span class="ow">in</span> <span class="n">nodes_to_insert</span><span class="p">:</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="n">bisect</span><span class="o">.</span><span class="n">bisect</span><span class="p">(</span><span class="n">time_keys</span><span class="p">,</span> <span class="n">node_to_insert</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+                    <span class="n">time_keys</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">node_to_insert</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+                    <span class="n">unfinished_nodes</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">node_to_insert</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unfinished_nodes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_leaves</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_aborted_evolve_cleanup</span><span class="p">()</span>
+                <span class="k">raise</span> <span class="n">TreeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;maximum number of leaves </span><span class="si">{</span><span class="n">max_leaves</span><span class="si">}</span><span class="s2"> exceeded at time </span><span class="si">{</span><span class="n">unfinished_nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">leaf</span><span class="o">.</span><span class="n">event</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SURVIVAL_EVENT</span> <span class="k">for</span> <span class="n">leaf</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">min_survivors</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_aborted_evolve_cleanup</span><span class="p">()</span>
+            <span class="k">raise</span> <span class="n">TreeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;minimum number of survivors </span><span class="si">{</span><span class="n">min_survivors</span><span class="si">}</span><span class="s2"> not attained&quot;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_aborted_evolve_cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Remove any children added to the root node during an aborted</span>
+<span class="sd">        evolution attempt, and reset the node name generator.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_child</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+            <span class="n">child</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+        <span class="n">TreeNode</span><span class="o">.</span><span class="n">_name_generator</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_generate_event</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -583,6 +634,38 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;must specify either n or p&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traverse</span><span class="p">():</span>
             <span class="n">node</span><span class="o">.</span><span class="n">_sampled</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+    <span class="c1"># NOTE: this could be generalized to take an ordered array-valued t, and made efficient via ordered traversal</span>
+<div class="viewcode-block" id="TreeNode.slice"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.slice">[docs]</a>    <span class="k">def</span> <span class="nf">slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return a list of attribute ``attr`` at time :math:`t` for all</span>
+<span class="sd">        lineages alive at that time.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            t: Slice the tree at time :math:`t`.</span>
+<span class="sd">            attr: Attribute to extract from slice.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pruned</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot slice a pruned tree&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot slice an unevolved tree&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot slice at time </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2"> before root time </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">tree_end_time</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">t</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">tree_end_time</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;cannot slice at time </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2"> after tree end time </span><span class="si">{</span><span class="n">tree_end_time</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">==</span> <span class="n">t</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">)]</span>
+
+        <span class="k">def</span> <span class="nf">is_leaf_fn</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">node</span><span class="o">.</span><span class="n">t</span> <span class="o">&gt;=</span> <span class="n">t</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">up</span><span class="o">.</span><span class="n">t</span> <span class="o">&lt;</span> <span class="n">t</span>
+
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">t</span> <span class="o">==</span> <span class="n">t</span> <span class="k">else</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">up</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_leaves</span><span class="p">(</span><span class="n">is_leaf_fn</span><span class="o">=</span><span class="n">is_leaf_fn</span><span class="p">)</span>
+        <span class="p">]</span></div>
 
 <div class="viewcode-block" id="TreeNode.prune"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.prune">[docs]</a>    <span class="k">def</span> <span class="nf">prune</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Prune the tree to the subtree induced by the sampled leaves.</span>

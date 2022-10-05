@@ -23,11 +23,13 @@
       ConstantResponse
       ExponentialResponse
       GaussianMutator
+      KdeMutator
       Mutator
       PhenotypeMutator
       PhenotypeResponse
       Response
       SigmoidResponse
+      SoftReluResponse
       TreeNode
    
    
