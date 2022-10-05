@@ -558,7 +558,7 @@ class TreeNode(ete3.Tree):
 
     # NOTE: this could be generalized to take an ordered array-valued t, and made efficient via ordered traversal
     def slice(self, t: float, attr: str = "x") -> List[Any]:
-        r"""Return a population list of attribute ``attr`` at time :math:`t`.
+        r"""Return a list of attribute ``attr`` at time :math:`t` for all lineages alive at that time.
 
         Args:
             t: Slice the tree at time :math:`t`.
