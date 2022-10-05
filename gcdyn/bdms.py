@@ -181,7 +181,7 @@ class SoftReluResponse(PhenotypeResponse):
     attribute :math:`x`.
 
     .. math::
-        f(x) = \theta_3\log(1 + e^{-\theta_1 (x - \theta_2)}) + \theta_4
+        f(x) = \theta_3\log(1 + e^{\theta_1 (x - \theta_2)}) + \theta_4
 
     Args:
         xscale: :math:`\theta_1`
