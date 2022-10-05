@@ -460,7 +460,7 @@ class TreeNode(ete3.Tree):
 
     def _aborted_evolve_cleanup(self) -> None:
         """Remove any children added to the root node during an aborted
-        evolution attempt."""
+        evolution attempt, and reset the node name generator."""
         for child in self.children:
             self.remove_child(child)
             child.delete()
@@ -558,7 +558,8 @@ class TreeNode(ete3.Tree):
 
     # NOTE: this could be generalized to take an ordered array-valued t, and made efficient via ordered traversal
     def slice(self, t: float, attr: str = "x") -> List[Any]:
-        r"""Return a list of attribute ``attr`` at time :math:`t` for all lineages alive at that time.
+        r"""Return a list of attribute ``attr`` at time :math:`t` for all
+        lineages alive at that time.
 
         Args:
             t: Slice the tree at time :math:`t`.
