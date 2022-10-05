@@ -49,7 +49,7 @@ from ete3.coretype.tree import TreeError
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, List
 
 # NOTE: sphinx is currently unable to present this in condensed form, using a string type hint
 # of "array-like" in the docstring args for now, instead of ArrayLike hint in call signature
@@ -57,7 +57,7 @@ from typing import Any, Optional, Union
 
 import itertools
 from scipy.special import expit
-from scipy.stats import norm
+from scipy.stats import norm, gaussian_kde
 import bisect
 
 
@@ -91,7 +91,7 @@ class PhenotypeResponse(Response):
 
     @abstractmethod
     def f(self, x) -> float:
-        r"""Convenience method for computing :math:`f(x)` (e.g. for plotting).
+        r"""Compute :math:`f(x)`.
 
         Args:
             x (array-like): Phenotype value.
@@ -118,12 +118,12 @@ class ExponentialResponse(PhenotypeResponse):
     phenotype attribute :math:`x`.
 
     .. math::
-        f(x) = \theta_1 e^{\theta_2 (x - \theta_3)} + \theta_4
+        f(x) = \theta_3 e^{\theta_1 (x - \theta_2)} + \theta_4
 
     Args:
-        xscale: :math:`\theta_2`
-        xshift: :math:`\theta_3`
-        yscale: :math:`\theta_1`
+        xscale: :math:`\theta_1`
+        xshift: :math:`\theta_2`
+        yscale: :math:`\theta_3`
         yshift: :math:`\theta_4`
     """
 
@@ -148,12 +148,12 @@ class SigmoidResponse(PhenotypeResponse):
     attribute :math:`x`.
 
     .. math::
-        f(x) = \frac{\theta_1}{1 + e^{-\theta_2 (x - \theta_3)}} + \theta_4
+        f(x) = \frac{\theta_3}{1 + e^{-\theta_1 (x - \theta_2)}} + \theta_4
 
     Args:
-        xscale: :math:`\theta_2`
-        xshift: :math:`\theta_3`
-        yscale: :math:`\theta_1`
+        xscale: :math:`\theta_1`
+        xshift: :math:`\theta_2`
+        yscale: :math:`\theta_3`
         yshift: :math:`\theta_4`
     """
 
@@ -173,12 +173,42 @@ class SigmoidResponse(PhenotypeResponse):
         return self.f(node.x)
 
     def f(self, x) -> float:
-        r"""Convenience method for computing :math:`f(x)` (e.g. for plotting).
-
-        Args:
-            x (array-like): Phenotype value.
-        """
         return self.yscale * expit(self.xscale * (x - self.xshift)) + self.yshift
+
+
+class SoftReluResponse(PhenotypeResponse):
+    r"""Soft ReLU response function on a :py:class:`TreeNode` object's phenotype
+    attribute :math:`x`.
+
+    .. math::
+        f(x) = \theta_3\log(1 + e^{\theta_1 (x - \theta_2)}) + \theta_4
+
+    Args:
+        xscale: :math:`\theta_1`
+        xshift: :math:`\theta_2`
+        yscale: :math:`\theta_3`
+        yshift: :math:`\theta_4`
+    """
+
+    def __init__(
+        self,
+        xscale: float = 1.0,
+        xshift: float = 0.0,
+        yscale: float = 1.0,
+        yshift: float = 0.0,
+    ):
+        self.xscale = xscale
+        self.xshift = xshift
+        self.yscale = yscale
+        self.yshift = yshift
+
+    def __call__(self, node: "TreeNode") -> float:
+        return self.f(node.x)
+
+    def f(self, x) -> float:
+        return (
+            self.yscale * np.logaddexp(0, self.xscale * (x - self.xshift)) + self.yshift
+        )
 
 
 class Mutator(ABC):
@@ -255,7 +285,35 @@ class GaussianMutator(PhenotypeMutator):
     ) -> None:
         node.x += self._distribution.rvs(random_state=seed)
 
-    def probx(self, x1, x2, log: bool = False) -> float:
+    def probx(self, x1: float, x2: float, log: bool = False) -> float:
+        Δx = np.array(x2) - np.array(x1)
+        return self._distribution.logpdf(Δx) if log else self._distribution.pdf(Δx)
+
+
+class KdeMutator(PhenotypeMutator):
+    r"""Gaussian kernel density estimator (KDE) for mutation effect on phenotype
+    attribute :math:`x`.
+
+    Args:
+        dataset (array-like): Data to fit the KDE to.
+        bw_method: KDE bandwidth (see :py:class:`scipy.stats.gaussian_kde`).
+        weights (optional array-like): Weights of data points (see :py:class:`scipy.stats.gaussian_kde`).
+    """
+
+    def __init__(
+        self,
+        dataset,
+        bw_method: Optional[Union[str, float, callable]] = None,
+        weights=None,
+    ):
+        self._distribution = gaussian_kde(dataset, bw_method, weights)
+
+    def mutate(
+        self, node: "TreeNode", seed: Optional[Union[int, np.random.Generator]] = None
+    ) -> None:
+        node.x += self._distribution.resample(size=1, seed=seed)[0, 0]
+
+    def probx(self, x1: float, x2: float, log: bool = False) -> float:
         Δx = np.array(x2) - np.array(x1)
         return self._distribution.logpdf(Δx) if log else self._distribution.pdf(Δx)
 
@@ -320,7 +378,6 @@ class TreeNode(ete3.Tree):
         mutator: Mutator = GaussianMutator(shift=0, scale=1),
         birth_mutations: bool = False,
         min_survivors: int = 1,
-        retry: int = 1000,
         max_leaves: int = 1000,
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
@@ -334,11 +391,10 @@ class TreeNode(ete3.Tree):
             mutator: Generator of mutation effects at mutation events
                      (and on offspring of birth events if ``birth_mutations=True``).
             birth_mutations: Flag to indicate whether mutations should occur at birth.
-            min_survivors: Minimum number of survivors.
-            retry: Number of times to retry if tree goes extinct.
-                   A ``RuntimeError`` is raised if it is exceeded during simulation.
-            max_leaves: Maximum number of active leaves, to truncate exploding processes.
-                        A ``RuntimeError`` is raised if this is exceeded during simulation.
+            min_survivors: Minimum number of survivors. If the simulation finishes with fewer than this number of
+                           survivors, then a :py:class:`TreeError` is raised.
+            max_leaves: Maximum number of active leaves, to truncate exploding processes. If exceeded, then a
+                        :py:class:`TreeError` is raised.
             seed: A seed to initialize the random number generation.
                   If ``None``, then fresh, unpredictable entropy will be pulled from the OS.
                   If an ``int``, then it will be used to derive the initial state.
@@ -352,68 +408,63 @@ class TreeNode(ete3.Tree):
             )
         rng = np.random.default_rng(seed)
 
-        success = False
-        attempt = 0
-        while not success:
-            unfinished_nodes = [self]
-            # NOTE: this key management is needed because the bisect.insort function does not have a
-            #       key argument in python 3.9 (it gains one in 3.10)
-            time_keys = [self.t]
-            while unfinished_nodes:
-                Δt = t - unfinished_nodes[0].t
-                new_event_node = unfinished_nodes[0]._generate_event(
-                    Δt,
-                    birth_rate,
-                    death_rate,
-                    mutation_rate,
-                    mutator,
-                    birth_mutations,
-                    rng,
-                )
-                # We pop the corresponding element of unfinished_nodes after we're finished operating on it with
-                # _generate_event. The special case is that birth nodes must be operated on twice before they
-                # should be popped, if birth_mutations is False. We then insert newly created nodes that need to
-                # be operated on. If birth_mutations is True, we get a cherry returned from _generate_event,
-                # and need to insert both children.
-                if (
-                    unfinished_nodes[0].event != self._BIRTH_EVENT
-                    or len(unfinished_nodes[0].children) == self._OFFSPRING_NUMBER
-                ):
-                    unfinished_nodes.pop(0)
-                    time_keys.pop(0)
-                if new_event_node.event not in (
-                    self._DEATH_EVENT,
-                    self._SURVIVAL_EVENT,
-                ):
-                    if new_event_node.event == self._BIRTH_EVENT and birth_mutations:
-                        assert len(new_event_node.children) == self._OFFSPRING_NUMBER
-                        nodes_to_insert = new_event_node.children
-                    else:
-                        nodes_to_insert = [new_event_node]
-                    for node_to_insert in nodes_to_insert:
-                        idx = bisect.bisect(time_keys, node_to_insert.t)
-                        time_keys.insert(idx, node_to_insert.t)
-                        unfinished_nodes.insert(idx, node_to_insert)
-                if len(unfinished_nodes) > max_leaves:
-                    raise RuntimeError(
-                        f"maximum number of leaves {max_leaves} exceeded during simulation"
-                    )
+        unfinished_nodes = [self]
+        # NOTE: this key management is needed because the bisect.insort function does not have a
+        #       key argument in python 3.9 (it gains one in 3.10)
+        time_keys = [self.t]
 
-            attempt += 1
-            if attempt == retry:
-                raise RuntimeError(
-                    f"less than {min_survivors} survivors in all {retry} tries"
-                )
+        while unfinished_nodes:
+            Δt = t - unfinished_nodes[0].t
+            new_event_node = unfinished_nodes[0]._generate_event(
+                Δt,
+                birth_rate,
+                death_rate,
+                mutation_rate,
+                mutator,
+                birth_mutations,
+                rng,
+            )
+            # We pop the corresponding element of unfinished_nodes after we're finished operating on it with
+            # _generate_event. The special case is that birth nodes must be operated on twice before they
+            # should be popped, if birth_mutations is False. We then insert newly created nodes that need to
+            # be operated on. If birth_mutations is True, we get a cherry returned from _generate_event,
+            # and need to insert both children.
             if (
-                sum(leaf.event == self._SURVIVAL_EVENT for leaf in self)
-                >= min_survivors
+                unfinished_nodes[0].event != self._BIRTH_EVENT
+                or len(unfinished_nodes[0].children) == self._OFFSPRING_NUMBER
             ):
-                success = True
-            else:
-                for child in self.children:
-                    self.remove_child(child)
-                    child.delete()
-                TreeNode._name_generator = itertools.count(start=self.name + 1)
+                unfinished_nodes.pop(0)
+                time_keys.pop(0)
+            if new_event_node.event not in (
+                self._DEATH_EVENT,
+                self._SURVIVAL_EVENT,
+            ):
+                if new_event_node.event == self._BIRTH_EVENT and birth_mutations:
+                    assert len(new_event_node.children) == self._OFFSPRING_NUMBER
+                    nodes_to_insert = new_event_node.children
+                else:
+                    nodes_to_insert = [new_event_node]
+                for node_to_insert in nodes_to_insert:
+                    idx = bisect.bisect(time_keys, node_to_insert.t)
+                    time_keys.insert(idx, node_to_insert.t)
+                    unfinished_nodes.insert(idx, node_to_insert)
+            if len(unfinished_nodes) > max_leaves:
+                self._aborted_evolve_cleanup()
+                raise TreeError(
+                    f"maximum number of leaves {max_leaves} exceeded at time {unfinished_nodes[0].t}"
+                )
+
+        if sum(leaf.event == self._SURVIVAL_EVENT for leaf in self) < min_survivors:
+            self._aborted_evolve_cleanup()
+            raise TreeError(f"minimum number of survivors {min_survivors} not attained")
+
+    def _aborted_evolve_cleanup(self) -> None:
+        """Remove any children added to the root node during an aborted
+        evolution attempt, and reset the node name generator."""
+        for child in self.children:
+            self.remove_child(child)
+            child.delete()
+        TreeNode._name_generator = itertools.count(start=self.name + 1)
 
     def _generate_event(
         self,
@@ -504,6 +555,38 @@ class TreeNode(ete3.Tree):
             raise ValueError("must specify either n or p")
         for node in self.traverse():
             node._sampled = True
+
+    # NOTE: this could be generalized to take an ordered array-valued t, and made efficient via ordered traversal
+    def slice(self, t: float, attr: str = "x") -> List[Any]:
+        r"""Return a list of attribute ``attr`` at time :math:`t` for all
+        lineages alive at that time.
+
+        Args:
+            t: Slice the tree at time :math:`t`.
+            attr: Attribute to extract from slice.
+        """
+        if self._pruned:
+            raise ValueError("Cannot slice a pruned tree")
+        if not self.children:
+            raise ValueError("Cannot slice an unevolved tree")
+        if t < self.t:
+            raise ValueError(f"Cannot slice at time {t} before root time {self.t}")
+        tree_end_time = max(node.t for node in self)
+        if t > tree_end_time:
+            raise ValueError(
+                f"cannot slice at time {t} after tree end time {tree_end_time}"
+            )
+
+        if self.t == t:
+            return [getattr(self, attr)]
+
+        def is_leaf_fn(node):
+            return node.t >= t and node.up.t < t
+
+        return [
+            (getattr(node, attr) if node.t == t else getattr(node.up, attr))
+            for node in self.iter_leaves(is_leaf_fn=is_leaf_fn)
+        ]
 
     def prune(self) -> None:
         r"""Prune the tree to the subtree induced by the sampled leaves.
