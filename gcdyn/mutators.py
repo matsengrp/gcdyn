@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 from typing import Any, Optional, Union
 from scipy.stats import norm, gaussian_kde
-from gcdyn import bdms
+import ete3
 
 
 class Mutator(ABC):
@@ -18,13 +18,13 @@ class Mutator(ABC):
     :py:class:`TreeNode` object, which is modified in place."""
 
     @abstractmethod
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        pass
+    def __init__(self, attr: str = "x", *args: Any, **kwargs: Any) -> None:
+        self.attr = attr
 
     @abstractmethod
     def mutate(
         self,
-        node: "bdms.TreeNode",
+        node: "ete3.TreeNode",
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
         r"""Mutate a :py:class:`TreeNode` object in place.
@@ -38,7 +38,7 @@ class Mutator(ABC):
         """
 
     @abstractmethod
-    def logprob(self, node1: "bdms.TreeNode", node2: "bdms.TreeNode") -> float:
+    def logprob(self, node1: "ete3.TreeNode", node2: "ete3.TreeNode") -> float:
         r"""Compute the log probability that a mutation effect on ``node1``
         gives ``node2``.
 
@@ -56,8 +56,10 @@ class PhenotypeMutator(Mutator):
     :math:`x`.
     """
 
-    def logprob(self, node1: "bdms.TreeNode", node2: "bdms.TreeNode") -> float:
-        return self.probx(node1.x, node2.x, log=True)
+    def logprob(self, node1: "ete3.TreeNode", node2: "ete3.TreeNode") -> float:
+        return self.probx(
+            getattr(node1, self.attr), getattr(node2, self.attr), log=True
+        )
 
     @abstractmethod
     def probx(self, x1: float, x2: float, log: bool = False) -> float:
@@ -81,15 +83,22 @@ class GaussianMutator(PhenotypeMutator):
         scale: Standard deviation of mutation effect.
     """
 
-    def __init__(self, shift: float = 0.0, scale: float = 1.0):
+    def __init__(
+        self,
+        shift: float = 0.0,
+        scale: float = 1.0,
+        attr: str = "x",
+    ):
+        super().__init__(attr=attr)
         self._distribution = norm(loc=shift, scale=scale)
 
     def mutate(
         self,
-        node: "bdms.TreeNode",
+        node: "ete3.TreeNode",
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
-        node.x += self._distribution.rvs(random_state=seed)
+        new_value = getattr(node, self.attr) + self._distribution.rvs(random_state=seed)
+        setattr(node, self.attr, new_value)
 
     def probx(self, x1: float, x2: float, log: bool = False) -> float:
         Δx = np.array(x2) - np.array(x1)
@@ -111,15 +120,21 @@ class KdeMutator(PhenotypeMutator):
         dataset,
         bw_method: Optional[Union[str, float, callable]] = None,
         weights=None,
+        attr: str = "x",
     ):
+        super().__init__(attr=attr)
         self._distribution = gaussian_kde(dataset, bw_method, weights)
 
     def mutate(
         self,
-        node: "bdms.TreeNode",
+        node: "ete3.TreeNode",
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
-        node.x += self._distribution.resample(size=1, seed=seed)[0, 0]
+        new_value = (
+            getattr(node, self.attr)
+            + self._distribution.resample(size=1, seed=seed)[0, 0]
+        )
+        setattr(node, self.attr, new_value)
 
     def probx(self, x1: float, x2: float, log: bool = False) -> float:
         Δx = np.array(x2) - np.array(x1)

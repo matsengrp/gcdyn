@@ -39,7 +39,7 @@ Some concrete child classes are included.
 from abc import ABC, abstractmethod
 import ete3
 from ete3.coretype.tree import TreeError
-from gcdyn.mutators import GaussianMutator, Mutator
+from gcdyn import mutators
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -261,7 +261,7 @@ class TreeNode(ete3.Tree):
         birth_rate: Response = ConstantResponse(1),
         death_rate: Response = ConstantResponse(0),
         mutation_rate: Response = ConstantResponse(1),
-        mutator: Mutator = GaussianMutator(shift=0, scale=1),
+        mutator: mutators.Mutator = mutators.GaussianMutator(shift=0, scale=1),
         birth_mutations: bool = False,
         min_survivors: int = 1,
         max_leaves: int = 1000,
@@ -358,7 +358,7 @@ class TreeNode(ete3.Tree):
         birth_rate: Response,
         death_rate: Response,
         mutation_rate: Response,
-        mutator: Mutator,
+        mutator: mutators.Mutator,
         birth_mutations: bool,
         rng: np.random.Generator,
     ) -> "TreeNode":
@@ -585,7 +585,7 @@ class TreeNode(ete3.Tree):
         birth_rate: Response,
         death_rate: Response,
         mutation_rate: Response,
-        mutator: Mutator,
+        mutator: mutators.Mutator,
         sampling_probability: float,
     ) -> float:
         r"""Compute the log-likelihood of a fully observed tree given the

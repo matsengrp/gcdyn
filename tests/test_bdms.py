@@ -1,5 +1,5 @@
 import numpy as np
-from gcdyn import bdms
+from gcdyn import bdms, mutators
 import unittest
 
 
@@ -13,7 +13,7 @@ class TestTreeNode(unittest.TestCase):
                     birth_rate=bdms.SigmoidResponse(1, 0, 2, 0),
                     death_rate=bdms.ConstantResponse(1),
                     mutation_rate=bdms.ConstantResponse(1),
-                    mutator=bdms.GaussianMutator(-1, 1),
+                    mutator=mutators.GaussianMutator(-1, 1),
                     min_survivors=20,
                     seed=seed,
                 )
