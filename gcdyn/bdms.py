@@ -727,7 +727,7 @@ class TreeNode(ete3.Tree):
             ρ = sampling_probability
             Λ = λ + μ + γ
             logΛ = np.log(Λ)
-            # First we have two cases that require special handling of the time interval as part of the 
+            # First we have two cases that require special handling of the time interval as part of the
             # likelihood.
             if node.event in (self._SAMPLING_EVENT, self._SURVIVAL_EVENT):
                 # exponential survival function (no event before sampling time), then sampling probability
@@ -735,10 +735,10 @@ class TreeNode(ete3.Tree):
                     ρ if node.event == self._SAMPLING_EVENT else 1 - ρ
                 )
             elif self._MUTATION_EVENT and Δt == 0:
-                    # mutation in offspring from birth (simulation run with birth_mutations=True)
-                    result += mutator.logprob(node, node.up)
+                # mutation in offspring from birth (simulation run with birth_mutations=True)
+                result += mutator.logprob(node, node.up)
             else:
-                # For the rest of the cases, the likelihood is the product of the likelihood of the time 
+                # For the rest of the cases, the likelihood is the product of the likelihood of the time
                 # interval (next line, exponential density), then the probability of the given event.
                 result += logΛ - Λ * Δt
                 # multinomial event probability
