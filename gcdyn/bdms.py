@@ -727,25 +727,27 @@ class TreeNode(ete3.Tree):
             ρ = sampling_probability
             Λ = λ + μ + γ
             logΛ = np.log(Λ)
+            # First we have two cases that require special handling of the time interval as part of the
+            # likelihood.
             if node.event in (self._SAMPLING_EVENT, self._SURVIVAL_EVENT):
                 # exponential survival function (no event before sampling time), then sampling probability
                 result += -Λ * Δt + np.log(
                     ρ if node.event == self._SAMPLING_EVENT else 1 - ρ
                 )
+            elif node.event == self._MUTATION_EVENT and Δt == 0:
+                # mutation in offspring from birth (simulation run with birth_mutations=True)
+                result += mutator.logprob(node, node.up)
             else:
-                if self._MUTATION_EVENT and Δt == 0:
-                    # mutation in offspring from birth (simulation run with birth_mutations=True)
-                    result += mutator.logprob(node, node.up)
+                # For the rest of the cases, the likelihood is the product of the likelihood of the time
+                # interval (next line, exponential density), then the probability of the given event.
+                result += logΛ - Λ * Δt
+                # multinomial event probability
+                if node.event == self._BIRTH_EVENT:
+                    result += np.log(λ) - logΛ
+                elif node.event == self._DEATH_EVENT:
+                    result += np.log(μ) - logΛ
+                elif node.event == self._MUTATION_EVENT:
+                    result += np.log(γ) - logΛ + mutator.logprob(node, node.up)
                 else:
-                    # exponential density for event time
-                    result += logΛ - Λ * Δt
-                    # multinomial event probability
-                    if node.event == self._BIRTH_EVENT:
-                        result += np.log(λ) - logΛ
-                    elif node.event == self._DEATH_EVENT:
-                        result += np.log(μ) - logΛ
-                    elif node.event == self._MUTATION_EVENT:
-                        result += np.log(γ) - logΛ + mutator.logprob(node, node.up)
-                    else:
-                        raise ValueError(f"unknown event {node.event}")
+                    raise ValueError(f"unknown event {node.event}")
         return result
