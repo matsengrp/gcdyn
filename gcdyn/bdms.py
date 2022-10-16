@@ -734,7 +734,7 @@ class TreeNode(ete3.Tree):
                 result += -Λ * Δt + np.log(
                     ρ if node.event == self._SAMPLING_EVENT else 1 - ρ
                 )
-            elif self._MUTATION_EVENT and Δt == 0:
+            elif node.event == self._MUTATION_EVENT and Δt == 0:
                 # mutation in offspring from birth (simulation run with birth_mutations=True)
                 result += mutator.logprob(node, node.up)
             else:
