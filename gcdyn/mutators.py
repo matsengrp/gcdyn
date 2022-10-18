@@ -57,12 +57,12 @@ class PhenotypeMutator(Mutator):
     """
 
     def logprob(self, node1: "ete3.TreeNode", node2: "ete3.TreeNode") -> float:
-        return self.probx(
+        return self.prob(
             getattr(node1, self.attr), getattr(node2, self.attr), log=True
         )
 
     @abstractmethod
-    def probx(self, x1: float, x2: float, log: bool = False) -> float:
+    def prob(self, x1: float, x2: float, log: bool = False) -> float:
         r"""Convenience method to compute the probability density (if :math:`x`
         is continuous) or mass (if :math:`x` is discrete) that a mutation event
         on phenotype :math:`x_1` gives phenotype :math:`x_2` (e.g. for
@@ -100,7 +100,7 @@ class GaussianMutator(PhenotypeMutator):
         new_value = getattr(node, self.attr) + self._distribution.rvs(random_state=seed)
         setattr(node, self.attr, new_value)
 
-    def probx(self, x1: float, x2: float, log: bool = False) -> float:
+    def prob(self, x1: float, x2: float, log: bool = False) -> float:
         Δx = np.array(x2) - np.array(x1)
         return self._distribution.logpdf(Δx) if log else self._distribution.pdf(Δx)
 
@@ -136,6 +136,6 @@ class KdeMutator(PhenotypeMutator):
         )
         setattr(node, self.attr, new_value)
 
-    def probx(self, x1: float, x2: float, log: bool = False) -> float:
+    def prob(self, x1: float, x2: float, log: bool = False) -> float:
         Δx = np.array(x2) - np.array(x1)
         return self._distribution.logpdf(Δx) if log else self._distribution.pdf(Δx)
