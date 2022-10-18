@@ -57,9 +57,7 @@ class PhenotypeMutator(Mutator):
     """
 
     def logprob(self, node1: "ete3.TreeNode", node2: "ete3.TreeNode") -> float:
-        return self.prob(
-            getattr(node1, self.attr), getattr(node2, self.attr), log=True
-        )
+        return self.prob(getattr(node1, self.attr), getattr(node2, self.attr), log=True)
 
     @abstractmethod
     def prob(self, x1: float, x2: float, log: bool = False) -> float:
