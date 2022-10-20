@@ -13,6 +13,9 @@ import pandas as pd
 from scipy.stats import norm, gaussian_kde
 import ete3
 
+# NOTE: sphinx is currently unable to present this in condensed form, using a string type hint
+# of "array-like" in the docstring args for now, instead of ArrayLike hint in call signature
+# from numpy.typing import ArrayLike
 
 class Mutator(ABC):
     r"""Abstract base class for generating mutation effects given
@@ -68,7 +71,7 @@ class AttrMutator(Mutator):
         return self.prob(getattr(node1, self.attr), getattr(node2, self.attr), log=True)
 
     @abstractmethod
-    def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
+    def prob(self, attr1, attr2, log: bool = False) -> float:
         r"""Convenience method to compute the probability density (if ``attr``
         is continuous) or mass (if ``attr`` is discrete) that a mutation event
         brings attribute value ``attr1`` to attribute value ``attr2`` (e.g. for
