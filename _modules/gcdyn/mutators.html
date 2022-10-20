@@ -130,37 +130,40 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">())</span><span class="si">}</span><span class="s2">)&quot;</span></div>
 
 
-<div class="viewcode-block" id="PhenotypeMutator"><a class="viewcode-back" href="../../_autosummary/gcdyn.mutators.PhenotypeMutator.html#gcdyn.mutators.PhenotypeMutator">[docs]</a><span class="k">class</span> <span class="nc">PhenotypeMutator</span><span class="p">(</span><span class="n">Mutator</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Abstract base class for mutators that mutate a :py:class:`ete3.TreeNode` object&#39;s phenotype attribute</span>
-<span class="sd">    :math:`attr`.</span>
+<div class="viewcode-block" id="AttrMutator"><a class="viewcode-back" href="../../_autosummary/gcdyn.mutators.AttrMutator.html#gcdyn.mutators.AttrMutator">[docs]</a><span class="k">class</span> <span class="nc">AttrMutator</span><span class="p">(</span><span class="n">Mutator</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Abstract base class for mutators that mutate a specified</span>
+<span class="sd">    :py:class:`ete3.TreeNode` node attribute.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        attr: Node attribute to mutate.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attr</span> <span class="o">=</span> <span class="n">attr</span>
 
-<div class="viewcode-block" id="PhenotypeMutator.logprob"><a class="viewcode-back" href="../../_autosummary/gcdyn.mutators.PhenotypeMutator.html#gcdyn.mutators.PhenotypeMutator.logprob">[docs]</a>    <span class="k">def</span> <span class="nf">logprob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node1</span><span class="p">:</span> <span class="s2">&quot;ete3.TreeNode&quot;</span><span class="p">,</span> <span class="n">node2</span><span class="p">:</span> <span class="s2">&quot;ete3.TreeNode&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<div class="viewcode-block" id="AttrMutator.logprob"><a class="viewcode-back" href="../../_autosummary/gcdyn.mutators.AttrMutator.html#gcdyn.mutators.AttrMutator.logprob">[docs]</a>    <span class="k">def</span> <span class="nf">logprob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node1</span><span class="p">:</span> <span class="s2">&quot;ete3.TreeNode&quot;</span><span class="p">,</span> <span class="n">node2</span><span class="p">:</span> <span class="s2">&quot;ete3.TreeNode&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">prob</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">node1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">attr</span><span class="p">),</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">node2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">attr</span><span class="p">),</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PhenotypeMutator.prob"><a class="viewcode-back" href="../../_autosummary/gcdyn.mutators.PhenotypeMutator.html#gcdyn.mutators.PhenotypeMutator.prob">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="AttrMutator.prob"><a class="viewcode-back" href="../../_autosummary/gcdyn.mutators.AttrMutator.html#gcdyn.mutators.AttrMutator.prob">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">attr2</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">log</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convenience method to compute the probability density (if</span>
-<span class="sd">        :math:`attr` is continuous) or mass (if :math:`attr` is discrete) that</span>
-<span class="sd">        a mutation event on phenotype :math:`attr_1` gives phenotype</span>
-<span class="sd">        :math:`attr_2` (e.g. for plotting).</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convenience method to compute the probability density (if ``attr``</span>
+<span class="sd">        is continuous) or mass (if ``attr`` is discrete) that a mutation event</span>
+<span class="sd">        brings attribute value ``attr1`` to attribute value ``attr2`` (e.g. for</span>
+<span class="sd">        plotting).</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            attr1 (array-like): Initial phenotype value.</span>
-<span class="sd">            attr2 (array-like): Final phenotype value.</span>
+<span class="sd">            attr1 (array-like): Initial attribute value.</span>
+<span class="sd">            attr2 (array-like): Final attribute value.</span>
 <span class="sd">            log: If ``True``, return the log probability density.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div></div>
 
 
-<div class="viewcode-block" id="GaussianMutator"><a class="viewcode-back" href="../../_autosummary/gcdyn.mutators.GaussianMutator.html#gcdyn.mutators.GaussianMutator">[docs]</a><span class="k">class</span> <span class="nc">GaussianMutator</span><span class="p">(</span><span class="n">PhenotypeMutator</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Gaussian mutation effect on phenotype attribute :math:`attr`.</span>
+<div class="viewcode-block" id="GaussianMutator"><a class="viewcode-back" href="../../_autosummary/gcdyn.mutators.GaussianMutator.html#gcdyn.mutators.GaussianMutator">[docs]</a><span class="k">class</span> <span class="nc">GaussianMutator</span><span class="p">(</span><span class="n">AttrMutator</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Gaussian mutation effects on a specified attribute.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        shift: Mean shift wrt current phenotype.</span>
+<span class="sd">        shift: Mean shift wrt current attribute value.</span>
 <span class="sd">        scale: Standard deviation of mutation effect.</span>
 <span class="sd">        attr: Node attribute to mutate.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -187,9 +190,9 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distribution</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">Δx</span><span class="p">)</span> <span class="k">if</span> <span class="n">log</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distribution</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">Δx</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="KdeMutator"><a class="viewcode-back" href="../../_autosummary/gcdyn.mutators.KdeMutator.html#gcdyn.mutators.KdeMutator">[docs]</a><span class="k">class</span> <span class="nc">KdeMutator</span><span class="p">(</span><span class="n">PhenotypeMutator</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Gaussian kernel density estimator (KDE) for mutation effect on phenotype</span>
-<span class="sd">    attribute :math:`attr`.</span>
+<div class="viewcode-block" id="KdeMutator"><a class="viewcode-back" href="../../_autosummary/gcdyn.mutators.KdeMutator.html#gcdyn.mutators.KdeMutator">[docs]</a><span class="k">class</span> <span class="nc">KdeMutator</span><span class="p">(</span><span class="n">AttrMutator</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Gaussian kernel density estimator (KDE) for mutation effect on a</span>
+<span class="sd">    specified attribute.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        dataset (array-like): Data to fit the KDE to.</span>

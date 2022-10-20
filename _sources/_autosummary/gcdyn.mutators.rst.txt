@@ -20,10 +20,10 @@
       :template: custom-class-template.rst
       :nosignatures:
    
+      AttrMutator
       GaussianMutator
       KdeMutator
       Mutator
-      PhenotypeMutator
    
    
 

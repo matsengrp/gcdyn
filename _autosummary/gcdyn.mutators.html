@@ -21,7 +21,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="gcdyn.mutators.GaussianMutator" href="gcdyn.mutators.GaussianMutator.html" />
+    <link rel="next" title="gcdyn.mutators.AttrMutator" href="gcdyn.mutators.AttrMutator.html" />
     <link rel="prev" title="gcdyn.fitness.Fitness" href="gcdyn.fitness.Fitness.html" /> 
 </head>
 
@@ -53,18 +53,18 @@
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.fitness.html">gcdyn.fitness</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">gcdyn.mutators</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#mutation-effects-generators-mutator">Mutation effects generators <code class="xref py py-class docutils literal notranslate"><span class="pre">Mutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.AttrMutator.html">gcdyn.mutators.AttrMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.GaussianMutator.html">gcdyn.mutators.GaussianMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.KdeMutator.html">gcdyn.mutators.KdeMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.Mutator.html">gcdyn.mutators.Mutator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.PhenotypeMutator.html">gcdyn.mutators.PhenotypeMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#gcdyn.mutators.Mutator"><code class="docutils literal notranslate"><span class="pre">Mutator</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#gcdyn.mutators.Mutator.mutate"><code class="docutils literal notranslate"><span class="pre">Mutator.mutate()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#gcdyn.mutators.Mutator.logprob"><code class="docutils literal notranslate"><span class="pre">Mutator.logprob()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#gcdyn.mutators.PhenotypeMutator"><code class="docutils literal notranslate"><span class="pre">PhenotypeMutator</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#gcdyn.mutators.PhenotypeMutator.logprob"><code class="docutils literal notranslate"><span class="pre">PhenotypeMutator.logprob()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#gcdyn.mutators.PhenotypeMutator.prob"><code class="docutils literal notranslate"><span class="pre">PhenotypeMutator.prob()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gcdyn.mutators.AttrMutator"><code class="docutils literal notranslate"><span class="pre">AttrMutator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gcdyn.mutators.AttrMutator.logprob"><code class="docutils literal notranslate"><span class="pre">AttrMutator.logprob()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gcdyn.mutators.AttrMutator.prob"><code class="docutils literal notranslate"><span class="pre">AttrMutator.prob()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#gcdyn.mutators.GaussianMutator"><code class="docutils literal notranslate"><span class="pre">GaussianMutator</span></code></a><ul>
@@ -128,17 +128,17 @@ Some concrete child classes are included.</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.mutators.GaussianMutator.html#gcdyn.mutators.GaussianMutator" title="gcdyn.mutators.GaussianMutator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GaussianMutator</span></code></a></p></td>
-<td><p>Gaussian mutation effect on phenotype attribute <span class="math notranslate nohighlight">\(attr\)</span>.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.mutators.AttrMutator.html#gcdyn.mutators.AttrMutator" title="gcdyn.mutators.AttrMutator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttrMutator</span></code></a></p></td>
+<td><p>Abstract base class for mutators that mutate a specified <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a> node attribute.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="gcdyn.mutators.KdeMutator.html#gcdyn.mutators.KdeMutator" title="gcdyn.mutators.KdeMutator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KdeMutator</span></code></a></p></td>
-<td><p>Gaussian kernel density estimator (KDE) for mutation effect on phenotype attribute <span class="math notranslate nohighlight">\(attr\)</span>.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="gcdyn.mutators.GaussianMutator.html#gcdyn.mutators.GaussianMutator" title="gcdyn.mutators.GaussianMutator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GaussianMutator</span></code></a></p></td>
+<td><p>Gaussian mutation effects on a specified attribute.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.mutators.Mutator.html#gcdyn.mutators.Mutator" title="gcdyn.mutators.Mutator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mutator</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.mutators.KdeMutator.html#gcdyn.mutators.KdeMutator" title="gcdyn.mutators.KdeMutator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KdeMutator</span></code></a></p></td>
+<td><p>Gaussian kernel density estimator (KDE) for mutation effect on a specified attribute.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="gcdyn.mutators.Mutator.html#gcdyn.mutators.Mutator" title="gcdyn.mutators.Mutator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mutator</span></code></a></p></td>
 <td><p>Abstract base class for generating mutation effects given <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a> object, which is modified in place.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="gcdyn.mutators.PhenotypeMutator.html#gcdyn.mutators.PhenotypeMutator" title="gcdyn.mutators.PhenotypeMutator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PhenotypeMutator</span></code></a></p></td>
-<td><p>Abstract base class for mutators that mutate a <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a> object's phenotype attribute <span class="math notranslate nohighlight">\(attr\)</span>.</p></td>
 </tr>
 </tbody>
 </table>
@@ -188,13 +188,18 @@ gives <code class="docutils literal notranslate"><span class="pre">node2</span><
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="gcdyn.mutators.PhenotypeMutator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.mutators.</span></span><span class="sig-name descname"><span class="pre">PhenotypeMutator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#PhenotypeMutator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.PhenotypeMutator" title="Permalink to this definition"></a></dt>
-<dd><p>Abstract base class for mutators that mutate a <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a> object’s phenotype attribute
-<span class="math notranslate nohighlight">\(attr\)</span>.</p>
+<dt class="sig sig-object py" id="gcdyn.mutators.AttrMutator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.mutators.</span></span><span class="sig-name descname"><span class="pre">AttrMutator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#AttrMutator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.AttrMutator" title="Permalink to this definition"></a></dt>
+<dd><p>Abstract base class for mutators that mutate a specified
+<a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a> node attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Node attribute to mutate.</p>
+</dd>
+</dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.mutators.PhenotypeMutator.logprob">
-<span class="sig-name descname"><span class="pre">logprob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#PhenotypeMutator.logprob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.PhenotypeMutator.logprob" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="gcdyn.mutators.AttrMutator.logprob">
+<span class="sig-name descname"><span class="pre">logprob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#AttrMutator.logprob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.AttrMutator.logprob" title="Permalink to this definition"></a></dt>
 <dd><p>Compute the log probability that a mutation effect on <code class="docutils literal notranslate"><span class="pre">node1</span></code>
 gives <code class="docutils literal notranslate"><span class="pre">node2</span></code>.</p>
 <dl class="field-list simple">
@@ -211,17 +216,17 @@ gives <code class="docutils literal notranslate"><span class="pre">node2</span><
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.mutators.PhenotypeMutator.prob">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#PhenotypeMutator.prob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.PhenotypeMutator.prob" title="Permalink to this definition"></a></dt>
-<dd><p>Convenience method to compute the probability density (if
-<span class="math notranslate nohighlight">\(attr\)</span> is continuous) or mass (if <span class="math notranslate nohighlight">\(attr\)</span> is discrete) that
-a mutation event on phenotype <span class="math notranslate nohighlight">\(attr_1\)</span> gives phenotype
-<span class="math notranslate nohighlight">\(attr_2\)</span> (e.g. for plotting).</p>
+<dt class="sig sig-object py" id="gcdyn.mutators.AttrMutator.prob">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#AttrMutator.prob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.AttrMutator.prob" title="Permalink to this definition"></a></dt>
+<dd><p>Convenience method to compute the probability density (if <code class="docutils literal notranslate"><span class="pre">attr</span></code>
+is continuous) or mass (if <code class="docutils literal notranslate"><span class="pre">attr</span></code> is discrete) that a mutation event
+brings attribute value <code class="docutils literal notranslate"><span class="pre">attr1</span></code> to attribute value <code class="docutils literal notranslate"><span class="pre">attr2</span></code> (e.g. for
+plotting).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>attr1</strong> (<em>array-like</em>) – Initial phenotype value.</p></li>
-<li><p><strong>attr2</strong> (<em>array-like</em>) – Final phenotype value.</p></li>
+<li><p><strong>attr1</strong> (<em>array-like</em>) – Initial attribute value.</p></li>
+<li><p><strong>attr2</strong> (<em>array-like</em>) – Final attribute value.</p></li>
 <li><p><strong>log</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, return the log probability density.</p></li>
 </ul>
 </dd>
@@ -236,11 +241,11 @@ a mutation event on phenotype <span class="math notranslate nohighlight">\(attr_
 <dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.mutators.GaussianMutator">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.mutators.</span></span><span class="sig-name descname"><span class="pre">GaussianMutator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#GaussianMutator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.GaussianMutator" title="Permalink to this definition"></a></dt>
-<dd><p>Gaussian mutation effect on phenotype attribute <span class="math notranslate nohighlight">\(attr\)</span>.</p>
+<dd><p>Gaussian mutation effects on a specified attribute.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>shift</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Mean shift wrt current phenotype.</p></li>
+<li><p><strong>shift</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Mean shift wrt current attribute value.</p></li>
 <li><p><strong>scale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Standard deviation of mutation effect.</p></li>
 <li><p><strong>attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Node attribute to mutate.</p></li>
 </ul>
@@ -269,15 +274,15 @@ If a <a class="reference external" href="https://numpy.org/doc/stable/reference/
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.mutators.GaussianMutator.prob">
 <span class="sig-name descname"><span class="pre">prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#GaussianMutator.prob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.GaussianMutator.prob" title="Permalink to this definition"></a></dt>
-<dd><p>Convenience method to compute the probability density (if
-<span class="math notranslate nohighlight">\(attr\)</span> is continuous) or mass (if <span class="math notranslate nohighlight">\(attr\)</span> is discrete) that
-a mutation event on phenotype <span class="math notranslate nohighlight">\(attr_1\)</span> gives phenotype
-<span class="math notranslate nohighlight">\(attr_2\)</span> (e.g. for plotting).</p>
+<dd><p>Convenience method to compute the probability density (if <code class="docutils literal notranslate"><span class="pre">attr</span></code>
+is continuous) or mass (if <code class="docutils literal notranslate"><span class="pre">attr</span></code> is discrete) that a mutation event
+brings attribute value <code class="docutils literal notranslate"><span class="pre">attr1</span></code> to attribute value <code class="docutils literal notranslate"><span class="pre">attr2</span></code> (e.g. for
+plotting).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>attr1</strong> (<em>array-like</em>) – Initial phenotype value.</p></li>
-<li><p><strong>attr2</strong> (<em>array-like</em>) – Final phenotype value.</p></li>
+<li><p><strong>attr1</strong> (<em>array-like</em>) – Initial attribute value.</p></li>
+<li><p><strong>attr2</strong> (<em>array-like</em>) – Final attribute value.</p></li>
 <li><p><strong>log</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, return the log probability density.</p></li>
 </ul>
 </dd>
@@ -292,8 +297,8 @@ a mutation event on phenotype <span class="math notranslate nohighlight">\(attr_
 <dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.mutators.KdeMutator">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.mutators.</span></span><span class="sig-name descname"><span class="pre">KdeMutator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bw_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#KdeMutator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.KdeMutator" title="Permalink to this definition"></a></dt>
-<dd><p>Gaussian kernel density estimator (KDE) for mutation effect on phenotype
-attribute <span class="math notranslate nohighlight">\(attr\)</span>.</p>
+<dd><p>Gaussian kernel density estimator (KDE) for mutation effect on a
+specified attribute.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -327,15 +332,15 @@ If a <a class="reference external" href="https://numpy.org/doc/stable/reference/
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.mutators.KdeMutator.prob">
 <span class="sig-name descname"><span class="pre">prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#KdeMutator.prob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.KdeMutator.prob" title="Permalink to this definition"></a></dt>
-<dd><p>Convenience method to compute the probability density (if
-<span class="math notranslate nohighlight">\(attr\)</span> is continuous) or mass (if <span class="math notranslate nohighlight">\(attr\)</span> is discrete) that
-a mutation event on phenotype <span class="math notranslate nohighlight">\(attr_1\)</span> gives phenotype
-<span class="math notranslate nohighlight">\(attr_2\)</span> (e.g. for plotting).</p>
+<dd><p>Convenience method to compute the probability density (if <code class="docutils literal notranslate"><span class="pre">attr</span></code>
+is continuous) or mass (if <code class="docutils literal notranslate"><span class="pre">attr</span></code> is discrete) that a mutation event
+brings attribute value <code class="docutils literal notranslate"><span class="pre">attr1</span></code> to attribute value <code class="docutils literal notranslate"><span class="pre">attr2</span></code> (e.g. for
+plotting).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>attr1</strong> (<em>array-like</em>) – Initial phenotype value.</p></li>
-<li><p><strong>attr2</strong> (<em>array-like</em>) – Final phenotype value.</p></li>
+<li><p><strong>attr1</strong> (<em>array-like</em>) – Initial attribute value.</p></li>
+<li><p><strong>attr2</strong> (<em>array-like</em>) – Final attribute value.</p></li>
 <li><p><strong>log</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, return the log probability density.</p></li>
 </ul>
 </dd>
@@ -354,7 +359,7 @@ a mutation event on phenotype <span class="math notranslate nohighlight">\(attr_
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="gcdyn.fitness.Fitness.html" class="btn btn-neutral float-left" title="gcdyn.fitness.Fitness" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="gcdyn.mutators.GaussianMutator.html" class="btn btn-neutral float-right" title="gcdyn.mutators.GaussianMutator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="gcdyn.mutators.AttrMutator.html" class="btn btn-neutral float-right" title="gcdyn.mutators.AttrMutator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

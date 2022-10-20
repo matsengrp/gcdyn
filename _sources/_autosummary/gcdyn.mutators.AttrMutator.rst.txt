@@ -1,9 +1,9 @@
-gcdyn.mutators.PhenotypeMutator
-===============================
+gcdyn.mutators.AttrMutator
+==========================
 
 .. currentmodule:: gcdyn.mutators
 
-.. autoclass:: PhenotypeMutator
+.. autoclass:: AttrMutator
    :members:
    :show-inheritance:
    :inherited-members:
@@ -16,9 +16,9 @@ gcdyn.mutators.PhenotypeMutator
    .. autosummary::
       :nosignatures:
    
-      ~PhenotypeMutator.logprob
-      ~PhenotypeMutator.mutate
-      ~PhenotypeMutator.prob
+      ~AttrMutator.logprob
+      ~AttrMutator.mutate
+      ~AttrMutator.prob
    
    
 
