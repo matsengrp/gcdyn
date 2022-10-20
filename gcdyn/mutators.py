@@ -8,7 +8,8 @@ Some concrete child classes are included.
 """
 from abc import ABC, abstractmethod
 import numpy as np
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, List
+import pandas as pd
 from scipy.stats import norm, gaussian_kde
 import ete3
 
@@ -146,3 +147,45 @@ class KdeMutator(AttrMutator):
     def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
         Δx = np.array(attr2) - np.array(attr1)
         return self._distribution.logpdf(Δx) if log else self._distribution.pdf(Δx)
+
+
+class DiscreteMutator(AttrMutator):
+    r"""Mutations on a discrete space with a stochastic matrix.
+
+    Args:
+        state_space: List of hashable state values.
+        transition_probs: Right-stochastic matrix, where column and row orders match the order of `state_space`.
+        attr: Node attribute to mutate.
+    """
+
+    def __init__(
+        self,
+        state_space: List,
+        transition_probs: List[List[float]],
+        attr: str = "x",
+    ):
+        transition_probs = np.array(transition_probs, dtype=float)
+        assert np.all(transition_probs.sum(axis=1)) == 1, "Invalid stochastic matrix"
+
+        super().__init__(attr=attr)
+
+        self._transition_probs = pd.DataFrame(
+            transition_probs, index=state_space, columns=state_space
+        )
+
+    def mutate(
+        self,
+        node: "ete3.TreeNode",
+        seed: Optional[Union[int, np.random.Generator]] = None,
+    ) -> None:
+
+        rng = np.random.default_rng(seed)
+
+        transition_probs = self._transition_probs.loc[getattr(node, self.attr)]
+        new_value = rng.choice(transition_probs.index, p=transition_probs)
+
+        setattr(node, self.attr, new_value)
+
+    def prob(self, attr1, attr2, log: bool = False) -> float:
+        p = self._transition_probs.loc[attr1, attr2]
+        return np.log(p) if log else p
