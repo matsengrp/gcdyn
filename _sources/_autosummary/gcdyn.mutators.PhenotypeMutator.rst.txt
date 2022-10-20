@@ -1,7 +1,7 @@
-gcdyn.bdms.PhenotypeMutator
-===========================
+gcdyn.mutators.PhenotypeMutator
+===============================
 
-.. currentmodule:: gcdyn.bdms
+.. currentmodule:: gcdyn.mutators
 
 .. autoclass:: PhenotypeMutator
    :members:
@@ -18,7 +18,7 @@ gcdyn.bdms.PhenotypeMutator
    
       ~PhenotypeMutator.logprob
       ~PhenotypeMutator.mutate
-      ~PhenotypeMutator.probx
+      ~PhenotypeMutator.prob
    
    
 

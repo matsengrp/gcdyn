@@ -1,9 +1,9 @@
-gcdyn.bdms.KdeMutator
-=====================
+gcdyn.mutators.Mutator
+======================
 
-.. currentmodule:: gcdyn.bdms
+.. currentmodule:: gcdyn.mutators
 
-.. autoclass:: KdeMutator
+.. autoclass:: Mutator
    :members:
    :show-inheritance:
    :inherited-members:
@@ -16,9 +16,8 @@ gcdyn.bdms.KdeMutator
    .. autosummary::
       :nosignatures:
    
-      ~KdeMutator.logprob
-      ~KdeMutator.mutate
-      ~KdeMutator.probx
+      ~Mutator.logprob
+      ~Mutator.mutate
    
    
 

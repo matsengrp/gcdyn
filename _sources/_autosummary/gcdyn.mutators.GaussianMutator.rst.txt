@@ -1,7 +1,7 @@
-gcdyn.bdms.GaussianMutator
-==========================
+gcdyn.mutators.GaussianMutator
+==============================
 
-.. currentmodule:: gcdyn.bdms
+.. currentmodule:: gcdyn.mutators
 
 .. autoclass:: GaussianMutator
    :members:
@@ -18,7 +18,7 @@ gcdyn.bdms.GaussianMutator
    
       ~GaussianMutator.logprob
       ~GaussianMutator.mutate
-      ~GaussianMutator.probx
+      ~GaussianMutator.prob
    
    
 
