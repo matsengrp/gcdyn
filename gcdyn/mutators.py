@@ -52,7 +52,7 @@ class Mutator(ABC):
 
 
 class AttrMutator(Mutator):
-    r"""Abstract base class for mutators that mutate a specifie
+    r"""Abstract base class for mutators that mutate a specified
     :py:class:`ete3.TreeNode` node attribute.
 
     Args:
