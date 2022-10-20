@@ -51,9 +51,12 @@ class Mutator(ABC):
         return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in self.__dict__.items())})"
 
 
-class PhenotypeMutator(Mutator):
-    r"""Abstract base class for mutators that mutate a :py:class:`ete3.TreeNode` object's phenotype attribute
-    :math:`attr`.
+class AttrMutator(Mutator):
+    r"""Abstract base class for mutators that mutate a specified
+    :py:class:`ete3.TreeNode` node attribute.
+
+    Args:
+        attr: Node attribute to mutate.
     """
 
     @abstractmethod
@@ -65,23 +68,23 @@ class PhenotypeMutator(Mutator):
 
     @abstractmethod
     def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
-        r"""Convenience method to compute the probability density (if
-        :math:`attr` is continuous) or mass (if :math:`attr` is discrete) that
-        a mutation event on phenotype :math:`attr_1` gives phenotype
-        :math:`attr_2` (e.g. for plotting).
+        r"""Convenience method to compute the probability density (if ``attr``
+        is continuous) or mass (if ``attr`` is discrete) that a mutation event
+        brings attribute value ``attr1`` to attribute value ``attr2`` (e.g. for
+        plotting).
 
         Args:
-            attr1 (array-like): Initial phenotype value.
-            attr2 (array-like): Final phenotype value.
+            attr1 (array-like): Initial attribute value.
+            attr2 (array-like): Final attribute value.
             log: If ``True``, return the log probability density.
         """
 
 
-class GaussianMutator(PhenotypeMutator):
-    r"""Gaussian mutation effect on phenotype attribute :math:`attr`.
+class GaussianMutator(AttrMutator):
+    r"""Gaussian mutation effects on a specified attribute.
 
     Args:
-        shift: Mean shift wrt current phenotype.
+        shift: Mean shift wrt current attribute value.
         scale: Standard deviation of mutation effect.
         attr: Node attribute to mutate.
     """
@@ -108,9 +111,9 @@ class GaussianMutator(PhenotypeMutator):
         return self._distribution.logpdf(Δx) if log else self._distribution.pdf(Δx)
 
 
-class KdeMutator(PhenotypeMutator):
-    r"""Gaussian kernel density estimator (KDE) for mutation effect on phenotype
-    attribute :math:`attr`.
+class KdeMutator(AttrMutator):
+    r"""Gaussian kernel density estimator (KDE) for mutation effect on a
+    specified attribute.
 
     Args:
         dataset (array-like): Data to fit the KDE to.
