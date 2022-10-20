@@ -3,7 +3,7 @@ Mutation effects generators :py:class:`Mutator`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Abstract base class for defining generic mutation effect generators (i.e. :math:`\mathcal{p}(x\mid x')`),
-with arbitrary :py:class:`TreeNode` attribute dependence.
+with arbitrary :py:class:`ete3.TreeNode` attribute dependence.
 Some concrete child classes are included.
 """
 from abc import ABC, abstractmethod
@@ -15,11 +15,11 @@ import ete3
 
 class Mutator(ABC):
     r"""Abstract base class for generating mutation effects given
-    :py:class:`TreeNode` object, which is modified in place."""
+    :py:class:`ete3.TreeNode` object, which is modified in place."""
 
     @abstractmethod
-    def __init__(self, attr: str = "x", *args: Any, **kwargs: Any) -> None:
-        self.attr = attr
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        pass
 
     @abstractmethod
     def mutate(
@@ -27,10 +27,10 @@ class Mutator(ABC):
         node: "ete3.TreeNode",
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
-        r"""Mutate a :py:class:`TreeNode` object in place.
+        r"""Mutate a :py:class:`ete3.TreeNode` object in place.
 
         Args:
-            node: A :py:class:`TreeNode` to mutate.
+            node: A :py:class:`ete3.TreeNode` to mutate.
             seed: A seed to initialize the random number generation. If ``None``, then fresh,
                   unpredictable entropy will be pulled from the OS.
                   If an ``int``, then it will be used to derive the initial state.
@@ -52,33 +52,38 @@ class Mutator(ABC):
 
 
 class PhenotypeMutator(Mutator):
-    r"""Abstract base class for mutators that mutate a :py:class:`TreeNode` object's phenotype attribute
-    :math:`x`.
+    r"""Abstract base class for mutators that mutate a :py:class:`ete3.TreeNode` object's phenotype attribute
+    :math:`attr`.
     """
+
+    @abstractmethod
+    def __init__(self, attr: str = "x", *args: Any, **kwargs: Any) -> None:
+        self.attr = attr
 
     def logprob(self, node1: "ete3.TreeNode", node2: "ete3.TreeNode") -> float:
         return self.prob(getattr(node1, self.attr), getattr(node2, self.attr), log=True)
 
     @abstractmethod
-    def prob(self, x1: float, x2: float, log: bool = False) -> float:
-        r"""Convenience method to compute the probability density (if :math:`x`
-        is continuous) or mass (if :math:`x` is discrete) that a mutation event
-        on phenotype :math:`x_1` gives phenotype :math:`x_2` (e.g. for
-        plotting).
+    def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
+        r"""Convenience method to compute the probability density (if
+        :math:`attr` is continuous) or mass (if :math:`attr` is discrete) that
+        a mutation event on phenotype :math:`attr_1` gives phenotype
+        :math:`attr_2` (e.g. for plotting).
 
         Args:
-            x1 (array-like): Initial phenotype value.
-            x2 (array-like): Final phenotype value.
+            attr1 (array-like): Initial phenotype value.
+            attr2 (array-like): Final phenotype value.
             log: If ``True``, return the log probability density.
         """
 
 
 class GaussianMutator(PhenotypeMutator):
-    r"""Gaussian mutation effect on phenotype attribute :math:`x`.
+    r"""Gaussian mutation effect on phenotype attribute :math:`attr`.
 
     Args:
         shift: Mean shift wrt current phenotype.
         scale: Standard deviation of mutation effect.
+        attr: Node attribute to mutate.
     """
 
     def __init__(
@@ -98,17 +103,18 @@ class GaussianMutator(PhenotypeMutator):
         new_value = getattr(node, self.attr) + self._distribution.rvs(random_state=seed)
         setattr(node, self.attr, new_value)
 
-    def prob(self, x1: float, x2: float, log: bool = False) -> float:
-        Δx = np.array(x2) - np.array(x1)
+    def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
+        Δx = np.array(attr2) - np.array(attr1)
         return self._distribution.logpdf(Δx) if log else self._distribution.pdf(Δx)
 
 
 class KdeMutator(PhenotypeMutator):
     r"""Gaussian kernel density estimator (KDE) for mutation effect on phenotype
-    attribute :math:`x`.
+    attribute :math:`attr`.
 
     Args:
         dataset (array-like): Data to fit the KDE to.
+        attr: Node attribute to mutate.
         bw_method: KDE bandwidth (see :py:class:`scipy.stats.gaussian_kde`).
         weights (optional array-like): Weights of data points (see :py:class:`scipy.stats.gaussian_kde`).
     """
@@ -116,9 +122,9 @@ class KdeMutator(PhenotypeMutator):
     def __init__(
         self,
         dataset,
+        attr: str = "x",
         bw_method: Optional[Union[str, float, callable]] = None,
         weights=None,
-        attr: str = "x",
     ):
         super().__init__(attr=attr)
         self._distribution = gaussian_kde(dataset, bw_method, weights)
@@ -134,6 +140,6 @@ class KdeMutator(PhenotypeMutator):
         )
         setattr(node, self.attr, new_value)
 
-    def prob(self, x1: float, x2: float, log: bool = False) -> float:
-        Δx = np.array(x2) - np.array(x1)
+    def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
+        Δx = np.array(attr2) - np.array(attr1)
         return self._distribution.logpdf(Δx) if log else self._distribution.pdf(Δx)
