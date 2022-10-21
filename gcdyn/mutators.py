@@ -8,13 +8,14 @@ Some concrete child classes are included.
 """
 from abc import ABC, abstractmethod
 import numpy as np
-from typing import Any, Optional, Union, List
+from typing import Any, Optional, Union
 from scipy.stats import norm, gaussian_kde
 import ete3
 
 # NOTE: sphinx is currently unable to present this in condensed form, using a string type hint
 # of "array-like" in the docstring args for now, instead of ArrayLike hint in call signature
 # from numpy.typing import ArrayLike
+
 
 class Mutator(ABC):
     r"""Abstract base class for generating mutation effects given
@@ -167,7 +168,9 @@ class DiscreteMutator(AttrMutator):
         attr: str = "x",
     ):
         transition_probs = np.array(transition_probs, dtype=float)
-        if np.any(transition_probs < 0) or np.any(transition_probs.sum(axis=1) != 1):
+        if np.any(transition_probs < 0) or np.any(
+            np.abs(transition_probs.sum(axis=1) - 1) > 1e-4
+        ):
             raise ValueError("Invalid stochastic matrix")
 
         super().__init__(attr=attr)
@@ -180,11 +183,12 @@ class DiscreteMutator(AttrMutator):
         node: "ete3.TreeNode",
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
-
         rng = np.random.default_rng(seed)
 
         states = list(self.state_space.keys())
-        transition_probs = self.transition_probs[self.state_space[getattr(node, self.attr)], :]
+        transition_probs = self.transition_probs[
+            self.state_space[getattr(node, self.attr)], :
+        ]
         new_value = rng.choice(states, p=transition_probs)
         setattr(node, self.attr, new_value)
 
