@@ -156,15 +156,15 @@ class DiscreteMutator(AttrMutator):
     r"""Mutations on a discrete space with a stochastic matrix.
 
     Args:
-        state_space: List of hashable state values.
-        transition_probs: Right-stochastic matrix, where column and row orders match the order of `state_space`.
+        state_space (array-like): hashable state values.
+        transition_probs (array-like): Right-stochastic matrix, where column and row orders match the order of `state_space`.
         attr: Node attribute to mutate.
     """
 
     def __init__(
         self,
-        state_space: List,
-        transition_probs: List[List[float]],
+        state_space,
+        transition_probs,
         attr: str = "x",
     ):
         transition_probs = np.array(transition_probs, dtype=float)
