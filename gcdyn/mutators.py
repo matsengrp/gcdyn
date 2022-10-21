@@ -9,7 +9,6 @@ Some concrete child classes are included.
 from abc import ABC, abstractmethod
 import numpy as np
 from typing import Any, Optional, Union, List
-import pandas as pd
 from scipy.stats import norm, gaussian_kde
 import ete3
 
@@ -173,9 +172,8 @@ class DiscreteMutator(AttrMutator):
 
         super().__init__(attr=attr)
 
-        self._transition_probs = pd.DataFrame(
-            transition_probs, index=state_space, columns=state_space
-        )
+        self.state_space = {state: index for index, state in enumerate(state_space)}
+        self.transition_probs = transition_probs
 
     def mutate(
         self,
@@ -185,11 +183,11 @@ class DiscreteMutator(AttrMutator):
 
         rng = np.random.default_rng(seed)
 
-        transition_probs = self._transition_probs.loc[getattr(node, self.attr)]
-        new_value = rng.choice(transition_probs.index, p=transition_probs)
-
+        states = list(self.state_space.keys())
+        transition_probs = self.transition_probs[self.state_space[getattr(node, self.attr)], :]
+        new_value = rng.choice(states, p=transition_probs)
         setattr(node, self.attr, new_value)
 
     def prob(self, attr1, attr2, log: bool = False) -> float:
-        p = self._transition_probs.loc[attr1, attr2]
+        p = self.transition_probs[self.state_space[attr1], self.state_space[attr2]]
         return np.log(p) if log else p
