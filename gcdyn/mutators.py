@@ -168,7 +168,8 @@ class DiscreteMutator(AttrMutator):
         attr: str = "x",
     ):
         transition_probs = np.array(transition_probs, dtype=float)
-        assert np.all(transition_probs.sum(axis=1)) == 1, "Invalid stochastic matrix"
+        if np.any(transition_probs < 0) or np.any(transition_probs.sum(axis=1) != 1):
+            raise ValueError("Invalid stochastic matrix")
 
         super().__init__(attr=attr)
 
