@@ -157,26 +157,26 @@ class DiscreteMutator(AttrMutator):
 
     Args:
         state_space (array-like): hashable state values.
-        transition_probs (array-like): Right-stochastic matrix, where column and row orders match the order of `state_space`.
+        transition_matrix (array-like): Right-stochastic matrix, where column and row orders match the order of `state_space`.
         attr: Node attribute to mutate.
     """
 
     def __init__(
         self,
         state_space,
-        transition_probs,
+        transition_matrix,
         attr: str = "x",
     ):
-        transition_probs = np.array(transition_probs, dtype=float)
-        if np.any(transition_probs < 0) or np.any(
-            np.abs(transition_probs.sum(axis=1) - 1) > 1e-4
+        transition_matrix = np.array(transition_matrix, dtype=float)
+        if np.any(transition_matrix < 0) or np.any(
+            np.abs(transition_matrix.sum(axis=1) - 1) > 1e-4
         ):
             raise ValueError("Invalid stochastic matrix")
 
         super().__init__(attr=attr)
 
         self.state_space = {state: index for index, state in enumerate(state_space)}
-        self.transition_probs = transition_probs
+        self.transition_matrix = transition_matrix
 
     def mutate(
         self,
@@ -186,12 +186,12 @@ class DiscreteMutator(AttrMutator):
         rng = np.random.default_rng(seed)
 
         states = list(self.state_space.keys())
-        transition_probs = self.transition_probs[
+        transition_probs = self.transition_matrix[
             self.state_space[getattr(node, self.attr)], :
         ]
         new_value = rng.choice(states, p=transition_probs)
         setattr(node, self.attr, new_value)
 
     def prob(self, attr1, attr2, log: bool = False) -> float:
-        p = self.transition_probs[self.state_space[attr1], self.state_space[attr2]]
+        p = self.transition_matrix[self.state_space[attr1], self.state_space[attr2]]
         return np.log(p) if log else p
