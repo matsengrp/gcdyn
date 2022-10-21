@@ -12,6 +12,10 @@ from typing import Any, Optional, Union
 from scipy.stats import norm, gaussian_kde
 import ete3
 
+# NOTE: sphinx is currently unable to present this in condensed form, using a string type hint
+# of "array-like" in the docstring args for now, instead of ArrayLike hint in call signature
+# from numpy.typing import ArrayLike
+
 
 class Mutator(ABC):
     r"""Abstract base class for generating mutation effects given
@@ -67,7 +71,7 @@ class AttrMutator(Mutator):
         return self.prob(getattr(node1, self.attr), getattr(node2, self.attr), log=True)
 
     @abstractmethod
-    def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
+    def prob(self, attr1, attr2, log: bool = False) -> float:
         r"""Convenience method to compute the probability density (if ``attr``
         is continuous) or mass (if ``attr`` is discrete) that a mutation event
         brings attribute value ``attr1`` to attribute value ``attr2`` (e.g. for
@@ -146,3 +150,48 @@ class KdeMutator(AttrMutator):
     def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
         Δx = np.array(attr2) - np.array(attr1)
         return self._distribution.logpdf(Δx) if log else self._distribution.pdf(Δx)
+
+
+class DiscreteMutator(AttrMutator):
+    r"""Mutations on a discrete space with a stochastic matrix.
+
+    Args:
+        state_space (array-like): hashable state values.
+        transition_matrix (array-like): Right-stochastic matrix, where column and row orders match the order of `state_space`.
+        attr: Node attribute to mutate.
+    """
+
+    def __init__(
+        self,
+        state_space,
+        transition_matrix,
+        attr: str = "x",
+    ):
+        transition_matrix = np.array(transition_matrix, dtype=float)
+        if np.any(transition_matrix < 0) or np.any(
+            np.abs(transition_matrix.sum(axis=1) - 1) > 1e-4
+        ):
+            raise ValueError("Invalid stochastic matrix")
+
+        super().__init__(attr=attr)
+
+        self.state_space = {state: index for index, state in enumerate(state_space)}
+        self.transition_matrix = transition_matrix
+
+    def mutate(
+        self,
+        node: "ete3.TreeNode",
+        seed: Optional[Union[int, np.random.Generator]] = None,
+    ) -> None:
+        rng = np.random.default_rng(seed)
+
+        states = list(self.state_space.keys())
+        transition_probs = self.transition_matrix[
+            self.state_space[getattr(node, self.attr)], :
+        ]
+        new_value = rng.choice(states, p=transition_probs)
+        setattr(node, self.attr, new_value)
+
+    def prob(self, attr1, attr2, log: bool = False) -> float:
+        p = self.transition_matrix[self.state_space[attr1], self.state_space[attr2]]
+        return np.log(p) if log else p
