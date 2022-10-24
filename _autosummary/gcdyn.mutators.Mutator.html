@@ -109,7 +109,7 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.mutators.</span></span><span class="sig-name descname"><span class="pre">Mutator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#Mutator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.Mutator" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
 <p>Abstract base class for generating mutation effects given
-<code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code> object, which is modified in place.</p>
+<a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a> object, which is modified in place.</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <colgroup>
@@ -121,18 +121,18 @@
 <td><p>Compute the log probability that a mutation effect on <code class="docutils literal notranslate"><span class="pre">node1</span></code> gives <code class="docutils literal notranslate"><span class="pre">node2</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.mutators.Mutator.mutate" title="gcdyn.mutators.Mutator.mutate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mutate</span></code></a></p></td>
-<td><p>Mutate a <code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code> object in place.</p></td>
+<td><p>Mutate a <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a> object in place.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.mutators.Mutator.mutate">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mutate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#Mutator.mutate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.Mutator.mutate" title="Permalink to this definition"></a></dt>
-<dd><p>Mutate a <code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code> object in place.</p>
+<dd><p>Mutate a <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a> object in place.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>node</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code>) – A <code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code> to mutate.</p></li>
+<li><p><strong>node</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code>) – A <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a> to mutate.</p></li>
 <li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – A seed to initialize the random number generation. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then fresh,
 unpredictable entropy will be pulled from the OS.
 If an <code class="docutils literal notranslate"><span class="pre">int</span></code>, then it will be used to derive the initial state.
