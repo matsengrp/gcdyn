@@ -60,8 +60,8 @@ class FivemerMutator(Mutator):
         substitution_csv: str,
         igk_idx: int = 336,
     ):
-        """AID hotspot-aware mutation model using mutability values at each
-        nucleotide 5mer and substitution probabilities.
+        """AID hotspot-aware mutation model using mutability values at
+        each nucleotide 5mer and substitution probabilities.
 
         Args:
             mutability_csv: path to CSV with rows representing 5mers and mutability value
@@ -81,8 +81,8 @@ class FivemerMutator(Mutator):
     def mutate(
         self, sequence: str, time: float, rng: np.random.Generator = default_rng()
     ) -> str:
-        """AID hotspot-aware mutation model using mutability values at each
-        nucleotide 5mer and substitution probabilities.
+        """AID hotspot-aware mutation model using mutability values at
+        each nucleotide 5mer and substitution probabilities.
 
         Args:
             sequence: initial sequence, consisting of characters ``ACGT``
@@ -133,8 +133,8 @@ class Selector(ABC):
     """
 
     def select(self, sequence_list: List[str], competition: bool = True) -> List[Tuple]:
-        """Assigns the fitness for each sequence, with normalization depending
-        on whether competition is considered.
+        """Assigns the fitness for each sequence, with normalization
+        depending on whether competition is considered.
 
         Args:
             sequence_list: list of nucleotide sequences
@@ -161,8 +161,8 @@ class UniformSelector(Selector):
     def select(
         self, sequence_list: List[str], competition: bool = True
     ) -> List[Tuple[float]]:
-        """Uniform selector assigning fitness of each sequence to an equal
-        value.
+        """Uniform selector assigning fitness of each sequence to an
+        equal value.
 
         Args:
             sequence_list: list of sequences for fitness assignment
@@ -184,8 +184,8 @@ class UniformSelector(Selector):
 
 
 class ThreeStepSelector(Selector):
-    """A Selector that uses DMS data as well as a discrete amount of T cell
-    help that is assigned."""
+    """A Selector that uses DMS data as well as a discrete amount of T
+    cell help that is assigned."""
 
     def __init__(
         self,
@@ -200,10 +200,12 @@ class ThreeStepSelector(Selector):
         total_t_cell_help: float = 50,
         max_help: float = 2,
         antigen_frac_limit: float = 0.2,
+        sigmoid_growth_rate: float = 10,
+        sigmoid_mid_competency: float = 0.5,
     ):
-        """Initializes values for a DMSPhenotype to calculate KD based on
-        sequence from torchDMS model if KDs are not provided, and sets antigen
-        concentration for determining antigen bound.
+        """Initializes values for a DMSPhenotype to calculate KD based
+        on sequence from torchDMS model if KDs are not provided, and
+        sets antigen concentration for determining antigen bound.
 
         Args:
             igh_frame: frame for translation of Ig heavy chain
@@ -216,6 +218,8 @@ class ThreeStepSelector(Selector):
             concentration_antigen: molar concentration of antigen to determine antigen bound
             total_t_cell_help: total units of T cell help to be distributed in germinal center
             antigen_frac_limit: lower limit (inclusive) for the fraction antigen bound to be returned.
+            sigmoid_growth_rate: logistic growth rate of signal in ``norm2_sigmoid``
+            sigmoid_mid_competency: value of input competency to set as midpoint  in ``norm2_sigmoid``
         """
         self.igh_frame = igh_frame
         self.igk_frame = igk_frame
@@ -228,6 +232,8 @@ class ThreeStepSelector(Selector):
         self.total_t_cell_help = total_t_cell_help
         self.max_help = max_help
         self.antigen_frac_limit = antigen_frac_limit
+        self.sigmoid_growth_rate = sigmoid_growth_rate
+        self.sigmoid_mid_competency = sigmoid_mid_competency
 
     def select(
         self,
@@ -237,8 +243,8 @@ class ThreeStepSelector(Selector):
     ) -> List[Tuple[float]]:
         """Produce the predicted number of cell divisions for a list of
         sequences with discrete units of T cell help. T cell help is
-        distributed semi-randomly, with probabilites based on normalized signal
-        from antigen bound.
+        distributed semi-randomly, with probabilites based on normalized
+        signal from antigen bound.
 
         Args:
             sequence_list: list of nucleotide sequences
@@ -261,9 +267,7 @@ class ThreeStepSelector(Selector):
             kd_list = phenotype.calculate_KD(sequence_list)
         competencies = self.norm1(kd_list)
         norm_signals = self.norm2_sigmoid(competencies, competition=competition)
-        selected_seqs = self._norm3_prob_distribution(
-            norm_signals, self.total_t_cell_help
-        )
+        selected_seqs = self._norm3_prob_distribution(norm_signals)
         return [tuple([float(selected_seq)]) for selected_seq in selected_seqs]
 
     def norm1(self, KD_list):
@@ -287,15 +291,11 @@ class ThreeStepSelector(Selector):
     def norm2_sigmoid(
         self,
         competencies: List[float],
-        curve_steepness: float = 10,
-        midpoint_competency: float = 0.5,
         competition: bool = True,
     ):
         """Maps the input competencies to a signal between 0 and 1 using a sigmoidal transformation.
         Args:
             competencies: list of competencies between 0 and 1
-            curve_steepness: logistic growth rate of signal
-            midpoint_competency: value of input competency to set as midpoint
             competition: presence of competition to determine whether signal is normalized
 
         Returns:
@@ -310,7 +310,11 @@ class ThreeStepSelector(Selector):
                     1
                     / (
                         1
-                        + exp(-1 * curve_steepness * (competency - midpoint_competency))
+                        + exp(
+                            -1
+                            * self.sigmoid_growth_rate
+                            * (competency - self.sigmoid_mid_competency)
+                        )
                     )
                 )
         sum_signals = sum(unnorm_signals)
@@ -320,8 +324,8 @@ class ThreeStepSelector(Selector):
         return norm_signals
 
     def _norm2_quartile(self, competencies: List[float]):
-        """Determines signal based on competency based on the distance from the
-        quartile value.
+        """Determines signal based on competency based on the distance
+        from the quartile value.
 
         Args:
             competencies: list of competencies between 0 and 1
@@ -336,8 +340,7 @@ class ThreeStepSelector(Selector):
 
     def _norm3_prob_distribution(
         self,
-        norm_signals,
-        total_t_cell_help,
+        norm_signals: List[float],
         rng: np.random.Generator = default_rng(),
     ):
         """Produces a list with integer T cell help values using
@@ -345,7 +348,6 @@ class ThreeStepSelector(Selector):
 
         Args:
             norm_signals: T cell help signal for each sequence (must add to 1).
-            total_t_cell_help: total units of T cell help to be distributed
             rng: random number generator
 
         Returns:
@@ -354,24 +356,48 @@ class ThreeStepSelector(Selector):
         indices = np.arange(len(norm_signals))
         amt_help = np.zeros(len(norm_signals), dtype=int)
 
-        # If T cell help available exceeds the number of non-zero signals, every non-zero signal produces ``max_help``.
-        if total_t_cell_help >= self.max_help * np.count_nonzero(norm_signals):
+        # If T cell help available exceeds the number of non-zero signals, every non-zero signal produces max_help.
+        if self.total_t_cell_help >= self.max_help * np.count_nonzero(norm_signals):
             for i in range(len(norm_signals)):
                 if norm_signals[i] > 0:
                     amt_help[i] = self.max_help
-        # Otherwise, sample with weighted probabilities ``norm_signals``, re-sampling to not exceed ``max_help``.
+        # Otherwise, sample with weighted probabilities norm_signals, re-sampling to not exceed max_help anywhere.
         else:
-            for _ in range(total_t_cell_help):
+            for _ in range(self.total_t_cell_help):
                 chosen_index = rng.choice(indices, p=norm_signals)
                 while amt_help[chosen_index] > self.max_help - 1:
                     chosen_index = rng.choice(indices, p=norm_signals)
                 amt_help[chosen_index] += 1
         return amt_help
 
+    def norm3_ranked(self, norm_signals: List[float], max_divisions: float = 6):
+        """
+
+        Args:
+            norm_signals:
+            max_divisions:
+
+        Returns:
+
+        """
+        help_left = self.total_t_cell_help
+        divisions = np.zeros(len(norm_signals))
+        norm_signal_sort = np.argsort(norm_signals)
+        signal_to_divisions = max_divisions / norm_signals[norm_signal_sort[-1]]
+        for signals_idx in reversed(norm_signal_sort):
+            division_count = signal_to_divisions * norm_signals[signals_idx]
+            help_left -= division_count
+            if help_left < 0:
+                break
+            else:
+                divisions[signals_idx] = division_count
+        return divisions
+
 
 class DMSSelector(Selector):
-    r"""A class for a GC selector which determines fitness for nucleotide
-    sequences by using DMS models of affinity."""
+    r"""A class for a GC selector which determines fitness for nucleotide sequences by using DMS models of
+    affinity.
+    """
 
     def __init__(
         self,
