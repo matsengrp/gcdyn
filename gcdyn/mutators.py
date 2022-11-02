@@ -43,8 +43,8 @@ class Mutator(ABC):
 
     @abstractmethod
     def logprob(self, node: "ete3.TreeNode") -> float:
-        r"""Compute the log probability that a mutation effect on the parent of ``node``
-        gives ``node``.
+        r"""Compute the log probability that a mutation effect on the parent of
+        ``node`` gives ``node``.
 
         Args:
             node: Mutant node.
@@ -73,8 +73,8 @@ class AttrMutator(Mutator):
     def prob(self, node: "ete3.TreeNode", log: bool = False) -> float:
         r"""Convenience method to compute the probability density (if ``attr``
         is continuous) or mass (if ``attr`` is discrete) that a mutation event
-        yields the attribute value of ``node`` from its parent's attribute value
-        (e.g. for plotting).
+        yields the attribute value of ``node`` from its parent's attribute
+        value (e.g. for plotting).
 
         Args:
             node (ete3.TreeNode): Mutant node.
