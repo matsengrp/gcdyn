@@ -67,17 +67,19 @@ class AttrMutator(Mutator):
         self.attr = attr
 
     def logprob(self, node: "ete3.TreeNode") -> float:
-        return self.prob(node, log=True)
+        return self.prob(
+            getattr(node.up, self.attr), getattr(node, self.attr), log=True
+        )
 
     @abstractmethod
-    def prob(self, node: "ete3.TreeNode", log: bool = False) -> float:
+    def prob(self, attr1, attr2, log: bool = False) -> float:
         r"""Convenience method to compute the probability density (if ``attr``
         is continuous) or mass (if ``attr`` is discrete) that a mutation event
-        yields the attribute value of ``node`` from its parent's attribute
-        value (e.g. for plotting).
-
+        brings attribute value ``attr1`` to attribute value ``attr2`` (e.g. for
+        plotting).
         Args:
-            node (ete3.TreeNode): Mutant node.
+            attr1 (array-like): Initial attribute value.
+            attr2 (array-like): Final attribute value.
             log: If ``True``, return the log probability density.
         """
 
@@ -108,8 +110,8 @@ class GaussianMutator(AttrMutator):
         new_value = getattr(node, self.attr) + self._distribution.rvs(random_state=seed)
         setattr(node, self.attr, new_value)
 
-    def prob(self, node: "ete3.TreeNode", log: bool = False) -> float:
-        Δx = np.array(getattr(node, self.attr)) - np.array(getattr(node.up, self.attr))
+    def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
+        Δx = np.array(attr2) - np.array(attr1)
         return self._distribution.logpdf(Δx) if log else self._distribution.pdf(Δx)
 
 
@@ -145,8 +147,8 @@ class KdeMutator(AttrMutator):
         )
         setattr(node, self.attr, new_value)
 
-    def prob(self, node: "ete3.TreeNode", log: bool = False) -> float:
-        Δx = np.array(getattr(node, self.attr)) - np.array(getattr(node.up, self.attr))
+    def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
+        Δx = np.array(attr2) - np.array(attr1)
         return self._distribution.logpdf(Δx) if log else self._distribution.pdf(Δx)
 
 
@@ -190,9 +192,6 @@ class DiscreteMutator(AttrMutator):
         new_value = rng.choice(states, p=transition_probs)
         setattr(node, self.attr, new_value)
 
-    def prob(self, node: "ete3.TreeNode", log: bool = False) -> float:
-        p = self.transition_matrix[
-            self.state_space[getattr(node.up, self.attr)],
-            self.state_space[getattr(node, self.attr)],
-        ]
+    def prob(self, attr1, attr2, log: bool = False) -> float:
+        p = self.transition_matrix[self.state_space[attr1], self.state_space[attr2]]
         return np.log(p) if log else p
