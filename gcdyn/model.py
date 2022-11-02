@@ -16,7 +16,8 @@ from jax.scipy.special import expit
 from jaxopt import ScipyBoundedMinimize
 from functools import partial
 
-from gcdyn.bdms import TreeNode
+from gcdyn import responses, mutators
+import ete3
 
 
 class Model:
@@ -31,7 +32,7 @@ class Model:
     """
 
     def __init__(
-        self, trees: list[TreeNode], μ: float, γ: float, ρ: float, **opt_kwargs
+        self, trees: list[ete3.TreeNode], μ: float, γ: float, ρ: float, **opt_kwargs
     ):
         self.trees = trees
         self.μ = μ
@@ -106,3 +107,62 @@ class Model:
                     else:
                         raise ValueError(f"unknown event {node.event}")
         return result
+
+
+def log_likelihood(
+    self,
+    birth_rate: responses.Response,
+    death_rate: responses.Response,
+    mutation_rate: responses.Response,
+    mutator: mutators.Mutator,
+    sampling_probability: float,
+) -> float:
+    r"""Compute the log-likelihood of a fully observed tree given the
+    specified birth, death, mutation, and sampling parameters.
+
+    Args:
+        birth_rate: Birth rate response function.
+        death_rate: Death rate response function.
+        mutation_rate: Mutation rate response function.
+        mutator: Generator of mutation effects.
+        sampling_probability: Probability of sampling a survivor.
+    """
+    if self._pruned:
+        raise NotImplementedError("tree must be fully observed, not pruned")
+    if not self._sampled:
+        raise RuntimeError("tree must be sampled")
+    result = 0
+    for node in self.iter_descendants():
+        Δt = node.dist
+        λ = birth_rate(node)
+        μ = death_rate(node)
+        γ = mutation_rate(node)
+        if not 0 <= sampling_probability <= 1:
+            raise ValueError("sampling_probability must be in [0, 1]")
+        ρ = sampling_probability
+        Λ = λ + μ + γ
+        logΛ = np.log(Λ)
+        # First we have two cases that require special handling of the time interval as part of the
+        # likelihood.
+        if node.event in (self._SAMPLING_EVENT, self._SURVIVAL_EVENT):
+            # exponential survival function (no event before sampling time), then sampling probability
+            result += -Λ * Δt + np.log(
+                ρ if node.event == self._SAMPLING_EVENT else 1 - ρ
+            )
+        elif node.event == self._MUTATION_EVENT and Δt == 0:
+            # mutation in offspring from birth (simulation run with birth_mutations=True)
+            result += mutator.logprob(node, node.up)
+        else:
+            # For the rest of the cases, the likelihood is the product of the likelihood of the time
+            # interval (next line, exponential density), then the probability of the given event.
+            result += logΛ - Λ * Δt
+            # multinomial event probability
+            if node.event == self._BIRTH_EVENT:
+                result += np.log(λ) - logΛ
+            elif node.event == self._DEATH_EVENT:
+                result += np.log(μ) - logΛ
+            elif node.event == self._MUTATION_EVENT:
+                result += np.log(γ) - logΛ + mutator.logprob(node, node.up)
+            else:
+                raise ValueError(f"unknown event {node.event}")
+    return result
