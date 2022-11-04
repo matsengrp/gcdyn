@@ -8,8 +8,10 @@ import ete3
 # from numpy.typing import ArrayLike
 
 from scipy.special import expit
+from jax.tree_util import register_pytree_node_class
 
 
+@register_pytree_node_class
 class Response(ABC):
     r"""Abstract base class for response function mapping
     :py:class:`TreeNode` objects to ``float`` values given parameters."""
@@ -18,12 +20,34 @@ class Response(ABC):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         pass
 
+    @property
+    @abstractmethod
+    def _param_dict(self):
+        """Returns a dictionary containing all parameters of the response function."""
+        pass
+
+    @_param_dict.setter
+    @abstractmethod
+    def _param_dict(self, d):
+        """Configures the parameter values of the response function using the provided dictionary
+        (whose format matches that returned by the `Response._param_dict` getter method."""
+        pass
+
     @abstractmethod
     def __call__(self, node: "ete3.TreeNode") -> float:
         pass
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in self.__dict__.items())})"
+
+    def tree_flatten(self):
+        return (self._param_dict, None)
+
+    @classmethod
+    def tree_unflatten(cls, aux_data, children):
+        obj = cls()
+        obj._param_dict = children
+        return obj
 
 
 class PhenotypeResponse(Response):
@@ -61,6 +85,14 @@ class ConstantResponse(PhenotypeResponse):
     def f(self, x) -> float:
         return self.value * np.ones_like(x)
 
+    @property
+    def _param_dict(self):
+        return dict(value=self.value)
+
+    @_param_dict.setter
+    def _param_dict(self, d):
+        self.value = d["value"]
+
 
 class ExponentialResponse(PhenotypeResponse):
     r"""Exponential response function on a :py:class:`TreeNode` object's
@@ -90,6 +122,22 @@ class ExponentialResponse(PhenotypeResponse):
 
     def f(self, x) -> float:
         return self.yscale * np.exp(self.xscale * (x - self.xshift)) + self.yshift
+
+    @property
+    def _param_dict(self):
+        return dict(
+            xscale=self.xscale,
+            xshift=self.xshift,
+            yscale=self.yscale,
+            yshift=self.yshift,
+        )
+
+    @_param_dict.setter
+    def _param_dict(self, d):
+        self.xscale = d["xscale"]
+        self.xshift = d["xshift"]
+        self.yscale = d["yscale"]
+        self.yshift = d["yshift"]
 
 
 class SigmoidResponse(PhenotypeResponse):
@@ -123,6 +171,22 @@ class SigmoidResponse(PhenotypeResponse):
 
     def f(self, x) -> float:
         return self.yscale * expit(self.xscale * (x - self.xshift)) + self.yshift
+
+    @property
+    def _param_dict(self):
+        return dict(
+            xscale=self.xscale,
+            xshift=self.xshift,
+            yscale=self.yscale,
+            yshift=self.yshift,
+        )
+
+    @_param_dict.setter
+    def _param_dict(self, d):
+        self.xscale = d["xscale"]
+        self.xshift = d["xshift"]
+        self.yscale = d["yscale"]
+        self.yshift = d["yshift"]
 
 
 class SoftReluResponse(PhenotypeResponse):
@@ -158,3 +222,19 @@ class SoftReluResponse(PhenotypeResponse):
         return (
             self.yscale * np.logaddexp(0, self.xscale * (x - self.xshift)) + self.yshift
         )
+
+    @property
+    def _param_dict(self):
+        return dict(
+            xscale=self.xscale,
+            xshift=self.xshift,
+            yscale=self.yscale,
+            yshift=self.yshift,
+        )
+
+    @_param_dict.setter
+    def _param_dict(self, d):
+        self.xscale = d["xscale"]
+        self.xshift = d["xshift"]
+        self.yscale = d["yscale"]
+        self.yshift = d["yshift"]
