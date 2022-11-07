@@ -11,7 +11,6 @@ from scipy.special import expit
 from jax.tree_util import register_pytree_node_class
 
 
-@register_pytree_node_class
 class Response(ABC):
     r"""Abstract base class for response function mapping
     :py:class:`TreeNode` objects to ``float`` values given parameters."""
@@ -41,12 +40,13 @@ class Response(ABC):
         return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in self.__dict__.items())})"
 
     def tree_flatten(self):
-        return (self._param_dict, None)
+        keys, values = zip(*self._param_dict.items())
+        return (values, keys)
 
     @classmethod
     def tree_unflatten(cls, aux_data, children):
         obj = cls()
-        obj._param_dict = children
+        obj._param_dict = dict(zip(aux_data, children))
         return obj
 
 
@@ -71,6 +71,7 @@ class PhenotypeResponse(Response):
         """
 
 
+@register_pytree_node_class
 class ConstantResponse(PhenotypeResponse):
     r"""Returns attribute :math:`\theta\in\mathbb{R}` when an instance is called
     on any :py:class:`TreeNode`.
