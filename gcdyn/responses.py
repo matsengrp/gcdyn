@@ -50,7 +50,8 @@ class Response(ABC):
         return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in self.__dict__.items())})"
 
     def tree_flatten(self):
-        keys, values = zip(*self._param_dict.items())
+        items = sorted(self._param_dict.items(), key=lambda item: item[0])
+        keys, values = zip(*items)
         return (values, keys)
 
     @classmethod
