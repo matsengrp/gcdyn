@@ -50,7 +50,7 @@ class BdmsModel:
     # so I think the init value and optimization bounds might not be specified correctly...
     def fit(
         self,
-        init_value=responses.SigmoidResponse(1.0, 0.0, 2.0, 0.0),
+        init_value: responses.Response = responses.SigmoidResponse(1.0, 0.0, 2.0, 0.0),
         lower_bounds=[0.0, -np.inf, 0.0, 0.0],
         upper_bounds=[np.inf, np.inf, np.inf, np.inf],
     ) -> np.ndarray:
@@ -58,9 +58,13 @@ class BdmsModel:
         the model.
 
         Args:
-            init_value (array-like): initial value for the optimizer
+            init_value (Response): initial value for the optimizer.
+                Result will be of the same functional form.
             lower_bounds (array-like): lower bounds for the optimizer
             upper_bounds (array-like): upper bounds for the optimizer
+
+        All array-like arguments should specify the order of the parameters to match the
+        lexographical order of the parameter names (eg. xscale, xshift, yscale, yshift).
         """
         try:
             register_pytree_node_class(type(init_value))
@@ -113,7 +117,7 @@ class BdmsModel:
                     )
                 elif node.event == tree._MUTATION_EVENT and Δt == 0:
                     # mutation in offspring from birth (simulation run with birth_mutations=True)
-                    result += self.mutator.logprob(node, node.up)
+                    result += self.mutator.logprob(node.up, node)
                 else:
                     # For the rest of the cases, the likelihood is the product of the likelihood of the time
                     # interval (next line, exponential density), then the probability of the given event.
@@ -124,7 +128,7 @@ class BdmsModel:
                     elif node.event == tree._DEATH_EVENT:
                         result += np.log(μ) - logΛ
                     elif node.event == tree._MUTATION_EVENT:
-                        result += np.log(γ) - logΛ + self.mutator.logprob(node, node.up)
+                        result += np.log(γ) - logΛ + self.mutator.logprob(node.up, node)
                     else:
                         raise ValueError(f"unknown event {node.event}")
         return result
