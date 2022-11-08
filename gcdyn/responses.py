@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-import numpy as np
 from typing import Any
 import ete3
 
@@ -7,8 +6,21 @@ import ete3
 # of "array-like" in the docstring args for now, instead of ArrayLike hint in call signature
 # from numpy.typing import ArrayLike
 
-from scipy.special import expit
 from jax.tree_util import register_pytree_node_class
+
+
+def init_numpy(use_jax: bool = False):
+    r"""Configures the numpy/scipy backend of this module to use the regular or JAX version.
+    This function must be called after import before any numpy/scipy operations can be used."""
+    global np
+    global expit
+
+    if use_jax:
+        import jax.numpy as np
+        from jax.scipy.special import expit
+    else:
+        import numpy as np
+        from scipy.special import expit
 
 
 class Response(ABC):
@@ -95,6 +107,7 @@ class ConstantResponse(PhenotypeResponse):
         self.value = d["value"]
 
 
+@register_pytree_node_class
 class ExponentialResponse(PhenotypeResponse):
     r"""Exponential response function on a :py:class:`TreeNode` object's
     phenotype attribute :math:`x`.
@@ -141,6 +154,7 @@ class ExponentialResponse(PhenotypeResponse):
         self.yshift = d["yshift"]
 
 
+@register_pytree_node_class
 class SigmoidResponse(PhenotypeResponse):
     r"""Sigmoid response function on a :py:class:`TreeNode` object's phenotype
     attribute :math:`x`.
@@ -190,6 +204,7 @@ class SigmoidResponse(PhenotypeResponse):
         self.yshift = d["yshift"]
 
 
+@register_pytree_node_class
 class SoftReluResponse(PhenotypeResponse):
     r"""Soft ReLU response function on a :py:class:`TreeNode` object's phenotype
     attribute :math:`x`.
