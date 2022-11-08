@@ -1,8 +1,4 @@
 r"""BDMS inference.
-
-.. todo::
-
-    Harmonize/integrate with :py:mod:`gcdyn.bdms` module.
 """
 import jax.numpy as np
 
@@ -10,9 +6,7 @@ import jax.numpy as np
 # of "array-like" in the docstring args for now, instead of ArrayLike hint in call signature
 # from numpy.typing import ArrayLike
 
-from jax.scipy.stats import norm
 from jax import jit
-from jax.scipy.special import expit
 from jaxopt import ScipyBoundedMinimize
 from functools import partial
 
@@ -20,44 +14,43 @@ from gcdyn import responses, mutators
 import ete3
 
 
-class Model:
+class BdmsModel:
     r"""A class that represents a GC model.
 
     Args:
         trees: list of trees
-        μ: death rate
-        γ: mutation rate
-        ρ: sampling probability
+        death_rate: Death rate response function.
+        mutation_rate: Mutation rate response function.
+        mutator: Generator of mutation effects.
+        sampling_probability: Probability of sampling a survivor.
         opt_kwargs: keyword arguments to pass to :py:class:`jaxopt.ScipyBoundedMinimize`
     """
 
     def __init__(
-        self, trees: list[ete3.TreeNode], μ: float, γ: float, ρ: float, **opt_kwargs
+        self,
+        trees: list[ete3.TreeNode],
+        death_rate: responses.Response,
+        mutation_rate: responses.Response,
+        mutator: mutators.Mutator,
+        sampling_probability: float,
+        **opt_kwargs,
     ):
         self.trees = trees
-        self.μ = μ
-        self.γ = γ
-        self.ρ = ρ
+        self.death_rate = death_rate
+        self.mutation_rate = mutation_rate
+        self.mutator = mutator
+        self.sampling_probability = sampling_probability
 
         self.optimizer = ScipyBoundedMinimize(
-            fun=jit(lambda θ: -self.log_likelihood(θ)), **opt_kwargs
+            fun=lambda birth_rate: -self.log_likelihood(birth_rate), **opt_kwargs
         )
 
-    def λ(self, x: float, θ) -> float:
-        r"""Birth rate of phenotype x.
-
-        Args:
-            x: phenotype
-
-        Returns:
-            float: birth rate
-        """
-        return θ[0] * expit(θ[1] * (x - θ[2])) + θ[3]
-
+    # TODO: I think `Responses._param_dict` has no guarantee of the order of the parameters,
+    # so I think the init value and optimization bounds might not be specified correctly...
     def fit(
         self,
-        init_value=[2.0, 1.0, 0.0, 0.0],
-        lower_bounds=[0.0, 0.0, -np.inf, 0.0],
+        init_value=responses.SigmoidResponse(1.0, 0.0, 2.0, 0.0),
+        lower_bounds=[0.0, -np.inf, 0.0, 0.0],
         upper_bounds=[np.inf, np.inf, np.inf, np.inf],
     ) -> np.ndarray:
         r"""Given a collection of :py:class:`TreeNode`, fit the parameters of
@@ -69,100 +62,61 @@ class Model:
             upper_bounds (array-like): upper bounds for the optimizer
         """
         return self.optimizer.run(
-            np.array(init_value, dtype=float),
+            init_value,
             (np.array(lower_bounds, dtype=float), np.array(upper_bounds, dtype=float)),
         )
 
     @partial(jit, static_argnums=(0,))
-    def log_likelihood(self, θ) -> float:
-        r"""Compute log likelihood of parameters.
+    def log_likelihood(
+        self,
+        birth_rate: responses.Response,
+    ) -> float:
+        r"""Compute the log-likelihood of a fully observed tree given the
+        specified birth response.
 
         Args:
-            θ: parameters
+            birth_rate: Birth rate response function.
         """
-        result = 0
         for tree in self.trees:
-            for node in tree.children[0].traverse():
-                x = node.up.x
+            if tree._pruned:
+                raise NotImplementedError("tree must be fully observed, not pruned")
+            if not tree._sampled:
+                raise RuntimeError("tree must be sampled")
+
+        result = 0
+
+        for tree in self.trees:
+            for node in tree.iter_descendants():
                 Δt = node.dist
-                λ_x = self.λ(x, θ)
-                Λ = λ_x + self.μ + self.γ
+                λ = birth_rate(node)
+                μ = self.death_rate(node)
+                γ = self.mutation_rate(node)
+                if not 0 <= self.sampling_probability <= 1:
+                    raise ValueError("sampling_probability must be in [0, 1]")
+                ρ = self.sampling_probability
+                Λ = λ + μ + γ
                 logΛ = np.log(Λ)
-                if node.event in ("sampling", "survival"):
+                # First we have two cases that require special handling of the time interval as part of the
+                # likelihood.
+                if node.event in (tree._SAMPLING_EVENT, tree._SURVIVAL_EVENT):
                     # exponential survival function (no event before sampling time), then sampling probability
                     result += -Λ * Δt + np.log(
-                        self.ρ if node.event == "sampling" else 1 - self.ρ
+                        ρ if node.event == tree._SAMPLING_EVENT else 1 - ρ
                     )
+                elif node.event == tree._MUTATION_EVENT and Δt == 0:
+                    # mutation in offspring from birth (simulation run with birth_mutations=True)
+                    result += self.mutator.logprob(node, node.up)
                 else:
-                    # exponential density for event time
+                    # For the rest of the cases, the likelihood is the product of the likelihood of the time
+                    # interval (next line, exponential density), then the probability of the given event.
                     result += logΛ - Λ * Δt
                     # multinomial event probability
-                    if node.event == "birth":
-                        result += np.log(λ_x) - logΛ
-                    elif node.event == "death":
-                        result += np.log(self.μ) - logΛ
-                    elif node.event == "mutation":
-                        Δx = node.x - x
-                        result += np.log(self.γ) - logΛ + norm.logpdf(Δx)
+                    if node.event == tree._BIRTH_EVENT:
+                        result += np.log(λ) - logΛ
+                    elif node.event == tree._DEATH_EVENT:
+                        result += np.log(μ) - logΛ
+                    elif node.event == tree._MUTATION_EVENT:
+                        result += np.log(γ) - logΛ + self.mutator.logprob(node, node.up)
                     else:
                         raise ValueError(f"unknown event {node.event}")
         return result
-
-
-def log_likelihood(
-    self,
-    birth_rate: responses.Response,
-    death_rate: responses.Response,
-    mutation_rate: responses.Response,
-    mutator: mutators.Mutator,
-    sampling_probability: float,
-) -> float:
-    r"""Compute the log-likelihood of a fully observed tree given the
-    specified birth, death, mutation, and sampling parameters.
-
-    Args:
-        birth_rate: Birth rate response function.
-        death_rate: Death rate response function.
-        mutation_rate: Mutation rate response function.
-        mutator: Generator of mutation effects.
-        sampling_probability: Probability of sampling a survivor.
-    """
-    if self._pruned:
-        raise NotImplementedError("tree must be fully observed, not pruned")
-    if not self._sampled:
-        raise RuntimeError("tree must be sampled")
-    result = 0
-    for node in self.iter_descendants():
-        Δt = node.dist
-        λ = birth_rate(node)
-        μ = death_rate(node)
-        γ = mutation_rate(node)
-        if not 0 <= sampling_probability <= 1:
-            raise ValueError("sampling_probability must be in [0, 1]")
-        ρ = sampling_probability
-        Λ = λ + μ + γ
-        logΛ = np.log(Λ)
-        # First we have two cases that require special handling of the time interval as part of the
-        # likelihood.
-        if node.event in (self._SAMPLING_EVENT, self._SURVIVAL_EVENT):
-            # exponential survival function (no event before sampling time), then sampling probability
-            result += -Λ * Δt + np.log(
-                ρ if node.event == self._SAMPLING_EVENT else 1 - ρ
-            )
-        elif node.event == self._MUTATION_EVENT and Δt == 0:
-            # mutation in offspring from birth (simulation run with birth_mutations=True)
-            result += mutator.logprob(node, node.up)
-        else:
-            # For the rest of the cases, the likelihood is the product of the likelihood of the time
-            # interval (next line, exponential density), then the probability of the given event.
-            result += logΛ - Λ * Δt
-            # multinomial event probability
-            if node.event == self._BIRTH_EVENT:
-                result += np.log(λ) - logΛ
-            elif node.event == self._DEATH_EVENT:
-                result += np.log(μ) - logΛ
-            elif node.event == self._MUTATION_EVENT:
-                result += np.log(γ) - logΛ + mutator.logprob(node, node.up)
-            else:
-                raise ValueError(f"unknown event {node.event}")
-    return result
