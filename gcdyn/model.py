@@ -1,5 +1,4 @@
-r"""BDMS inference.
-"""
+r"""BDMS inference."""
 import jax.numpy as np
 
 # NOTE: sphinx is currently unable to present this in condensed form, using a string type hint

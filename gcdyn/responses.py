@@ -8,8 +8,12 @@ import ete3
 
 
 def init_numpy(use_jax: bool = False):
-    r"""Configures the numpy/scipy backend of this module to use the regular or JAX version.
-    This function must be called after import before any numpy/scipy operations can be used."""
+    r"""Configures the numpy/scipy backend of this module to use the regular or
+    JAX version.
+
+    This function must be called after import before any numpy/scipy
+    operations can be used.
+    """
     global np
     global expit
 
@@ -32,14 +36,16 @@ class Response(ABC):
     @property
     @abstractmethod
     def _param_dict(self):
-        """Returns a dictionary containing all parameters of the response function."""
+        """Returns a dictionary containing all parameters of the response
+        function."""
         pass
 
     @_param_dict.setter
     @abstractmethod
     def _param_dict(self, d):
-        """Configures the parameter values of the response function using the provided dictionary
-        (whose format matches that returned by the `Response._param_dict` getter method."""
+        """Configures the parameter values of the response function using the
+        provided dictionary (whose format matches that returned by the
+        `Response._param_dict` getter method."""
         pass
 
     @abstractmethod
