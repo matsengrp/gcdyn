@@ -12,6 +12,7 @@ from functools import partial
 
 from gcdyn import responses, mutators
 import ete3
+from jax.tree_util import register_pytree_node_class
 
 
 class BdmsModel:
@@ -61,6 +62,12 @@ class BdmsModel:
             lower_bounds (array-like): lower bounds for the optimizer
             upper_bounds (array-like): upper bounds for the optimizer
         """
+        try:
+            register_pytree_node_class(type(init_value))
+        except ValueError:
+            # Already registered this type
+            pass
+
         return self.optimizer.run(
             init_value,
             (np.array(lower_bounds, dtype=float), np.array(upper_bounds, dtype=float)),
@@ -77,6 +84,7 @@ class BdmsModel:
         Args:
             birth_rate: Birth rate response function.
         """
+
         for tree in self.trees:
             if tree._pruned:
                 raise NotImplementedError("tree must be fully observed, not pruned")

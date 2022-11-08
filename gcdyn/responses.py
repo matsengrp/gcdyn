@@ -6,8 +6,6 @@ import ete3
 # of "array-like" in the docstring args for now, instead of ArrayLike hint in call signature
 # from numpy.typing import ArrayLike
 
-from jax.tree_util import register_pytree_node_class
-
 
 def init_numpy(use_jax: bool = False):
     r"""Configures the numpy/scipy backend of this module to use the regular or JAX version.
@@ -83,7 +81,6 @@ class PhenotypeResponse(Response):
         """
 
 
-@register_pytree_node_class
 class ConstantResponse(PhenotypeResponse):
     r"""Returns attribute :math:`\theta\in\mathbb{R}` when an instance is called
     on any :py:class:`TreeNode`.
@@ -107,7 +104,6 @@ class ConstantResponse(PhenotypeResponse):
         self.value = d["value"]
 
 
-@register_pytree_node_class
 class ExponentialResponse(PhenotypeResponse):
     r"""Exponential response function on a :py:class:`TreeNode` object's
     phenotype attribute :math:`x`.
@@ -154,7 +150,6 @@ class ExponentialResponse(PhenotypeResponse):
         self.yshift = d["yshift"]
 
 
-@register_pytree_node_class
 class SigmoidResponse(PhenotypeResponse):
     r"""Sigmoid response function on a :py:class:`TreeNode` object's phenotype
     attribute :math:`x`.
@@ -204,7 +199,6 @@ class SigmoidResponse(PhenotypeResponse):
         self.yshift = d["yshift"]
 
 
-@register_pytree_node_class
 class SoftReluResponse(PhenotypeResponse):
     r"""Soft ReLU response function on a :py:class:`TreeNode` object's phenotype
     attribute :math:`x`.
