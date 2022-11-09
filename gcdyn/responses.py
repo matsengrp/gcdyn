@@ -11,8 +11,7 @@ def init_numpy(use_jax: bool = False):
     r"""Configures the numpy/scipy backend of this module to use the regular or
     JAX version.
 
-    This function must be called after import before any numpy/scipy
-    operations can be used.
+    This function is run on import with the default argument (non-JAX).
     """
     global np
     global expit
@@ -23,6 +22,9 @@ def init_numpy(use_jax: bool = False):
     else:
         import numpy as np
         from scipy.special import expit
+
+
+init_numpy()
 
 
 class Response(ABC):
