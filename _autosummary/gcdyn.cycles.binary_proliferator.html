@@ -104,10 +104,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../api.html">Modules</a> &raquo;</li>
-          <li><a href="gcdyn.cycles.html">gcdyn.cycles</a> &raquo;</li>
-      <li>gcdyn.cycles.binary_proliferator</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Modules</a></li>
+          <li class="breadcrumb-item"><a href="gcdyn.cycles.html">gcdyn.cycles</a></li>
+      <li class="breadcrumb-item active">gcdyn.cycles.binary_proliferator</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -120,7 +120,7 @@
 <h1>gcdyn.cycles.binary_proliferator<a class="headerlink" href="#gcdyn-cycles-binary-proliferator" title="Permalink to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="gcdyn.cycles.binary_proliferator">
-<span class="sig-prename descclassname"><span class="pre">gcdyn.cycles.</span></span><span class="sig-name descname"><span class="pre">binary_proliferator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treenode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng=Generator(PCG64)</span> <span class="pre">at</span> <span class="pre">0x7FB35FAB3F20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#binary_proliferator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.binary_proliferator" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">gcdyn.cycles.</span></span><span class="sig-name descname"><span class="pre">binary_proliferator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treenode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng=Generator(PCG64)</span> <span class="pre">at</span> <span class="pre">0x7FA34B825D60</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#binary_proliferator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.binary_proliferator" title="Permalink to this definition"></a></dt>
 <dd><p>Binary dark zone step (Galton-Watson). With probability <span class="math notranslate nohighlight">\(1-p\)</span> the
 input’s <code class="docutils literal notranslate"><span class="pre">terminated</span></code> attribute is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, indicating extinction.
 With probability <span class="math notranslate nohighlight">\(p\)</span> add two children to the input with
@@ -129,7 +129,7 @@ With probability <span class="math notranslate nohighlight">\(p\)</span> add two
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>treenode</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code>) – root node to simulate from</p></li>
-<li><p><strong>p</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – bifurcation probability <span class="math notranslate nohighlight">\(p \in [0, 1]\)</span></p></li>
+<li><p><strong>p</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – bifurcation probability <span class="math notranslate nohighlight">\(p \in [0, 1]\)</span></p></li>
 <li><p><strong>rng</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>) – random number generator</p></li>
 </ul>
 </dd>

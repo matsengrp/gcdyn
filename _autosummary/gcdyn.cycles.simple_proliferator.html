@@ -103,10 +103,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../api.html">Modules</a> &raquo;</li>
-          <li><a href="gcdyn.cycles.html">gcdyn.cycles</a> &raquo;</li>
-      <li>gcdyn.cycles.simple_proliferator</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Modules</a></li>
+          <li class="breadcrumb-item"><a href="gcdyn.cycles.html">gcdyn.cycles</a></li>
+      <li class="breadcrumb-item active">gcdyn.cycles.simple_proliferator</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -119,7 +119,7 @@
 <h1>gcdyn.cycles.simple_proliferator<a class="headerlink" href="#gcdyn-cycles-simple-proliferator" title="Permalink to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="gcdyn.cycles.simple_proliferator">
-<span class="sig-prename descclassname"><span class="pre">gcdyn.cycles.</span></span><span class="sig-name descname"><span class="pre">simple_proliferator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treenode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_divisions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng=Generator(PCG64)</span> <span class="pre">at</span> <span class="pre">0x7FB35FA88040</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#simple_proliferator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.simple_proliferator" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">gcdyn.cycles.</span></span><span class="sig-name descname"><span class="pre">simple_proliferator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treenode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_divisions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng=Generator(PCG64)</span> <span class="pre">at</span> <span class="pre">0x7FA34B825E40</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#simple_proliferator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.simple_proliferator" title="Permalink to this definition"></a></dt>
 <dd><p>Recursively populates descendants on a tree node based on the number of
 integer cell divisions indicated. Branch lengths are set to
 1/<cite>cell_divisions</cite>, such that the distance from the root to all leaves will
@@ -128,13 +128,13 @@ be 1.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>treenode</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code>) – root node to populate from</p></li>
-<li><p><strong>cell_divisions</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – number of cell divisions from the cell represented by <code class="docutils literal notranslate"><span class="pre">treenode</span></code></p></li>
-<li><p><strong>dist</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]) – distance from each parent to child node</p></li>
+<li><p><strong>cell_divisions</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – number of cell divisions from the cell represented by <code class="docutils literal notranslate"><span class="pre">treenode</span></code></p></li>
+<li><p><strong>dist</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]) – distance from each parent to child node</p></li>
 <li><p><strong>rng</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>) – random number generator</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>

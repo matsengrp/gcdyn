@@ -90,10 +90,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../api.html">Modules</a> &raquo;</li>
-          <li><a href="gcdyn.mutators.html">gcdyn.mutators</a> &raquo;</li>
-      <li>gcdyn.mutators.GaussianMutator</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Modules</a></li>
+          <li class="breadcrumb-item"><a href="gcdyn.mutators.html">gcdyn.mutators</a></li>
+      <li class="breadcrumb-item active">gcdyn.mutators.GaussianMutator</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -112,9 +112,9 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>shift</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Mean shift wrt current attribute value.</p></li>
-<li><p><strong>scale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Standard deviation of mutation effect.</p></li>
-<li><p><strong>attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Node attribute to mutate.</p></li>
+<li><p><strong>shift</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Mean shift wrt current attribute value.</p></li>
+<li><p><strong>scale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Standard deviation of mutation effect.</p></li>
+<li><p><strong>attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Node attribute to mutate.</p></li>
 </ul>
 </dd>
 </dl>
@@ -126,7 +126,7 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.mutators.GaussianMutator.logprob" title="gcdyn.mutators.GaussianMutator.logprob"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logprob</span></code></a></p></td>
-<td><p>Compute the log probability that a mutation effect on <code class="docutils literal notranslate"><span class="pre">node1</span></code> gives <code class="docutils literal notranslate"><span class="pre">node2</span></code>.</p></td>
+<td><p>Compute the log probability that a mutation effect on the parent of <code class="docutils literal notranslate"><span class="pre">node</span></code> gives <code class="docutils literal notranslate"><span class="pre">node</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.mutators.GaussianMutator.mutate" title="gcdyn.mutators.GaussianMutator.mutate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mutate</span></code></a></p></td>
 <td><p>Mutate a <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a> object in place.</p></td>
@@ -144,14 +144,14 @@
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>node</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code>) – A <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a> to mutate.</p></li>
-<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – A seed to initialize the random number generation. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then fresh,
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – A seed to initialize the random number generation. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then fresh,
 unpredictable entropy will be pulled from the OS.
 If an <code class="docutils literal notranslate"><span class="pre">int</span></code>, then it will be used to derive the initial state.
 If a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a>, then that will be used directly.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -168,29 +168,26 @@ plotting).</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>attr1</strong> (<em>array-like</em>) – Initial attribute value.</p></li>
 <li><p><strong>attr2</strong> (<em>array-like</em>) – Final attribute value.</p></li>
-<li><p><strong>log</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, return the log probability density.</p></li>
+<li><p><strong>log</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, return the log probability density.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.mutators.GaussianMutator.logprob">
-<span class="sig-name descname"><span class="pre">logprob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.mutators.GaussianMutator.logprob" title="Permalink to this definition"></a></dt>
-<dd><p>Compute the log probability that a mutation effect on <code class="docutils literal notranslate"><span class="pre">node1</span></code>
-gives <code class="docutils literal notranslate"><span class="pre">node2</span></code>.</p>
+<span class="sig-name descname"><span class="pre">logprob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.mutators.GaussianMutator.logprob" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the log probability that a mutation effect on the parent of
+<code class="docutils literal notranslate"><span class="pre">node</span></code> gives <code class="docutils literal notranslate"><span class="pre">node</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>node1</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code>) – Initial node.</p></li>
-<li><p><strong>node2</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code>) – Mutant node.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>node</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code>) – Mutant node.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>

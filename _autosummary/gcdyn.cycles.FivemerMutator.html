@@ -103,10 +103,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../api.html">Modules</a> &raquo;</li>
-          <li><a href="gcdyn.cycles.html">gcdyn.cycles</a> &raquo;</li>
-      <li>gcdyn.cycles.FivemerMutator</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Modules</a></li>
+          <li class="breadcrumb-item"><a href="gcdyn.cycles.html">gcdyn.cycles</a></li>
+      <li class="breadcrumb-item active">gcdyn.cycles.FivemerMutator</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -126,9 +126,9 @@ nucleotide 5mer and substitution probabilities.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mutability_csv</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – path to CSV with rows representing 5mers and mutability value</p></li>
-<li><p><strong>substitution_csv</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – path to CSV with rows representing 5mers and probability of substitution to each nucleotide in columns</p></li>
-<li><p><strong>igk_idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – index of Ig light chain starting position</p></li>
+<li><p><strong>mutability_csv</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – path to CSV with rows representing 5mers and mutability value</p></li>
+<li><p><strong>substitution_csv</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – path to CSV with rows representing 5mers and probability of substitution to each nucleotide in columns</p></li>
+<li><p><strong>igk_idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – index of Ig light chain starting position</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -152,14 +152,14 @@ nucleotide 5mer and substitution probabilities.</p>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.cycles.FivemerMutator.mutate">
-<span class="sig-name descname"><span class="pre">mutate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng=Generator(PCG64)</span> <span class="pre">at</span> <span class="pre">0x7FB35FAB3820</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#FivemerMutator.mutate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.FivemerMutator.mutate" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">mutate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng=Generator(PCG64)</span> <span class="pre">at</span> <span class="pre">0x7FA34B825660</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/cycles.html#FivemerMutator.mutate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.cycles.FivemerMutator.mutate" title="Permalink to this definition"></a></dt>
 <dd><p>AID hotspot-aware mutation model using mutability values at each
 nucleotide 5mer and substitution probabilities.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>sequence</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – initial sequence, consisting of characters <code class="docutils literal notranslate"><span class="pre">ACGT</span></code></p></li>
-<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – exposure time</p></li>
+<li><p><strong>sequence</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – initial sequence, consisting of characters <code class="docutils literal notranslate"><span class="pre">ACGT</span></code></p></li>
+<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – exposure time</p></li>
 <li><p><strong>rng</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>) – random number generator</p></li>
 </ul>
 </dd>
