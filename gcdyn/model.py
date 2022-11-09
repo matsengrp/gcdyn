@@ -45,8 +45,6 @@ class BdmsModel:
             fun=lambda birth_rate: -self.log_likelihood(birth_rate), **opt_kwargs
         )
 
-    # TODO: I think `Responses._param_dict` has no guarantee of the order of the parameters,
-    # so I think the init value and optimization bounds might not be specified correctly...
     def fit(
         self,
         init_value: responses.Response = responses.SigmoidResponse(1.0, 0.0, 2.0, 0.0),
