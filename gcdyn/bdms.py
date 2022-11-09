@@ -622,7 +622,7 @@ class TreeNode(ete3.Tree):
                 )
             elif node.event == self._MUTATION_EVENT and Δt == 0:
                 # mutation in offspring from birth (simulation run with birth_mutations=True)
-                result += mutator.logprob(node, node.up)
+                result += mutator.logprob(node)
             else:
                 # For the rest of the cases, the likelihood is the product of the likelihood of the time
                 # interval (next line, exponential density), then the probability of the given event.
@@ -633,7 +633,7 @@ class TreeNode(ete3.Tree):
                 elif node.event == self._DEATH_EVENT:
                     result += np.log(μ) - logΛ
                 elif node.event == self._MUTATION_EVENT:
-                    result += np.log(γ) - logΛ + mutator.logprob(node, node.up)
+                    result += np.log(γ) - logΛ + mutator.logprob(node)
                 else:
                     raise ValueError(f"unknown event {node.event}")
         return result
