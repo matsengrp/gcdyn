@@ -99,9 +99,9 @@ class BdmsModel:
         for tree in self.trees:
             for node in tree.iter_descendants():
                 Δt = node.dist
-                λ = birth_rate(node)
-                μ = self.death_rate(node)
-                γ = self.mutation_rate(node)
+                λ = birth_rate(node.up)
+                μ = self.death_rate(node.up)
+                γ = self.mutation_rate(node.up)
                 if not 0 <= self.sampling_probability <= 1:
                     raise ValueError("sampling_probability must be in [0, 1]")
                 ρ = self.sampling_probability
