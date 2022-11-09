@@ -114,7 +114,7 @@ class BdmsModel:
                     )
                 elif node.event == tree._MUTATION_EVENT and Δt == 0:
                     # mutation in offspring from birth (simulation run with birth_mutations=True)
-                    result += self.mutator.logprob(node.up, node)
+                    result += self.mutator.logprob(node)
                 else:
                     # For the rest of the cases, the likelihood is the product of the likelihood of the time
                     # interval (next line, exponential density), then the probability of the given event.
@@ -125,7 +125,7 @@ class BdmsModel:
                     elif node.event == tree._DEATH_EVENT:
                         result += np.log(μ) - logΛ
                     elif node.event == tree._MUTATION_EVENT:
-                        result += np.log(γ) - logΛ + self.mutator.logprob(node.up, node)
+                        result += np.log(γ) - logΛ + self.mutator.logprob(node)
                     else:
                         raise ValueError(f"unknown event {node.event}")
         return result

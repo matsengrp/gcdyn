@@ -42,13 +42,12 @@ class Mutator(ABC):
         """
 
     @abstractmethod
-    def logprob(self, node1: "ete3.TreeNode", node2: "ete3.TreeNode") -> float:
-        r"""Compute the log probability that a mutation effect on ``node1``
-        gives ``node2``.
+    def logprob(self, node: "ete3.TreeNode") -> float:
+        r"""Compute the log probability that a mutation effect on the parent of
+        ``node`` gives ``node``.
 
         Args:
-            node1: Initial node.
-            node2: Mutant node.
+            node: Mutant node.
         """
 
     def __repr__(self) -> str:
@@ -67,8 +66,10 @@ class AttrMutator(Mutator):
     def __init__(self, attr: str = "x", *args: Any, **kwargs: Any) -> None:
         self.attr = attr
 
-    def logprob(self, node1: "ete3.TreeNode", node2: "ete3.TreeNode") -> float:
-        return self.prob(getattr(node1, self.attr), getattr(node2, self.attr), log=True)
+    def logprob(self, node: "ete3.TreeNode") -> float:
+        return self.prob(
+            getattr(node.up, self.attr), getattr(node, self.attr), log=True
+        )
 
     @abstractmethod
     def prob(self, attr1, attr2, log: bool = False) -> float:
