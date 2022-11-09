@@ -77,6 +77,7 @@ class AttrMutator(Mutator):
         is continuous) or mass (if ``attr`` is discrete) that a mutation event
         brings attribute value ``attr1`` to attribute value ``attr2`` (e.g. for
         plotting).
+
         Args:
             attr1 (array-like): Initial attribute value.
             attr2 (array-like): Final attribute value.
