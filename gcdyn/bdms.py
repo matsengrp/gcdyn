@@ -72,6 +72,7 @@ class TreeNode(ete3.Tree):
         self,
         t: float = 0,
         x: float = 0,
+        sequence: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
         if "dist" not in kwargs:
@@ -84,6 +85,8 @@ class TreeNode(ete3.Tree):
         """Time of the node."""
         self.x = x
         """Phenotype of the node."""
+        self.sequence = sequence
+        """Sequence for the node."""
         self.event = None
         """Event at this node."""
         self.n_mutations = 0
@@ -91,6 +94,10 @@ class TreeNode(ete3.Tree):
         tree has been pruned above this node, removing mutation event
         nodes)."""
         self._sampled = False
+        """
+        Whether sampling has been run on this tree. (Not whether the node has been
+        sampled as part of this sampling process).
+        """
         self._pruned = False
 
     def evolve(
@@ -215,7 +222,11 @@ class TreeNode(ete3.Tree):
         τ = min(rng.exponential(1 / Λ), Δt)
 
         child = TreeNode(
-            t=self.t + τ, x=self.x, dist=τ, name=next(self._name_generator)
+            t=self.t + τ,
+            x=self.x,
+            sequence=self.sequence,
+            dist=τ,
+            name=next(self._name_generator),
         )
         if τ == Δt:
             child.event = self._SURVIVAL_EVENT

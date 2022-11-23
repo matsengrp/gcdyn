@@ -16,6 +16,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/matsengrp/gcdyn",
     packages=["gcdyn"],
+    package_data={"gcdyn": ["data/*"]},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License (GPL)",
@@ -31,6 +32,8 @@ setuptools.setup(
         "biopython",
     ],
     extras_require={
-        "PyQt5": ["PyQt5",],
+        "PyQt5": [
+            "PyQt5",
+        ],
     },
 )

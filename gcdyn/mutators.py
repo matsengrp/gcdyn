@@ -7,10 +7,12 @@ with arbitrary :py:class:`ete3.TreeNode` attribute dependence.
 Some concrete child classes are included.
 """
 from abc import ABC, abstractmethod
+from typing import Any, Callable, List, Optional, Union
 import numpy as np
-from typing import Any, Optional, Union
+import pandas as pd
 from scipy.stats import norm, gaussian_kde
 import ete3
+from gcdyn.gpmap import GPMap
 
 # NOTE: sphinx is currently unable to present this in condensed form, using a string type hint
 # of "array-like" in the docstring args for now, instead of ArrayLike hint in call signature
@@ -198,3 +200,123 @@ class DiscreteMutator(AttrMutator):
     def prob(self, attr1, attr2, log: bool = False) -> float:
         p = self.transition_matrix[self.state_space[attr1], self.state_space[attr2]]
         return np.log(p) if log else p
+
+
+class SequenceMutator(AttrMutator):
+    r"""Mutations on a DNA sequence."""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(attr="sequence")
+
+    def prob(self, attr1, attr2, log: bool = False) -> float:
+        raise NotImplementedError
+
+
+class UniformMutator(SequenceMutator):
+    r"""Uniform mutation process.
+
+    Args:
+        node: a TreeNode with a string-valued sequence attribute consisting of
+              characters ``ACGT``
+        seed: See above.
+    """
+
+    def mutate(
+        self,
+        node: "ete3.TreeNode",
+        seed: Optional[Union[int, np.random.Generator]] = None,
+    ) -> None:
+        alphabet = "ACGT"
+        rng = np.random.default_rng(seed)
+        sequence = list(node.sequence)
+        idx = rng.choice(len(sequence))
+        sequence[idx] = rng.choice([base for base in alphabet if base != sequence[idx]])
+        node.sequence = "".join(sequence)
+
+
+class ContextMutator(SequenceMutator):
+    """Class for hotspot-aware mutation model using mutability substitution
+    probabilities expressed in terms of context.
+
+    Args:
+        mutability: a mapping from local context to mutability
+        substitution: a mapping from local context to substitution process
+        seq_to_contexts: a function that accepts a sequence and splits it into local contexts
+    """
+
+    def __init__(
+        self,
+        mutability: pd.Series,
+        substitution: pd.DataFrame,
+        seq_to_contexts: Callable[str, List[str]],
+    ):
+        super().__init__()
+
+        self.mutability = mutability
+        self.substitution = substitution
+        self.seq_to_contexts = seq_to_contexts
+
+    def mutate(
+        self,
+        node: "ete3.TreeNode",
+        seed: Optional[Union[int, np.random.Generator]] = None,
+    ) -> None:
+        """Mutate node.sequence according to an AID hotspot-aware mutation model using
+        mutability values at each nucleotide 5mer and substitution probabilities.
+
+        Args:
+            node: node with sequence, consisting of characters ``ACGT``
+            seed: See above.
+        """
+
+        rng = np.random.default_rng(seed)
+
+        contexts = self.seq_to_contexts(node.sequence)
+        mutabilities = np.array([self.mutability[context] for context in contexts])
+        i = rng.choice(len(mutabilities), p=mutabilities / sum(mutabilities))
+        sub_nt = rng.choice(
+            self.substitution.columns,
+            p=self.substitution.loc[contexts[i]].fillna(0),
+        )
+        node.sequence = node.sequence[:i] + sub_nt + node.sequence[(i + 1) :]
+
+
+class SequencePhenotypeMutator(AttrMutator):
+    r"""Mutations on a DNA sequence that get translated into a functional phenotype.
+
+    Args:
+        sequence_mutator: A SequenceMutator object.
+        gp_map: a map from sequence to phenotype that will be used after applying a
+                sequence-level mutation.
+        attr: Node attribute to update using the gp_map after sequence mutation.
+    """
+
+    def __init__(
+        self,
+        sequence_mutator: SequenceMutator,
+        gp_map: Optional[GPMap] = None,
+        attr: str = "x",
+    ):
+        self.sequence_mutator = sequence_mutator
+        self.gp_map = gp_map
+        super().__init__(attr=attr)
+
+    def mutate(
+        self,
+        node: "ete3.TreeNode",
+        seed: Optional[Union[int, np.random.Generator]] = None,
+    ) -> None:
+
+        if self.gp_map is not None:
+            current_attr = getattr(node, self.attr)
+            assert current_attr == self.gp_map(
+                node.sequence
+            ), "Unexpected phenotype given sequence. Did you forget to initialize the phenotype?"
+
+        self.sequence_mutator.mutate(node, seed)
+
+        if self.gp_map is not None:
+            setattr(node, self.attr, self.gp_map(node.sequence))
+
+    def prob(self, attr1, attr2, log: bool = False) -> float:
+        raise NotImplementedError
