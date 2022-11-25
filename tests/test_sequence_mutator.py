@@ -1,5 +1,3 @@
-import pytest
-
 from gcdyn import bdms, mutators
 
 # Note that some fixtures have been moved to conftest.py so they are more widely

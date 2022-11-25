@@ -1,6 +1,5 @@
 from gcdyn.fitness import Fitness
 from gcdyn.phenotype import DMSPhenotype
-from Bio import SeqIO
 import pytest
 
 # Note that some fixtures have been moved to conftest.py so they are more widely
