@@ -106,6 +106,22 @@ class ConstantResponse(PhenotypeResponse):
         return self.value * np.ones_like(x)
 
 
+class ConstantStringResponse(PhenotypeResponse):
+    r"""Returns attribute :math:`\theta\in\mathbb{R}` when an instance is called
+    on any :py:class:`TreeNode`.
+
+    Args:
+        value: Constant response value.
+    """
+
+    def __init__(self, value: float = 1.0):
+        self.value = value
+
+    def f(self, x) -> float:
+        # TODO I don't understand this ones_like above. It's supposed to return a float.
+        return self.value
+
+
 class ExponentialResponse(PhenotypeResponse):
     r"""Exponential response function on a :py:class:`TreeNode` object's
     phenotype attribute :math:`x`.

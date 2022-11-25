@@ -11,6 +11,7 @@ import numpy as np
 from typing import Any, Optional, Union
 from scipy.stats import norm, gaussian_kde
 import ete3
+import gcdyn.cycles as cycles
 
 # NOTE: sphinx is currently unable to present this in condensed form, using a string type hint
 # of "array-like" in the docstring args for now, instead of ArrayLike hint in call signature
@@ -196,3 +197,35 @@ class DiscreteMutator(AttrMutator):
     def prob(self, attr1, attr2, log: bool = False) -> float:
         p = self.transition_matrix[self.state_space[attr1], self.state_space[attr2]]
         return np.log(p) if log else p
+
+
+class SillySequenceMutator(AttrMutator):
+    r"""Mutations on a molecular sequence.
+
+    Args:
+        attr: Node attribute to mutate.
+    """
+
+    def __init__(
+        self,
+        attr: str = "x",
+    ):
+        self.cycles_mutator = cycles.UniformMutator()
+        super().__init__(attr=attr)
+
+    def mutate(
+        self,
+        node: "ete3.TreeNode",
+        seed: Optional[Union[int, np.random.Generator]] = None,
+    ) -> None:
+        rng = np.random.default_rng(seed)
+
+        try:
+            starting_sequence = getattr(node, self.attr)
+            new_sequence = self.cycles_mutator.mutate(starting_sequence, node.t, rng)
+            setattr(node, self.attr, new_sequence)
+        except (AttributeError, TypeError):
+            raise AssertionError("Sequence mutator expects attribute to be a string.")
+
+    def prob(self, attr1, attr2, log: bool = False) -> float:
+        raise NotImplementedError
