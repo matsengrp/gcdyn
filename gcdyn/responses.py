@@ -17,6 +17,8 @@ def init_numpy(use_jax: bool = False):
     global expit
 
     if use_jax:
+        from jax.config import config
+        config.update("jax_enable_x64", True)
         import jax.numpy as np
         from jax.scipy.special import expit
     else:
