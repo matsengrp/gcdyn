@@ -31,7 +31,7 @@ def log_hazard_exp(x, rate):
     return expon.logsf(x, scale=1 / rate)
 
 
-class TestMtbdLikelihood(unittest.TestCase):
+class TestMTBDLikelihood(unittest.TestCase):
     def setUp(self):
         self.λ = responses.SigmoidResponse()
         self.μ = responses.ConstantResponse(1)
