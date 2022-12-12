@@ -75,8 +75,7 @@ class BDMSModel:
         self,
         birth_rate: responses.Response,
     ) -> float:
-        r"""Compute the log-likelihood of a fully observed tree given the
-        specified birth response.
+        r"""Compute the log-likelihood of the birth parameters given fully observed trees.
 
         Args:
             birth_rate: Birth rate response function.
