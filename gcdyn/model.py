@@ -8,6 +8,7 @@ import jax.numpy as np
 from jax import jit
 from jaxopt import ScipyBoundedMinimize
 from functools import partial
+from typing import List
 
 from gcdyn import responses, mutators
 import ete3
@@ -27,7 +28,7 @@ class BDMSModel:
 
     def __init__(
         self,
-        trees: list[ete3.TreeNode],
+        trees: List[ete3.TreeNode],
         death_rate: responses.Response,
         mutation_rate: responses.Response,
         mutator: mutators.Mutator,
@@ -75,7 +76,8 @@ class BDMSModel:
         self,
         birth_rate: responses.Response,
     ) -> float:
-        r"""Compute the log-likelihood of the birth parameters given fully observed trees.
+        r"""Compute the log-likelihood of the birth parameters given fully
+        observed trees.
 
         Args:
             birth_rate: Birth rate response function.
