@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Type
 import ete3
 from jax.tree_util import register_pytree_node
 
@@ -32,11 +32,13 @@ def init_numpy(use_jax: bool = False):
 init_numpy()
 
 
-def register_with_pytree(obj):
-    """Registers the class of `object` as a node in JAX pytree, if it is not already.
-    This allows parameterized `Response` objects to be optimized with JAX."""
+def register_with_pytree(cls: Type):
+    """Registers the `Response` subclass `cls` as a node in JAX pytree, if it
+    is not already.
 
-    cls = type(obj)
+    This allows parameterized `Response` objects of subclass `cls` to be
+    optimized with JAX.
+    """
 
     def flatten(v):
         items = sorted(v._param_dict.items(), key=lambda item: item[0])

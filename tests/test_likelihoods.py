@@ -42,12 +42,7 @@ class TestMtbdLikelihood(unittest.TestCase):
         self.Λ = lambda x: self.λ(x) + self.μ(x) + self.γ(x)
 
         responses.init_numpy(use_jax=True)
-
-        try:
-            model.register_pytree_node_class(responses.SigmoidResponse)
-        except ValueError:
-            # Already registered this type
-            pass
+        responses.register_with_pytree(responses.SigmoidResponse)
 
     def test_sample_event(self):
         """Single edge to sample time."""
@@ -57,7 +52,7 @@ class TestMtbdLikelihood(unittest.TestCase):
         tree._sampled = True  # We do this ourselves
 
         # BDMS likelihood by code
-        m = model.BdmsModel(
+        m = model.BDMSModel(
             [tree],
             death_rate=self.μ,
             mutation_rate=self.γ,
@@ -86,7 +81,7 @@ class TestMtbdLikelihood(unittest.TestCase):
         tree._sampled = True  # We do this ourselves
 
         # BDMS likelihood by code
-        m = model.BdmsModel(
+        m = model.BDMSModel(
             [tree],
             death_rate=self.μ,
             mutation_rate=self.γ,
@@ -121,7 +116,7 @@ class TestMtbdLikelihood(unittest.TestCase):
         tree._sampled = True
 
         # BDMS likelihood by code
-        m = model.BdmsModel(
+        m = model.BDMSModel(
             [tree],
             death_rate=self.μ,
             mutation_rate=self.γ,
@@ -170,7 +165,7 @@ class TestMtbdLikelihood(unittest.TestCase):
         tree._sampled = True
 
         # BDMS likelihood by code
-        m = model.BdmsModel(
+        m = model.BDMSModel(
             [tree],
             death_rate=self.μ,
             mutation_rate=self.γ,

@@ -13,7 +13,7 @@ from gcdyn import responses, mutators
 import ete3
 
 
-class BdmsModel:
+class BDMSModel:
     r"""A class that represents a GC model.
 
     Args:
@@ -63,7 +63,7 @@ class BdmsModel:
         lexographical order of the parameter names (eg. xscale, xshift, yscale, yshift).
         """
 
-        responses.register_with_pytree(init_value)
+        responses.register_with_pytree(type(init_value))
 
         return self.optimizer.run(
             init_value,
