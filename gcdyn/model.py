@@ -11,7 +11,6 @@ from functools import partial
 
 from gcdyn import responses, mutators
 import ete3
-from jax.tree_util import register_pytree_node_class
 
 
 class BdmsModel:
@@ -63,11 +62,8 @@ class BdmsModel:
         All array-like arguments should specify the order of the parameters to match the
         lexographical order of the parameter names (eg. xscale, xshift, yscale, yshift).
         """
-        try:
-            register_pytree_node_class(type(init_value))
-        except ValueError:
-            # Already registered this type
-            pass
+
+        responses.register_with_pytree(init_value)
 
         return self.optimizer.run(
             init_value,

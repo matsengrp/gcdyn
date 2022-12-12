@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 import ete3
+from jax.tree_util import register_pytree_node
 
 # NOTE: sphinx is currently unable to present this in condensed form, using a string type hint
 # of "array-like" in the docstring args for now, instead of ArrayLike hint in call signature
@@ -18,7 +19,9 @@ def init_numpy(use_jax: bool = False):
 
     if use_jax:
         from jax.config import config
+
         config.update("jax_enable_x64", True)
+
         import jax.numpy as np
         from jax.scipy.special import expit
     else:
@@ -27,6 +30,29 @@ def init_numpy(use_jax: bool = False):
 
 
 init_numpy()
+
+
+def register_with_pytree(obj):
+    """Registers the class of `object` as a node in JAX pytree, if it is not already.
+    This allows parameterized `Response` objects to be optimized with JAX."""
+
+    cls = type(obj)
+
+    def flatten(v):
+        items = sorted(v._param_dict.items(), key=lambda item: item[0])
+        keys, values = zip(*items)
+        return (values, keys)
+
+    def unflatten(aux_data, children):
+        new_obj = cls()
+        new_obj._param_dict = dict(zip(aux_data, children))
+        return new_obj
+
+    try:
+        register_pytree_node(cls, flatten, unflatten)
+    except ValueError:
+        # Already registered this type
+        pass
 
 
 class Response(ABC):
@@ -58,17 +84,6 @@ class Response(ABC):
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in self.__dict__.items())})"
-
-    def tree_flatten(self):
-        items = sorted(self._param_dict.items(), key=lambda item: item[0])
-        keys, values = zip(*items)
-        return (values, keys)
-
-    @classmethod
-    def tree_unflatten(cls, aux_data, children):
-        obj = cls()
-        obj._param_dict = dict(zip(aux_data, children))
-        return obj
 
 
 class PhenotypeResponse(Response):
