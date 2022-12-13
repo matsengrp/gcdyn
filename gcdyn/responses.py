@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Type
+from typing import Any, TypeVar
 import ete3
 from jax.tree_util import register_pytree_node
 
@@ -32,31 +32,6 @@ def init_numpy(use_jax: bool = False):
 init_numpy()
 
 
-def register_with_pytree(cls: Type):
-    """Registers the `Response` subclass `cls` as a node in JAX pytree, if it
-    is not already.
-
-    This allows parameterized `Response` objects of subclass `cls` to be
-    optimized with JAX.
-    """
-
-    def flatten(v):
-        items = sorted(v._param_dict.items(), key=lambda item: item[0])
-        keys, values = zip(*items)
-        return (values, keys)
-
-    def unflatten(aux_data, children):
-        new_obj = cls()
-        new_obj._param_dict = dict(zip(aux_data, children))
-        return new_obj
-
-    try:
-        register_pytree_node(cls, flatten, unflatten)
-    except ValueError:
-        # Already registered this type
-        pass
-
-
 class Response(ABC):
     r"""Abstract base class for response function mapping
     :py:class:`TreeNode` objects to ``float`` values given parameters."""
@@ -86,6 +61,34 @@ class Response(ABC):
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in self.__dict__.items())})"
+
+
+ResponseType = TypeVar("ResponseType", bound=Response)
+
+
+def _register_with_pytree(response_type: ResponseType):
+    """Registers the `Response` subclass `response_type` as a node in JAX pytree,
+    if it is not already.
+
+    This allows parameterized `Response` objects of subclass `response_type` to be
+    optimized with JAX.
+    """
+
+    def flatten(v):
+        items = sorted(v._param_dict.items(), key=lambda item: item[0])
+        keys, values = zip(*items)
+        return (values, keys)
+
+    def unflatten(aux_data, children):
+        new_obj = response_type()
+        new_obj._param_dict = dict(zip(aux_data, children))
+        return new_obj
+
+    try:
+        register_pytree_node(response_type, flatten, unflatten)
+    except ValueError:
+        # Already registered this type
+        pass
 
 
 class PhenotypeResponse(Response):

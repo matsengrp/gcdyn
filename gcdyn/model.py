@@ -64,7 +64,7 @@ class BDMSModel:
         lexographical order of the parameter names (eg. xscale, xshift, yscale, yshift).
         """
 
-        responses.register_with_pytree(type(init_value))
+        responses._register_with_pytree(type(init_value))
 
         return self.optimizer.run(
             init_value,

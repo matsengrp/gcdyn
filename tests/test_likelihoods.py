@@ -42,7 +42,7 @@ class TestMTBDLikelihood(unittest.TestCase):
         self.Λ = lambda x: self.λ(x) + self.μ(x) + self.γ(x)
 
         responses.init_numpy(use_jax=True)
-        responses.register_with_pytree(responses.SigmoidResponse)
+        responses._register_with_pytree(responses.SigmoidResponse)
 
     def test_sample_event(self):
         """Single edge to sample time."""
