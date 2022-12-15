@@ -33,7 +33,7 @@ def log_hazard_exp(x, rate):
 
 class TestMTBDLikelihood(unittest.TestCase):
     def setUp(self):
-        self.λ = responses.SigmoidResponse()
+        self.λ = responses.SigmoidResponse(grad=True)
         self.μ = responses.ConstantResponse(1)
         self.γ = responses.ConstantResponse(1)
         self.mutator = mutators.GaussianMutator(-1, 1)
@@ -41,7 +41,6 @@ class TestMTBDLikelihood(unittest.TestCase):
         self.σ = 1
         self.Λ = lambda x: self.λ(x) + self.μ(x) + self.γ(x)
 
-        responses.init_numpy(use_jax=True)
         responses._register_with_pytree(responses.SigmoidResponse)
 
     def test_sample_event(self):
@@ -54,12 +53,13 @@ class TestMTBDLikelihood(unittest.TestCase):
         # BDMS likelihood by code
         m = model.BDMSModel(
             [tree],
+            birth_rate=self.λ,
             death_rate=self.μ,
             mutation_rate=self.γ,
             mutator=None,
             sampling_probability=self.ρ,
         )
-        bdms_ll_code = m.log_likelihood(birth_rate=self.λ).item()
+        bdms_ll_code = m.log_likelihood().item()
 
         # BDMS likelihood by hand.
         # The likelihood is the probability that no BDM event happens along this branch (ie. one would've happened after sample time),
@@ -83,12 +83,13 @@ class TestMTBDLikelihood(unittest.TestCase):
         # BDMS likelihood by code
         m = model.BDMSModel(
             [tree],
+            birth_rate=self.λ,
             death_rate=self.μ,
             mutation_rate=self.γ,
             mutator=None,
             sampling_probability=self.ρ,
         )
-        bdms_ll_code = m.log_likelihood(birth_rate=self.λ).item()
+        bdms_ll_code = m.log_likelihood().item()
 
         # BDMS likelihood by hand.
         # The likelihood is the probability that no BDM event happens along this branch (ie. one would've happened after sample time),
@@ -118,12 +119,13 @@ class TestMTBDLikelihood(unittest.TestCase):
         # BDMS likelihood by code
         m = model.BDMSModel(
             [tree],
+            birth_rate=self.λ,
             death_rate=self.μ,
             mutation_rate=self.γ,
             mutator=self.mutator,
             sampling_probability=self.ρ,
         )
-        bdms_ll_code = m.log_likelihood(birth_rate=self.λ).item()
+        bdms_ll_code = m.log_likelihood().item()
 
         # BDMS likelihood by hand.
         # The likelihood is the probability of mutating after the given time
@@ -167,12 +169,13 @@ class TestMTBDLikelihood(unittest.TestCase):
         # BDMS likelihood by code
         m = model.BDMSModel(
             [tree],
+            birth_rate=self.λ,
             death_rate=self.μ,
             mutation_rate=self.γ,
             mutator=None,
             sampling_probability=self.ρ,
         )
-        bdms_ll_code = m.log_likelihood(birth_rate=self.λ).item()
+        bdms_ll_code = m.log_likelihood().item()
 
         # BDMS likelihood by hand.
         # The likelihood is the probability of birthing after the given time

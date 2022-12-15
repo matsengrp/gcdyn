@@ -3,42 +3,33 @@ from typing import Any, TypeVar
 import ete3
 from jax.tree_util import register_pytree_node
 
+import jax.numpy as jnp
+import numpy as onp
+import jax.scipy.special as jsp
+import scipy.special as osp
+
 # NOTE: sphinx is currently unable to present this in condensed form, using a string type hint
 # of "array-like" in the docstring args for now, instead of ArrayLike hint in call signature
 # from numpy.typing import ArrayLike
 
+from jax.config import config
 
-def init_numpy(use_jax: bool = False):
-    r"""Configures the numpy/scipy backend of this module to use the regular or
-    JAX version.
-
-    This function is run on import with the default argument (non-JAX).
-    """
-    global np
-    global expit
-
-    if use_jax:
-        from jax.config import config
-
-        config.update("jax_enable_x64", True)
-
-        import jax.numpy as np
-        from jax.scipy.special import expit
-    else:
-        import numpy as np
-        from scipy.special import expit
-
-
-init_numpy()
+config.update("jax_enable_x64", True)
 
 
 class Response(ABC):
     r"""Abstract base class for response function mapping
-    :py:class:`TreeNode` objects to ``float`` values given parameters."""
+    :py:class:`TreeNode` objects to ``float`` values given parameters.
+
+    Args:
+        grad: Enables JAX compilation and gradient for optimizing.
+    """
 
     @abstractmethod
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        pass
+    def __init__(self, grad: bool = False, *args: Any, **kwargs: Any) -> None:
+        self.grad = grad
+        self._np = jnp if grad else onp
+        self._sp = jsp if grad else osp
 
     @property
     @abstractmethod
@@ -60,28 +51,32 @@ class Response(ABC):
         pass
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in self.__dict__.items())})"
+        return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in vars(self).items() if not key.startswith('_'))})"
 
 
 ResponseType = TypeVar("ResponseType", bound=Response)
 
 
-def _register_with_pytree(response_type: ResponseType):
-    """Registers the `Response` subclass `response_type` as a node in JAX pytree,
-    if it is not already.
+def _register_with_pytree(response_type: ResponseType) -> None:
+    """Registers the `Response` subclass `response_type` as a node in JAX
+    pytree, if it is not already.
 
-    This allows parameterized `Response` objects of subclass `response_type` to be
-    optimized with JAX.
+    This allows parameterized `Response` objects of subclass
+    `response_type` to be optimized with JAX.
     """
 
     def flatten(v):
+        # When recreating this object, we need to be able to assign
+        # correct values to each parameter, and also be able to set
+        # `grad` to its original boolean value
+
         items = sorted(v._param_dict.items(), key=lambda item: item[0])
-        keys, values = zip(*items)
-        return (values, keys)
+        names, values = zip(*items)
+        return (values, (names, v.grad))
 
     def unflatten(aux_data, children):
-        new_obj = response_type()
-        new_obj._param_dict = dict(zip(aux_data, children))
+        new_obj = response_type(grad=aux_data[1])
+        new_obj._param_dict = dict(zip(aux_data[0], children))
         return new_obj
 
     try:
@@ -118,16 +113,18 @@ class ConstantResponse(PhenotypeResponse):
 
     Args:
         value: Constant response value.
+        grad: See :py:class:`Response` docstring.
     """
 
-    def __init__(self, value: float = 1.0):
+    def __init__(self, value: float = 1.0, grad: bool = False):
+        super().__init__(grad)
         self.value = value
 
     def f(self, x) -> float:
-        return self.value * np.ones_like(x)
+        return self.value * self._np.ones_like(x)
 
     @property
-    def _param_dict(self):
+    def _param_dict(self) -> dict:
         return dict(value=self.value)
 
     @_param_dict.setter
@@ -147,6 +144,7 @@ class ExponentialResponse(PhenotypeResponse):
         xshift: :math:`\theta_2`
         yscale: :math:`\theta_3`
         yshift: :math:`\theta_4`
+        grad: See :py:class:`Response` docstring.
     """
 
     def __init__(
@@ -155,17 +153,19 @@ class ExponentialResponse(PhenotypeResponse):
         xshift: float = 0.0,
         yscale: float = 1.0,
         yshift: float = 0.0,
+        grad: bool = False,
     ):
+        super().__init__(grad)
         self.xscale = xscale
         self.xshift = xshift
         self.yscale = yscale
         self.yshift = yshift
 
     def f(self, x) -> float:
-        return self.yscale * np.exp(self.xscale * (x - self.xshift)) + self.yshift
+        return self.yscale * self._np.exp(self.xscale * (x - self.xshift)) + self.yshift
 
     @property
-    def _param_dict(self):
+    def _param_dict(self) -> dict:
         return dict(
             xscale=self.xscale,
             xshift=self.xshift,
@@ -193,6 +193,7 @@ class SigmoidResponse(PhenotypeResponse):
         xshift: :math:`\theta_2`
         yscale: :math:`\theta_3`
         yshift: :math:`\theta_4`
+        grad: See :py:class:`Response` docstring.
     """
 
     def __init__(
@@ -201,7 +202,9 @@ class SigmoidResponse(PhenotypeResponse):
         xshift: float = 0.0,
         yscale: float = 2.0,
         yshift: float = 0.0,
+        grad: bool = False,
     ):
+        super().__init__(grad)
         self.xscale = xscale
         self.xshift = xshift
         self.yscale = yscale
@@ -211,10 +214,12 @@ class SigmoidResponse(PhenotypeResponse):
         return self.f(node.x)
 
     def f(self, x) -> float:
-        return self.yscale * expit(self.xscale * (x - self.xshift)) + self.yshift
+        return (
+            self.yscale * self._sp.expit(self.xscale * (x - self.xshift)) + self.yshift
+        )
 
     @property
-    def _param_dict(self):
+    def _param_dict(self) -> dict:
         return dict(
             xscale=self.xscale,
             xshift=self.xshift,
@@ -242,6 +247,7 @@ class SoftReluResponse(PhenotypeResponse):
         xshift: :math:`\theta_2`
         yscale: :math:`\theta_3`
         yshift: :math:`\theta_4`
+        grad: See :py:class:`Response` docstring.
     """
 
     def __init__(
@@ -250,7 +256,9 @@ class SoftReluResponse(PhenotypeResponse):
         xshift: float = 0.0,
         yscale: float = 1.0,
         yshift: float = 0.0,
+        grad: bool = False,
     ):
+        super().__init__(grad)
         self.xscale = xscale
         self.xshift = xshift
         self.yscale = yscale
@@ -261,11 +269,12 @@ class SoftReluResponse(PhenotypeResponse):
 
     def f(self, x) -> float:
         return (
-            self.yscale * np.logaddexp(0, self.xscale * (x - self.xshift)) + self.yshift
+            self.yscale * self._np.logaddexp(0, self.xscale * (x - self.xshift))
+            + self.yshift
         )
 
     @property
-    def _param_dict(self):
+    def _param_dict(self) -> dict:
         return dict(
             xscale=self.xscale,
             xshift=self.xshift,
