@@ -42,7 +42,7 @@ from gcdyn import mutators, responses
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from typing import Any, Optional, Union, List
+from typing import Any, Optional, Union
 
 # NOTE: sphinx is currently unable to present this in condensed form, using a string type hint
 # of "array-like" in the docstring args for now, instead of ArrayLike hint in call signature
@@ -291,7 +291,7 @@ class TreeNode(ete3.Tree):
             node._sampled = True
 
     # NOTE: this could be generalized to take an ordered array-valued t, and made efficient via ordered traversal
-    def slice(self, t: float, attr: str = "x") -> List[Any]:
+    def slice(self, t: float, attr: str = "x") -> list[Any]:
         r"""Return a list of attribute ``attr`` at time :math:`t` for all
         lineages alive at that time.
 

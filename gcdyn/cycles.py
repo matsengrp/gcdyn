@@ -3,7 +3,7 @@ r"""Germinal center light zone / dark-zone cycles simulator.
 Borrowing from `gctree <https://github.com/matsengrp/gctree/blob/master/gctree/mutation_model.py>`_
 """
 
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, Optional, Tuple
 from ete3 import TreeNode
 import numpy as np
 from numpy.random import default_rng
@@ -132,7 +132,7 @@ class Selector(ABC):
     proliferator method
     """
 
-    def select(self, sequence_list: List[str], competition: bool = True) -> List[Tuple]:
+    def select(self, sequence_list: list[str], competition: bool = True) -> list[Tuple]:
         """Assigns the fitness for each sequence, with normalization depending
         on whether competition is considered.
 
@@ -159,8 +159,8 @@ class UniformSelector(Selector):
             self.fitness_value = fitness_value
 
     def select(
-        self, sequence_list: List[str], competition: bool = True
-    ) -> List[Tuple[float]]:
+        self, sequence_list: list[str], competition: bool = True
+    ) -> list[Tuple[float]]:
         """Uniform selector assigning fitness of each sequence to an equal
         value.
 
@@ -194,7 +194,7 @@ class ThreeStepSelector(Selector):
         igk_idx: int = 336,
         naive_sites_path: str = "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
         model_path: str = "Linear.model",
-        tdms_phenotypes: List[str] = ["delta_log10_KD", "delta_expression"],
+        tdms_phenotypes: list[str] = ["delta_log10_KD", "delta_expression"],
         log10_naive_KD: float = -10.43,
         concentration_antigen: float = 10 ** (-9),
         total_t_cell_help: float = 50,
@@ -231,10 +231,10 @@ class ThreeStepSelector(Selector):
 
     def select(
         self,
-        sequence_list: List[str],
+        sequence_list: list[str],
         competition: bool = True,
-        kd_list: List[float] = None,
-    ) -> List[Tuple[float]]:
+        kd_list: list[float] = None,
+    ) -> list[Tuple[float]]:
         """Produce the predicted number of cell divisions for a list of
         sequences with discrete units of T cell help. T cell help is
         distributed semi-randomly, with probabilites based on normalized signal
@@ -286,7 +286,7 @@ class ThreeStepSelector(Selector):
 
     def norm2_sigmoid(
         self,
-        competencies: List[float],
+        competencies: list[float],
         curve_steepness: float = 10,
         midpoint_competency: float = 0.5,
         competition: bool = True,
@@ -319,7 +319,7 @@ class ThreeStepSelector(Selector):
         norm_signals = [signal / sum_signals for signal in unnorm_signals]
         return norm_signals
 
-    def _norm2_quartile(self, competencies: List[float]):
+    def _norm2_quartile(self, competencies: list[float]):
         """Determines signal based on competency based on the distance from the
         quartile value.
 
@@ -382,10 +382,10 @@ class DMSSelector(Selector):
         igk_idx: int = 336,
         naive_sites_path: str = "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv",
         model_path: str = "Linear.model",
-        tdms_phenotypes: List[str] = ["delta_log10_KD", "delta_expression"],
+        tdms_phenotypes: list[str] = ["delta_log10_KD", "delta_expression"],
         log10_naive_KD: float = -10.43,
         fitness_method: Callable[
-            [List[float]], List[float]
+            [list[float]], list[float]
         ] = Fitness.sigmoidal_fitness,
     ):
         """
@@ -415,8 +415,8 @@ class DMSSelector(Selector):
         self.y_intercept = y_intercept
 
     def select(
-        self, sequence_list: List[str], competition: bool = True
-    ) -> List[Tuple[float]]:
+        self, sequence_list: list[str], competition: bool = True
+    ) -> list[Tuple[float]]:
         """Produce the predicted number of cell divisions for a list of
         sequences using a sigmoidal relationship between T cell help and
         fitness.

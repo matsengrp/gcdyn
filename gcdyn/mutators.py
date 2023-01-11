@@ -28,7 +28,7 @@ class Mutator(ABC):
     @abstractmethod
     def mutate(
         self,
-        node: "ete3.TreeNode",
+        node: ete3.TreeNode,
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
         r"""Mutate a :py:class:`ete3.TreeNode` object in place.
@@ -42,7 +42,7 @@ class Mutator(ABC):
         """
 
     @abstractmethod
-    def logprob(self, node: "ete3.TreeNode") -> float:
+    def logprob(self, node: ete3.TreeNode) -> float:
         r"""Compute the log probability that a mutation effect on the parent of
         ``node`` gives ``node``.
 
@@ -66,7 +66,7 @@ class AttrMutator(Mutator):
     def __init__(self, attr: str = "x", *args: Any, **kwargs: Any) -> None:
         self.attr = attr
 
-    def logprob(self, node: "ete3.TreeNode") -> float:
+    def logprob(self, node: ete3.TreeNode) -> float:
         return self.prob(
             getattr(node.up, self.attr), getattr(node, self.attr), log=True
         )
@@ -105,7 +105,7 @@ class GaussianMutator(AttrMutator):
 
     def mutate(
         self,
-        node: "ete3.TreeNode",
+        node: ete3.TreeNode,
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
         new_value = getattr(node, self.attr) + self._distribution.rvs(random_state=seed)
@@ -139,7 +139,7 @@ class KdeMutator(AttrMutator):
 
     def mutate(
         self,
-        node: "ete3.TreeNode",
+        node: ete3.TreeNode,
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
         new_value = (
@@ -181,7 +181,7 @@ class DiscreteMutator(AttrMutator):
 
     def mutate(
         self,
-        node: "ete3.TreeNode",
+        node: ete3.TreeNode,
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
         rng = np.random.default_rng(seed)

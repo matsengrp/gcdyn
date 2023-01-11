@@ -8,7 +8,6 @@ import jax.numpy as np
 from jax import jit
 from jaxopt import ScipyBoundedMinimize
 from functools import partial
-from typing import List
 
 from gcdyn import responses, mutators
 import ete3
@@ -29,7 +28,7 @@ class BDMSModel:
 
     def __init__(
         self,
-        trees: List[ete3.TreeNode],
+        trees: list[ete3.TreeNode],
         birth_rate: responses.Response,
         death_rate: responses.Response,
         mutation_rate: responses.Response,
@@ -57,8 +56,8 @@ class BDMSModel:
         mutation_rate_lower_bound=0,
         mutation_rate_upper_bound=np.inf,
     ):
-        r"""Given a collection of :py:class:`TreeNode`, fit the parameters of
-        the model.
+        r"""Given a collection of :py:class:`ete3.TreeNode`, fit the parameters
+        of the model.
 
         Args:
             birth_rate_lower_bound (array-like): lower bounds for the birth rate parameters

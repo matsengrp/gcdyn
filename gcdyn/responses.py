@@ -47,7 +47,7 @@ class Response(ABC):
         pass
 
     @abstractmethod
-    def __call__(self, node: "ete3.TreeNode") -> float:
+    def __call__(self, node: ete3.TreeNode) -> float:
         pass
 
     def __repr__(self) -> str:
@@ -95,7 +95,7 @@ class PhenotypeResponse(Response):
 
     """
 
-    def __call__(self, node: "ete3.TreeNode") -> float:
+    def __call__(self, node: ete3.TreeNode) -> float:
         return self.f(node.x)
 
     @abstractmethod
@@ -210,7 +210,7 @@ class SigmoidResponse(PhenotypeResponse):
         self.yscale = yscale
         self.yshift = yshift
 
-    def __call__(self, node: "ete3.TreeNode") -> float:
+    def __call__(self, node: ete3.TreeNode) -> float:
         return self.f(node.x)
 
     def f(self, x) -> float:
@@ -264,7 +264,7 @@ class SoftReluResponse(PhenotypeResponse):
         self.yscale = yscale
         self.yshift = yshift
 
-    def __call__(self, node: "ete3.TreeNode") -> float:
+    def __call__(self, node: ete3.TreeNode) -> float:
         return self.f(node.x)
 
     def f(self, x) -> float:
