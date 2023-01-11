@@ -51,7 +51,7 @@ class Mutator(ABC):
         """
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in self.__dict__.items())})"
+        return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in vars(self).items() if not key.startswith('_'))})"
 
 
 class AttrMutator(Mutator):
