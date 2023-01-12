@@ -1,3 +1,12 @@
+r"""
+Event rate response functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Abstract base class for defining generic response functions (e.g. :math:`\lambda(x)`, :math:`\mu(x)`, :math:`\gamma(x)`),
+with arbitrary :py:class:`TreeNode` attribute dependence.
+Some concrete child classes are included.
+"""
+
 from abc import ABC, abstractmethod
 from typing import Any, TypeVar
 import ete3

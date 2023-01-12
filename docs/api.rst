@@ -9,7 +9,6 @@ Modules
     :template: custom-module-template.rst
 
     bdms
-    model
-    cycles
-    fitness
+    responses
     mutators
+    model

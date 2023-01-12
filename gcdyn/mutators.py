@@ -1,6 +1,6 @@
 r"""
-Mutation effects generators :py:class:`Mutator`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Mutation effects generators
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Abstract base class for defining generic mutation effect generators (i.e. :math:`\mathcal{p}(x\mid x')`),
 with arbitrary :py:class:`ete3.TreeNode` attribute dependence.
@@ -101,7 +101,9 @@ class GaussianMutator(AttrMutator):
         attr: str = "x",
     ):
         super().__init__(attr=attr)
-        self._distribution = norm(loc=shift, scale=scale)
+        self.shift = shift
+        self.scale = scale
+        self._distribution = norm(loc=self.shift, scale=self.scale)
 
     def mutate(
         self,

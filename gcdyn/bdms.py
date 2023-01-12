@@ -1,40 +1,29 @@
-r"""Birth-death-mutation-sampling (BDMS) process.
+r"""
+Birth-death-mutation-sampling (BDMS) process simulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The BDMS process is defined by the following parameters:
 
-* :math:`\Delta t`: run time of the process
-* :math:`\lambda(x)`: birth rate of phenotype :math:`x`
-* :math:`\mu(x)`: death rate of phenotype :math:`x`
-* :math:`\gamma(x)`: mutation rate of phenotype :math:`x`
-* :math:`\mathcal{p}(x\mid x')`: phenotypic mutation transition density conditional on initial phenotype :math:`x'`,
-  which we draw from to generate mutation effects when a mutation event occurs
-* :math:`\rho`: sampling probability of surviving lineages after :math:`\Delta t`
-
-Primary class :py:class:`TreeNode`
-----------------------------------
+ * :math:`\Delta t`: run time of the process
+ * :math:`\lambda(x)`: birth rate of phenotype :math:`x`
+ * :math:`\mu(x)`: death rate of phenotype :math:`x`
+ * :math:`\gamma(x)`: mutation rate of phenotype :math:`x`
+ * :math:`\mathcal{p}(x\mid x')`: phenotypic mutation transition density conditional on initial phenotype :math:`x'`,
+   which we draw from to generate mutation effects when a mutation event occurs
+ * :math:`\rho`: sampling probability of surviving lineages after :math:`\Delta t`
 
 This module's primary class :py:class:`TreeNode` subclasses ETE's :py:class:`ete3.TreeNode`,
 with these notable differences:
 
-* Attribute :py:attr:`t`: the time :math:`t \in \mathbb{R}_{\ge 0}` of the event at the node
-* Attribute :py:attr:`x`: the phenotype :math:`x \in \mathbb{R}` of the node
-* Attribute :py:attr:`event`: the event that occurred at the node
-* Attribute :py:attr:`n_mutations`: the number of mutations that occurred on the branch above the node
-* Method :py:meth:`TreeNode.evolve`: evolve the tree, adding nodes according a BDMS process
-* Method :py:meth:`TreeNode.sample_survivors`: sample a subset of surviving leaves from the tree
-* Method :py:meth:`TreeNode.prune`: prune the tree subtree induced by the sampled leaves
-  (overrides ETE's :py:meth:`ete3.TreeNode.prune`)
-* Method :py:meth:`TreeNode.render`: visualizes the tree (overrides ETE's :py:meth:`ete3.TreeNode.render`)
-
-Additional classes:
--------------------
-
-Rate response functions :py:class:`Response`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Abstract base class for defining generic response functions (i.e. :math:`\lambda(x)`, :math:`\mu(x)`, :math:`\gamma(x)`),
-with arbitrary :py:class:`TreeNode` attribute dependence.
-Some concrete child classes are included.
+ * Attribute :py:attr:`t`: the time :math:`t \in \mathbb{R}_{\ge 0}` of the event at the node
+ * Attribute :py:attr:`x`: the phenotype :math:`x \in \mathbb{R}` of the node
+ * Attribute :py:attr:`event`: the event that occurred at the node
+ * Attribute :py:attr:`n_mutations`: the number of mutations that occurred on the branch above the node
+ * Method :py:meth:`TreeNode.evolve`: evolve the tree, adding nodes according a BDMS process
+ * Method :py:meth:`TreeNode.sample_survivors`: sample a subset of surviving leaves from the tree
+ * Method :py:meth:`TreeNode.prune`: prune the tree subtree induced by the sampled leaves
+   (overrides ETE's :py:meth:`ete3.TreeNode.prune`)
+ * Method :py:meth:`TreeNode.render`: visualizes the tree (overrides ETE's :py:meth:`ete3.TreeNode.render`)
 """
 import ete3
 from ete3.coretype.tree import TreeError
@@ -98,8 +87,9 @@ class TreeNode(ete3.Tree):
         self.event = None
         """Event at this node."""
         self.n_mutations = 0
-        """Number of mutations on the branch above this node (zero unless the tree has been pruned above this node,
-        removing mutation event nodes)."""
+        """Number of mutations on the branch above this node (zero unless the
+        tree has been pruned above this node, removing mutation event
+        nodes)."""
         self._sampled = False
         self._pruned = False
 
