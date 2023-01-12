@@ -2,6 +2,10 @@ default:
 
 install:
 	pip install -r requirements.txt
+	pip install -e .[PyQt5]
+
+install-no-pyqt:
+	pip install -r requirements.txt
 	pip install -e .
 
 install-torchdms:

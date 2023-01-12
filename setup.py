@@ -23,12 +23,14 @@ setuptools.setup(
     ],
     python_requires="==3.9.*",
     install_requires=[
-        "PyQt5",
         "ete3",
         "matplotlib",
         "jaxlib",
-        "jax",
+        "jax[cpu]",
         "jaxopt",
         "biopython",
     ],
+    extras_require={
+    "PyQt5": ["PyQt5",],
+    },
 )
