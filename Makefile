@@ -4,6 +4,9 @@ install:
 	pip install -r requirements.txt
 	pip install -e .
 
+install-torchdms:
+	git+https://github.com/matsengrp/torchdms
+
 test:
 	pytest
 
