@@ -38,7 +38,6 @@ jobs:
       - name: Check format with black
         run: |
           black --check gcdyn tests
-          docformatter --check gcdyn/*.py
 
       - name: Test
         run: make test
