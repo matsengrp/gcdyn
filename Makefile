@@ -9,7 +9,7 @@ install-no-pyqt:
 	pip install -e .
 
 install-torchdms:
-	git+https://github.com/matsengrp/torchdms
+	pip install git+https://github.com/matsengrp/torchdms
 
 test:
 	pytest
