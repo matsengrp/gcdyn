@@ -1,0 +1,316 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>gcdyn.model.BDMSModel &mdash; gcdyn  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Open source code repository" href="../developer.html" />
+    <link rel="prev" title="gcdyn.model" href="gcdyn.model.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> gcdyn
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cite.html">Citing <code class="docutils literal notranslate"><span class="pre">gcdyn</span></code></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.bdms.html">gcdyn.bdms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.responses.html">gcdyn.responses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.mutators.html">gcdyn.mutators</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="gcdyn.model.html">gcdyn.model</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.model.BDMSModel</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gcdyn.model.BDMSModel"><code class="docutils literal notranslate"><span class="pre">BDMSModel</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.model.html#gcdyn.model.BDMSModel"><code class="docutils literal notranslate"><span class="pre">BDMSModel</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">Open source code repository</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html#developer-tools">Developer tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html#todo-list">Todo list</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">gcdyn</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../api.html">Modules</a> &raquo;</li>
+        
+          <li><a href="gcdyn.model.html">gcdyn.model</a> &raquo;</li>
+        
+      <li>gcdyn.model.BDMSModel</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="gcdyn-model-bdmsmodel">
+<h1>gcdyn.model.BDMSModel<a class="headerlink" href="#gcdyn-model-bdmsmodel" title="Permalink to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="gcdyn.model.BDMSModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.model.</span></span><span class="sig-name descname"><span class="pre">BDMSModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trees</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">birth_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">death_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_probability</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">opt_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/model.html#BDMSModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.model.BDMSModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A class that represents a GC model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trees</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code>]) – list of trees</p></li>
+<li><p><strong>birth_rate</strong> (<a class="reference internal" href="gcdyn.responses.Response.html#gcdyn.responses.Response" title="gcdyn.responses.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Initial birth rate response function. If <cite>birth_rate.grad == True</cite>, will be optimizable via <a class="reference internal" href="#gcdyn.model.BDMSModel.fit" title="gcdyn.model.BDMSModel.fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code></a>.</p></li>
+<li><p><strong>death_rate</strong> (<a class="reference internal" href="gcdyn.responses.Response.html#gcdyn.responses.Response" title="gcdyn.responses.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Initial death rate response function. If <cite>death_rate.grad == True</cite>, will be optimizable via <a class="reference internal" href="#gcdyn.model.BDMSModel.fit" title="gcdyn.model.BDMSModel.fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code></a>.</p></li>
+<li><p><strong>mutation_rate</strong> (<a class="reference internal" href="gcdyn.responses.Response.html#gcdyn.responses.Response" title="gcdyn.responses.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Initial mutation rate response function. If <cite>mutation_rate.grad == True</cite>, will be optimizable via <a class="reference internal" href="#gcdyn.model.BDMSModel.fit" title="gcdyn.model.BDMSModel.fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code></a>.</p></li>
+<li><p><strong>mutator</strong> (<a class="reference internal" href="gcdyn.mutators.Mutator.html#gcdyn.mutators.Mutator" title="gcdyn.mutators.Mutator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mutator</span></code></a>) – Generator of mutation effects.</p></li>
+<li><p><strong>sampling_probability</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Probability of sampling a survivor.</p></li>
+<li><p><strong>opt_kwargs</strong> – keyword arguments to pass to <code class="xref py py-class docutils literal notranslate"><span class="pre">jaxopt.ScipyBoundedMinimize</span></code></p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.model.BDMSModel.fit" title="gcdyn.model.BDMSModel.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a></p></td>
+<td><p>Given a collection of <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a>, fit the parameters of the model.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.model.BDMSModel.initialize_parameters" title="gcdyn.model.BDMSModel.initialize_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize_parameters</span></code></a></p></td>
+<td><p>Updates the current values of the model parameters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.model.BDMSModel.log_likelihood" title="gcdyn.model.BDMSModel.log_likelihood"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_likelihood</span></code></a></p></td>
+<td><p>Compute the log-likelihood of the birth parameters given fully observed trees.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.model.BDMSModel.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">birth_rate_lower_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.0,</span> <span class="pre">-inf,</span> <span class="pre">0.0,</span> <span class="pre">0.0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">birth_rate_upper_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[inf,</span> <span class="pre">inf,</span> <span class="pre">inf,</span> <span class="pre">inf]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">death_rate_lower_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">death_rate_upper_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_rate_lower_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_rate_upper_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/model.html#BDMSModel.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.model.BDMSModel.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a collection of <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a>, fit the parameters
+of the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>birth_rate_lower_bound</strong> (<em>array-like</em>) – lower bounds for the birth rate parameters</p></li>
+<li><p><strong>birth_rate_upper_bound</strong> (<em>array-like</em>) – upper bounds for the birth rate parameters</p></li>
+<li><p><strong>death_rate_lower_bound</strong> (<em>array-like</em>) – lower bounds for the death rate parameters</p></li>
+<li><p><strong>death_rate_upper_bound</strong> (<em>array-like</em>) – upper bounds for the death rate parameters</p></li>
+<li><p><strong>mutation_rate_lower_bound</strong> (<em>array-like</em>) – lower bounds for the mutation rate parameters</p></li>
+<li><p><strong>mutation_rate_upper_bound</strong> (<em>array-like</em>) – upper bounds for the mutation rate parameters</p></li>
+</ul>
+</dd>
+</dl>
+<p>All array-like arguments should specify the order of the parameters to match the
+lexographical order of the parameter names (eg. xscale, xshift, yscale, yshift).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.model.BDMSModel.log_likelihood">
+<span class="sig-name descname"><span class="pre">log_likelihood</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/model.html#BDMSModel.log_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.model.BDMSModel.log_likelihood" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the log-likelihood of the birth parameters given fully
+observed trees.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.model.BDMSModel.initialize_parameters">
+<span class="sig-name descname"><span class="pre">initialize_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">birth_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">death_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_rate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/model.html#BDMSModel.initialize_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.model.BDMSModel.initialize_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the current values of the model parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../developer.html" class="btn btn-neutral float-right" title="Open source code repository" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="gcdyn.model.html" class="btn btn-neutral float-left" title="gcdyn.model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2022, Erick Matsen.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

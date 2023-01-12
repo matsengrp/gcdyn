@@ -1,9 +1,9 @@
-gcdyn.bdms.ConstantResponse
-===========================
+gcdyn.responses.PhenotypeResponse
+=================================
 
-.. currentmodule:: gcdyn.bdms
+.. currentmodule:: gcdyn.responses
 
-.. autoclass:: ConstantResponse
+.. autoclass:: PhenotypeResponse
    :members:
    :show-inheritance:
    :inherited-members:
@@ -16,7 +16,7 @@ gcdyn.bdms.ConstantResponse
    .. autosummary::
       :nosignatures:
    
-      ~ConstantResponse.f
+      ~PhenotypeResponse.f
    
    
 

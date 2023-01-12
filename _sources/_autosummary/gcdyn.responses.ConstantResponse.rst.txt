@@ -1,9 +1,9 @@
-gcdyn.bdms.SoftReluResponse
-===========================
+gcdyn.responses.ConstantResponse
+================================
 
-.. currentmodule:: gcdyn.bdms
+.. currentmodule:: gcdyn.responses
 
-.. autoclass:: SoftReluResponse
+.. autoclass:: ConstantResponse
    :members:
    :show-inheritance:
    :inherited-members:
@@ -16,7 +16,7 @@ gcdyn.bdms.SoftReluResponse
    .. autosummary::
       :nosignatures:
    
-      ~SoftReluResponse.f
+      ~ConstantResponse.f
    
    
 

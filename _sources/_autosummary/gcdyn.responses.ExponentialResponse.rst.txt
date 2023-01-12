@@ -1,9 +1,9 @@
-gcdyn.cycles.Selector
-=====================
+gcdyn.responses.ExponentialResponse
+===================================
 
-.. currentmodule:: gcdyn.cycles
+.. currentmodule:: gcdyn.responses
 
-.. autoclass:: Selector
+.. autoclass:: ExponentialResponse
    :members:
    :show-inheritance:
    :inherited-members:
@@ -16,7 +16,7 @@ gcdyn.cycles.Selector
    .. autosummary::
       :nosignatures:
    
-      ~Selector.select
+      ~ExponentialResponse.f
    
    
 

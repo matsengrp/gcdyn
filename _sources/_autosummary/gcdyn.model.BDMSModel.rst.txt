@@ -1,9 +1,9 @@
-gcdyn.bdms.ExponentialResponse
-==============================
+gcdyn.model.BDMSModel
+=====================
 
-.. currentmodule:: gcdyn.bdms
+.. currentmodule:: gcdyn.model
 
-.. autoclass:: ExponentialResponse
+.. autoclass:: BDMSModel
    :members:
    :show-inheritance:
    :inherited-members:
@@ -16,7 +16,9 @@ gcdyn.bdms.ExponentialResponse
    .. autosummary::
       :nosignatures:
    
-      ~ExponentialResponse.f
+      ~BDMSModel.fit
+      ~BDMSModel.initialize_parameters
+      ~BDMSModel.log_likelihood
    
    
 

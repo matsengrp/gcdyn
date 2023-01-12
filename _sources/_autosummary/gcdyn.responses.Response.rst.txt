@@ -1,9 +1,9 @@
-gcdyn.cycles.GC
-===============
+gcdyn.responses.Response
+========================
 
-.. currentmodule:: gcdyn.cycles
+.. currentmodule:: gcdyn.responses
 
-.. autoclass:: GC
+.. autoclass:: Response
    :members:
    :show-inheritance:
    :inherited-members:
@@ -16,9 +16,6 @@ gcdyn.cycles.GC
    .. autosummary::
       :nosignatures:
    
-      ~GC.prune
-      ~GC.simulate
-      ~GC.step
    
    
 

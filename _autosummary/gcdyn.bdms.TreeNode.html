@@ -1,37 +1,74 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>gcdyn.bdms.TreeNode &mdash; gcdyn  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script src="../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="gcdyn.cycles" href="gcdyn.cycles.html" />
-    <link rel="prev" title="gcdyn.bdms.SoftReluResponse" href="gcdyn.bdms.SoftReluResponse.html" /> 
+    <link rel="next" title="gcdyn.responses" href="gcdyn.responses.html" />
+    <link rel="prev" title="gcdyn.bdms" href="gcdyn.bdms.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../index.html" class="icon icon-home"> gcdyn
+          
+
+          
           </a>
+
+          
+            
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -39,7 +76,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
@@ -49,30 +97,17 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">Modules</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="gcdyn.bdms.html">gcdyn.bdms</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#primary-class-treenode">Primary class <code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#additional-classes">Additional classes:</a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.ConstantResponse.html">gcdyn.bdms.ConstantResponse</a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.ExponentialResponse.html">gcdyn.bdms.ExponentialResponse</a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.PhenotypeResponse.html">gcdyn.bdms.PhenotypeResponse</a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.Response.html">gcdyn.bdms.Response</a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.SigmoidResponse.html">gcdyn.bdms.SigmoidResponse</a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.SoftReluResponse.html">gcdyn.bdms.SoftReluResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#birth-death-mutation-sampling-bdms-process-simulation">Birth-death-mutation-sampling (BDMS) process simulation</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.bdms.TreeNode</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.TreeNode"><code class="docutils literal notranslate"><span class="pre">TreeNode</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.Response"><code class="docutils literal notranslate"><span class="pre">Response</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.PhenotypeResponse"><code class="docutils literal notranslate"><span class="pre">PhenotypeResponse</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.ConstantResponse"><code class="docutils literal notranslate"><span class="pre">ConstantResponse</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.ExponentialResponse"><code class="docutils literal notranslate"><span class="pre">ExponentialResponse</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.SigmoidResponse"><code class="docutils literal notranslate"><span class="pre">SigmoidResponse</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.SoftReluResponse"><code class="docutils literal notranslate"><span class="pre">SoftReluResponse</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.html#gcdyn.bdms.TreeNode"><code class="docutils literal notranslate"><span class="pre">TreeNode</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.cycles.html">gcdyn.cycles</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.fitness.html">gcdyn.fitness</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.responses.html">gcdyn.responses</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.mutators.html">gcdyn.mutators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.model.html">gcdyn.model</a></li>
 </ul>
 </li>
 </ul>
@@ -83,41 +118,83 @@
 <li class="toctree-l1"><a class="reference internal" href="../developer.html#todo-list">Todo list</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">gcdyn</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
-          <li class="breadcrumb-item"><a href="../api.html">Modules</a></li>
-          <li class="breadcrumb-item"><a href="gcdyn.bdms.html">gcdyn.bdms</a></li>
-      <li class="breadcrumb-item active">gcdyn.bdms.TreeNode</li>
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../api.html">Modules</a> &raquo;</li>
+        
+          <li><a href="gcdyn.bdms.html">gcdyn.bdms</a> &raquo;</li>
+        
+      <li>gcdyn.bdms.TreeNode</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+            
   <section id="gcdyn-bdms-treenode">
-<h1>gcdyn.bdms.TreeNode<a class="headerlink" href="#gcdyn-bdms-treenode" title="Permalink to this heading"></a></h1>
+<h1>gcdyn.bdms.TreeNode<a class="headerlink" href="#gcdyn-bdms-treenode" title="Permalink to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.bdms.</span></span><span class="sig-name descname"><span class="pre">TreeNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.bdms.</span></span><span class="sig-name descname"><span class="pre">TreeNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></p>
 <p>A tree generated by a BDMS process. Subclasses
 <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Time of this node.</p></li>
 <li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Phenotype of this node.</p></li>
@@ -127,10 +204,6 @@
 </dl>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.add_child" title="gcdyn.bdms.TreeNode.add_child"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_child</span></code></a></p></td>
 <td><p>Adds a new child to this node.</p></td>
@@ -288,80 +361,73 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.ladderize" title="gcdyn.bdms.TreeNode.ladderize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ladderize</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.log_likelihood" title="gcdyn.bdms.TreeNode.log_likelihood"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_likelihood</span></code></a></p></td>
-<td><p>Compute the log-likelihood of a fully observed tree given the specified birth, death, mutation, and sampling parameters.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">phonehome</span></code></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">phonehome</span></code></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.populate" title="gcdyn.bdms.TreeNode.populate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">populate</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.populate" title="gcdyn.bdms.TreeNode.populate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">populate</span></code></a></p></td>
 <td><p>Generates a random topology by populating current node.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.prune" title="gcdyn.bdms.TreeNode.prune"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prune</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.prune" title="gcdyn.bdms.TreeNode.prune"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prune</span></code></a></p></td>
 <td><p>Prune the tree to the subtree induced by the sampled leaves.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.remove_child" title="gcdyn.bdms.TreeNode.remove_child"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_child</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.remove_child" title="gcdyn.bdms.TreeNode.remove_child"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_child</span></code></a></p></td>
 <td><p>Removes a child from this node (parent and child nodes still exit but are no longer connected).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.remove_sister" title="gcdyn.bdms.TreeNode.remove_sister"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_sister</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.remove_sister" title="gcdyn.bdms.TreeNode.remove_sister"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_sister</span></code></a></p></td>
 <td><p>Removes a sister node.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.render" title="gcdyn.bdms.TreeNode.render"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.render" title="gcdyn.bdms.TreeNode.render"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render</span></code></a></p></td>
 <td><p>A thin wrapper around <code class="xref py py-func docutils literal notranslate"><span class="pre">ete3.TreeNode.render()</span></code> that adds some custom decoration and a color bar.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.resolve_polytomy" title="gcdyn.bdms.TreeNode.resolve_polytomy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolve_polytomy</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.resolve_polytomy" title="gcdyn.bdms.TreeNode.resolve_polytomy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolve_polytomy</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.robinson_foulds" title="gcdyn.bdms.TreeNode.robinson_foulds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">robinson_foulds</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.robinson_foulds" title="gcdyn.bdms.TreeNode.robinson_foulds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">robinson_foulds</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.sample_survivors" title="gcdyn.bdms.TreeNode.sample_survivors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_survivors</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.sample_survivors" title="gcdyn.bdms.TreeNode.sample_survivors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_survivors</span></code></a></p></td>
 <td><p>Choose <span class="math notranslate nohighlight">\(n\)</span> survivor leaves from the tree, or each survivor leaf with probability <span class="math notranslate nohighlight">\(p\)</span>, to mark as sampled (via the event attribute).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.search_nodes" title="gcdyn.bdms.TreeNode.search_nodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">search_nodes</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.search_nodes" title="gcdyn.bdms.TreeNode.search_nodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">search_nodes</span></code></a></p></td>
 <td><p>Returns the list of nodes matching a given set of conditions.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.set_outgroup" title="gcdyn.bdms.TreeNode.set_outgroup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_outgroup</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.set_outgroup" title="gcdyn.bdms.TreeNode.set_outgroup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_outgroup</span></code></a></p></td>
 <td><p>Sets a descendant node as the outgroup of a tree.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.set_style" title="gcdyn.bdms.TreeNode.set_style"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_style</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.set_style" title="gcdyn.bdms.TreeNode.set_style"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_style</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.show" title="gcdyn.bdms.TreeNode.show"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.show" title="gcdyn.bdms.TreeNode.show"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show</span></code></a></p></td>
 <td><p>Starts an interactive session to visualize current node structure using provided layout and TreeStyle.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.slice" title="gcdyn.bdms.TreeNode.slice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slice</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.slice" title="gcdyn.bdms.TreeNode.slice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slice</span></code></a></p></td>
 <td><p>Return a list of attribute <code class="docutils literal notranslate"><span class="pre">attr</span></code> at time <span class="math notranslate nohighlight">\(t\)</span> for all lineages alive at that time.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.sort_descendants" title="gcdyn.bdms.TreeNode.sort_descendants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_descendants</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.sort_descendants" title="gcdyn.bdms.TreeNode.sort_descendants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_descendants</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.standardize" title="gcdyn.bdms.TreeNode.standardize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">standardize</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.standardize" title="gcdyn.bdms.TreeNode.standardize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">standardize</span></code></a></p></td>
 <td><p><div class="versionadded">
 <p><span class="versionmodified added">New in version 2.3.</span></p>
 </div>
 </p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.swap_children" title="gcdyn.bdms.TreeNode.swap_children"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_children</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.swap_children" title="gcdyn.bdms.TreeNode.swap_children"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_children</span></code></a></p></td>
 <td><p>Swaps current children order.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.traverse" title="gcdyn.bdms.TreeNode.traverse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">traverse</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.traverse" title="gcdyn.bdms.TreeNode.traverse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">traverse</span></code></a></p></td>
 <td><p>Returns an iterator to traverse the tree structure under this node.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.unroot" title="gcdyn.bdms.TreeNode.unroot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unroot</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.unroot" title="gcdyn.bdms.TreeNode.unroot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unroot</span></code></a></p></td>
 <td><p>Unroots current node.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.write" title="gcdyn.bdms.TreeNode.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.write" title="gcdyn.bdms.TreeNode.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a></p></td>
 <td><p>Returns the newick representation of current node.</p></td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Attributes</p>
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.children" title="gcdyn.bdms.TreeNode.children"><code class="xref py py-obj docutils literal notranslate"><span class="pre">children</span></code></a></p></td>
 <td><p></p></td>
@@ -397,40 +463,41 @@
 </table>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.t">
-<span class="sig-name descname"><span class="pre">t</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.t" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">t</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.t" title="Permalink to this definition">¶</a></dt>
 <dd><p>Time of the node.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.x">
-<span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.x" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Phenotype of the node.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.event">
-<span class="sig-name descname"><span class="pre">event</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.event" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">event</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.event" title="Permalink to this definition">¶</a></dt>
 <dd><p>Event at this node.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.n_mutations">
-<span class="sig-name descname"><span class="pre">n_mutations</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.n_mutations" title="Permalink to this definition"></a></dt>
-<dd><p>Number of mutations on the branch above this node (zero unless the tree has been pruned above this node,
-removing mutation event nodes).</p>
+<span class="sig-name descname"><span class="pre">n_mutations</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.n_mutations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of mutations on the branch above this node (zero unless the
+tree has been pruned above this node, removing mutation event
+nodes).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.evolve">
-<span class="sig-name descname"><span class="pre">evolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">birth_rate=ConstantResponse(value=1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">death_rate=ConstantResponse(value=0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_rate=ConstantResponse(value=1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutator=GaussianMutator(attr=x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_distribution=&lt;scipy.stats._distn_infrastructure.rv_continuous_frozen</span> <span class="pre">object&gt;)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">birth_mutations=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_survivors=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_leaves=1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.evolve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.evolve" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">evolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">birth_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ConstantResponse(grad=False,</span> <span class="pre">value=1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">death_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ConstantResponse(grad=False,</span> <span class="pre">value=0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ConstantResponse(grad=False,</span> <span class="pre">value=1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">GaussianMutator(attr=x,</span> <span class="pre">shift=0,</span> <span class="pre">scale=1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">birth_mutations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_survivors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_leaves</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.evolve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.evolve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evolve for time <span class="math notranslate nohighlight">\(\Delta t\)</span>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Evolve for this time</p></li>
-<li><p><strong>birth_rate</strong> (<a class="reference internal" href="gcdyn.bdms.Response.html#gcdyn.bdms.Response" title="gcdyn.bdms.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Birth rate response function.</p></li>
-<li><p><strong>death_rate</strong> (<a class="reference internal" href="gcdyn.bdms.Response.html#gcdyn.bdms.Response" title="gcdyn.bdms.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Death rate response function.</p></li>
-<li><p><strong>mutation_rate</strong> (<a class="reference internal" href="gcdyn.bdms.Response.html#gcdyn.bdms.Response" title="gcdyn.bdms.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Mutation rate response function.</p></li>
+<li><p><strong>birth_rate</strong> (<a class="reference internal" href="gcdyn.responses.Response.html#gcdyn.responses.Response" title="gcdyn.responses.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Birth rate response function.</p></li>
+<li><p><strong>death_rate</strong> (<a class="reference internal" href="gcdyn.responses.Response.html#gcdyn.responses.Response" title="gcdyn.responses.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Death rate response function.</p></li>
+<li><p><strong>mutation_rate</strong> (<a class="reference internal" href="gcdyn.responses.Response.html#gcdyn.responses.Response" title="gcdyn.responses.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Mutation rate response function.</p></li>
 <li><p><strong>mutator</strong> (<a class="reference internal" href="gcdyn.mutators.Mutator.html#gcdyn.mutators.Mutator" title="gcdyn.mutators.Mutator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mutator</span></code></a>) – Generator of mutation effects at mutation events
 (and on offspring of birth events if <code class="docutils literal notranslate"><span class="pre">birth_mutations=True</span></code>).</p></li>
 <li><p><strong>birth_mutations</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – Flag to indicate whether mutations should occur at birth.</p></li>
@@ -438,35 +505,13 @@ removing mutation event nodes).</p>
 survivors, then a <code class="xref py py-class docutils literal notranslate"><span class="pre">TreeError</span></code> is raised.</p></li>
 <li><p><strong>max_leaves</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Maximum number of active leaves, to truncate exploding processes. If exceeded, then a
 <code class="xref py py-class docutils literal notranslate"><span class="pre">TreeError</span></code> is raised.</p></li>
-<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – A seed to initialize the random number generation.
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – A seed to initialize the random number generation.
 If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then fresh, unpredictable entropy will be pulled from the OS.
 If an <code class="docutils literal notranslate"><span class="pre">int</span></code>, then it will be used to derive the initial state.
-If a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a>, then that will be used directly.</p></li>
+If a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a>, then that will be used directly.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.sample_survivors">
-<span class="sig-name descname"><span class="pre">sample_survivors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.sample_survivors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.sample_survivors" title="Permalink to this definition"></a></dt>
-<dd><p>Choose <span class="math notranslate nohighlight">\(n\)</span> survivor leaves from the tree, or each survivor leaf with probability
-<span class="math notranslate nohighlight">\(p\)</span>, to mark as sampled (via the event attribute).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Number of leaves to sample.</p></li>
-<li><p><strong>p</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]) – Probability of sampling a leaf.</p></li>
-<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – A seed to initialize the random number generation.
-If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then fresh, unpredictable entropy will be pulled from the OS.
-If an <code class="docutils literal notranslate"><span class="pre">int</span></code>, then it will be used to derive the initial state.
-If a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a>, then that will be used directly.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
@@ -474,17 +519,17 @@ If a <a class="reference external" href="https://numpy.org/doc/stable/reference/
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.__add__">
-<span class="sig-name descname"><span class="pre">__add__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.__add__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.__add__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__add__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.__add__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.__add__" title="Permalink to this definition">¶</a></dt>
 <dd><p>This allows to sum two trees.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.add_child">
-<span class="sig-name descname"><span class="pre">add_child</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">child</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.add_child"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.add_child" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_child</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">child</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.add_child"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.add_child" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a new child to this node. If child node is not suplied
 as an argument, a new node instance will be created.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>child</strong> (<em>None</em>) – the node instance to be added as a child.</p></li>
 <li><p><strong>name</strong> (<em>None</em>) – the name that will be given to the child.</p></li>
@@ -492,7 +537,7 @@ as an argument, a new node instance will be created.</p>
 <li><p><strong>support</strong> (<em>None</em>) – the support value of child partition.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The child node instance</p>
 </dd>
 </dl>
@@ -500,12 +545,12 @@ as an argument, a new node instance will be created.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.add_face">
-<span class="sig-name descname"><span class="pre">add_face</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">face</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'branch-right'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.add_face"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.add_face" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_face</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">face</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'branch-right'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.add_face"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.add_face" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a fixed face to the node.  This type of faces will be
 always attached to nodes, independently of the layout
 function.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>face</strong> – a Face or inherited instance</p></li>
 <li><p><strong>column</strong> – An integer number starting from 0</p></li>
@@ -519,19 +564,19 @@ function.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.add_feature">
-<span class="sig-name descname"><span class="pre">add_feature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pr_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pr_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.add_feature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.add_feature" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_feature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pr_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pr_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.add_feature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.add_feature" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add or update a node’s feature.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.add_features">
-<span class="sig-name descname"><span class="pre">add_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.add_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.add_features" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.add_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.add_features" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add or update several features.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.add_sister">
-<span class="sig-name descname"><span class="pre">add_sister</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sister</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.add_sister"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.add_sister" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_sister</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sister</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.add_sister"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.add_sister" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a sister to this node. If sister node is not supplied
 as an argument, a new TreeNode instance will be created and
 returned.</p>
@@ -539,7 +584,7 @@ returned.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.check_monophyly">
-<span class="sig-name descname"><span class="pre">check_monophyly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_attr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unrooted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.check_monophyly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.check_monophyly" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_monophyly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_attr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unrooted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.check_monophyly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.check_monophyly" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if a given target attribute is monophyletic under
 this node for the provided set of values.</p>
 <p>If not all values are represented in the current tree
@@ -547,7 +592,7 @@ structure, a ValueError exception will be raised to warn that
 strict monophyly could never be reached (this behaviour can be
 avoided by enabling the <cite>ignore_missing</cite> flag.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>values</strong> – a set of values for which monophyly is
 expected.</p></li>
@@ -560,12 +605,12 @@ missing attributes are found.</p></li>
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>unrooted</strong> (<em>False</em>) – If True, tree will be treated as unrooted, thus
 allowing to find monophyly even when current outgroup is splitting a
 monophyletic group.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>the following tuple
 IsMonophyletic (boolean),
 clade type (‘monophyletic’, ‘paraphyletic’ or ‘polyphyletic’),
@@ -576,12 +621,12 @@ leaves breaking the monophyly (set)</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.children">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">children</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.children" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">children</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.children" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.compare">
-<span class="sig-name descname"><span class="pre">compare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_tree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_collateral</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_support_source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_support_ref</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_duplications</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expand_polytomies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unrooted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_treeko_splits_to_be_artifact</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_tree_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'name'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_tree_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'name'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.compare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.compare" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">compare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_tree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_collateral</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_support_source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_support_ref</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_duplications</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expand_polytomies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unrooted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_treeko_splits_to_be_artifact</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_tree_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'name'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_tree_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'name'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.compare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.compare" title="Permalink to this definition">¶</a></dt>
 <dd><p>compare this tree with another using robinson foulds symmetric difference
 and number of shared edges. Trees of different sizes and with duplicated
 items allowed.</p>
@@ -590,7 +635,7 @@ items allowed.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.convert_to_ultrametric">
-<span class="sig-name descname"><span class="pre">convert_to_ultrametric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'balanced'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.convert_to_ultrametric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.convert_to_ultrametric" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">convert_to_ultrametric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'balanced'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.convert_to_ultrametric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.convert_to_ultrametric" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts a tree into ultrametric topology (all leaves must have
 the same distance to root). Note that, for visual inspection
 of ultrametric trees, node.img_style[“size”] should be set to
@@ -599,7 +644,7 @@ of ultrametric trees, node.img_style[“size”] should be set to
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.cophenetic_matrix">
-<span class="sig-name descname"><span class="pre">cophenetic_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.cophenetic_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.cophenetic_matrix" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">cophenetic_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.cophenetic_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.cophenetic_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a cophenetic distance matrix of the treee to standard output</p>
 <p>The <cite>cophenetic matrix &lt;https://en.wikipedia.org/wiki/Cophenetic&gt;</cite> is a matrix representation of the
 distance between each node.</p>
@@ -663,10 +708,10 @@ E         d(E-z) + d(A-z)    d(E-z) + d(B-z)     d(E-x) + d(C-x)     d(E-w) + d(
 <p>We will also return the one dimensional array with the leaves in the order in which they appear in the matrix
 (i.e. the column and/or row headers).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>filename</strong> – the optional file to write to. If not provided, output will be to standard output</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>two-dimensional array and a one dimensional array</p>
 </dd>
 </dl>
@@ -674,10 +719,10 @@ E         d(E-z) + d(A-z)    d(E-z) + d(B-z)     d(E-x) + d(C-x)     d(E-w) + d(
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.copy">
-<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpickle'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.copy" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpickle'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a copy of the current node.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Variables</dt>
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>method</strong> (<em>cpickle</em>) – Protocol used to copy the node</p>
 </dd>
 </dl>
@@ -707,19 +752,19 @@ etc.)</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.del_feature">
-<span class="sig-name descname"><span class="pre">del_feature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pr_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.del_feature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.del_feature" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">del_feature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pr_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.del_feature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.del_feature" title="Permalink to this definition">¶</a></dt>
 <dd><p>Permanently deletes a node’s feature.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.delete">
-<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prevent_nondicotomic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preserve_branch_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.delete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.delete" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prevent_nondicotomic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preserve_branch_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.delete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.delete" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deletes node from the tree structure. Notice that this method
 makes ‘disappear’ the node from the tree structure. This means
 that children from the deleted node are transferred to the
 next available parent.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>prevent_nondicotomic</strong> (<em>True</em>) – When True (default), delete
 function will be execute recursively to prevent
@@ -751,14 +796,14 @@ nodes.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.describe">
-<span class="sig-name descname"><span class="pre">describe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.describe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.describe" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">describe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.describe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.describe" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints general information about this node and its
 connections.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.detach">
-<span class="sig-name descname"><span class="pre">detach</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.detach"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.detach" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">detach</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.detach"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.detach" title="Permalink to this definition">¶</a></dt>
 <dd><p>Detachs this node (and all its descendants) from its parent
 and returns the referent to itself.</p>
 <p>Detached node conserves all its structure of descendants, and can
@@ -768,12 +813,12 @@ mechanism can be seen as a cut and paste.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.dist">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dist</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.dist" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dist</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.dist" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.expand_polytomies">
-<span class="sig-name descname"><span class="pre">expand_polytomies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'name'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polytomy_size_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_large_polytomies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.expand_polytomies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.expand_polytomies" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">expand_polytomies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'name'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polytomy_size_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_large_polytomies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.expand_polytomies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.expand_polytomies" title="Permalink to this definition">¶</a></dt>
 <dd><div class="versionadded">
 <p><span class="versionmodified added">New in version 2.3.</span></p>
 </div>
@@ -785,19 +830,19 @@ all possible solutions of the multifurcated nodes.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.from_parent_child_table">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_parent_child_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_child_table</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.from_parent_child_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.from_parent_child_table" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_parent_child_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_child_table</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.from_parent_child_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.from_parent_child_table" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts a parent-child table into an ETE Tree instance.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>parent_child_table</strong> – a list of tuples containing parent-child
 relationships. For example: [(“A”, “B”, 0.1), (“A”, “C”, 0.2), (“C”,
 “D”, 1), (“C”, “E”, 1.5)]. Where each tuple represents: [parent, child,
 child-parent-dist]</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A new Tree instance</p>
 </dd>
-<dt class="field-odd">Example</dt>
+<dt class="field-odd">Example<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p></dd>
 </dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="o">.</span><span class="n">from_parent_child_table</span><span class="p">([(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">)])</span>
@@ -808,10 +853,10 @@ child-parent-dist]</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.from_skbio">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_skbio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skbio_tree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.from_skbio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.from_skbio" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_skbio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skbio_tree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.from_skbio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.from_skbio" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts a scikit-bio TreeNode object into ETE Tree object.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>skbio_tree</strong> – a scikit bio TreeNode instance</p></li>
 <li><p><strong>map_attributes</strong> (<em>None</em>) – A list of attribute nanes in the
@@ -819,10 +864,10 @@ scikit-bio tree that should be mapped into the ETE tree
 instance. (name, id and branch length are always mapped)</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A new Tree instance</p>
 </dd>
-<dt class="field-odd">Example</dt>
+<dt class="field-odd">Example<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p></dd>
 </dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="o">.</span><span class="n">from_skibio</span><span class="p">(</span><span class="n">skbioTree</span><span class="p">,</span> <span class="n">map_attributes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">])</span>
@@ -832,7 +877,7 @@ instance. (name, id and branch length are always mapped)</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.get_ancestors">
-<span class="sig-name descname"><span class="pre">get_ancestors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_ancestors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_ancestors" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_ancestors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_ancestors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_ancestors" title="Permalink to this definition">¶</a></dt>
 <dd><p>versionadded: 2.2</p>
 <p>Returns the list of all ancestor nodes from current node to
 the current tree root.</p>
@@ -840,10 +885,10 @@ the current tree root.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.get_ascii">
-<span class="sig-name descname"><span class="pre">get_ascii</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">show_internal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compact</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_ascii"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_ascii" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_ascii</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">show_internal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compact</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_ascii"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_ascii" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a string containing an ascii drawing of the tree.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>show_internal</strong> – includes internal edge names.</p></li>
 <li><p><strong>compact</strong> – use exactly one line per tip.</p></li>
@@ -856,13 +901,13 @@ ASCII representation.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.get_cached_content">
-<span class="sig-name descname"><span class="pre">get_cached_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store_attr=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container_type=&lt;class</span> <span class="pre">'set'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">leaves_only=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_store=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_cached_content"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_cached_content" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_cached_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store_attr=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container_type=&lt;class</span> <span class="pre">'set'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">leaves_only=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_store=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_cached_content"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_cached_content" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a dictionary pointing to the preloaded content of each
 internal node under this tree. Such a dictionary is intended
 to work as a cache for operations that require many traversal
 operations.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>store_attr</strong> (<em>None</em>) – Specifies the node attribute that
 should be cached (i.e. name, distance, etc.). When none,
@@ -875,23 +920,23 @@ the whole node instance is cached.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.get_children">
-<span class="sig-name descname"><span class="pre">get_children</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_children"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_children" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_children</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_children"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_children" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns an independent list of node’s children.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.get_closest_leaf">
-<span class="sig-name descname"><span class="pre">get_closest_leaf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topology_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_closest_leaf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_closest_leaf" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_closest_leaf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topology_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_closest_leaf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_closest_leaf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns node’s closest descendant leaf and the distance to
 it.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>topology_only</strong> (<em>False</em>) – If set to True, distance
 between nodes will be referred to the number of nodes
 between them. In other words, topological distance will be
 used instead of branch length distances.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A tuple containing the closest leaf referred to the
 current node and the distance to it.</p>
 </dd>
@@ -900,7 +945,7 @@ current node and the distance to it.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.get_common_ancestor">
-<span class="sig-name descname"><span class="pre">get_common_ancestor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">target_nodes</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_common_ancestor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_common_ancestor" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_common_ancestor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">target_nodes</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_common_ancestor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_common_ancestor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the first common ancestor between this node and a given
 list of ‘target_nodes’.</p>
 <p><strong>Examples:</strong></p>
@@ -915,10 +960,10 @@ list of ‘target_nodes’.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.get_descendants">
-<span class="sig-name descname"><span class="pre">get_descendants</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'levelorder'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_descendants"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_descendants" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_descendants</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'levelorder'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_descendants"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_descendants" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of all (leaves and internal) descendant nodes.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>is_leaf_fn</strong> (<em>None</em>) – See <a class="reference internal" href="#gcdyn.bdms.TreeNode.traverse" title="gcdyn.bdms.TreeNode.traverse"><code class="xref py py-func docutils literal notranslate"><span class="pre">TreeNode.traverse()</span></code></a> for
 documentation.</p>
 </dd>
@@ -927,12 +972,12 @@ documentation.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.get_distance">
-<span class="sig-name descname"><span class="pre">get_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topology_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_distance" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topology_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_distance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the distance between two nodes. If only one target is
 specified, it returns the distance between the target and the
 current node.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>target</strong> – a node within the same tree structure.</p></li>
 <li><p><strong>target2</strong> – a node within the same tree structure. If
@@ -941,7 +986,7 @@ not specified, current node is used as target2.</p></li>
 refer to the number of nodes between target and target2.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>branch length distance between target and
 target2. If topology_only flag is True, returns the number
 of nodes between target and target2.</p>
@@ -951,7 +996,7 @@ of nodes between target and target2.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.get_edges">
-<span class="sig-name descname"><span class="pre">get_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cached_content</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_edges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_edges" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cached_content</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_edges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_edges" title="Permalink to this definition">¶</a></dt>
 <dd><div class="versionadded">
 <p><span class="versionmodified added">New in version 2.3.</span></p>
 </div>
@@ -962,17 +1007,17 @@ the edge.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.get_farthest_leaf">
-<span class="sig-name descname"><span class="pre">get_farthest_leaf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topology_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_farthest_leaf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_farthest_leaf" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_farthest_leaf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topology_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_farthest_leaf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_farthest_leaf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns node’s farthest descendant node (which is always a leaf), and the
 distance to it.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>topology_only</strong> (<em>False</em>) – If set to True, distance
 between nodes will be referred to the number of nodes
 between them. In other words, topological distance will be
 used instead of branch length distances.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A tuple containing the farthest leaf referred to the
 current node and the distance to it.</p>
 </dd>
@@ -981,17 +1026,17 @@ current node and the distance to it.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.get_farthest_node">
-<span class="sig-name descname"><span class="pre">get_farthest_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topology_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_farthest_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_farthest_node" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_farthest_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topology_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_farthest_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_farthest_node" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the node’s farthest descendant or ancestor node, and the
 distance to it.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>topology_only</strong> (<em>False</em>) – If set to True, distance
 between nodes will be referred to the number of nodes
 between them. In other words, topological distance will be
 used instead of branch length distances.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A tuple containing the farthest node referred to the
 current node and the distance to it.</p>
 </dd>
@@ -1000,11 +1045,11 @@ current node and the distance to it.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.get_leaf_names">
-<span class="sig-name descname"><span class="pre">get_leaf_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_leaf_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_leaf_names" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_leaf_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_leaf_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_leaf_names" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the list of terminal node names under the current
 node.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>is_leaf_fn</strong> (<em>None</em>) – See <a class="reference internal" href="#gcdyn.bdms.TreeNode.traverse" title="gcdyn.bdms.TreeNode.traverse"><code class="xref py py-func docutils literal notranslate"><span class="pre">TreeNode.traverse()</span></code></a> for
 documentation.</p>
 </dd>
@@ -1013,10 +1058,10 @@ documentation.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.get_leaves">
-<span class="sig-name descname"><span class="pre">get_leaves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_leaves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_leaves" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_leaves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_leaves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_leaves" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the list of terminal nodes (leaves) under this node.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>is_leaf_fn</strong> (<em>None</em>) – See <a class="reference internal" href="#gcdyn.bdms.TreeNode.traverse" title="gcdyn.bdms.TreeNode.traverse"><code class="xref py py-func docutils literal notranslate"><span class="pre">TreeNode.traverse()</span></code></a> for
 documentation.</p>
 </dd>
@@ -1025,20 +1070,20 @@ documentation.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.get_leaves_by_name">
-<span class="sig-name descname"><span class="pre">get_leaves_by_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_leaves_by_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_leaves_by_name" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_leaves_by_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_leaves_by_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_leaves_by_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of leaf nodes matching a given name.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.get_midpoint_outgroup">
-<span class="sig-name descname"><span class="pre">get_midpoint_outgroup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_midpoint_outgroup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_midpoint_outgroup" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_midpoint_outgroup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_midpoint_outgroup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_midpoint_outgroup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the node that divides the current tree into two distance-balanced
 partitions.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.get_monophyletic">
-<span class="sig-name descname"><span class="pre">get_monophyletic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_attr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_monophyletic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_monophyletic" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_monophyletic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_attr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_monophyletic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_monophyletic" title="Permalink to this definition">¶</a></dt>
 <dd><div class="versionadded">
 <p><span class="versionmodified added">New in version 2.2.</span></p>
 </div>
@@ -1047,7 +1092,7 @@ criteria. For a node to be considered a match, all
 <cite>target_attr</cite> values within and node, and exclusively them,
 should be grouped.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>values</strong> – a set of values for which monophyly is
 expected.</p></li>
@@ -1061,13 +1106,13 @@ family trees).</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.get_sisters">
-<span class="sig-name descname"><span class="pre">get_sisters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_sisters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_sisters" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_sisters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_sisters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_sisters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns an independent list of sister nodes.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.get_topology_id">
-<span class="sig-name descname"><span class="pre">get_topology_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'name'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_topology_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_topology_id" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_topology_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'name'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_topology_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_topology_id" title="Permalink to this definition">¶</a></dt>
 <dd><div class="versionadded">
 <p><span class="versionmodified added">New in version 2.3.</span></p>
 </div>
@@ -1083,30 +1128,30 @@ other node attribute could be used instead.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.get_tree_root">
-<span class="sig-name descname"><span class="pre">get_tree_root</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_tree_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_tree_root" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_tree_root</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.get_tree_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.get_tree_root" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the absolute root node of current tree structure.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.img_style">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">img_style</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.img_style" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">img_style</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.img_style" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.is_leaf">
-<span class="sig-name descname"><span class="pre">is_leaf</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.is_leaf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.is_leaf" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">is_leaf</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.is_leaf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.is_leaf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return True if current node is a leaf.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.is_root">
-<span class="sig-name descname"><span class="pre">is_root</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.is_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.is_root" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">is_root</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.is_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.is_root" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if current node has no parent</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.iter_ancestors">
-<span class="sig-name descname"><span class="pre">iter_ancestors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.iter_ancestors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.iter_ancestors" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">iter_ancestors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.iter_ancestors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.iter_ancestors" title="Permalink to this definition">¶</a></dt>
 <dd><p>versionadded: 2.2</p>
 <p>Iterates over the list of all ancestor nodes from current node
 to the current tree root.</p>
@@ -1114,10 +1159,10 @@ to the current tree root.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.iter_descendants">
-<span class="sig-name descname"><span class="pre">iter_descendants</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'levelorder'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.iter_descendants"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.iter_descendants" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">iter_descendants</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'levelorder'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.iter_descendants"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.iter_descendants" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns an iterator over all descendant nodes.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>is_leaf_fn</strong> (<em>None</em>) – See <a class="reference internal" href="#gcdyn.bdms.TreeNode.traverse" title="gcdyn.bdms.TreeNode.traverse"><code class="xref py py-func docutils literal notranslate"><span class="pre">TreeNode.traverse()</span></code></a> for
 documentation.</p>
 </dd>
@@ -1126,7 +1171,7 @@ documentation.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.iter_edges">
-<span class="sig-name descname"><span class="pre">iter_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cached_content</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.iter_edges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.iter_edges" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">iter_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cached_content</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.iter_edges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.iter_edges" title="Permalink to this definition">¶</a></dt>
 <dd><div class="versionadded">
 <p><span class="versionmodified added">New in version 2.3.</span></p>
 </div>
@@ -1137,10 +1182,10 @@ the edge.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.iter_leaf_names">
-<span class="sig-name descname"><span class="pre">iter_leaf_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.iter_leaf_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.iter_leaf_names" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">iter_leaf_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.iter_leaf_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.iter_leaf_names" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns an iterator over the leaf names under this node.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>is_leaf_fn</strong> (<em>None</em>) – See <a class="reference internal" href="#gcdyn.bdms.TreeNode.traverse" title="gcdyn.bdms.TreeNode.traverse"><code class="xref py py-func docutils literal notranslate"><span class="pre">TreeNode.traverse()</span></code></a> for
 documentation.</p>
 </dd>
@@ -1149,10 +1194,10 @@ documentation.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.iter_leaves">
-<span class="sig-name descname"><span class="pre">iter_leaves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.iter_leaves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.iter_leaves" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">iter_leaves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.iter_leaves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.iter_leaves" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns an iterator over the leaves under this node.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>is_leaf_fn</strong> (<em>None</em>) – See <a class="reference internal" href="#gcdyn.bdms.TreeNode.traverse" title="gcdyn.bdms.TreeNode.traverse"><code class="xref py py-func docutils literal notranslate"><span class="pre">TreeNode.traverse()</span></code></a> for
 documentation.</p>
 </dd>
@@ -1161,7 +1206,7 @@ documentation.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.iter_prepostorder">
-<span class="sig-name descname"><span class="pre">iter_prepostorder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.iter_prepostorder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.iter_prepostorder" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">iter_prepostorder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.iter_prepostorder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.iter_prepostorder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Iterate over all nodes in a tree yielding every node in both
 pre and post order. Each iteration returns a postorder flag
 (True if node is being visited in postorder) and a node
@@ -1170,7 +1215,7 @@ instance.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.iter_search_nodes">
-<span class="sig-name descname"><span class="pre">iter_search_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">conditions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.iter_search_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.iter_search_nodes" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">iter_search_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">conditions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.iter_search_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.iter_search_nodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Search nodes in an iterative way. Matches are yielded as they
 are being found. This avoids needing to scan the full tree
 topology before returning the first matches. Useful when
@@ -1179,7 +1224,7 @@ dealing with huge trees.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.ladderize">
-<span class="sig-name descname"><span class="pre">ladderize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.ladderize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.ladderize" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ladderize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.ladderize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.ladderize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sort the branches of a given tree (swapping children nodes)
 according to the size of each partition.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">t</span> <span class="o">=</span>  <span class="n">Tree</span><span class="p">(</span><span class="s2">&quot;(f,((d, ((a,b),c)),e));&quot;</span><span class="p">)</span>
@@ -1219,10 +1264,10 @@ according to the size of each partition.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.populate">
-<span class="sig-name descname"><span class="pre">populate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names_library</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reuse_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_branches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">1)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.populate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.populate" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">populate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names_library</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reuse_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_branches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">1)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.populate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.populate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a random topology by populating current node.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>names_library</strong> (<em>None</em>) – If provided, names library
 (list, set, dict, etc.) will be used to name nodes.</p></li>
@@ -1243,23 +1288,23 @@ support values.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.remove_child">
-<span class="sig-name descname"><span class="pre">remove_child</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">child</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.remove_child"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.remove_child" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">remove_child</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">child</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.remove_child"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.remove_child" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes a child from this node (parent and child
 nodes still exit but are no longer connected).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.remove_sister">
-<span class="sig-name descname"><span class="pre">remove_sister</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sister</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.remove_sister"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.remove_sister" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">remove_sister</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sister</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.remove_sister"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.remove_sister" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes a sister node. It has the same effect as
 <strong>`TreeNode.up.remove_child(sister)`</strong></p>
 <p>If a sister node is not supplied, the first sister will be deleted
 and returned.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>sister</strong> – A node instance</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The node removed</p>
 </dd>
 </dl>
@@ -1267,14 +1312,14 @@ and returned.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.resolve_polytomy">
-<span class="sig-name descname"><span class="pre">resolve_polytomy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_support</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recursive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.resolve_polytomy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.resolve_polytomy" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">resolve_polytomy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_support</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recursive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.resolve_polytomy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.resolve_polytomy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Resolve all polytomies under current node by creating an
 arbitrary dicotomic structure among the affected nodes. This
 function randomly modifies current tree topology and should
 only be used for compatibility reasons (i.e. programs
 rejecting multifurcated node in the newick representation).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>default_dist</strong> (<em>0.0</em>) – artificial branch distance of new
 nodes.</p></li>
@@ -1289,11 +1334,11 @@ node. When False, only current node will be checked and fixed.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.robinson_foulds">
-<span class="sig-name descname"><span class="pre">robinson_foulds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr_t1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'name'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr_t2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'name'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unrooted_trees</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expand_polytomies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polytomy_size_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_large_polytomies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correct_by_polytomy_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_support_t1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_support_t2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.robinson_foulds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.robinson_foulds" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">robinson_foulds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr_t1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'name'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr_t2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'name'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unrooted_trees</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expand_polytomies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polytomy_size_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_large_polytomies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correct_by_polytomy_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_support_t1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_support_t2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.robinson_foulds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.robinson_foulds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the Robinson-Foulds symmetric distance between current
 tree and a different tree instance.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>t2</strong> – reference tree</p></li>
 <li><p><strong>attr_t1</strong> (<em>name</em>) – Compare trees using a custom node
@@ -1308,15 +1353,37 @@ tree combinations and the minimum value will be returned.
 See also, <code class="xref py py-func docutils literal notranslate"><span class="pre">NodeTree.expand_polytomy()</span></code>.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>(rf, rf_max, common_attrs, names, edges_t1, edges_t2,  discarded_edges_t1, discarded_edges_t2)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.sample_survivors">
+<span class="sig-name descname"><span class="pre">sample_survivors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.sample_survivors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.sample_survivors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Choose <span class="math notranslate nohighlight">\(n\)</span> survivor leaves from the tree, or each survivor leaf with probability
+<span class="math notranslate nohighlight">\(p\)</span>, to mark as sampled (via the event attribute).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Number of leaves to sample.</p></li>
+<li><p><strong>p</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]) – Probability of sampling a leaf.</p></li>
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – A seed to initialize the random number generation.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then fresh, unpredictable entropy will be pulled from the OS.
+If an <code class="docutils literal notranslate"><span class="pre">int</span></code>, then it will be used to derive the initial state.
+If a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a>, then that will be used directly.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.search_nodes">
-<span class="sig-name descname"><span class="pre">search_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">conditions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.search_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.search_nodes" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">search_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">conditions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.search_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.search_nodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the list of nodes matching a given set of conditions.</p>
 <p><strong>Example:</strong></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tree</span><span class="o">.</span><span class="n">search_nodes</span><span class="p">(</span><span class="n">dist</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;human&quot;</span><span class="p">)</span>
@@ -1326,11 +1393,11 @@ See also, <code class="xref py py-func docutils literal notranslate"><span class
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.set_outgroup">
-<span class="sig-name descname"><span class="pre">set_outgroup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outgroup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.set_outgroup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.set_outgroup" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_outgroup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outgroup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.set_outgroup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.set_outgroup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets a descendant node as the outgroup of a tree.  This function
 can be used to root a tree or even an internal node.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>outgroup</strong> – a node instance within the same tree
 structure that will be used as a basal node.</p>
 </dd>
@@ -1339,38 +1406,20 @@ structure that will be used as a basal node.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.set_style">
-<span class="sig-name descname"><span class="pre">set_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.set_style"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.set_style" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.set_style"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.set_style" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set ‘node_style’ as the fixed style for the current node.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.show">
-<span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ETE'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.show" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ETE'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.show" title="Permalink to this definition">¶</a></dt>
 <dd><p>Starts an interactive session to visualize current node
 structure using provided layout and TreeStyle.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.slice">
-<span class="sig-name descname"><span class="pre">slice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.slice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.slice" title="Permalink to this definition"></a></dt>
-<dd><p>Return a list of attribute <code class="docutils literal notranslate"><span class="pre">attr</span></code> at time <span class="math notranslate nohighlight">\(t\)</span> for all
-lineages alive at that time.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Slice the tree at time <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
-<li><p><strong>attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Attribute to extract from slice.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.sort_descendants">
-<span class="sig-name descname"><span class="pre">sort_descendants</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'name'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.sort_descendants"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.sort_descendants" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">sort_descendants</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'name'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.sort_descendants"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.sort_descendants" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sort the branches of a given tree by node names. After the
 tree is sorted. Note that if duplicated names are present,
 extra criteria should be added to sort nodes.</p>
@@ -1378,7 +1427,7 @@ extra criteria should be added to sort nodes.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.standardize">
-<span class="sig-name descname"><span class="pre">standardize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delete_orphan</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preserve_branch_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.standardize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.standardize" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">standardize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delete_orphan</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preserve_branch_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.standardize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.standardize" title="Permalink to this definition">¶</a></dt>
 <dd><div class="versionadded">
 <p><span class="versionmodified added">New in version 2.3.</span></p>
 </div>
@@ -1388,22 +1437,22 @@ with only one child are removed and multifurcations are automatically resolved.<
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.support">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">support</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.support" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">support</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.support" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.swap_children">
-<span class="sig-name descname"><span class="pre">swap_children</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.swap_children"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.swap_children" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">swap_children</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.swap_children"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.swap_children" title="Permalink to this definition">¶</a></dt>
 <dd><p>Swaps current children order.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.traverse">
-<span class="sig-name descname"><span class="pre">traverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'levelorder'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.traverse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.traverse" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">traverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'levelorder'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.traverse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.traverse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns an iterator to traverse the tree structure under this
 node.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>strategy</strong> (<em>&quot;levelorder&quot;</em>) – set the way in which tree
 will be traversed. Possible values are: “preorder” (first
@@ -1424,13 +1473,13 @@ dynamically collapsing internal nodes matching
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.unroot">
-<span class="sig-name descname"><span class="pre">unroot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'legacy'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.unroot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.unroot" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">unroot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'legacy'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.unroot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.unroot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unroots current node. This function is expected to be used on
 the absolute tree root node, but it can be also be applied to
 any other internal node. It will convert a split into a
 multifurcation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>mode</strong> (<em>&quot;legacy&quot;</em>) – The value can be “legacy” or “keep”.</p>
 </dd>
 </dl>
@@ -1442,17 +1491,17 @@ value of the deleted edge is dropped</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.up">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">up</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.up" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">up</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.up" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.write">
-<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_root_node</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_formatter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support_formatter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_formatter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quoted_node_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.write" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_leaf_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_root_node</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_formatter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support_formatter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_formatter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quoted_node_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the newick representation of current node. Several
 arguments control the way in which extra data is shown for
 every node:</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>features</strong> – a list of feature names to be exported
 using the Extended Newick Format (i.e. features=[“name”,
@@ -1477,13 +1526,31 @@ documentation.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.slice">
+<span class="sig-name descname"><span class="pre">slice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.slice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.slice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of attribute <code class="docutils literal notranslate"><span class="pre">attr</span></code> at time <span class="math notranslate nohighlight">\(t\)</span> for all
+lineages alive at that time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Slice the tree at time <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
+<li><p><strong>attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Attribute to extract from slice.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.prune">
-<span class="sig-name descname"><span class="pre">prune</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.prune"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.prune" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">prune</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.prune"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.prune" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prune the tree to the subtree induced by the sampled leaves.</p>
 <p>Also removes mutation events, and annotates mutation counts in
 child node <code class="docutils literal notranslate"><span class="pre">n_mutations</span></code> attribute.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
@@ -1491,7 +1558,7 @@ child node <code class="docutils literal notranslate"><span class="pre">n_mutati
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.render">
-<span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.render"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.render" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.render"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.render" title="Permalink to this definition">¶</a></dt>
 <dd><p>A thin wrapper around <code class="xref py py-func docutils literal notranslate"><span class="pre">ete3.TreeNode.render()</span></code> that adds some
 custom decoration and a color bar. As with the base class method, pass
 <code class="docutils literal notranslate"><span class="pre">&quot;%%inline&quot;</span></code> for the first argument to render inline in a notebook.
@@ -1505,36 +1572,15 @@ with. Sampled leaves are indicated with a circle.</p>
 <p>If tree is pruned, then nodes are colored according to phenotype,
 branches are annotated above with branch length (in black text) and below with number of mutations (in green text).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arguments to pass to <code class="xref py py-func docutils literal notranslate"><span class="pre">ete3.TreeNode.render()</span></code>.</p></li>
 <li><p><strong>cbar_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – If not <code class="docutils literal notranslate"><span class="pre">None</span></code>, save color bar to this file.</p></li>
 <li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Keyword arguments to pass to <code class="xref py py-func docutils literal notranslate"><span class="pre">ete3.TreeNode.render()</span></code>.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.log_likelihood">
-<span class="sig-name descname"><span class="pre">log_likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">birth_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">death_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_probability</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.log_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.log_likelihood" title="Permalink to this definition"></a></dt>
-<dd><p>Compute the log-likelihood of a fully observed tree given the
-specified birth, death, mutation, and sampling parameters.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>birth_rate</strong> (<a class="reference internal" href="gcdyn.bdms.Response.html#gcdyn.bdms.Response" title="gcdyn.bdms.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Birth rate response function.</p></li>
-<li><p><strong>death_rate</strong> (<a class="reference internal" href="gcdyn.bdms.Response.html#gcdyn.bdms.Response" title="gcdyn.bdms.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Death rate response function.</p></li>
-<li><p><strong>mutation_rate</strong> (<a class="reference internal" href="gcdyn.bdms.Response.html#gcdyn.bdms.Response" title="gcdyn.bdms.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Mutation rate response function.</p></li>
-<li><p><strong>mutator</strong> (<a class="reference internal" href="gcdyn.mutators.Mutator.html#gcdyn.mutators.Mutator" title="gcdyn.mutators.Mutator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mutator</span></code></a>) – Generator of mutation effects.</p></li>
-<li><p><strong>sampling_probability</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Probability of sampling a survivor.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1545,33 +1591,50 @@ specified birth, death, mutation, and sampling parameters.</p>
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="gcdyn.bdms.SoftReluResponse.html" class="btn btn-neutral float-left" title="gcdyn.bdms.SoftReluResponse" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="gcdyn.cycles.html" class="btn btn-neutral float-right" title="gcdyn.cycles" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="gcdyn.responses.html" class="btn btn-neutral float-right" title="gcdyn.responses" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="gcdyn.bdms.html" class="btn btn-neutral float-left" title="gcdyn.bdms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Erick Matsen.</p>
-  </div>
+    <p>
+        &#169; Copyright 2022, Erick Matsen.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

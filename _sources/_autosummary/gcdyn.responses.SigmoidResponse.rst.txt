@@ -1,9 +1,9 @@
-gcdyn.cycles.Mutator
-====================
+gcdyn.responses.SigmoidResponse
+===============================
 
-.. currentmodule:: gcdyn.cycles
+.. currentmodule:: gcdyn.responses
 
-.. autoclass:: Mutator
+.. autoclass:: SigmoidResponse
    :members:
    :show-inheritance:
    :inherited-members:
@@ -16,7 +16,7 @@ gcdyn.cycles.Mutator
    .. autosummary::
       :nosignatures:
    
-      ~Mutator.mutate
+      ~SigmoidResponse.f
    
    
 

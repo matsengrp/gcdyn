@@ -1,6 +1,0 @@
-gcdyn.cycles.simple\_proliferator
-=================================
-
-.. currentmodule:: gcdyn.cycles
-
-.. autofunction:: simple_proliferator

@@ -20,12 +20,6 @@
       :template: custom-class-template.rst
       :nosignatures:
    
-      ConstantResponse
-      ExponentialResponse
-      PhenotypeResponse
-      Response
-      SigmoidResponse
-      SoftReluResponse
       TreeNode
    
    

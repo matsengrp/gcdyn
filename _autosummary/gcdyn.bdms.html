@@ -1,37 +1,74 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>gcdyn.bdms &mdash; gcdyn  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script src="../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="gcdyn.bdms.ConstantResponse" href="gcdyn.bdms.ConstantResponse.html" />
+    <link rel="next" title="gcdyn.bdms.TreeNode" href="gcdyn.bdms.TreeNode.html" />
     <link rel="prev" title="Modules" href="../api.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../index.html" class="icon icon-home"> gcdyn
+          
+
+          
           </a>
+
+          
+            
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -39,7 +76,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
@@ -49,39 +97,8 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">Modules</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">gcdyn.bdms</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#primary-class-treenode">Primary class <code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#additional-classes">Additional classes:</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#rate-response-functions-response">Rate response functions <code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.ConstantResponse.html">gcdyn.bdms.ConstantResponse</a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.ExponentialResponse.html">gcdyn.bdms.ExponentialResponse</a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.PhenotypeResponse.html">gcdyn.bdms.PhenotypeResponse</a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.Response.html">gcdyn.bdms.Response</a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.SigmoidResponse.html">gcdyn.bdms.SigmoidResponse</a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.SoftReluResponse.html">gcdyn.bdms.SoftReluResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#birth-death-mutation-sampling-bdms-process-simulation">Birth-death-mutation-sampling (BDMS) process simulation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.TreeNode.html">gcdyn.bdms.TreeNode</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#gcdyn.bdms.Response"><code class="docutils literal notranslate"><span class="pre">Response</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#gcdyn.bdms.PhenotypeResponse"><code class="docutils literal notranslate"><span class="pre">PhenotypeResponse</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.PhenotypeResponse.f"><code class="docutils literal notranslate"><span class="pre">PhenotypeResponse.f()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#gcdyn.bdms.ConstantResponse"><code class="docutils literal notranslate"><span class="pre">ConstantResponse</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.ConstantResponse.f"><code class="docutils literal notranslate"><span class="pre">ConstantResponse.f()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#gcdyn.bdms.ExponentialResponse"><code class="docutils literal notranslate"><span class="pre">ExponentialResponse</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.ExponentialResponse.f"><code class="docutils literal notranslate"><span class="pre">ExponentialResponse.f()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#gcdyn.bdms.SigmoidResponse"><code class="docutils literal notranslate"><span class="pre">SigmoidResponse</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.SigmoidResponse.f"><code class="docutils literal notranslate"><span class="pre">SigmoidResponse.f()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#gcdyn.bdms.SoftReluResponse"><code class="docutils literal notranslate"><span class="pre">SoftReluResponse</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.SoftReluResponse.f"><code class="docutils literal notranslate"><span class="pre">SoftReluResponse.f()</span></code></a></li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="#gcdyn.bdms.TreeNode"><code class="docutils literal notranslate"><span class="pre">TreeNode</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.TreeNode.t"><code class="docutils literal notranslate"><span class="pre">TreeNode.t</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.TreeNode.x"><code class="docutils literal notranslate"><span class="pre">TreeNode.x</span></code></a></li>
@@ -92,14 +109,13 @@
 <li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.TreeNode.slice"><code class="docutils literal notranslate"><span class="pre">TreeNode.slice()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.TreeNode.prune"><code class="docutils literal notranslate"><span class="pre">TreeNode.prune()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.TreeNode.render"><code class="docutils literal notranslate"><span class="pre">TreeNode.render()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#gcdyn.bdms.TreeNode.log_likelihood"><code class="docutils literal notranslate"><span class="pre">TreeNode.log_likelihood()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.cycles.html">gcdyn.cycles</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gcdyn.fitness.html">gcdyn.fitness</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.responses.html">gcdyn.responses</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.mutators.html">gcdyn.mutators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.model.html">gcdyn.model</a></li>
 </ul>
 </li>
 </ul>
@@ -110,35 +126,78 @@
 <li class="toctree-l1"><a class="reference internal" href="../developer.html#todo-list">Todo list</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">gcdyn</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
-          <li class="breadcrumb-item"><a href="../api.html">Modules</a></li>
-      <li class="breadcrumb-item active">gcdyn.bdms</li>
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../api.html">Modules</a> &raquo;</li>
+        
+      <li>gcdyn.bdms</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+            
   <section id="module-gcdyn.bdms">
-<span id="gcdyn-bdms"></span><h1>gcdyn.bdms<a class="headerlink" href="#module-gcdyn.bdms" title="Permalink to this heading"></a></h1>
-<p>Birth-death-mutation-sampling (BDMS) process.</p>
+<span id="gcdyn-bdms"></span><h1>gcdyn.bdms<a class="headerlink" href="#module-gcdyn.bdms" title="Permalink to this heading">¶</a></h1>
+<section id="birth-death-mutation-sampling-bdms-process-simulation">
+<h2>Birth-death-mutation-sampling (BDMS) process simulation<a class="headerlink" href="#birth-death-mutation-sampling-bdms-process-simulation" title="Permalink to this heading">¶</a></h2>
 <p>The BDMS process is defined by the following parameters:</p>
-<ul class="simple">
+<blockquote>
+<div><ul class="simple">
 <li><p><span class="math notranslate nohighlight">\(\Delta t\)</span>: run time of the process</p></li>
 <li><p><span class="math notranslate nohighlight">\(\lambda(x)\)</span>: birth rate of phenotype <span class="math notranslate nohighlight">\(x\)</span></p></li>
 <li><p><span class="math notranslate nohighlight">\(\mu(x)\)</span>: death rate of phenotype <span class="math notranslate nohighlight">\(x\)</span></p></li>
@@ -147,11 +206,11 @@
 which we draw from to generate mutation effects when a mutation event occurs</p></li>
 <li><p><span class="math notranslate nohighlight">\(\rho\)</span>: sampling probability of surviving lineages after <span class="math notranslate nohighlight">\(\Delta t\)</span></p></li>
 </ul>
-<section id="primary-class-treenode">
-<h2>Primary class <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a><a class="headerlink" href="#primary-class-treenode" title="Permalink to this heading"></a></h2>
+</div></blockquote>
 <p>This module’s primary class <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> subclasses ETE’s <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a>,
 with these notable differences:</p>
-<ul class="simple">
+<blockquote>
+<div><ul class="simple">
 <li><p>Attribute <code class="xref py py-attr docutils literal notranslate"><span class="pre">t</span></code>: the time <span class="math notranslate nohighlight">\(t \in \mathbb{R}_{\ge 0}\)</span> of the event at the node</p></li>
 <li><p>Attribute <code class="xref py py-attr docutils literal notranslate"><span class="pre">x</span></code>: the phenotype <span class="math notranslate nohighlight">\(x \in \mathbb{R}\)</span> of the node</p></li>
 <li><p>Attribute <code class="xref py py-attr docutils literal notranslate"><span class="pre">event</span></code>: the event that occurred at the node</p></li>
@@ -162,208 +221,23 @@ with these notable differences:</p>
 (overrides ETE’s <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode.prune" title="(in ETE Toolkit v3.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ete3.TreeNode.prune()</span></code></a>)</p></li>
 <li><p>Method <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.render" title="gcdyn.bdms.TreeNode.render"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TreeNode.render()</span></code></a>: visualizes the tree (overrides ETE’s <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode.render" title="(in ETE Toolkit v3.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ete3.TreeNode.render()</span></code></a>)</p></li>
 </ul>
-</section>
-<section id="additional-classes">
-<h2>Additional classes:<a class="headerlink" href="#additional-classes" title="Permalink to this heading"></a></h2>
-<section id="rate-response-functions-response">
-<h3>Rate response functions <a class="reference internal" href="gcdyn.bdms.Response.html#gcdyn.bdms.Response" title="gcdyn.bdms.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a><a class="headerlink" href="#rate-response-functions-response" title="Permalink to this heading"></a></h3>
-<p>Abstract base class for defining generic response functions (i.e. <span class="math notranslate nohighlight">\(\lambda(x)\)</span>, <span class="math notranslate nohighlight">\(\mu(x)\)</span>, <span class="math notranslate nohighlight">\(\gamma(x)\)</span>),
-with arbitrary <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> attribute dependence.
-Some concrete child classes are included.</p>
-</section>
+</div></blockquote>
 </section>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.bdms.ConstantResponse.html#gcdyn.bdms.ConstantResponse" title="gcdyn.bdms.ConstantResponse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConstantResponse</span></code></a></p></td>
-<td><p>Returns attribute <span class="math notranslate nohighlight">\(\theta\in\mathbb{R}\)</span> when an instance is called on any <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a>.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="gcdyn.bdms.ExponentialResponse.html#gcdyn.bdms.ExponentialResponse" title="gcdyn.bdms.ExponentialResponse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ExponentialResponse</span></code></a></p></td>
-<td><p>Exponential response function on a <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object's phenotype attribute <span class="math notranslate nohighlight">\(x\)</span>.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.bdms.PhenotypeResponse.html#gcdyn.bdms.PhenotypeResponse" title="gcdyn.bdms.PhenotypeResponse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PhenotypeResponse</span></code></a></p></td>
-<td><p>Abstract base class for response function mapping from a <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object's phenotype attribute <span class="math notranslate nohighlight">\(x\in\mathbb{R}\)</span> to real values given parameters.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="gcdyn.bdms.Response.html#gcdyn.bdms.Response" title="gcdyn.bdms.Response"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Response</span></code></a></p></td>
-<td><p>Abstract base class for response function mapping <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> objects to <code class="docutils literal notranslate"><span class="pre">float</span></code> values given parameters.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.bdms.SigmoidResponse.html#gcdyn.bdms.SigmoidResponse" title="gcdyn.bdms.SigmoidResponse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SigmoidResponse</span></code></a></p></td>
-<td><p>Sigmoid response function on a <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object's phenotype attribute <span class="math notranslate nohighlight">\(x\)</span>.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="gcdyn.bdms.SoftReluResponse.html#gcdyn.bdms.SoftReluResponse" title="gcdyn.bdms.SoftReluResponse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SoftReluResponse</span></code></a></p></td>
-<td><p>Soft ReLU response function on a <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object's phenotype attribute <span class="math notranslate nohighlight">\(x\)</span>.</p></td>
-</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TreeNode</span></code></a></p></td>
 <td><p>A tree generated by a BDMS process.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py class">
-<dt class="sig sig-object py" id="gcdyn.bdms.Response">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.bdms.</span></span><span class="sig-name descname"><span class="pre">Response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#Response"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.Response" title="Permalink to this definition"></a></dt>
-<dd><p>Abstract base class for response function mapping
-<a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> objects to <code class="docutils literal notranslate"><span class="pre">float</span></code> values given parameters.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="gcdyn.bdms.PhenotypeResponse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.bdms.</span></span><span class="sig-name descname"><span class="pre">PhenotypeResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#PhenotypeResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.PhenotypeResponse" title="Permalink to this definition"></a></dt>
-<dd><p>Abstract base class for response function mapping from a
-<a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object’s phenotype attribute <span class="math notranslate nohighlight">\(x\in\mathbb{R}\)</span> to real values given parameters.</p>
-<div class="math notranslate nohighlight">
-\[f: \mathbb{R} \to \mathbb{R}\]</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.bdms.PhenotypeResponse.f">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#PhenotypeResponse.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.PhenotypeResponse.f" title="Permalink to this definition"></a></dt>
-<dd><p>Compute <span class="math notranslate nohighlight">\(f(x)\)</span>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>array-like</em>) – Phenotype value.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="gcdyn.bdms.ConstantResponse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.bdms.</span></span><span class="sig-name descname"><span class="pre">ConstantResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#ConstantResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.ConstantResponse" title="Permalink to this definition"></a></dt>
-<dd><p>Returns attribute <span class="math notranslate nohighlight">\(\theta\in\mathbb{R}\)</span> when an instance is called
-on any <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Constant response value.</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.bdms.ConstantResponse.f">
-<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#ConstantResponse.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.ConstantResponse.f" title="Permalink to this definition"></a></dt>
-<dd><p>Compute <span class="math notranslate nohighlight">\(f(x)\)</span>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>array-like</em>) – Phenotype value.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="gcdyn.bdms.ExponentialResponse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.bdms.</span></span><span class="sig-name descname"><span class="pre">ExponentialResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#ExponentialResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.ExponentialResponse" title="Permalink to this definition"></a></dt>
-<dd><p>Exponential response function on a <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object’s
-phenotype attribute <span class="math notranslate nohighlight">\(x\)</span>.</p>
-<div class="math notranslate nohighlight">
-\[f(x) = \theta_3 e^{\theta_1 (x - \theta_2)} + \theta_4\]</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>xscale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_1\)</span></p></li>
-<li><p><strong>xshift</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_2\)</span></p></li>
-<li><p><strong>yscale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_3\)</span></p></li>
-<li><p><strong>yshift</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_4\)</span></p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.bdms.ExponentialResponse.f">
-<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#ExponentialResponse.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.ExponentialResponse.f" title="Permalink to this definition"></a></dt>
-<dd><p>Compute <span class="math notranslate nohighlight">\(f(x)\)</span>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>array-like</em>) – Phenotype value.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="gcdyn.bdms.SigmoidResponse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.bdms.</span></span><span class="sig-name descname"><span class="pre">SigmoidResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#SigmoidResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.SigmoidResponse" title="Permalink to this definition"></a></dt>
-<dd><p>Sigmoid response function on a <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object’s phenotype
-attribute <span class="math notranslate nohighlight">\(x\)</span>.</p>
-<div class="math notranslate nohighlight">
-\[f(x) = \frac{\theta_3}{1 + e^{-\theta_1 (x - \theta_2)}} + \theta_4\]</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>xscale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_1\)</span></p></li>
-<li><p><strong>xshift</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_2\)</span></p></li>
-<li><p><strong>yscale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_3\)</span></p></li>
-<li><p><strong>yshift</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_4\)</span></p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.bdms.SigmoidResponse.f">
-<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#SigmoidResponse.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.SigmoidResponse.f" title="Permalink to this definition"></a></dt>
-<dd><p>Compute <span class="math notranslate nohighlight">\(f(x)\)</span>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>array-like</em>) – Phenotype value.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="gcdyn.bdms.SoftReluResponse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.bdms.</span></span><span class="sig-name descname"><span class="pre">SoftReluResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#SoftReluResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.SoftReluResponse" title="Permalink to this definition"></a></dt>
-<dd><p>Soft ReLU response function on a <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a> object’s phenotype
-attribute <span class="math notranslate nohighlight">\(x\)</span>.</p>
-<div class="math notranslate nohighlight">
-\[f(x) = \theta_3\log(1 + e^{\theta_1 (x - \theta_2)}) + \theta_4\]</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>xscale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_1\)</span></p></li>
-<li><p><strong>xshift</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_2\)</span></p></li>
-<li><p><strong>yscale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_3\)</span></p></li>
-<li><p><strong>yshift</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – <span class="math notranslate nohighlight">\(\theta_4\)</span></p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.bdms.SoftReluResponse.f">
-<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#SoftReluResponse.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.SoftReluResponse.f" title="Permalink to this definition"></a></dt>
-<dd><p>Compute <span class="math notranslate nohighlight">\(f(x)\)</span>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>array-like</em>) – Phenotype value.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.bdms.</span></span><span class="sig-name descname"><span class="pre">TreeNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.bdms.</span></span><span class="sig-name descname"><span class="pre">TreeNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode" title="Permalink to this definition">¶</a></dt>
 <dd><p>A tree generated by a BDMS process. Subclasses
 <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Time of this node.</p></li>
 <li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Phenotype of this node.</p></li>
@@ -373,40 +247,41 @@ attribute <span class="math notranslate nohighlight">\(x\)</span>.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.t">
-<span class="sig-name descname"><span class="pre">t</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.t" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">t</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.t" title="Permalink to this definition">¶</a></dt>
 <dd><p>Time of the node.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.x">
-<span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.x" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Phenotype of the node.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.event">
-<span class="sig-name descname"><span class="pre">event</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.event" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">event</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.event" title="Permalink to this definition">¶</a></dt>
 <dd><p>Event at this node.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.n_mutations">
-<span class="sig-name descname"><span class="pre">n_mutations</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.n_mutations" title="Permalink to this definition"></a></dt>
-<dd><p>Number of mutations on the branch above this node (zero unless the tree has been pruned above this node,
-removing mutation event nodes).</p>
+<span class="sig-name descname"><span class="pre">n_mutations</span></span><a class="headerlink" href="#gcdyn.bdms.TreeNode.n_mutations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of mutations on the branch above this node (zero unless the
+tree has been pruned above this node, removing mutation event
+nodes).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.evolve">
-<span class="sig-name descname"><span class="pre">evolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">birth_rate=ConstantResponse(value=1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">death_rate=ConstantResponse(value=0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_rate=ConstantResponse(value=1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutator=GaussianMutator(attr=x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_distribution=&lt;scipy.stats._distn_infrastructure.rv_continuous_frozen</span> <span class="pre">object&gt;)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">birth_mutations=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_survivors=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_leaves=1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.evolve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.evolve" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">evolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">birth_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ConstantResponse(grad=False,</span> <span class="pre">value=1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">death_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ConstantResponse(grad=False,</span> <span class="pre">value=0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ConstantResponse(grad=False,</span> <span class="pre">value=1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">GaussianMutator(attr=x,</span> <span class="pre">shift=0,</span> <span class="pre">scale=1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">birth_mutations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_survivors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_leaves</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.evolve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.evolve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evolve for time <span class="math notranslate nohighlight">\(\Delta t\)</span>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Evolve for this time</p></li>
-<li><p><strong>birth_rate</strong> (<a class="reference internal" href="gcdyn.bdms.Response.html#gcdyn.bdms.Response" title="gcdyn.bdms.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Birth rate response function.</p></li>
-<li><p><strong>death_rate</strong> (<a class="reference internal" href="gcdyn.bdms.Response.html#gcdyn.bdms.Response" title="gcdyn.bdms.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Death rate response function.</p></li>
-<li><p><strong>mutation_rate</strong> (<a class="reference internal" href="gcdyn.bdms.Response.html#gcdyn.bdms.Response" title="gcdyn.bdms.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Mutation rate response function.</p></li>
+<li><p><strong>birth_rate</strong> (<a class="reference internal" href="gcdyn.responses.Response.html#gcdyn.responses.Response" title="gcdyn.responses.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Birth rate response function.</p></li>
+<li><p><strong>death_rate</strong> (<a class="reference internal" href="gcdyn.responses.Response.html#gcdyn.responses.Response" title="gcdyn.responses.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Death rate response function.</p></li>
+<li><p><strong>mutation_rate</strong> (<a class="reference internal" href="gcdyn.responses.Response.html#gcdyn.responses.Response" title="gcdyn.responses.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Mutation rate response function.</p></li>
 <li><p><strong>mutator</strong> (<a class="reference internal" href="gcdyn.mutators.Mutator.html#gcdyn.mutators.Mutator" title="gcdyn.mutators.Mutator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mutator</span></code></a>) – Generator of mutation effects at mutation events
 (and on offspring of birth events if <code class="docutils literal notranslate"><span class="pre">birth_mutations=True</span></code>).</p></li>
 <li><p><strong>birth_mutations</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – Flag to indicate whether mutations should occur at birth.</p></li>
@@ -414,13 +289,13 @@ removing mutation event nodes).</p>
 survivors, then a <code class="xref py py-class docutils literal notranslate"><span class="pre">TreeError</span></code> is raised.</p></li>
 <li><p><strong>max_leaves</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Maximum number of active leaves, to truncate exploding processes. If exceeded, then a
 <code class="xref py py-class docutils literal notranslate"><span class="pre">TreeError</span></code> is raised.</p></li>
-<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – A seed to initialize the random number generation.
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – A seed to initialize the random number generation.
 If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then fresh, unpredictable entropy will be pulled from the OS.
 If an <code class="docutils literal notranslate"><span class="pre">int</span></code>, then it will be used to derive the initial state.
-If a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a>, then that will be used directly.</p></li>
+If a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a>, then that will be used directly.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
@@ -428,21 +303,21 @@ If a <a class="reference external" href="https://numpy.org/doc/stable/reference/
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.sample_survivors">
-<span class="sig-name descname"><span class="pre">sample_survivors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.sample_survivors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.sample_survivors" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">sample_survivors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.sample_survivors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.sample_survivors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Choose <span class="math notranslate nohighlight">\(n\)</span> survivor leaves from the tree, or each survivor leaf with probability
 <span class="math notranslate nohighlight">\(p\)</span>, to mark as sampled (via the event attribute).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Number of leaves to sample.</p></li>
 <li><p><strong>p</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]) – Probability of sampling a leaf.</p></li>
-<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – A seed to initialize the random number generation.
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – A seed to initialize the random number generation.
 If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then fresh, unpredictable entropy will be pulled from the OS.
 If an <code class="docutils literal notranslate"><span class="pre">int</span></code>, then it will be used to derive the initial state.
-If a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a>, then that will be used directly.</p></li>
+If a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a>, then that will be used directly.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
@@ -450,30 +325,30 @@ If a <a class="reference external" href="https://numpy.org/doc/stable/reference/
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.slice">
-<span class="sig-name descname"><span class="pre">slice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.slice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.slice" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">slice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.slice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.slice" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a list of attribute <code class="docutils literal notranslate"><span class="pre">attr</span></code> at time <span class="math notranslate nohighlight">\(t\)</span> for all
 lineages alive at that time.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Slice the tree at time <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
 <li><p><strong>attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Attribute to extract from slice.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.prune">
-<span class="sig-name descname"><span class="pre">prune</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.prune"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.prune" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">prune</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.prune"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.prune" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prune the tree to the subtree induced by the sampled leaves.</p>
 <p>Also removes mutation events, and annotates mutation counts in
 child node <code class="docutils literal notranslate"><span class="pre">n_mutations</span></code> attribute.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
@@ -481,7 +356,7 @@ child node <code class="docutils literal notranslate"><span class="pre">n_mutati
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.render">
-<span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.render"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.render" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.render"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.render" title="Permalink to this definition">¶</a></dt>
 <dd><p>A thin wrapper around <code class="xref py py-func docutils literal notranslate"><span class="pre">ete3.TreeNode.render()</span></code> that adds some
 custom decoration and a color bar. As with the base class method, pass
 <code class="docutils literal notranslate"><span class="pre">&quot;%%inline&quot;</span></code> for the first argument to render inline in a notebook.
@@ -495,36 +370,15 @@ with. Sampled leaves are indicated with a circle.</p>
 <p>If tree is pruned, then nodes are colored according to phenotype,
 branches are annotated above with branch length (in black text) and below with number of mutations (in green text).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arguments to pass to <code class="xref py py-func docutils literal notranslate"><span class="pre">ete3.TreeNode.render()</span></code>.</p></li>
 <li><p><strong>cbar_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – If not <code class="docutils literal notranslate"><span class="pre">None</span></code>, save color bar to this file.</p></li>
 <li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Keyword arguments to pass to <code class="xref py py-func docutils literal notranslate"><span class="pre">ete3.TreeNode.render()</span></code>.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.log_likelihood">
-<span class="sig-name descname"><span class="pre">log_likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">birth_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">death_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_probability</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.log_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.log_likelihood" title="Permalink to this definition"></a></dt>
-<dd><p>Compute the log-likelihood of a fully observed tree given the
-specified birth, death, mutation, and sampling parameters.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>birth_rate</strong> (<a class="reference internal" href="gcdyn.bdms.Response.html#gcdyn.bdms.Response" title="gcdyn.bdms.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Birth rate response function.</p></li>
-<li><p><strong>death_rate</strong> (<a class="reference internal" href="gcdyn.bdms.Response.html#gcdyn.bdms.Response" title="gcdyn.bdms.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Death rate response function.</p></li>
-<li><p><strong>mutation_rate</strong> (<a class="reference internal" href="gcdyn.bdms.Response.html#gcdyn.bdms.Response" title="gcdyn.bdms.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>) – Mutation rate response function.</p></li>
-<li><p><strong>mutator</strong> (<a class="reference internal" href="gcdyn.mutators.Mutator.html#gcdyn.mutators.Mutator" title="gcdyn.mutators.Mutator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mutator</span></code></a>) – Generator of mutation effects.</p></li>
-<li><p><strong>sampling_probability</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Probability of sampling a survivor.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -535,33 +389,50 @@ specified birth, death, mutation, and sampling parameters.</p>
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="gcdyn.bdms.TreeNode.html" class="btn btn-neutral float-right" title="gcdyn.bdms.TreeNode" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="../api.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="gcdyn.bdms.ConstantResponse.html" class="btn btn-neutral float-right" title="gcdyn.bdms.ConstantResponse" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Erick Matsen.</p>
-  </div>
+    <p>
+        &#169; Copyright 2022, Erick Matsen.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

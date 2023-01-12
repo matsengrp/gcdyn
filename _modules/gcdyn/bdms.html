@@ -1,33 +1,70 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>gcdyn.bdms &mdash; gcdyn  documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
-    <script src="../../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../../index.html" class="icon icon-home"> gcdyn
+          
+
+          
           </a>
+
+          
+            
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -35,7 +72,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
@@ -52,239 +100,115 @@
 <li class="toctree-l1"><a class="reference internal" href="../../developer.html#todo-list">Todo list</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">gcdyn</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
-          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
-      <li class="breadcrumb-item active">gcdyn.bdms</li>
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>gcdyn.bdms</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+            
   <h1>Source code for gcdyn.bdms</h1><div class="highlight"><pre>
-<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Birth-death-mutation-sampling (BDMS) process.</span>
+<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Birth-death-mutation-sampling (BDMS) process simulation</span>
+<span class="sd">^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>
 
 <span class="sd">The BDMS process is defined by the following parameters:</span>
 
-<span class="sd">* :math:`\Delta t`: run time of the process</span>
-<span class="sd">* :math:`\lambda(x)`: birth rate of phenotype :math:`x`</span>
-<span class="sd">* :math:`\mu(x)`: death rate of phenotype :math:`x`</span>
-<span class="sd">* :math:`\gamma(x)`: mutation rate of phenotype :math:`x`</span>
-<span class="sd">* :math:`\mathcal{p}(x\mid x&#39;)`: phenotypic mutation transition density conditional on initial phenotype :math:`x&#39;`,</span>
-<span class="sd">  which we draw from to generate mutation effects when a mutation event occurs</span>
-<span class="sd">* :math:`\rho`: sampling probability of surviving lineages after :math:`\Delta t`</span>
-
-<span class="sd">Primary class :py:class:`TreeNode`</span>
-<span class="sd">----------------------------------</span>
+<span class="sd"> * :math:`\Delta t`: run time of the process</span>
+<span class="sd"> * :math:`\lambda(x)`: birth rate of phenotype :math:`x`</span>
+<span class="sd"> * :math:`\mu(x)`: death rate of phenotype :math:`x`</span>
+<span class="sd"> * :math:`\gamma(x)`: mutation rate of phenotype :math:`x`</span>
+<span class="sd"> * :math:`\mathcal{p}(x\mid x&#39;)`: phenotypic mutation transition density conditional on initial phenotype :math:`x&#39;`,</span>
+<span class="sd">   which we draw from to generate mutation effects when a mutation event occurs</span>
+<span class="sd"> * :math:`\rho`: sampling probability of surviving lineages after :math:`\Delta t`</span>
 
 <span class="sd">This module&#39;s primary class :py:class:`TreeNode` subclasses ETE&#39;s :py:class:`ete3.TreeNode`,</span>
 <span class="sd">with these notable differences:</span>
 
-<span class="sd">* Attribute :py:attr:`t`: the time :math:`t \in \mathbb{R}_{\ge 0}` of the event at the node</span>
-<span class="sd">* Attribute :py:attr:`x`: the phenotype :math:`x \in \mathbb{R}` of the node</span>
-<span class="sd">* Attribute :py:attr:`event`: the event that occurred at the node</span>
-<span class="sd">* Attribute :py:attr:`n_mutations`: the number of mutations that occurred on the branch above the node</span>
-<span class="sd">* Method :py:meth:`TreeNode.evolve`: evolve the tree, adding nodes according a BDMS process</span>
-<span class="sd">* Method :py:meth:`TreeNode.sample_survivors`: sample a subset of surviving leaves from the tree</span>
-<span class="sd">* Method :py:meth:`TreeNode.prune`: prune the tree subtree induced by the sampled leaves</span>
-<span class="sd">  (overrides ETE&#39;s :py:meth:`ete3.TreeNode.prune`)</span>
-<span class="sd">* Method :py:meth:`TreeNode.render`: visualizes the tree (overrides ETE&#39;s :py:meth:`ete3.TreeNode.render`)</span>
-
-<span class="sd">Additional classes:</span>
-<span class="sd">-------------------</span>
-
-<span class="sd">Rate response functions :py:class:`Response`</span>
-<span class="sd">^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>
-
-<span class="sd">Abstract base class for defining generic response functions (i.e. :math:`\lambda(x)`, :math:`\mu(x)`, :math:`\gamma(x)`),</span>
-<span class="sd">with arbitrary :py:class:`TreeNode` attribute dependence.</span>
-<span class="sd">Some concrete child classes are included.</span>
+<span class="sd"> * Attribute :py:attr:`t`: the time :math:`t \in \mathbb{R}_{\ge 0}` of the event at the node</span>
+<span class="sd"> * Attribute :py:attr:`x`: the phenotype :math:`x \in \mathbb{R}` of the node</span>
+<span class="sd"> * Attribute :py:attr:`event`: the event that occurred at the node</span>
+<span class="sd"> * Attribute :py:attr:`n_mutations`: the number of mutations that occurred on the branch above the node</span>
+<span class="sd"> * Method :py:meth:`TreeNode.evolve`: evolve the tree, adding nodes according a BDMS process</span>
+<span class="sd"> * Method :py:meth:`TreeNode.sample_survivors`: sample a subset of surviving leaves from the tree</span>
+<span class="sd"> * Method :py:meth:`TreeNode.prune`: prune the tree subtree induced by the sampled leaves</span>
+<span class="sd">   (overrides ETE&#39;s :py:meth:`ete3.TreeNode.prune`)</span>
+<span class="sd"> * Method :py:meth:`TreeNode.render`: visualizes the tree (overrides ETE&#39;s :py:meth:`ete3.TreeNode.render`)</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">import</span> <span class="nn">ete3</span>
 <span class="kn">from</span> <span class="nn">ete3.coretype.tree</span> <span class="kn">import</span> <span class="n">TreeError</span>
-<span class="kn">from</span> <span class="nn">gcdyn</span> <span class="kn">import</span> <span class="n">mutators</span>
+<span class="kn">from</span> <span class="nn">gcdyn</span> <span class="kn">import</span> <span class="n">mutators</span><span class="p">,</span> <span class="n">responses</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="c1"># NOTE: sphinx is currently unable to present this in condensed form, using a string type hint</span>
 <span class="c1"># of &quot;array-like&quot; in the docstring args for now, instead of ArrayLike hint in call signature</span>
 <span class="c1"># from numpy.typing import ArrayLike</span>
 
 <span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">expit</span>
 <span class="kn">import</span> <span class="nn">bisect</span>
 
 
-<div class="viewcode-block" id="Response"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.Response.html#gcdyn.bdms.Response">[docs]</a><span class="k">class</span> <span class="nc">Response</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Abstract base class for response function mapping</span>
-<span class="sd">    :py:class:`TreeNode` objects to ``float`` values given parameters.&quot;&quot;&quot;</span>
-
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">pass</span>
-
-<div class="viewcode-block" id="Response.__call__"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.Response.html#gcdyn.bdms.Response.__call__">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">pass</span></div>
-
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">())</span><span class="si">}</span><span class="s2">)&quot;</span></div>
-
-
-<div class="viewcode-block" id="PhenotypeResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.PhenotypeResponse.html#gcdyn.bdms.PhenotypeResponse">[docs]</a><span class="k">class</span> <span class="nc">PhenotypeResponse</span><span class="p">(</span><span class="n">Response</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Abstract base class for response function mapping from a</span>
-<span class="sd">    :py:class:`TreeNode` object&#39;s phenotype attribute :math:`x\in\mathbb{R}` to real values given parameters.</span>
-
-<span class="sd">    .. math::</span>
-<span class="sd">        f: \mathbb{R} \to \mathbb{R}</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-
-<div class="viewcode-block" id="PhenotypeResponse.__call__"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.PhenotypeResponse.html#gcdyn.bdms.PhenotypeResponse.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">x</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="PhenotypeResponse.f"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.PhenotypeResponse.html#gcdyn.bdms.PhenotypeResponse.f">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute :math:`f(x)`.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            x (array-like): Phenotype value.</span>
-<span class="sd">        &quot;&quot;&quot;</span></div></div>
-
-
-<div class="viewcode-block" id="ConstantResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.ConstantResponse.html#gcdyn.bdms.ConstantResponse">[docs]</a><span class="k">class</span> <span class="nc">ConstantResponse</span><span class="p">(</span><span class="n">PhenotypeResponse</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Returns attribute :math:`\theta\in\mathbb{R}` when an instance is called</span>
-<span class="sd">    on any :py:class:`TreeNode`.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        value: Constant response value.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
-
-<div class="viewcode-block" id="ConstantResponse.f"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.ConstantResponse.html#gcdyn.bdms.ConstantResponse.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div></div>
-
-
-<div class="viewcode-block" id="ExponentialResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.ExponentialResponse.html#gcdyn.bdms.ExponentialResponse">[docs]</a><span class="k">class</span> <span class="nc">ExponentialResponse</span><span class="p">(</span><span class="n">PhenotypeResponse</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Exponential response function on a :py:class:`TreeNode` object&#39;s</span>
-<span class="sd">    phenotype attribute :math:`x`.</span>
-
-<span class="sd">    .. math::</span>
-<span class="sd">        f(x) = \theta_3 e^{\theta_1 (x - \theta_2)} + \theta_4</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        xscale: :math:`\theta_1`</span>
-<span class="sd">        xshift: :math:`\theta_2`</span>
-<span class="sd">        yscale: :math:`\theta_3`</span>
-<span class="sd">        yshift: :math:`\theta_4`</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">xscale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">xshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-        <span class="n">yscale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">yshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-    <span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">=</span> <span class="n">xscale</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span> <span class="o">=</span> <span class="n">xshift</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">=</span> <span class="n">yscale</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span> <span class="o">=</span> <span class="n">yshift</span>
-
-<div class="viewcode-block" id="ExponentialResponse.f"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.ExponentialResponse.html#gcdyn.bdms.ExponentialResponse.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span></div></div>
-
-
-<div class="viewcode-block" id="SigmoidResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.SigmoidResponse.html#gcdyn.bdms.SigmoidResponse">[docs]</a><span class="k">class</span> <span class="nc">SigmoidResponse</span><span class="p">(</span><span class="n">PhenotypeResponse</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sigmoid response function on a :py:class:`TreeNode` object&#39;s phenotype</span>
-<span class="sd">    attribute :math:`x`.</span>
-
-<span class="sd">    .. math::</span>
-<span class="sd">        f(x) = \frac{\theta_3}{1 + e^{-\theta_1 (x - \theta_2)}} + \theta_4</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        xscale: :math:`\theta_1`</span>
-<span class="sd">        xshift: :math:`\theta_2`</span>
-<span class="sd">        yscale: :math:`\theta_3`</span>
-<span class="sd">        yshift: :math:`\theta_4`</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">xscale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">xshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-        <span class="n">yscale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
-        <span class="n">yshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-    <span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">=</span> <span class="n">xscale</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span> <span class="o">=</span> <span class="n">xshift</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">=</span> <span class="n">yscale</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span> <span class="o">=</span> <span class="n">yshift</span>
-
-<div class="viewcode-block" id="SigmoidResponse.__call__"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.SigmoidResponse.html#gcdyn.bdms.SigmoidResponse.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">x</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="SigmoidResponse.f"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.SigmoidResponse.html#gcdyn.bdms.SigmoidResponse.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">*</span> <span class="n">expit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span></div></div>
-
-
-<div class="viewcode-block" id="SoftReluResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.SoftReluResponse.html#gcdyn.bdms.SoftReluResponse">[docs]</a><span class="k">class</span> <span class="nc">SoftReluResponse</span><span class="p">(</span><span class="n">PhenotypeResponse</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Soft ReLU response function on a :py:class:`TreeNode` object&#39;s phenotype</span>
-<span class="sd">    attribute :math:`x`.</span>
-
-<span class="sd">    .. math::</span>
-<span class="sd">        f(x) = \theta_3\log(1 + e^{\theta_1 (x - \theta_2)}) + \theta_4</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        xscale: :math:`\theta_1`</span>
-<span class="sd">        xshift: :math:`\theta_2`</span>
-<span class="sd">        yscale: :math:`\theta_3`</span>
-<span class="sd">        yshift: :math:`\theta_4`</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">xscale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">xshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-        <span class="n">yscale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">yshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-    <span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">=</span> <span class="n">xscale</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span> <span class="o">=</span> <span class="n">xshift</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">=</span> <span class="n">yscale</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span> <span class="o">=</span> <span class="n">yshift</span>
-
-<div class="viewcode-block" id="SoftReluResponse.__call__"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.SoftReluResponse.html#gcdyn.bdms.SoftReluResponse.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">x</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="SoftReluResponse.f"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.SoftReluResponse.html#gcdyn.bdms.SoftReluResponse.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">logaddexp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span>
-        <span class="p">)</span></div></div>
-
-
 <div class="viewcode-block" id="TreeNode"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode">[docs]</a><span class="k">class</span> <span class="nc">TreeNode</span><span class="p">(</span><span class="n">ete3</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;A tree generated by a BDMS process. Subclasses</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;A tree generated by a BDMS process. Subclasses</span>
 <span class="sd">    :py:class:`ete3.TreeNode`.</span>
 
 <span class="sd">    Args:</span>
@@ -323,30 +247,31 @@
             <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name_generator</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">t</span>
-        <span class="sd">&quot;&quot;&quot;Time of the node.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Time of the node.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
-        <span class="sd">&quot;&quot;&quot;Phenotype of the node.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Phenotype of the node.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">event</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="sd">&quot;&quot;&quot;Event at this node.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Event at this node.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_mutations</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="sd">&quot;&quot;&quot;Number of mutations on the branch above this node (zero unless the tree has been pruned above this node,</span>
-<span class="sd">        removing mutation event nodes).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of mutations on the branch above this node (zero unless the</span>
+<span class="sd">        tree has been pruned above this node, removing mutation event</span>
+<span class="sd">        nodes).&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sampled</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pruned</span> <span class="o">=</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="TreeNode.evolve"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.evolve">[docs]</a>    <span class="k">def</span> <span class="nf">evolve</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">birth_rate</span><span class="p">:</span> <span class="n">Response</span> <span class="o">=</span> <span class="n">ConstantResponse</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
-        <span class="n">death_rate</span><span class="p">:</span> <span class="n">Response</span> <span class="o">=</span> <span class="n">ConstantResponse</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
-        <span class="n">mutation_rate</span><span class="p">:</span> <span class="n">Response</span> <span class="o">=</span> <span class="n">ConstantResponse</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">birth_rate</span><span class="p">:</span> <span class="n">responses</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">responses</span><span class="o">.</span><span class="n">ConstantResponse</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">death_rate</span><span class="p">:</span> <span class="n">responses</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">responses</span><span class="o">.</span><span class="n">ConstantResponse</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="n">mutation_rate</span><span class="p">:</span> <span class="n">responses</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">responses</span><span class="o">.</span><span class="n">ConstantResponse</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
         <span class="n">mutator</span><span class="p">:</span> <span class="n">mutators</span><span class="o">.</span><span class="n">Mutator</span> <span class="o">=</span> <span class="n">mutators</span><span class="o">.</span><span class="n">GaussianMutator</span><span class="p">(</span><span class="n">shift</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
         <span class="n">birth_mutations</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">min_survivors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">max_leaves</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
         <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evolve for time :math:`\Delta t`.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evolve for time :math:`\Delta t`.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            t: Evolve for this time</span>
@@ -424,7 +349,7 @@
             <span class="k">raise</span> <span class="n">TreeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;minimum number of survivors </span><span class="si">{</span><span class="n">min_survivors</span><span class="si">}</span><span class="s2"> not attained&quot;</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_aborted_evolve_cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Remove any children added to the root node during an aborted</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove any children added to the root node during an aborted</span>
 <span class="sd">        evolution attempt, and reset the node name generator.&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">remove_child</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
@@ -434,14 +359,14 @@
     <span class="k">def</span> <span class="nf">_generate_event</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">Δt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">birth_rate</span><span class="p">:</span> <span class="n">Response</span><span class="p">,</span>
-        <span class="n">death_rate</span><span class="p">:</span> <span class="n">Response</span><span class="p">,</span>
-        <span class="n">mutation_rate</span><span class="p">:</span> <span class="n">Response</span><span class="p">,</span>
+        <span class="n">birth_rate</span><span class="p">:</span> <span class="n">responses</span><span class="o">.</span><span class="n">Response</span><span class="p">,</span>
+        <span class="n">death_rate</span><span class="p">:</span> <span class="n">responses</span><span class="o">.</span><span class="n">Response</span><span class="p">,</span>
+        <span class="n">mutation_rate</span><span class="p">:</span> <span class="n">responses</span><span class="o">.</span><span class="n">Response</span><span class="p">,</span>
         <span class="n">mutator</span><span class="p">:</span> <span class="n">mutators</span><span class="o">.</span><span class="n">Mutator</span><span class="p">,</span>
         <span class="n">birth_mutations</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TreeNode&quot;</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Simulate a single event, adding a new child TreeNode to self, and</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Simulate a single event, adding a new child TreeNode to self, and</span>
 <span class="sd">        returning it.</span>
 
 <span class="sd">        The Δt parameter is a boundary time: events that reach this time</span>
@@ -494,7 +419,7 @@
         <span class="n">p</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Choose :math:`n` survivor leaves from the tree, or each survivor leaf with probability</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Choose :math:`n` survivor leaves from the tree, or each survivor leaf with probability</span>
 <span class="sd">        :math:`p`, to mark as sampled (via the event attribute).</span>
 
 <span class="sd">        Args:</span>
@@ -522,8 +447,8 @@
             <span class="n">node</span><span class="o">.</span><span class="n">_sampled</span> <span class="o">=</span> <span class="kc">True</span></div>
 
     <span class="c1"># NOTE: this could be generalized to take an ordered array-valued t, and made efficient via ordered traversal</span>
-<div class="viewcode-block" id="TreeNode.slice"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.slice">[docs]</a>    <span class="k">def</span> <span class="nf">slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return a list of attribute ``attr`` at time :math:`t` for all</span>
+<div class="viewcode-block" id="TreeNode.slice"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.slice">[docs]</a>    <span class="k">def</span> <span class="nf">slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return a list of attribute ``attr`` at time :math:`t` for all</span>
 <span class="sd">        lineages alive at that time.</span>
 
 <span class="sd">        Args:</span>
@@ -554,7 +479,7 @@
         <span class="p">]</span></div>
 
 <div class="viewcode-block" id="TreeNode.prune"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.prune">[docs]</a>    <span class="k">def</span> <span class="nf">prune</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Prune the tree to the subtree induced by the sampled leaves.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Prune the tree to the subtree induced by the sampled leaves.</span>
 
 <span class="sd">        Also removes mutation events, and annotates mutation counts in</span>
 <span class="sd">        child node ``n_mutations`` attribute.</span>
@@ -585,7 +510,7 @@
             <span class="n">node</span><span class="o">.</span><span class="n">_pruned</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="TreeNode.render"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.render">[docs]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">cbar_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;A thin wrapper around :py:func:`ete3.TreeNode.render` that adds some</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;A thin wrapper around :py:func:`ete3.TreeNode.render` that adds some</span>
 <span class="sd">        custom decoration and a color bar. As with the base class method, pass</span>
 <span class="sd">        ``&quot;%%inline&quot;`` for the first argument to render inline in a notebook.</span>
 <span class="sd">        See also ETE&#39;s tree rendering `tutorial`_ and linked API docs pages</span>
@@ -657,92 +582,50 @@
         <span class="k">if</span> <span class="n">cbar_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">cbar_file</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="TreeNode.log_likelihood"><a class="viewcode-back" href="../../_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.log_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">log_likelihood</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">birth_rate</span><span class="p">:</span> <span class="n">Response</span><span class="p">,</span>
-        <span class="n">death_rate</span><span class="p">:</span> <span class="n">Response</span><span class="p">,</span>
-        <span class="n">mutation_rate</span><span class="p">:</span> <span class="n">Response</span><span class="p">,</span>
-        <span class="n">mutator</span><span class="p">:</span> <span class="n">mutators</span><span class="o">.</span><span class="n">Mutator</span><span class="p">,</span>
-        <span class="n">sampling_probability</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the log-likelihood of a fully observed tree given the</span>
-<span class="sd">        specified birth, death, mutation, and sampling parameters.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            birth_rate: Birth rate response function.</span>
-<span class="sd">            death_rate: Death rate response function.</span>
-<span class="sd">            mutation_rate: Mutation rate response function.</span>
-<span class="sd">            mutator: Generator of mutation effects.</span>
-<span class="sd">            sampling_probability: Probability of sampling a survivor.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pruned</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;tree must be fully observed, not pruned&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sampled</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;tree must be sampled&quot;</span><span class="p">)</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_descendants</span><span class="p">():</span>
-            <span class="n">Δt</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">dist</span>
-            <span class="n">λ</span> <span class="o">=</span> <span class="n">birth_rate</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
-            <span class="n">μ</span> <span class="o">=</span> <span class="n">death_rate</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
-            <span class="n">γ</span> <span class="o">=</span> <span class="n">mutation_rate</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">sampling_probability</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sampling_probability must be in [0, 1]&quot;</span><span class="p">)</span>
-            <span class="n">ρ</span> <span class="o">=</span> <span class="n">sampling_probability</span>
-            <span class="n">Λ</span> <span class="o">=</span> <span class="n">λ</span> <span class="o">+</span> <span class="n">μ</span> <span class="o">+</span> <span class="n">γ</span>
-            <span class="n">logΛ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">Λ</span><span class="p">)</span>
-            <span class="c1"># First we have two cases that require special handling of the time interval as part of the</span>
-            <span class="c1"># likelihood.</span>
-            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">event</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_SAMPLING_EVENT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SURVIVAL_EVENT</span><span class="p">):</span>
-                <span class="c1"># exponential survival function (no event before sampling time), then sampling probability</span>
-                <span class="n">result</span> <span class="o">+=</span> <span class="o">-</span><span class="n">Λ</span> <span class="o">*</span> <span class="n">Δt</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
-                    <span class="n">ρ</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">event</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SAMPLING_EVENT</span> <span class="k">else</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">ρ</span>
-                <span class="p">)</span>
-            <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">event</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_MUTATION_EVENT</span> <span class="ow">and</span> <span class="n">Δt</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="c1"># mutation in offspring from birth (simulation run with birth_mutations=True)</span>
-                <span class="n">result</span> <span class="o">+=</span> <span class="n">mutator</span><span class="o">.</span><span class="n">logprob</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># For the rest of the cases, the likelihood is the product of the likelihood of the time</span>
-                <span class="c1"># interval (next line, exponential density), then the probability of the given event.</span>
-                <span class="n">result</span> <span class="o">+=</span> <span class="n">logΛ</span> <span class="o">-</span> <span class="n">Λ</span> <span class="o">*</span> <span class="n">Δt</span>
-                <span class="c1"># multinomial event probability</span>
-                <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">event</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_BIRTH_EVENT</span><span class="p">:</span>
-                    <span class="n">result</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">λ</span><span class="p">)</span> <span class="o">-</span> <span class="n">logΛ</span>
-                <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">event</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_DEATH_EVENT</span><span class="p">:</span>
-                    <span class="n">result</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">μ</span><span class="p">)</span> <span class="o">-</span> <span class="n">logΛ</span>
-                <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">event</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_MUTATION_EVENT</span><span class="p">:</span>
-                    <span class="n">result</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">γ</span><span class="p">)</span> <span class="o">-</span> <span class="n">logΛ</span> <span class="o">+</span> <span class="n">mutator</span><span class="o">.</span><span class="n">logprob</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown event </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">event</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span></div></div>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>
+           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Erick Matsen.</p>
-  </div>
+    <p>
+        &#169; Copyright 2022, Erick Matsen.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

@@ -1,7 +1,7 @@
-﻿gcdyn.fitness
-=============
+﻿gcdyn.model
+===========
 
-.. automodule:: gcdyn.fitness
+.. automodule:: gcdyn.model
 
    
    
@@ -20,7 +20,7 @@
       :template: custom-class-template.rst
       :nosignatures:
    
-      Fitness
+      BDMSModel
    
    
 
