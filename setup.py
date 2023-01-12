@@ -31,6 +31,6 @@ setuptools.setup(
         "biopython",
     ],
     extras_require={
-    "PyQt5": ["PyQt5",],
+        "PyQt5": ["PyQt5",],
     },
 )
