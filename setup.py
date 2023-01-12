@@ -15,20 +15,22 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/matsengrp/gcdyn",
-    packages=['gcdyn'],
+    packages=["gcdyn"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License (GPL)",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.7, <3.10",
+    python_requires="==3.9.*",
     install_requires=[
-        "PyQt5",
         "ete3",
         "matplotlib",
         "jaxlib",
-        "jax",
+        "jax[cpu]",
         "jaxopt",
         "biopython",
     ],
+    extras_require={
+        "PyQt5": ["PyQt5",],
+    },
 )

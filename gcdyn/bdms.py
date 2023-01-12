@@ -1,207 +1,44 @@
-r"""Birth-death-mutation-sampling (BDMS) process.
+r"""
+Birth-death-mutation-sampling (BDMS) process simulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The BDMS process is defined by the following parameters:
 
-* :math:`\Delta t`: run time of the process
-* :math:`\lambda(x)`: birth rate of phenotype :math:`x`
-* :math:`\mu(x)`: death rate of phenotype :math:`x`
-* :math:`\gamma(x)`: mutation rate of phenotype :math:`x`
-* :math:`\mathcal{p}(x\mid x')`: phenotypic mutation transition density conditional on initial phenotype :math:`x'`,
-  which we draw from to generate mutation effects when a mutation event occurs
-* :math:`\rho`: sampling probability of surviving lineages after :math:`\Delta t`
-
-Primary class :py:class:`TreeNode`
-----------------------------------
+ * :math:`\Delta t`: run time of the process
+ * :math:`\lambda(x)`: birth rate of phenotype :math:`x`
+ * :math:`\mu(x)`: death rate of phenotype :math:`x`
+ * :math:`\gamma(x)`: mutation rate of phenotype :math:`x`
+ * :math:`\mathcal{p}(x\mid x')`: phenotypic mutation transition density conditional on initial phenotype :math:`x'`,
+   which we draw from to generate mutation effects when a mutation event occurs
+ * :math:`\rho`: sampling probability of surviving lineages after :math:`\Delta t`
 
 This module's primary class :py:class:`TreeNode` subclasses ETE's :py:class:`ete3.TreeNode`,
 with these notable differences:
 
-* Attribute :py:attr:`t`: the time :math:`t \in \mathbb{R}_{\ge 0}` of the event at the node
-* Attribute :py:attr:`x`: the phenotype :math:`x \in \mathbb{R}` of the node
-* Attribute :py:attr:`event`: the event that occurred at the node
-* Attribute :py:attr:`n_mutations`: the number of mutations that occurred on the branch above the node
-* Method :py:meth:`TreeNode.evolve`: evolve the tree, adding nodes according a BDMS process
-* Method :py:meth:`TreeNode.sample_survivors`: sample a subset of surviving leaves from the tree
-* Method :py:meth:`TreeNode.prune`: prune the tree subtree induced by the sampled leaves
-  (overrides ETE's :py:meth:`ete3.TreeNode.prune`)
-* Method :py:meth:`TreeNode.render`: visualizes the tree (overrides ETE's :py:meth:`ete3.TreeNode.render`)
-
-Additional classes:
--------------------
-
-Rate response functions :py:class:`Response`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Abstract base class for defining generic response functions (i.e. :math:`\lambda(x)`, :math:`\mu(x)`, :math:`\gamma(x)`),
-with arbitrary :py:class:`TreeNode` attribute dependence.
-Some concrete child classes are included.
+ * Attribute :py:attr:`t`: the time :math:`t \in \mathbb{R}_{\ge 0}` of the event at the node
+ * Attribute :py:attr:`x`: the phenotype :math:`x \in \mathbb{R}` of the node
+ * Attribute :py:attr:`event`: the event that occurred at the node
+ * Attribute :py:attr:`n_mutations`: the number of mutations that occurred on the branch above the node
+ * Method :py:meth:`TreeNode.evolve`: evolve the tree, adding nodes according a BDMS process
+ * Method :py:meth:`TreeNode.sample_survivors`: sample a subset of surviving leaves from the tree
+ * Method :py:meth:`TreeNode.prune`: prune the tree subtree induced by the sampled leaves
+   (overrides ETE's :py:meth:`ete3.TreeNode.prune`)
+ * Method :py:meth:`TreeNode.render`: visualizes the tree (overrides ETE's :py:meth:`ete3.TreeNode.render`)
 """
-from abc import ABC, abstractmethod
 import ete3
 from ete3.coretype.tree import TreeError
-from gcdyn import mutators
+from gcdyn import mutators, responses
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from typing import Any, Optional, Union, List
+from typing import Any, Optional, Union
 
 # NOTE: sphinx is currently unable to present this in condensed form, using a string type hint
 # of "array-like" in the docstring args for now, instead of ArrayLike hint in call signature
 # from numpy.typing import ArrayLike
 
 import itertools
-from scipy.special import expit
 import bisect
-
-
-class Response(ABC):
-    r"""Abstract base class for response function mapping
-    :py:class:`TreeNode` objects to ``float`` values given parameters."""
-
-    @abstractmethod
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        pass
-
-    @abstractmethod
-    def __call__(self, node: "TreeNode") -> float:
-        pass
-
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in self.__dict__.items())})"
-
-
-class PhenotypeResponse(Response):
-    r"""Abstract base class for response function mapping from a
-    :py:class:`TreeNode` object's phenotype attribute :math:`x\in\mathbb{R}` to real values given parameters.
-
-    .. math::
-        f: \mathbb{R} \to \mathbb{R}
-
-    """
-
-    def __call__(self, node: "TreeNode") -> float:
-        return self.f(node.x)
-
-    @abstractmethod
-    def f(self, x) -> float:
-        r"""Compute :math:`f(x)`.
-
-        Args:
-            x (array-like): Phenotype value.
-        """
-
-
-class ConstantResponse(PhenotypeResponse):
-    r"""Returns attribute :math:`\theta\in\mathbb{R}` when an instance is called
-    on any :py:class:`TreeNode`.
-
-    Args:
-        value: Constant response value.
-    """
-
-    def __init__(self, value: float = 1.0):
-        self.value = value
-
-    def f(self, x) -> float:
-        return self.value * np.ones_like(x)
-
-
-class ExponentialResponse(PhenotypeResponse):
-    r"""Exponential response function on a :py:class:`TreeNode` object's
-    phenotype attribute :math:`x`.
-
-    .. math::
-        f(x) = \theta_3 e^{\theta_1 (x - \theta_2)} + \theta_4
-
-    Args:
-        xscale: :math:`\theta_1`
-        xshift: :math:`\theta_2`
-        yscale: :math:`\theta_3`
-        yshift: :math:`\theta_4`
-    """
-
-    def __init__(
-        self,
-        xscale: float = 1.0,
-        xshift: float = 0.0,
-        yscale: float = 1.0,
-        yshift: float = 0.0,
-    ):
-        self.xscale = xscale
-        self.xshift = xshift
-        self.yscale = yscale
-        self.yshift = yshift
-
-    def f(self, x) -> float:
-        return self.yscale * np.exp(self.xscale * (x - self.xshift)) + self.yshift
-
-
-class SigmoidResponse(PhenotypeResponse):
-    r"""Sigmoid response function on a :py:class:`TreeNode` object's phenotype
-    attribute :math:`x`.
-
-    .. math::
-        f(x) = \frac{\theta_3}{1 + e^{-\theta_1 (x - \theta_2)}} + \theta_4
-
-    Args:
-        xscale: :math:`\theta_1`
-        xshift: :math:`\theta_2`
-        yscale: :math:`\theta_3`
-        yshift: :math:`\theta_4`
-    """
-
-    def __init__(
-        self,
-        xscale: float = 1.0,
-        xshift: float = 0.0,
-        yscale: float = 2.0,
-        yshift: float = 0.0,
-    ):
-        self.xscale = xscale
-        self.xshift = xshift
-        self.yscale = yscale
-        self.yshift = yshift
-
-    def __call__(self, node: "TreeNode") -> float:
-        return self.f(node.x)
-
-    def f(self, x) -> float:
-        return self.yscale * expit(self.xscale * (x - self.xshift)) + self.yshift
-
-
-class SoftReluResponse(PhenotypeResponse):
-    r"""Soft ReLU response function on a :py:class:`TreeNode` object's phenotype
-    attribute :math:`x`.
-
-    .. math::
-        f(x) = \theta_3\log(1 + e^{\theta_1 (x - \theta_2)}) + \theta_4
-
-    Args:
-        xscale: :math:`\theta_1`
-        xshift: :math:`\theta_2`
-        yscale: :math:`\theta_3`
-        yshift: :math:`\theta_4`
-    """
-
-    def __init__(
-        self,
-        xscale: float = 1.0,
-        xshift: float = 0.0,
-        yscale: float = 1.0,
-        yshift: float = 0.0,
-    ):
-        self.xscale = xscale
-        self.xshift = xshift
-        self.yscale = yscale
-        self.yshift = yshift
-
-    def __call__(self, node: "TreeNode") -> float:
-        return self.f(node.x)
-
-    def f(self, x) -> float:
-        return (
-            self.yscale * np.logaddexp(0, self.xscale * (x - self.xshift)) + self.yshift
-        )
 
 
 class TreeNode(ete3.Tree):
@@ -250,17 +87,18 @@ class TreeNode(ete3.Tree):
         self.event = None
         """Event at this node."""
         self.n_mutations = 0
-        """Number of mutations on the branch above this node (zero unless the tree has been pruned above this node,
-        removing mutation event nodes)."""
+        """Number of mutations on the branch above this node (zero unless the
+        tree has been pruned above this node, removing mutation event
+        nodes)."""
         self._sampled = False
         self._pruned = False
 
     def evolve(
         self,
         t: float,
-        birth_rate: Response = ConstantResponse(1),
-        death_rate: Response = ConstantResponse(0),
-        mutation_rate: Response = ConstantResponse(1),
+        birth_rate: responses.Response = responses.ConstantResponse(1),
+        death_rate: responses.Response = responses.ConstantResponse(0),
+        mutation_rate: responses.Response = responses.ConstantResponse(1),
         mutator: mutators.Mutator = mutators.GaussianMutator(shift=0, scale=1),
         birth_mutations: bool = False,
         min_survivors: int = 1,
@@ -355,9 +193,9 @@ class TreeNode(ete3.Tree):
     def _generate_event(
         self,
         Δt: float,
-        birth_rate: Response,
-        death_rate: Response,
-        mutation_rate: Response,
+        birth_rate: responses.Response,
+        death_rate: responses.Response,
+        mutation_rate: responses.Response,
         mutator: mutators.Mutator,
         birth_mutations: bool,
         rng: np.random.Generator,
@@ -443,7 +281,7 @@ class TreeNode(ete3.Tree):
             node._sampled = True
 
     # NOTE: this could be generalized to take an ordered array-valued t, and made efficient via ordered traversal
-    def slice(self, t: float, attr: str = "x") -> List[Any]:
+    def slice(self, t: float, attr: str = "x") -> list[Any]:
         r"""Return a list of attribute ``attr`` at time :math:`t` for all
         lineages alive at that time.
 
@@ -579,61 +417,3 @@ class TreeNode(ete3.Tree):
             plt.savefig(cbar_file)
 
         return super().render(*args, **kwargs)
-
-    def log_likelihood(
-        self,
-        birth_rate: Response,
-        death_rate: Response,
-        mutation_rate: Response,
-        mutator: mutators.Mutator,
-        sampling_probability: float,
-    ) -> float:
-        r"""Compute the log-likelihood of a fully observed tree given the
-        specified birth, death, mutation, and sampling parameters.
-
-        Args:
-            birth_rate: Birth rate response function.
-            death_rate: Death rate response function.
-            mutation_rate: Mutation rate response function.
-            mutator: Generator of mutation effects.
-            sampling_probability: Probability of sampling a survivor.
-        """
-        if self._pruned:
-            raise NotImplementedError("tree must be fully observed, not pruned")
-        if not self._sampled:
-            raise RuntimeError("tree must be sampled")
-        result = 0
-        for node in self.iter_descendants():
-            Δt = node.dist
-            λ = birth_rate(node)
-            μ = death_rate(node)
-            γ = mutation_rate(node)
-            if not 0 <= sampling_probability <= 1:
-                raise ValueError("sampling_probability must be in [0, 1]")
-            ρ = sampling_probability
-            Λ = λ + μ + γ
-            logΛ = np.log(Λ)
-            # First we have two cases that require special handling of the time interval as part of the
-            # likelihood.
-            if node.event in (self._SAMPLING_EVENT, self._SURVIVAL_EVENT):
-                # exponential survival function (no event before sampling time), then sampling probability
-                result += -Λ * Δt + np.log(
-                    ρ if node.event == self._SAMPLING_EVENT else 1 - ρ
-                )
-            elif node.event == self._MUTATION_EVENT and Δt == 0:
-                # mutation in offspring from birth (simulation run with birth_mutations=True)
-                result += mutator.logprob(node)
-            else:
-                # For the rest of the cases, the likelihood is the product of the likelihood of the time
-                # interval (next line, exponential density), then the probability of the given event.
-                result += logΛ - Λ * Δt
-                # multinomial event probability
-                if node.event == self._BIRTH_EVENT:
-                    result += np.log(λ) - logΛ
-                elif node.event == self._DEATH_EVENT:
-                    result += np.log(μ) - logΛ
-                elif node.event == self._MUTATION_EVENT:
-                    result += np.log(γ) - logΛ + mutator.logprob(node)
-                else:
-                    raise ValueError(f"unknown event {node.event}")
-        return result

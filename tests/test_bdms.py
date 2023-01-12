@@ -1,5 +1,5 @@
 import numpy as np
-from gcdyn import bdms, mutators
+from gcdyn import bdms, mutators, responses
 import unittest
 
 
@@ -10,9 +10,9 @@ class TestTreeNode(unittest.TestCase):
             try:
                 self.tree.evolve(
                     5,
-                    birth_rate=bdms.SigmoidResponse(1, 0, 2, 0),
-                    death_rate=bdms.ConstantResponse(1),
-                    mutation_rate=bdms.ConstantResponse(1),
+                    birth_rate=responses.SigmoidResponse(1, 0, 2, 0),
+                    death_rate=responses.ConstantResponse(1),
+                    mutation_rate=responses.ConstantResponse(1),
                     mutator=mutators.GaussianMutator(-1, 1),
                     min_survivors=20,
                     seed=seed,
