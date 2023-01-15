@@ -6,8 +6,6 @@ from gcdyn import bdms, gpmap, mutators, responses, utils
 # Note that some fixtures have been moved to conftest.py so they are more widely
 # available.
 
-# TODO what tests do we really want?
-
 
 @pytest.fixture
 def uniform_mutator():

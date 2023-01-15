@@ -1,7 +1,12 @@
 import os
 import sys
+
 import pytest
 from Bio import SeqIO
+
+sys.path.append("experiments")
+
+import replay
 
 
 @pytest.fixture
@@ -15,10 +20,9 @@ def seq_list():
     return seqs
 
 
-# TODO Will can you double check this?
 @pytest.fixture
 def replay_naive():
-    return "GAGGTGCAGCTTCAGGAGTCAGGACCTAGCCTCGTGAAACCTTCTCAGACTCTGTCCCTCACCTGTTCTGTCACTGGCGACTCCATCACCAGTGGTTACTGGAACTGGATCCGGAAATTCCCAGGGAATAAACTTGAGTACATGGGGTACATAAGCTACAGTGGTAGCACTTACTACAATCCATCTCTCAAAAGTCGAATCTCCATCACTCGAGACACATCCAAGAACCAGTACTACCTGCAGTTGAATTCTGTGACTACTGAGGACACAGCCACATATTACTGTGCAAGGGACTTCGATGTCTGGGGCGCAGGGACCACGGTCACCGTCTCCTCAGACATTGTGATGACTCAGTCTCAAAAATTCATGTCCACATCAGTAGGAGACAGGGTCAGCGTCACCTGCAAGGCCAGTCAGAATGTGGGTACTAATGTAGCCTGGTATCAACAGAAACCAGGGCAATCTCCTAAAGCACTGATTTACTCGGCATCCTACAGGTACAGTGGAGTCCCTGATCGCTTCACAGGCAGTGGATCTGGGACAGATTTCACTCTCACCATCAGCAATGTGCAGTCTGAAGACTTGGCAGAGTATTTCTGTCAGCAATATAACAGCTATCCTCTCACGTTCGGCTCGGGGACTAAGCTAGAAATAAAA"
+    return replay.naive_sequence
 
 
 @pytest.fixture
@@ -46,18 +50,3 @@ def MK_RS5NF_mutability_path(gcdyn_data_dir):
 @pytest.fixture
 def MK_RS5NF_substitution_path(gcdyn_data_dir):
     return os.path.join(gcdyn_data_dir, "MK_RS5NF_substitution.csv")
-
-
-# pkgutil.get_data("gcdyn", 'data/MK_RS5NF_mutability.csv')
-
-# with importlib.resources.path('gcdyn', 'MK_RS5NF_mutability.csv') as data_path:
-#     print(data_path)
-#
-#
-# import pkgutil
-# import pkg_resources
-#
-# print(os.path.join(d, 'data/MK_RS5NF_mutability.csv'))
-#
-# d = os.path.dirname(sys.modules["gcdyn"].__file__)
-# print(os.path.join(d, 'data/MK_RS5NF_mutability.csv'))
