@@ -23,11 +23,11 @@ def test_simple_fivemer_contexts():
     assert utils.simple_fivemer_contexts(sequence) == correct_contexts
 
 
-def test_sequence_context_mutation_response(mutability):
+def test_sequence_context_mutation_response(mk_rs5nf_mutability):
     node = bdms.TreeNode()
     node.sequence = "ACTGCA"
     seq_resp = responses.SequenceContextMutationResponse(
-        mutability, utils.simple_fivemer_contexts
+        mk_rs5nf_mutability, utils.simple_fivemer_contexts
     )
     correct_mutabilty = 0.000251042867724124 + 0.00233425857869025
     assert correct_mutabilty == pytest.approx(seq_resp(node))

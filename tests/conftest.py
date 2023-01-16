@@ -26,6 +26,11 @@ def replay_naive():
 
 
 @pytest.fixture
+def mk_rs5nf_mutability():
+    return replay.mutability
+
+
+@pytest.fixture
 def seq_list_big():
     seqs = [
         str(seq_record.seq)
