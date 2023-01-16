@@ -223,7 +223,7 @@ class UniformMutator(SequenceMutator):
 
     def mutate(
         self,
-        node: "ete3.TreeNode",
+        node: ete3.TreeNode,
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
         alphabet = "ACGT"
@@ -258,7 +258,7 @@ class ContextMutator(SequenceMutator):
 
     def mutate(
         self,
-        node: "ete3.TreeNode",
+        node: ete3.TreeNode,
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
         """Mutate node.sequence according to an AID hotspot-aware mutation model using
@@ -303,7 +303,7 @@ class SequencePhenotypeMutator(AttrMutator):
 
     def mutate(
         self,
-        node: "ete3.TreeNode",
+        node: ete3.TreeNode,
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
 
