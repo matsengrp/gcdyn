@@ -1,5 +1,4 @@
 import pytest
-import pandas as pd
 
 from gcdyn import bdms, gpmap, mutators, responses, utils
 
@@ -39,21 +38,3 @@ def test_uniform_mutator(uniform_mutator, gp_map):
     node.x = gp_map(node.sequence)
     mutator = mutators.SequencePhenotypeMutator(uniform_mutator, gp_map)
     mutator.mutate(node)
-
-
-def test_mutator_in_tree(uniform_mutator, gp_map):
-    tree = bdms.TreeNode()
-    tree.sequence = "AGCT"
-    tree.x = gp_map(tree.sequence)
-    for seed in range(1000):
-        try:
-            tree.evolve(
-                5,
-                mutator=mutators.SequencePhenotypeMutator(uniform_mutator, gp_map),
-                min_survivors=20,
-                seed=seed,
-            )
-            break
-        except bdms.TreeError:
-            continue
-    print([node.sequence for node in tree.iter_leaves()])

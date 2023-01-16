@@ -6,7 +6,7 @@ import sys
 
 import pandas as pd
 
-from gcdyn import bdms, gpmap, mutators, responses, utils
+from gcdyn import mutators, responses, utils
 
 # TODO Will can you double check this naive sequence?
 

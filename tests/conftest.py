@@ -40,18 +40,3 @@ def seq_list_big():
         if seq_record.id != "naive"
     ]
     return seqs
-
-
-@pytest.fixture
-def gcdyn_data_dir():
-    return os.path.join(os.path.dirname(sys.modules["gcdyn"].__file__), "data")
-
-
-@pytest.fixture
-def MK_RS5NF_mutability_path(gcdyn_data_dir):
-    return os.path.join(gcdyn_data_dir, "MK_RS5NF_mutability.csv")
-
-
-@pytest.fixture
-def MK_RS5NF_substitution_path(gcdyn_data_dir):
-    return os.path.join(gcdyn_data_dir, "MK_RS5NF_substitution.csv")
