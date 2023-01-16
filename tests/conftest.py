@@ -21,11 +21,6 @@ def seq_list():
 
 
 @pytest.fixture
-def replay_naive():
-    return replay.naive_sequence
-
-
-@pytest.fixture
 def mk_rs5nf_mutability():
     return replay.mutability
 
