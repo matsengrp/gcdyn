@@ -4,9 +4,7 @@ import sys
 import pytest
 from Bio import SeqIO
 
-sys.path.append("experiments")
-
-import replay
+from experiments import replay
 
 
 @pytest.fixture
