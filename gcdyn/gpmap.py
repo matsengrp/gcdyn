@@ -36,7 +36,7 @@ class ConstantGPMap(GPMap):
         constant: The constant returned by this GPMap.
     """
 
-    def __init__(self, constant: float, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, constant: float) -> None:
         self.constant = constant
 
     def __call__(self, sequence: str) -> float:
