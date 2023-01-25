@@ -40,9 +40,4 @@ class ConstantGPMap(GPMap):
         self.constant = constant
 
     def __call__(self, sequence: str) -> float:
-        r"""Evaluate a GPMap on a given DNA sequence.
-
-        Args:
-            sequence: A DNA sequence.
-        """
         return self.constant
