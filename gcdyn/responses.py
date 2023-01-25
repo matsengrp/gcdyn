@@ -8,7 +8,8 @@ Some concrete child classes are included.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, List, TypeVar
+from typing import Any, TypeVar
+from collections.abc import Callable
 import ete3
 from jax.tree_util import register_pytree_node
 
