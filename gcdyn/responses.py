@@ -336,14 +336,14 @@ class SequenceContextMutationResponse(SequenceResponse):
     Importantly, the mutability needs to be in units of mutations per unit time.
 
     Args:
-        mutability: a mapping from local context to mutation rate (mutations per site per unit time) 
+        mutability: a mapping from local context to mutation rate (mutations per site per unit time)
         seq_to_contexts: a function that accepts a sequence and splits it into local contexts
     """
 
     def __init__(
         self,
         mutability: pd.Series,
-        seq_to_contexts: Callable[str, List[str]],
+        seq_to_contexts: Callable[str, list[str]],
     ):
 
         self.mutability = mutability
