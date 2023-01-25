@@ -335,7 +335,7 @@ class SequenceContextMutationResponse(SequenceResponse):
     Importantly, the mutability needs to be in units of mutations per unit time.
 
     Args:
-        mutability: a mapping from local context to mutability
+        mutability: a mapping from local context to mutation rate (mutations per site per unit time) 
         seq_to_contexts: a function that accepts a sequence and splits it into local contexts
     """
 
