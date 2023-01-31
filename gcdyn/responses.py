@@ -313,14 +313,6 @@ class SequenceResponse(Response):
     def __call__(self, node: "ete3.TreeNode") -> float:
         return self.f(node.sequence)
 
-    @property
-    def _param_dict(self) -> dict:
-        return {}
-
-    @_param_dict.setter
-    def _param_dict(self, d):
-        pass
-
     @abstractmethod
     def f(self, sequence) -> float:
         r"""Compute a sequence response.`.
@@ -349,8 +341,16 @@ class SequenceContextMutationResponse(SequenceResponse):
         self.mutability = mutability
         self.seq_to_contexts = seq_to_contexts
 
+    @property
+    def _param_dict(self) -> dict:
+        return {}
+
+    @_param_dict.setter
+    def _param_dict(self, d):
+        pass
+
     def f(self, sequence) -> float:
-        """ """
+        """The total mutability of a given sequence."""
 
         contexts = self.seq_to_contexts(sequence)
         return sum(self.mutability[context] for context in contexts)

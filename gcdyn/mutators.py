@@ -319,4 +319,7 @@ class SequencePhenotypeMutator(AttrMutator):
             setattr(node, self.attr, self.gp_map(node.sequence))
 
     def prob(self, attr1, attr2, log: bool = False) -> float:
-        raise NotImplementedError
+        raise NotImplementedError(
+            "This doesn't make sense according to the current "
+            "formulation because attr1 and attr2 will be phenotypes."
+        )
