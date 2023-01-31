@@ -25,6 +25,7 @@ setuptools.setup(
     install_requires=[
         "ete3",
         "matplotlib",
+        "pandas",
         "jaxlib",
         "jax[cpu]",
         "jaxopt",
