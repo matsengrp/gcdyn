@@ -219,7 +219,7 @@ class UniformMutator(SequenceMutator):
     Args:
         node: a TreeNode with a string-valued sequence attribute consisting of
               characters ``ACGT``
-        seed: See above.
+        seed: See :py:class:`Mutator`.
     """
 
     def mutate(
