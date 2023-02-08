@@ -262,7 +262,7 @@ class ContextMutator(SequenceMutator):
         node: ete3.TreeNode,
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
-        """Mutate node.sequence according to an AID hotspot-aware mutation model using
+        """Mutate ``node.sequence`` according to an AID hotspot-aware mutation model using
         mutability values at each nucleotide 5mer and substitution probabilities.
 
         Args:
