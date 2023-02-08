@@ -7,7 +7,8 @@ with arbitrary :py:class:`ete3.TreeNode` attribute dependence.
 Some concrete child classes are included.
 """
 from abc import ABC, abstractmethod
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Optional, Union
+from collections.abc import Callable
 import numpy as np
 import pandas as pd
 from scipy.stats import norm, gaussian_kde
