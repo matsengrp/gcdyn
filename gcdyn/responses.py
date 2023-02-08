@@ -9,9 +9,11 @@ Some concrete child classes are included.
 
 from abc import ABC, abstractmethod
 from typing import Any, TypeVar
+from collections.abc import Callable
 import ete3
 from jax.tree_util import register_pytree_node
 
+import pandas as pd
 import jax.numpy as jnp
 import numpy as onp
 import jax.scipy.special as jsp
@@ -297,3 +299,58 @@ class SoftReluResponse(PhenotypeResponse):
         self.xshift = d["xshift"]
         self.yscale = d["yscale"]
         self.yshift = d["yshift"]
+
+
+class SequenceResponse(Response):
+    r"""Abstract base class for response function mapping from a
+    :py:class:`TreeNode` object's sequence attribute to real values given parameters.
+
+    .. math::
+        f: \{A,C,G,T\}^n \to \mathbb{R}
+
+    """
+
+    def __call__(self, node: "ete3.TreeNode") -> float:
+        return self.f(node.sequence)
+
+    @abstractmethod
+    def f(self, sequence) -> float:
+        r"""Compute a sequence response.`.
+
+        Args:
+            sequence: DNA sequence.
+        """
+
+
+class SequenceContextMutationResponse(SequenceResponse):
+    """A Response that accepts a sequence and outputs an aggregate mutation
+    rate.
+
+    Importantly, the mutability needs to be in units of mutations per unit time.
+
+    Args:
+        mutability: a mapping from local context to mutation rate (mutations per site per unit time)
+        seq_to_contexts: a function that accepts a sequence and splits it into local contexts
+    """
+
+    def __init__(
+        self,
+        mutability: pd.Series,
+        seq_to_contexts: Callable[str, list[str]],
+    ):
+        self.mutability = mutability
+        self.seq_to_contexts = seq_to_contexts
+
+    @property
+    def _param_dict(self) -> dict:
+        return {}
+
+    @_param_dict.setter
+    def _param_dict(self, d):
+        pass
+
+    def f(self, sequence) -> float:
+        """The total mutability of a given sequence."""
+
+        contexts = self.seq_to_contexts(sequence)
+        return sum(self.mutability[context] for context in contexts)

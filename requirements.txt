@@ -2,12 +2,12 @@ black
 docformatter
 flake8
 pytest
+nbval
 sphinx
 sphinx-argparse
 sphinx_rtd_theme
 sphinx-autodoc-typehints
 pandoc
 jupyterlab
-pandas
 seaborn
 biopython
