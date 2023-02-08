@@ -249,7 +249,7 @@ class ContextMutator(SequenceMutator):
         self,
         mutability: pd.Series,
         substitution: pd.DataFrame,
-        seq_to_contexts: Callable[str, List[str]],
+        seq_to_contexts: Callable[str, list[str]],
     ):
         super().__init__()
 
