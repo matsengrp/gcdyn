@@ -1,93 +1,47 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>gcdyn.responses &mdash; gcdyn  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="gcdyn.responses.ConstantResponse" href="gcdyn.responses.ConstantResponse.html" />
     <link rel="prev" title="gcdyn.bdms.TreeNode" href="gcdyn.bdms.TreeNode.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../index.html" class="icon icon-home"> gcdyn
           
-
-          
+          <a href="../index.html">
+            
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
@@ -103,6 +57,8 @@
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.responses.ExponentialResponse.html">gcdyn.responses.ExponentialResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.responses.PhenotypeResponse.html">gcdyn.responses.PhenotypeResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.responses.Response.html">gcdyn.responses.Response</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.responses.SequenceContextMutationResponse.html">gcdyn.responses.SequenceContextMutationResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.responses.SequenceResponse.html">gcdyn.responses.SequenceResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.responses.SigmoidResponse.html">gcdyn.responses.SigmoidResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.responses.SoftReluResponse.html">gcdyn.responses.SoftReluResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#gcdyn.responses.Response"><code class="docutils literal notranslate"><span class="pre">Response</span></code></a></li>
@@ -126,10 +82,20 @@
 <li class="toctree-l4"><a class="reference internal" href="#gcdyn.responses.SoftReluResponse.f"><code class="docutils literal notranslate"><span class="pre">SoftReluResponse.f()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#gcdyn.responses.SequenceResponse"><code class="docutils literal notranslate"><span class="pre">SequenceResponse</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gcdyn.responses.SequenceResponse.f"><code class="docutils literal notranslate"><span class="pre">SequenceResponse.f()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#gcdyn.responses.SequenceContextMutationResponse"><code class="docutils literal notranslate"><span class="pre">SequenceContextMutationResponse</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gcdyn.responses.SequenceContextMutationResponse.f"><code class="docutils literal notranslate"><span class="pre">SequenceContextMutationResponse.f()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.mutators.html">gcdyn.mutators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.gpmap.html">gcdyn.gpmap</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.model.html">gcdyn.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.utils.html">gcdyn.utils</a></li>
 </ul>
 </li>
 </ul>
@@ -140,75 +106,34 @@
 <li class="toctree-l1"><a class="reference internal" href="../developer.html#todo-list">Todo list</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">gcdyn</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../api.html">Modules</a> &raquo;</li>
-        
-      <li>gcdyn.responses</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Modules</a></li>
+      <li class="breadcrumb-item active">gcdyn.responses</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="module-gcdyn.responses">
-<span id="gcdyn-responses"></span><h1>gcdyn.responses<a class="headerlink" href="#module-gcdyn.responses" title="Permalink to this heading">¶</a></h1>
+<span id="gcdyn-responses"></span><h1>gcdyn.responses<a class="headerlink" href="#module-gcdyn.responses" title="Permalink to this heading"></a></h1>
 <section id="event-rate-response-functions">
-<h2>Event rate response functions<a class="headerlink" href="#event-rate-response-functions" title="Permalink to this heading">¶</a></h2>
+<h2>Event rate response functions<a class="headerlink" href="#event-rate-response-functions" title="Permalink to this heading"></a></h2>
 <p>Abstract base class for defining generic response functions (e.g. <span class="math notranslate nohighlight">\(\lambda(x)\)</span>, <span class="math notranslate nohighlight">\(\mu(x)\)</span>, <span class="math notranslate nohighlight">\(\gamma(x)\)</span>),
 with arbitrary <code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code> attribute dependence.
 Some concrete child classes are included.</p>
@@ -228,6 +153,12 @@ Some concrete child classes are included.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="gcdyn.responses.Response.html#gcdyn.responses.Response" title="gcdyn.responses.Response"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Response</span></code></a></p></td>
 <td><p>Abstract base class for response function mapping <code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code> objects to <code class="docutils literal notranslate"><span class="pre">float</span></code> values given parameters.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.responses.SequenceContextMutationResponse.html#gcdyn.responses.SequenceContextMutationResponse" title="gcdyn.responses.SequenceContextMutationResponse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SequenceContextMutationResponse</span></code></a></p></td>
+<td><p>A Response that accepts a sequence and outputs an aggregate mutation rate.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="gcdyn.responses.SequenceResponse.html#gcdyn.responses.SequenceResponse" title="gcdyn.responses.SequenceResponse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SequenceResponse</span></code></a></p></td>
+<td><p>Abstract base class for response function mapping from a <code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code> object's sequence attribute to real values given parameters.</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.responses.SigmoidResponse.html#gcdyn.responses.SigmoidResponse" title="gcdyn.responses.SigmoidResponse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SigmoidResponse</span></code></a></p></td>
 <td><p>Sigmoid response function on a <code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code> object's phenotype attribute <span class="math notranslate nohighlight">\(x\)</span>.</p></td>
 </tr>
@@ -238,7 +169,7 @@ Some concrete child classes are included.</p>
 </table>
 <dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.responses.Response">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.responses.</span></span><span class="sig-name descname"><span class="pre">Response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#Response"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.Response" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.responses.</span></span><span class="sig-name descname"><span class="pre">Response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#Response"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.Response" title="Permalink to this definition"></a></dt>
 <dd><p>Abstract base class for response function mapping
 <code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code> objects to <code class="docutils literal notranslate"><span class="pre">float</span></code> values given parameters.</p>
 <dl class="field-list simple">
@@ -250,14 +181,14 @@ Some concrete child classes are included.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.responses.PhenotypeResponse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.responses.</span></span><span class="sig-name descname"><span class="pre">PhenotypeResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#PhenotypeResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.PhenotypeResponse" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.responses.</span></span><span class="sig-name descname"><span class="pre">PhenotypeResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#PhenotypeResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.PhenotypeResponse" title="Permalink to this definition"></a></dt>
 <dd><p>Abstract base class for response function mapping from a
 <code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code> object’s phenotype attribute <span class="math notranslate nohighlight">\(x\in\mathbb{R}\)</span> to real values given parameters.</p>
 <div class="math notranslate nohighlight">
 \[f: \mathbb{R} \to \mathbb{R}\]</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.responses.PhenotypeResponse.f">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#PhenotypeResponse.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.PhenotypeResponse.f" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#PhenotypeResponse.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.PhenotypeResponse.f" title="Permalink to this definition"></a></dt>
 <dd><p>Compute <span class="math notranslate nohighlight">\(f(x)\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -273,7 +204,7 @@ Some concrete child classes are included.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.responses.ConstantResponse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.responses.</span></span><span class="sig-name descname"><span class="pre">ConstantResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#ConstantResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.ConstantResponse" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.responses.</span></span><span class="sig-name descname"><span class="pre">ConstantResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#ConstantResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.ConstantResponse" title="Permalink to this definition"></a></dt>
 <dd><p>Returns attribute <span class="math notranslate nohighlight">\(\theta\in\mathbb{R}\)</span> when an instance is called
 on any <code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code>.</p>
 <dl class="field-list simple">
@@ -286,7 +217,7 @@ on any <code class="xref py py-class docutils literal notranslate"><span class="
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.responses.ConstantResponse.f">
-<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#ConstantResponse.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.ConstantResponse.f" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#ConstantResponse.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.ConstantResponse.f" title="Permalink to this definition"></a></dt>
 <dd><p>Compute <span class="math notranslate nohighlight">\(f(x)\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -302,7 +233,7 @@ on any <code class="xref py py-class docutils literal notranslate"><span class="
 
 <dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.responses.ExponentialResponse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.responses.</span></span><span class="sig-name descname"><span class="pre">ExponentialResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#ExponentialResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.ExponentialResponse" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.responses.</span></span><span class="sig-name descname"><span class="pre">ExponentialResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#ExponentialResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.ExponentialResponse" title="Permalink to this definition"></a></dt>
 <dd><p>Exponential response function on a <code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code> object’s
 phenotype attribute <span class="math notranslate nohighlight">\(x\)</span>.</p>
 <div class="math notranslate nohighlight">
@@ -320,7 +251,7 @@ phenotype attribute <span class="math notranslate nohighlight">\(x\)</span>.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.responses.ExponentialResponse.f">
-<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#ExponentialResponse.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.ExponentialResponse.f" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#ExponentialResponse.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.ExponentialResponse.f" title="Permalink to this definition"></a></dt>
 <dd><p>Compute <span class="math notranslate nohighlight">\(f(x)\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -336,7 +267,7 @@ phenotype attribute <span class="math notranslate nohighlight">\(x\)</span>.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.responses.SigmoidResponse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.responses.</span></span><span class="sig-name descname"><span class="pre">SigmoidResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#SigmoidResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.SigmoidResponse" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.responses.</span></span><span class="sig-name descname"><span class="pre">SigmoidResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#SigmoidResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.SigmoidResponse" title="Permalink to this definition"></a></dt>
 <dd><p>Sigmoid response function on a <code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code> object’s phenotype
 attribute <span class="math notranslate nohighlight">\(x\)</span>.</p>
 <div class="math notranslate nohighlight">
@@ -354,7 +285,7 @@ attribute <span class="math notranslate nohighlight">\(x\)</span>.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.responses.SigmoidResponse.f">
-<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#SigmoidResponse.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.SigmoidResponse.f" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#SigmoidResponse.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.SigmoidResponse.f" title="Permalink to this definition"></a></dt>
 <dd><p>Compute <span class="math notranslate nohighlight">\(f(x)\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -370,7 +301,7 @@ attribute <span class="math notranslate nohighlight">\(x\)</span>.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.responses.SoftReluResponse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.responses.</span></span><span class="sig-name descname"><span class="pre">SoftReluResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#SoftReluResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.SoftReluResponse" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.responses.</span></span><span class="sig-name descname"><span class="pre">SoftReluResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#SoftReluResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.SoftReluResponse" title="Permalink to this definition"></a></dt>
 <dd><p>Soft ReLU response function on a <code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code> object’s phenotype
 attribute <span class="math notranslate nohighlight">\(x\)</span>.</p>
 <div class="math notranslate nohighlight">
@@ -388,7 +319,7 @@ attribute <span class="math notranslate nohighlight">\(x\)</span>.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.responses.SoftReluResponse.f">
-<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#SoftReluResponse.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.SoftReluResponse.f" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#SoftReluResponse.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.SoftReluResponse.f" title="Permalink to this definition"></a></dt>
 <dd><p>Compute <span class="math notranslate nohighlight">\(f(x)\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -402,54 +333,87 @@ attribute <span class="math notranslate nohighlight">\(x\)</span>.</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="gcdyn.responses.SequenceResponse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.responses.</span></span><span class="sig-name descname"><span class="pre">SequenceResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#SequenceResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.SequenceResponse" title="Permalink to this definition"></a></dt>
+<dd><p>Abstract base class for response function mapping from a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code> object’s sequence attribute to real values given parameters.</p>
+<div class="math notranslate nohighlight">
+\[f: \{A,C,G,T\}^n \to \mathbb{R}\]</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.responses.SequenceResponse.f">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#SequenceResponse.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.SequenceResponse.f" title="Permalink to this definition"></a></dt>
+<dd><p>Compute a sequence response.`.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sequence</strong> – DNA sequence.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gcdyn.responses.SequenceContextMutationResponse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.responses.</span></span><span class="sig-name descname"><span class="pre">SequenceContextMutationResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mutability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_to_contexts</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#SequenceContextMutationResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.SequenceContextMutationResponse" title="Permalink to this definition"></a></dt>
+<dd><p>A Response that accepts a sequence and outputs an aggregate mutation
+rate.</p>
+<p>Importantly, the mutability needs to be in units of mutations per unit time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mutability</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code>) – a mapping from local context to mutation rate (mutations per site per unit time)</p></li>
+<li><p><strong>seq_to_contexts</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]]) – a function that accepts a sequence and splits it into local contexts</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.responses.SequenceContextMutationResponse.f">
+<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/responses.html#SequenceContextMutationResponse.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.responses.SequenceContextMutationResponse.f" title="Permalink to this definition"></a></dt>
+<dd><p>The total mutability of a given sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="gcdyn.responses.ConstantResponse.html" class="btn btn-neutral float-right" title="gcdyn.responses.ConstantResponse" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="gcdyn.bdms.TreeNode.html" class="btn btn-neutral float-left" title="gcdyn.bdms.TreeNode" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gcdyn.responses.ConstantResponse.html" class="btn btn-neutral float-right" title="gcdyn.responses.ConstantResponse" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2022, Erick Matsen.
-
-    </p>
+    <p>&#169; Copyright 2022, Erick Matsen.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

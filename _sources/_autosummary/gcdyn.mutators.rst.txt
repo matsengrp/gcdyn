@@ -21,10 +21,14 @@
       :nosignatures:
    
       AttrMutator
+      ContextMutator
       DiscreteMutator
       GaussianMutator
       KdeMutator
       Mutator
+      SequenceMutator
+      SequencePhenotypeMutator
+      UniformMutator
    
    
 

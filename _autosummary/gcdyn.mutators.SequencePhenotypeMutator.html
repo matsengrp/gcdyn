@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gcdyn.mutators.SequencePhenotypeMutator &mdash; gcdyn  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="gcdyn.mutators.UniformMutator" href="gcdyn.mutators.UniformMutator.html" />
+    <link rel="prev" title="gcdyn.mutators.SequenceMutator" href="gcdyn.mutators.SequenceMutator.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cite.html">Citing <code class="docutils literal notranslate"><span class="pre">gcdyn</span></code></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.bdms.html">gcdyn.bdms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.responses.html">gcdyn.responses</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="gcdyn.mutators.html">gcdyn.mutators</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#mutation-effects-generators">Mutation effects generators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.AttrMutator.html">gcdyn.mutators.AttrMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.ContextMutator.html">gcdyn.mutators.ContextMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.DiscreteMutator.html">gcdyn.mutators.DiscreteMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.GaussianMutator.html">gcdyn.mutators.GaussianMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.KdeMutator.html">gcdyn.mutators.KdeMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.Mutator.html">gcdyn.mutators.Mutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.SequenceMutator.html">gcdyn.mutators.SequenceMutator</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.mutators.SequencePhenotypeMutator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gcdyn.mutators.SequencePhenotypeMutator"><code class="docutils literal notranslate"><span class="pre">SequencePhenotypeMutator</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.UniformMutator.html">gcdyn.mutators.UniformMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#gcdyn.mutators.Mutator"><code class="docutils literal notranslate"><span class="pre">Mutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#gcdyn.mutators.AttrMutator"><code class="docutils literal notranslate"><span class="pre">AttrMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#gcdyn.mutators.GaussianMutator"><code class="docutils literal notranslate"><span class="pre">GaussianMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#gcdyn.mutators.KdeMutator"><code class="docutils literal notranslate"><span class="pre">KdeMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#gcdyn.mutators.DiscreteMutator"><code class="docutils literal notranslate"><span class="pre">DiscreteMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#gcdyn.mutators.SequenceMutator"><code class="docutils literal notranslate"><span class="pre">SequenceMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#gcdyn.mutators.UniformMutator"><code class="docutils literal notranslate"><span class="pre">UniformMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#gcdyn.mutators.ContextMutator"><code class="docutils literal notranslate"><span class="pre">ContextMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#gcdyn.mutators.SequencePhenotypeMutator"><code class="docutils literal notranslate"><span class="pre">SequencePhenotypeMutator</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.gpmap.html">gcdyn.gpmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.model.html">gcdyn.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.utils.html">gcdyn.utils</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">Open source code repository</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html#developer-tools">Developer tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html#todo-list">Todo list</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">gcdyn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Modules</a></li>
+          <li class="breadcrumb-item"><a href="gcdyn.mutators.html">gcdyn.mutators</a></li>
+      <li class="breadcrumb-item active">gcdyn.mutators.SequencePhenotypeMutator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="gcdyn-mutators-sequencephenotypemutator">
+<h1>gcdyn.mutators.SequencePhenotypeMutator<a class="headerlink" href="#gcdyn-mutators-sequencephenotypemutator" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="gcdyn.mutators.SequencePhenotypeMutator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.mutators.</span></span><span class="sig-name descname"><span class="pre">SequencePhenotypeMutator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence_mutator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gp_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#SequencePhenotypeMutator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.SequencePhenotypeMutator" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="gcdyn.mutators.AttrMutator.html#gcdyn.mutators.AttrMutator" title="gcdyn.mutators.AttrMutator"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttrMutator</span></code></a></p>
+<p>Mutations on a DNA sequence that get translated into a functional
+phenotype.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequence_mutator</strong> (<a class="reference internal" href="gcdyn.mutators.SequenceMutator.html#gcdyn.mutators.SequenceMutator" title="gcdyn.mutators.SequenceMutator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SequenceMutator</span></code></a>) – A SequenceMutator object.</p></li>
+<li><p><strong>gp_map</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="gcdyn.gpmap.GPMap.html#gcdyn.gpmap.GPMap" title="gcdyn.gpmap.GPMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">GPMap</span></code></a>]) – a map from sequence to phenotype that will be used after applying a
+sequence-level mutation.</p></li>
+<li><p><strong>attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Node attribute to update using the gp_map after sequence mutation.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.mutators.SequencePhenotypeMutator.logprob" title="gcdyn.mutators.SequencePhenotypeMutator.logprob"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logprob</span></code></a></p></td>
+<td><p>Compute the log probability that a mutation effect on the parent of <code class="docutils literal notranslate"><span class="pre">node</span></code> gives <code class="docutils literal notranslate"><span class="pre">node</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.mutators.SequencePhenotypeMutator.mutate" title="gcdyn.mutators.SequencePhenotypeMutator.mutate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mutate</span></code></a></p></td>
+<td><p>Mutate a <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a> object in place.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.mutators.SequencePhenotypeMutator.prob" title="gcdyn.mutators.SequencePhenotypeMutator.prob"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prob</span></code></a></p></td>
+<td><p>Convenience method to compute the probability density (if <code class="docutils literal notranslate"><span class="pre">attr</span></code> is continuous) or mass (if <code class="docutils literal notranslate"><span class="pre">attr</span></code> is discrete) that a mutation event brings attribute value <code class="docutils literal notranslate"><span class="pre">attr1</span></code> to attribute value <code class="docutils literal notranslate"><span class="pre">attr2</span></code> (e.g.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.mutators.SequencePhenotypeMutator.mutate">
+<span class="sig-name descname"><span class="pre">mutate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#SequencePhenotypeMutator.mutate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.SequencePhenotypeMutator.mutate" title="Permalink to this definition"></a></dt>
+<dd><p>Mutate a <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a> object in place.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code>) – A <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a> to mutate.</p></li>
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – A seed to initialize the random number generation. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then fresh,
+unpredictable entropy will be pulled from the OS.
+If an <code class="docutils literal notranslate"><span class="pre">int</span></code>, then it will be used to derive the initial state.
+If a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a>, then that will be used directly.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.mutators.SequencePhenotypeMutator.prob">
+<span class="sig-name descname"><span class="pre">prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#SequencePhenotypeMutator.prob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.SequencePhenotypeMutator.prob" title="Permalink to this definition"></a></dt>
+<dd><p>Convenience method to compute the probability density (if <code class="docutils literal notranslate"><span class="pre">attr</span></code>
+is continuous) or mass (if <code class="docutils literal notranslate"><span class="pre">attr</span></code> is discrete) that a mutation event
+brings attribute value <code class="docutils literal notranslate"><span class="pre">attr1</span></code> to attribute value <code class="docutils literal notranslate"><span class="pre">attr2</span></code> (e.g. for
+plotting).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attr1</strong> (<em>array-like</em>) – Initial attribute value.</p></li>
+<li><p><strong>attr2</strong> (<em>array-like</em>) – Final attribute value.</p></li>
+<li><p><strong>log</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, return the log probability density.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.mutators.SequencePhenotypeMutator.logprob">
+<span class="sig-name descname"><span class="pre">logprob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.mutators.SequencePhenotypeMutator.logprob" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the log probability that a mutation effect on the parent of
+<code class="docutils literal notranslate"><span class="pre">node</span></code> gives <code class="docutils literal notranslate"><span class="pre">node</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code>) – Mutant node.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="gcdyn.mutators.SequenceMutator.html" class="btn btn-neutral float-left" title="gcdyn.mutators.SequenceMutator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gcdyn.mutators.UniformMutator.html" class="btn btn-neutral float-right" title="gcdyn.mutators.UniformMutator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Erick Matsen.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

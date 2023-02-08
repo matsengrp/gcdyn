@@ -24,6 +24,8 @@
       ExponentialResponse
       PhenotypeResponse
       Response
+      SequenceContextMutationResponse
+      SequenceResponse
       SigmoidResponse
       SoftReluResponse
    

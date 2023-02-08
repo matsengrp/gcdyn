@@ -1,92 +1,46 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>gcdyn.mutators.GaussianMutator &mdash; gcdyn  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="gcdyn.mutators.KdeMutator" href="gcdyn.mutators.KdeMutator.html" />
     <link rel="prev" title="gcdyn.mutators.DiscreteMutator" href="gcdyn.mutators.DiscreteMutator.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../index.html" class="icon icon-home"> gcdyn
           
-
-          
+          <a href="../index.html">
+            
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
@@ -100,6 +54,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="gcdyn.mutators.html">gcdyn.mutators</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#mutation-effects-generators">Mutation effects generators</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.AttrMutator.html">gcdyn.mutators.AttrMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.ContextMutator.html">gcdyn.mutators.ContextMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.DiscreteMutator.html">gcdyn.mutators.DiscreteMutator</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.mutators.GaussianMutator</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#gcdyn.mutators.GaussianMutator"><code class="docutils literal notranslate"><span class="pre">GaussianMutator</span></code></a></li>
@@ -107,14 +62,23 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.KdeMutator.html">gcdyn.mutators.KdeMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.Mutator.html">gcdyn.mutators.Mutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.SequenceMutator.html">gcdyn.mutators.SequenceMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.SequencePhenotypeMutator.html">gcdyn.mutators.SequencePhenotypeMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.UniformMutator.html">gcdyn.mutators.UniformMutator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#gcdyn.mutators.Mutator"><code class="docutils literal notranslate"><span class="pre">Mutator</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#gcdyn.mutators.AttrMutator"><code class="docutils literal notranslate"><span class="pre">AttrMutator</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#gcdyn.mutators.GaussianMutator"><code class="docutils literal notranslate"><span class="pre">GaussianMutator</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#gcdyn.mutators.KdeMutator"><code class="docutils literal notranslate"><span class="pre">KdeMutator</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#gcdyn.mutators.DiscreteMutator"><code class="docutils literal notranslate"><span class="pre">DiscreteMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#gcdyn.mutators.SequenceMutator"><code class="docutils literal notranslate"><span class="pre">SequenceMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#gcdyn.mutators.UniformMutator"><code class="docutils literal notranslate"><span class="pre">UniformMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#gcdyn.mutators.ContextMutator"><code class="docutils literal notranslate"><span class="pre">ContextMutator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.html#gcdyn.mutators.SequencePhenotypeMutator"><code class="docutils literal notranslate"><span class="pre">SequencePhenotypeMutator</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.gpmap.html">gcdyn.gpmap</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.model.html">gcdyn.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gcdyn.utils.html">gcdyn.utils</a></li>
 </ul>
 </li>
 </ul>
@@ -125,78 +89,36 @@
 <li class="toctree-l1"><a class="reference internal" href="../developer.html#todo-list">Todo list</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">gcdyn</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../api.html">Modules</a> &raquo;</li>
-        
-          <li><a href="gcdyn.mutators.html">gcdyn.mutators</a> &raquo;</li>
-        
-      <li>gcdyn.mutators.GaussianMutator</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Modules</a></li>
+          <li class="breadcrumb-item"><a href="gcdyn.mutators.html">gcdyn.mutators</a></li>
+      <li class="breadcrumb-item active">gcdyn.mutators.GaussianMutator</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="gcdyn-mutators-gaussianmutator">
-<h1>gcdyn.mutators.GaussianMutator<a class="headerlink" href="#gcdyn-mutators-gaussianmutator" title="Permalink to this heading">¶</a></h1>
+<h1>gcdyn.mutators.GaussianMutator<a class="headerlink" href="#gcdyn-mutators-gaussianmutator" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.mutators.GaussianMutator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.mutators.</span></span><span class="sig-name descname"><span class="pre">GaussianMutator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#GaussianMutator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.GaussianMutator" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.mutators.</span></span><span class="sig-name descname"><span class="pre">GaussianMutator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#GaussianMutator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.GaussianMutator" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="gcdyn.mutators.AttrMutator.html#gcdyn.mutators.AttrMutator" title="gcdyn.mutators.AttrMutator"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttrMutator</span></code></a></p>
 <p>Gaussian mutation effects on a specified attribute.</p>
 <dl class="field-list simple">
@@ -224,7 +146,7 @@
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.mutators.GaussianMutator.mutate">
-<span class="sig-name descname"><span class="pre">mutate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#GaussianMutator.mutate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.GaussianMutator.mutate" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">mutate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#GaussianMutator.mutate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.GaussianMutator.mutate" title="Permalink to this definition"></a></dt>
 <dd><p>Mutate a <a class="reference external" href="http://etetoolkit.org/docs/latest/reference/reference_tree.html#ete3.TreeNode" title="(in ETE Toolkit v3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ete3.TreeNode</span></code></a> object in place.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -244,7 +166,7 @@ If a <a class="reference external" href="https://numpy.org/doc/stable/reference/
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.mutators.GaussianMutator.prob">
-<span class="sig-name descname"><span class="pre">prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#GaussianMutator.prob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.GaussianMutator.prob" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/mutators.html#GaussianMutator.prob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.mutators.GaussianMutator.prob" title="Permalink to this definition"></a></dt>
 <dd><p>Convenience method to compute the probability density (if <code class="docutils literal notranslate"><span class="pre">attr</span></code>
 is continuous) or mass (if <code class="docutils literal notranslate"><span class="pre">attr</span></code> is discrete) that a mutation event
 brings attribute value <code class="docutils literal notranslate"><span class="pre">attr1</span></code> to attribute value <code class="docutils literal notranslate"><span class="pre">attr2</span></code> (e.g. for
@@ -265,7 +187,7 @@ plotting).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.mutators.GaussianMutator.logprob">
-<span class="sig-name descname"><span class="pre">logprob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.mutators.GaussianMutator.logprob" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">logprob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.mutators.GaussianMutator.logprob" title="Permalink to this definition"></a></dt>
 <dd><p>Compute the log probability that a mutation effect on the parent of
 <code class="docutils literal notranslate"><span class="pre">node</span></code> gives <code class="docutils literal notranslate"><span class="pre">node</span></code>.</p>
 <dl class="field-list simple">
@@ -284,50 +206,33 @@ plotting).</p>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="gcdyn.mutators.KdeMutator.html" class="btn btn-neutral float-right" title="gcdyn.mutators.KdeMutator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="gcdyn.mutators.DiscreteMutator.html" class="btn btn-neutral float-left" title="gcdyn.mutators.DiscreteMutator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gcdyn.mutators.KdeMutator.html" class="btn btn-neutral float-right" title="gcdyn.mutators.KdeMutator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2022, Erick Matsen.
-
-    </p>
+    <p>&#169; Copyright 2022, Erick Matsen.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
