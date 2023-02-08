@@ -267,7 +267,7 @@ class ContextMutator(SequenceMutator):
 
         Args:
             node: node with sequence, consisting of characters ``ACGT``
-            seed: See above.
+            seed: See :py:class:`Mutator`.
         """
 
         rng = np.random.default_rng(seed)
