@@ -217,8 +217,8 @@ class UniformMutator(SequenceMutator):
     r"""Uniform mutation process.
 
     Args:
-        node: a TreeNode with a string-valued sequence attribute consisting of
-              characters ``ACGT``
+        node: An :py:class:`ete3.TreeNode` with a string-valued sequence attribute consisting of
+              characters ``ACGT``.
         seed: See :py:class:`Mutator`.
     """
 
@@ -240,9 +240,9 @@ class ContextMutator(SequenceMutator):
     probabilities expressed in terms of context.
 
     Args:
-        mutability: a mapping from local context to mutability
-        substitution: a mapping from local context to substitution process
-        seq_to_contexts: a function that accepts a sequence and splits it into local contexts
+        mutability: Mutability values for each local nucleotide context.
+        substitution: Table of nucleotide substitution bias (columns) for each local nucleotide context (index).
+        seq_to_contexts: A function that accepts a sequence and splits it into local contexts.
     """
 
     def __init__(
@@ -262,8 +262,9 @@ class ContextMutator(SequenceMutator):
         node: ete3.TreeNode,
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
-        """Mutate ``node.sequence`` according to an AID hotspot-aware mutation model using
-        mutability values at each nucleotide 5mer and substitution probabilities.
+        """Mutate ``node.sequence`` according to an AID hotspot-aware mutation
+        model using mutability values at each nucleotide 5mer and substitution
+        probabilities.
 
         Args:
             node: node with sequence, consisting of characters ``ACGT``
@@ -283,7 +284,8 @@ class ContextMutator(SequenceMutator):
 
 
 class SequencePhenotypeMutator(AttrMutator):
-    r"""Mutations on a DNA sequence that get translated into a functional phenotype.
+    r"""Mutations on a DNA sequence that get translated into a functional
+    phenotype.
 
     Args:
         sequence_mutator: A SequenceMutator object.

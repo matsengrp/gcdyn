@@ -323,7 +323,8 @@ class SequenceResponse(Response):
 
 
 class SequenceContextMutationResponse(SequenceResponse):
-    """A Response that accepts a sequence and outputs an aggregate mutation rate.
+    """A Response that accepts a sequence and outputs an aggregate mutation
+    rate.
 
     Importantly, the mutability needs to be in units of mutations per unit time.
 
