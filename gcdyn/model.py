@@ -135,7 +135,6 @@ class BDMSModel:
         self,
         parameters: dict[str, responses.Response],
     ) -> float:
-
         for tree in self._trees:
             if tree._pruned:
                 raise NotImplementedError("tree must be fully observed, not pruned")

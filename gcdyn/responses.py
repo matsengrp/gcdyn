@@ -338,7 +338,6 @@ class SequenceContextMutationResponse(SequenceResponse):
         mutability: pd.Series,
         seq_to_contexts: Callable[str, list[str]],
     ):
-
         self.mutability = mutability
         self.seq_to_contexts = seq_to_contexts
 

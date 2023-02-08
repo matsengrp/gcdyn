@@ -309,7 +309,6 @@ class SequencePhenotypeMutator(AttrMutator):
         node: ete3.TreeNode,
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
-
         if self.gp_map is not None:
             current_attr = getattr(node, self.attr)
             assert current_attr == self.gp_map(
