@@ -3,10 +3,9 @@ Various things relevant for the replay experiment.
 """
 import os
 import sys
-
 import pandas as pd
 
-from gcdyn import mutators, responses, utils
+from gcdyn import responses, utils
 
 NAIVE_SEQUENCE = "GAGGTGCAGCTTCAGGAGTCAGGACCTAGCCTCGTGAAACCTTCTCAGACTCTGTCCCTCACCTGTTCTGTCACTGGCGACTCCATCACCAGTGGTTACTGGAACTGGATCCGGAAATTCCCAGGGAATAAACTTGAGTACATGGGGTACATAAGCTACAGTGGTAGCACTTACTACAATCCATCTCTCAAAAGTCGAATCTCCATCACTCGAGACACATCCAAGAACCAGTACTACCTGCAGTTGAATTCTGTGACTACTGAGGACACAGCCACATATTACTGTGCAAGGGACTTCGATGTCTGGGGCGCAGGGACCACGGTCACCGTCTCCTCAGACATTGTGATGACTCAGTCTCAAAAATTCATGTCCACATCAGTAGGAGACAGGGTCAGCGTCACCTGCAAGGCCAGTCAGAATGTGGGTACTAATGTAGCCTGGTATCAACAGAAACCAGGGCAATCTCCTAAAGCACTGATTTACTCGGCATCCTACAGGTACAGTGGAGTCCCTGATCGCTTCACAGGCAGTGGATCTGGGACAGATTTCACTCTCACCATCAGCAATGTGCAGTCTGAAGACTTGGCAGAGTATTTCTGTCAGCAATATAACAGCTATCCTCTCACGTTCGGCTCGGGGACTAAGCTAGAAATAAAA"
 
@@ -28,12 +27,24 @@ def seq_to_contexts(seq):
     return utils.padded_fivemer_contexts_of_paired_sequences(seq, CHAIN_2_START_IDX)
 
 
-mutator = mutators.ContextMutator(
-    mutability=mutability,
-    substitution=substitution,
-    seq_to_contexts=seq_to_contexts,
-)
-
 mutation_response = responses.SequenceContextMutationResponse(
     mutability, seq_to_contexts
 )
+
+dms_df = pd.read_csv("https://media.githubusercontent.com/media/jbloomlab/Ab-CGGnaive_DMS/main/results/final_variant_scores/final_variant_scores.csv", index_col="mutation")
+# remove linker sites
+dms_df = dms_df[dms_df.chain != "link"]
+
+bind_df = dms_df.pivot(index="position", columns="mutant", values="delta_bind_CGG").reset_index().drop(columns="position")
+expr_df = dms_df.pivot(index="position", columns="mutant", values="delta_expr").reset_index().drop(columns="position")
+psr_df = dms_df.pivot(index="position", columns="mutant", values="delta_psr").reset_index().drop(columns="position")
+
+# the DMS has one additional codon wrt replay sequence
+bind_df.drop(index=bind_df.index[-1], inplace=True)
+expr_df.drop(index=expr_df.index[-1], inplace=True)
+psr_df.drop(index=psr_df.index[-1], inplace=True)
+
+# replace NaNs with 0 (some single mutants are missing in DMS data)
+bind_df.fillna(0, inplace=True)
+expr_df.fillna(0, inplace=True)
+psr_df.fillna(0, inplace=True)

@@ -13,7 +13,7 @@ install-torchdms:
 
 test:
 	pytest
-	pytest --nbval notebooks/bdms_replay_ish.ipynb
+	pytest --nbval notebooks/bdms_replay.ipynb
 
 format:
 	black gcdyn tests
