@@ -18,7 +18,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="gcdyn.gpmap.ConstantGPMap" href="gcdyn.gpmap.ConstantGPMap.html" />
+    <link rel="next" title="gcdyn.gpmap.AdditiveGPMap" href="gcdyn.gpmap.AdditiveGPMap.html" />
     <link rel="prev" title="gcdyn.mutators.UniformMutator" href="gcdyn.mutators.UniformMutator.html" /> 
 </head>
 
@@ -54,10 +54,12 @@
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.mutators.html">gcdyn.mutators</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">gcdyn.gpmap</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#genotype-phenotype-map-gpmap">Genotype-phenotype map <code class="xref py py-class docutils literal notranslate"><span class="pre">GPMap</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.AdditiveGPMap.html">gcdyn.gpmap.AdditiveGPMap</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.ConstantGPMap.html">gcdyn.gpmap.ConstantGPMap</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.GPMap.html">gcdyn.gpmap.GPMap</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#gcdyn.gpmap.GPMap"><code class="docutils literal notranslate"><span class="pre">GPMap</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#gcdyn.gpmap.ConstantGPMap"><code class="docutils literal notranslate"><span class="pre">ConstantGPMap</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gcdyn.gpmap.AdditiveGPMap"><code class="docutils literal notranslate"><span class="pre">AdditiveGPMap</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.model.html">gcdyn.model</a></li>
@@ -100,33 +102,51 @@
 <span id="gcdyn-gpmap"></span><h1>gcdyn.gpmap<a class="headerlink" href="#module-gcdyn.gpmap" title="Permalink to this heading"></a></h1>
 <section id="genotype-phenotype-map-gpmap">
 <h2>Genotype-phenotype map <a class="reference internal" href="gcdyn.gpmap.GPMap.html#gcdyn.gpmap.GPMap" title="gcdyn.gpmap.GPMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">GPMap</span></code></a><a class="headerlink" href="#genotype-phenotype-map-gpmap" title="Permalink to this heading"></a></h2>
-<p>Abstract base class for defining generic genotype-phenotype maps.
+<p>Abstract base class for defining generic genotype-phenotype (GP) maps.
 Some concrete child classes are included.</p>
 </section>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.gpmap.ConstantGPMap.html#gcdyn.gpmap.ConstantGPMap" title="gcdyn.gpmap.ConstantGPMap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConstantGPMap</span></code></a></p></td>
-<td><p>A map that evaluates to a constant.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.gpmap.AdditiveGPMap.html#gcdyn.gpmap.AdditiveGPMap" title="gcdyn.gpmap.AdditiveGPMap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AdditiveGPMap</span></code></a></p></td>
+<td><p>A GP map with additive effects over the amino acids in a given DNA sequence.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="gcdyn.gpmap.GPMap.html#gcdyn.gpmap.GPMap" title="gcdyn.gpmap.GPMap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GPMap</span></code></a></p></td>
-<td><p>Abstract base class genotype-phenotype maps.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="gcdyn.gpmap.ConstantGPMap.html#gcdyn.gpmap.ConstantGPMap" title="gcdyn.gpmap.ConstantGPMap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConstantGPMap</span></code></a></p></td>
+<td><p>A GP map that evaluates to a constant.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="gcdyn.gpmap.GPMap.html#gcdyn.gpmap.GPMap" title="gcdyn.gpmap.GPMap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GPMap</span></code></a></p></td>
+<td><p>Abstract base class genotype-phenotype map.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.gpmap.GPMap">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.gpmap.</span></span><span class="sig-name descname"><span class="pre">GPMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gpmap.html#GPMap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gpmap.GPMap" title="Permalink to this definition"></a></dt>
-<dd><p>Abstract base class genotype-phenotype maps.</p>
+<dd><p>Abstract base class genotype-phenotype map.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.gpmap.ConstantGPMap">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.gpmap.</span></span><span class="sig-name descname"><span class="pre">ConstantGPMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">constant</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gpmap.html#ConstantGPMap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gpmap.ConstantGPMap" title="Permalink to this definition"></a></dt>
-<dd><p>A map that evaluates to a constant.</p>
+<dd><p>A GP map that evaluates to a constant.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>constant</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – The constant returned by this GPMap.</p>
+<dd class="field-odd"><p><strong>constant</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – The constant returned by this GP map.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gcdyn.gpmap.AdditiveGPMap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.gpmap.</span></span><span class="sig-name descname"><span class="pre">AdditiveGPMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mutation_effects</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonsense_phenotype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gpmap.html#AdditiveGPMap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gpmap.AdditiveGPMap" title="Permalink to this definition"></a></dt>
+<dd><p>A GP map with additive effects over the amino acids in a given DNA
+sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mutation_effects</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – A <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> of phenotypic effects of amino acid states at all sites, indexed by (0-based) sites in the translated sequence and columns corresponding to amino acid identity.</p></li>
+<li><p><strong>nonsense_phenotype</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – The phenotype of a sequence with a nonsense mutation (stop codon).</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -138,7 +158,7 @@ Some concrete child classes are included.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="gcdyn.mutators.UniformMutator.html" class="btn btn-neutral float-left" title="gcdyn.mutators.UniformMutator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="gcdyn.gpmap.ConstantGPMap.html" class="btn btn-neutral float-right" title="gcdyn.gpmap.ConstantGPMap" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="gcdyn.gpmap.AdditiveGPMap.html" class="btn btn-neutral float-right" title="gcdyn.gpmap.AdditiveGPMap" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -19,7 +19,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="gcdyn.gpmap.GPMap" href="gcdyn.gpmap.GPMap.html" />
-    <link rel="prev" title="gcdyn.gpmap" href="gcdyn.gpmap.html" /> 
+    <link rel="prev" title="gcdyn.gpmap.AdditiveGPMap" href="gcdyn.gpmap.AdditiveGPMap.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -54,6 +54,7 @@
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.mutators.html">gcdyn.mutators</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="gcdyn.gpmap.html">gcdyn.gpmap</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.html#genotype-phenotype-map-gpmap">Genotype-phenotype map <code class="xref py py-class docutils literal notranslate"><span class="pre">GPMap</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.AdditiveGPMap.html">gcdyn.gpmap.AdditiveGPMap</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.gpmap.ConstantGPMap</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#gcdyn.gpmap.ConstantGPMap"><code class="docutils literal notranslate"><span class="pre">ConstantGPMap</span></code></a></li>
 </ul>
@@ -61,6 +62,7 @@
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.GPMap.html">gcdyn.gpmap.GPMap</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.html#gcdyn.gpmap.GPMap"><code class="docutils literal notranslate"><span class="pre">GPMap</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.html#gcdyn.gpmap.ConstantGPMap"><code class="docutils literal notranslate"><span class="pre">ConstantGPMap</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.html#gcdyn.gpmap.AdditiveGPMap"><code class="docutils literal notranslate"><span class="pre">AdditiveGPMap</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.model.html">gcdyn.model</a></li>
@@ -106,10 +108,10 @@
 <dt class="sig sig-object py" id="gcdyn.gpmap.ConstantGPMap">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.gpmap.</span></span><span class="sig-name descname"><span class="pre">ConstantGPMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">constant</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gpmap.html#ConstantGPMap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gpmap.ConstantGPMap" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="gcdyn.gpmap.GPMap.html#gcdyn.gpmap.GPMap" title="gcdyn.gpmap.GPMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">GPMap</span></code></a></p>
-<p>A map that evaluates to a constant.</p>
+<p>A GP map that evaluates to a constant.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>constant</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – The constant returned by this GPMap.</p>
+<dd class="field-odd"><p><strong>constant</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – The constant returned by this GP map.</p>
 </dd>
 </dl>
 <p class="rubric">Methods</p>
@@ -120,7 +122,7 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.gpmap.ConstantGPMap.__call__">
 <span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gpmap.html#ConstantGPMap.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gpmap.ConstantGPMap.__call__" title="Permalink to this definition"></a></dt>
-<dd><p>Evaluate a GPMap on a given DNA sequence.</p>
+<dd><p>Evaluate GP map on a given DNA sequence.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>sequence</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – A DNA sequence.</p>
@@ -139,7 +141,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="gcdyn.gpmap.html" class="btn btn-neutral float-left" title="gcdyn.gpmap" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gcdyn.gpmap.AdditiveGPMap.html" class="btn btn-neutral float-left" title="gcdyn.gpmap.AdditiveGPMap" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="gcdyn.gpmap.GPMap.html" class="btn btn-neutral float-right" title="gcdyn.gpmap.GPMap" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

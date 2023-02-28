@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gcdyn.gpmap.GPMap &mdash; gcdyn  documentation</title>
+  <title>gcdyn.gpmap.AdditiveGPMap &mdash; gcdyn  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,8 +18,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="gcdyn.model" href="gcdyn.model.html" />
-    <link rel="prev" title="gcdyn.gpmap.ConstantGPMap" href="gcdyn.gpmap.ConstantGPMap.html" /> 
+    <link rel="next" title="gcdyn.gpmap.ConstantGPMap" href="gcdyn.gpmap.ConstantGPMap.html" />
+    <link rel="prev" title="gcdyn.gpmap" href="gcdyn.gpmap.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -54,12 +54,12 @@
 <li class="toctree-l2"><a class="reference internal" href="gcdyn.mutators.html">gcdyn.mutators</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="gcdyn.gpmap.html">gcdyn.gpmap</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.html#genotype-phenotype-map-gpmap">Genotype-phenotype map <code class="xref py py-class docutils literal notranslate"><span class="pre">GPMap</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.AdditiveGPMap.html">gcdyn.gpmap.AdditiveGPMap</a></li>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.ConstantGPMap.html">gcdyn.gpmap.ConstantGPMap</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.gpmap.GPMap</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#gcdyn.gpmap.GPMap"><code class="docutils literal notranslate"><span class="pre">GPMap</span></code></a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">gcdyn.gpmap.AdditiveGPMap</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gcdyn.gpmap.AdditiveGPMap"><code class="docutils literal notranslate"><span class="pre">AdditiveGPMap</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.ConstantGPMap.html">gcdyn.gpmap.ConstantGPMap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.GPMap.html">gcdyn.gpmap.GPMap</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.html#gcdyn.gpmap.GPMap"><code class="docutils literal notranslate"><span class="pre">GPMap</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.html#gcdyn.gpmap.ConstantGPMap"><code class="docutils literal notranslate"><span class="pre">ConstantGPMap</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.html#gcdyn.gpmap.AdditiveGPMap"><code class="docutils literal notranslate"><span class="pre">AdditiveGPMap</span></code></a></li>
@@ -93,7 +93,7 @@
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../api.html">Modules</a></li>
           <li class="breadcrumb-item"><a href="gcdyn.gpmap.html">gcdyn.gpmap</a></li>
-      <li class="breadcrumb-item active">gcdyn.gpmap.GPMap</li>
+      <li class="breadcrumb-item active">gcdyn.gpmap.AdditiveGPMap</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -102,21 +102,30 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="gcdyn-gpmap-gpmap">
-<h1>gcdyn.gpmap.GPMap<a class="headerlink" href="#gcdyn-gpmap-gpmap" title="Permalink to this heading"></a></h1>
+  <section id="gcdyn-gpmap-additivegpmap">
+<h1>gcdyn.gpmap.AdditiveGPMap<a class="headerlink" href="#gcdyn-gpmap-additivegpmap" title="Permalink to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="gcdyn.gpmap.GPMap">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.gpmap.</span></span><span class="sig-name descname"><span class="pre">GPMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gpmap.html#GPMap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gpmap.GPMap" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
-<p>Abstract base class genotype-phenotype map.</p>
+<dt class="sig sig-object py" id="gcdyn.gpmap.AdditiveGPMap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.gpmap.</span></span><span class="sig-name descname"><span class="pre">AdditiveGPMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mutation_effects</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonsense_phenotype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gpmap.html#AdditiveGPMap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gpmap.AdditiveGPMap" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="gcdyn.gpmap.GPMap.html#gcdyn.gpmap.GPMap" title="gcdyn.gpmap.GPMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">GPMap</span></code></a></p>
+<p>A GP map with additive effects over the amino acids in a given DNA
+sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mutation_effects</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – A <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> of phenotypic effects of amino acid states at all sites, indexed by (0-based) sites in the translated sequence and columns corresponding to amino acid identity.</p></li>
+<li><p><strong>nonsense_phenotype</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – The phenotype of a sequence with a nonsense mutation (stop codon).</p></li>
+</ul>
+</dd>
+</dl>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 </tbody>
 </table>
 <dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.gpmap.GPMap.__call__">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gpmap.html#GPMap.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gpmap.GPMap.__call__" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="gcdyn.gpmap.AdditiveGPMap.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/gpmap.html#AdditiveGPMap.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.gpmap.AdditiveGPMap.__call__" title="Permalink to this definition"></a></dt>
 <dd><p>Evaluate GP map on a given DNA sequence.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -136,8 +145,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="gcdyn.gpmap.ConstantGPMap.html" class="btn btn-neutral float-left" title="gcdyn.gpmap.ConstantGPMap" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="gcdyn.model.html" class="btn btn-neutral float-right" title="gcdyn.model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="gcdyn.gpmap.html" class="btn btn-neutral float-left" title="gcdyn.gpmap" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gcdyn.gpmap.ConstantGPMap.html" class="btn btn-neutral float-right" title="gcdyn.gpmap.ConstantGPMap" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
