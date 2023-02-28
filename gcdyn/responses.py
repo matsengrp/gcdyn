@@ -47,7 +47,6 @@ class Response(ABC):
     def _param_dict(self):
         """Returns a dictionary containing all parameters of the response
         function."""
-        pass
 
     @_param_dict.setter
     @abstractmethod
@@ -55,7 +54,6 @@ class Response(ABC):
         """Configures the parameter values of the response function using the
         provided dictionary (whose format matches that returned by the
         `Response._param_dict` getter method."""
-        pass
 
     @abstractmethod
     def __call__(self, node: ete3.TreeNode) -> float:
