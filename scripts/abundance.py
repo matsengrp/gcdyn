@@ -33,6 +33,7 @@ for fasta_path in sys.argv[1:]:
     assert sequence_count == sum(k * v for k, v in abundance_distribution.items())
 
     base, _ = os.path.splitext(fasta_path)
+    base = os.path.basename(base)
     abundances[base] = pd.Series(
         abundance_distribution.values(), index=abundance_distribution.keys()
     )
