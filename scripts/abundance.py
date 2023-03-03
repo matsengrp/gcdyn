@@ -85,7 +85,7 @@ for fasta_path in args.infiles:
 
     assert sequence_count == sum(k * v for k, v in abundance_distribution.items())
 
-    # base, _ = os.path.splitext(fasta_path)
+    # base = os.path.basename(base)
     base = bstr(mouse, flowcell, ln_loc, ln_id)
     abundances[base] = pd.Series(
         abundance_distribution.values(), index=abundance_distribution.keys()
@@ -104,9 +104,4 @@ ofn = "%s/abundances.csv" % (args.outdir if args.outdir is not None else os.getc
 if not os.path.exists(args.outdir):
     os.makedirs(args.outdir)
 print('  writing to %s'%ofn)
-# to_write.to_csv(ofn)
-for base, vals in abundances.items():
-    print base
-    for x in vals:
-        print x
-    sys.exit()
+to_write.to_csv(ofn)
