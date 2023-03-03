@@ -18,8 +18,8 @@ python abundance.py <input fasta files> [--outdir <outdir>]
 parser = argparse.ArgumentParser(usage=ustr)
 parser.add_argument('infiles', nargs='+')
 parser.add_argument('--outdir', default=os.getcwd())
-parser.add_argument('--min-seqs', help='only keep GCs that have this many seqs')
-parser.add_argument('--max-seqs', help='downsample to this many seqs any GCs that have more than this')
+parser.add_argument('--min-seqs', type=int, help='only keep GCs that have this many seqs')
+parser.add_argument('--max-seqs', type=int, help='downsample to this many seqs any GCs that have more than this')
 args = parser.parse_args()
 
 n_too_small, init_sizes = 0, []

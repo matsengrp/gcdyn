@@ -52,8 +52,8 @@ def calc_abdn():
     if len(skipped_mice) > 0:
         print '    skipped %d mice: %s' % (len(skipped_mice), ' '.join(str(s) for s in sorted(skipped_mice)))
     print '    kept %d samples from %d mice: %s' % (len(final_fnames), len(kept_mice), ' '.join(str(s) for s in sorted(kept_mice)))
-    
-    cmd = 'python scripts/abundance.py %s --outdir %s' % (' '.join(final_fnames), odir)
+
+    cmd = 'python scripts/abundance.py %s --min-seqs 70 --max-seqs 70 --outdir %s' % (' '.join(final_fnames), odir)
     utils.simplerun(cmd)
 
 # ----------------------------------------------------------------------------------------
@@ -89,5 +89,5 @@ parser.add_argument('--outdir')
 parser.add_argument('--mice', default=[1, 2, 3, 4, 5, 6], help='restrict to these mouse numbers')
 args = parser.parse_args()
 
-# calc_abdn()
+calc_abdn()
 plot()
