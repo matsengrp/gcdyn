@@ -16,9 +16,6 @@ import glutils
 import plotting
 import hutils
 
-odir = '/fh/fast/matsen_e/dralph/gcdyn/tmp-out'
-abdfn = '%s/abundances.csv' % odir
-
 # ----------------------------------------------------------------------------------------
 def parse_name(fn):  # convert .fa name to mouse #, etc
     fn = os.path.basename(fn)
@@ -39,26 +36,41 @@ def bstr(mouse, flowcell, ln_loc, ln_id):
     return '-'.join([str(mouse), flowcell, ln_loc, ln_id])
 
 # ----------------------------------------------------------------------------------------
-def calc_abdn():
+def filter_mice(in_fns):
     skipped_mice, kept_mice = set(), set()
-    final_fnames = []
-    for fasta_path in glob.glob('%s/*.fasta'%args.indir):
+    fn_fns = []
+    for fasta_path in in_fns:
         mouse, flowcell, ln_loc, ln_id = parse_name(fasta_path)
         if args.mice is not None and mouse not in args.mice:
             skipped_mice.add(mouse)
             continue
         kept_mice.add(mouse)
-        final_fnames.append(fasta_path)
+        fn_fns.append(fasta_path)
     if len(skipped_mice) > 0:
         print '    skipped %d mice: %s' % (len(skipped_mice), ' '.join(str(s) for s in sorted(skipped_mice)))
-    print '    kept %d samples from %d mice: %s' % (len(final_fnames), len(kept_mice), ' '.join(str(s) for s in sorted(kept_mice)))
+    print '    kept %d samples from %d mice: %s' % (len(fn_fns), len(kept_mice), ' '.join(str(s) for s in sorted(kept_mice)))
+    return fn_fns
 
-    cmd = 'python scripts/abundance.py %s --min-seqs 70 --max-seqs 70 --outdir %s' % (' '.join(final_fnames), odir)
+# ----------------------------------------------------------------------------------------
+def calc_abdn(indir, label, is_simu):
+    fn_fns = glob.glob('%s/*.fasta'%indir)
+    if not is_simu:
+        fn_fns = filter_mice(fn_fns)
+    cmd = 'python scripts/abundance.py %s --min-seqs 70 --max-seqs 70 --outdir %s/%s' % (' '.join(fn_fns), args.outdir, label)
     utils.simplerun(cmd)
 
 # ----------------------------------------------------------------------------------------
-def plot():
-    with open(abdfn) as afile:
+def hargs(htmp):
+    xbounds = [0.5, htmp.xmax+0.5]
+    xticks = list(range(1, int(htmp.xmax)+1, 2))
+    ybounds = [0.9 * htmp.get_minimum(exclude_empty=True), 1.1 * htmp.get_maximum()]
+    yticks, yticklabels = plotting.get_auto_y_ticks(ybounds[0], ybounds[1])
+    ybounds = [yticks[0], yticks[-1]]
+    return xbounds, ybounds, xticks, yticks, yticklabels
+
+# ----------------------------------------------------------------------------------------
+def plot(base_outdir, label):
+    with open('%s/%s/abundances.csv'%(base_outdir, label)) as afile:
         reader = csv.DictReader(afile)
         plotvals = {k : {} for k in reader.fieldnames if k!=''}
         for line in reader:
@@ -72,22 +84,46 @@ def plot():
         hists.append(htmp)
 
     mhist = plotting.make_mean_hist(hists)
-    ybounds = [0.9 * mhist.get_minimum(exclude_empty=True), 1.1 * mhist.get_maximum()]
-    yticks, yticklabels = plotting.get_auto_y_ticks(ybounds[0], ybounds[1])
-    ybounds = [yticks[0], yticks[-1]]
-    mhist.fullplot(odir, 'abdn', pargs={'remove_empty_bins' : True}, fargs={'xbounds' : [0.5, mhist.xmax+0.5], 'ybounds' : ybounds, 'yticks' : yticks, 'yticklabels' : yticklabels,
-                                                                            'xlabel' : 'abundance', 'ylabel' : 'N seqs\nmean+/-std, %d GCs'%len(hists), 'log' : 'y', 'xticks' : list(range(int(mhist.xmax)+1))})
-    # plotting.draw_no_root(None, plotdir=odir, plotname='abdn', more_hists=hists, log='xy')
+    mhist.title = '%s (%d GCs)' % (label, len(hists))
+    mhist.xtitle = 'abundance'
+    mhist.ytitle = 'N seqs\nmean+/-std, %d GCs' % len(hists)
+    xbounds, ybounds, xticks, yticks, yticklabels = hargs(mhist)
+    fn = mhist.fullplot(base_outdir+'/'+label, 'abdn', pargs={'remove_empty_bins' : True}, fargs={'xbounds' : xbounds, 'ybounds' : ybounds, 'yticks' : yticks, 'yticklabels' : yticklabels,
+                                                                                                  'xlabel' : mhist.xtitle, 'ylabel' : mhist.ytitle, 'log' : 'y', 'xticks' : xticks})
+    fnames[0].append(fn)
+    return mhist
+
+# ----------------------------------------------------------------------------------------
+def compare_plots(base_outdir, hists, labels):
+    utils.mkdir(base_outdir+'/comparisons')
+    xbounds, ybounds, xticks, yticks, yticklabels = hargs(hists[0])
+    ytitle = '%s\nmean +/- std' % hists[0].ytitle.split('\n')[0]
+    fn = plotting.draw_no_root(None, plotdir=base_outdir+'/comparisons', plotname='abdn', more_hists=hists, log='y', xtitle=hists[0].xtitle, ytitle=ytitle,
+                               bounds=xbounds, ybounds=ybounds, xticks=xticks, yticks=yticks, yticklabels=yticklabels, errors=True, linewidths=[4, 3], plottitle='')
+    fnames[0].append(fn)
 
 # ----------------------------------------------------------------------------------------
 ustr = """
-./projects/gcdyn/scripts/plot-abdn.py --indir /fh/fast/matsen_e/dralph/gcdyn/gcreplay-observed
+./scripts/plot-abdn.py --data-dir <path with fastas> --simu-dir <path with fastas>
 """
 parser = argparse.ArgumentParser(usage=ustr)
-parser.add_argument('--indir')
+parser.add_argument('--data-dir')
+parser.add_argument('--simu-dir')
 parser.add_argument('--outdir')
 parser.add_argument('--mice', default=[1, 2, 3, 4, 5, 6], help='restrict to these mouse numbers')
+parser.add_argument('--is-simu', action='store_true')
 args = parser.parse_args()
 
-calc_abdn()
-plot()
+dlabels = []
+if args.data_dir is not None:
+    dlabels.append([args.data_dir, 'data'])
+if args.simu_dir is not None:
+    dlabels.append([args.simu_dir, 'simu'])
+
+hists, fnames = [], [[]]
+for idir, tlab in dlabels:
+    calc_abdn(idir, tlab, is_simu=tlab=='simu')
+    hists.append(plot(args.outdir, tlab))
+
+compare_plots(args.outdir, hists, [l for _, l in dlabels])
+plotting.make_html(args.outdir, fnames=fnames)
