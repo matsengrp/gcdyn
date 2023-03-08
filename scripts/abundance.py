@@ -8,6 +8,7 @@ import sys
 import pandas as pd
 import argparse
 import numpy
+import csv
 
 from Bio import SeqIO
 from Bio.SeqUtils.CheckSum import seguid
@@ -33,10 +34,11 @@ args = parser.parse_args()
 numpy.random.seed(args.random_seed)
 
 n_too_small, init_sizes, n_removed = 0, [], 0
-final_distrs = {k : {} for k in ['abundances', 'hdists']}  # hdist: hamming distance from naive (root-to-tip distance)
+abundances = {}
+fdicts = {'hdists' : {}}
 
 for fasta_path in args.infiles:
-    records = list(SeqIO.parse(fasta_path, "fasta"))
+    records = list(SeqIO.parse(fasta_path, 'fasta'))
     naive_record = None
     if args.naive_name is not None:
         n_before = len(records)
@@ -59,32 +61,27 @@ for fasta_path in args.infiles:
 
     # This dictionary will map sequence checksum to the list of squence ids that have that
     # sequence checksum.
-    ids_by_checksum = {k : collections.defaultdict(list) for k in final_distrs}
+    ids_by_checksum = collections.defaultdict(list)
+    hdvals = []  # list of hamming distance to naive for each sequence
     sequence_count = 0
     for record in records:
         sequence_count = sequence_count + 1
-        for tkey in final_distrs:
-            if tkey == 'abundances':
-                vkey = seguid(record.seq)
-            elif tkey == 'hdists':
-                vkey = hamming_distance(record.seq, naive_record.seq)
-            else:
-                assert False
-            ids_by_checksum[tkey][vkey].append(record.id)
+        ids_by_checksum[seguid(record.seq)].append(record.id)
+        hdvals.append(hamming_distance(record.seq, naive_record.seq))
 
-    distr_dicts = {k : collections.defaultdict(int) for k in final_distrs}
-    for tkey in final_distrs:
-        for id_list in ids_by_checksum[tkey].values():
-            id_count = len(id_list)
-            distr_dicts[tkey][id_count] = distr_dicts[tkey][id_count] + 1
-        assert sequence_count == sum(k * v for k, v in distr_dicts[tkey].items())
+    abundance_distribution = collections.defaultdict(int)
+    for id_list in ids_by_checksum.values():
+        id_count = len(id_list)
+        abundance_distribution[id_count] = abundance_distribution[id_count] + 1
+    assert sequence_count == sum(k * v for k, v in abundance_distribution.items())
 
     base, _ = os.path.splitext(fasta_path)
     base = os.path.basename(base)
-    for tkey in final_distrs:
-        final_distrs[tkey][base] = pd.Series(
-            distr_dicts[tkey].values(), index=distr_dicts[tkey].keys()
-        )
+    abundances[base] = pd.Series(
+        abundance_distribution.values(), index=abundance_distribution.keys()
+    )
+
+    fdicts['hdists'][base] = hdvals
 
 if n_too_small > 0:
     print('    skipped %d files with fewer than %d seqs' % (n_too_small, args.min_seqs))
@@ -93,10 +90,16 @@ if len(init_sizes) > 0:
 if n_removed > 0:
     print('    removed %d seqs with name \'%s\'' % (n_removed, args.naive_name))
 
+print('  writing to %s'%args.outdir)
 if not os.path.exists(args.outdir):
     os.makedirs(args.outdir)
-for fstr in ['abundances', 'hdists']:
-    to_write = pd.DataFrame(final_distrs[fstr]).fillna(0).astype(int)
-    ofn = "%s/%s.csv" % (args.outdir, fstr)
-    print('  writing to %s'%ofn)
-    to_write.to_csv(ofn)
+
+to_write = pd.DataFrame(abundances).fillna(0).astype(int)
+to_write.to_csv('%s/abundances.csv' % args.outdir)
+
+for fstr, fdct in fdicts.items():
+    with open('%s/%s.csv'%(args.outdir, fstr), 'w') as cfile:
+        writer = csv.DictWriter(cfile, ['fbase', 'vlist'])
+        writer.writeheader()
+        for fbase, vlist in fdicts[fstr].items():
+            writer.writerow({'fbase' : fbase, 'vlist' : ':'.join(str(v) for v in vlist)})
