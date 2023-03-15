@@ -77,12 +77,12 @@ class Response(ABC):
 
     @abstractmethod
     def Λ(self, node: ete3.TreeNode, Δt: float) -> float:
-        r"""Evaluate the Poisson intensity measure of the time interval :math:`[t, t+\Delta t)`,
-        defined as
-        
+        r"""Evaluate the Poisson intensity measure of the time interval
+        :math:`[t, t+\Delta t)`, defined as.
+
         .. math::
             \Lambda(t, t+Δt) = \int_{t}^{t+\Delta t} \lambda(t')dt',
-            
+
         for a tree node at time :math:`t`. This is needed for sampling waiting times and evaluating the
         log probability density function of waiting times.
 
