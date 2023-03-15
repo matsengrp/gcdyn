@@ -43,6 +43,7 @@ extensions = [
     # support NumPy and Google style docstrings
     "sphinx.ext.napoleon",
     # Automatically document param types (less noise in class signature)
+    # NOTE: this disables autodoc_type_aliases used below (i.e. numpy.typing.ArrayLike are not properly condensed).
     "sphinx_autodoc_typehints",
     # track to do list items
     "sphinx.ext.todo",
@@ -75,6 +76,7 @@ autodoc_inherit_docstrings = True  # If no class summary, inherit base class sum
 autodoc_default_options = {
     'members': True,
     'member-order': 'bysource',
+    'show-inheritance': True,
     # 'special-members': '__init__',
 }
 
@@ -103,3 +105,9 @@ html_theme_options = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# https://stackoverflow.com/questions/67473396/shorten-display-format-of-python-type-annotations-in-sphinx
+# NOTE: the sphinx_autodoc_typehints extentension above disables this, so aliases are not properly condensed.
+autodoc_type_aliases = {
+    'ArrayLike': 'ArrayLike'
+}
