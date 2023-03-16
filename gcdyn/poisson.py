@@ -1,10 +1,10 @@
 r"""
-Poisson intensity response functions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Poisson process responses
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Abstract base classes for defining generic Poisson process response functions (e.g. :math:`\lambda(x, t)`, :math:`\mu(x, t)`, :math:`\gamma(x, t)`),
+Abstract base classes for defining generic Poisson processes (e.g. :math:`\lambda(x, t)`, :math:`\mu(x, t)`, :math:`\gamma(x, t)`),
 with arbitrary :py:class:`ete3.TreeNode` attribute dependence.
-Some concrete child classes are included.
+Several concrete child classes are included.
 """
 
 from __future__ import annotations
@@ -29,8 +29,7 @@ config.update("jax_enable_x64", True)
 
 
 class Response(ABC):
-    r"""Abstract base class for response function mapping
-    :py:class:`ete3.TreeNode` objects to a Poisson process.
+    r"""Abstract base class for mapping :py:class:`ete3.TreeNode` objects to a Poisson process.
 
     Args:
         grad: Enables JAX compilation and gradient for optimizing.

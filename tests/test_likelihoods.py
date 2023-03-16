@@ -1,4 +1,4 @@
-from gcdyn import bdms, mutators, model, responses
+from gcdyn import bdms, mutators, model, poisson
 from numpy import log, sqrt, exp, max
 from scipy.stats import expon
 import unittest
@@ -33,15 +33,15 @@ def log_hazard_exp(x, rate):
 
 class TestMTBDLikelihood(unittest.TestCase):
     def setUp(self):
-        self.λ = responses.SigmoidResponse(grad=True)
-        self.μ = responses.ConstantResponse(1)
-        self.γ = responses.ConstantResponse(1)
+        self.λ = poisson.SigmoidResponse(grad=True)
+        self.μ = poisson.ConstantResponse(1)
+        self.γ = poisson.ConstantResponse(1)
         self.mutator = mutators.GaussianMutator(-1, 1)
         self.ρ = 1
         self.σ = 1
         self.Λ = lambda x: self.λ(x) + self.μ(x) + self.γ(x)
 
-        responses._register_with_pytree(responses.SigmoidResponse)
+        poisson._register_with_pytree(poisson.SigmoidResponse)
 
     def test_sample_event(self):
         """Single edge to sample time."""

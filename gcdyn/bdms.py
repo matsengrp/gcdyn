@@ -29,7 +29,7 @@ with these notable differences:
 from __future__ import annotations
 import ete3
 from ete3.coretype.tree import TreeError
-from gcdyn import mutators, responses
+from gcdyn import mutators, poisson
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -101,9 +101,9 @@ class TreeNode(ete3.Tree):
     def evolve(
         self,
         t: float,
-        birth_rate: responses.Response = responses.ConstantResponse(1),
-        death_rate: responses.Response = responses.ConstantResponse(0),
-        mutation_rate: responses.Response = responses.ConstantResponse(1),
+        birth_rate: poisson.Response = poisson.ConstantResponse(1),
+        death_rate: poisson.Response = poisson.ConstantResponse(0),
+        mutation_rate: poisson.Response = poisson.ConstantResponse(1),
         mutator: mutators.Mutator = mutators.GaussianMutator(shift=0, scale=1),
         birth_mutations: bool = False,
         min_survivors: int = 1,
@@ -201,7 +201,7 @@ class TreeNode(ete3.Tree):
     def _generate_event(
         self,
         Δt_max: float,
-        event_rates: dict[responses.Response],
+        event_rates: dict[poisson.Response],
         mutator: mutators.Mutator,
         birth_mutations: bool,
         rng: np.random.Generator,

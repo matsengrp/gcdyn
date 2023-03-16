@@ -11,7 +11,7 @@ from jax import jit
 from jaxopt import ScipyBoundedMinimize
 from functools import partial
 
-from gcdyn import responses, mutators
+from gcdyn import poisson, mutators
 import ete3
 
 
@@ -31,16 +31,16 @@ class BDMSModel:
     def __init__(
         self,
         trees: list[ete3.TreeNode],
-        birth_rate: responses.Response,
-        death_rate: responses.Response,
-        mutation_rate: responses.Response,
+        birth_rate: poisson.Response,
+        death_rate: poisson.Response,
+        mutation_rate: poisson.Response,
         mutator: mutators.Mutator,
         sampling_probability: float,
         **opt_kwargs,
     ):
         self.initialize_parameters(birth_rate, death_rate, mutation_rate)
         for event, rate in self.parameters.items():
-            if not isinstance(rate, responses.HomogeneousResponse):
+            if not isinstance(rate, poisson.HomogeneousResponse):
                 raise NotImplementedError(
                     f"Non-homogeneous {event} rate not implemented"
                 )
@@ -105,7 +105,7 @@ class BDMSModel:
         }
 
         for v in init_value.values():
-            responses._register_with_pytree(type(v))
+            poisson._register_with_pytree(type(v))
 
         result = self.optimizer.run(
             init_value, (lower_bounds, upper_bounds), fixed_params
@@ -123,9 +123,9 @@ class BDMSModel:
 
     def initialize_parameters(
         self,
-        birth_rate: responses.Response,
-        death_rate: responses.Response,
-        mutation_rate: responses.Response,
+        birth_rate: poisson.Response,
+        death_rate: poisson.Response,
+        mutation_rate: poisson.Response,
     ) -> None:
         r"""Updates the current values of the model parameters."""
 
@@ -136,12 +136,12 @@ class BDMSModel:
         }
 
         for v in self.parameters.values():
-            responses._register_with_pytree(type(v))
+            poisson._register_with_pytree(type(v))
 
     @partial(jit, static_argnums=(0,))
     def _neg_log_likelihood(
         self,
-        parameters: dict[str, responses.Response],
+        parameters: dict[str, poisson.Response],
     ) -> float:
         for tree in self._trees:
             if tree._pruned:

@@ -9,7 +9,7 @@ Modules
     :template: custom-module-template.rst
 
     bdms
-    responses
+    poisson
     mutators
     gpmap
     model
