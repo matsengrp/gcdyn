@@ -474,7 +474,7 @@ class PhenotypeTimeResponse(Response):
 class ModulatedPhenotypeResponse(PhenotypeTimeResponse):
     r"""An inhomogeneous phenotype response that combines a homogeneous
     phenotype response with a time-dependent external field :math:`f(t)` that
-    modulates the effective phenotype via a coupling :math:`\tilde x = \phi(x, f(t))`
+    modulates the effective phenotype via an interaction :math:`\tilde x = \phi(x, f(t))`
     that maps the phenotype and external field to the effective phenotype.
     For example, if :math:`\phi(x, f(t)) = x - f(t)`, then the external field
     represents an additive phenotype shift.
@@ -483,7 +483,7 @@ class ModulatedPhenotypeResponse(PhenotypeTimeResponse):
     Args:
         phenotype_response: a homogeneous phenotype response for the effective phenotype :math:`x - f(t)`.
         external_field: external field :math:`f(t)`, a function that maps time to the external field.
-        coupling: a function :math:`\phi(x, f(t))` that maps the phenotype and external field to the effective phenotype.
+        interaction: a function :math:`\phi(x, f(t))` that maps the phenotype and external field to the effective phenotype.
         tol: tolerance for root-finding.
         maxiter: maximum number of iterations for root-finding.
     """
@@ -492,19 +492,19 @@ class ModulatedPhenotypeResponse(PhenotypeTimeResponse):
         self,
         phenotype_response: HomogeneousResponse,
         external_field: Callable[[float], float],
-        coupling: Callable[[float, float], float] = lambda x, f: x - f,
+        interaction: Callable[[float, float], float] = lambda x, f: x - f,
         tol: float = 1e-6,
         maxiter: int = 100,
     ):
         super().__init__(grad=phenotype_response.grad)
         self.phenotype_response = phenotype_response
         self.external_field = external_field
-        self.coupling = coupling
+        self.interaction = interaction
         self.tol = tol
         self.maxiter = maxiter
 
     def λ_phenotype_time(self, x: float, t: float) -> float:
-        effective_phenotype = self.coupling(x, self.external_field(t))
+        effective_phenotype = self.interaction(x, self.external_field(t))
         return self.phenotype_response.λ_phenotype(effective_phenotype)
 
     def Λ(self, node: ete3.TreeNode, Δt: float) -> float:
@@ -526,7 +526,7 @@ class ModulatedPhenotypeResponse(PhenotypeTimeResponse):
                 break
         if not converged:
             raise RuntimeError(
-                f"Newton-Raphson failed to converge after {self.maxiter} iterations with {Δt} error {abs(self.Λ(node, Δt) - τ)}"
+                f"Newton-Raphson failed to converge after {self.maxiter} iterations with Δt={Δt} and error={abs(self.Λ(node, Δt) - τ)}"
             )
         return Δt
 
