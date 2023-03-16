@@ -29,7 +29,8 @@ config.update("jax_enable_x64", True)
 
 
 class Response(ABC):
-    r"""Abstract base class for mapping :py:class:`ete3.TreeNode` objects to a Poisson process.
+    r"""Abstract base class for mapping :py:class:`ete3.TreeNode` objects to a
+    Poisson process.
 
     Args:
         grad: Enables JAX compilation and gradient for optimizing.
