@@ -486,6 +486,7 @@ class ModulatedPhenotypeResponse(PhenotypeTimeResponse):
         interaction: a function :math:`\phi(x, f(t))` that maps the phenotype and external field to the effective phenotype.
         tol: tolerance for root-finding.
         maxiter: maximum number of iterations for root-finding.
+        grad: See :py:class:`Response` docstring.
     """
 
     def __init__(
