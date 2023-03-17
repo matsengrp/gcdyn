@@ -219,7 +219,7 @@ class ConstantResponse(PhenotypeResponse):
 
     Args:
         value: Constant response value.
-        grad: See :py:class:`Response` docstring.
+        grad: See :py:class:`Response`.
     """
 
     def __init__(self, value: float = 1.0, grad: bool = False):
@@ -250,7 +250,7 @@ class ExponentialResponse(PhenotypeResponse):
         xshift: :math:`\theta_2`
         yscale: :math:`\theta_3`
         yshift: :math:`\theta_4`
-        grad: See :py:class:`Response` docstring.
+        grad: See :py:class:`Response`.
     """
 
     def __init__(
@@ -300,7 +300,7 @@ class SigmoidResponse(PhenotypeResponse):
         xshift: :math:`\theta_2`
         yscale: :math:`\theta_3`
         yshift: :math:`\theta_4`
-        grad: See :py:class:`Response` docstring.
+        grad: See :py:class:`Response`.
     """
 
     def __init__(
@@ -352,7 +352,7 @@ class SoftReluResponse(PhenotypeResponse):
         xshift: :math:`\theta_2`
         yscale: :math:`\theta_3`
         yshift: :math:`\theta_4`
-        grad: See :py:class:`Response` docstring.
+        grad: See :py:class:`Response`.
     """
 
     def __init__(
@@ -422,7 +422,7 @@ class SequenceContextMutationResponse(SequenceResponse):
         mutability: a mapping from local context to mutation rate (mutations per site per unit time)
         seq_to_contexts: a function that accepts a sequence and splits it into local contexts
         mutation_intensity: a scaling factor for the mutability
-        grad: See :py:class:`Response` docstring.
+        grad: See :py:class:`Response`.
     """
 
     def __init__(
@@ -461,7 +461,7 @@ class PhenotypeTimeResponse(Response):
     respectively.
 
     Args:
-        grad: See :py:class:`Response` docstring.
+        grad: See :py:class:`Response`.
         tol: Tolerance for root-finding.
         maxiter: Maximum number of iterations for root-finding.
     """
@@ -523,9 +523,9 @@ class ModulatedPhenotypeResponse(PhenotypeTimeResponse):
         phenotype_response: a homogeneous phenotype response for the effective phenotype :math:`x - f(t)`.
         external_field: external field :math:`f(t)`, a function that maps time to the external field.
         interaction: a function :math:`\phi(x, f(t))` that maps the phenotype and external field to the effective phenotype.
-        tol: See :py:class:`PhenotypeTimeResponse` docstring.
-        maxiter: See :py:class:`PhenotypeTimeResponse` docstring.
-        grad: See :py:class:`Response` docstring.
+        tol: See :py:class:`PhenotypeTimeResponse`.
+        maxiter: See :py:class:`PhenotypeTimeResponse`.
+        grad: See :py:class:`Response`.
     """
 
     def __init__(
@@ -563,11 +563,11 @@ class ModulatedRateResponse(PhenotypeTimeResponse):
     :math:`\tilde\lambda(\lambda, t)` to yield a time-dependent modulated rate.
 
     Args:
-        phenotype_response: a homogeneous phenotype response for the effective phenotype :math:`x - f(t)`.
-        modulation: a function :math:`\tilde\lambda(\lambda, t)` that maps the original rate and time to the modulated rate.
-        tol: See :py:class:`PhenotypeTimeResponse` docstring.
-        maxiter: See :py:class:`PhenotypeTimeResponse` docstring.
-        grad: See :py:class:`Response` docstring.
+        phenotype_response: a homogeneous phenotype response.
+        modulation: a function :math:`\tilde\lambda(\lambda, t)` that maps the original rate :math:`lambda` and time :math:`t` to the modulated rate.
+        tol: See :py:class:`PhenotypeTimeResponse`.
+        maxiter: See :py:class:`PhenotypeTimeResponse`.
+        grad: See :py:class:`Response`.
     """
 
     def __init__(
