@@ -48,11 +48,21 @@ extensions = [
     # track to do list items
     "sphinx.ext.todo",
     "sphinxarg.ext",
+    # Copy button for code blocks
+    'sphinx_copybutton',
     # render command line output
     # "sphinxcontrib.programoutput",
     # jupyter notebooks
-    # "nbsphinx",
+    "myst_nb",
 ]
+
+
+# -- Options for myst ----------------------------------------------
+myst_heading_anchors = 3  # auto-generate 3 levels of heading anchors
+myst_enable_extensions = ['dollarmath']
+nb_execution_mode = "off"  # NOTE: this is off because we are committing executed notebooks for testing
+nb_execution_allow_errors = False
+nb_merge_streams = True
 
 # show todos in output
 todo_include_todos = True
@@ -60,8 +70,8 @@ todo_include_todos = True
 # Mappings for sphinx.ext.intersphinx. Projects have to have Sphinx-generated doc! (.inv file)
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
-    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
-    'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/', None),
     'ete3': ('http://etetoolkit.org/docs/latest/', None),
     'jax': ('https://jax.readthedocs.io/en/latest/', None),
 }

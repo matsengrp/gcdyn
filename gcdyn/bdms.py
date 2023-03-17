@@ -92,9 +92,10 @@ class TreeNode(ete3.Tree):
         tree has been pruned above this node, removing mutation event
         nodes)."""
         self._sampled = False
-        """
-        Whether sampling has been run on this tree. (Not whether the node has been
-        sampled as part of this sampling process).
+        """Whether sampling has been run on this tree.
+
+        (Not whether the node has been sampled as part of this sampling
+        process).
         """
         self._pruned = False
 
@@ -201,7 +202,7 @@ class TreeNode(ete3.Tree):
     def _generate_event(
         self,
         Δt_max: float,
-        event_rates: dict[poisson.Response],
+        event_rates: dict[str, poisson.Response],
         mutator: mutators.Mutator,
         birth_mutations: bool,
         rng: np.random.Generator,

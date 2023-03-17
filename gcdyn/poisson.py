@@ -3,24 +3,29 @@ Poisson process responses
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Abstract base classes for defining generic Poisson processes (e.g. :math:`\lambda(x, t)`, :math:`\mu(x, t)`, :math:`\gamma(x, t)`),
-with arbitrary :py:class:`ete3.TreeNode` attribute dependence.
+with arbitrary :py:class:`bdms.TreeNode` attribute dependence.
 Several concrete child classes are included.
 """
 
 from __future__ import annotations
-from abc import ABC, abstractmethod
 from typing import Any, TypeVar, Optional, Union
+from typing import TYPE_CHECKING
+from abc import ABC, abstractmethod
 from collections.abc import Callable
-import ete3
 from jax.tree_util import register_pytree_node
-import pandas as pd
 import jax.numpy as jnp
 import numpy as onp
 import jax.scipy.special as jsp
 import scipy.special as osp
 from scipy.integrate import quad
 
+# imports that are only used for type hints
+if TYPE_CHECKING:
+    from gcdyn import bdms
+    import pandas as pd
+
 # NOTE: sphinx is currently unable to present this in condensed form when the sphinx_autodoc_typehints extension is enabled
+# TODO: use ArrayLike in various phenotype/time response methods (current float types) once it is available in a stable release
 # from numpy.typing import ArrayLike
 
 from jax.config import config
@@ -29,7 +34,7 @@ config.update("jax_enable_x64", True)
 
 
 class Response(ABC):
-    r"""Abstract base class for mapping :py:class:`ete3.TreeNode` objects to a
+    r"""Abstract base class for mapping :py:class:`bdms.TreeNode` objects to a
     Poisson process.
 
     Args:
@@ -55,7 +60,7 @@ class Response(ABC):
         provided dictionary (whose format matches that returned by the
         `Response._param_dict` getter method."""
 
-    def __call__(self, node: ete3.TreeNode) -> float:
+    def __call__(self, node: bdms.TreeNode) -> float:
         r"""Call ``self`` to evaluate the Poisson intensity at a tree node.
 
         Args:
@@ -64,7 +69,7 @@ class Response(ABC):
         return self.λ(node, 0.0)
 
     @abstractmethod
-    def λ(self, node: ete3.TreeNode, Δt: float) -> float:
+    def λ(self, node: bdms.TreeNode, Δt: float) -> float:
         r"""Evaluate the Poisson intensity :math:`\lambda(t+\Delta t)` for a
         tree node at time :math:`t`.
 
@@ -76,7 +81,7 @@ class Response(ABC):
         """
 
     @abstractmethod
-    def Λ(self, node: ete3.TreeNode, Δt: float) -> float:
+    def Λ(self, node: bdms.TreeNode, Δt: float) -> float:
         r"""Evaluate the Poisson intensity measure of the time interval
         :math:`[t, t+\Delta t)`, defined as.
 
@@ -92,7 +97,7 @@ class Response(ABC):
         """
 
     @abstractmethod
-    def Λ_inv(self, node: ete3.TreeNode, τ: float) -> float:
+    def Λ_inv(self, node: bdms.TreeNode, τ: float) -> float:
         r"""Evaluate the inverse function wrt :math:`\Delta t` of :py:meth:`Response.Λ`,
         :math:`\Lambda_t^{-1}(\tau)`, such that :math:`\Lambda_t^{-1}(\Lambda(t, t+\Delta t)) = \Delta t`.
         This is needed for sampling waiting times.
@@ -105,7 +110,7 @@ class Response(ABC):
 
     def waiting_time_rv(
         self,
-        node: ete3.TreeNode,
+        node: bdms.TreeNode,
         seed: Optional[Union[int, onp.random.Generator]] = None,
     ) -> float:
         r"""Sample the waiting time :math:`\Delta t` until the first event,
@@ -121,7 +126,7 @@ class Response(ABC):
         rng = onp.random.default_rng(seed)
         return self.Λ_inv(node, rng.exponential())
 
-    def waiting_time_logsf(self, node: ete3.TreeNode, Δt: float) -> float:
+    def waiting_time_logsf(self, node: bdms.TreeNode, Δt: float) -> float:
         r"""Evaluate the logarithm of the survival function of the waiting time
         :math:`\Delta t` given the rate process starting at the provided node.
 
@@ -169,14 +174,14 @@ def _register_with_pytree(response_type: ResponseType) -> None:
 
 class HomogeneousResponse(Response):
     r"""Abstract base class for response functions mapping
-    :py:class:`ete3.TreeNode` objects to a homogenous Poisson process.
+    :py:class:`bdms.TreeNode` objects to a homogenous Poisson process.
 
     Args:
         grad: Enables JAX compilation and gradient for optimizing.
     """
 
     @abstractmethod
-    def λ_homogeneous(self, node: ete3.TreeNode) -> float:
+    def λ_homogeneous(self, node: bdms.TreeNode) -> float:
         r"""Evaluate the homogeneous Poisson intensity :math:`\lambda` for a
         tree node.
 
@@ -184,23 +189,23 @@ class HomogeneousResponse(Response):
             node: The node whose state is accessed to evaluate the response function.
         """
 
-    def λ(self, node: ete3.TreeNode, Δt: float) -> float:
+    def λ(self, node: bdms.TreeNode, Δt: float) -> float:
         return self.λ_homogeneous(node)
 
-    def Λ(self, node: ete3.TreeNode, Δt: float) -> float:
+    def Λ(self, node: bdms.TreeNode, Δt: float) -> float:
         return self.λ_homogeneous(node) * Δt
 
-    def Λ_inv(self, node: ete3.TreeNode, τ: float) -> float:
+    def Λ_inv(self, node: bdms.TreeNode, τ: float) -> float:
         return τ / self.λ_homogeneous(node)
 
 
 class PhenotypeResponse(HomogeneousResponse):
     r"""Abstract base class for response function mapping from a
-    :py:class:`ete3.TreeNode` object's phenotype attribute
+    :py:class:`bdms.TreeNode` object's phenotype attribute
     :math:`x\in\mathbb{R}` to a homogeneous Poisson process.
     """
 
-    def λ_homogeneous(self, node: ete3.TreeNode) -> float:
+    def λ_homogeneous(self, node: bdms.TreeNode) -> float:
         return self.λ_phenotype(node.x)
 
     @abstractmethod
@@ -215,7 +220,7 @@ class PhenotypeResponse(HomogeneousResponse):
 
 class ConstantResponse(PhenotypeResponse):
     r"""Returns attribute :math:`\theta\in\mathbb{R}` when an instance is called
-    on any :py:class:`ete3.TreeNode`.
+    on any :py:class:`bdms.TreeNode`.
 
     Args:
         value: Constant response value.
@@ -239,7 +244,7 @@ class ConstantResponse(PhenotypeResponse):
 
 
 class ExponentialResponse(PhenotypeResponse):
-    r"""Exponential response function on a :py:class:`ete3.TreeNode` object's
+    r"""Exponential response function on a :py:class:`bdms.TreeNode` object's
     phenotype attribute :math:`x`.
 
     .. math::
@@ -289,7 +294,7 @@ class ExponentialResponse(PhenotypeResponse):
 
 
 class SigmoidResponse(PhenotypeResponse):
-    r"""Sigmoid response function on a :py:class:`ete3.TreeNode` object's
+    r"""Sigmoid response function on a :py:class:`bdms.TreeNode` object's
     phenotype attribute :math:`x`.
 
     .. math::
@@ -341,7 +346,7 @@ class SigmoidResponse(PhenotypeResponse):
 
 
 class SoftReluResponse(PhenotypeResponse):
-    r"""Soft ReLU response function on a :py:class:`ete3.TreeNode` object's
+    r"""Soft ReLU response function on a :py:class:`bdms.TreeNode` object's
     phenotype attribute :math:`x`.
 
     .. math::
@@ -395,7 +400,7 @@ class SoftReluResponse(PhenotypeResponse):
 
 class SequenceResponse(HomogeneousResponse):
     r"""Abstract base class for response function mapping from a
-    :py:class:`ete3.TreeNode` object's sequence attribute to a homogenous
+    :py:class:`bdms.TreeNode` object's sequence attribute to a homogenous
     Poisson process.
     """
 
@@ -408,7 +413,7 @@ class SequenceResponse(HomogeneousResponse):
             sequence: DNA sequence.
         """
 
-    def λ_homogeneous(self, node: ete3.TreeNode) -> float:
+    def λ_homogeneous(self, node: bdms.TreeNode) -> float:
         return self.λ_sequence(node.sequence)
 
 
@@ -451,7 +456,7 @@ class SequenceContextMutationResponse(SequenceResponse):
 
 class PhenotypeTimeResponse(Response):
     r"""Abstract base class for response function mapping from a
-    :py:class:`ete3.TreeNode` object's phenotype attribute
+    :py:class:`bdms.TreeNode` object's phenotype attribute
     :math:`x\in\mathbb{R}` and time :math:`t\in\mathbb{R}_{\ge 0}` to a Poisson
     process. Explicit phenotype and time dependence must be specified by
     concrete subclasses.
@@ -485,13 +490,13 @@ class PhenotypeTimeResponse(Response):
             t: Time.
         """
 
-    def λ(self, node: ete3.TreeNode, Δt: float) -> float:
+    def λ(self, node: bdms.TreeNode, Δt: float) -> float:
         return self.λ_phenotype_time(node.x, node.t + Δt)
 
-    def Λ(self, node: ete3.TreeNode, Δt: float) -> float:
+    def Λ(self, node: bdms.TreeNode, Δt: float) -> float:
         return quad(lambda Δt: self.λ(node, Δt), 0, Δt, limit=1000)[0]
 
-    def Λ_inv(self, node: ete3.TreeNode, τ: float) -> float:
+    def Λ_inv(self, node: bdms.TreeNode, τ: float) -> float:
         # initial guess via rate at node
         Δt = τ / self(node)
         # non-negative Newton-Raphson root-finding
