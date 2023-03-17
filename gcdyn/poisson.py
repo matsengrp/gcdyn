@@ -455,7 +455,25 @@ class PhenotypeTimeResponse(Response):
     :math:`x\in\mathbb{R}` and time :math:`t\in\mathbb{R}_{\ge 0}` to a Poisson
     process. Explicit phenotype and time dependence must be specified by
     concrete subclasses.
+
+    This abstract base class provides generic default implementations of
+    :py:meth:`Λ` and :py:meth:`Λ_inv` via quadrature and root-finding,
+    respectively.
+
+    Args:
+        grad: See :py:class:`Response` docstring.
+        tol: Tolerance for root-finding.
+        maxiter: Maximum number of iterations for root-finding.
     """
+
+    def __init__(
+        self, grad: bool = False, tol: float = 1e-6, maxiter: int = 100, *args, **kwargs
+    ):
+        if grad:
+            raise NotImplementedError(f"gradients are not implemented for {type(self)}")
+        super().__init__(grad)
+        self.tol = tol
+        self.maxiter = maxiter
 
     @abstractmethod
     def λ_phenotype_time(self, x: float, t: float) -> float:
@@ -469,6 +487,27 @@ class PhenotypeTimeResponse(Response):
 
     def λ(self, node: ete3.TreeNode, Δt: float) -> float:
         return self.λ_phenotype_time(node.x, node.t + Δt)
+
+    def Λ(self, node: ete3.TreeNode, Δt: float) -> float:
+        return quad(lambda Δt: self.λ(node, Δt), 0, Δt, limit=1000)[0]
+
+    def Λ_inv(self, node: ete3.TreeNode, τ: float) -> float:
+        # initial guess via rate at node
+        Δt = τ / self(node)
+        # non-negative Newton-Raphson root-finding
+        converged = False
+        for iter in range(self.maxiter):
+            if self.λ(node, Δt) == 0:
+                return self._np.inf
+            Δt = max(Δt - (self.Λ(node, Δt) - τ) / self.λ(node, Δt), 0.0)
+            if abs(self.Λ(node, Δt) - τ) < self.tol:
+                converged = True
+                break
+        if not converged:
+            raise RuntimeError(
+                f"Newton-Raphson failed to converge after {self.maxiter} iterations with Δt={Δt} and error={abs(self.Λ(node, Δt) - τ)}"
+            )
+        return Δt
 
 
 class ModulatedPhenotypeResponse(PhenotypeTimeResponse):
@@ -484,8 +523,8 @@ class ModulatedPhenotypeResponse(PhenotypeTimeResponse):
         phenotype_response: a homogeneous phenotype response for the effective phenotype :math:`x - f(t)`.
         external_field: external field :math:`f(t)`, a function that maps time to the external field.
         interaction: a function :math:`\phi(x, f(t))` that maps the phenotype and external field to the effective phenotype.
-        tol: tolerance for root-finding.
-        maxiter: maximum number of iterations for root-finding.
+        tol: See :py:class:`PhenotypeTimeResponse` docstring.
+        maxiter: See :py:class:`PhenotypeTimeResponse` docstring.
         grad: See :py:class:`Response` docstring.
     """
 
@@ -496,6 +535,7 @@ class ModulatedPhenotypeResponse(PhenotypeTimeResponse):
         interaction: Callable[[float, float], float] = lambda x, f: x - f,
         tol: float = 1e-6,
         maxiter: int = 100,
+        grad: bool = False,
     ):
         super().__init__(grad=phenotype_response.grad)
         self.phenotype_response = phenotype_response
@@ -508,28 +548,44 @@ class ModulatedPhenotypeResponse(PhenotypeTimeResponse):
         effective_phenotype = self.interaction(x, self.external_field(t))
         return self.phenotype_response.λ_phenotype(effective_phenotype)
 
-    def Λ(self, node: ete3.TreeNode, Δt: float) -> float:
-        return quad(lambda Δt: self.λ(node, Δt), 0, Δt, limit=1000)[0]
+    @property
+    def _param_dict(self) -> dict:
+        return self.phenotype_response._param_dict
 
-    def Λ_inv(self, node: ete3.TreeNode, τ: float) -> float:
-        # initial guess via rate at node
-        Δt = τ / self(node)
-        # non-negative Newton-Raphson root-finding
-        converged = False
-        for iter in range(self.maxiter):
-            if self.λ(node, Δt) == 0:
-                raise RuntimeError(
-                    f"Vanishing intensity at iteration {iter + 1} x={node.x}, t={node.t}, Δt={Δt}"
-                )
-            Δt = max(Δt - (self.Λ(node, Δt) - τ) / self.λ(node, Δt), 0.0)
-            if abs(self.Λ(node, Δt) - τ) < self.tol:
-                converged = True
-                break
-        if not converged:
-            raise RuntimeError(
-                f"Newton-Raphson failed to converge after {self.maxiter} iterations with Δt={Δt} and error={abs(self.Λ(node, Δt) - τ)}"
-            )
-        return Δt
+    @_param_dict.setter
+    def _param_dict(self, d):
+        self.phenotype_response._param_dict = d
+
+
+class ModulatedRateResponse(PhenotypeTimeResponse):
+    r"""An inhomogeneous phenotype response that modulates a homogeneous
+    phenotype response rate :math:`\lambda` via a time-dependent function
+    :math:`\tilde\lambda(\lambda, t)` to yield a time-dependent modulated rate.
+
+    Args:
+        phenotype_response: a homogeneous phenotype response for the effective phenotype :math:`x - f(t)`.
+        modulation: a function :math:`\tilde\lambda(\lambda, t)` that maps the original rate and time to the modulated rate.
+        tol: See :py:class:`PhenotypeTimeResponse` docstring.
+        maxiter: See :py:class:`PhenotypeTimeResponse` docstring.
+        grad: See :py:class:`Response` docstring.
+    """
+
+    def __init__(
+        self,
+        phenotype_response: PhenotypeResponse,
+        modulation: Callable[[float, float], float],
+        tol: float = 1e-6,
+        maxiter: int = 100,
+        grad: bool = False,
+    ):
+        super().__init__(grad=phenotype_response.grad)
+        self.phenotype_response = phenotype_response
+        self.modulation = modulation
+        self.tol = tol
+        self.maxiter = maxiter
+
+    def λ_phenotype_time(self, x: float, t: float) -> float:
+        return self.modulation(self.phenotype_response.λ_phenotype(x), t)
 
     @property
     def _param_dict(self) -> dict:
