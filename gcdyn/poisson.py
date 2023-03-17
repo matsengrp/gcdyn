@@ -491,7 +491,7 @@ class ModulatedPhenotypeResponse(PhenotypeTimeResponse):
 
     def __init__(
         self,
-        phenotype_response: HomogeneousResponse,
+        phenotype_response: PhenotypeResponse,
         external_field: Callable[[float], float],
         interaction: Callable[[float, float], float] = lambda x, f: x - f,
         tol: float = 1e-6,
