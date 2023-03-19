@@ -6,18 +6,19 @@ Abstract base class for defining generic mutation effect generators (i.e. :math:
 with arbitrary :py:class:`ete3.TreeNode` attribute dependence.
 Some concrete child classes are included.
 """
+
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Optional, Union
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 import numpy as np
 import pandas as pd
 from scipy.stats import norm, gaussian_kde
 import ete3
 from gcdyn.gpmap import GPMap
 
-# NOTE: sphinx is currently unable to present this in condensed form, using a string type hint
-# of "array-like" in the docstring args for now, instead of ArrayLike hint in call signature
-# from numpy.typing import ArrayLike
+# NOTE: sphinx is currently unable to present this in condensed form when the sphinx_autodoc_typehints extension is enabled
+from numpy.typing import ArrayLike
 
 
 class Mutator(ABC):
@@ -41,7 +42,7 @@ class Mutator(ABC):
             seed: A seed to initialize the random number generation. If ``None``, then fresh,
                   unpredictable entropy will be pulled from the OS.
                   If an ``int``, then it will be used to derive the initial state.
-                  If a :py:class:`numpy.random.Generator`, then that will be used directly.
+                  If a :py:class:`numpy.random.Generator`, then it will be used directly.
         """
 
     @abstractmethod
@@ -75,15 +76,15 @@ class AttrMutator(Mutator):
         )
 
     @abstractmethod
-    def prob(self, attr1, attr2, log: bool = False) -> float:
+    def prob(self, attr1: ArrayLike, attr2: ArrayLike, log: bool = False) -> float:
         r"""Convenience method to compute the probability density (if ``attr``
         is continuous) or mass (if ``attr`` is discrete) that a mutation event
         brings attribute value ``attr1`` to attribute value ``attr2`` (e.g. for
         plotting).
 
         Args:
-            attr1 (array-like): Initial attribute value.
-            attr2 (array-like): Final attribute value.
+            attr1: Initial attribute value.
+            attr2: Final attribute value.
             log: If ``True``, return the log probability density.
         """
 
@@ -117,7 +118,7 @@ class GaussianMutator(AttrMutator):
         setattr(node, self.attr, new_value)
 
     def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
-        Δx = np.array(attr2) - np.array(attr1)
+        Δx = np.asarray(attr2) - np.asarray(attr1)
         return self._distribution.logpdf(Δx) if log else self._distribution.pdf(Δx)
 
 
@@ -126,18 +127,18 @@ class KdeMutator(AttrMutator):
     specified attribute.
 
     Args:
-        dataset (array-like): Data to fit the KDE to.
+        dataset: Data to fit the KDE to.
         attr: Node attribute to mutate.
         bw_method: KDE bandwidth (see :py:class:`scipy.stats.gaussian_kde`).
-        weights (optional array-like): Weights of data points (see :py:class:`scipy.stats.gaussian_kde`).
+        weights: Weights of data points (see :py:class:`scipy.stats.gaussian_kde`).
     """
 
     def __init__(
         self,
-        dataset,
+        dataset: ArrayLike,
         attr: str = "x",
         bw_method: Optional[Union[str, float, callable]] = None,
-        weights=None,
+        weights: Optional[ArrayLike] = None,
     ):
         super().__init__(attr=attr)
         self._distribution = gaussian_kde(dataset, bw_method, weights)
@@ -154,7 +155,7 @@ class KdeMutator(AttrMutator):
         setattr(node, self.attr, new_value)
 
     def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
-        Δx = np.array(attr2) - np.array(attr1)
+        Δx = np.asarray(attr2) - np.asarray(attr1)
         return self._distribution.logpdf(Δx) if log else self._distribution.pdf(Δx)
 
 
@@ -162,22 +163,31 @@ class DiscreteMutator(AttrMutator):
     r"""Mutations on a discrete space with a stochastic matrix.
 
     Args:
-        state_space (array-like): hashable state values.
-        transition_matrix (array-like): Right-stochastic matrix, where column and row orders match the order of `state_space`.
+        state_space: hashable state values.
+        transition_matrix: Right-stochastic matrix, where column and row orders match the order of `state_space`.
         attr: Node attribute to mutate.
     """
 
     def __init__(
         self,
-        state_space,
-        transition_matrix,
+        state_space: Iterable,
+        transition_matrix: ArrayLike,
         attr: str = "x",
     ):
-        transition_matrix = np.array(transition_matrix, dtype=float)
+        transition_matrix = np.asarray(transition_matrix, dtype=float)
+        if not (
+            transition_matrix.ndim == 2
+            and transition_matrix.shape[0]
+            == transition_matrix.shape[1]
+            == len(state_space)
+        ):
+            raise ValueError(
+                f"Transition matrix shape {transition_matrix.shape} does not match state space size {state_space}"
+            )
         if np.any(transition_matrix < 0) or np.any(
             np.abs(transition_matrix.sum(axis=1) - 1) > 1e-4
         ):
-            raise ValueError("Invalid stochastic matrix")
+            raise ValueError("Transition matrix is not a valid stochastic matrix.")
 
         super().__init__(attr=attr)
 
