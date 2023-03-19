@@ -569,7 +569,7 @@ class ModulatedRateResponse(PhenotypeTimeResponse):
 
     Args:
         phenotype_response: a homogeneous phenotype response.
-        modulation: a function :math:`\tilde\lambda(\lambda, t)` that maps the original rate :math:`lambda` and time :math:`t` to the modulated rate.
+        modulation: a function :math:`\tilde\lambda(\lambda, t)` that maps the original rate :math:`\lambda` and time :math:`t` to the modulated rate.
         tol: See :py:class:`PhenotypeTimeResponse`.
         maxiter: See :py:class:`PhenotypeTimeResponse`.
         grad: See :py:class:`Response`.
