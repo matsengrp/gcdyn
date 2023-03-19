@@ -564,12 +564,12 @@ class ModulatedPhenotypeResponse(PhenotypeTimeResponse):
 
 class ModulatedRateResponse(PhenotypeTimeResponse):
     r"""An inhomogeneous phenotype response that modulates a homogeneous
-    phenotype response rate :math:`\lambda` via a time-dependent function
-    :math:`\tilde\lambda(\lambda, t)` to yield a time-dependent modulated rate.
+    phenotype response rate :math:`\lambda_x` via a time-dependent function
+    :math:`\tilde\lambda(\lambda_x, x, t)` to yield a time-dependent modulated rate.
 
     Args:
         phenotype_response: a homogeneous phenotype response.
-        modulation: a function :math:`\tilde\lambda(\lambda, t)` that maps the original rate :math:`\lambda` and time :math:`t` to the modulated rate.
+        modulation: a function :math:`\tilde\lambda(\lambda_x, x, t)` that maps the original rate :math:`\lambda_x`, phenotype :math:`x`, and time :math:`t` to the modulated rate.
         tol: See :py:class:`PhenotypeTimeResponse`.
         maxiter: See :py:class:`PhenotypeTimeResponse`.
         grad: See :py:class:`Response`.
@@ -578,7 +578,7 @@ class ModulatedRateResponse(PhenotypeTimeResponse):
     def __init__(
         self,
         phenotype_response: PhenotypeResponse,
-        modulation: Callable[[float, float], float],
+        modulation: Callable[[float, float, float], float],
         tol: float = 1e-6,
         maxiter: int = 100,
         grad: bool = False,
@@ -590,7 +590,7 @@ class ModulatedRateResponse(PhenotypeTimeResponse):
         self.maxiter = maxiter
 
     def λ_phenotype_time(self, x: float, t: float) -> float:
-        return self.modulation(self.phenotype_response.λ_phenotype(x), t)
+        return self.modulation(self.phenotype_response.λ_phenotype(x), x, t)
 
     @property
     def _param_dict(self) -> dict:
