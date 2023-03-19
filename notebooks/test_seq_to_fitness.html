@@ -1,0 +1,681 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>&lt;no title&gt; &#8212; gcdyn  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/test_seq_to_fitness';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cite.html">Citing <code class="docutils literal notranslate"><span class="pre">gcdyn</span></code></a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="bdms_replay.html">Germinal center replay modeling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bdms_inhomogeneous.html">Inhomogeneous processes</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api.html">Modules</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../_autosummary/gcdyn.bdms.html">gcdyn.bdms</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.bdms.TreeNode.html">gcdyn.bdms.TreeNode</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../_autosummary/gcdyn.poisson.html">gcdyn.poisson</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.ConstantResponse.html">gcdyn.poisson.ConstantResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.ExponentialResponse.html">gcdyn.poisson.ExponentialResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.HomogeneousResponse.html">gcdyn.poisson.HomogeneousResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.ModulatedPhenotypeResponse.html">gcdyn.poisson.ModulatedPhenotypeResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.ModulatedRateResponse.html">gcdyn.poisson.ModulatedRateResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.PhenotypeResponse.html">gcdyn.poisson.PhenotypeResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.PhenotypeTimeResponse.html">gcdyn.poisson.PhenotypeTimeResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.Response.html">gcdyn.poisson.Response</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.SequenceContextMutationResponse.html">gcdyn.poisson.SequenceContextMutationResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.SequenceResponse.html">gcdyn.poisson.SequenceResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.SigmoidResponse.html">gcdyn.poisson.SigmoidResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.SoftReluResponse.html">gcdyn.poisson.SoftReluResponse</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../_autosummary/gcdyn.mutators.html">gcdyn.mutators</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.mutators.AttrMutator.html">gcdyn.mutators.AttrMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.mutators.ContextMutator.html">gcdyn.mutators.ContextMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.mutators.DiscreteMutator.html">gcdyn.mutators.DiscreteMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.mutators.GaussianMutator.html">gcdyn.mutators.GaussianMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.mutators.KdeMutator.html">gcdyn.mutators.KdeMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.mutators.Mutator.html">gcdyn.mutators.Mutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.mutators.SequenceMutator.html">gcdyn.mutators.SequenceMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.mutators.SequencePhenotypeMutator.html">gcdyn.mutators.SequencePhenotypeMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.mutators.UniformMutator.html">gcdyn.mutators.UniformMutator</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../_autosummary/gcdyn.gpmap.html">gcdyn.gpmap</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.gpmap.AdditiveGPMap.html">gcdyn.gpmap.AdditiveGPMap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.gpmap.ConstantGPMap.html">gcdyn.gpmap.ConstantGPMap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.gpmap.GPMap.html">gcdyn.gpmap.GPMap</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../_autosummary/gcdyn.model.html">gcdyn.model</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.model.BDMSModel.html">gcdyn.model.BDMSModel</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../_autosummary/gcdyn.utils.html">gcdyn.utils</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.utils.padded_fivemer_contexts_of_paired_sequences.html">gcdyn.utils.padded_fivemer_contexts_of_paired_sequences</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.utils.simple_fivemer_contexts.html">gcdyn.utils.simple_fivemer_contexts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.utils.write_leaf_sequences_to_fasta.html">gcdyn.utils.write_leaf_sequences_to_fasta</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">Open source code repository</a></li>
+
+
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/matsengrp/gcdyn" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/notebooks/test_seq_to_fitness.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1><no title></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="simple visible nav section-nav flex-column">
+</ul>
+
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <p>Creating DMSPhenotype and Fitness objects</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gcdyn.fitness</span> <span class="kn">import</span> <span class="n">Fitness</span>
+<span class="kn">from</span> <span class="nn">gcdyn.phenotype</span> <span class="kn">import</span> <span class="n">DMSPhenotype</span>
+<span class="kn">from</span> <span class="nn">Bio</span> <span class="kn">import</span> <span class="n">SeqIO</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dms_phenotype</span> <span class="o">=</span> <span class="n">DMSPhenotype</span><span class="p">(</span>
+    <span class="mi">1</span><span class="p">,</span>
+    <span class="mi">1</span><span class="p">,</span>
+    <span class="mi">336</span><span class="p">,</span>
+    <span class="s2">&quot;https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Linear.model&quot;</span><span class="p">,</span>
+    <span class="p">[</span><span class="s2">&quot;delta_log10_KD&quot;</span><span class="p">,</span> <span class="s2">&quot;expression&quot;</span><span class="p">],</span>
+    <span class="o">-</span><span class="mf">10.43</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="n">fasta_path</span> <span class="o">=</span> <span class="s2">&quot;gcreplay_samples/gctree_PR1.2-5-LP-78-GC.fasta&quot;</span>
+<span class="n">seqs</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="nb">str</span><span class="p">(</span><span class="n">seq_record</span><span class="o">.</span><span class="n">seq</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">seq_record</span> <span class="ow">in</span> <span class="n">SeqIO</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">fasta_path</span><span class="p">,</span> <span class="s2">&quot;fasta&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">seq_record</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="s2">&quot;naive&quot;</span>
+<span class="p">]</span>
+
+<span class="n">fit</span> <span class="o">=</span> <span class="n">Fitness</span><span class="p">(</span><span class="n">Fitness</span><span class="o">.</span><span class="n">sigmoidal_fitness</span><span class="p">)</span>
+<span class="n">fitness_df</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">normalized_fitness_df</span><span class="p">(</span><span class="n">seqs</span><span class="p">,</span> <span class="n">calculate_KD</span><span class="o">=</span><span class="n">dms_phenotype</span><span class="o">.</span><span class="n">calculate_KD</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Testing different antigen concentrations vs antigen bound</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">plotnine</span> <span class="kn">import</span> <span class="n">ggplot</span><span class="p">,</span> <span class="n">geom_histogram</span><span class="p">,</span> <span class="n">aes</span><span class="p">,</span> <span class="n">facet_wrap</span><span class="p">,</span> <span class="n">ggtitle</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span>
+
+<span class="n">antigen_bound_fracs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">concentrations</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+<span class="k">def</span> <span class="nf">frac_antigen_bound</span><span class="p">(</span>
+    <span class="n">sequence_KDs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">concentration_antigen</span><span class="p">:</span> <span class="nb">int</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="n">thetas</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">seq_KD</span> <span class="ow">in</span> <span class="n">sequence_KDs</span><span class="p">:</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">concentration_antigen</span> <span class="o">/</span> <span class="p">(</span><span class="n">seq_KD</span> <span class="o">+</span> <span class="n">concentration_antigen</span><span class="p">)</span>
+        <span class="n">thetas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">thetas</span>
+
+
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">11</span><span class="p">):</span>  <span class="c1"># concentration of antigen from 10^-6 to 10^-10</span>
+    <span class="n">concentration_antigen</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span>
+    <span class="n">fit</span> <span class="o">=</span> <span class="n">Fitness</span><span class="p">(</span><span class="n">Fitness</span><span class="o">.</span><span class="n">sigmoidal_fitness</span><span class="p">,</span> <span class="n">concentration_antigen</span><span class="p">)</span>
+    <span class="n">antigen_bound_fracs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="n">frac_antigen_bound</span><span class="p">(</span><span class="n">fitness_df</span><span class="p">[</span><span class="s2">&quot;KD&quot;</span><span class="p">],</span> <span class="n">concentration_antigen</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">concentrations</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">concentration_antigen</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">fitness_df</span><span class="p">[</span><span class="s2">&quot;KD&quot;</span><span class="p">]))</span>
+
+<span class="n">antigen_bound_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span><span class="s2">&quot;concentration_antigen&quot;</span><span class="p">:</span> <span class="n">concentrations</span><span class="p">,</span> <span class="s2">&quot;frac_antigen_bound&quot;</span><span class="p">:</span> <span class="n">antigen_bound_fracs</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="p">(</span>
+    <span class="n">ggplot</span><span class="p">(</span><span class="n">antigen_bound_df</span><span class="p">)</span>
+    <span class="o">+</span> <span class="n">facet_wrap</span><span class="p">(</span><span class="n">facets</span><span class="o">=</span><span class="s2">&quot;~concentration_antigen&quot;</span><span class="p">)</span>
+    <span class="o">+</span> <span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;frac_antigen_bound&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;factor(concentration_antigen)&quot;</span><span class="p">)</span>
+    <span class="o">+</span> <span class="n">geom_histogram</span><span class="p">(</span><span class="n">binwidth</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+    <span class="o">+</span> <span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/alyssa/miniconda3/envs/gcdyn_39/lib/python3.9/site-packages/plotnine/utils.py:371: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+/Users/alyssa/miniconda3/envs/gcdyn_39/lib/python3.9/site-packages/plotnine/layer.py:401: PlotnineWarning: geom_histogram : Removed 10 rows containing missing values.
+</pre></div>
+</div>
+<img alt="../_images/cde06df7266ebdeed276bdd0e500461b505551d102c095ab01eac0543f6d4a38.png" src="../_images/cde06df7266ebdeed276bdd0e500461b505551d102c095ab01eac0543f6d4a38.png" />
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ggplot: (8783282393516)&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Mapping to fitness (sigmoidal)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">plotnine</span> <span class="kn">import</span> <span class="n">geom_point</span>
+
+<span class="n">fitness_df</span><span class="p">[</span><span class="s2">&quot;frac_antigen_bound&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">frac_antigen_bound</span><span class="p">(</span><span class="n">fitness_df</span><span class="p">[</span><span class="s2">&quot;KD&quot;</span><span class="p">],</span> <span class="mi">10</span><span class="o">**-</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">ggplot</span><span class="p">(</span><span class="n">fitness_df</span><span class="p">)</span> <span class="o">+</span> <span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;frac_antigen_bound&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;t_cell_help&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">geom_point</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/0e6391dba3e912bf77e76a97f0df637ba178dc59ca4cb4b639949c891178646f.png" src="../_images/0e6391dba3e912bf77e76a97f0df637ba178dc59ca4cb4b639949c891178646f.png" />
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ggplot: (8783282270058)&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Normalized fitness (T cell help)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span>
+    <span class="n">ggplot</span><span class="p">(</span><span class="n">fitness_df</span><span class="p">)</span>
+    <span class="o">+</span> <span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;frac_antigen_bound&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;normalized_t_cell_help&quot;</span><span class="p">)</span>
+    <span class="o">+</span> <span class="n">geom_point</span><span class="p">()</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/1089c8f3ce6456930bbb90a5731d1c6977873537384533fd66eb68f32fccd80e.png" src="../_images/1089c8f3ce6456930bbb90a5731d1c6977873537384533fd66eb68f32fccd80e.png" />
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ggplot: (8783282424826)&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">fitness_df</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                                  seq            KD  \
+0   GAGGTGCAGCTTCAGGAGTCAGGACCTAGCCTCGTGAAACCTTCTC...  1.019846e-10   
+1   GAGGTGCAGCTTCAGGAGTCAGGACCTAGCCTCGTGAAACCTTCTC...  4.797376e-12   
+2   GAGGTGCAGCTTCAGGAGTCAGGACCTAGCCTCGTGAAACCTTCTC...  2.203513e-09   
+3   GAGGTGCAGCTTCAGGAGTCAGGACCTAGCCTCGTGAAACCTTCTC...  8.136458e-12   
+4   GAGGTGCAGCTTCAGGAGTCAGGACCTAGCCTCGTGAAACCTTCTC...  1.152404e-11   
+..                                                ...           ...   
+72  GAGGTGCAGCTTCAGGAGTCAGGACCTAGCCTCGTGAAACCTTCTC...  1.887426e-11   
+73  GAGGTGCAGCTTCAGGAGTCAGGACCTAGCCTCGTGAAACCTTCTC...  5.685297e-12   
+74  GAGGTGCAGCTTCAGGAGTCAGGACCTAGCCTCGTGAAACCTTCTC...  2.984258e-12   
+75  GAGGTGCAGCTTCAGGAGTCAGGACCTAGCCTCGTGAAACCTTCTC...  1.130994e-11   
+76  GAGGTGCAGCTTCAGGAGTCAGGACCTAGCCTCGTGAAACCTTCTC...  1.617107e-11   
+
+    t_cell_help  normalized_t_cell_help  frac_antigen_bound  
+0      3.313718                0.012742            0.495087  
+1      3.682905                0.014162            0.954222  
+2      0.049559                0.000191            0.043412  
+3      3.673147                0.014124            0.924757  
+4      3.663036                0.014085            0.896668  
+..          ...                     ...                 ...  
+72     3.640366                0.013998            0.841225  
+73     3.680330                0.014152            0.946205  
+74     3.688118                0.014182            0.971022  
+75     3.663682                0.014088            0.898392  
+76     3.648821                0.014031            0.860799  
+
+[77 rows x 5 columns]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Map to fitness (linear)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">linfit</span> <span class="o">=</span> <span class="n">Fitness</span><span class="p">(</span><span class="n">Fitness</span><span class="o">.</span><span class="n">linear_fitness</span><span class="p">)</span>
+<span class="n">linfit_fitness_df</span> <span class="o">=</span> <span class="n">linfit</span><span class="o">.</span><span class="n">normalized_fitness_df</span><span class="p">(</span>
+    <span class="n">seqs</span><span class="p">,</span> <span class="n">calculate_KD</span><span class="o">=</span><span class="n">dms_phenotype</span><span class="o">.</span><span class="n">calculate_KD</span>
+<span class="p">)</span>
+<span class="n">linfit_fitness_df</span><span class="p">[</span><span class="s2">&quot;frac_antigen_bound&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">frac_antigen_bound</span><span class="p">(</span>
+    <span class="n">linfit_fitness_df</span><span class="p">[</span><span class="s2">&quot;KD&quot;</span><span class="p">],</span> <span class="mi">10</span><span class="o">**-</span><span class="mi">9</span>
+<span class="p">)</span>
+<span class="n">ggplot</span><span class="p">(</span><span class="n">linfit_fitness_df</span><span class="p">)</span> <span class="o">+</span> <span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;frac_antigen_bound&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;t_cell_help&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">geom_point</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/9a94810650548f99e1a68cf78b431850868962f4ef704b52c7afec1db077ca93.png" src="../_images/9a94810650548f99e1a68cf78b431850868962f4ef704b52c7afec1db077ca93.png" />
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ggplot: (8783284626101)&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># map normalized fitness linearly to number of cell divisions</span>
+<span class="n">test_cell_divs</span> <span class="o">=</span> <span class="n">linfit</span><span class="o">.</span><span class="n">cell_divisions_from_tfh_linear</span><span class="p">(</span>
+    <span class="n">linfit_fitness_df</span><span class="p">[</span><span class="s2">&quot;normalized_t_cell_help&quot;</span><span class="p">],</span> <span class="mi">200</span>
+<span class="p">)</span>
+<span class="n">linfit_fitness_df</span><span class="p">[</span><span class="s2">&quot;cell_divs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">test_cell_divs</span>
+<span class="n">ggplot</span><span class="p">(</span><span class="n">linfit_fitness_df</span><span class="p">)</span> <span class="o">+</span> <span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;frac_antigen_bound&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;cell_divs&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">geom_point</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/8a45b543073a7c04db0d87abfc78a6da63c470a663bf8efd8ff19562dd8a4619.png" src="../_images/8a45b543073a7c04db0d87abfc78a6da63c470a663bf8efd8ff19562dd8a4619.png" />
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ggplot: (8783251480414)&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Uniform fitness</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">uniform_fit</span> <span class="o">=</span> <span class="n">Fitness</span><span class="p">(</span><span class="n">Fitness</span><span class="o">.</span><span class="n">uniform_fitness</span><span class="p">)</span>
+<span class="n">uniform_fitness_df</span> <span class="o">=</span> <span class="n">uniform_fit</span><span class="o">.</span><span class="n">normalized_fitness_df</span><span class="p">(</span>
+    <span class="n">seqs</span><span class="p">,</span> <span class="n">calculate_KD</span><span class="o">=</span><span class="n">dms_phenotype</span><span class="o">.</span><span class="n">calculate_KD</span>
+<span class="p">)</span>
+<span class="n">uniform_fitness_df</span><span class="p">[</span><span class="s2">&quot;frac_antigen_bound&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">frac_antigen_bound</span><span class="p">(</span>
+    <span class="n">uniform_fitness_df</span><span class="p">[</span><span class="s2">&quot;KD&quot;</span><span class="p">],</span> <span class="mi">10</span><span class="o">**-</span><span class="mi">10</span>
+<span class="p">)</span>
+<span class="p">(</span>
+    <span class="n">ggplot</span><span class="p">(</span><span class="n">uniform_fitness_df</span><span class="p">)</span>
+    <span class="o">+</span> <span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;frac_antigen_bound&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;normalized_t_cell_help&quot;</span><span class="p">)</span>
+    <span class="o">+</span> <span class="n">geom_point</span><span class="p">()</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/9290e8cb9748cfca29eadd7e7559020e642d519f6ae37b08b8a4f189996f6491.png" src="../_images/9290e8cb9748cfca29eadd7e7559020e642d519f6ae37b08b8a4f189996f6491.png" />
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ggplot: (8783252416702)&gt;
+</pre></div>
+</div>
+</div>
+</div>
+
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="simple visible nav section-nav flex-column">
+</ul>
+
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            <div class="bd-footer-content__inner">
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Erick Matsen
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2022, Erick Matsen.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div></div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

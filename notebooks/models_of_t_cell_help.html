@@ -1,0 +1,806 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>&lt;no title&gt; &#8212; gcdyn  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/models_of_t_cell_help';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cite.html">Citing <code class="docutils literal notranslate"><span class="pre">gcdyn</span></code></a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="bdms_replay.html">Germinal center replay modeling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bdms_inhomogeneous.html">Inhomogeneous processes</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api.html">Modules</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../_autosummary/gcdyn.bdms.html">gcdyn.bdms</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.bdms.TreeNode.html">gcdyn.bdms.TreeNode</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../_autosummary/gcdyn.poisson.html">gcdyn.poisson</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.ConstantResponse.html">gcdyn.poisson.ConstantResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.ExponentialResponse.html">gcdyn.poisson.ExponentialResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.HomogeneousResponse.html">gcdyn.poisson.HomogeneousResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.ModulatedPhenotypeResponse.html">gcdyn.poisson.ModulatedPhenotypeResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.ModulatedRateResponse.html">gcdyn.poisson.ModulatedRateResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.PhenotypeResponse.html">gcdyn.poisson.PhenotypeResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.PhenotypeTimeResponse.html">gcdyn.poisson.PhenotypeTimeResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.Response.html">gcdyn.poisson.Response</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.SequenceContextMutationResponse.html">gcdyn.poisson.SequenceContextMutationResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.SequenceResponse.html">gcdyn.poisson.SequenceResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.SigmoidResponse.html">gcdyn.poisson.SigmoidResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.poisson.SoftReluResponse.html">gcdyn.poisson.SoftReluResponse</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../_autosummary/gcdyn.mutators.html">gcdyn.mutators</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.mutators.AttrMutator.html">gcdyn.mutators.AttrMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.mutators.ContextMutator.html">gcdyn.mutators.ContextMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.mutators.DiscreteMutator.html">gcdyn.mutators.DiscreteMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.mutators.GaussianMutator.html">gcdyn.mutators.GaussianMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.mutators.KdeMutator.html">gcdyn.mutators.KdeMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.mutators.Mutator.html">gcdyn.mutators.Mutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.mutators.SequenceMutator.html">gcdyn.mutators.SequenceMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.mutators.SequencePhenotypeMutator.html">gcdyn.mutators.SequencePhenotypeMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.mutators.UniformMutator.html">gcdyn.mutators.UniformMutator</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../_autosummary/gcdyn.gpmap.html">gcdyn.gpmap</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.gpmap.AdditiveGPMap.html">gcdyn.gpmap.AdditiveGPMap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.gpmap.ConstantGPMap.html">gcdyn.gpmap.ConstantGPMap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.gpmap.GPMap.html">gcdyn.gpmap.GPMap</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../_autosummary/gcdyn.model.html">gcdyn.model</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.model.BDMSModel.html">gcdyn.model.BDMSModel</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../_autosummary/gcdyn.utils.html">gcdyn.utils</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.utils.padded_fivemer_contexts_of_paired_sequences.html">gcdyn.utils.padded_fivemer_contexts_of_paired_sequences</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.utils.simple_fivemer_contexts.html">gcdyn.utils.simple_fivemer_contexts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/gcdyn.utils.write_leaf_sequences_to_fasta.html">gcdyn.utils.write_leaf_sequences_to_fasta</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">Open source code repository</a></li>
+
+
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/matsengrp/gcdyn" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/notebooks/models_of_t_cell_help.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1><no title></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="simple visible nav section-nav flex-column">
+</ul>
+
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <p>This compares how reproduction is determined by the DMS Selector and the three-step Selector.
+Both selectors start from the <span class="math notranslate nohighlight">\(K_D\)</span>, which is determined from the <span class="math notranslate nohighlight">\(\Delta log_{10}K_D\)</span>: <span class="math notranslate nohighlight">\(K_D = 10^{(naive K_D - \Delta log_{10}K_D)}\)</span>, where a positive <span class="math notranslate nohighlight">\(\Delta log_{10}K_D\)</span> represents an increase in affinity from naive.</p>
+<p>The fraction of antigen bound is also determined in the same way, with it being determined by <span class="math notranslate nohighlight">\(\theta = { M_{antigen} \over {K_D + M_{antigen}}}\)</span></p>
+<p>The DMS selector then uses a linear or sigmoidal function (sigmoidal in this notebook, as <span class="math notranslate nohighlight">\(maxsignal \over 1+e^{-growthrate(\theta - \theta_{mid})}\)</span>) to determine the T cell help signal from these antigen bound values, then normalizes them if competition is on (which is consistently true in this notebook) via <span class="math notranslate nohighlight">\(signal \over \Sigma signals\)</span></p>
+<p>These values are then multiplied by a constant to produce the number of cell divisions.</p>
+<p>The three-step Selector applies a minimum cutoff to the antigen bound in the first step (<code class="docutils literal notranslate"><span class="pre">norm1</span></code>). Then, these values are sigmoidally mapped to a signal between 0 and 1 (<code class="docutils literal notranslate"><span class="pre">norm2</span></code>), given by <span class="math notranslate nohighlight">\(1 \over 1+e^{-growthrate(\theta - \theta_{mid})}\)</span>. These values are then normalized: <code class="docutils literal notranslate"><span class="pre">norm_signal</span></code><span class="math notranslate nohighlight">\(=  {signal \over \Sigma signals}\)</span></p>
+<p>In <code class="docutils literal notranslate"><span class="pre">norm3</span></code>, a discrete quantity of T cell help is distributed among cells. Each <code class="docutils literal notranslate"><span class="pre">norm_signal</span></code> represents a weighted probability of receiving T cell help, and cells are chosen with replacement, though prevented from receiving more than a determined maximum quantity of T cell help, until all T cell help has been distributed or every cell has the maximum T cell help. Each cell’s fitness is determined by the units of T cell help it receives.</p>
+<p>Make a large set of KDs</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gcdyn.cycles</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ThreeStepSelector</span><span class="p">,</span>
+    <span class="n">simple_proliferator</span><span class="p">,</span>
+    <span class="n">FivemerMutator</span><span class="p">,</span>
+    <span class="n">UniformMutator</span><span class="p">,</span>
+    <span class="n">DMSSelector</span><span class="p">,</span>
+    <span class="n">cell_div_balanced_proliferator</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">gcdyn.phenotype</span> <span class="kn">import</span> <span class="n">DMSPhenotype</span>
+<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">default_rng</span>
+<span class="kn">from</span> <span class="nn">Bio</span> <span class="kn">import</span> <span class="n">SeqIO</span>
+<span class="kn">from</span> <span class="nn">ete3</span> <span class="kn">import</span> <span class="n">TreeNode</span>
+<span class="kn">from</span> <span class="nn">plotnine</span> <span class="kn">import</span> <span class="n">ggplot</span><span class="p">,</span> <span class="n">aes</span><span class="p">,</span> <span class="n">geom_histogram</span><span class="p">,</span> <span class="n">after_stat</span><span class="p">,</span> <span class="n">geom_density</span><span class="p">,</span> <span class="n">xlim</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">statistics</span> <span class="kn">import</span> <span class="n">mean</span><span class="p">,</span> <span class="n">median</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">display</span>
+
+<span class="n">fasta_path</span> <span class="o">=</span> <span class="s2">&quot;gcreplay_samples/gctree_PR1.3-1-LB-16-GC-KD_recalc.fasta&quot;</span>
+<span class="n">seqs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">seq_record</span><span class="o">.</span><span class="n">seq</span><span class="p">)</span> <span class="k">for</span> <span class="n">seq_record</span> <span class="ow">in</span> <span class="n">SeqIO</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">fasta_path</span><span class="p">,</span> <span class="s2">&quot;fasta&quot;</span><span class="p">)]</span>
+<span class="n">mult_seqs</span> <span class="o">=</span> <span class="n">seqs</span> <span class="o">*</span> <span class="mi">20</span>
+<span class="n">KDs</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="nb">float</span><span class="p">(</span><span class="n">seq_record</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">seq_record</span> <span class="ow">in</span> <span class="n">SeqIO</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">fasta_path</span><span class="p">,</span> <span class="s2">&quot;fasta&quot;</span><span class="p">)</span>
+<span class="p">]</span>
+<span class="n">mult_KDs</span> <span class="o">=</span> <span class="n">KDs</span> <span class="o">*</span> <span class="mi">20</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mult_KDs</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1160
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">phenotype</span> <span class="o">=</span> <span class="n">DMSPhenotype</span><span class="p">(</span>
+    <span class="mi">1</span><span class="p">,</span>
+    <span class="mi">1</span><span class="p">,</span>
+    <span class="mi">336</span><span class="p">,</span>
+    <span class="s2">&quot;https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Linear.model&quot;</span><span class="p">,</span>
+    <span class="p">[</span><span class="s2">&quot;delta_log10_KD&quot;</span><span class="p">,</span> <span class="s2">&quot;delta_expression&quot;</span><span class="p">],</span>
+    <span class="o">-</span><span class="mf">10.43</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">threenormselector</span> <span class="o">=</span> <span class="n">ThreeStepSelector</span><span class="p">(</span>
+    <span class="n">concentration_antigen</span><span class="o">=</span><span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">),</span> <span class="n">total_t_cell_help</span><span class="o">=</span><span class="mi">550</span>
+<span class="p">)</span>
+<span class="n">fitnesses</span> <span class="o">=</span> <span class="n">threenormselector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">mult_seqs</span><span class="p">,</span> <span class="n">kd_list</span><span class="o">=</span><span class="n">mult_KDs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">fivemer_mutator</span> <span class="o">=</span> <span class="n">FivemerMutator</span><span class="p">(</span>
+    <span class="n">mutability_csv</span><span class="o">=</span><span class="s2">&quot;MK_RS5NF_mutability.csv&quot;</span><span class="p">,</span>
+    <span class="n">substitution_csv</span><span class="o">=</span><span class="s2">&quot;MK_RS5NF_substitution.csv&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">uniform_mutator</span> <span class="o">=</span> <span class="n">UniformMutator</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Sanity check: balanced proliferator and simple proliferator have the same behavior for an integer number of divisions</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">test_node</span> <span class="o">=</span> <span class="n">TreeNode</span><span class="p">()</span>
+<span class="n">test_node</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="s2">&quot;AAA&quot;</span>
+<span class="n">cell_div_balanced_proliferator</span><span class="p">(</span><span class="n">test_node</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">descendant_seqs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">test_node</span><span class="o">.</span><span class="n">iter_descendants</span><span class="p">():</span>
+    <span class="n">node</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="n">fivemer_mutator</span><span class="o">.</span><span class="n">mutate</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">up</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">dist</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">()</span> <span class="ow">and</span> <span class="n">node</span> <span class="o">!=</span> <span class="n">test_node</span><span class="p">:</span>
+        <span class="n">descendant_seqs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span>
+<span class="n">test_node</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2">inline&quot;</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/3bacae5b2de67e12319b3f2ca1d60a74b3acff5934b1e510f716a2b7ef84f82d.png" src="../_images/3bacae5b2de67e12319b3f2ca1d60a74b3acff5934b1e510f716a2b7ef84f82d.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">test_node_simple</span> <span class="o">=</span> <span class="n">TreeNode</span><span class="p">()</span>
+<span class="n">test_node_simple</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="s2">&quot;AAA&quot;</span>
+<span class="n">simple_proliferator</span><span class="p">(</span><span class="n">test_node_simple</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">test_node_simple</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2">inline&quot;</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+<span class="n">simple_descendant_seqs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">test_node_simple</span><span class="o">.</span><span class="n">iter_descendants</span><span class="p">():</span>
+    <span class="n">node</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="n">fivemer_mutator</span><span class="o">.</span><span class="n">mutate</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">up</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">dist</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">()</span> <span class="ow">and</span> <span class="n">node</span> <span class="o">!=</span> <span class="n">test_node_simple</span><span class="p">:</span>
+        <span class="n">simple_descendant_seqs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">simple_descendant_seqs</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">descendant_seqs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">alive_leaves</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">tree_renders</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">mult_seqs</span><span class="p">:</span>
+    <span class="n">leaf</span> <span class="o">=</span> <span class="n">TreeNode</span><span class="p">()</span>
+    <span class="n">leaf</span><span class="o">.</span><span class="n">dist</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">leaf</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="n">seq</span>
+    <span class="n">alive_leaves</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">leaf</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">descendant_seqs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">tree_renders</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">leaf</span><span class="p">,</span> <span class="n">args</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">alive_leaves</span><span class="p">,</span> <span class="n">fitnesses</span><span class="p">):</span>
+    <span class="n">simple_proliferator</span><span class="p">(</span><span class="n">leaf</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">leaf</span><span class="o">.</span><span class="n">iter_descendants</span><span class="p">():</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="n">fivemer_mutator</span><span class="o">.</span><span class="n">mutate</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">up</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">dist</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">()</span> <span class="ow">and</span> <span class="n">node</span> <span class="o">!=</span> <span class="n">leaf</span><span class="p">:</span>
+            <span class="n">descendant_seqs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span>
+    <span class="c1"># tree_renders.append(leaf.render(&quot;%%inline&quot;, w=200))</span>
+<span class="c1"># for render in tree_renders:</span>
+<span class="c1">#   display(render)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;number of descendants: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">descendant_seqs</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">num_expected_descendants</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">fitness</span> <span class="ow">in</span> <span class="n">fitnesses</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">fitness</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">num_expected_descendants</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">fitness</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;expected number of descendants: </span><span class="si">{</span><span class="n">num_expected_descendants</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>number of descendants: 1100
+expected number of descendants: 1100.0
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">descendant_KDs</span> <span class="o">=</span> <span class="n">phenotype</span><span class="o">.</span><span class="n">calculate_KD</span><span class="p">(</span><span class="n">descendant_seqs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">fit_sum</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">fitness</span> <span class="ow">in</span> <span class="n">fitnesses</span><span class="p">:</span>
+    <span class="n">fit_sum</span> <span class="o">+=</span> <span class="n">fitness</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sum of fitnesses: </span><span class="si">{</span><span class="n">fit_sum</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>sum of fitnesses: 550.0
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">cats</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;observed&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">mult_KDs</span><span class="p">)</span>
+<span class="n">cats</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;simulated_descendants&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">descendant_KDs</span><span class="p">))</span>
+<span class="n">all_KDs</span> <span class="o">=</span> <span class="n">mult_KDs</span> <span class="o">+</span> <span class="n">descendant_KDs</span>
+<span class="n">KD_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;KD&quot;</span><span class="p">:</span> <span class="n">all_KDs</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="n">cats</span><span class="p">})</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Naive KD: </span><span class="si">{</span><span class="mi">10</span><span class="w"> </span><span class="o">**</span><span class="w"> </span><span class="p">(</span><span class="o">-</span><span class="mf">10.43</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Original KDs: mean </span><span class="si">{</span><span class="n">mean</span><span class="p">(</span><span class="n">mult_KDs</span><span class="p">)</span><span class="si">}</span><span class="s2">, median </span><span class="si">{</span><span class="n">median</span><span class="p">(</span><span class="n">mult_KDs</span><span class="p">)</span><span class="si">}</span><span class="s2">, minimum </span><span class="si">{</span><span class="nb">min</span><span class="p">(</span><span class="n">mult_KDs</span><span class="p">)</span><span class="si">}</span><span class="s2">, maximum </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">mult_KDs</span><span class="p">)</span><span class="si">}</span><span class="s2">, range </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">mult_KDs</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">min</span><span class="p">(</span><span class="n">mult_KDs</span><span class="p">)</span><span class="si">}</span><span class="s2">, count </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">mult_KDs</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Descendant KDs: mean </span><span class="si">{</span><span class="w"> </span><span class="n">mean</span><span class="p">(</span><span class="n">descendant_KDs</span><span class="p">)</span><span class="si">}</span><span class="s2">, median </span><span class="si">{</span><span class="n">median</span><span class="p">(</span><span class="n">descendant_KDs</span><span class="p">)</span><span class="si">}</span><span class="s2">, minimum </span><span class="si">{</span><span class="nb">min</span><span class="p">(</span><span class="n">descendant_KDs</span><span class="p">)</span><span class="si">}</span><span class="s2">, maximum </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">descendant_KDs</span><span class="p">)</span><span class="si">}</span><span class="s2">, range </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">descendant_KDs</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">min</span><span class="p">(</span><span class="n">descendant_KDs</span><span class="p">)</span><span class="si">}</span><span class="s2">, count </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">descendant_KDs</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="p">(</span>
+    <span class="n">ggplot</span><span class="p">(</span><span class="n">KD_df</span><span class="p">,</span> <span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;KD&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="s2">&quot;category&quot;</span><span class="p">))</span>
+    <span class="o">+</span> <span class="n">geom_density</span><span class="p">(</span><span class="n">aes</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">after_stat</span><span class="p">(</span><span class="s2">&quot;scaled&quot;</span><span class="p">)),</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="o">+</span> <span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">9</span><span class="p">))</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Naive KD: 3.7153522909717275e-11
+Original KDs: mean 5.817783359026082e-10, median 5.367487565772558e-12, minimum 2.2684547652542707e-13, maximum 1.5923808200515968e-08, range 1.592358135503944e-08, count 1160
+Descendant KDs: mean 4.875520203018669e-10, median 5.360077936159021e-12, minimum 2.358520865954112e-14, maximum 1.166662883041017e-07, range 1.1666626471889303e-07, count 1100
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/alyssa/miniconda3/envs/gcdyn_39/lib/python3.9/site-packages/plotnine/layer.py:324: PlotnineWarning: stat_density : Removed 105 rows containing non-finite values.
+</pre></div>
+</div>
+<img alt="../_images/beac2cd58b67528652cf010647920acee8d342fc94f08da6619c9b64f0f87c7e.png" src="../_images/beac2cd58b67528652cf010647920acee8d342fc94f08da6619c9b64f0f87c7e.png" />
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ggplot: (8762819381077)&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Distributions of signal in descendants:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">competencies</span> <span class="o">=</span> <span class="n">threenormselector</span><span class="o">.</span><span class="n">norm1</span><span class="p">(</span><span class="n">descendant_KDs</span><span class="p">)</span>
+<span class="n">midpoint_competency</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">curve_steepness</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">unnorm_signals</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">exp</span>
+
+<span class="k">for</span> <span class="n">competency</span> <span class="ow">in</span> <span class="n">competencies</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">competency</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">unnorm_signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">unnorm_signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">curve_steepness</span> <span class="o">*</span> <span class="p">(</span><span class="n">competency</span> <span class="o">-</span> <span class="n">midpoint_competency</span><span class="p">)))</span>
+        <span class="p">)</span>
+<span class="n">competencies_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;competency&quot;</span><span class="p">:</span> <span class="n">competencies</span><span class="p">,</span>
+        <span class="s2">&quot;KD&quot;</span><span class="p">:</span> <span class="n">descendant_KDs</span><span class="p">,</span>
+        <span class="s2">&quot;norm_signal&quot;</span><span class="p">:</span> <span class="n">threenormselector</span><span class="o">.</span><span class="n">norm2_sigmoid</span><span class="p">(</span>
+            <span class="n">competencies</span><span class="p">,</span>
+            <span class="n">midpoint_competency</span><span class="o">=</span><span class="n">midpoint_competency</span><span class="p">,</span>
+            <span class="n">curve_steepness</span><span class="o">=</span><span class="n">curve_steepness</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="s2">&quot;unnorm_signal&quot;</span><span class="p">:</span> <span class="n">unnorm_signals</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">plotnine</span> <span class="kn">import</span> <span class="n">geom_point</span>
+
+<span class="p">(</span><span class="n">ggplot</span><span class="p">(</span><span class="n">competencies_df</span><span class="p">)</span> <span class="o">+</span> <span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;competencies&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;norm_signal&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">geom_point</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/3861b17dfe1ba86659becbfb09939bc5b896208771673ef6e977286e68a5aacf.png" src="../_images/3861b17dfe1ba86659becbfb09939bc5b896208771673ef6e977286e68a5aacf.png" />
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ggplot: (8762850285303)&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span>
+    <span class="n">ggplot</span><span class="p">(</span><span class="n">competencies_df</span><span class="p">,</span> <span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;competency&quot;</span><span class="p">))</span>
+    <span class="o">+</span> <span class="n">geom_density</span><span class="p">(</span><span class="n">aes</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">after_stat</span><span class="p">(</span><span class="s2">&quot;scaled&quot;</span><span class="p">)),</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/ab7bbfa6d502ef98d8a136075c3ac2577d7b13fbc739021fb52bf1ced942f685.png" src="../_images/ab7bbfa6d502ef98d8a136075c3ac2577d7b13fbc739021fb52bf1ced942f685.png" />
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ggplot: (8762818663277)&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>DMS selector comparison</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">default_rng</span>
+
+<span class="n">dms_alive_leaves</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">dms_selector</span> <span class="o">=</span> <span class="n">DMSSelector</span><span class="p">(</span><span class="n">slope</span><span class="o">=</span><span class="mi">550</span><span class="p">,</span> <span class="n">y_intercept</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">dms_fitnesses</span> <span class="o">=</span> <span class="n">dms_selector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">mult_seqs</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">mult_seqs</span><span class="p">:</span>
+    <span class="n">leaf</span> <span class="o">=</span> <span class="n">TreeNode</span><span class="p">()</span>
+    <span class="n">leaf</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="n">seq</span>
+    <span class="n">dms_alive_leaves</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">leaf</span><span class="p">)</span>
+
+<span class="n">dms_descendant_seqs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">leaf</span><span class="p">,</span> <span class="n">args</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">dms_alive_leaves</span><span class="p">,</span> <span class="n">dms_fitnesses</span><span class="p">):</span>
+    <span class="n">cell_div_balanced_proliferator</span><span class="p">(</span><span class="n">leaf</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">leaf</span><span class="o">.</span><span class="n">iter_descendants</span><span class="p">():</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">up</span><span class="o">.</span><span class="n">sequence</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="n">fivemer_mutator</span><span class="o">.</span><span class="n">mutate</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">up</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">dist</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">desc</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">iter_leaves</span><span class="p">():</span>
+            <span class="n">dms_descendant_seqs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span>
+<span class="n">dms_descendant_KDs</span> <span class="o">=</span> <span class="n">phenotype</span><span class="o">.</span><span class="n">calculate_KD</span><span class="p">(</span><span class="n">dms_descendant_seqs</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dms_descendant_KDs</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1160
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">cats</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;observed&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">mult_KDs</span><span class="p">)</span>
+<span class="n">cats</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;simulated_descendants&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">dms_descendant_KDs</span><span class="p">))</span>
+<span class="n">dms_all_KDs</span> <span class="o">=</span> <span class="n">mult_KDs</span> <span class="o">+</span> <span class="n">dms_descendant_KDs</span>
+<span class="n">dms_KD_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;KD&quot;</span><span class="p">:</span> <span class="n">dms_all_KDs</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="n">cats</span><span class="p">})</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Naive KD: </span><span class="si">{</span><span class="mi">10</span><span class="w"> </span><span class="o">**</span><span class="w"> </span><span class="p">(</span><span class="o">-</span><span class="mf">10.43</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original KDs: mean </span><span class="si">{</span><span class="n">mean</span><span class="p">(</span><span class="n">mult_KDs</span><span class="p">)</span><span class="si">}</span><span class="s2">, median </span><span class="si">{</span><span class="n">median</span><span class="p">(</span><span class="n">mult_KDs</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Descendant KDs: mean </span><span class="si">{</span><span class="w"> </span><span class="n">mean</span><span class="p">(</span><span class="n">dms_descendant_KDs</span><span class="p">)</span><span class="si">}</span><span class="s2">, median </span><span class="si">{</span><span class="n">median</span><span class="p">(</span><span class="n">dms_descendant_KDs</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+
+<span class="p">(</span>
+    <span class="n">ggplot</span><span class="p">(</span><span class="n">dms_KD_df</span><span class="p">,</span> <span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;KD&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="s2">&quot;category&quot;</span><span class="p">))</span>
+    <span class="o">+</span> <span class="n">geom_density</span><span class="p">(</span><span class="n">aes</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">after_stat</span><span class="p">(</span><span class="s2">&quot;scaled&quot;</span><span class="p">)),</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="o">+</span> <span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">9</span><span class="p">))</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Naive KD: 3.7153522909717275e-11
+Original KDs: mean 5.817783359026082e-10, median 5.367487565772558e-12
+Descendant KDs: mean 3.6801919833067778e-09, median 1.2084752293443781e-11
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/alyssa/miniconda3/envs/gcdyn_39/lib/python3.9/site-packages/plotnine/layer.py:324: PlotnineWarning: stat_density : Removed 191 rows containing non-finite values.
+</pre></div>
+</div>
+<img alt="../_images/42305e9002f83cecf84e8ee1b21fdccbebe320d9a6fb0f8b98ba9c9ced1ca729.png" src="../_images/42305e9002f83cecf84e8ee1b21fdccbebe320d9a6fb0f8b98ba9c9ced1ca729.png" />
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ggplot: (8762819389724)&gt;
+</pre></div>
+</div>
+</div>
+</div>
+
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="simple visible nav section-nav flex-column">
+</ul>
+
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            <div class="bd-footer-content__inner">
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Erick Matsen
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2022, Erick Matsen.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div></div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

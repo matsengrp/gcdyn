@@ -1,0 +1,984 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>gcdyn.poisson &#8212; gcdyn  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/gcdyn/poisson';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../../_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cite.html">Citing <code class="docutils literal notranslate"><span class="pre">gcdyn</span></code></a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/bdms_replay.html">Germinal center replay modeling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/bdms_inhomogeneous.html">Inhomogeneous processes</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../api.html">Modules</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/gcdyn.bdms.html">gcdyn.bdms</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.bdms.TreeNode.html">gcdyn.bdms.TreeNode</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.html">gcdyn.poisson</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.ConstantResponse.html">gcdyn.poisson.ConstantResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.ExponentialResponse.html">gcdyn.poisson.ExponentialResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.HomogeneousResponse.html">gcdyn.poisson.HomogeneousResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.ModulatedPhenotypeResponse.html">gcdyn.poisson.ModulatedPhenotypeResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.ModulatedRateResponse.html">gcdyn.poisson.ModulatedRateResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.PhenotypeResponse.html">gcdyn.poisson.PhenotypeResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.PhenotypeTimeResponse.html">gcdyn.poisson.PhenotypeTimeResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.Response.html">gcdyn.poisson.Response</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.SequenceContextMutationResponse.html">gcdyn.poisson.SequenceContextMutationResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.SequenceResponse.html">gcdyn.poisson.SequenceResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.SigmoidResponse.html">gcdyn.poisson.SigmoidResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.SoftReluResponse.html">gcdyn.poisson.SoftReluResponse</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/gcdyn.mutators.html">gcdyn.mutators</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.mutators.AttrMutator.html">gcdyn.mutators.AttrMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.mutators.ContextMutator.html">gcdyn.mutators.ContextMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.mutators.DiscreteMutator.html">gcdyn.mutators.DiscreteMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.mutators.GaussianMutator.html">gcdyn.mutators.GaussianMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.mutators.KdeMutator.html">gcdyn.mutators.KdeMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.mutators.Mutator.html">gcdyn.mutators.Mutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.mutators.SequenceMutator.html">gcdyn.mutators.SequenceMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.mutators.SequencePhenotypeMutator.html">gcdyn.mutators.SequencePhenotypeMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.mutators.UniformMutator.html">gcdyn.mutators.UniformMutator</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/gcdyn.gpmap.html">gcdyn.gpmap</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.gpmap.AdditiveGPMap.html">gcdyn.gpmap.AdditiveGPMap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.gpmap.ConstantGPMap.html">gcdyn.gpmap.ConstantGPMap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.gpmap.GPMap.html">gcdyn.gpmap.GPMap</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/gcdyn.model.html">gcdyn.model</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.model.BDMSModel.html">gcdyn.model.BDMSModel</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/gcdyn.utils.html">gcdyn.utils</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.utils.padded_fivemer_contexts_of_paired_sequences.html">gcdyn.utils.padded_fivemer_contexts_of_paired_sequences</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.utils.simple_fivemer_contexts.html">gcdyn.utils.simple_fivemer_contexts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.utils.write_leaf_sequences_to_fasta.html">gcdyn.utils.write_leaf_sequences_to_fasta</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../developer.html">Open source code repository</a></li>
+
+
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/matsengrp/gcdyn" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <h1>Source code for gcdyn.poisson</h1><div class="highlight"><pre>
+<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Poisson process responses</span>
+<span class="sd">^^^^^^^^^^^^^^^^^^^^^^^^^</span>
+
+<span class="sd">Abstract base classes for defining generic Poisson processes (e.g. :math:`\lambda(x, t)`, :math:`\mu(x, t)`, :math:`\gamma(x, t)`),</span>
+<span class="sd">with arbitrary :py:class:`bdms.TreeNode` attribute dependence.</span>
+<span class="sd">Several concrete child classes are included.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span> <span class="nn">jax.tree_util</span> <span class="kn">import</span> <span class="n">register_pytree_node</span>
+<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">jnp</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">onp</span>
+<span class="kn">import</span> <span class="nn">jax.scipy.special</span> <span class="k">as</span> <span class="nn">jsp</span>
+<span class="kn">import</span> <span class="nn">scipy.special</span> <span class="k">as</span> <span class="nn">osp</span>
+<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <span class="n">quad</span>
+
+<span class="c1"># imports that are only used for type hints</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">gcdyn</span> <span class="kn">import</span> <span class="n">bdms</span>
+    <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="c1"># NOTE: sphinx is currently unable to present this in condensed form when the sphinx_autodoc_typehints extension is enabled</span>
+<span class="c1"># TODO: use ArrayLike in various phenotype/time response methods (current float types) once it is available in a stable release</span>
+<span class="c1"># from numpy.typing import ArrayLike</span>
+
+<span class="kn">from</span> <span class="nn">jax.config</span> <span class="kn">import</span> <span class="n">config</span>
+
+<span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;jax_enable_x64&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Response"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.Response.html#gcdyn.poisson.Response">[docs]</a><span class="k">class</span> <span class="nc">Response</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Abstract base class for mapping :py:class:`bdms.TreeNode` objects to a</span>
+<span class="sd">    Poisson process.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        grad: Enables JAX compilation and gradient for optimizing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grad</span> <span class="o">=</span> <span class="n">grad</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_np</span> <span class="o">=</span> <span class="n">jnp</span> <span class="k">if</span> <span class="n">grad</span> <span class="k">else</span> <span class="n">onp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sp</span> <span class="o">=</span> <span class="n">jsp</span> <span class="k">if</span> <span class="n">grad</span> <span class="k">else</span> <span class="n">osp</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a dictionary containing all parameters of the response</span>
+<span class="sd">        function.&quot;&quot;&quot;</span>
+
+    <span class="nd">@_param_dict</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configures the parameter values of the response function using the</span>
+<span class="sd">        provided dictionary (whose format matches that returned by the</span>
+<span class="sd">        `Response._param_dict` getter method.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Response.__call__"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.Response.html#gcdyn.poisson.Response.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">bdms</span><span class="o">.</span><span class="n">TreeNode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Call ``self`` to evaluate the Poisson intensity at a tree node.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            node: The node whose state is accessed to evaluate the response function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">λ</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Response.λ"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.Response.html#gcdyn.poisson.Response.λ">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">λ</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">bdms</span><span class="o">.</span><span class="n">TreeNode</span><span class="p">,</span> <span class="n">Δt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate the Poisson intensity :math:`\lambda(t+\Delta t)` for a</span>
+<span class="sd">        tree node at time :math:`t`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            node: The node whose state is accessed to evaluate the response function.</span>
+<span class="sd">            Δt: Time shift from ``node`` at which to evaluate Poisson intensity</span>
+<span class="sd">                (``0.0`` corresponds to the node&#39;s time). This only has an effect if the</span>
+<span class="sd">                response function is time-inhomogeneous.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="Response.Λ"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.Response.html#gcdyn.poisson.Response.Λ">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">Λ</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">bdms</span><span class="o">.</span><span class="n">TreeNode</span><span class="p">,</span> <span class="n">Δt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate the Poisson intensity measure of the time interval</span>
+<span class="sd">        :math:`[t, t+\Delta t)`, defined as.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \Lambda(t, t+Δt) = \int_{t}^{t+\Delta t} \lambda(t&#39;)dt&#39;,</span>
+
+<span class="sd">        for a tree node at time :math:`t`. This is needed for sampling waiting times and evaluating the</span>
+<span class="sd">        log probability density function of waiting times.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            node: The node whose state is accessed to evaluate the response function.</span>
+<span class="sd">            Δt: Time interval duration (Lebesgue measure).</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="Response.Λ_inv"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.Response.html#gcdyn.poisson.Response.Λ_inv">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">Λ_inv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">bdms</span><span class="o">.</span><span class="n">TreeNode</span><span class="p">,</span> <span class="n">τ</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate the inverse function wrt :math:`\Delta t` of :py:meth:`Response.Λ`,</span>
+<span class="sd">        :math:`\Lambda_t^{-1}(\tau)`, such that :math:`\Lambda_t^{-1}(\Lambda(t, t+\Delta t)) = \Delta t`.</span>
+<span class="sd">        This is needed for sampling waiting times.</span>
+<span class="sd">        Note that :math:`\Lambda_t^{-1}` is well-defined iff :math:`\lambda(t) &gt; 0 \forall t`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            node: The node whose state is accessed to evaluate the response function.</span>
+<span class="sd">            τ: Poisson intensity measure of a time interval.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="Response.waiting_time_rv"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.Response.html#gcdyn.poisson.Response.waiting_time_rv">[docs]</a>    <span class="k">def</span> <span class="nf">waiting_time_rv</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">node</span><span class="p">:</span> <span class="n">bdms</span><span class="o">.</span><span class="n">TreeNode</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">onp</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sample the waiting time :math:`\Delta t` until the first event,</span>
+<span class="sd">        given the rate process starting at the provided node.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            node: The node at which the rate process starts.</span>
+<span class="sd">            seed: A seed to initialize the random number generation.</span>
+<span class="sd">                  If ``None``, then fresh, unpredictable entropy will be pulled from the OS.</span>
+<span class="sd">                  If an ``int``, then it will be used to derive the initial state.</span>
+<span class="sd">                  If a :py:class:`numpy.random.Generator`, then it will be used directly.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">onp</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Λ_inv</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">rng</span><span class="o">.</span><span class="n">exponential</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="Response.waiting_time_logsf"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.Response.html#gcdyn.poisson.Response.waiting_time_logsf">[docs]</a>    <span class="k">def</span> <span class="nf">waiting_time_logsf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">bdms</span><span class="o">.</span><span class="n">TreeNode</span><span class="p">,</span> <span class="n">Δt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate the logarithm of the survival function of the waiting time</span>
+<span class="sd">        :math:`\Delta t` given the rate process starting at the provided node.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            node: The node at which the rate process starts.</span>
+<span class="sd">            Δt: The waiting time.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">Λ</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">Δt</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">))</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+
+
+<span class="n">ResponseType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;ResponseType&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Response</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_register_with_pytree</span><span class="p">(</span><span class="n">response_type</span><span class="p">:</span> <span class="n">ResponseType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Registers the `Response` subclass `response_type` as a node in JAX</span>
+<span class="sd">    pytree, if it is not already.</span>
+
+<span class="sd">    This allows parameterized `Response` objects of subclass</span>
+<span class="sd">    `response_type` to be optimized with JAX.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">flatten</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+        <span class="c1"># When recreating this object, we need to be able to assign</span>
+        <span class="c1"># correct values to each parameter, and also be able to set</span>
+        <span class="c1"># `grad` to its original boolean value</span>
+
+        <span class="n">items</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">_param_dict</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">names</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">items</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">grad</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">unflatten</span><span class="p">(</span><span class="n">aux_data</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
+        <span class="n">new_obj</span> <span class="o">=</span> <span class="n">response_type</span><span class="p">(</span><span class="n">grad</span><span class="o">=</span><span class="n">aux_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">new_obj</span><span class="o">.</span><span class="n">_param_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">aux_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">children</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">new_obj</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">register_pytree_node</span><span class="p">(</span><span class="n">response_type</span><span class="p">,</span> <span class="n">flatten</span><span class="p">,</span> <span class="n">unflatten</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="c1"># Already registered this type</span>
+        <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="HomogeneousResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.HomogeneousResponse.html#gcdyn.poisson.HomogeneousResponse">[docs]</a><span class="k">class</span> <span class="nc">HomogeneousResponse</span><span class="p">(</span><span class="n">Response</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Abstract base class for response functions mapping</span>
+<span class="sd">    :py:class:`bdms.TreeNode` objects to a homogenous Poisson process.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        grad: Enables JAX compilation and gradient for optimizing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="HomogeneousResponse.λ_homogeneous"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.HomogeneousResponse.html#gcdyn.poisson.HomogeneousResponse.λ_homogeneous">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">λ_homogeneous</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">bdms</span><span class="o">.</span><span class="n">TreeNode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate the homogeneous Poisson intensity :math:`\lambda` for a</span>
+<span class="sd">        tree node.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            node: The node whose state is accessed to evaluate the response function.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="HomogeneousResponse.λ"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.HomogeneousResponse.html#gcdyn.poisson.HomogeneousResponse.λ">[docs]</a>    <span class="k">def</span> <span class="nf">λ</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">bdms</span><span class="o">.</span><span class="n">TreeNode</span><span class="p">,</span> <span class="n">Δt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">λ_homogeneous</span><span class="p">(</span><span class="n">node</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="HomogeneousResponse.Λ"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.HomogeneousResponse.html#gcdyn.poisson.HomogeneousResponse.Λ">[docs]</a>    <span class="k">def</span> <span class="nf">Λ</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">bdms</span><span class="o">.</span><span class="n">TreeNode</span><span class="p">,</span> <span class="n">Δt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">λ_homogeneous</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">*</span> <span class="n">Δt</span></div>
+
+<div class="viewcode-block" id="HomogeneousResponse.Λ_inv"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.HomogeneousResponse.html#gcdyn.poisson.HomogeneousResponse.Λ_inv">[docs]</a>    <span class="k">def</span> <span class="nf">Λ_inv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">bdms</span><span class="o">.</span><span class="n">TreeNode</span><span class="p">,</span> <span class="n">τ</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">τ</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">λ_homogeneous</span><span class="p">(</span><span class="n">node</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="PhenotypeResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.PhenotypeResponse.html#gcdyn.poisson.PhenotypeResponse">[docs]</a><span class="k">class</span> <span class="nc">PhenotypeResponse</span><span class="p">(</span><span class="n">HomogeneousResponse</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Abstract base class for response function mapping from a</span>
+<span class="sd">    :py:class:`bdms.TreeNode` object&#39;s phenotype attribute</span>
+<span class="sd">    :math:`x\in\mathbb{R}` to a homogeneous Poisson process.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PhenotypeResponse.λ_homogeneous"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.PhenotypeResponse.html#gcdyn.poisson.PhenotypeResponse.λ_homogeneous">[docs]</a>    <span class="k">def</span> <span class="nf">λ_homogeneous</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">bdms</span><span class="o">.</span><span class="n">TreeNode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">λ_phenotype</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">x</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PhenotypeResponse.λ_phenotype"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.PhenotypeResponse.html#gcdyn.poisson.PhenotypeResponse.λ_phenotype">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">λ_phenotype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate the Poisson intensity :math:`\lambda_x` for phenotype</span>
+<span class="sd">        :math:`x`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x: Phenotype value.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div></div>
+
+
+<div class="viewcode-block" id="ConstantResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.ConstantResponse.html#gcdyn.poisson.ConstantResponse">[docs]</a><span class="k">class</span> <span class="nc">ConstantResponse</span><span class="p">(</span><span class="n">PhenotypeResponse</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Returns attribute :math:`\theta\in\mathbb{R}` when an instance is called</span>
+<span class="sd">    on any :py:class:`bdms.TreeNode`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: Constant response value.</span>
+<span class="sd">        grad: See :py:class:`Response`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="ConstantResponse.λ_phenotype"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.ConstantResponse.html#gcdyn.poisson.ConstantResponse.λ_phenotype">[docs]</a>    <span class="k">def</span> <span class="nf">λ_phenotype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@_param_dict</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="ExponentialResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.ExponentialResponse.html#gcdyn.poisson.ExponentialResponse">[docs]</a><span class="k">class</span> <span class="nc">ExponentialResponse</span><span class="p">(</span><span class="n">PhenotypeResponse</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Exponential response function on a :py:class:`bdms.TreeNode` object&#39;s</span>
+<span class="sd">    phenotype attribute :math:`x`.</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \lambda_x = \theta_3 e^{\theta_1 (x - \theta_2)} + \theta_4</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        xscale: :math:`\theta_1`</span>
+<span class="sd">        xshift: :math:`\theta_2`</span>
+<span class="sd">        yscale: :math:`\theta_3`</span>
+<span class="sd">        yshift: :math:`\theta_4`</span>
+<span class="sd">        grad: See :py:class:`Response`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">xscale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">xshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">yscale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">yshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">=</span> <span class="n">xscale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span> <span class="o">=</span> <span class="n">xshift</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">=</span> <span class="n">yscale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span> <span class="o">=</span> <span class="n">yshift</span>
+
+<div class="viewcode-block" id="ExponentialResponse.λ_phenotype"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.ExponentialResponse.html#gcdyn.poisson.ExponentialResponse.λ_phenotype">[docs]</a>    <span class="k">def</span> <span class="nf">λ_phenotype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">xscale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xscale</span><span class="p">,</span>
+            <span class="n">xshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xshift</span><span class="p">,</span>
+            <span class="n">yscale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">yscale</span><span class="p">,</span>
+            <span class="n">yshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">yshift</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@_param_dict</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;xscale&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;xshift&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;yscale&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;yshift&quot;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="SigmoidResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.SigmoidResponse.html#gcdyn.poisson.SigmoidResponse">[docs]</a><span class="k">class</span> <span class="nc">SigmoidResponse</span><span class="p">(</span><span class="n">PhenotypeResponse</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sigmoid response function on a :py:class:`bdms.TreeNode` object&#39;s</span>
+<span class="sd">    phenotype attribute :math:`x`.</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \lambda_x = \frac{\theta_3}{1 + e^{-\theta_1 (x - \theta_2)}} + \theta_4</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        xscale: :math:`\theta_1`</span>
+<span class="sd">        xshift: :math:`\theta_2`</span>
+<span class="sd">        yscale: :math:`\theta_3`</span>
+<span class="sd">        yshift: :math:`\theta_4`</span>
+<span class="sd">        grad: See :py:class:`Response`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">xscale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">xshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">yscale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+        <span class="n">yshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">=</span> <span class="n">xscale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span> <span class="o">=</span> <span class="n">xshift</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">=</span> <span class="n">yscale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span> <span class="o">=</span> <span class="n">yshift</span>
+
+<div class="viewcode-block" id="SigmoidResponse.λ_phenotype"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.SigmoidResponse.html#gcdyn.poisson.SigmoidResponse.λ_phenotype">[docs]</a>    <span class="k">def</span> <span class="nf">λ_phenotype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sp</span><span class="o">.</span><span class="n">expit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span>
+        <span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">xscale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xscale</span><span class="p">,</span>
+            <span class="n">xshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xshift</span><span class="p">,</span>
+            <span class="n">yscale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">yscale</span><span class="p">,</span>
+            <span class="n">yshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">yshift</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@_param_dict</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;xscale&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;xshift&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;yscale&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;yshift&quot;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="SoftReluResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.SoftReluResponse.html#gcdyn.poisson.SoftReluResponse">[docs]</a><span class="k">class</span> <span class="nc">SoftReluResponse</span><span class="p">(</span><span class="n">PhenotypeResponse</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Soft ReLU response function on a :py:class:`bdms.TreeNode` object&#39;s</span>
+<span class="sd">    phenotype attribute :math:`x`.</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \lambda_x = \theta_3\log(1 + e^{\theta_1 (x - \theta_2)}) + \theta_4</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        xscale: :math:`\theta_1`</span>
+<span class="sd">        xshift: :math:`\theta_2`</span>
+<span class="sd">        yscale: :math:`\theta_3`</span>
+<span class="sd">        yshift: :math:`\theta_4`</span>
+<span class="sd">        grad: See :py:class:`Response`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">xscale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">xshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">yscale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">yshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">=</span> <span class="n">xscale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span> <span class="o">=</span> <span class="n">xshift</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">=</span> <span class="n">yscale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span> <span class="o">=</span> <span class="n">yshift</span>
+
+<div class="viewcode-block" id="SoftReluResponse.λ_phenotype"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.SoftReluResponse.html#gcdyn.poisson.SoftReluResponse.λ_phenotype">[docs]</a>    <span class="k">def</span> <span class="nf">λ_phenotype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_np</span><span class="o">.</span><span class="n">logaddexp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span><span class="p">))</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span>
+        <span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">xscale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xscale</span><span class="p">,</span>
+            <span class="n">xshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xshift</span><span class="p">,</span>
+            <span class="n">yscale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">yscale</span><span class="p">,</span>
+            <span class="n">yshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">yshift</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@_param_dict</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;xscale&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;xshift&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;yscale&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;yshift&quot;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="SequenceResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.SequenceResponse.html#gcdyn.poisson.SequenceResponse">[docs]</a><span class="k">class</span> <span class="nc">SequenceResponse</span><span class="p">(</span><span class="n">HomogeneousResponse</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Abstract base class for response function mapping from a</span>
+<span class="sd">    :py:class:`bdms.TreeNode` object&#39;s sequence attribute to a homogenous</span>
+<span class="sd">    Poisson process.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SequenceResponse.λ_sequence"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.SequenceResponse.html#gcdyn.poisson.SequenceResponse.λ_sequence">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">λ_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate the Poisson intensity :math:`\lambda_s` for sequence</span>
+<span class="sd">        :math:`s`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sequence: DNA sequence.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="SequenceResponse.λ_homogeneous"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.SequenceResponse.html#gcdyn.poisson.SequenceResponse.λ_homogeneous">[docs]</a>    <span class="k">def</span> <span class="nf">λ_homogeneous</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">bdms</span><span class="o">.</span><span class="n">TreeNode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">λ_sequence</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="SequenceContextMutationResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.SequenceContextMutationResponse.html#gcdyn.poisson.SequenceContextMutationResponse">[docs]</a><span class="k">class</span> <span class="nc">SequenceContextMutationResponse</span><span class="p">(</span><span class="n">SequenceResponse</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;A Response that accepts a sequence and outputs an aggregate mutation</span>
+<span class="sd">    rate.</span>
+
+<span class="sd">    Importantly, the mutability needs to be in units of mutations per unit time.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mutability: a mapping from local context to mutation rate (mutations per site per unit time)</span>
+<span class="sd">        seq_to_contexts: a function that accepts a sequence and splits it into local contexts</span>
+<span class="sd">        mutation_intensity: a scaling factor for the mutability</span>
+<span class="sd">        grad: See :py:class:`Response`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mutability</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+        <span class="n">seq_to_contexts</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+        <span class="n">mutation_intensity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mutability</span> <span class="o">=</span> <span class="n">mutation_intensity</span> <span class="o">*</span> <span class="n">mutability</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seq_to_contexts</span> <span class="o">=</span> <span class="n">seq_to_contexts</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">mutation_intensity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mutation_intensity</span><span class="p">)</span>
+
+    <span class="nd">@_param_dict</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mutation_intensity</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;mutation_intensity&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="SequenceContextMutationResponse.λ_sequence"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.SequenceContextMutationResponse.html#gcdyn.poisson.SequenceContextMutationResponse.λ_sequence">[docs]</a>    <span class="k">def</span> <span class="nf">λ_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">contexts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seq_to_contexts</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mutability</span><span class="p">[</span><span class="n">context</span><span class="p">]</span> <span class="k">for</span> <span class="n">context</span> <span class="ow">in</span> <span class="n">contexts</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="PhenotypeTimeResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.PhenotypeTimeResponse.html#gcdyn.poisson.PhenotypeTimeResponse">[docs]</a><span class="k">class</span> <span class="nc">PhenotypeTimeResponse</span><span class="p">(</span><span class="n">Response</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Abstract base class for response function mapping from a</span>
+<span class="sd">    :py:class:`bdms.TreeNode` object&#39;s phenotype attribute</span>
+<span class="sd">    :math:`x\in\mathbb{R}` and time :math:`t\in\mathbb{R}_{\ge 0}` to a Poisson</span>
+<span class="sd">    process. Explicit phenotype and time dependence must be specified by</span>
+<span class="sd">    concrete subclasses.</span>
+
+<span class="sd">    This abstract base class provides generic default implementations of</span>
+<span class="sd">    :py:meth:`Λ` and :py:meth:`Λ_inv` via quadrature and root-finding,</span>
+<span class="sd">    respectively.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        grad: See :py:class:`Response`.</span>
+<span class="sd">        tol: Tolerance for root-finding.</span>
+<span class="sd">        maxiter: Maximum number of iterations for root-finding.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="n">maxiter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">grad</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;gradients are not implemented for </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tol</span> <span class="o">=</span> <span class="n">tol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxiter</span> <span class="o">=</span> <span class="n">maxiter</span>
+
+<div class="viewcode-block" id="PhenotypeTimeResponse.λ_phenotype_time"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.PhenotypeTimeResponse.html#gcdyn.poisson.PhenotypeTimeResponse.λ_phenotype_time">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">λ_phenotype_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate the Poisson intensity :math:`\lambda_x(t)` for phenotype</span>
+<span class="sd">        :math:`x` at time :math:`t`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x: Phenotype.</span>
+<span class="sd">            t: Time.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="PhenotypeTimeResponse.λ"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.PhenotypeTimeResponse.html#gcdyn.poisson.PhenotypeTimeResponse.λ">[docs]</a>    <span class="k">def</span> <span class="nf">λ</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">bdms</span><span class="o">.</span><span class="n">TreeNode</span><span class="p">,</span> <span class="n">Δt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">λ_phenotype_time</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">t</span> <span class="o">+</span> <span class="n">Δt</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PhenotypeTimeResponse.Λ"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.PhenotypeTimeResponse.html#gcdyn.poisson.PhenotypeTimeResponse.Λ">[docs]</a>    <span class="k">def</span> <span class="nf">Λ</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">bdms</span><span class="o">.</span><span class="n">TreeNode</span><span class="p">,</span> <span class="n">Δt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">quad</span><span class="p">(</span><span class="k">lambda</span> <span class="n">Δt</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">λ</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">Δt</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Δt</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">1000</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="PhenotypeTimeResponse.Λ_inv"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.PhenotypeTimeResponse.html#gcdyn.poisson.PhenotypeTimeResponse.Λ_inv">[docs]</a>    <span class="k">def</span> <span class="nf">Λ_inv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">bdms</span><span class="o">.</span><span class="n">TreeNode</span><span class="p">,</span> <span class="n">τ</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="c1"># initial guess via rate at node</span>
+        <span class="n">Δt</span> <span class="o">=</span> <span class="n">τ</span> <span class="o">/</span> <span class="bp">self</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="c1"># non-negative Newton-Raphson root-finding</span>
+        <span class="n">converged</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxiter</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">λ</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">Δt</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_np</span><span class="o">.</span><span class="n">inf</span>
+            <span class="n">Δt</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">Δt</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Λ</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">Δt</span><span class="p">)</span> <span class="o">-</span> <span class="n">τ</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">λ</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">Δt</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Λ</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">Δt</span><span class="p">)</span> <span class="o">-</span> <span class="n">τ</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">:</span>
+                <span class="n">converged</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">converged</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Newton-Raphson failed to converge after </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">maxiter</span><span class="si">}</span><span class="s2"> iterations with Δt=</span><span class="si">{</span><span class="n">Δt</span><span class="si">}</span><span class="s2"> and error=</span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Λ</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="w"> </span><span class="n">Δt</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">τ</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">Δt</span></div></div>
+
+
+<div class="viewcode-block" id="ModulatedPhenotypeResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.ModulatedPhenotypeResponse.html#gcdyn.poisson.ModulatedPhenotypeResponse">[docs]</a><span class="k">class</span> <span class="nc">ModulatedPhenotypeResponse</span><span class="p">(</span><span class="n">PhenotypeTimeResponse</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;An inhomogeneous phenotype response that combines a homogeneous</span>
+<span class="sd">    phenotype response with a time-dependent external field :math:`f(t)` that</span>
+<span class="sd">    modulates the effective phenotype via an interaction :math:`\tilde x = \phi(x, f(t))`</span>
+<span class="sd">    that maps the phenotype and external field to the effective phenotype.</span>
+<span class="sd">    For example, if :math:`\phi(x, f(t)) = x - f(t)`, then the external field</span>
+<span class="sd">    represents an additive phenotype shift.</span>
+<span class="sd">    The homogeneous phenotype response is evaluated at the effective phenotype.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        phenotype_response: a homogeneous phenotype response for the effective phenotype :math:`x - f(t)`.</span>
+<span class="sd">        external_field: external field :math:`f(t)`, a function that maps time to the external field.</span>
+<span class="sd">        interaction: a function :math:`\phi(x, f(t))` that maps the phenotype and external field to the effective phenotype.</span>
+<span class="sd">        tol: See :py:class:`PhenotypeTimeResponse`.</span>
+<span class="sd">        maxiter: See :py:class:`PhenotypeTimeResponse`.</span>
+<span class="sd">        grad: See :py:class:`Response`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">phenotype_response</span><span class="p">:</span> <span class="n">PhenotypeResponse</span><span class="p">,</span>
+        <span class="n">external_field</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
+        <span class="n">interaction</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="n">x</span> <span class="o">-</span> <span class="n">f</span><span class="p">,</span>
+        <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
+        <span class="n">maxiter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grad</span><span class="o">=</span><span class="n">phenotype_response</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phenotype_response</span> <span class="o">=</span> <span class="n">phenotype_response</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">external_field</span> <span class="o">=</span> <span class="n">external_field</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interaction</span> <span class="o">=</span> <span class="n">interaction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tol</span> <span class="o">=</span> <span class="n">tol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxiter</span> <span class="o">=</span> <span class="n">maxiter</span>
+
+<div class="viewcode-block" id="ModulatedPhenotypeResponse.λ_phenotype_time"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.ModulatedPhenotypeResponse.html#gcdyn.poisson.ModulatedPhenotypeResponse.λ_phenotype_time">[docs]</a>    <span class="k">def</span> <span class="nf">λ_phenotype_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">effective_phenotype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interaction</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">external_field</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">phenotype_response</span><span class="o">.</span><span class="n">λ_phenotype</span><span class="p">(</span><span class="n">effective_phenotype</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">phenotype_response</span><span class="o">.</span><span class="n">_param_dict</span>
+
+    <span class="nd">@_param_dict</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phenotype_response</span><span class="o">.</span><span class="n">_param_dict</span> <span class="o">=</span> <span class="n">d</span></div>
+
+
+<div class="viewcode-block" id="ModulatedRateResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.ModulatedRateResponse.html#gcdyn.poisson.ModulatedRateResponse">[docs]</a><span class="k">class</span> <span class="nc">ModulatedRateResponse</span><span class="p">(</span><span class="n">PhenotypeTimeResponse</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;An inhomogeneous phenotype response that modulates a homogeneous</span>
+<span class="sd">    phenotype response rate :math:`\lambda` via a time-dependent function</span>
+<span class="sd">    :math:`\tilde\lambda(\lambda, t)` to yield a time-dependent modulated rate.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        phenotype_response: a homogeneous phenotype response.</span>
+<span class="sd">        modulation: a function :math:`\tilde\lambda(\lambda, t)` that maps the original rate :math:`lambda` and time :math:`t` to the modulated rate.</span>
+<span class="sd">        tol: See :py:class:`PhenotypeTimeResponse`.</span>
+<span class="sd">        maxiter: See :py:class:`PhenotypeTimeResponse`.</span>
+<span class="sd">        grad: See :py:class:`Response`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">phenotype_response</span><span class="p">:</span> <span class="n">PhenotypeResponse</span><span class="p">,</span>
+        <span class="n">modulation</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
+        <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
+        <span class="n">maxiter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grad</span><span class="o">=</span><span class="n">phenotype_response</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phenotype_response</span> <span class="o">=</span> <span class="n">phenotype_response</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modulation</span> <span class="o">=</span> <span class="n">modulation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tol</span> <span class="o">=</span> <span class="n">tol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxiter</span> <span class="o">=</span> <span class="n">maxiter</span>
+
+<div class="viewcode-block" id="ModulatedRateResponse.λ_phenotype_time"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.ModulatedRateResponse.html#gcdyn.poisson.ModulatedRateResponse.λ_phenotype_time">[docs]</a>    <span class="k">def</span> <span class="nf">λ_phenotype_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">modulation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phenotype_response</span><span class="o">.</span><span class="n">λ_phenotype</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">t</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">phenotype_response</span><span class="o">.</span><span class="n">_param_dict</span>
+
+    <span class="nd">@_param_dict</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phenotype_response</span><span class="o">.</span><span class="n">_param_dict</span> <span class="o">=</span> <span class="n">d</span></div>
+</pre></div>
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            <div class="bd-footer-content__inner">
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Erick Matsen
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2022, Erick Matsen.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div></div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
