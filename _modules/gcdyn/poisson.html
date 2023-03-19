@@ -881,12 +881,12 @@ document.write(`
 
 <div class="viewcode-block" id="ModulatedRateResponse"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.ModulatedRateResponse.html#gcdyn.poisson.ModulatedRateResponse">[docs]</a><span class="k">class</span> <span class="nc">ModulatedRateResponse</span><span class="p">(</span><span class="n">PhenotypeTimeResponse</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;An inhomogeneous phenotype response that modulates a homogeneous</span>
-<span class="sd">    phenotype response rate :math:`\lambda` via a time-dependent function</span>
-<span class="sd">    :math:`\tilde\lambda(\lambda, t)` to yield a time-dependent modulated rate.</span>
+<span class="sd">    phenotype response rate :math:`\lambda_x` via a time-dependent function</span>
+<span class="sd">    :math:`\tilde\lambda(\lambda_x, x, t)` to yield a time-dependent modulated rate.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        phenotype_response: a homogeneous phenotype response.</span>
-<span class="sd">        modulation: a function :math:`\tilde\lambda(\lambda, t)` that maps the original rate :math:`\lambda` and time :math:`t` to the modulated rate.</span>
+<span class="sd">        modulation: a function :math:`\tilde\lambda(\lambda_x, x, t)` that maps the original rate :math:`\lambda_x`, phenotype :math:`x`, and time :math:`t` to the modulated rate.</span>
 <span class="sd">        tol: See :py:class:`PhenotypeTimeResponse`.</span>
 <span class="sd">        maxiter: See :py:class:`PhenotypeTimeResponse`.</span>
 <span class="sd">        grad: See :py:class:`Response`.</span>
@@ -895,7 +895,7 @@ document.write(`
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">phenotype_response</span><span class="p">:</span> <span class="n">PhenotypeResponse</span><span class="p">,</span>
-        <span class="n">modulation</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
+        <span class="n">modulation</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
         <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
         <span class="n">maxiter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
         <span class="n">grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -907,7 +907,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">maxiter</span> <span class="o">=</span> <span class="n">maxiter</span>
 
 <div class="viewcode-block" id="ModulatedRateResponse.λ_phenotype_time"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.ModulatedRateResponse.html#gcdyn.poisson.ModulatedRateResponse.λ_phenotype_time">[docs]</a>    <span class="k">def</span> <span class="nf">λ_phenotype_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">modulation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phenotype_response</span><span class="o">.</span><span class="n">λ_phenotype</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">t</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">modulation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phenotype_response</span><span class="o">.</span><span class="n">λ_phenotype</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>

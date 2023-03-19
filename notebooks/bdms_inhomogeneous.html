@@ -551,7 +551,7 @@ try 7 succeeded, tip count: 124
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/81f036ecbafe429b9a3e0ea754fa78b47e2f50daebd03ac1f692fe225132b232.png" src="../_images/81f036ecbafe429b9a3e0ea754fa78b47e2f50daebd03ac1f692fe225132b232.png" />
+<img alt="../_images/c6210f121393a67c0c360081b173e6690dbd5fe41d2765de1ce99c016a3ef1fd.png" src="../_images/c6210f121393a67c0c360081b173e6690dbd5fe41d2765de1ce99c016a3ef1fd.png" />
 <img alt="../_images/61894240b0855cc00034a0b9f8df9b9c162d3ab05e1cf5dd4b9346c76a40cceb.png" src="../_images/61894240b0855cc00034a0b9f8df9b9c162d3ab05e1cf5dd4b9346c76a40cceb.png" />
 </div>
 </div>
@@ -566,7 +566,7 @@ try 7 succeeded, tip count: 124
 <p>We’ll modulate the birth rate to approximate a capacity constraint</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">λ</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">λ</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">λ</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -577,7 +577,7 @@ try 7 succeeded, tip count: 124
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
 <span class="k">for</span> <span class="n">λ</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">]:</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">(</span><span class="n">λ</span><span class="p">,</span> <span class="n">t</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;$\lambda=</span><span class="si">{</span><span class="n">λ</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">(</span><span class="n">λ</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">t</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;$\lambda=</span><span class="si">{</span><span class="n">λ</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;$t$&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\tilde\lambda(\lambda, t)$&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
@@ -678,7 +678,7 @@ try 5 succeeded, tip count: 125
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/1a54c96b9ff9b9036204fc31e7ca8d051014d37d148207e8403225e4c2a16be3.png" src="../_images/1a54c96b9ff9b9036204fc31e7ca8d051014d37d148207e8403225e4c2a16be3.png" />
+<img alt="../_images/f51fadf56f8e3534aa80e19afd42b7f2527904056fde4005b0475574c5096ae9.png" src="../_images/f51fadf56f8e3534aa80e19afd42b7f2527904056fde4005b0475574c5096ae9.png" />
 <img alt="../_images/58a41f316c5625e8436c80bbc6e7c861f17cb2a322b43e965ccaa733e6cf9c1d.png" src="../_images/58a41f316c5625e8436c80bbc6e7c861f17cb2a322b43e965ccaa733e6cf9c1d.png" />
 </div>
 </div>
