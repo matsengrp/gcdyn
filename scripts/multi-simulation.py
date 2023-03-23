@@ -170,7 +170,7 @@ mutator = mutators.SequencePhenotypeMutator(
 )
 
 mutation_rate = responses.SequenceContextMutationResponse(
-    mutability_multiplier * replay.mutability, replay.seq_to_contexts
+    args.mutability_multiplier * replay.mutability, replay.seq_to_contexts
 )
 
 for i in range(1, args.n_trials + 1):
