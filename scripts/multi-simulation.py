@@ -2,13 +2,35 @@ import numpy as np
 import matplotlib.pyplot as plt
 import argparse
 import os
+import sys
 
 from gcdyn import bdms, gpmap, mutators, responses, utils
 from experiments import replay
 
 # ----------------------------------------------------------------------------------------
+def n_expected_seqs(rbirth, rdeath, timeval):
+    return 2**((rbirth - rdeath) * timeval)
+
+# ----------------------------------------------------------------------------------------
+def print_final_response_vals(tree):
+    print('                 N seqs       mean    mean    mean')
+    print('      time   actual  expec.     x     birth   death')
+    xvals, bvals, dvals = [], [], []
+    for tval in range(args.time_to_sampling + 1):  # kind of weird/arbitrary to take integer values
+        txv = sorted(tree.slice(tval))
+        tbv, tdv = [[r.f(x) for x in txv] for r in [birth_rate, death_rate]]
+        xvals += txv
+        bvals += tbv
+        dvals += tdv
+        print('      %3d   %4d    %4d    %6.2f  %6.2f   %7.3f' % (tval, len(txv), n_expected_seqs(np.mean(tbv), np.mean(tdv), tval), np.mean(txv), np.mean(tbv), np.mean(tdv)))
+    print('             mean      min       max')
+    print('       x   %6.2f    %6.2f    %6.2f' % (np.mean(xvals), min(xvals), max(xvals)))
+    print('     birth %6.2f    %6.2f    %6.2f' % (np.mean(bvals), min(bvals), max(bvals)))
+    print('     death %7.3f   %7.3f   %7.3f' % (np.mean(dvals), min(dvals), max(dvals)))
+
+# ----------------------------------------------------------------------------------------
 def generate_sequences_and_tree(
-    birth_rate, death_rate, mutation_rate, mutator, seed=0, time_to_sampling=20
+    birth_rate, death_rate, mutation_rate, mutator, seed=0,
 ):
 
     for iter in range(1000):
@@ -17,17 +39,19 @@ def generate_sequences_and_tree(
             tree.sequence = replay.NAIVE_SEQUENCE
             tree.x = gp_map(tree.sequence)
             tree.evolve(
-                time_to_sampling,
+                args.time_to_sampling,
                 birth_rate=birth_rate,
                 death_rate=death_rate,
                 mutation_rate=mutation_rate,
                 mutator=mutator,
-                min_survivors=100,
-                max_leaves=1000,
+                min_survivors=args.min_survivors,
+                max_leaves=args.max_leaves,
                 birth_mutations=False,
                 seed=seed,
             )
             print(f"try {iter + 1} succeeded, tip count: {len(tree)}")
+            if args.debug_response_fcn:
+                print_final_response_vals(tree)
             break
         except bdms.TreeError as e:
             print(f"try {iter + 1} failed, {e}", flush=True)
@@ -39,20 +63,74 @@ def generate_sequences_and_tree(
     return tree
 
 # ----------------------------------------------------------------------------------------
-def average_mutations(tree):
+def get_mut_stats(tree):
     tree.total_mutations = 0
 
     for node in tree.iter_descendants(strategy="preorder"):
         node.total_mutations = node.n_mutations + node.up.total_mutations
 
-    return np.mean([leaf.total_mutations for leaf in tree.iter_leaves()])
+    tmut_tots = [leaf.total_mutations for leaf in tree.iter_leaves()]
+    return np.mean(tmut_tots), min(tmut_tots), max(tmut_tots)
+
+# ----------------------------------------------------------------------------------------
+def scan_response(xmin=-5, xmax=2, nsteps=10):  # print output values of response function
+    dx = (xmax-xmin) / nsteps
+    xvals = np.arange(xmin, xmax + dx, dx)
+    rvals = [birth_rate.f(x) for x in xvals]
+    xstr = '   '.join('%7.2f'%x for x in xvals)
+    rstr = '   '.join('%7.2f'%r for r in rvals)
+    print('   ', xstr)
+    print('   ', rstr)
+    print('    x: %.2f - %.2f' % (min(xvals), max(xvals)))
+    print('    r: %.2f - %.2f' % (min(rvals), max(rvals)))
+
+# ----------------------------------------------------------------------------------------
+def print_resp():
+    print('   response    f(x=0)    function')
+    for rname, rfcn in zip(['birth', 'death'], [birth_rate, death_rate]):
+        print('     %s   %7.3f      %s' % (rname, rfcn.f(0), rfcn))
+    print('   expected population at time %d (x=0): %d' % (args.time_to_sampling, n_expected_seqs(birth_rate.f(0), death_rate.f(0), args.time_to_sampling)))
+
+# ----------------------------------------------------------------------------------------
+def set_responses():
+    if args.birth_response == 'constant':
+        birth_rate = responses.ConstantResponse(args.yscale) #args.birth_value)
+    elif args.birth_response in ['soft-relu', 'sigmoid']:
+        kwargs = {'xscale' : args.xscale, 'xshift' : args.xshift, 'yscale' : args.yscale, 'yshift' : args.yshift}
+        rfcns = {'soft-relu' : responses.SoftReluResponse, 'sigmoid' : responses.SigmoidResponse}
+        birth_rate = rfcns[args.birth_response](**kwargs)
+    else:
+        assert False
+    death_rate = responses.ConstantResponse(args.death_value)
+    return birth_rate, death_rate
 
 # ----------------------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
-parser.add_argument('--n-seqs', default=60, type=int, help='Number of sequences to observe')
-parser.add_argument('--n-trials', default=10, type=int, help='Number of trials/GCs to simulate')
+parser.add_argument('--n-seqs', default=70, type=int, help='Number of sequences to observe')
+parser.add_argument('--n-trials', default=51, type=int, help='Number of trials/GCs to simulate')
+parser.add_argument('--time-to-sampling', default=20, type=int)
+parser.add_argument('--min-survivors', default=100, type=int)
+parser.add_argument('--max-leaves', default=1000, type=int)
+parser.add_argument('--seed', default=0, type=int, help='random seed')
 parser.add_argument('--outdir', default=os.getcwd())
+parser.add_argument('--birth-response', default='soft-relu', choices=['constant', 'soft-relu', 'sigmoid'], help='birth rate response function')
+# parser.add_argument('--birth-value', default=0.5, type=float, help='value (parameter) for constant birth response')
+parser.add_argument('--death-value', default=0.025, type=float, help='value (parameter) for constant death response')
+parser.add_argument('--xscale', default=2, type=float, help='parameters (see also {x,y}{scale,shift}) for sigmoid and soft-relu birth responses')
+parser.add_argument('--xshift', default=-2.5, type=float)
+parser.add_argument('--yscale', default=0.1, type=float)
+parser.add_argument('--yshift', default=0, type=float)
+parser.add_argument('--initial-birth-rate', default=0.45, type=float, help='this gives a reasonable growth rate (with death rate 0.025, this gives ~500 seqs at time 20)')
+parser.add_argument('--mutability-multiplier', default=0.68, type=float)
+parser.add_argument('--debug-response-fcn', action='store_true')
+
 args = parser.parse_args()
+
+# assert args.birth_value >= 0
+assert args.death_value >= 0
+if args.birth_response == 'sigmoid':
+    assert args.xscale > 0 and args.yscale > 0  # necessary so that the phenotype increases with phenotype (e.g. affinity)
+# TODO work out rest of bounds that make sense for x/y scale/shift paramers
 
 if not os.path.exists(args.outdir):
     os.makedirs(args.outdir)
@@ -62,13 +140,29 @@ gp_map = gpmap.AdditiveGPMap(
 )
 assert gp_map(replay.NAIVE_SEQUENCE) == 0
 
-birth_rate = responses.SoftReluResponse(xscale=2, xshift=-2.5, yscale=0.05, yshift=0)
-death_rate = responses.ConstantResponse(0.025)
+birth_rate, death_rate = set_responses()
+print_resp()
 
-mutability_multiplier = 1
+# if necessary, rescale response fcns
+n_exp = n_expected_seqs(birth_rate.f(0), death_rate.f(0), args.time_to_sampling)
+rescale, fuzz_factor = False, 0.5
+if n_exp > fuzz_factor * args.max_leaves:
+    print('  expected number of leaves too high (%d > %.2f * %d), so rescaling response function' % (n_exp, fuzz_factor, args.max_leaves))
+    rescale = True
+if n_exp * fuzz_factor < args.min_survivors:
+    print('  expected number of leaves too small (%d * %.2f < %d), so rescaling response function' % (n_exp, fuzz_factor, args.min_survivors))
+    rescale = True
+if rescale:
+    args.yscale *= args.initial_birth_rate / birth_rate.f(0)
+    birth_rate, death_rate = set_responses()
+    print_resp()
+
+if args.debug_response_fcn:
+    scan_response()
+
 mutator = mutators.SequencePhenotypeMutator(
     mutators.ContextMutator(
-        mutability=mutability_multiplier * replay.mutability,
+        mutability=args.mutability_multiplier * replay.mutability,
         substitution=replay.substitution,
         seq_to_contexts=replay.seq_to_contexts,
     ),
@@ -81,12 +175,13 @@ mutation_rate = responses.SequenceContextMutationResponse(
 
 for i in range(1, args.n_trials + 1):
     print("trial #", i)
-    rng = np.random.default_rng(seed=i * i)
+    rng = np.random.default_rng(seed=i + args.seed)
     tree = generate_sequences_and_tree(
         birth_rate, death_rate, mutation_rate, mutator, seed=rng
     )
 
-    print("average # of mutations per sequence", average_mutations(tree))
+    tmean, tmin, tmax = get_mut_stats(tree)
+    print("   mutations per sequence:  mean %.1f   min %.1f  max %.1f" % (tmean, tmin, tmax))
 
     with open(f"{args.outdir}/tree_{i}.nwk", "w") as fp:
         fp.write(tree.write() + "\n")
