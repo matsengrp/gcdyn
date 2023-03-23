@@ -6,6 +6,7 @@ import sys
 
 from gcdyn import bdms, gpmap, mutators, responses, utils
 from experiments import replay
+from colors import color
 
 # ----------------------------------------------------------------------------------------
 def n_expected_seqs(rbirth, rdeath, timeval):
@@ -13,8 +14,8 @@ def n_expected_seqs(rbirth, rdeath, timeval):
 
 # ----------------------------------------------------------------------------------------
 def print_final_response_vals(tree):
-    print('                 N seqs       mean    mean    mean')
-    print('      time   actual  expec.     x     birth   death')
+    print('                       mean    mean     mean')
+    print('      time   N seqs.     x     birth    death')
     xvals, bvals, dvals = [], [], []
     for tval in range(args.time_to_sampling + 1):  # kind of weird/arbitrary to take integer values
         txv = sorted(tree.slice(tval))
@@ -22,7 +23,7 @@ def print_final_response_vals(tree):
         xvals += txv
         bvals += tbv
         dvals += tdv
-        print('      %3d   %4d    %4d    %6.2f  %6.2f   %7.3f' % (tval, len(txv), n_expected_seqs(np.mean(tbv), np.mean(tdv), tval), np.mean(txv), np.mean(tbv), np.mean(tdv)))
+        print('      %3d   %4d     %6.2f  %6.2f   %7.3f' % (tval, len(txv), np.mean(txv), np.mean(tbv), np.mean(tdv)))
     print('             mean      min       max')
     print('       x   %6.2f    %6.2f    %6.2f' % (np.mean(xvals), min(xvals), max(xvals)))
     print('     birth %6.2f    %6.2f    %6.2f' % (np.mean(bvals), min(bvals), max(bvals)))
@@ -49,7 +50,7 @@ def generate_sequences_and_tree(
                 birth_mutations=False,
                 seed=seed,
             )
-            print(f"try {iter + 1} succeeded, tip count: {len(tree)}")
+            print(f"    try {iter + 1} succeeded, tip count: {len(tree)}")
             if args.debug_response_fcn:
                 print_final_response_vals(tree)
             break
@@ -75,14 +76,12 @@ def get_mut_stats(tree):
 # ----------------------------------------------------------------------------------------
 def scan_response(xmin=-5, xmax=2, nsteps=10):  # print output values of response function
     dx = (xmax-xmin) / nsteps
-    xvals = np.arange(xmin, xmax + dx, dx)
+    xvals = list(np.arange(xmin, 0, dx)) + list(np.arange(0, xmax + dx, dx))
     rvals = [birth_rate.f(x) for x in xvals]
     xstr = '   '.join('%7.2f'%x for x in xvals)
     rstr = '   '.join('%7.2f'%r for r in rvals)
-    print('   ', xstr)
-    print('   ', rstr)
-    print('    x: %.2f - %.2f' % (min(xvals), max(xvals)))
-    print('    r: %.2f - %.2f' % (min(rvals), max(rvals)))
+    print('    x:', xstr)
+    print('    r:', rstr)
 
 # ----------------------------------------------------------------------------------------
 def print_resp():
@@ -130,7 +129,6 @@ args = parser.parse_args()
 assert args.death_value >= 0
 if args.birth_response == 'sigmoid':
     assert args.xscale > 0 and args.yscale > 0  # necessary so that the phenotype increases with phenotype (e.g. affinity)
-# TODO work out rest of bounds that make sense for x/y scale/shift paramers
 
 if not os.path.exists(args.outdir):
     os.makedirs(args.outdir)
@@ -174,7 +172,8 @@ mutation_rate = responses.SequenceContextMutationResponse(
 )
 
 for i in range(1, args.n_trials + 1):
-    print("trial #", i)
+    print(color('blue', "trial %d:"%i), end=' ')
+    sys.stdout.flush()
     rng = np.random.default_rng(seed=i + args.seed)
     tree = generate_sequences_and_tree(
         birth_rate, death_rate, mutation_rate, mutator, seed=rng
