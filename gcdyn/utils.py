@@ -47,3 +47,5 @@ def write_leaf_sequences_to_fasta(
         for name, sequence in sequence_dict.items():
             fp.write(f">{name}\n")
             fp.write(f"{sequence}\n")
+
+    return sequence_dict

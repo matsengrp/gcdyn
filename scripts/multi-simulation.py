@@ -3,10 +3,16 @@ import matplotlib.pyplot as plt
 import argparse
 import os
 import sys
+from Bio import SeqIO
 
 from gcdyn import bdms, gpmap, mutators, responses, utils
 from experiments import replay
 from colors import color
+
+# ----------------------------------------------------------------------------------------
+def add_seqs(all_seqs, itrial, seqfos):
+    for sfo in seqfos:
+        all_seqs.append({'name' : '%d-%s'%(itrial, sfo['name']), 'seq' : sfo['seq']})
 
 # ----------------------------------------------------------------------------------------
 def n_expected_seqs(rbirth, rdeath, timeval):
@@ -14,8 +20,8 @@ def n_expected_seqs(rbirth, rdeath, timeval):
 
 # ----------------------------------------------------------------------------------------
 def print_final_response_vals(tree):
-    print('                       mean    mean     mean')
-    print('      time   N seqs.     x     birth    death')
+    print('                           x         birth           death')
+    print('      time   N seqs.   min   max    min  max       min     max')
     xvals, bvals, dvals = [], [], []
     for tval in range(args.time_to_sampling + 1):  # kind of weird/arbitrary to take integer values
         txv = sorted(tree.slice(tval))
@@ -23,7 +29,7 @@ def print_final_response_vals(tree):
         xvals += txv
         bvals += tbv
         dvals += tdv
-        print('      %3d   %4d     %6.2f  %6.2f   %7.3f' % (tval, len(txv), np.mean(txv), np.mean(tbv), np.mean(tdv)))
+        print('      %3d   %4d     %5.2f %5.2f  %5.2f %5.2f   %6.3f %6.3f' % (tval, len(txv), min(txv), max(txv), min(tbv), max(tbv), min(tdv), max(tdv)))
     print('             mean      min       max')
     print('       x   %6.2f    %6.2f    %6.2f' % (np.mean(xvals), min(xvals), max(xvals)))
     print('     birth %6.2f    %6.2f    %6.2f' % (np.mean(bvals), min(bvals), max(bvals)))
@@ -109,19 +115,20 @@ parser.add_argument('--n-seqs', default=70, type=int, help='Number of sequences 
 parser.add_argument('--n-trials', default=51, type=int, help='Number of trials/GCs to simulate')
 parser.add_argument('--time-to-sampling', default=20, type=int)
 parser.add_argument('--min-survivors', default=100, type=int)
-parser.add_argument('--max-leaves', default=1000, type=int)
+parser.add_argument('--max-leaves', default=3000, type=int)
 parser.add_argument('--seed', default=0, type=int, help='random seed')
 parser.add_argument('--outdir', default=os.getcwd())
 parser.add_argument('--birth-response', default='soft-relu', choices=['constant', 'soft-relu', 'sigmoid'], help='birth rate response function')
 # parser.add_argument('--birth-value', default=0.5, type=float, help='value (parameter) for constant birth response')
 parser.add_argument('--death-value', default=0.025, type=float, help='value (parameter) for constant death response')
-parser.add_argument('--xscale', default=2, type=float, help='parameters (see also {x,y}{scale,shift}) for sigmoid and soft-relu birth responses')
+parser.add_argument('--xscale', default=2, type=float, help='parameters (see also {x,y}{scale,shift}) for birth (consant, sigmoid and soft-relu) response')
 parser.add_argument('--xshift', default=-2.5, type=float)
-parser.add_argument('--yscale', default=0.1, type=float)
-parser.add_argument('--yshift', default=0, type=float)
+parser.add_argument('--yscale', default=0.1, type=float, help='mostly don\'t set this by hand -- better to let the auto scaler below change it to get a reasonable growth rate.')
+parser.add_argument('--yshift', default=0, type=float, help='atm this shouldn\'t (need to, at least) be changed')
 parser.add_argument('--initial-birth-rate', default=0.45, type=float, help='this gives a reasonable growth rate (with death rate 0.025, this gives ~500 seqs at time 20)')
 parser.add_argument('--mutability-multiplier', default=0.68, type=float)
 parser.add_argument('--debug-response-fcn', action='store_true')
+parser.add_argument('--overwrite', action='store_true')
 
 args = parser.parse_args()
 
@@ -171,10 +178,17 @@ mutation_rate = responses.SequenceContextMutationResponse(
     args.mutability_multiplier * replay.mutability, replay.seq_to_contexts
 )
 
-for i in range(1, args.n_trials + 1):
-    print(color('blue', "trial %d:"%i), end=' ')
+all_seqs = []
+for itrial in range(1, args.n_trials + 1):
+    print(color('blue', "trial %d:"%itrial), end=' ')
+    ofn = f"{args.outdir}/seqs_{itrial}.fasta"
+    if os.path.exists(ofn) and not args.overwrite:
+        print('    output %s already exists, skipping'%ofn)
+        records = list(SeqIO.parse(ofn, 'fasta'))
+        add_seqs(all_seqs, itrial, [{'name' : rcd.id, 'seq' : rcd.seq} for rcd in records])
+        continue
     sys.stdout.flush()
-    rng = np.random.default_rng(seed=i + args.seed)
+    rng = np.random.default_rng(seed=itrial + args.seed)
     tree = generate_sequences_and_tree(
         birth_rate, death_rate, mutation_rate, mutator, seed=rng
     )
@@ -182,11 +196,18 @@ for i in range(1, args.n_trials + 1):
     tmean, tmin, tmax = get_mut_stats(tree)
     print("   mutations per sequence:  mean %.1f   min %.1f  max %.1f" % (tmean, tmin, tmax))
 
-    with open(f"{args.outdir}/tree_{i}.nwk", "w") as fp:
+    with open(f"{args.outdir}/tree_{itrial}.nwk", "w") as fp:
         fp.write(tree.write() + "\n")
 
-    utils.write_leaf_sequences_to_fasta(
+    seqdict = utils.write_leaf_sequences_to_fasta(
         tree,
-        f"{args.outdir}/seqs_{i}.fasta",
+        ofn,
         naive=replay.NAIVE_SEQUENCE,
     )
+    add_seqs(all_seqs, itrial, [{'name' : sname, 'seq' : seq} for sname, seq in seqdict.items()])
+
+asfn = '%s/all-seqs.fasta' % args.outdir
+print('  writing all seqs to %s'%asfn)
+with open(asfn, 'w') as asfile:
+    for sfo in all_seqs:
+        asfile.write('>%s\n%s\n' % (sfo['name'], sfo['seq']))
