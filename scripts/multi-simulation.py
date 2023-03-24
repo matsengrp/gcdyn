@@ -64,7 +64,7 @@ def generate_sequences_and_tree(
             print(f"try {iter + 1} failed, {e}", flush=True)
             continue
 
-    tree.sample_survivors(n=args.n_seqs, seed=0)
+    tree.sample_survivors(n=args.n_seqs, seed=seed)
     tree.prune()
 
     return tree
