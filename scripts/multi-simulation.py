@@ -179,6 +179,7 @@ mutation_rate = responses.SequenceContextMutationResponse(
 )
 
 all_seqs = []
+rng = np.random.default_rng(seed=args.seed)
 for itrial in range(1, args.n_trials + 1):
     print(color('blue', "trial %d:"%itrial), end=' ')
     ofn = f"{args.outdir}/seqs_{itrial}.fasta"
@@ -188,7 +189,6 @@ for itrial in range(1, args.n_trials + 1):
         add_seqs(all_seqs, itrial, [{'name' : rcd.id, 'seq' : rcd.seq} for rcd in records])
         continue
     sys.stdout.flush()
-    rng = np.random.default_rng(seed=itrial + args.seed)
     tree = generate_sequences_and_tree(
         birth_rate, death_rate, mutation_rate, mutator, seed=rng
     )
