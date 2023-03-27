@@ -40,7 +40,8 @@ def generate_sequences_and_tree(
     birth_rate, death_rate, mutation_rate, mutator, seed=0,
 ):
 
-    for iter in range(1000):
+    min_fails, max_fails = 0, 0
+    for iter in range(args.n_max_tries):
         try:
             tree = bdms.TreeNode()
             tree.sequence = replay.NAIVE_SEQUENCE
@@ -60,9 +61,17 @@ def generate_sequences_and_tree(
             if args.debug_response_fcn:
                 print_final_response_vals(tree)
             break
-        except bdms.TreeError as e:
-            print(f"try {iter + 1} failed, {e}", flush=True)
+        except bdms.TreeError as terr:
+            if terr.value.find('minimum number of survivors') == 0:
+                min_fails += 1
+            elif terr.value.find('maximum number of leaves') == 0:
+                max_fails += 1
+            print('%s%s' % ('failures: ' if min_fails+max_fails==1 else '', '.'), end='')
             continue
+    if min_fails > 0:
+        print('   %s %d failures dropped below min N survivors %d' % (color('yellow', 'warning'), min_fails, args.min_survivors))
+    if max_fails > 0:
+        print('   %s %d failures exceeded max N leaves %d' % (color('yellow', 'warning'), max_fails, args.max_leaves))
 
     tree.sample_survivors(n=args.n_seqs, seed=seed)
     tree.prune()
@@ -113,6 +122,7 @@ def set_responses():
 parser = argparse.ArgumentParser()
 parser.add_argument('--n-seqs', default=70, type=int, help='Number of sequences to observe')
 parser.add_argument('--n-trials', default=51, type=int, help='Number of trials/GCs to simulate')
+parser.add_argument('--n-max-tries', default=1000, type=int, help='Number of times to retry simulation if it fails due to reaching either the min or max number of leaves.')
 parser.add_argument('--time-to-sampling', default=20, type=int)
 parser.add_argument('--min-survivors', default=100, type=int)
 parser.add_argument('--max-leaves', default=3000, type=int)
@@ -129,10 +139,16 @@ parser.add_argument('--initial-birth-rate', default=0.45, type=float, help='this
 parser.add_argument('--mutability-multiplier', default=0.68, type=float)
 parser.add_argument('--debug-response-fcn', action='store_true')
 parser.add_argument('--overwrite', action='store_true')
+parser.add_argument('--test', action='store_true', help='sets some default parameter values that run quickly and successfully, i.e. useful for quick tests')
 
 args = parser.parse_args()
 
-# assert args.birth_value >= 0
+if args.test:
+    args.n_trials = 2
+    args.time_to_sampling = 5
+    args.min_survivors = 10
+    args.n_seqs = 5
+
 assert args.death_value >= 0
 if args.birth_response == 'sigmoid':
     assert args.xscale > 0 and args.yscale > 0  # necessary so that the phenotype increases with phenotype (e.g. affinity)
