@@ -4,6 +4,7 @@ import argparse
 import os
 import sys
 from Bio import SeqIO
+# import colored_traceback.always  # need to add this to installation stuff, i'm not sure how to do it atm
 
 from gcdyn import bdms, gpmap, mutators, responses, utils
 from experiments import replay
@@ -40,7 +41,7 @@ def generate_sequences_and_tree(
     birth_rate, death_rate, mutation_rate, mutator, seed=0,
 ):
 
-    min_fails, max_fails = 0, 0
+    min_fails, max_fails, success = 0, 0, False
     for iter in range(args.n_max_tries):
         try:
             tree = bdms.TreeNode()
@@ -60,18 +61,23 @@ def generate_sequences_and_tree(
             print(f"    try {iter + 1} succeeded, tip count: {len(tree)}")
             if args.debug_response_fcn:
                 print_final_response_vals(tree)
+            success = True
             break
         except bdms.TreeError as terr:
             if terr.value.find('minimum number of survivors') == 0:
                 min_fails += 1
             elif terr.value.find('maximum number of leaves') == 0:
                 max_fails += 1
-            print('%s%s' % ('failures: ' if min_fails+max_fails==1 else '', '.'), end='')
+            print('%s%s' % ('failures: ' if min_fails+max_fails==1 else '', '.'), end='', flush=True)
             continue
+    if min_fails + max_fails > 0:
+        print()
     if min_fails > 0:
         print('   %s %d failures dropped below min N survivors %d' % (color('yellow', 'warning'), min_fails, args.min_survivors))
     if max_fails > 0:
         print('   %s %d failures exceeded max N leaves %d' % (color('yellow', 'warning'), max_fails, args.max_leaves))
+    if not success:
+        raise Exception('exceeded maximum number of tries %d' % args.n_max_tries)
 
     tree.sample_survivors(n=args.n_seqs, seed=seed)
     tree.prune()
