@@ -9,6 +9,7 @@ import pandas as pd
 import argparse
 import numpy
 import csv
+import itertools
 
 from Bio import SeqIO
 from Bio.SeqUtils.CheckSum import seguid
@@ -35,7 +36,7 @@ numpy.random.seed(args.random_seed)
 
 n_too_small, init_sizes, n_removed = 0, [], 0
 abundances = {}
-fdicts = {'hdists' : {}}
+fdicts = {'hdists' : {}, 'max-abdn-shm' : {}}
 
 for fasta_path in args.infiles:
     records = list(SeqIO.parse(fasta_path, 'fasta'))
@@ -62,18 +63,21 @@ for fasta_path in args.infiles:
     # This dictionary will map sequence checksum to the list of squence ids that have that
     # sequence checksum.
     ids_by_checksum = collections.defaultdict(list)
-    hdvals = []  # list of hamming distance to naive for each sequence
+    hdvals, hd_dict = [], {}  # list of hamming distance to naive for each sequence (hd_dict is just for max_abdn below)
     sequence_count = 0
     for record in records:
         sequence_count = sequence_count + 1
         ids_by_checksum[seguid(record.seq)].append(record.id)
         hdvals.append(hamming_distance(record.seq, naive_record.seq))
+        hd_dict[record.id] = hdvals[-1]
 
     abundance_distribution = collections.defaultdict(int)
     for id_list in ids_by_checksum.values():
         id_count = len(id_list)
         abundance_distribution[id_count] = abundance_distribution[id_count] + 1
     assert sequence_count == sum(k * v for k, v in abundance_distribution.items())
+    for amax, max_abdn_idlists in itertools.groupby(sorted(ids_by_checksum.values(), key=len, reverse=True), key=len):
+        break  # just want the first one (max abundance)
 
     base, _ = os.path.splitext(fasta_path)
     base = os.path.basename(base)
@@ -82,6 +86,7 @@ for fasta_path in args.infiles:
     )
 
     fdicts['hdists'][base] = hdvals
+    fdicts['max-abdn-shm'][base] = [int(numpy.median([hd_dict[u] for l in max_abdn_idlists for u in l]))]
 
 if n_too_small > 0:
     print('    skipped %d files with fewer than %d seqs' % (n_too_small, args.min_seqs))
