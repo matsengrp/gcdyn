@@ -6,7 +6,7 @@ import sys
 from Bio import SeqIO
 # import colored_traceback.always  # need to add this to installation stuff, i'm not sure how to do it atm
 
-from gcdyn import bdms, gpmap, mutators, responses, utils
+from gcdyn import bdms, gpmap, mutators, poisson, utils
 from experiments import replay
 from colors import color
 
@@ -26,7 +26,7 @@ def print_final_response_vals(tree):
     xvals, bvals, dvals = [], [], []
     for tval in range(args.time_to_sampling + 1):  # kind of weird/arbitrary to take integer values
         txv = sorted(tree.slice(tval))
-        tbv, tdv = [[r.f(x) for x in txv] for r in [birth_rate, death_rate]]
+        tbv, tdv = [[r.λ_phenotype(x) for x in txv] for r in [birth_rate, death_rate]]
         xvals += txv
         bvals += tbv
         dvals += tdv
@@ -98,7 +98,7 @@ def get_mut_stats(tree):
 def scan_response(xmin=-5, xmax=2, nsteps=10):  # print output values of response function
     dx = (xmax-xmin) / nsteps
     xvals = list(np.arange(xmin, 0, dx)) + list(np.arange(0, xmax + dx, dx))
-    rvals = [birth_rate.f(x) for x in xvals]
+    rvals = [birth_rate.λ_phenotype(x) for x in xvals]
     xstr = '   '.join('%7.2f'%x for x in xvals)
     rstr = '   '.join('%7.2f'%r for r in rvals)
     print('    x:', xstr)
@@ -108,20 +108,20 @@ def scan_response(xmin=-5, xmax=2, nsteps=10):  # print output values of respons
 def print_resp():
     print('   response    f(x=0)    function')
     for rname, rfcn in zip(['birth', 'death'], [birth_rate, death_rate]):
-        print('     %s   %7.3f      %s' % (rname, rfcn.f(0), rfcn))
-    print('   expected population at time %d (x=0): %d' % (args.time_to_sampling, n_expected_seqs(birth_rate.f(0), death_rate.f(0), args.time_to_sampling)))
+        print('     %s   %7.3f      %s' % (rname, rfcn.λ_phenotype(0), rfcn))
+    print('   expected population at time %d (x=0): %d' % (args.time_to_sampling, n_expected_seqs(birth_rate.λ_phenotype(0), death_rate.λ_phenotype(0), args.time_to_sampling)))
 
 # ----------------------------------------------------------------------------------------
 def set_responses():
     if args.birth_response == 'constant':
-        birth_rate = responses.ConstantResponse(args.yscale) #args.birth_value)
+        birth_rate = poisson.ConstantResponse(args.yscale) #args.birth_value)
     elif args.birth_response in ['soft-relu', 'sigmoid']:
         kwargs = {'xscale' : args.xscale, 'xshift' : args.xshift, 'yscale' : args.yscale, 'yshift' : args.yshift}
-        rfcns = {'soft-relu' : responses.SoftReluResponse, 'sigmoid' : responses.SigmoidResponse}
+        rfcns = {'soft-relu' : poisson.SoftReluResponse, 'sigmoid' : poisson.SigmoidResponse}
         birth_rate = rfcns[args.birth_response](**kwargs)
     else:
         assert False
-    death_rate = responses.ConstantResponse(args.death_value)
+    death_rate = poisson.ConstantResponse(args.death_value)
     return birth_rate, death_rate
 
 # ----------------------------------------------------------------------------------------
@@ -171,7 +171,7 @@ birth_rate, death_rate = set_responses()
 print_resp()
 
 # if necessary, rescale response fcns
-n_exp = n_expected_seqs(birth_rate.f(0), death_rate.f(0), args.time_to_sampling)
+n_exp = n_expected_seqs(birth_rate.λ_phenotype(0), death_rate.λ_phenotype(0), args.time_to_sampling)
 rescale, fuzz_factor = False, 0.5
 if n_exp > fuzz_factor * args.max_leaves:
     print('  expected number of leaves too high (%d > %.2f * %d), so rescaling response function' % (n_exp, fuzz_factor, args.max_leaves))
@@ -180,7 +180,7 @@ if n_exp * fuzz_factor < args.min_survivors:
     print('  expected number of leaves too small (%d * %.2f < %d), so rescaling response function' % (n_exp, fuzz_factor, args.min_survivors))
     rescale = True
 if rescale:
-    args.yscale *= args.initial_birth_rate / birth_rate.f(0)
+    args.yscale *= args.initial_birth_rate / birth_rate.λ_phenotype(0)
     birth_rate, death_rate = set_responses()
     print_resp()
 
@@ -196,7 +196,7 @@ mutator = mutators.SequencePhenotypeMutator(
     gp_map,
 )
 
-mutation_rate = responses.SequenceContextMutationResponse(
+mutation_rate = poisson.SequenceContextMutationResponse(
     args.mutability_multiplier * replay.mutability, replay.seq_to_contexts
 )
 

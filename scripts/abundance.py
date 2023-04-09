@@ -77,6 +77,7 @@ for fasta_path in args.infiles:
         abundance_distribution[id_count] = abundance_distribution[id_count] + 1
     assert sequence_count == sum(k * v for k, v in abundance_distribution.items())
     for amax, max_abdn_idlists in itertools.groupby(sorted(ids_by_checksum.values(), key=len, reverse=True), key=len):
+        # print(amax, [len(l) for l in max_abdn_idlists])
         break  # just want the first one (max abundance)
 
     base, _ = os.path.splitext(fasta_path)
