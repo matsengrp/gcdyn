@@ -5,8 +5,10 @@ pytest
 nbval
 sphinx
 sphinx-argparse
-sphinx_rtd_theme
+sphinx-book-theme
 sphinx-autodoc-typehints
+sphinx-copybutton
+myst-nb
 pandoc
 jupyterlab
 seaborn

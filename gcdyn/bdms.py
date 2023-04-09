@@ -25,17 +25,15 @@ with these notable differences:
    (overrides ETE's :py:meth:`ete3.TreeNode.prune`)
  * Method :py:meth:`TreeNode.render`: visualizes the tree (overrides ETE's :py:meth:`ete3.TreeNode.render`)
 """
+
+from __future__ import annotations
 import ete3
 from ete3.coretype.tree import TreeError
-from gcdyn import mutators, responses
+from gcdyn import mutators, poisson
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from typing import Any, Optional, Union
-
-# NOTE: sphinx is currently unable to present this in condensed form, using a string type hint
-# of "array-like" in the docstring args for now, instead of ArrayLike hint in call signature
-# from numpy.typing import ArrayLike
 
 import itertools
 import bisect
@@ -94,18 +92,19 @@ class TreeNode(ete3.Tree):
         tree has been pruned above this node, removing mutation event
         nodes)."""
         self._sampled = False
-        """
-        Whether sampling has been run on this tree. (Not whether the node has been
-        sampled as part of this sampling process).
+        """Whether sampling has been run on this tree.
+
+        (Not whether the node has been sampled as part of this sampling
+        process).
         """
         self._pruned = False
 
     def evolve(
         self,
         t: float,
-        birth_rate: responses.Response = responses.ConstantResponse(1),
-        death_rate: responses.Response = responses.ConstantResponse(0),
-        mutation_rate: responses.Response = responses.ConstantResponse(1),
+        birth_rate: poisson.Response = poisson.ConstantResponse(1),
+        death_rate: poisson.Response = poisson.ConstantResponse(0),
+        mutation_rate: poisson.Response = poisson.ConstantResponse(1),
         mutator: mutators.Mutator = mutators.GaussianMutator(shift=0, scale=1),
         birth_mutations: bool = False,
         min_survivors: int = 1,
@@ -129,7 +128,7 @@ class TreeNode(ete3.Tree):
             seed: A seed to initialize the random number generation.
                   If ``None``, then fresh, unpredictable entropy will be pulled from the OS.
                   If an ``int``, then it will be used to derive the initial state.
-                  If a :py:class:`numpy.random.Generator`, then that will be used directly.
+                  If a :py:class:`numpy.random.Generator`, then it will be used directly.
         """
         if not self.is_root():
             raise TreeError("Cannot evolve a non-root node")
@@ -144,13 +143,16 @@ class TreeNode(ete3.Tree):
         #       key argument in python 3.9 (it gains one in 3.10)
         time_keys = [self.t]
 
+        event_rates = {
+            self._BIRTH_EVENT: birth_rate,
+            self._DEATH_EVENT: death_rate,
+            self._MUTATION_EVENT: mutation_rate,
+        }
+
         while unfinished_nodes:
-            Δt = t - unfinished_nodes[0].t
             new_event_node = unfinished_nodes[0]._generate_event(
-                Δt,
-                birth_rate,
-                death_rate,
-                mutation_rate,
+                t - unfinished_nodes[0].t,
+                event_rates,
                 mutator,
                 birth_mutations,
                 rng,
@@ -193,16 +195,14 @@ class TreeNode(ete3.Tree):
         """Remove any children added to the root node during an aborted
         evolution attempt, and reset the node name generator."""
         for child in self.children:
-            self.remove_child(child)
-            child.delete()
+            child.detach()
+            del child
         TreeNode._name_generator = itertools.count(start=self.name + 1)
 
     def _generate_event(
         self,
-        Δt: float,
-        birth_rate: responses.Response,
-        death_rate: responses.Response,
-        mutation_rate: responses.Response,
+        Δt_max: float,
+        event_rates: dict[str, poisson.Response],
         mutator: mutators.Mutator,
         birth_mutations: bool,
         rng: np.random.Generator,
@@ -210,52 +210,50 @@ class TreeNode(ete3.Tree):
         r"""Simulate a single event, adding a new child TreeNode to self, and
         returning it.
 
-        The Δt parameter is a boundary time: events that reach this time
+        The event_rates parameter is a dictionary of responses.Response objects, keyed by
+        event type.
+
+        The Δt_max parameter is a boundary time: events that reach this time
         are survivors.
         """
-        λ = birth_rate(self)
-        μ = death_rate(self)
-        γ = mutation_rate(self)
-
-        Λ = λ + μ + γ
-
-        τ = min(rng.exponential(1 / Λ), Δt)
+        # initialize the next event to be a survivor at the boundary time,
+        # then sample other possible events, and choose the one that occurs first
+        event = self._SURVIVAL_EVENT
+        Δt = Δt_max
+        for possible_event in event_rates:
+            new_waiting_time = event_rates[possible_event].waiting_time_rv(self, rng)
+            if new_waiting_time < Δt:
+                Δt = new_waiting_time
+                event = possible_event
 
         child = TreeNode(
-            t=self.t + τ,
+            t=self.t + Δt,
             x=self.x,
             sequence=self.sequence,
-            dist=τ,
+            dist=Δt,
             name=next(self._name_generator),
         )
-        if τ == Δt:
-            child.event = self._SURVIVAL_EVENT
+        child.event = event
+        if child.event == self._BIRTH_EVENT:
+            if birth_mutations:
+                for _ in range(self._OFFSPRING_NUMBER):
+                    grandchild = TreeNode(
+                        t=child.t,
+                        x=child.x,
+                        dist=0,
+                        name=next(self._name_generator),
+                    )
+                    grandchild.event = self._MUTATION_EVENT
+                    mutator.mutate(grandchild, seed=rng)
+                    child.add_child(grandchild)
+        elif child.event == self._DEATH_EVENT:
+            pass
+        elif child.event == self._MUTATION_EVENT:
+            mutator.mutate(child, seed=rng)
+        elif child.event == self._SURVIVAL_EVENT:
+            pass
         else:
-            possible_events = [
-                self._BIRTH_EVENT,
-                self._DEATH_EVENT,
-                self._MUTATION_EVENT,
-            ]
-            event_probabilities = np.array([λ, μ, γ]) / Λ
-            child.event = rng.choice(possible_events, p=event_probabilities)
-            if child.event == self._BIRTH_EVENT:
-                if birth_mutations:
-                    for _ in range(self._OFFSPRING_NUMBER):
-                        grandchild = TreeNode(
-                            t=child.t,
-                            x=child.x,
-                            dist=0,
-                            name=next(self._name_generator),
-                        )
-                        grandchild.event = self._MUTATION_EVENT
-                        mutator.mutate(grandchild, seed=rng)
-                        child.add_child(grandchild)
-            elif child.event == self._DEATH_EVENT:
-                pass
-            elif child.event == self._MUTATION_EVENT:
-                mutator.mutate(child, seed=rng)
-            else:
-                raise ValueError(f"unknown event {child.event}")
+            raise ValueError(f"unknown event {child.event}")
         return self.add_child(child)
 
     def sample_survivors(
@@ -273,7 +271,7 @@ class TreeNode(ete3.Tree):
             seed: A seed to initialize the random number generation.
                   If ``None``, then fresh, unpredictable entropy will be pulled from the OS.
                   If an ``int``, then it will be used to derive the initial state.
-                  If a :py:class:`numpy.random.Generator`, then that will be used directly.
+                  If a :py:class:`numpy.random.Generator`, then it will be used directly.
         """
         if self._sampled:
             raise ValueError(f"tree has already been sampled below node {self.name}")

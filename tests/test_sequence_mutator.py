@@ -1,6 +1,6 @@
 import pytest
 
-from gcdyn import bdms, gpmap, mutators, responses, utils
+from gcdyn import bdms, gpmap, mutators, poisson, utils
 
 # Note that some fixtures have been moved to conftest.py so they are more widely
 # available.
@@ -25,7 +25,7 @@ def test_simple_fivemer_contexts():
 def test_sequence_context_mutation_response(mk_rs5nf_mutability):
     node = bdms.TreeNode()
     node.sequence = "ACTGCA"
-    seq_resp = responses.SequenceContextMutationResponse(
+    seq_resp = poisson.SequenceContextMutationResponse(
         mk_rs5nf_mutability, utils.simple_fivemer_contexts
     )
     correct_mutabilty = 0.000251042867724124 + 0.00233425857869025

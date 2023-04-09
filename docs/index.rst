@@ -1,7 +1,7 @@
 gcdyn documentation
-####################
+###################
 
-``gcdyn`` is a package for simulation inference of germinal center affinity-fitness response.
+``gcdyn`` is a package for simulation and inference of germinal center affinity-fitness response.
 
 .. toctree::
   :maxdepth: 1
@@ -9,6 +9,13 @@ gcdyn documentation
 
   install
   cite
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Tutorials
+
+   notebooks/bdms_replay
+   notebooks/bdms_inhomogeneous
 
 .. toctree::
    :maxdepth: 2
