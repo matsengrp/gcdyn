@@ -111,6 +111,7 @@ class Response(ABC):
     def waiting_time_rv(
         self,
         node: bdms.TreeNode,
+        rate_multiplier: float = 1.0,
         seed: Optional[Union[int, onp.random.Generator]] = None,
     ) -> float:
         r"""Sample the waiting time :math:`\Delta t` until the first event,
@@ -118,13 +119,16 @@ class Response(ABC):
 
         Args:
             node: The node at which the rate process starts.
+            rate_multiplier: A multiplicative factor to apply to the rate process when
+                             sampling the waiting time. This can be used to impose a
+                             population-size constraint in simulations.
             seed: A seed to initialize the random number generation.
                   If ``None``, then fresh, unpredictable entropy will be pulled from the OS.
                   If an ``int``, then it will be used to derive the initial state.
                   If a :py:class:`numpy.random.Generator`, then it will be used directly.
         """
         rng = onp.random.default_rng(seed)
-        return self.Λ_inv(node, rng.exponential())
+        return self.Λ_inv(node, rng.exponential(scale=1 / rate_multiplier))
 
     def waiting_time_logsf(self, node: bdms.TreeNode, Δt: float) -> float:
         r"""Evaluate the logarithm of the survival function of the waiting time

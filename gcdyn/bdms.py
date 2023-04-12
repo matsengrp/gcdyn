@@ -36,7 +36,6 @@ import matplotlib.pyplot as plt
 from typing import Any, Optional, Union
 
 import itertools
-import bisect
 
 
 class TreeNode(ete3.Tree):
@@ -102,33 +101,35 @@ class TreeNode(ete3.Tree):
     def evolve(
         self,
         t: float,
-        birth_rate: poisson.Response = poisson.ConstantResponse(1),
-        death_rate: poisson.Response = poisson.ConstantResponse(0),
-        mutation_rate: poisson.Response = poisson.ConstantResponse(1),
+        birth_response: poisson.Response = poisson.ConstantResponse(1),
+        death_response: poisson.Response = poisson.ConstantResponse(0),
+        mutation_response: poisson.Response = poisson.ConstantResponse(1),
         mutator: mutators.Mutator = mutators.GaussianMutator(shift=0, scale=1),
         birth_mutations: bool = False,
         min_survivors: int = 1,
-        max_leaves: int = 1000,
+        max_population: int = 1000,
         seed: Optional[Union[int, np.random.Generator]] = None,
+        verbose: bool = False,
     ) -> None:
         r"""Evolve for time :math:`\Delta t`.
 
         Args:
-            t: Evolve for this time
-            birth_rate: Birth rate response function.
-            death_rate: Death rate response function.
-            mutation_rate: Mutation rate response function.
+            t: Evolve for a duration of :math:`t` time units.
+            birth_response: Birth rate response function.
+            death_response: Death rate response function.
+            mutation_response: Mutation rate response function.
             mutator: Generator of mutation effects at mutation events
                      (and on offspring of birth events if ``birth_mutations=True``).
             birth_mutations: Flag to indicate whether mutations should occur at birth.
             min_survivors: Minimum number of survivors. If the simulation finishes with fewer than this number of
                            survivors, then a :py:class:`TreeError` is raised.
-            max_leaves: Maximum number of active leaves, to truncate exploding processes. If exceeded, then a
+            max_population: Maximum population size, to truncate exploding processes. If exceeded, then a
                         :py:class:`TreeError` is raised.
             seed: A seed to initialize the random number generation.
                   If ``None``, then fresh, unpredictable entropy will be pulled from the OS.
                   If an ``int``, then it will be used to derive the initial state.
                   If a :py:class:`numpy.random.Generator`, then it will be used directly.
+            verbose: Flag to indicate whether to print progress information.
         """
         if not self.is_root():
             raise TreeError("Cannot evolve a non-root node")
@@ -137,59 +138,102 @@ class TreeNode(ete3.Tree):
                 f"tree has already evolved at node {self.name} with {len(self.children)} descendant lineages"
             )
         rng = np.random.default_rng(seed)
-
-        unfinished_nodes = [self]
-        # NOTE: this key management is needed because the bisect.insort function does not have a
-        #       key argument in python 3.9 (it gains one in 3.10)
-        time_keys = [self.t]
-
+        # initialize a single node to start evolving from the root
+        start_node = TreeNode(
+            t=self.t,
+            x=self.x,
+            sequence=self.sequence,
+            dist=0,
+            name=next(self._name_generator),
+        )
+        self.add_child(start_node)
+        n_active_nodes = 1
+        current_time = self.t
+        end_time = self.t + t
         event_rates = {
-            self._BIRTH_EVENT: birth_rate,
-            self._DEATH_EVENT: death_rate,
-            self._MUTATION_EVENT: mutation_rate,
+            self._BIRTH_EVENT: birth_response,
+            self._DEATH_EVENT: death_response,
+            self._MUTATION_EVENT: mutation_response,
         }
-
-        while unfinished_nodes:
-            new_event_node = unfinished_nodes[0]._generate_event(
-                t - unfinished_nodes[0].t,
-                event_rates,
-                mutator,
-                birth_mutations,
-                rng,
-            )
-            # We pop the corresponding element of unfinished_nodes after we're finished operating on it with
-            # _generate_event. The special case is that birth nodes must be operated on twice before they
-            # should be popped, if birth_mutations is False. We then insert newly created nodes that need to
-            # be operated on. If birth_mutations is True, we get a cherry returned from _generate_event,
-            # and need to insert both children.
-            if (
-                unfinished_nodes[0].event != self._BIRTH_EVENT
-                or len(unfinished_nodes[0].children) == self._OFFSPRING_NUMBER
-            ):
-                unfinished_nodes.pop(0)
-                time_keys.pop(0)
-            if new_event_node.event not in (
-                self._DEATH_EVENT,
-                self._SURVIVAL_EVENT,
-            ):
-                if new_event_node.event == self._BIRTH_EVENT and birth_mutations:
-                    assert len(new_event_node.children) == self._OFFSPRING_NUMBER
-                    nodes_to_insert = new_event_node.children
-                else:
-                    nodes_to_insert = [new_event_node]
-                for node_to_insert in nodes_to_insert:
-                    idx = bisect.bisect(time_keys, node_to_insert.t)
-                    time_keys.insert(idx, node_to_insert.t)
-                    unfinished_nodes.insert(idx, node_to_insert)
-            if len(unfinished_nodes) > max_leaves:
-                self._aborted_evolve_cleanup()
-                raise TreeError(
-                    f"maximum number of leaves {max_leaves} exceeded at time {unfinished_nodes[0].t}"
+        def is_active_node(node):
+            return node.is_leaf() and node.event is None
+        while n_active_nodes:
+            rate_multiplier = 1 - n_active_nodes / max_population
+            waiting_time, event, event_node_idx, event_node = min(
+                (
+                    event_rates[event].waiting_time_rv(
+                        node, rate_multiplier=rate_multiplier, seed=rng
+                    ),
+                    event,
+                    node_idx,
+                    node,
                 )
-
-        if sum(leaf.event == self._SURVIVAL_EVENT for leaf in self) < min_survivors:
+                for node_idx, node in enumerate(self.iter_leaves(is_leaf_fn=is_active_node))
+                for event in event_rates
+            )
+            Δt = min(waiting_time, end_time - current_time)
+            current_time += Δt
+            if verbose:
+                print(f"t={current_time:.2f}, n={n_active_nodes}")
+            assert current_time <= end_time
+            for node in self.iter_leaves(is_leaf_fn=is_active_node):
+                node.dist += Δt
+                node.t = current_time
+                assert np.isclose(node.dist, node.t - node.up.t)
+            if current_time < end_time:
+                event_node.event = event
+                if event_node.event == self._BIRTH_EVENT:
+                    for _ in range(self._OFFSPRING_NUMBER):
+                        child = TreeNode(
+                            t=event_node.t,
+                            x=event_node.x,
+                            sequence=event_node.sequence,
+                            dist=0,
+                            name=next(self._name_generator),
+                        )
+                        if birth_mutations:
+                            child.event = self._MUTATION_EVENT
+                            mutator.mutate(child, seed=rng)
+                            grandchild = TreeNode(
+                                t=child.t,
+                                x=child.x,
+                                sequence=child.sequence,
+                                dist=0,
+                                name=next(self._name_generator),
+                            )
+                            child.add_child(grandchild)
+                        event_node.add_child(child)
+                        n_active_nodes += 1
+                elif event_node.event == self._DEATH_EVENT:
+                    n_active_nodes -= 1
+                elif event_node.event == self._MUTATION_EVENT:
+                    mutator.mutate(event_node, seed=rng)
+                    child = TreeNode(
+                        t=event_node.t,
+                        x=event_node.x,
+                        sequence=event_node.sequence,
+                        dist=0,
+                        name=next(self._name_generator),
+                    )
+                    event_node.add_child(child)
+                else:
+                    raise ValueError(f"invalid event {event_node.event}")
+                if n_active_nodes > max_population:
+                    self._aborted_evolve_cleanup()
+                    raise TreeError(
+                        f"{max_population=} exceeded at time={current_time}"
+                    )
+            else:
+                for node in self.iter_leaves(is_leaf_fn=is_active_node):
+                    node.event = self._SURVIVAL_EVENT
+                    assert node.t == end_time
+                break
+        n_survivors = sum(leaf.event == self._SURVIVAL_EVENT for leaf in self)
+        if n_survivors < min_survivors:
             self._aborted_evolve_cleanup()
-            raise TreeError(f"minimum number of survivors {min_survivors} not attained")
+            raise TreeError(
+                f"number of survivors {n_survivors} is less than {min_survivors=}"
+            )
 
     def _aborted_evolve_cleanup(self) -> None:
         """Remove any children added to the root node during an aborted
@@ -198,63 +242,6 @@ class TreeNode(ete3.Tree):
             child.detach()
             del child
         TreeNode._name_generator = itertools.count(start=self.name + 1)
-
-    def _generate_event(
-        self,
-        Δt_max: float,
-        event_rates: dict[str, poisson.Response],
-        mutator: mutators.Mutator,
-        birth_mutations: bool,
-        rng: np.random.Generator,
-    ) -> "TreeNode":
-        r"""Simulate a single event, adding a new child TreeNode to self, and
-        returning it.
-
-        The event_rates parameter is a dictionary of responses.Response objects, keyed by
-        event type.
-
-        The Δt_max parameter is a boundary time: events that reach this time
-        are survivors.
-        """
-        # initialize the next event to be a survivor at the boundary time,
-        # then sample other possible events, and choose the one that occurs first
-        event = self._SURVIVAL_EVENT
-        Δt = Δt_max
-        for possible_event in event_rates:
-            new_waiting_time = event_rates[possible_event].waiting_time_rv(self, rng)
-            if new_waiting_time < Δt:
-                Δt = new_waiting_time
-                event = possible_event
-
-        child = TreeNode(
-            t=self.t + Δt,
-            x=self.x,
-            sequence=self.sequence,
-            dist=Δt,
-            name=next(self._name_generator),
-        )
-        child.event = event
-        if child.event == self._BIRTH_EVENT:
-            if birth_mutations:
-                for _ in range(self._OFFSPRING_NUMBER):
-                    grandchild = TreeNode(
-                        t=child.t,
-                        x=child.x,
-                        dist=0,
-                        name=next(self._name_generator),
-                    )
-                    grandchild.event = self._MUTATION_EVENT
-                    mutator.mutate(grandchild, seed=rng)
-                    child.add_child(grandchild)
-        elif child.event == self._DEATH_EVENT:
-            pass
-        elif child.event == self._MUTATION_EVENT:
-            mutator.mutate(child, seed=rng)
-        elif child.event == self._SURVIVAL_EVENT:
-            pass
-        else:
-            raise ValueError(f"unknown event {child.event}")
-        return self.add_child(child)
 
     def sample_survivors(
         self,
