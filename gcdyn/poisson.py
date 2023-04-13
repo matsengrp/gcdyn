@@ -127,6 +127,8 @@ class Response(ABC):
                   If an ``int``, then it will be used to derive the initial state.
                   If a :py:class:`numpy.random.Generator`, then it will be used directly.
         """
+        if rate_multiplier == 0.0:
+            return float("inf")
         rng = onp.random.default_rng(seed)
         return self.Λ_inv(node, rng.exponential(scale=1 / rate_multiplier))
 

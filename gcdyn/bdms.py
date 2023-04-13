@@ -33,7 +33,7 @@ from gcdyn import mutators, poisson
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, Literal
 
 import itertools
 
@@ -107,7 +107,9 @@ class TreeNode(ete3.Tree):
         mutator: mutators.Mutator = mutators.GaussianMutator(shift=0, scale=1),
         birth_mutations: bool = False,
         min_survivors: int = 1,
-        max_population: int = 1000,
+        capacity: int = 1000,
+        capacity_method: Optional[Literal["birth", "death"]] = None,
+        init_population: int = 1,
         seed: Optional[Union[int, np.random.Generator]] = None,
         verbose: bool = False,
     ) -> None:
@@ -123,8 +125,14 @@ class TreeNode(ete3.Tree):
             birth_mutations: Flag to indicate whether mutations should occur at birth.
             min_survivors: Minimum number of survivors. If the simulation finishes with fewer than this number of
                            survivors, then a :py:class:`TreeError` is raised.
-            max_population: Maximum population size, to truncate exploding processes. If exceeded, then a
-                        :py:class:`TreeError` is raised.
+            capacity: Population carrying capacity.
+            capacity_method: Method to enforce population carrying capacity. If ``None``, then a
+                             :py:class:`TreeError` is raised if the population exceeds the carrying capacity.
+                             If ``"birth"``, then the birth rate is logistically modulated such that the
+                             process is critical when the population is at carrying capacity.
+                             If ``"death"``, then the death rate is logistically modulated such that the
+                             process is critical when the population is at carrying capacity.
+            init_population: Initial population size.
             seed: A seed to initialize the random number generation.
                   If ``None``, then fresh, unpredictable entropy will be pulled from the OS.
                   If an ``int``, then it will be used to derive the initial state.
@@ -137,17 +145,12 @@ class TreeNode(ete3.Tree):
             raise TreeError(
                 f"tree has already evolved at node {self.name} with {len(self.children)} descendant lineages"
             )
+
         rng = np.random.default_rng(seed)
-        # initialize a single node to start evolving from the root
-        start_node = TreeNode(
-            t=self.t,
-            x=self.x,
-            sequence=self.sequence,
-            dist=0,
-            name=next(self._name_generator),
-        )
-        self.add_child(start_node)
-        n_active_nodes = 1
+
+        # function to print progress if verbose
+        print_progress = print if verbose else lambda *args, **kwargs: None
+
         current_time = self.t
         end_time = self.t + t
         event_rates = {
@@ -155,33 +158,74 @@ class TreeNode(ete3.Tree):
             self._DEATH_EVENT: death_response,
             self._MUTATION_EVENT: mutation_response,
         }
-        def is_active_node(node):
-            return node.is_leaf() and node.event is None
+
+        # initialize population
+        active_nodes = {}
+        n_active_nodes = 0
+        total_birth_rate = 0.0
+        total_death_rate = 0.0
+        for _ in range(init_population):
+            start_node = TreeNode(
+                t=self.t,
+                x=self.x,
+                sequence=self.sequence,
+                dist=0,
+                name=next(self._name_generator),
+            )
+            self.add_child(start_node)
+            active_nodes[start_node.name] = start_node
+            n_active_nodes += 1
+            total_birth_rate += birth_response(start_node)
+            total_death_rate += death_response(start_node)
+
+        # initialize rate multipliers, which are used to logistically modulate
+        # rates in accordance with the carrying capacity
+        rate_multipliers = {
+            self._BIRTH_EVENT: 1.0,
+            self._DEATH_EVENT: 1.0,
+            self._MUTATION_EVENT: 1.0,
+        }
         while n_active_nodes:
-            rate_multiplier = 1 - n_active_nodes / max_population
-            waiting_time, event, event_node_idx, event_node = min(
+            if capacity_method == "birth":
+                rate_multipliers[self._BIRTH_EVENT] = (
+                    total_death_rate / total_birth_rate
+                ) ** (n_active_nodes / capacity)
+            elif capacity_method == "death":
+                rate_multipliers[self._DEATH_EVENT] = (
+                    total_birth_rate / total_death_rate
+                ) ** (n_active_nodes / capacity)
+            elif capacity_method is None:
+                if n_active_nodes > capacity:
+                    self._aborted_evolve_cleanup()
+                    print_progress()  # clear progress line
+                    raise TreeError(f"{capacity=} exceeded at time={current_time}")
+            else:
+                raise ValueError(f"{capacity_method=} not recognized")
+            waiting_time, event, event_node_name = min(
                 (
                     event_rates[event].waiting_time_rv(
-                        node, rate_multiplier=rate_multiplier, seed=rng
+                        node, rate_multiplier=rate_multipliers[event], seed=rng
                     ),
                     event,
-                    node_idx,
-                    node,
+                    node.name,
                 )
-                for node_idx, node in enumerate(self.iter_leaves(is_leaf_fn=is_active_node))
+                for node in active_nodes.values()
                 for event in event_rates
             )
             Δt = min(waiting_time, end_time - current_time)
             current_time += Δt
-            if verbose:
-                print(f"t={current_time:.2f}, n={n_active_nodes}")
             assert current_time <= end_time
-            for node in self.iter_leaves(is_leaf_fn=is_active_node):
+            for node in active_nodes.values():
                 node.dist += Δt
                 node.t = current_time
                 assert np.isclose(node.dist, node.t - node.up.t)
             if current_time < end_time:
+                event_node = active_nodes[event_node_name]
                 event_node.event = event
+                del active_nodes[event_node.name]
+                n_active_nodes -= 1
+                total_birth_rate -= birth_response(event_node)
+                total_death_rate -= death_response(event_node)
                 if event_node.event == self._BIRTH_EVENT:
                     for _ in range(self._OFFSPRING_NUMBER):
                         child = TreeNode(
@@ -202,10 +246,18 @@ class TreeNode(ete3.Tree):
                                 name=next(self._name_generator),
                             )
                             child.add_child(grandchild)
+                            active_nodes[grandchild.name] = grandchild
+                            n_active_nodes += 1
+                            total_birth_rate += birth_response(grandchild)
+                            total_death_rate += death_response(grandchild)
+                        else:
+                            active_nodes[child.name] = child
+                            n_active_nodes += 1
+                            total_birth_rate += birth_response(child)
+                            total_death_rate += death_response(child)
                         event_node.add_child(child)
-                        n_active_nodes += 1
                 elif event_node.event == self._DEATH_EVENT:
-                    n_active_nodes -= 1
+                    pass
                 elif event_node.event == self._MUTATION_EVENT:
                     mutator.mutate(event_node, seed=rng)
                     child = TreeNode(
@@ -216,18 +268,21 @@ class TreeNode(ete3.Tree):
                         name=next(self._name_generator),
                     )
                     event_node.add_child(child)
+                    active_nodes[child.name] = child
+                    n_active_nodes += 1
+                    total_birth_rate += birth_response(child)
+                    total_death_rate += death_response(child)
                 else:
                     raise ValueError(f"invalid event {event_node.event}")
-                if n_active_nodes > max_population:
-                    self._aborted_evolve_cleanup()
-                    raise TreeError(
-                        f"{max_population=} exceeded at time={current_time}"
-                    )
+                print_progress(f"t={current_time:.3f}, n={n_active_nodes}", end="   \r")
             else:
-                for node in self.iter_leaves(is_leaf_fn=is_active_node):
+                for node in active_nodes.values():
                     node.event = self._SURVIVAL_EVENT
+                    n_active_nodes -= 1
                     assert node.t == end_time
-                break
+                assert n_active_nodes == 0
+                active_nodes.clear()
+        print_progress()  # clear progress line
         n_survivors = sum(leaf.event == self._SURVIVAL_EVENT for leaf in self)
         if n_survivors < min_survivors:
             self._aborted_evolve_cleanup()
@@ -329,7 +384,7 @@ class TreeNode(ete3.Tree):
         for node in self.iter_leaves(is_leaf_fn=is_leaf_fn):
             parent = node.up
             parent.remove_child(node)
-            assert parent.event == self._BIRTH_EVENT
+            assert parent.event == self._BIRTH_EVENT or parent.is_root()
             parent.delete(prevent_nondicotomic=False, preserve_branch_length=True)
         for node in self.traverse(strategy="postorder"):
             if node.event == self._MUTATION_EVENT:
