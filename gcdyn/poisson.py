@@ -11,7 +11,6 @@ from __future__ import annotations
 from typing import Any, TypeVar, Optional, Union
 from typing import TYPE_CHECKING
 from abc import ABC, abstractmethod
-from collections.abc import Callable
 from jax.tree_util import register_pytree_node
 import jax.numpy as jnp
 import numpy as onp
@@ -404,34 +403,16 @@ class SoftReluResponse(PhenotypeResponse):
         self.yshift = d["yshift"]
 
 
-class SequenceResponse(HomogeneousResponse):
-    r"""Abstract base class for response function mapping from a
-    :py:class:`bdms.TreeNode` object's sequence attribute to a homogenous
-    Poisson process.
-    """
-
-    @abstractmethod
-    def λ_sequence(self, sequence: str) -> float:
-        r"""Evaluate the Poisson intensity :math:`\lambda_s` for sequence
-        :math:`s`.
-
-        Args:
-            sequence: DNA sequence.
-        """
-
-    def λ_homogeneous(self, node: bdms.TreeNode) -> float:
-        return self.λ_sequence(node.sequence)
-
-
-class SequenceContextMutationResponse(SequenceResponse):
+class SequenceContextMutationResponse(HomogeneousResponse):
     r"""A Response that accepts a sequence and outputs an aggregate mutation
     rate.
 
-    Importantly, the mutability needs to be in units of mutations per unit time.
+    The mutability needs to be in units of mutations per unit time.
+
+    A ``sequence_context`` node feature is created when nodes are first operated on.
 
     Args:
         mutability: a mapping from local context to mutation rate (mutations per site per unit time)
-        seq_to_contexts: a function that accepts a sequence and splits it into local contexts
         mutation_intensity: a scaling factor for the mutability
         grad: See :py:class:`Response`.
     """
@@ -439,13 +420,11 @@ class SequenceContextMutationResponse(SequenceResponse):
     def __init__(
         self,
         mutability: pd.Series,
-        seq_to_contexts: Callable[str, list[str]],
         mutation_intensity: float = 1.0,
         grad: bool = False,
     ):
         super().__init__(grad)
-        self.mutability = mutation_intensity * mutability
-        self.seq_to_contexts = seq_to_contexts
+        self.mutability = (mutation_intensity * mutability).to_dict()
 
     @property
     def _param_dict(self) -> dict:
@@ -455,9 +434,8 @@ class SequenceContextMutationResponse(SequenceResponse):
     def _param_dict(self, d):
         self.mutation_intensity = d["mutation_intensity"]
 
-    def λ_sequence(self, sequence: str) -> float:
-        contexts = self.seq_to_contexts(sequence)
-        return sum(self.mutability[context] for context in contexts)
+    def λ_homogeneous(self, node: bdms.TreeNode) -> float:
+        return sum(self.mutability[context] for context in node.sequence_context)
 
 
 class PhenotypeTimeResponse(Response):
@@ -542,8 +520,8 @@ class ModulatedPhenotypeResponse(PhenotypeTimeResponse):
     def __init__(
         self,
         phenotype_response: PhenotypeResponse,
-        external_field: Callable[[float], float],
-        interaction: Callable[[float, float], float] = lambda x, f: x - f,
+        external_field: callable[[float], float],
+        interaction: callable[[float, float], float] = lambda x, f: x - f,
         tol: float = 1e-6,
         maxiter: int = 100,
         grad: bool = False,
@@ -584,7 +562,7 @@ class ModulatedRateResponse(PhenotypeTimeResponse):
     def __init__(
         self,
         phenotype_response: PhenotypeResponse,
-        modulation: Callable[[float, float, float], float],
+        modulation: callable[[float, float, float], float],
         tol: float = 1e-6,
         maxiter: int = 100,
         grad: bool = False,

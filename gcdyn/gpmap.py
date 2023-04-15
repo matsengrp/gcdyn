@@ -65,7 +65,8 @@ class AdditiveGPMap(GPMap):
             raise ValueError(
                 "mutation_effects.columns must be the 20 amino acids letters."
             )
-        self.mutation_effects = mutation_effects
+        self.mutation_effects = mutation_effects.to_numpy()
+        self.aa_indexer = {aa: i for i, aa in enumerate(mutation_effects.columns)}
         self.nonsense_phenotype = nonsense_phenotype
 
     def __call__(self, sequence: str) -> float:
@@ -76,4 +77,7 @@ class AdditiveGPMap(GPMap):
             raise ValueError(
                 "amino acid sequence length does not match length of mutation_effects DataFrame."
             )
-        return sum(self.mutation_effects.loc[i, aa] for i, aa in enumerate(aa_sequence))
+        return sum(
+            self.mutation_effects[i, self.aa_indexer[aa]]
+            for i, aa in enumerate(aa_sequence)
+        )

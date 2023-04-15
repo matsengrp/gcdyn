@@ -34,8 +34,8 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from typing import Any, Optional, Union, Literal
-
 import itertools
+import copy
 
 
 class TreeNode(ete3.Tree):
@@ -44,7 +44,6 @@ class TreeNode(ete3.Tree):
 
     Args:
         t: Time of this node.
-        x: Phenotype of this node.
         kwargs: Keyword arguments passed to :py:class:`ete3.TreeNode` initializer.
     """
 
@@ -68,8 +67,6 @@ class TreeNode(ete3.Tree):
     def __init__(
         self,
         t: float = 0,
-        x: float = 0,
-        sequence: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
         if "dist" not in kwargs:
@@ -80,10 +77,6 @@ class TreeNode(ete3.Tree):
         super().__init__(**kwargs)
         self.t = t
         """Time of the node."""
-        self.x = x
-        """Phenotype of the node."""
-        self.sequence = sequence
-        """Sequence for the node."""
         self.event = None
         """Event at this node."""
         self.n_mutations = 0
@@ -145,11 +138,24 @@ class TreeNode(ete3.Tree):
             raise TreeError(
                 f"tree has already evolved at node {self.name} with {len(self.children)} descendant lineages"
             )
+        for attr in mutator.mutated_attrs:
+            if not hasattr(self, attr):
+                raise ValueError(
+                    f"node {self.name} does not have attribute {attr} specified in mutator"
+                )
 
         rng = np.random.default_rng(seed)
 
         # function to print progress if verbose
-        print_progress = print if verbose else lambda *args, **kwargs: None
+        if verbose:
+
+            def print_progress(current_time, n_active_nodes):
+                print(f"t={current_time:.3f}, n={n_active_nodes}", end="   \r")
+
+        else:
+
+            def print_progress(current_time, n_active_nodes):
+                pass
 
         current_time = self.t
         end_time = self.t + t
@@ -167,11 +173,11 @@ class TreeNode(ete3.Tree):
         for _ in range(init_population):
             start_node = TreeNode(
                 t=self.t,
-                x=self.x,
-                sequence=self.sequence,
                 dist=0,
                 name=next(self._name_generator),
             )
+            for attr in mutator.mutated_attrs:
+                setattr(start_node, attr, copy.copy(getattr(self, attr)))
             self.add_child(start_node)
             active_nodes[start_node.name] = start_node
             n_active_nodes += 1
@@ -197,7 +203,9 @@ class TreeNode(ete3.Tree):
             elif capacity_method is None:
                 if n_active_nodes > capacity:
                     self._aborted_evolve_cleanup()
-                    print_progress()  # clear progress line
+                    if verbose:
+                        # clear progress line
+                        print()
                     raise TreeError(f"{capacity=} exceeded at time={current_time}")
             else:
                 raise ValueError(f"{capacity_method=} not recognized")
@@ -230,21 +238,23 @@ class TreeNode(ete3.Tree):
                     for _ in range(self._OFFSPRING_NUMBER):
                         child = TreeNode(
                             t=event_node.t,
-                            x=event_node.x,
-                            sequence=event_node.sequence,
                             dist=0,
                             name=next(self._name_generator),
                         )
+                        for attr in mutator.mutated_attrs:
+                            setattr(child, attr, copy.copy(getattr(event_node, attr)))
                         if birth_mutations:
                             child.event = self._MUTATION_EVENT
                             mutator.mutate(child, seed=rng)
                             grandchild = TreeNode(
                                 t=child.t,
-                                x=child.x,
-                                sequence=child.sequence,
                                 dist=0,
                                 name=next(self._name_generator),
                             )
+                            for attr in mutator.mutated_attrs:
+                                setattr(
+                                    grandchild, attr, copy.copy(getattr(child, attr))
+                                )
                             child.add_child(grandchild)
                             active_nodes[grandchild.name] = grandchild
                             n_active_nodes += 1
@@ -262,11 +272,11 @@ class TreeNode(ete3.Tree):
                     mutator.mutate(event_node, seed=rng)
                     child = TreeNode(
                         t=event_node.t,
-                        x=event_node.x,
-                        sequence=event_node.sequence,
                         dist=0,
                         name=next(self._name_generator),
                     )
+                    for attr in mutator.mutated_attrs:
+                        setattr(child, attr, copy.copy(getattr(event_node, attr)))
                     event_node.add_child(child)
                     active_nodes[child.name] = child
                     n_active_nodes += 1
@@ -274,15 +284,18 @@ class TreeNode(ete3.Tree):
                     total_death_rate += death_response(child)
                 else:
                     raise ValueError(f"invalid event {event_node.event}")
-                print_progress(f"t={current_time:.3f}, n={n_active_nodes}", end="   \r")
+                print_progress(current_time, n_active_nodes)
             else:
+                print_progress(current_time, n_active_nodes)
                 for node in active_nodes.values():
                     node.event = self._SURVIVAL_EVENT
                     n_active_nodes -= 1
                     assert node.t == end_time
                 assert n_active_nodes == 0
                 active_nodes.clear()
-        print_progress()  # clear progress line
+        if verbose:
+            # clear progress line
+            print()
         n_survivors = sum(leaf.event == self._SURVIVAL_EVENT for leaf in self)
         if n_survivors < min_survivors:
             self._aborted_evolve_cleanup()
@@ -293,7 +306,7 @@ class TreeNode(ete3.Tree):
     def _aborted_evolve_cleanup(self) -> None:
         """Remove any children added to the root node during an aborted
         evolution attempt, and reset the node name generator."""
-        for child in self.children:
+        for child in self.children.copy():
             child.detach()
             del child
         TreeNode._name_generator = itertools.count(start=self.name + 1)
@@ -394,7 +407,9 @@ class TreeNode(ete3.Tree):
         for node in self.traverse():
             node._pruned = True
 
-    def render(self, *args: Any, cbar_file: Optional[str] = None, **kwargs: Any) -> Any:
+    def render(
+        self, color_by=None, *args: Any, cbar_file: Optional[str] = None, **kwargs: Any
+    ) -> Any:
         r"""A thin wrapper around :py:func:`ete3.TreeNode.render` that adds some
         custom decoration and a color bar. As with the base class method, pass
         ``"%%inline"`` for the first argument to render inline in a notebook.
@@ -413,6 +428,7 @@ class TreeNode(ete3.Tree):
         branches are annotated above with branch length (in black text) and below with number of mutations (in green text).
 
         Args:
+            color_by: If not ``None``, color tree by this attribute (must be a scalar).
             args: Arguments to pass to :py:func:`ete3.TreeNode.render`.
             cbar_file: If not ``None``, save color bar to this file.
             kwargs: Keyword arguments to pass to :py:func:`ete3.TreeNode.render`.
@@ -423,13 +439,17 @@ class TreeNode(ete3.Tree):
             kwargs["tree_style"].show_scale = False
         cmap = "coolwarm_r"
         cmap = mpl.cm.get_cmap(cmap)
-        halfrange = max(abs(node.x - self.x) for node in self.traverse())
+        halfrange = max(
+            abs(getattr(node, color_by) - getattr(self, color_by))
+            for node in self.traverse()
+        )
         norm = mpl.colors.CenteredNorm(
-            vcenter=self.x,
+            vcenter=getattr(self, color_by),
             halfrange=halfrange if halfrange > 0 else 1,
         )
         colormap = {
-            node.name: mpl.colors.to_hex(cmap(norm(node.x))) for node in self.traverse()
+            node.name: mpl.colors.to_hex(cmap(norm(getattr(node, color_by))))
+            for node in self.traverse()
         }
         event_cache = self.get_cached_content(store_attr="event")
         for node in self.traverse():

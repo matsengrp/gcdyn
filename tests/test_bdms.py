@@ -6,6 +6,7 @@ import unittest
 class TestTreeNode(unittest.TestCase):
     def setUp(self):
         self.tree = bdms.TreeNode()
+        self.tree.x = 0.0
         for seed in range(1000):
             try:
                 self.tree.evolve(
