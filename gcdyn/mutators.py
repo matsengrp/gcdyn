@@ -52,6 +52,7 @@ class Mutator(ABC):
         Args:
             node: Mutant node.
         """
+
     @property
     @abstractmethod
     def mutated_attrs(self) -> Tuple[str]:
@@ -94,7 +95,6 @@ class AttrMutator(Mutator):
             attr2: Final attribute value.
             log: If ``True``, return the log probability density.
         """
-        pass
 
 
 class GaussianMutator(AttrMutator):

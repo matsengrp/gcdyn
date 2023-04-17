@@ -17,7 +17,6 @@ test:
 
 format:
 	black gcdyn tests
-	docformatter --in-place gcdyn/*.py
 
 lint:
 	# stop the build if there are Python syntax errors or undefined names
