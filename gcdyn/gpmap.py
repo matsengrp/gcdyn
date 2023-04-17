@@ -1,5 +1,4 @@
-r"""
-Genotype-phenotype map :py:class:`GPMap`
+r"""Genotype-phenotype map :py:class:`GPMap`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Abstract base class for defining generic genotype-phenotype (GP) maps.
@@ -26,7 +25,6 @@ class GPMap(ABC):
         Args:
             sequence: A DNA sequence.
         """
-
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in vars(self).items() if not key.startswith('_'))})"
 

@@ -1,10 +1,9 @@
-r"""
-Poisson process responses
-^^^^^^^^^^^^^^^^^^^^^^^^^
+r"""Poisson process responses ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Abstract base classes for defining generic Poisson processes (e.g. :math:`\lambda(x, t)`, :math:`\mu(x, t)`, :math:`\gamma(x, t)`),
-with arbitrary :py:class:`bdms.TreeNode` attribute dependence.
-Several concrete child classes are included.
+Abstract base classes for defining generic Poisson processes (e.g.
+:math:`\lambda(x, t)`, :math:`\mu(x, t)`, :math:`\gamma(x, t)`), with
+arbitrary :py:class:`bdms.TreeNode` attribute dependence. Several
+concrete child classes are included.
 """
 
 from __future__ import annotations
@@ -78,7 +77,6 @@ class Response(ABC):
                 (``0.0`` corresponds to the node's time). This only has an effect if the
                 response function is time-inhomogeneous.
         """
-
     @abstractmethod
     def Λ(self, node: bdms.TreeNode, Δt: float) -> float:
         r"""Evaluate the Poisson intensity measure of the time interval
@@ -94,7 +92,6 @@ class Response(ABC):
             node: The node whose state is accessed to evaluate the response function.
             Δt: Time interval duration (Lebesgue measure).
         """
-
     @abstractmethod
     def Λ_inv(self, node: bdms.TreeNode, τ: float) -> float:
         r"""Evaluate the inverse function wrt :math:`\Delta t` of :py:meth:`Response.Λ`,
@@ -106,7 +103,6 @@ class Response(ABC):
             node: The node whose state is accessed to evaluate the response function.
             τ: Poisson intensity measure of a time interval.
         """
-
     def waiting_time_rv(
         self,
         node: bdms.TreeNode,
@@ -155,7 +151,6 @@ def _register_with_pytree(response_type: ResponseType) -> None:
     This allows parameterized `Response` objects of subclass
     `response_type` to be optimized with JAX.
     """
-
     def flatten(v):
         # When recreating this object, we need to be able to assign
         # correct values to each parameter, and also be able to set
@@ -193,7 +188,6 @@ class HomogeneousResponse(Response):
         Args:
             node: The node whose state is accessed to evaluate the response function.
         """
-
     def λ(self, node: bdms.TreeNode, Δt: float) -> float:
         return self.λ_homogeneous(node)
 
@@ -221,6 +215,7 @@ class PhenotypeResponse(HomogeneousResponse):
         Args:
             x: Phenotype value.
         """
+        pass
 
 
 class ConstantResponse(PhenotypeResponse):
@@ -473,7 +468,6 @@ class PhenotypeTimeResponse(Response):
             x: Phenotype.
             t: Time.
         """
-
     def λ(self, node: bdms.TreeNode, Δt: float) -> float:
         return self.λ_phenotype_time(node.x, node.t + Δt)
 
@@ -488,13 +482,15 @@ class PhenotypeTimeResponse(Response):
         for iter in range(self.maxiter):
             if self.λ(node, Δt) == 0:
                 return self._np.inf
-            Δt = max(Δt - (self.Λ(node, Δt) - τ) / self.λ(node, Δt), 0.0)
+            with self._np.errstate(over="ignore"):
+                Δt = max(Δt - (self.Λ(node, Δt) - τ) / self.λ(node, Δt), 0.0)
             if abs(self.Λ(node, Δt) - τ) < self.tol:
                 converged = True
                 break
         if not converged:
+            print(f"Δt={Δt}, Λ={self.Λ(node, Δt)}, τ={τ}, λ={self.λ(node, Δt)}")
             raise RuntimeError(
-                f"Newton-Raphson failed to converge after {self.maxiter} iterations with Δt={Δt} and error={abs(self.Λ(node, Δt) - τ)}"
+                f"Newton-Raphson failed to converge after {self.maxiter} iterations with Δt={Δt} and error={abs(self.Λ(node, Δt) - τ):.3f}"
             )
         return Δt
 

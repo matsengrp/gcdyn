@@ -1,10 +1,9 @@
-r"""
-Mutation effects generators
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+r"""Mutation effects generators ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Abstract base class for defining generic mutation effect generators (i.e. :math:`\mathcal{p}(x\mid x')`),
-with arbitrary :py:class:`ete3.TreeNode` attribute dependence.
-Some concrete child classes are included.
+Abstract base class for defining generic mutation effect generators
+(i.e. :math:`\mathcal{p}(x\mid x')`), with arbitrary
+:py:class:`ete3.TreeNode` attribute dependence. Some concrete child
+classes are included.
 """
 
 from __future__ import annotations
@@ -53,7 +52,6 @@ class Mutator(ABC):
         Args:
             node: Mutant node.
         """
-
     @property
     @abstractmethod
     def mutated_attrs(self) -> Tuple[str]:
@@ -96,6 +94,7 @@ class AttrMutator(Mutator):
             attr2: Final attribute value.
             log: If ``True``, return the log probability density.
         """
+        pass
 
 
 class GaussianMutator(AttrMutator):
