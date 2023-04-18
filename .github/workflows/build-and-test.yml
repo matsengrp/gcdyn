@@ -28,7 +28,7 @@ jobs:
 
       - name: Install
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           make install
 
       - name: Lint
