@@ -1,8 +1,3 @@
-Open source code repository
-===========================
-
-All code is freely available at `<https://github.com/matsengrp/gcdyn>`_
-
 Developer tools
 ===============
 
@@ -32,8 +27,3 @@ Build docs locally (you can then see the generated documentation in ``docs/_buil
   make docs
 
 Docs are automatically deployed to github pages via a workflow on push to the main branch.
-
-Todo list
-=========
-
-.. todolist::

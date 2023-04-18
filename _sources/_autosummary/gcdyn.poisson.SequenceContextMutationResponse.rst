@@ -22,7 +22,6 @@ gcdyn.poisson.SequenceContextMutationResponse
       ~SequenceContextMutationResponse.Λ_inv
       ~SequenceContextMutationResponse.λ
       ~SequenceContextMutationResponse.λ_homogeneous
-      ~SequenceContextMutationResponse.λ_sequence
    
    
 

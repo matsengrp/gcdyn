@@ -24,4 +24,10 @@ gcdyn.mutators.ContextMutator
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ContextMutator.mutated_attrs
+   
    

@@ -29,7 +29,6 @@
       PhenotypeTimeResponse
       Response
       SequenceContextMutationResponse
-      SequenceResponse
       SigmoidResponse
       SoftReluResponse
    

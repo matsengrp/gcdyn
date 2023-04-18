@@ -24,4 +24,10 @@ gcdyn.mutators.GaussianMutator
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GaussianMutator.mutated_attrs
+   
    

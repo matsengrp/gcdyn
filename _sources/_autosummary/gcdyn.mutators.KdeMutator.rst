@@ -24,4 +24,10 @@ gcdyn.mutators.KdeMutator
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~KdeMutator.mutated_attrs
+   
    

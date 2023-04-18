@@ -99,8 +99,6 @@ gcdyn.bdms.TreeNode
       ~TreeNode.support
       ~TreeNode.up
       ~TreeNode.t
-      ~TreeNode.x
-      ~TreeNode.sequence
       ~TreeNode.event
       ~TreeNode.n_mutations
    

@@ -24,4 +24,10 @@ gcdyn.mutators.SequenceMutator
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SequenceMutator.mutated_attrs
+   
    
