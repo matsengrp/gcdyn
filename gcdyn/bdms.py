@@ -32,7 +32,7 @@ from gcdyn import mutators, poisson
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from typing import Any, Optional, Union, Literal
+from typing import Any, Optional, Union, Literal, Iterator
 import itertools
 import copy
 
@@ -90,6 +90,68 @@ class TreeNode(ete3.Tree):
         """
         self._pruned = False
 
+    def _birth_outcome(
+        self, birth_mutations: bool, mutator: mutators.Mutator, rng: np.random.Generator
+    ) -> Iterator[TreeNode]:
+        r"""Generate the outcome of a birth event at this node.
+
+        Args:
+            birth_mutations: Flag to indicate whether mutations should occur at birth.
+            mutator: Generator of mutation effects if ``birth_mutations=True``.
+            rng: Random number generator.
+
+        Yields:
+            The child nodes, or mutated grandchild nodes if ``birth_mutations=True``.
+        """
+        assert self.event == self._BIRTH_EVENT
+        for _ in range(self._OFFSPRING_NUMBER):
+            child = TreeNode(
+                t=self.t,
+                dist=0,
+                name=next(self._name_generator),
+            )
+            for attr in mutator.mutated_attrs:
+                setattr(child, attr, copy.copy(getattr(self, attr)))
+            if birth_mutations:
+                child.event = self._MUTATION_EVENT
+                mutator.mutate(child, seed=rng)
+                grandchild = TreeNode(
+                    t=child.t,
+                    dist=0,
+                    name=next(self._name_generator),
+                )
+                for attr in mutator.mutated_attrs:
+                    setattr(grandchild, attr, copy.copy(getattr(child, attr)))
+                child.add_child(grandchild)
+                yield grandchild
+            else:
+                yield child
+            self.add_child(child)
+
+    def _mutation_outcome(
+        self, mutator: mutators.Mutator, rng: np.random.Generator
+    ) -> Iterator[TreeNode]:
+        r"""Generate the outcome of a mutation event at this node.
+
+        Args:
+            mutator: Generator of mutation effects.
+            rng: Random number generator.
+
+        Yields:
+            The mutated child node.
+        """
+        assert self.event == self._MUTATION_EVENT
+        mutator.mutate(self, seed=rng)
+        child = TreeNode(
+            t=self.t,
+            dist=0,
+            name=next(self._name_generator),
+        )
+        for attr in mutator.mutated_attrs:
+            setattr(child, attr, copy.copy(getattr(self, attr)))
+        self.add_child(child)
+        yield child
+
     def evolve(
         self,
         t: float,
@@ -100,7 +162,7 @@ class TreeNode(ete3.Tree):
         birth_mutations: bool = False,
         min_survivors: int = 1,
         capacity: int = 1000,
-        capacity_method: Optional[Literal["birth", "death"]] = None,
+        capacity_method: Optional[Literal["birth", "death", "hard"]] = None,
         init_population: int = 1,
         seed: Optional[Union[int, np.random.Generator]] = None,
         verbose: bool = False,
@@ -124,6 +186,8 @@ class TreeNode(ete3.Tree):
                              process is critical when the population is at carrying capacity.
                              If ``"death"``, then the death rate is logistically modulated such that the
                              process is critical when the population is at carrying capacity.
+                             If ``"hard"``, then a random individual is chosen to die whenever a birth event
+                             results in carrying capacity being exceeded.
             init_population: Initial population size.
             seed: A seed to initialize the random number generation.
                   If ``None``, then fresh, unpredictable entropy will be pulled from the OS.
@@ -137,6 +201,8 @@ class TreeNode(ete3.Tree):
             raise TreeError(
                 f"tree has already evolved at node {self.name} with {len(self.children)} descendant lineages"
             )
+        if init_population > capacity:
+            raise ValueError(f"{init_population=} must be less than {capacity=}")
         for attr in mutator.mutated_attrs:
             if not hasattr(self, attr):
                 raise ValueError(
@@ -145,7 +211,6 @@ class TreeNode(ete3.Tree):
 
         rng = np.random.default_rng(seed)
 
-        # function to print progress if verbose
         if verbose:
 
             def print_progress(current_time, n_active_nodes):
@@ -199,11 +264,18 @@ class TreeNode(ete3.Tree):
                 rate_multipliers[self._DEATH_EVENT] = (
                     total_birth_rate / total_death_rate
                 ) ** (n_active_nodes / capacity)
+            elif capacity_method == "hard":
+                if n_active_nodes > capacity:
+                    node_to_die = rng.choice(list(active_nodes.values()))
+                    node_to_die.event = self._DEATH_EVENT
+                    del active_nodes[node_to_die.name]
+                    n_active_nodes -= 1
+                    total_birth_rate -= birth_response(node_to_die)
+                    total_death_rate -= death_response(node_to_die)
             elif capacity_method is None:
                 if n_active_nodes > capacity:
                     self._aborted_evolve_cleanup()
                     if verbose:
-                        # clear progress line
                         print()
                     raise TreeError(f"{capacity=} exceeded at time={current_time}")
             else:
@@ -233,56 +305,19 @@ class TreeNode(ete3.Tree):
                 n_active_nodes -= 1
                 total_birth_rate -= birth_response(event_node)
                 total_death_rate -= death_response(event_node)
-                if event_node.event == self._BIRTH_EVENT:
-                    for _ in range(self._OFFSPRING_NUMBER):
-                        child = TreeNode(
-                            t=event_node.t,
-                            dist=0,
-                            name=next(self._name_generator),
-                        )
-                        for attr in mutator.mutated_attrs:
-                            setattr(child, attr, copy.copy(getattr(event_node, attr)))
-                        if birth_mutations:
-                            child.event = self._MUTATION_EVENT
-                            mutator.mutate(child, seed=rng)
-                            grandchild = TreeNode(
-                                t=child.t,
-                                dist=0,
-                                name=next(self._name_generator),
-                            )
-                            for attr in mutator.mutated_attrs:
-                                setattr(
-                                    grandchild, attr, copy.copy(getattr(child, attr))
-                                )
-                            child.add_child(grandchild)
-                            active_nodes[grandchild.name] = grandchild
-                            n_active_nodes += 1
-                            total_birth_rate += birth_response(grandchild)
-                            total_death_rate += death_response(grandchild)
-                        else:
-                            active_nodes[child.name] = child
-                            n_active_nodes += 1
-                            total_birth_rate += birth_response(child)
-                            total_death_rate += death_response(child)
-                        event_node.add_child(child)
-                elif event_node.event == self._DEATH_EVENT:
-                    pass
+                if event_node.event == self._DEATH_EVENT:
+                    new_nodes = ()
+                elif event_node.event == self._BIRTH_EVENT:
+                    new_nodes = event_node._birth_outcome(birth_mutations, mutator, rng)
                 elif event_node.event == self._MUTATION_EVENT:
-                    mutator.mutate(event_node, seed=rng)
-                    child = TreeNode(
-                        t=event_node.t,
-                        dist=0,
-                        name=next(self._name_generator),
-                    )
-                    for attr in mutator.mutated_attrs:
-                        setattr(child, attr, copy.copy(getattr(event_node, attr)))
-                    event_node.add_child(child)
-                    active_nodes[child.name] = child
-                    n_active_nodes += 1
-                    total_birth_rate += birth_response(child)
-                    total_death_rate += death_response(child)
+                    new_nodes = event_node._mutation_outcome(mutator, rng)
                 else:
                     raise ValueError(f"invalid event {event_node.event}")
+                for new_node in new_nodes:
+                    active_nodes[new_node.name] = new_node
+                    n_active_nodes += 1
+                    total_birth_rate += birth_response(new_node)
+                    total_death_rate += death_response(new_node)
                 print_progress(current_time, n_active_nodes)
             else:
                 print_progress(current_time, n_active_nodes)
@@ -293,7 +328,6 @@ class TreeNode(ete3.Tree):
                 assert n_active_nodes == 0
                 active_nodes.clear()
         if verbose:
-            # clear progress line
             print()
         n_survivors = sum(leaf.event == self._SURVIVAL_EVENT for leaf in self)
         if n_survivors < min_survivors:
