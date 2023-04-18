@@ -1,5 +1,6 @@
 Citing ``gcdyn``
 ################
 
-..todo::
+.. todo::
+
   put citation info here, someday

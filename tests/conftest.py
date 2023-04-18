@@ -17,7 +17,7 @@ def seq_list():
 
 @pytest.fixture
 def mk_rs5nf_mutability():
-    return replay.mutability
+    return replay.mutability()
 
 
 @pytest.fixture

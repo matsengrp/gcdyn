@@ -1,16 +1,15 @@
-r"""
-Mutation effects generators
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+r"""Mutation effects generators ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Abstract base class for defining generic mutation effect generators (i.e. :math:`\mathcal{p}(x\mid x')`),
-with arbitrary :py:class:`ete3.TreeNode` attribute dependence.
-Some concrete child classes are included.
+Abstract base class for defining generic mutation effect generators
+(i.e. :math:`\mathcal{p}(x\mid x')`), with arbitrary
+:py:class:`ete3.TreeNode` attribute dependence. Some concrete child
+classes are included.
 """
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Union
-from collections.abc import Callable, Iterable
+from typing import Any, Optional, Union, Tuple
+from collections.abc import Iterable
 import numpy as np
 import pandas as pd
 from scipy.stats import norm, gaussian_kde
@@ -54,6 +53,12 @@ class Mutator(ABC):
             node: Mutant node.
         """
 
+    @property
+    @abstractmethod
+    def mutated_attrs(self) -> Tuple[str]:
+        """Tuple of node attribute names that may be mutated by this
+        mutator."""
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in vars(self).items() if not key.startswith('_'))})"
 
@@ -66,9 +71,12 @@ class AttrMutator(Mutator):
         attr: Node attribute to mutate.
     """
 
-    @abstractmethod
     def __init__(self, attr: str = "x", *args: Any, **kwargs: Any) -> None:
         self.attr = attr
+
+    @property
+    def mutated_attrs(self) -> Tuple[str]:
+        return (self.attr,)
 
     def logprob(self, node: ete3.TreeNode) -> float:
         return self.prob(
@@ -208,18 +216,21 @@ class DiscreteMutator(AttrMutator):
         new_value = rng.choice(states, p=transition_probs)
         setattr(node, self.attr, new_value)
 
-    def prob(self, attr1, attr2, log: bool = False) -> float:
+    def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
         p = self.transition_matrix[self.state_space[attr1], self.state_space[attr2]]
         return np.log(p) if log else p
 
 
 class SequenceMutator(AttrMutator):
-    r"""Mutations on a DNA sequence."""
+    r"""Mutations on a DNA sequence.
+
+    Nodes must have a ``sequence`` attribute
+    """
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(attr="sequence")
 
-    def prob(self, attr1, attr2, log: bool = False) -> float:
+    def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
         raise NotImplementedError
 
 
@@ -247,25 +258,22 @@ class UniformMutator(SequenceMutator):
 
 class ContextMutator(SequenceMutator):
     """Class for hotspot-aware mutation model using mutability substitution
-    probabilities expressed in terms of context.
+    probabilities expressed in terms of context. Nodes must have a
+    ``sequence_context`` attribute.
 
     Args:
         mutability: Mutability values for each local nucleotide context.
         substitution: Table of nucleotide substitution bias (columns) for each local nucleotide context (index).
-        seq_to_contexts: A function that accepts a sequence and splits it into local contexts.
     """
 
     def __init__(
         self,
         mutability: pd.Series,
         substitution: pd.DataFrame,
-        seq_to_contexts: Callable[str, list[str]],
     ):
         super().__init__()
-
-        self.mutability = mutability
-        self.substitution = substitution
-        self.seq_to_contexts = seq_to_contexts
+        self.mutability = mutability.to_dict()
+        self.substitution = substitution.fillna(0.0).T.to_dict()
 
     def mutate(
         self,
@@ -280,17 +288,34 @@ class ContextMutator(SequenceMutator):
             node: node with sequence, consisting of characters ``ACGT``
             seed: See :py:class:`Mutator`.
         """
-
         rng = np.random.default_rng(seed)
-
-        contexts = self.seq_to_contexts(node.sequence)
-        mutabilities = np.array([self.mutability[context] for context in contexts])
-        i = rng.choice(len(mutabilities), p=mutabilities / sum(mutabilities))
+        mutabilities = np.asarray(
+            [self.mutability[context] for context in node.sequence_context]
+        )
+        i = rng.choice(len(mutabilities), p=mutabilities / mutabilities.sum())
+        context = node.sequence_context[i]
         sub_nt = rng.choice(
-            self.substitution.columns,
-            p=self.substitution.loc[contexts[i]].fillna(0),
+            list(self.substitution[context].keys()),
+            p=list(self.substitution[context].values()),
         )
         node.sequence = node.sequence[:i] + sub_nt + node.sequence[(i + 1) :]
+        # update the modified sequence contexts (assumes they have fixed size)
+        context_size = len(node.sequence_context[i])
+        for pos in range(0, context_size):
+            i_offset = i - context_size // 2 + pos
+            if (
+                0 <= i_offset <= len(node.sequence) - 1
+                and node.sequence_context[i_offset][context_size - pos - 1] != "N"
+            ):
+                node.sequence_context[i_offset] = (
+                    node.sequence_context[i_offset][: (context_size - pos - 1)]
+                    + sub_nt
+                    + node.sequence_context[i_offset][(context_size - pos) :]
+                )
+
+    @property
+    def mutated_attrs(self) -> Tuple[str]:
+        return super().mutated_attrs + ("sequence_context",)
 
 
 class SequencePhenotypeMutator(AttrMutator):
@@ -335,3 +360,7 @@ class SequencePhenotypeMutator(AttrMutator):
             "This doesn't make sense according to the current "
             "formulation because attr1 and attr2 will be phenotypes."
         )
+
+    @property
+    def mutated_attrs(self) -> Tuple[str]:
+        return (self.attr,) + self.sequence_mutator.mutated_attrs

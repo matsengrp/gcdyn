@@ -1,5 +1,4 @@
-r"""
-Birth-death-mutation-sampling (BDMS) process simulation
+r"""Birth-death-mutation-sampling (BDMS) process simulation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The BDMS process is defined by the following parameters:
@@ -33,10 +32,9 @@ from gcdyn import mutators, poisson
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from typing import Any, Optional, Union
-
+from typing import Any, Optional, Union, Literal, Iterator
 import itertools
-import bisect
+import copy
 
 
 class TreeNode(ete3.Tree):
@@ -45,7 +43,6 @@ class TreeNode(ete3.Tree):
 
     Args:
         t: Time of this node.
-        x: Phenotype of this node.
         kwargs: Keyword arguments passed to :py:class:`ete3.TreeNode` initializer.
     """
 
@@ -69,8 +66,6 @@ class TreeNode(ete3.Tree):
     def __init__(
         self,
         t: float = 0,
-        x: float = 0,
-        sequence: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
         if "dist" not in kwargs:
@@ -81,10 +76,6 @@ class TreeNode(ete3.Tree):
         super().__init__(**kwargs)
         self.t = t
         """Time of the node."""
-        self.x = x
-        """Phenotype of the node."""
-        self.sequence = sequence
-        """Sequence for the node."""
         self.event = None
         """Event at this node."""
         self.n_mutations = 0
@@ -99,36 +90,110 @@ class TreeNode(ete3.Tree):
         """
         self._pruned = False
 
+    def _birth_outcome(
+        self, birth_mutations: bool, mutator: mutators.Mutator, rng: np.random.Generator
+    ) -> Iterator[TreeNode]:
+        r"""Generate the outcome of a birth event at this node.
+
+        Args:
+            birth_mutations: Flag to indicate whether mutations should occur at birth.
+            mutator: Generator of mutation effects if ``birth_mutations=True``.
+            rng: Random number generator.
+
+        Yields:
+            The child nodes, or mutated grandchild nodes if ``birth_mutations=True``.
+        """
+        assert self.event == self._BIRTH_EVENT
+        for _ in range(self._OFFSPRING_NUMBER):
+            child = TreeNode(
+                t=self.t,
+                dist=0,
+                name=next(self._name_generator),
+            )
+            for attr in mutator.mutated_attrs:
+                setattr(child, attr, copy.copy(getattr(self, attr)))
+            if birth_mutations:
+                child.event = self._MUTATION_EVENT
+                mutator.mutate(child, seed=rng)
+                grandchild = TreeNode(
+                    t=child.t,
+                    dist=0,
+                    name=next(self._name_generator),
+                )
+                for attr in mutator.mutated_attrs:
+                    setattr(grandchild, attr, copy.copy(getattr(child, attr)))
+                child.add_child(grandchild)
+                yield grandchild
+            else:
+                yield child
+            self.add_child(child)
+
+    def _mutation_outcome(
+        self, mutator: mutators.Mutator, rng: np.random.Generator
+    ) -> Iterator[TreeNode]:
+        r"""Generate the outcome of a mutation event at this node.
+
+        Args:
+            mutator: Generator of mutation effects.
+            rng: Random number generator.
+
+        Yields:
+            The mutated child node.
+        """
+        assert self.event == self._MUTATION_EVENT
+        mutator.mutate(self, seed=rng)
+        child = TreeNode(
+            t=self.t,
+            dist=0,
+            name=next(self._name_generator),
+        )
+        for attr in mutator.mutated_attrs:
+            setattr(child, attr, copy.copy(getattr(self, attr)))
+        self.add_child(child)
+        yield child
+
     def evolve(
         self,
         t: float,
-        birth_rate: poisson.Response = poisson.ConstantResponse(1),
-        death_rate: poisson.Response = poisson.ConstantResponse(0),
-        mutation_rate: poisson.Response = poisson.ConstantResponse(1),
+        birth_response: poisson.Response = poisson.ConstantResponse(1),
+        death_response: poisson.Response = poisson.ConstantResponse(0),
+        mutation_response: poisson.Response = poisson.ConstantResponse(1),
         mutator: mutators.Mutator = mutators.GaussianMutator(shift=0, scale=1),
         birth_mutations: bool = False,
         min_survivors: int = 1,
-        max_leaves: int = 1000,
+        capacity: int = 1000,
+        capacity_method: Optional[Literal["birth", "death", "hard"]] = None,
+        init_population: int = 1,
         seed: Optional[Union[int, np.random.Generator]] = None,
+        verbose: bool = False,
     ) -> None:
         r"""Evolve for time :math:`\Delta t`.
 
         Args:
-            t: Evolve for this time
-            birth_rate: Birth rate response function.
-            death_rate: Death rate response function.
-            mutation_rate: Mutation rate response function.
+            t: Evolve for a duration of :math:`t` time units.
+            birth_response: Birth rate response function.
+            death_response: Death rate response function.
+            mutation_response: Mutation rate response function.
             mutator: Generator of mutation effects at mutation events
                      (and on offspring of birth events if ``birth_mutations=True``).
             birth_mutations: Flag to indicate whether mutations should occur at birth.
             min_survivors: Minimum number of survivors. If the simulation finishes with fewer than this number of
                            survivors, then a :py:class:`TreeError` is raised.
-            max_leaves: Maximum number of active leaves, to truncate exploding processes. If exceeded, then a
-                        :py:class:`TreeError` is raised.
+            capacity: Population carrying capacity.
+            capacity_method: Method to enforce population carrying capacity. If ``None``, then a
+                             :py:class:`TreeError` is raised if the population exceeds the carrying capacity.
+                             If ``"birth"``, then the birth rate is logistically modulated such that the
+                             process is critical when the population is at carrying capacity.
+                             If ``"death"``, then the death rate is logistically modulated such that the
+                             process is critical when the population is at carrying capacity.
+                             If ``"hard"``, then a random individual is chosen to die whenever a birth event
+                             results in carrying capacity being exceeded.
+            init_population: Initial population size.
             seed: A seed to initialize the random number generation.
                   If ``None``, then fresh, unpredictable entropy will be pulled from the OS.
                   If an ``int``, then it will be used to derive the initial state.
                   If a :py:class:`numpy.random.Generator`, then it will be used directly.
+            verbose: Flag to indicate whether to print progress information.
         """
         if not self.is_root():
             raise TreeError("Cannot evolve a non-root node")
@@ -136,125 +201,148 @@ class TreeNode(ete3.Tree):
             raise TreeError(
                 f"tree has already evolved at node {self.name} with {len(self.children)} descendant lineages"
             )
-        rng = np.random.default_rng(seed)
-
-        unfinished_nodes = [self]
-        # NOTE: this key management is needed because the bisect.insort function does not have a
-        #       key argument in python 3.9 (it gains one in 3.10)
-        time_keys = [self.t]
-
-        event_rates = {
-            self._BIRTH_EVENT: birth_rate,
-            self._DEATH_EVENT: death_rate,
-            self._MUTATION_EVENT: mutation_rate,
-        }
-
-        while unfinished_nodes:
-            new_event_node = unfinished_nodes[0]._generate_event(
-                t - unfinished_nodes[0].t,
-                event_rates,
-                mutator,
-                birth_mutations,
-                rng,
-            )
-            # We pop the corresponding element of unfinished_nodes after we're finished operating on it with
-            # _generate_event. The special case is that birth nodes must be operated on twice before they
-            # should be popped, if birth_mutations is False. We then insert newly created nodes that need to
-            # be operated on. If birth_mutations is True, we get a cherry returned from _generate_event,
-            # and need to insert both children.
-            if (
-                unfinished_nodes[0].event != self._BIRTH_EVENT
-                or len(unfinished_nodes[0].children) == self._OFFSPRING_NUMBER
-            ):
-                unfinished_nodes.pop(0)
-                time_keys.pop(0)
-            if new_event_node.event not in (
-                self._DEATH_EVENT,
-                self._SURVIVAL_EVENT,
-            ):
-                if new_event_node.event == self._BIRTH_EVENT and birth_mutations:
-                    assert len(new_event_node.children) == self._OFFSPRING_NUMBER
-                    nodes_to_insert = new_event_node.children
-                else:
-                    nodes_to_insert = [new_event_node]
-                for node_to_insert in nodes_to_insert:
-                    idx = bisect.bisect(time_keys, node_to_insert.t)
-                    time_keys.insert(idx, node_to_insert.t)
-                    unfinished_nodes.insert(idx, node_to_insert)
-            if len(unfinished_nodes) > max_leaves:
-                self._aborted_evolve_cleanup()
-                raise TreeError(
-                    f"maximum number of leaves {max_leaves} exceeded at time {unfinished_nodes[0].t}"
+        if init_population > capacity:
+            raise ValueError(f"{init_population=} must be less than {capacity=}")
+        for attr in mutator.mutated_attrs:
+            if not hasattr(self, attr):
+                raise ValueError(
+                    f"node {self.name} does not have attribute {attr} specified in mutator"
                 )
 
-        if sum(leaf.event == self._SURVIVAL_EVENT for leaf in self) < min_survivors:
+        rng = np.random.default_rng(seed)
+
+        if verbose:
+
+            def print_progress(current_time, n_active_nodes):
+                print(f"t={current_time:.3f}, n={n_active_nodes}", end="   \r")
+
+        else:
+
+            def print_progress(current_time, n_active_nodes):
+                pass
+
+        current_time = self.t
+        end_time = self.t + t
+        event_rates = {
+            self._BIRTH_EVENT: birth_response,
+            self._DEATH_EVENT: death_response,
+            self._MUTATION_EVENT: mutation_response,
+        }
+
+        # initialize population
+        active_nodes = {}
+        n_active_nodes = 0
+        total_birth_rate = 0.0
+        total_death_rate = 0.0
+        for _ in range(init_population):
+            start_node = TreeNode(
+                t=self.t,
+                dist=0,
+                name=next(self._name_generator),
+            )
+            for attr in mutator.mutated_attrs:
+                setattr(start_node, attr, copy.copy(getattr(self, attr)))
+            self.add_child(start_node)
+            active_nodes[start_node.name] = start_node
+            n_active_nodes += 1
+            total_birth_rate += birth_response(start_node)
+            total_death_rate += death_response(start_node)
+
+        # initialize rate multipliers, which are used to logistically modulate
+        # rates in accordance with the carrying capacity
+        rate_multipliers = {
+            self._BIRTH_EVENT: 1.0,
+            self._DEATH_EVENT: 1.0,
+            self._MUTATION_EVENT: 1.0,
+        }
+        while n_active_nodes:
+            if capacity_method == "birth":
+                rate_multipliers[self._BIRTH_EVENT] = (
+                    total_death_rate / total_birth_rate
+                ) ** (n_active_nodes / capacity)
+            elif capacity_method == "death":
+                rate_multipliers[self._DEATH_EVENT] = (
+                    total_birth_rate / total_death_rate
+                ) ** (n_active_nodes / capacity)
+            elif capacity_method == "hard":
+                if n_active_nodes > capacity:
+                    node_to_die = rng.choice(list(active_nodes.values()))
+                    node_to_die.event = self._DEATH_EVENT
+                    del active_nodes[node_to_die.name]
+                    n_active_nodes -= 1
+                    total_birth_rate -= birth_response(node_to_die)
+                    total_death_rate -= death_response(node_to_die)
+            elif capacity_method is None:
+                if n_active_nodes > capacity:
+                    self._aborted_evolve_cleanup()
+                    if verbose:
+                        print()
+                    raise TreeError(f"{capacity=} exceeded at time={current_time}")
+            else:
+                raise ValueError(f"{capacity_method=} not recognized")
+            waiting_time, event, event_node_name = min(
+                (
+                    event_rates[event].waiting_time_rv(
+                        node, rate_multiplier=rate_multipliers[event], seed=rng
+                    ),
+                    event,
+                    node.name,
+                )
+                for node in active_nodes.values()
+                for event in event_rates
+            )
+            Δt = min(waiting_time, end_time - current_time)
+            current_time += Δt
+            assert current_time <= end_time
+            for node in active_nodes.values():
+                node.dist += Δt
+                node.t = current_time
+                assert np.isclose(node.dist, node.t - node.up.t)
+            if current_time < end_time:
+                event_node = active_nodes[event_node_name]
+                event_node.event = event
+                del active_nodes[event_node.name]
+                n_active_nodes -= 1
+                total_birth_rate -= birth_response(event_node)
+                total_death_rate -= death_response(event_node)
+                if event_node.event == self._DEATH_EVENT:
+                    new_nodes = ()
+                elif event_node.event == self._BIRTH_EVENT:
+                    new_nodes = event_node._birth_outcome(birth_mutations, mutator, rng)
+                elif event_node.event == self._MUTATION_EVENT:
+                    new_nodes = event_node._mutation_outcome(mutator, rng)
+                else:
+                    raise ValueError(f"invalid event {event_node.event}")
+                for new_node in new_nodes:
+                    active_nodes[new_node.name] = new_node
+                    n_active_nodes += 1
+                    total_birth_rate += birth_response(new_node)
+                    total_death_rate += death_response(new_node)
+                print_progress(current_time, n_active_nodes)
+            else:
+                print_progress(current_time, n_active_nodes)
+                for node in active_nodes.values():
+                    node.event = self._SURVIVAL_EVENT
+                    n_active_nodes -= 1
+                    assert node.t == end_time
+                assert n_active_nodes == 0
+                active_nodes.clear()
+        if verbose:
+            print()
+        n_survivors = sum(leaf.event == self._SURVIVAL_EVENT for leaf in self)
+        if n_survivors < min_survivors:
             self._aborted_evolve_cleanup()
-            raise TreeError(f"minimum number of survivors {min_survivors} not attained")
+            raise TreeError(
+                f"number of survivors {n_survivors} is less than {min_survivors=}"
+            )
 
     def _aborted_evolve_cleanup(self) -> None:
         """Remove any children added to the root node during an aborted
         evolution attempt, and reset the node name generator."""
-        for child in self.children:
+        for child in self.children.copy():
             child.detach()
             del child
         TreeNode._name_generator = itertools.count(start=self.name + 1)
-
-    def _generate_event(
-        self,
-        Δt_max: float,
-        event_rates: dict[str, poisson.Response],
-        mutator: mutators.Mutator,
-        birth_mutations: bool,
-        rng: np.random.Generator,
-    ) -> "TreeNode":
-        r"""Simulate a single event, adding a new child TreeNode to self, and
-        returning it.
-
-        The event_rates parameter is a dictionary of responses.Response objects, keyed by
-        event type.
-
-        The Δt_max parameter is a boundary time: events that reach this time
-        are survivors.
-        """
-        # initialize the next event to be a survivor at the boundary time,
-        # then sample other possible events, and choose the one that occurs first
-        event = self._SURVIVAL_EVENT
-        Δt = Δt_max
-        for possible_event in event_rates:
-            new_waiting_time = event_rates[possible_event].waiting_time_rv(self, rng)
-            if new_waiting_time < Δt:
-                Δt = new_waiting_time
-                event = possible_event
-
-        child = TreeNode(
-            t=self.t + Δt,
-            x=self.x,
-            sequence=self.sequence,
-            dist=Δt,
-            name=next(self._name_generator),
-        )
-        child.event = event
-        if child.event == self._BIRTH_EVENT:
-            if birth_mutations:
-                for _ in range(self._OFFSPRING_NUMBER):
-                    grandchild = TreeNode(
-                        t=child.t,
-                        x=child.x,
-                        dist=0,
-                        name=next(self._name_generator),
-                    )
-                    grandchild.event = self._MUTATION_EVENT
-                    mutator.mutate(grandchild, seed=rng)
-                    child.add_child(grandchild)
-        elif child.event == self._DEATH_EVENT:
-            pass
-        elif child.event == self._MUTATION_EVENT:
-            mutator.mutate(child, seed=rng)
-        elif child.event == self._SURVIVAL_EVENT:
-            pass
-        else:
-            raise ValueError(f"unknown event {child.event}")
-        return self.add_child(child)
 
     def sample_survivors(
         self,
@@ -342,7 +430,7 @@ class TreeNode(ete3.Tree):
         for node in self.iter_leaves(is_leaf_fn=is_leaf_fn):
             parent = node.up
             parent.remove_child(node)
-            assert parent.event == self._BIRTH_EVENT
+            assert parent.event == self._BIRTH_EVENT or parent.is_root()
             parent.delete(prevent_nondicotomic=False, preserve_branch_length=True)
         for node in self.traverse(strategy="postorder"):
             if node.event == self._MUTATION_EVENT:
@@ -352,7 +440,9 @@ class TreeNode(ete3.Tree):
         for node in self.traverse():
             node._pruned = True
 
-    def render(self, *args: Any, cbar_file: Optional[str] = None, **kwargs: Any) -> Any:
+    def render(
+        self, color_by=None, *args: Any, cbar_file: Optional[str] = None, **kwargs: Any
+    ) -> Any:
         r"""A thin wrapper around :py:func:`ete3.TreeNode.render` that adds some
         custom decoration and a color bar. As with the base class method, pass
         ``"%%inline"`` for the first argument to render inline in a notebook.
@@ -371,6 +461,7 @@ class TreeNode(ete3.Tree):
         branches are annotated above with branch length (in black text) and below with number of mutations (in green text).
 
         Args:
+            color_by: If not ``None``, color tree by this attribute (must be a scalar).
             args: Arguments to pass to :py:func:`ete3.TreeNode.render`.
             cbar_file: If not ``None``, save color bar to this file.
             kwargs: Keyword arguments to pass to :py:func:`ete3.TreeNode.render`.
@@ -381,13 +472,17 @@ class TreeNode(ete3.Tree):
             kwargs["tree_style"].show_scale = False
         cmap = "coolwarm_r"
         cmap = mpl.cm.get_cmap(cmap)
-        halfrange = max(abs(node.x - self.x) for node in self.traverse())
+        halfrange = max(
+            abs(getattr(node, color_by) - getattr(self, color_by))
+            for node in self.traverse()
+        )
         norm = mpl.colors.CenteredNorm(
-            vcenter=self.x,
+            vcenter=getattr(self, color_by),
             halfrange=halfrange if halfrange > 0 else 1,
         )
         colormap = {
-            node.name: mpl.colors.to_hex(cmap(norm(node.x))) for node in self.traverse()
+            node.name: mpl.colors.to_hex(cmap(norm(getattr(node, color_by))))
+            for node in self.traverse()
         }
         event_cache = self.get_cached_content(store_attr="event")
         for node in self.traverse():

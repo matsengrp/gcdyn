@@ -15,7 +15,8 @@ TOLERANCE = 2
 
 
 def add_event(node, event, edge_length):
-    child = bdms.TreeNode(t=node.t + edge_length, x=node.x, dist=edge_length)
+    child = bdms.TreeNode(t=node.t + edge_length, dist=edge_length)
+    child.x = node.x
 
     child.event = event
     node.add_child(child)
@@ -46,7 +47,8 @@ class TestMTBDLikelihood(unittest.TestCase):
     def test_sample_event(self):
         """Single edge to sample time."""
 
-        tree = bdms.TreeNode(x=10)
+        tree = bdms.TreeNode()
+        tree.x = 10.0
         event = add_event(tree, SAMPLED_SURVIVOR, edge_length=3)
         tree._sampled = True  # We do this ourselves
 
@@ -76,7 +78,8 @@ class TestMTBDLikelihood(unittest.TestCase):
     def test_death_event(self):
         """Single edge dying and being sampled."""
 
-        tree = bdms.TreeNode(x=10)
+        tree = bdms.TreeNode()
+        tree.x = 10.0
         event = add_event(tree, DEATH, edge_length=3)
         tree._sampled = True  # We do this ourselves
 
@@ -110,7 +113,8 @@ class TestMTBDLikelihood(unittest.TestCase):
     def test_mutation_event(self):
         """Edge with a type change, then eventually being sampled."""
 
-        tree = bdms.TreeNode(x=10)
+        tree = bdms.TreeNode()
+        tree.x = 10.0
         m_event = add_event(tree, MUTATION, edge_length=3)
         self.mutator.mutate(m_event)
         s_event = add_event(m_event, SAMPLED_SURVIVOR, edge_length=4)
@@ -156,7 +160,8 @@ class TestMTBDLikelihood(unittest.TestCase):
     def test_birth_event(self):
         """A bifurcation with both children sampled."""
 
-        tree = bdms.TreeNode(x=10)
+        tree = bdms.TreeNode()
+        tree.x = 10.0
         b_event = add_event(tree, BIRTH, edge_length=3)
 
         s_events = []

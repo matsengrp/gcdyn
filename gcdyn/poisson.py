@@ -1,17 +1,15 @@
-r"""
-Poisson process responses
-^^^^^^^^^^^^^^^^^^^^^^^^^
+r"""Poisson process responses ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Abstract base classes for defining generic Poisson processes (e.g. :math:`\lambda(x, t)`, :math:`\mu(x, t)`, :math:`\gamma(x, t)`),
-with arbitrary :py:class:`bdms.TreeNode` attribute dependence.
-Several concrete child classes are included.
+Abstract base classes for defining generic Poisson processes (e.g.
+:math:`\lambda(x, t)`, :math:`\mu(x, t)`, :math:`\gamma(x, t)`), with
+arbitrary :py:class:`bdms.TreeNode` attribute dependence. Several
+concrete child classes are included.
 """
 
 from __future__ import annotations
 from typing import Any, TypeVar, Optional, Union
 from typing import TYPE_CHECKING
 from abc import ABC, abstractmethod
-from collections.abc import Callable
 from jax.tree_util import register_pytree_node
 import jax.numpy as jnp
 import numpy as onp
@@ -111,6 +109,7 @@ class Response(ABC):
     def waiting_time_rv(
         self,
         node: bdms.TreeNode,
+        rate_multiplier: float = 1.0,
         seed: Optional[Union[int, onp.random.Generator]] = None,
     ) -> float:
         r"""Sample the waiting time :math:`\Delta t` until the first event,
@@ -118,13 +117,18 @@ class Response(ABC):
 
         Args:
             node: The node at which the rate process starts.
+            rate_multiplier: A multiplicative factor to apply to the rate process when
+                             sampling the waiting time. This can be used to impose a
+                             population-size constraint in simulations.
             seed: A seed to initialize the random number generation.
                   If ``None``, then fresh, unpredictable entropy will be pulled from the OS.
                   If an ``int``, then it will be used to derive the initial state.
                   If a :py:class:`numpy.random.Generator`, then it will be used directly.
         """
+        if rate_multiplier == 0.0:
+            return float("inf")
         rng = onp.random.default_rng(seed)
-        return self.Λ_inv(node, rng.exponential())
+        return self.Λ_inv(node, rng.exponential(scale=1 / rate_multiplier))
 
     def waiting_time_logsf(self, node: bdms.TreeNode, Δt: float) -> float:
         r"""Evaluate the logarithm of the survival function of the waiting time
@@ -398,34 +402,16 @@ class SoftReluResponse(PhenotypeResponse):
         self.yshift = d["yshift"]
 
 
-class SequenceResponse(HomogeneousResponse):
-    r"""Abstract base class for response function mapping from a
-    :py:class:`bdms.TreeNode` object's sequence attribute to a homogenous
-    Poisson process.
-    """
-
-    @abstractmethod
-    def λ_sequence(self, sequence: str) -> float:
-        r"""Evaluate the Poisson intensity :math:`\lambda_s` for sequence
-        :math:`s`.
-
-        Args:
-            sequence: DNA sequence.
-        """
-
-    def λ_homogeneous(self, node: bdms.TreeNode) -> float:
-        return self.λ_sequence(node.sequence)
-
-
-class SequenceContextMutationResponse(SequenceResponse):
+class SequenceContextMutationResponse(HomogeneousResponse):
     r"""A Response that accepts a sequence and outputs an aggregate mutation
     rate.
 
-    Importantly, the mutability needs to be in units of mutations per unit time.
+    The mutability needs to be in units of mutations per unit time.
+
+    A ``sequence_context`` node feature is created when nodes are first operated on.
 
     Args:
         mutability: a mapping from local context to mutation rate (mutations per site per unit time)
-        seq_to_contexts: a function that accepts a sequence and splits it into local contexts
         mutation_intensity: a scaling factor for the mutability
         grad: See :py:class:`Response`.
     """
@@ -433,13 +419,11 @@ class SequenceContextMutationResponse(SequenceResponse):
     def __init__(
         self,
         mutability: pd.Series,
-        seq_to_contexts: Callable[str, list[str]],
         mutation_intensity: float = 1.0,
         grad: bool = False,
     ):
         super().__init__(grad)
-        self.mutability = mutation_intensity * mutability
-        self.seq_to_contexts = seq_to_contexts
+        self.mutability = (mutation_intensity * mutability).to_dict()
 
     @property
     def _param_dict(self) -> dict:
@@ -449,9 +433,8 @@ class SequenceContextMutationResponse(SequenceResponse):
     def _param_dict(self, d):
         self.mutation_intensity = d["mutation_intensity"]
 
-    def λ_sequence(self, sequence: str) -> float:
-        contexts = self.seq_to_contexts(sequence)
-        return sum(self.mutability[context] for context in contexts)
+    def λ_homogeneous(self, node: bdms.TreeNode) -> float:
+        return sum(self.mutability[context] for context in node.sequence_context)
 
 
 class PhenotypeTimeResponse(Response):
@@ -504,13 +487,15 @@ class PhenotypeTimeResponse(Response):
         for iter in range(self.maxiter):
             if self.λ(node, Δt) == 0:
                 return self._np.inf
-            Δt = max(Δt - (self.Λ(node, Δt) - τ) / self.λ(node, Δt), 0.0)
+            with self._np.errstate(over="ignore"):
+                Δt = max(Δt - (self.Λ(node, Δt) - τ) / self.λ(node, Δt), 0.0)
             if abs(self.Λ(node, Δt) - τ) < self.tol:
                 converged = True
                 break
         if not converged:
+            print(f"Δt={Δt}, Λ={self.Λ(node, Δt)}, τ={τ}, λ={self.λ(node, Δt)}")
             raise RuntimeError(
-                f"Newton-Raphson failed to converge after {self.maxiter} iterations with Δt={Δt} and error={abs(self.Λ(node, Δt) - τ)}"
+                f"Newton-Raphson failed to converge after {self.maxiter} iterations with Δt={Δt} and error={abs(self.Λ(node, Δt) - τ):.3f}"
             )
         return Δt
 
@@ -536,8 +521,8 @@ class ModulatedPhenotypeResponse(PhenotypeTimeResponse):
     def __init__(
         self,
         phenotype_response: PhenotypeResponse,
-        external_field: Callable[[float], float],
-        interaction: Callable[[float, float], float] = lambda x, f: x - f,
+        external_field: callable[[float], float],
+        interaction: callable[[float, float], float] = lambda x, f: x - f,
         tol: float = 1e-6,
         maxiter: int = 100,
         grad: bool = False,
@@ -578,7 +563,7 @@ class ModulatedRateResponse(PhenotypeTimeResponse):
     def __init__(
         self,
         phenotype_response: PhenotypeResponse,
-        modulation: Callable[[float, float, float], float],
+        modulation: callable[[float, float, float], float],
         tol: float = 1e-6,
         maxiter: int = 100,
         grad: bool = False,
