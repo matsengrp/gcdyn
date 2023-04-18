@@ -1,5 +1,5 @@
 """
-Various things relevant for the replay experiment.
+Various things relevant for the GC replay experiment.
 """
 import os
 import sys
@@ -14,33 +14,51 @@ CHAIN_2_START_IDX = 336
 gcdyn_data_dir = os.path.join(os.path.dirname(sys.modules["gcdyn"].__file__), "data")
 
 
-mutability = pd.read_csv(
-    os.path.join(gcdyn_data_dir, "MK_RS5NF_mutability.csv"), index_col=0
-).squeeze("columns")
+def mutability(file: str = "MK_RS5NF_mutability.csv"):
+    return pd.read_csv(os.path.join(gcdyn_data_dir, file), index_col=0).squeeze(
+        "columns"
+    )
 
-substitution = pd.read_csv(
-    os.path.join(gcdyn_data_dir, "MK_RS5NF_substitution.csv"), index_col=0
-)
+
+def substitution(file: str = "MK_RS5NF_substitution.csv"):
+    return pd.read_csv(os.path.join(gcdyn_data_dir, file), index_col=0)
 
 
 def seq_to_contexts(seq):
     return utils.padded_fivemer_contexts_of_paired_sequences(seq, CHAIN_2_START_IDX)
 
 
-dms_df = pd.read_csv("https://media.githubusercontent.com/media/jbloomlab/Ab-CGGnaive_DMS/main/results/final_variant_scores/final_variant_scores.csv", index_col="mutation")
-# remove linker sites
-dms_df = dms_df[dms_df.chain != "link"]
+def dms(
+    file: str = "https://media.githubusercontent.com/media/jbloomlab/Ab-CGGnaive_DMS/main/results/final_variant_scores/final_variant_scores.csv",
+):
+    dms_df = pd.read_csv(file, index_col="mutation")
+    # remove linker sites
+    dms_df = dms_df[dms_df.chain != "link"]
 
-bind_df = dms_df.pivot(index="position", columns="mutant", values="delta_bind_CGG").reset_index().drop(columns="position")
-expr_df = dms_df.pivot(index="position", columns="mutant", values="delta_expr").reset_index().drop(columns="position")
-psr_df = dms_df.pivot(index="position", columns="mutant", values="delta_psr").reset_index().drop(columns="position")
+    bind_df = (
+        dms_df.pivot(index="position", columns="mutant", values="delta_bind_CGG")
+        .reset_index()
+        .drop(columns="position")
+    )
+    expr_df = (
+        dms_df.pivot(index="position", columns="mutant", values="delta_expr")
+        .reset_index()
+        .drop(columns="position")
+    )
+    psr_df = (
+        dms_df.pivot(index="position", columns="mutant", values="delta_psr")
+        .reset_index()
+        .drop(columns="position")
+    )
 
-# the DMS has one additional codon wrt replay sequence
-bind_df.drop(index=bind_df.index[-1], inplace=True)
-expr_df.drop(index=expr_df.index[-1], inplace=True)
-psr_df.drop(index=psr_df.index[-1], inplace=True)
+    # the DMS has one additional codon wrt replay sequence
+    bind_df.drop(index=bind_df.index[-1], inplace=True)
+    expr_df.drop(index=expr_df.index[-1], inplace=True)
+    psr_df.drop(index=psr_df.index[-1], inplace=True)
 
-# replace NaNs with 0 (some single mutants are missing in DMS data)
-bind_df.fillna(0, inplace=True)
-expr_df.fillna(0, inplace=True)
-psr_df.fillna(0, inplace=True)
+    # replace NaNs with 0 (some single mutants are missing in DMS data)
+    bind_df.fillna(0, inplace=True)
+    expr_df.fillna(0, inplace=True)
+    psr_df.fillna(0, inplace=True)
+
+    return dict(affinity=bind_df, expr=expr_df, psr=psr_df)
