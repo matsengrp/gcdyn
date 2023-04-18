@@ -1,15 +1,15 @@
 default:
 
 install:
-	python -m pip install -r requirements.txt
-	python -m pip install -e .[PyQt5]
+	pip install -r requirements.txt
+	pip install -e .[PyQt5]
 
 install-no-pyqt:
-	python -m pip install -r requirements.txt
-	python -m pip install -e .
+	pip install -r requirements.txt
+	pip install -e .
 
 install-torchdms:
-	python -m pip install git+https://github.com/matsengrp/torchdms
+	pip install git+https://github.com/matsengrp/torchdms
 
 test:
 	pytest

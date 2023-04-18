@@ -1,11 +1,11 @@
-import setuptools
+from setuptools import setup
 import versioneer
 
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-setuptools.setup(
+setup(
     name="gcdyn",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
@@ -15,7 +15,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/matsengrp/gcdyn",
-    packages=["gcdyn"],
+    packages=["gcdyn", "experiments"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License (GPL)",
