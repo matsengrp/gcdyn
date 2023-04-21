@@ -50,6 +50,7 @@ def write_leaf_sequences_to_fasta(
             fp.write(f">{name}\n")
             fp.write(f"{sequence}\n")
 
+    return sequence_dict
 
 def ladderize_tree(tree, attr="x"):
     """
