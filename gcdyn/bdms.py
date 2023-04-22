@@ -409,17 +409,9 @@ class TreeNode(ete3.Tree):
             for node in self.iter_leaves(is_leaf_fn=is_leaf_fn)
         ]
 
-    def prune(self, keep_mutation_events: bool = True) -> None:
-        r"""Prune the tree to the subtree induced by the sampled leaves.
-
-        Also removes mutation events, and annotates mutation counts in
-        child node ``n_mutations`` attribute.
-
-        Args:
-            keep_mutation_events: If ``True``, keep mutation events as unifurcating
-                                  nodes in the pruned tree. Otherwise, remove mutation
-                                  events (preserving branch length) and annotate mutation
-                                  counts in child node ``n_mutations`` attribute.
+    def prune(self) -> None:
+        r"""Prune the tree to the subtree subtending the sampled leaves,
+        removing unobserved subtrees.
         """
         if self._pruned:
             raise ValueError(f"tree has already been pruned below node {self.name}")
@@ -438,14 +430,21 @@ class TreeNode(ete3.Tree):
             parent.remove_child(node)
             assert parent.event == self._BIRTH_EVENT or parent.is_root()
             parent.delete(prevent_nondicotomic=False, preserve_branch_length=True)
-        if not keep_mutation_events:
-            for node in self.traverse(strategy="postorder"):
-                if node.event == self._MUTATION_EVENT:
-                    assert len(node.children) == 1
-                    node.children[0].n_mutations += 1
-                    node.delete(prevent_nondicotomic=False, preserve_branch_length=True)
         for node in self.traverse():
             node._pruned = True
+
+    def remove_mutation_events(self) -> None:
+        r"""Remove unifurcating mutation event nodes, preserving branch length,
+        and annotate mutation counts in child node ``n_mutations`` attribute.
+        The tree must have been pruned first with :py:meth:`prune`.
+        """
+        if not self._pruned:
+            raise ValueError(f"tree has not been pruned below node {self.name}")
+        for node in self.traverse(strategy="postorder"):
+            if node.event == self._MUTATION_EVENT:
+                assert len(node.children) == 1
+                node.children[0].n_mutations += 1
+                node.delete(prevent_nondicotomic=False, preserve_branch_length=True)
 
     def render(
         self, color_by=None, *args: Any, cbar_file: Optional[str] = None, **kwargs: Any
