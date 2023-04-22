@@ -5,6 +5,7 @@ import os
 import sys
 from Bio import SeqIO
 # import colored_traceback.always  # need to add this to installation stuff, i'm not sure how to do it atm
+import dill
 
 from gcdyn import bdms, gpmap, mutators, poisson, utils
 from experiments import replay
@@ -200,7 +201,7 @@ mutation_rate = poisson.SequenceContextMutationResponse(
     args.mutability_multiplier * replay.mutability, replay.seq_to_contexts
 )
 
-all_seqs = []
+all_seqs, all_trees = [], []
 rng = np.random.default_rng(seed=args.seed)
 for itrial in range(1, args.n_trials + 1):
     print(color('blue', "trial %d:"%itrial), end=' ')
@@ -227,9 +228,17 @@ for itrial in range(1, args.n_trials + 1):
         naive=replay.NAIVE_SEQUENCE,
     )
     add_seqs(all_seqs, itrial, [{'name' : sname, 'seq' : seq} for sname, seq in seqdict.items()])
+    all_trees.append(tree)
 
 asfn = '%s/all-seqs.fasta' % args.outdir
 print('  writing all seqs to %s'%asfn)
 with open(asfn, 'w') as asfile:
     for sfo in all_seqs:
         asfile.write('>%s\n%s\n' % (sfo['name'], sfo['seq']))
+
+pkfn = '%s/simu.pkl' % args.outdir
+print('  writing objects to %s'%pkfn)
+with open(pkfn, 'wb') as pfile:
+    pkfo = {'birth-response' : birth_rate, 'death-response' : death_rate, 'trees' : all_trees}
+    dill.dump(pkfo, pfile)
+
