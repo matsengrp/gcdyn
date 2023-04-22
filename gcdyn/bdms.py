@@ -409,11 +409,17 @@ class TreeNode(ete3.Tree):
             for node in self.iter_leaves(is_leaf_fn=is_leaf_fn)
         ]
 
-    def prune(self) -> None:
+    def prune(self, keep_mutation_events: bool = True) -> None:
         r"""Prune the tree to the subtree induced by the sampled leaves.
 
         Also removes mutation events, and annotates mutation counts in
         child node ``n_mutations`` attribute.
+
+        Args:
+            keep_mutation_events: If ``True``, keep mutation events as unifurcating
+                                  nodes in the pruned tree. Otherwise, remove mutation
+                                  events (preserving branch length) and annotate mutation
+                                  counts in child node ``n_mutations`` attribute.
         """
         if self._pruned:
             raise ValueError(f"tree has already been pruned below node {self.name}")
@@ -432,11 +438,12 @@ class TreeNode(ete3.Tree):
             parent.remove_child(node)
             assert parent.event == self._BIRTH_EVENT or parent.is_root()
             parent.delete(prevent_nondicotomic=False, preserve_branch_length=True)
-        for node in self.traverse(strategy="postorder"):
-            if node.event == self._MUTATION_EVENT:
-                assert len(node.children) == 1
-                node.children[0].n_mutations += 1
-                node.delete(prevent_nondicotomic=False, preserve_branch_length=True)
+        if not keep_mutation_events:
+            for node in self.traverse(strategy="postorder"):
+                if node.event == self._MUTATION_EVENT:
+                    assert len(node.children) == 1
+                    node.children[0].n_mutations += 1
+                    node.delete(prevent_nondicotomic=False, preserve_branch_length=True)
         for node in self.traverse():
             node._pruned = True
 
@@ -451,14 +458,16 @@ class TreeNode(ete3.Tree):
 
         .. _tutorial: http://etetoolkit.org/docs/latest/tutorial/tutorial_drawing.html
 
-        If tree is not pruned, then branches
-        are colored according to phenotype, extinct lineages are indicated as
-        dotted branches, unsampled non-extint lineages are indicated as solid
-        branches, and sampled lineages are indicated as thick solid branches
-        with. Sampled leaves are indicated with a circle.
+        If tree is not pruned (or is pruned without removing mutation events), then
+        branches are colored according to the attribute specified by ``color_by``,
+        extinct lineages are indicated as dotted branches, unsampled non-extint
+        lineages are indicated as solid branches, and sampled lineages are indicated
+        as thick solid branches. Sampled leaves are indicated with a circle.
 
-        If tree is pruned, then nodes are colored according to phenotype,
-        branches are annotated above with branch length (in black text) and below with number of mutations (in green text).
+        If tree is pruned without retaining mutation events, then nodes are colored
+        according to the attribute specified by ``color_by``, branches are annotated
+        above with branch length (in black text) and below with number of mutations
+        (in green text).
 
         Args:
             color_by: If not ``None``, color tree by this attribute (must be a scalar).
@@ -484,10 +493,10 @@ class TreeNode(ete3.Tree):
             node.name: mpl.colors.to_hex(cmap(norm(getattr(node, color_by))))
             for node in self.traverse()
         }
-        event_cache = self.get_cached_content(store_attr="event")
-        for node in self.traverse():
-            nstyle = ete3.NodeStyle()
-            if not self._pruned:
+        event_cache = self.get_cached_content(store_attr="event", leaves_only=False)
+        if (not self._pruned) or (self._MUTATION_EVENT in event_cache[self]):
+            for node in self.traverse():
+                nstyle = ete3.NodeStyle()
                 if (
                     self._SURVIVAL_EVENT not in event_cache[node]
                     and self._SAMPLING_EVENT not in event_cache[node]
@@ -502,12 +511,15 @@ class TreeNode(ete3.Tree):
                 nstyle["hz_line_color"] = colormap[node.name]
                 nstyle["fgcolor"] = colormap[node.name]
                 nstyle["size"] = 1 if node.event == self._SAMPLING_EVENT else 0
-            else:
+                node.set_style(nstyle)
+        else:
+            for node in self.traverse():
+                nstyle = ete3.NodeStyle()
                 nstyle["fgcolor"] = colormap[node.name]
                 if not node.is_root() and not getattr(node.faces, "branch-bottom"):
                     node.add_face(self._time_face, 0, position="branch-top")
                     node.add_face(self._mutation_face, 0, position="branch-bottom")
-            node.set_style(nstyle)
+                node.set_style(nstyle)
 
         fig = plt.figure(figsize=(2, 1))
         cax = fig.add_axes([0, 0, 1, 0.1])
