@@ -1,5 +1,5 @@
 r"""Birth-death-mutation-sampling (BDMS) process simulation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The BDMS process is defined by the following parameters:
 
