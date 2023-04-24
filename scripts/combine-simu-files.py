@@ -26,9 +26,14 @@ for ifn in args.infiles:
             simfo['responses'].append([dfo[r+'-response'] for r in ['birth', 'death']])
 
 print('  writing %d trees from %d files to %s' % (len(simfo['trees']), len(args.infiles), args.outfile))
+if not os.path.exists(os.path.dirname(args.outfile)):
+    os.makedirs(os.path.dirname(args.outfile))
 with open(args.outfile, 'wb') as pfile:
     dill.dump(simfo, pfile)
 
-# with open(args.outfile, 'rb') as pfile:
-#     dfo = dill.load(pfile)
-#     print('    checking info in outfile: %d trees with leaf counts: %s' % (len(dfo['trees']), ' '.join(str(len(list(t.iter_leaves()))) for t in dfo['trees'])))
+with open(args.outfile, 'rb') as pfile:
+    dfo = dill.load(pfile)
+    treestrs = [str(len(list(t.iter_leaves()))) for t in dfo['trees']]
+    birthstrs, deathstrs = zip(*[rp for rp in dfo['responses']])
+    print('    checking info in outfile: %d trees with leaf counts: %s' % (len(dfo['trees']), ' '.join(treestrs)))
+    print('        distinct response fcns:  birth %d  death %d' % (len(set(birthstrs)), len(set(deathstrs))))
