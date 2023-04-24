@@ -1,4 +1,4 @@
-from gcdyn import bdms, mutators, model, poisson
+from gcdyn import bdms, mutators, models, poisson
 from numpy import log, sqrt, exp, max
 from scipy.stats import expon
 import unittest
@@ -33,191 +33,208 @@ def log_hazard_exp(x, rate):
 
 
 class TestMTBDLikelihood(unittest.TestCase):
+    """Test cases where the MTBD likelihood value matches the BDMS likelihood value."""
+
     def setUp(self):
-        self.λ = poisson.SigmoidResponse(grad=True)
+        self.λ = poisson.SigmoidResponse()
         self.μ = poisson.ConstantResponse(1)
         self.γ = poisson.ConstantResponse(1)
-        self.mutator = mutators.GaussianMutator(-1, 1)
+        self.state_space = (1, 1.5)
+        self.mutator = mutators.DiscreteMutator(
+            state_space=self.state_space, transition_matrix=[[0, 1], [1, 0]]
+        )
         self.ρ = 1
         self.σ = 1
         self.Λ = lambda x: self.λ(x) + self.μ(x) + self.γ(x)
 
-        poisson._register_with_pytree(poisson.SigmoidResponse)
+    def compare_models(self, tree):
+        """
+        Compares the likelihoods of the naive, Stadler approximate, and Stadler full models,
+        and returns the value should they match.
+        """
+
+        parameters = {
+            "birth_rate": self.λ,
+            "death_rate": self.μ,
+            "mutation_rate": self.γ,
+            "mutator": self.mutator,
+        }
+
+        # Naive likelihood by code
+        naive_ll_code = models.naive_log_likelihood(
+            [tree],
+            **parameters,
+            extant_sampling_probability=self.ρ,
+        ).item()
+
+        # Stadler approximate likelihood by code
+
+        # TODO: prune this correctly once `prune` is updated
+        tree._pruned = True
+
+        present_time = max([node.t for node in tree.iter_leaves()])
+
+        appx_ll_code = models.stadler_appx_log_likelihood(
+            [tree],
+            **parameters,
+            extant_sampling_probability=self.ρ,
+            extinct_sampling_probability=self.σ,
+            present_time=present_time,
+        ).item()
+
+        # Stadler full likelihood by code
+        full_ll_code = models.stadler_full_log_likelihood(
+            [tree],
+            **parameters,
+            extant_sampling_probability=self.ρ,
+            extinct_sampling_probability=self.σ,
+            present_time=present_time,
+        ).item()
+
+        self.assertAlmostEqual(naive_ll_code, appx_ll_code, places=TOLERANCE)
+        self.assertAlmostEqual(naive_ll_code, full_ll_code, places=TOLERANCE)
+
+        return naive_ll_code
 
     def test_sample_event(self):
         """Single edge to sample time."""
 
-        tree = bdms.TreeNode()
-        tree.x = 10.0
+        tree = bdms.TreeNode(x=self.state_space[0])
         event = add_event(tree, SAMPLED_SURVIVOR, edge_length=3)
         tree._sampled = True  # We do this ourselves
 
-        # BDMS likelihood by code
-        m = model.BDMSModel(
-            [tree],
-            birth_rate=self.λ,
-            death_rate=self.μ,
-            mutation_rate=self.γ,
-            mutator=None,
-            sampling_probability=self.ρ,
-        )
-        bdms_ll_code = m.log_likelihood().item()
+        ll_code = self.compare_models(tree)
 
-        # BDMS likelihood by hand.
+        # Naive likelihood by hand.
         # The likelihood is the probability that no BDM event happens along this branch (ie. one would've happened after sample time),
         # times the probability of being sampled
-        bdms_ll_hand = log_hazard_exp(event.dist, self.Λ(event)) + log(self.ρ)
+        naive_ll_hand = log_hazard_exp(event.dist, self.Λ(event.up)) + log(self.ρ)
 
-        # MTBD likelihood by hand
+        # Stadler approximate likelihood by hand
         present_time = max([node.t for node in tree.get_leaves()])
-        mtbd_ll_hand = self.log_f_N(event, present_time) + log(self.ρ)
+        appx_ll_hand = self.log_f_N(event, present_time) + log(self.ρ)
 
-        self.assertAlmostEqual(bdms_ll_code, bdms_ll_hand, places=TOLERANCE)
-        self.assertAlmostEqual(bdms_ll_code, mtbd_ll_hand, places=TOLERANCE)
+        self.assertAlmostEqual(ll_code, naive_ll_hand, places=TOLERANCE)
+        self.assertAlmostEqual(ll_code, appx_ll_hand, places=TOLERANCE)
 
     def test_death_event(self):
         """Single edge dying and being sampled."""
 
-        tree = bdms.TreeNode()
-        tree.x = 10.0
+        tree = bdms.TreeNode(x=self.state_space[0])
         event = add_event(tree, DEATH, edge_length=3)
         tree._sampled = True  # We do this ourselves
 
-        # BDMS likelihood by code
-        m = model.BDMSModel(
-            [tree],
-            birth_rate=self.λ,
-            death_rate=self.μ,
-            mutation_rate=self.γ,
-            mutator=None,
-            sampling_probability=self.ρ,
-        )
-        bdms_ll_code = m.log_likelihood().item()
+        ll_code = self.compare_models(tree)
 
         # BDMS likelihood by hand.
         # The likelihood is the probability that no BDM event happens along this branch (ie. one would've happened after sample time),
         # times the probability of being sampled
-        bdms_ll_hand = log_dexp(event.dist, self.Λ(event)) + (
-            log(self.μ(event)) - log(self.Λ(event))
+        naive_ll_hand = log_dexp(event.dist, self.Λ(event.up)) + (
+            log(self.μ(event.up)) - log(self.Λ(event.up))
         )
 
         # MTBD likelihood by hand
         present_time = max([node.t for node in tree.get_leaves()])
-        mtbd_ll_hand = (
-            self.log_f_N(event, present_time) + log(self.σ) + log(self.μ(event))
+        appx_ll_hand = (
+            self.log_f_N(event, present_time) + log(self.σ) + log(self.μ(event.up))
         )
 
-        self.assertAlmostEqual(bdms_ll_code, bdms_ll_hand, places=TOLERANCE)
-        self.assertAlmostEqual(bdms_ll_code, mtbd_ll_hand, places=TOLERANCE)
+        self.assertAlmostEqual(ll_code, naive_ll_hand, places=TOLERANCE)
+        self.assertAlmostEqual(ll_code, appx_ll_hand, places=TOLERANCE)
 
     def test_mutation_event(self):
         """Edge with a type change, then eventually being sampled."""
 
-        tree = bdms.TreeNode()
-        tree.x = 10.0
+        tree = bdms.TreeNode(x=self.state_space[0])
         m_event = add_event(tree, MUTATION, edge_length=3)
         self.mutator.mutate(m_event)
         s_event = add_event(m_event, SAMPLED_SURVIVOR, edge_length=4)
         tree._sampled = True
 
-        # BDMS likelihood by code
-        m = model.BDMSModel(
-            [tree],
-            birth_rate=self.λ,
-            death_rate=self.μ,
-            mutation_rate=self.γ,
-            mutator=self.mutator,
-            sampling_probability=self.ρ,
-        )
-        bdms_ll_code = m.log_likelihood().item()
+        ll_code = self.compare_models(tree)
 
         # BDMS likelihood by hand.
         # The likelihood is the probability of mutating after the given time
         # (which is probability to any event, times probability the event is a mutation),
         # times the probability of the specific mutation that occurred,
         # times the likelihood as derived in "Single edge to sample time"
-        bdms_ll_hand = (
-            log_dexp(m_event.dist, self.Λ(m_event))
-            + (log(self.γ(m_event)) - log(self.Λ(m_event)))
+        naive_ll_hand = (
+            log_dexp(m_event.dist, self.Λ(m_event.up))
+            + (log(self.γ(m_event.up)) - log(self.Λ(m_event.up)))
             + self.mutator.logprob(m_event)
-            + log_hazard_exp(s_event.dist, self.Λ(s_event))
+            + log_hazard_exp(s_event.dist, self.Λ(s_event.up))
             + log(self.ρ)
         )
 
         # MTBD likelihood by hand
         present_time = max([node.t for node in tree.get_leaves()])
-        mtbd_ll_hand = (
+        appx_ll_hand = (
             self.log_f_N(m_event, present_time)
             + self.log_f_N(s_event, present_time)
-            + log(self.γ(m_event))
+            + log(self.γ(m_event.up))
             + self.mutator.logprob(m_event)
             + log(self.ρ)
         )
 
-        self.assertAlmostEqual(bdms_ll_code, bdms_ll_hand, places=TOLERANCE)
-        self.assertAlmostEqual(bdms_ll_code, mtbd_ll_hand, places=TOLERANCE)
+        self.assertAlmostEqual(ll_code, naive_ll_hand, places=TOLERANCE)
+        self.assertAlmostEqual(ll_code, appx_ll_hand, places=TOLERANCE)
 
     def test_birth_event(self):
         """A bifurcation with both children sampled."""
 
-        tree = bdms.TreeNode()
-        tree.x = 10.0
+        tree = bdms.TreeNode(x=self.state_space[0])
         b_event = add_event(tree, BIRTH, edge_length=3)
 
         s_events = []
 
         for i in range(bdms.TreeNode._OFFSPRING_NUMBER):
-            s_events.append(add_event(b_event, SAMPLED_SURVIVOR, edge_length=3 + i))
+            # Note to self: make sure that these are the same length...
+            # sampling of survivors only happens at the present
+            s_events.append(add_event(b_event, SAMPLED_SURVIVOR, edge_length=4))
 
         tree._sampled = True
 
-        # BDMS likelihood by code
-        m = model.BDMSModel(
-            [tree],
-            birth_rate=self.λ,
-            death_rate=self.μ,
-            mutation_rate=self.γ,
-            mutator=None,
-            sampling_probability=self.ρ,
-        )
-        bdms_ll_code = m.log_likelihood().item()
+        ll_code = self.compare_models(tree)
 
         # BDMS likelihood by hand.
         # The likelihood is the probability of birthing after the given time
         # (which is probability to any event, times probability the event is a birth),
         # times the likelihood as derived in "Single edge to sample time", once for each child
-        bdms_ll_hand = (
-            log_dexp(b_event.dist, self.Λ(b_event))
-            + (log(self.λ(b_event)) - log(self.Λ(b_event)))
-            + log_hazard_exp(s_events[0].dist, self.Λ(s_events[0]))
+        naive_ll_hand = (
+            log_dexp(b_event.dist, self.Λ(b_event.up))
+            + (log(self.λ(b_event.up)) - log(self.Λ(b_event.up)))
+            + log_hazard_exp(s_events[0].dist, self.Λ(s_events[0].up))
             + log(self.ρ)
-            + log_hazard_exp(s_events[1].dist, self.Λ(s_events[1]))
+            + log_hazard_exp(s_events[1].dist, self.Λ(s_events[1].up))
             + log(self.ρ)
         )
 
         # MTBD likelihood by hand
         present_time = max([node.t for node in tree.get_leaves()])
-        mtbd_ll_hand = (
+        appx_ll_hand = (
             self.log_f_N(b_event, present_time)
             + self.log_f_N(s_events[0], present_time)
             + self.log_f_N(s_events[1], present_time)
-            + log(self.λ(b_event))  # + log(b_event.t)
+            + log(self.λ(b_event.up))
             + 2 * log(self.ρ)
         )
 
-        self.assertAlmostEqual(bdms_ll_code, bdms_ll_hand, places=TOLERANCE)
-        self.assertAlmostEqual(bdms_ll_code, mtbd_ll_hand, places=TOLERANCE)
+        self.assertAlmostEqual(ll_code, naive_ll_hand, places=TOLERANCE)
+        self.assertAlmostEqual(ll_code, appx_ll_hand, places=TOLERANCE)
 
     def log_f_N(self, event, present_time):
-        """The logarithm of the f_N quantity in the MTBD likelihood."""
-        c = sqrt(self.Λ(event) ** 2 - 4 * self.μ(event) * (1 - self.σ) * self.λ(event))
-        x = (-self.Λ(event) - c) / 2
-        y = (-self.Λ(event) + c) / 2
+        """The logarithm of the f_N quantity in the Stadler approximate likelihood."""
+        c = sqrt(
+            self.Λ(event.up) ** 2
+            - 4 * self.μ(event.up) * (1 - self.σ) * self.λ(event.up)
+        )
+        x = (-self.Λ(event.up) - c) / 2
+        y = (-self.Λ(event.up) + c) / 2
 
         helper = (
-            lambda t: (y + self.λ(event) * (1 - self.ρ)) * exp(-c * t)
+            lambda t: (y + self.λ(event.up) * (1 - self.ρ)) * exp(-c * t)
             - x
-            - self.λ(event) * (1 - self.ρ)
+            - self.λ(event.up) * (1 - self.ρ)
         )
 
         t_s = present_time - (event.t - event.dist)

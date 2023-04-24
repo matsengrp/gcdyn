@@ -15,7 +15,6 @@ from jax.tree_util import register_pytree_node
 import jax.numpy as jnp
 import numpy as onp
 import jax.scipy.special as jsp
-import scipy.special as osp
 from scipy.integrate import quad
 
 # imports that are only used for type hints
@@ -42,9 +41,15 @@ class Response(ABC):
 
     @abstractmethod
     def __init__(self, grad: bool = False, *args: Any, **kwargs: Any) -> None:
-        self.grad = grad
-        self._np = jnp if grad else onp
-        self._sp = jsp if grad else osp
+        _register_with_pytree(type(self))
+
+        if grad:
+            # Backtracking on this implementation, because JIT cannot be used
+            # if any of the responses use onp/osp, even the non-grad ones
+            print(f"Note that {type(self)}(grad=True) is no longer used.")
+
+        self._np = jnp
+        self._sp = jsp
 
     @property
     @abstractmethod
@@ -144,6 +149,20 @@ class Response(ABC):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in vars(self).items() if not key.startswith('_'))})"
 
+    def _flatten(self):
+        """Separates out the components of a Response object so its raw
+        parameter values can be used in model fitting."""
+        items = sorted(self._param_dict.items(), key=lambda item: item[0])
+        names, values = zip(*items)
+        return type(self), names, values
+
+    @classmethod
+    def _from_flat(cls, names, values):
+        """Reverses `_flatten`."""
+        new_obj = cls()
+        new_obj._param_dict = dict(zip(names, values))
+        return new_obj
+
 
 ResponseType = TypeVar("ResponseType", bound=Response)
 
@@ -156,22 +175,15 @@ def _register_with_pytree(response_type: ResponseType) -> None:
     `response_type` to be optimized with JAX.
     """
 
-    def flatten(v):
-        # When recreating this object, we need to be able to assign
-        # correct values to each parameter, and also be able to set
-        # `grad` to its original boolean value
+    def flatten(response):
+        _, names, values = response._flatten()
+        return values, names
 
-        items = sorted(v._param_dict.items(), key=lambda item: item[0])
-        names, values = zip(*items)
-        return (values, (names, v.grad))
-
-    def unflatten(aux_data, children):
-        new_obj = response_type(grad=aux_data[1])
-        new_obj._param_dict = dict(zip(aux_data[0], children))
-        return new_obj
+    def unflatten(cls, static_data, dynamic_data):
+        return cls._from_flat(static_data, dynamic_data)
 
     try:
-        register_pytree_node(response_type, flatten, unflatten)
+        register_pytree_node(response_type, flatten, response_type._from_flat)
     except ValueError:
         # Already registered this type
         pass

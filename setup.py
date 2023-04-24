@@ -30,6 +30,7 @@ setup(
         "jax[cpu]",
         "jaxopt",
         "biopython",
+        "diffrax",
     ],
     extras_require={
         "PyQt5": [
