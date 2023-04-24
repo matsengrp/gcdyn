@@ -21,6 +21,17 @@ def n_expected_seqs(rbirth, rdeath, timeval):
     return 2**((rbirth - rdeath) * timeval)
 
 # ----------------------------------------------------------------------------------------
+def outfn(ftype, itrial):
+    if ftype == 'fasta':
+        return f"{args.outdir}/seqs_{itrial}.fasta"
+    elif ftype == 'nwk':
+        return f"{args.outdir}/tree_{itrial}.nwk"
+    elif ftype == 'pkl':
+        return f"{args.outdir}/tree_{itrial}.pkl"
+    else:
+        assert False
+
+# ----------------------------------------------------------------------------------------
 def print_final_response_vals(tree):
     print('                           x         birth           death')
     print('      time   N seqs.   min   max    min  max       min     max')
@@ -129,7 +140,7 @@ def set_responses():
 parser = argparse.ArgumentParser()
 parser.add_argument('--n-seqs', default=70, type=int, help='Number of sequences to observe')
 parser.add_argument('--n-trials', default=51, type=int, help='Number of trials/GCs to simulate')
-parser.add_argument('--n-max-tries', default=1000, type=int, help='Number of times to retry simulation if it fails due to reaching either the min or max number of leaves.')
+parser.add_argument('--n-max-tries', default=30, type=int, help='Number of times to retry simulation if it fails due to reaching either the min or max number of leaves.')
 parser.add_argument('--time-to-sampling', default=20, type=int)
 parser.add_argument('--min-survivors', default=100, type=int)
 parser.add_argument('--max-leaves', default=3000, type=int)
@@ -155,6 +166,7 @@ if args.test:
     args.time_to_sampling = 5
     args.min_survivors = 10
     args.n_seqs = 5
+    args.n_max_tries = 5
 
 assert args.death_value >= 0
 if args.birth_response == 'sigmoid':
@@ -205,11 +217,14 @@ all_seqs, all_trees = [], []
 rng = np.random.default_rng(seed=args.seed)
 for itrial in range(1, args.n_trials + 1):
     print(color('blue', "trial %d:"%itrial), end=' ')
-    ofn = f"{args.outdir}/seqs_{itrial}.fasta"
+    ofn = outfn('fasta', itrial)
     if os.path.exists(ofn) and not args.overwrite:
         print('    output %s already exists, skipping'%ofn)
         records = list(SeqIO.parse(ofn, 'fasta'))
         add_seqs(all_seqs, itrial, [{'name' : rcd.id, 'seq' : rcd.seq} for rcd in records])
+        with open(outfn('pkl', itrial), 'rb') as pfile:
+            tree = dill.load(pfile)
+        all_trees.append(tree)
         continue
     sys.stdout.flush()
     tree = generate_sequences_and_tree(
@@ -219,8 +234,10 @@ for itrial in range(1, args.n_trials + 1):
     tmean, tmin, tmax = get_mut_stats(tree)
     print("   mutations per sequence:  mean %.1f   min %.1f  max %.1f" % (tmean, tmin, tmax))
 
-    with open(f"{args.outdir}/tree_{itrial}.nwk", "w") as fp:
+    with open(outfn('nwk', itrial), "w") as fp:
         fp.write(tree.write() + "\n")
+    with open(outfn('pkl', itrial), "wb") as fp:
+        dill.dump(tree, fp)
 
     seqdict = utils.write_leaf_sequences_to_fasta(
         tree,
@@ -237,7 +254,7 @@ with open(asfn, 'w') as asfile:
         asfile.write('>%s\n%s\n' % (sfo['name'], sfo['seq']))
 
 pkfn = '%s/simu.pkl' % args.outdir
-print('  writing objects to %s'%pkfn)
+print('  writing %d trees and birth/death responses to %s' % (len(all_trees), pkfn))
 with open(pkfn, 'wb') as pfile:
     pkfo = {'birth-response' : birth_rate, 'death-response' : death_rate, 'trees' : all_trees}
     dill.dump(pkfo, pfile)
