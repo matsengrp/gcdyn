@@ -56,6 +56,8 @@ class TestTreeNode(unittest.TestCase):
         )
         self.tree.prune()
         self.assertTrue(all(leaf.event == "sampling" for leaf in self.tree))
+        mutation_count = sum(node.event == "mutation" for node in self.tree.traverse())
+        self.tree.remove_mutation_events()
         self.assertTrue(
             all(
                 len(node.children) == 2
@@ -63,6 +65,8 @@ class TestTreeNode(unittest.TestCase):
                 if node.event == "birth"
             )
         )
+        mutation_count2 = sum(node.n_mutations for node in self.tree.traverse())
+        self.assertEqual(mutation_count, mutation_count2)
         self.assertTrue(
             not any(len(node.children) == 1 for node in self.tree.iter_descendants())
         )

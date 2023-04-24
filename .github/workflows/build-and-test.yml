@@ -7,9 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-    if: "!contains(github.event.commits[0].message, '[skip ci]')"
-
+  build-and-test:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
@@ -25,6 +23,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          cache: pip
 
       - name: Install
         run: |
@@ -38,12 +37,18 @@ jobs:
         run: |
           black --check gcdyn tests
 
-      - name: Test
+      - name: Tests
         run: make test
 
+      - name: Test notebooks
+        # NOTE: only run on ubuntu-latest to save on compute usage
+        if: matrix.os == 'ubuntu-latest'
+        run: make notebooks
+    
       - name: Test docs build
-        run: |
-          make docs
+        # NOTE: only run on ubuntu-latest to save on compute usage
+        if: matrix.os == 'ubuntu-latest'
+        run: make docs
         env:
           QT_QPA_PLATFORM: offscreen
           MPLBACKEND: agg

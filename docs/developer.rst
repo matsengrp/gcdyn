@@ -14,6 +14,10 @@ Run tests::
 
   make test
 
+Test notebooks::
+
+  make notebooks
+
 Format code::
 
   make format
