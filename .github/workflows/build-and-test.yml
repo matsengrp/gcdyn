@@ -25,6 +25,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          cache: pip
 
       - name: Install
         run: |
@@ -38,9 +39,14 @@ jobs:
         run: |
           black --check gcdyn tests
 
-      - name: Test
+      - name: Tests
         run: make test
 
+      - name: Test notebooks
+        if: runner.os == 'ubuntu-latest'
+        run: |
+          make notebooks
+    
       - name: Test docs build
         run: |
           make docs

@@ -13,6 +13,8 @@ install-torchdms:
 
 test:
 	pytest
+
+notebooks:
 	pytest --nbval notebooks/bdms_replay.ipynb notebooks/bdms_inhomogeneous.ipynb
 
 format:
@@ -27,4 +29,4 @@ lint:
 docs:
 	make -C docs html
 
-.PHONY: install test format lint docs
+.PHONY: install test notebooks format lint docs
