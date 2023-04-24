@@ -9,6 +9,7 @@ concrete child classes are included.
 from __future__ import annotations
 from typing import Any, TypeVar, Optional, Union
 from typing import TYPE_CHECKING
+from collections.abc import Callable
 from abc import ABC, abstractmethod
 from jax.tree_util import register_pytree_node
 import jax.numpy as jnp
@@ -521,8 +522,8 @@ class ModulatedPhenotypeResponse(PhenotypeTimeResponse):
     def __init__(
         self,
         phenotype_response: PhenotypeResponse,
-        external_field: callable[[float], float],
-        interaction: callable[[float, float], float] = lambda x, f: x - f,
+        external_field: Callable[[float], float],
+        interaction: Callable[[float, float], float] = lambda x, f: x - f,
         tol: float = 1e-6,
         maxiter: int = 100,
         grad: bool = False,
@@ -563,7 +564,7 @@ class ModulatedRateResponse(PhenotypeTimeResponse):
     def __init__(
         self,
         phenotype_response: PhenotypeResponse,
-        modulation: callable[[float, float, float], float],
+        modulation: Callable[[float, float, float], float],
         tol: float = 1e-6,
         maxiter: int = 100,
         grad: bool = False,

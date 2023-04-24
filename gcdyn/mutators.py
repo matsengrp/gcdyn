@@ -9,7 +9,7 @@ classes are included.
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Optional, Union, Tuple
-from collections.abc import Iterable
+from collections.abc import Iterable, Callable
 import numpy as np
 import pandas as pd
 from scipy.stats import norm, gaussian_kde
@@ -145,7 +145,7 @@ class KdeMutator(AttrMutator):
         self,
         dataset: ArrayLike,
         attr: str = "x",
-        bw_method: Optional[Union[str, float, callable]] = None,
+        bw_method: Optional[Union[str, float, Callable]] = None,
         weights: Optional[ArrayLike] = None,
     ):
         super().__init__(attr=attr)
