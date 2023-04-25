@@ -42,14 +42,21 @@ def mh_step(
     for key in list(from_values):
         proposals = from_values | {key: proposal_generators[key](from_values[key])}
 
-        log_mh_ratio = (
-            log_priors[key](proposals[key])
-            + log_likelihood(**proposals)
-            + proposal_log_densities[key](from_values[key], proposals[key])
-            - log_priors[key](from_values[key])
-            - log_likelihood(**from_values)
-            - proposal_log_densities[key](proposals[key], from_values[key])
-        )
+        try:
+            log_mh_ratio = (
+                log_priors[key](proposals[key])
+                + log_likelihood(**proposals)
+                + proposal_log_densities[key](from_values[key], proposals[key])
+                - log_priors[key](from_values[key])
+                - log_likelihood(**from_values)
+                - proposal_log_densities[key](proposals[key], from_values[key])
+            )
+        except Exception:
+            print("Something went wrong while calculating the MH ratio.")
+            print("The current values at time of failure were", from_values)
+            print("The proposed values at time of failure were", proposals)
+            print("The exception raised was:")
+            raise
 
         rng = random.default_rng()
 
