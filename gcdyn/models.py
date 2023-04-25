@@ -75,16 +75,16 @@ class BirthDeathModel:
         # Fill in defaults if not provided
         if not lower_bounds:
             lower_bounds = {
-                "birth_rate": [0.0, -np.inf, 0.0, 0.0],
-                "death_rate": 0,
-                "mutation_rate": 0,
+                "birth_response": [0.0, -np.inf, 0.0, 0.0],
+                "death_response": 0,
+                "mutation_response": 0,
             }
 
         if not upper_bounds:
             upper_bounds = {
-                "birth_rate": [np.inf, np.inf, np.inf, np.inf],
-                "death_rate": np.inf,
-                "mutation_rate": np.inf,
+                "birth_response": [np.inf, np.inf, np.inf, np.inf],
+                "death_response": np.inf,
+                "mutation_response": np.inf,
             }
 
         # Restrict bounds to optimized parameters
@@ -112,9 +112,9 @@ class BirthDeathModel:
 
 def naive_log_likelihood(
     trees: list[ete3.TreeNode],
-    birth_rate: poisson.Response,
-    death_rate: poisson.Response,
-    mutation_rate: poisson.Response,
+    birth_response: poisson.Response,
+    death_response: poisson.Response,
+    mutation_response: poisson.Response,
     mutator: mutators.Mutator,
     extant_sampling_probability: float,
 ) -> float:
@@ -133,9 +133,9 @@ def naive_log_likelihood(
                 raise ValueError("sampling_probability must be in [0, 1]")
             ρ = extant_sampling_probability
             parameters = {
-                tree._BIRTH_EVENT: birth_rate,
-                tree._DEATH_EVENT: death_rate,
-                tree._MUTATION_EVENT: mutation_rate,
+                tree._BIRTH_EVENT: birth_response,
+                tree._DEATH_EVENT: death_response,
+                tree._MUTATION_EVENT: mutation_response,
             }
 
             # We have two cases that require special handling of the time interval as part of the
@@ -171,9 +171,9 @@ def naive_log_likelihood(
 
 def stadler_appx_log_likelihood(
     trees: list[ete3.TreeNode],
-    birth_rate: poisson.Response,
-    death_rate: poisson.Response,
-    mutation_rate: poisson.Response,
+    birth_response: poisson.Response,
+    death_response: poisson.Response,
+    mutation_response: poisson.Response,
     mutator: mutators.Mutator,
     extant_sampling_probability: float,
     extinct_sampling_probability: float,
@@ -190,9 +190,9 @@ def stadler_appx_log_likelihood(
     for tree in trees:
         for node in tree.iter_descendants():
             Δt = node.dist
-            λ = birth_rate(node.up)
-            μ = death_rate(node.up)
-            γ = mutation_rate(node.up)
+            λ = birth_response(node.up)
+            μ = death_response(node.up)
+            γ = mutation_response(node.up)
             Λ = λ + μ + γ
             ρ = extant_sampling_probability
             σ = extinct_sampling_probability
@@ -230,9 +230,9 @@ def stadler_appx_log_likelihood(
 
 def stadler_full_log_likelihood(
     trees: list[ete3.TreeNode],
-    birth_rate: poisson.Response,
-    death_rate: poisson.Response,
-    mutation_rate: poisson.Response,
+    birth_response: poisson.Response,
+    death_response: poisson.Response,
+    mutation_response: poisson.Response,
     mutator: mutators.Mutator,
     extant_sampling_probability: float,
     extinct_sampling_probability: float,
@@ -256,9 +256,9 @@ def stadler_full_log_likelihood(
     mutation_probs = mutator.transition_matrix
 
     # Relevant values to set aside
-    λ = birth_rate
-    μ = death_rate
-    γ = mutation_rate
+    λ = birth_response
+    μ = death_response
+    γ = mutation_response
     ρ = extant_sampling_probability
     σ = extinct_sampling_probability
 
@@ -389,9 +389,9 @@ def stadler_full_log_likelihood(
 
 def stadler_full_log_likelihood_scipy(
     trees: list[ete3.TreeNode],
-    birth_rate: poisson.Response,
-    death_rate: poisson.Response,
-    mutation_rate: poisson.Response,
+    birth_response: poisson.Response,
+    death_response: poisson.Response,
+    mutation_response: poisson.Response,
     mutator: mutators.Mutator,
     extant_sampling_probability: float,
     extinct_sampling_probability: float,
@@ -412,9 +412,9 @@ def stadler_full_log_likelihood_scipy(
     mutation_probs = mutator.transition_matrix
 
     # Relevant values to set aside
-    λ = birth_rate
-    μ = death_rate
-    γ = mutation_rate
+    λ = birth_response
+    μ = death_response
+    γ = mutation_response
     ρ = extant_sampling_probability
     σ = extinct_sampling_probability
 
