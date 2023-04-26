@@ -5,10 +5,12 @@ import numpy as np
 from mcmc import mh_step
 from jax import disable_jit
 from jax.config import config
-from tqdm import notebook as tqdm
+import tqdm
 import pickle
 
 config.update("jax_enable_x64", True)
+
+intermediate_samples_file = open("intermediate_samples.pkl", "wb")
 
 
 true_parameters = {
@@ -56,6 +58,7 @@ NUM_SAMPLES = 2000
 
 
 # Monte Carlo sampling
+print("Running MC sampling...")
 
 
 def sample_prior():
@@ -72,7 +75,9 @@ mc_samples = {
     "death_response": np.hstack([s["death_response"].value for s in mc_samples]),
 }
 
+
 # Gibbs sampling
+print("Running MCMC sampling...")
 
 
 # Function of just birth_rate and death_rate
@@ -102,7 +107,7 @@ mcmc_samples = [
 ]
 
 with disable_jit():
-    for _ in tqdm.trange(NUM_SAMPLES):
+    for iteration in tqdm.trange(NUM_SAMPLES):
         trees = sample_tree(**mcmc_samples[-1], print_info=False)
 
         for tree in trees:
@@ -118,11 +123,18 @@ with disable_jit():
 
         mcmc_samples.append(params)
 
+        if iteration % 100 == 0:
+            pickle.dump(mcmc_samples, intermediate_samples_file)
+            intermediate_samples_file.flush()
+
 mcmc_samples = {
     "birth_response": np.hstack([s["birth_response"].value for s in mcmc_samples]),
     "death_response": np.hstack([s["death_response"].value for s in mcmc_samples]),
 }
 
+print("Exporting samples...")
 
 with open("geweke_samples.pkl", "wb") as f:
     pickle.dump({"mc_samples": mc_samples, "mcmc_samples": mcmc_samples}, f)
+
+print("Done.")
