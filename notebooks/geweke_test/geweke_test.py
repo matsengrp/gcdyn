@@ -124,7 +124,17 @@ with disable_jit():
         mcmc_samples.append(params)
 
         if iteration % 100 == 0:
-            pickle.dump(mcmc_samples, intermediate_samples_file)
+            pickle.dump(
+                {
+                    "birth_response": np.hstack(
+                        [s["birth_response"].value for s in mcmc_samples]
+                    ),
+                    "death_response": np.hstack(
+                        [s["death_response"].value for s in mcmc_samples]
+                    ),
+                },
+                intermediate_samples_file,
+            )
             intermediate_samples_file.flush()
 
 mcmc_samples = {
