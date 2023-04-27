@@ -12,10 +12,12 @@ from typing import TYPE_CHECKING
 from collections.abc import Callable
 from abc import ABC, abstractmethod
 from jax.tree_util import register_pytree_node
-import jax.numpy as jnp
-import numpy as onp
-import jax.scipy.special as jsp
 from scipy.integrate import quad
+
+import numpy as np
+from numpy import random
+import scipy as sp
+
 
 # imports that are only used for type hints
 if TYPE_CHECKING:
@@ -31,25 +33,25 @@ from jax.config import config
 config.update("jax_enable_x64", True)
 
 
+def set_backend(use_jax=True):
+    import numpy
+    import scipy
+    import jax.numpy
+    import jax.scipy.special
+
+    global np, sp
+    np = jax.numpy if use_jax else numpy
+    sp = jax.scipy.special if use_jax else scipy
+
+
 class Response(ABC):
     r"""Abstract base class for mapping :py:class:`bdms.TreeNode` objects to a
     Poisson process.
-
-    Args:
-        grad: Enables JAX compilation and gradient for optimizing.
     """
 
     @abstractmethod
-    def __init__(self, grad: bool = False, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         _register_with_pytree(type(self))
-
-        if grad:
-            # Backtracking on this implementation, because JIT cannot be used
-            # if any of the responses use onp/osp, even the non-grad ones
-            print(f"Note that {type(self)}(grad=True) is no longer used.")
-
-        self._np = jnp
-        self._sp = jsp
 
     @property
     @abstractmethod
@@ -116,7 +118,7 @@ class Response(ABC):
         self,
         node: bdms.TreeNode,
         rate_multiplier: float = 1.0,
-        seed: Optional[Union[int, onp.random.Generator]] = None,
+        seed: Optional[Union[int, random.Generator]] = None,
     ) -> float:
         r"""Sample the waiting time :math:`\Delta t` until the first event,
         given the rate process starting at the provided node.
@@ -133,7 +135,7 @@ class Response(ABC):
         """
         if rate_multiplier == 0.0:
             return float("inf")
-        rng = onp.random.default_rng(seed)
+        rng = random.default_rng(seed)
         return self.Λ_inv(node, rng.exponential(scale=1 / rate_multiplier))
 
     def waiting_time_logsf(self, node: bdms.TreeNode, Δt: float) -> float:
@@ -241,15 +243,14 @@ class ConstantResponse(PhenotypeResponse):
 
     Args:
         value: Constant response value.
-        grad: See :py:class:`Response`.
     """
 
-    def __init__(self, value: float = 1.0, grad: bool = False):
-        super().__init__(grad)
+    def __init__(self, value: float = 1.0):
+        super().__init__()
         self.value = value
 
     def λ_phenotype(self, x: float) -> float:
-        return self.value * self._np.ones_like(x)
+        return self.value * np.ones_like(x)
 
     @property
     def _param_dict(self) -> dict:
@@ -272,7 +273,6 @@ class ExponentialResponse(PhenotypeResponse):
         xshift: :math:`\theta_2`
         yscale: :math:`\theta_3`
         yshift: :math:`\theta_4`
-        grad: See :py:class:`Response`.
     """
 
     def __init__(
@@ -281,17 +281,16 @@ class ExponentialResponse(PhenotypeResponse):
         xshift: float = 0.0,
         yscale: float = 1.0,
         yshift: float = 0.0,
-        grad: bool = False,
     ):
-        super().__init__(grad)
+        super().__init__()
         self.xscale = xscale
         self.xshift = xshift
         self.yscale = yscale
         self.yshift = yshift
 
     def λ_phenotype(self, x: float) -> float:
-        x = self._np.asarray(x)
-        return self.yscale * self._np.exp(self.xscale * (x - self.xshift)) + self.yshift
+        x = np.asarray(x)
+        return self.yscale * np.exp(self.xscale * (x - self.xshift)) + self.yshift
 
     @property
     def _param_dict(self) -> dict:
@@ -322,7 +321,6 @@ class SigmoidResponse(PhenotypeResponse):
         xshift: :math:`\theta_2`
         yscale: :math:`\theta_3`
         yshift: :math:`\theta_4`
-        grad: See :py:class:`Response`.
     """
 
     def __init__(
@@ -331,19 +329,16 @@ class SigmoidResponse(PhenotypeResponse):
         xshift: float = 0.0,
         yscale: float = 2.0,
         yshift: float = 0.0,
-        grad: bool = False,
     ):
-        super().__init__(grad)
+        super().__init__()
         self.xscale = xscale
         self.xshift = xshift
         self.yscale = yscale
         self.yshift = yshift
 
     def λ_phenotype(self, x: float) -> float:
-        x = self._np.asarray(x)
-        return (
-            self.yscale * self._sp.expit(self.xscale * (x - self.xshift)) + self.yshift
-        )
+        x = np.asarray(x)
+        return self.yscale * sp.expit(self.xscale * (x - self.xshift)) + self.yshift
 
     @property
     def _param_dict(self) -> dict:
@@ -374,7 +369,6 @@ class SoftReluResponse(PhenotypeResponse):
         xshift: :math:`\theta_2`
         yscale: :math:`\theta_3`
         yshift: :math:`\theta_4`
-        grad: See :py:class:`Response`.
     """
 
     def __init__(
@@ -383,19 +377,17 @@ class SoftReluResponse(PhenotypeResponse):
         xshift: float = 0.0,
         yscale: float = 1.0,
         yshift: float = 0.0,
-        grad: bool = False,
     ):
-        super().__init__(grad)
+        super().__init__()
         self.xscale = xscale
         self.xshift = xshift
         self.yscale = yscale
         self.yshift = yshift
 
     def λ_phenotype(self, x: float) -> float:
-        x = self._np.asarray(x)
+        x = np.asarray(x)
         return (
-            self.yscale * self._np.logaddexp(0, self.xscale * (x - self.xshift))
-            + self.yshift
+            self.yscale * np.logaddexp(0, self.xscale * (x - self.xshift)) + self.yshift
         )
 
     @property
@@ -426,16 +418,13 @@ class SequenceContextMutationResponse(HomogeneousResponse):
     Args:
         mutability: a mapping from local context to mutation rate (mutations per site per unit time)
         mutation_intensity: a scaling factor for the mutability
-        grad: See :py:class:`Response`.
     """
 
     def __init__(
         self,
         mutability: pd.Series,
         mutation_intensity: float = 1.0,
-        grad: bool = False,
     ):
-        super().__init__(grad)
         self.mutability = (mutation_intensity * mutability).to_dict()
 
     @property
@@ -462,17 +451,13 @@ class PhenotypeTimeResponse(Response):
     respectively.
 
     Args:
-        grad: See :py:class:`Response`.
         tol: Tolerance for root-finding.
         maxiter: Maximum number of iterations for root-finding.
     """
 
-    def __init__(
-        self, grad: bool = False, tol: float = 1e-6, maxiter: int = 100, *args, **kwargs
-    ):
-        if grad:
-            raise NotImplementedError(f"gradients are not implemented for {type(self)}")
-        super().__init__(grad)
+    def __init__(self, tol: float = 1e-6, maxiter: int = 100, *args, **kwargs):
+        # if grad:
+        #     raise NotImplementedError(f"gradients are not implemented for {type(self)}")
         self.tol = tol
         self.maxiter = maxiter
 
@@ -499,8 +484,8 @@ class PhenotypeTimeResponse(Response):
         converged = False
         for iter in range(self.maxiter):
             if self.λ(node, Δt) == 0:
-                return self._np.inf
-            with self._np.errstate(over="ignore"):
+                return np.inf
+            with np.errstate(over="ignore"):
                 Δt = max(Δt - (self.Λ(node, Δt) - τ) / self.λ(node, Δt), 0.0)
             if abs(self.Λ(node, Δt) - τ) < self.tol:
                 converged = True
@@ -528,7 +513,6 @@ class ModulatedPhenotypeResponse(PhenotypeTimeResponse):
         interaction: a function :math:`\phi(x, f(t))` that maps the phenotype and external field to the effective phenotype.
         tol: See :py:class:`PhenotypeTimeResponse`.
         maxiter: See :py:class:`PhenotypeTimeResponse`.
-        grad: See :py:class:`Response`.
     """
 
     def __init__(
@@ -538,9 +522,7 @@ class ModulatedPhenotypeResponse(PhenotypeTimeResponse):
         interaction: Callable[[float, float], float] = lambda x, f: x - f,
         tol: float = 1e-6,
         maxiter: int = 100,
-        grad: bool = False,
     ):
-        super().__init__(grad=phenotype_response.grad)
         self.phenotype_response = phenotype_response
         self.external_field = external_field
         self.interaction = interaction
@@ -570,7 +552,6 @@ class ModulatedRateResponse(PhenotypeTimeResponse):
         modulation: a function :math:`\tilde\lambda(\lambda_x, x, t)` that maps the original rate :math:`\lambda_x`, phenotype :math:`x`, and time :math:`t` to the modulated rate.
         tol: See :py:class:`PhenotypeTimeResponse`.
         maxiter: See :py:class:`PhenotypeTimeResponse`.
-        grad: See :py:class:`Response`.
     """
 
     def __init__(
@@ -579,9 +560,7 @@ class ModulatedRateResponse(PhenotypeTimeResponse):
         modulation: Callable[[float, float, float], float],
         tol: float = 1e-6,
         maxiter: int = 100,
-        grad: bool = False,
     ):
-        super().__init__(grad=phenotype_response.grad)
         self.phenotype_response = phenotype_response
         self.modulation = modulation
         self.tol = tol

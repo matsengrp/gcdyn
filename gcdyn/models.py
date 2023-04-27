@@ -15,6 +15,8 @@ from jaxopt import ScipyBoundedMinimize
 from gcdyn import mutators, poisson
 import ete3
 
+poisson.set_backend(use_jax=True)
+
 
 def _select_where(source, selector):
     """`jax.jit`-compatible version of `source[selector]` for a boolean array
@@ -228,6 +230,7 @@ def stadler_appx_log_likelihood(
     return result
 
 
+# TODO: can I merge this with scipy somehow and just swap out the integrator
 def stadler_full_log_likelihood(
     trees: list[ete3.TreeNode],
     birth_response: poisson.Response,
