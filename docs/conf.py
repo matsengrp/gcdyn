@@ -54,6 +54,8 @@ extensions = [
     # "sphinxcontrib.programoutput",
     # jupyter notebooks
     "myst_nb",
+    # docstring tests
+    "sphinx.ext.doctest",
 ]
 
 
@@ -74,6 +76,7 @@ intersphinx_mapping = {
     'scipy': ('https://docs.scipy.org/doc/scipy/', None),
     'ete3': ('http://etetoolkit.org/docs/latest/', None),
     'jax': ('https://jax.readthedocs.io/en/latest/', None),
+    'equinox': ('https://docs.kidger.site/equinox/', None),
 }
 
 autosummary_generate = True  # Turn on sphinx.ext.autosummary

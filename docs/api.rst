@@ -12,5 +12,6 @@ Modules
     poisson
     mutators
     gpmap
+    messages
     model
     utils
