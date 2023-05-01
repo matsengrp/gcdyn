@@ -1,5 +1,5 @@
 r"""Poisson process responses
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------
 
 Abstract base classes for defining generic Poisson processes (e.g.
 :math:`\lambda(x, t)`, :math:`\mu(x, t)`, :math:`\gamma(x, t)`), with

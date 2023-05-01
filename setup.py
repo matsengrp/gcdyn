@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 import versioneer
 
 
@@ -9,13 +9,13 @@ setup(
     name="gcdyn",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    author="Erick Matsen",
+    author="gcdyn developers",
     author_email="ematsen@gmail.com",
     description="inference of affinity-fitness response functions",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/matsengrp/gcdyn",
-    packages=["gcdyn", "experiments"],
+    packages=find_packages(exclude=[]),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License (GPL)",
@@ -28,6 +28,7 @@ setup(
         "pandas",
         "jaxlib",
         "jax[cpu]",
+        "equinox",
         "jaxopt",
         "biopython",
     ],

@@ -1,4 +1,7 @@
-r"""BDMS inference."""
+r"""BDMS inference
+------------------
+
+"""
 
 from __future__ import annotations
 

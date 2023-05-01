@@ -1,4 +1,6 @@
-r"""Utility functions ^^^^^^^^^^^^^^^^^"""
+r"""Utility functions
+---------------------
+"""
 
 import ete3
 

@@ -1,4 +1,4 @@
-.. currentmodule:: gcdyn
+.. currentmodule:: phylax
 
 
 Modules
@@ -8,9 +8,4 @@ Modules
     :toctree: _autosummary
     :template: custom-module-template.rst
 
-    bdms
-    poisson
-    mutators
-    gpmap
-    model
-    utils
+    treemp

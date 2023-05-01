@@ -1,6 +1,7 @@
 r"""Germinal center light zone / dark-zone cycles simulator.
 
-Borrowing from `gctree <https://github.com/matsengrp/gctree/blob/master/gctree/mutation_model.py>`_
+Borrowing from
+`gctree<https://github.com/matsengrp/gctree/blob/master/gctree/mutation_model.py>`_
 """
 
 from typing import Callable, Optional, Tuple

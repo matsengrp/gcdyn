@@ -81,7 +81,6 @@ class DMSPhenotype:
         Returns:
             kd_values: predicted KD based on ``torchdms`` model for each sequence
         """
-
         seqs = self._seq_aa_tdms(nt_seqs)
         aa_seq_one_hot = torch.stack([self.model.seq_to_binary(seq) for seq in seqs])
         try:
