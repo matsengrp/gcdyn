@@ -16,7 +16,7 @@ from scipy.integrate import quad
 
 import numpy as np
 from numpy import random
-import scipy as sp
+import scipy.special as sp
 
 
 # imports that are only used for type hints
@@ -35,13 +35,13 @@ config.update("jax_enable_x64", True)
 
 def set_backend(use_jax=True):
     import numpy
-    import scipy
+    import scipy.special
     import jax.numpy
     import jax.scipy.special
 
     global np, sp
     np = jax.numpy if use_jax else numpy
-    sp = jax.scipy.special if use_jax else scipy
+    sp = jax.scipy.special if use_jax else scipy.special
 
 
 class Response(ABC):
@@ -159,9 +159,15 @@ class Response(ABC):
         return type(self), names, values
 
     @classmethod
-    def _from_flat(cls, names, values):
-        """Reverses `_flatten`."""
-        new_obj = cls()
+    def _from_flat(response_type, names, values):
+        """
+        Reverses `_flatten`.
+        Usage:
+            flat = response._flatten()
+
+            flat[0]._from_flat(*flat[1:])
+        """
+        new_obj = response_type()
         new_obj._param_dict = dict(zip(names, values))
         return new_obj
 
