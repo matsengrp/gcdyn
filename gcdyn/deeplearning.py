@@ -7,7 +7,6 @@ import numpy as np
 
 import tensorflow as tf
 from functools import reduce, partial
-from collections import defaultdict
 from gcdyn import poisson, mutators, utils
 
 # from tensorflow import keras
@@ -18,14 +17,14 @@ layers = keras.layers
 
 
 class NeuralNetworkModel:
-    def __init__(self, trees, responses, max_leaf_count=200):
+    def __init__(self, trees, responses, max_leaf_count=200, ladderize_trees=True):
         """
         trees: sequence of `bdms.TreeNode`s
         responses: 2D sequence, with first dimension corresponding to trees
                    and second dimension to the Response objects to predict
                    (Responses that aren't being estimated need not be provided)
         max_leaf_count: will specify the size of the second dimension of encoded trees
-        ladderize_trees: if trees are not already ladderized,
+        ladderize_trees: if trees are already ladderized, set this to `False` to save computing time
         """
         num_parameters = sum(len(response._param_dict) for response in responses[0])
 
@@ -51,47 +50,15 @@ class NeuralNetworkModel:
         # TODO: should we rescale the trees too?
         self.max_leaf_count = max_leaf_count
 
-        for tree in trees:
-            self._ladderize_tree(tree)
+        if ladderize_trees:
+            for tree in trees:
+                utils.ladderize_tree(tree)
 
         self.trees = trees
         self.encoded_trees = np.stack(
             [self._encode_tree(tree, self.max_leaf_count) for tree in trees]
         )
         self.responses = responses
-
-    @classmethod
-    def _ladderize_tree(cls, tree):
-        """Ladderizes the given tree.
-
-        *NOTE: this is done in place!*
-        """
-
-        # Maps the name of a node to the time of the most
-        # recent leaf in the subtree at/below this node
-        time_of_most_recent_leaf = defaultdict(int)
-
-        for node in tree.iter_leaves():
-            while True:
-                if node.is_leaf():
-                    time_of_most_recent_leaf[node.name] = node.t
-                else:
-                    time_of_most_recent_leaf[node.name] = max(
-                        time_of_most_recent_leaf[child.name] for child in node.children
-                    )
-
-                if node.up:
-                    node = node.up
-                else:
-                    break
-
-        for node in tree.traverse():
-            if len(node.children) > 1:
-                node.children = sorted(
-                    node.children,
-                    key=lambda node: time_of_most_recent_leaf[node.name],
-                    reverse=True,
-                )
 
     @classmethod
     def _encode_tree(cls, tree, max_leaf_count):
@@ -131,36 +98,24 @@ class NeuralNetworkModel:
 
         return matrix
 
-    def fit(self, epochs=30):
-        """Trains neural network on given trees and response parameters."""
-
-        response_parameters = np.array(
+    @classmethod
+    def _encode_responses(cls, responses):
+        return np.array(
             [
                 np.hstack([response._flatten()[2] for response in row])
-                for row in self.responses
+                for row in responses
             ]
         )
 
-        self.network.compile(loss="mean_squared_error")
-        self.network.fit(self.encoded_trees, response_parameters, epochs=epochs)
-
-    def predict(self, trees):
-        """Returns the Response objects predicted for each tree."""
-        for tree in trees:
-            self._ladderize_tree(tree)
-
-        encoded_trees = np.stack(
-            [self._encode_tree(tree, self.max_leaf_count) for tree in trees]
-        )
-
-        response_parameters = self.network(encoded_trees)
-        response_structure = [response._flatten() for response in self.responses[0]]
-
+    @classmethod
+    def _decode_responses(cls, response_parameters, example_responses):
         result = []
 
         for row in response_parameters:
-            predicted_responses = []
+            responses = []
             i = 0
+
+            response_structure = [response._flatten() for response in example_responses]
 
             for (
                 response_cls,
@@ -168,14 +123,37 @@ class NeuralNetworkModel:
                 example_param_values,
             ) in response_structure:
                 param_values = row[i : i + len(example_param_values)]
-                predicted_responses.append(
-                    response_cls._from_flat(param_names, param_values)
-                )
+                responses.append(response_cls._from_flat(param_names, param_values))
                 i += len(example_param_values)
 
-            result.append(predicted_responses)
+            result.append(responses)
 
         return result
+
+    def fit(self, epochs=30):
+        """Trains neural network on given trees and response parameters."""
+
+        response_parameters = self._encode_responses(self.responses)
+
+        self.network.compile(loss="mean_squared_error")
+        self.network.fit(self.encoded_trees, response_parameters, epochs=epochs)
+
+    def predict(self, trees, ladderize_trees=True):
+        """Returns the Response objects predicted for each tree."""
+
+        if ladderize_trees:
+            for tree in trees:
+                utils.ladderize_tree(tree)
+
+        encoded_trees = np.stack(
+            [self._encode_tree(tree, self.max_leaf_count) for tree in trees]
+        )
+
+        response_parameters = self.network(encoded_trees)
+
+        return self._decode_responses(
+            response_parameters, example_responses=self.responses[0]
+        )
 
 
 # %%
@@ -196,7 +174,7 @@ if __name__ == "__main__":
 
     print(tree)
 
-    NeuralNetworkModel._ladderize_tree(tree)
+    utils.ladderize_tree(tree)
     print(tree)
 
     encoded_tree = NeuralNetworkModel._encode_tree(tree, max_leaf_count=10)

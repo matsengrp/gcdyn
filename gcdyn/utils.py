@@ -50,6 +50,39 @@ def write_leaf_sequences_to_fasta(
             fp.write(f"{sequence}\n")
 
 
+def ladderize_tree(tree):
+    """Ladderizes the given tree.
+
+    *NOTE: this is done in place!*
+    """
+
+    # Maps the name of a node to the time of the most
+    # recent leaf in the subtree at/below this node
+    time_of_most_recent_leaf = defaultdict(int)
+
+    for node in tree.iter_leaves():
+        while True:
+            if node.is_leaf():
+                time_of_most_recent_leaf[node.name] = node.t
+            else:
+                time_of_most_recent_leaf[node.name] = max(
+                    time_of_most_recent_leaf[child.name] for child in node.children
+                )
+
+            if node.up:
+                node = node.up
+            else:
+                break
+
+    for node in tree.traverse():
+        if len(node.children) > 1:
+            node.children = sorted(
+                node.children,
+                key=lambda node: time_of_most_recent_leaf[node.name],
+                reverse=True,
+            )
+
+
 def sample_trees(
     n,
     init_x=0,
