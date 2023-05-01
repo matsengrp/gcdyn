@@ -55,7 +55,8 @@ def sample_trees(
     init_x=0,
     seed=None,
     print_info=True,
-    **kwargs,
+    extant_sampling_probability=1,
+    **evolve_kwargs,
 ):
     r"""Returns a sequence of n simulated trees.
 
@@ -67,14 +68,11 @@ def sample_trees(
               If an ``int``, then it will be used to derive the initial state.
               If a :py:class:`numpy.random.Generator`, then it will be used directly.
         print_info: Whether to print a summary statistic of the tree sizes.
-        kwargs: Keyword arguments passed to :py:meth:`TreeNode.evolve`, and/or
-                `extant_sampling_probability` to be passed to :py:meth:`TreeNode.sample_survivors`
-                as argument `p`..
+        extant_sampling_probability: To be passed to :py:meth:`TreeNode.sample_survivors` as argument `p`.
+        kwargs: Keyword arguments passed to :py:meth:`TreeNode.evolve`.
     """
 
     rng = np.random.default_rng(seed)
-
-    extant_sampling_probability = kwargs.pop("extant_sampling_probability", None)
 
     trees = []
     encountered_errors = defaultdict(int)
@@ -83,7 +81,7 @@ def sample_trees(
         try:
             tree = TreeNode()
             tree.x = init_x
-            tree.evolve(seed=rng, **kwargs)
+            tree.evolve(seed=rng, **evolve_kwargs)
             tree.sample_survivors(p=extant_sampling_probability, seed=rng)
             trees.append(tree)
         except TreeError as err:  # not enough survivors
