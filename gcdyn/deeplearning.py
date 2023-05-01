@@ -25,10 +25,10 @@ class NeuralNetworkModel:
                    and second dimension to the Response objects to predict
                    (Responses that aren't being estimated need not be provided)
         max_leaf_count: will specify the size of the second dimension of encoded trees
+        ladderize_trees: if trees are not already ladderized,
         """
-        num_parameters = sum(
-            len(response._param_dict) for row in responses for response in row
-        )
+        num_parameters = sum(len(response._param_dict) for response in responses[0])
+
         network_layers = (
             # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
             lambda x: tf.transpose(x, (0, 2, 1)),
@@ -54,6 +54,7 @@ class NeuralNetworkModel:
         for tree in trees:
             self._ladderize_tree(tree)
 
+        self.trees = trees
         self.encoded_trees = np.stack(
             [self._encode_tree(tree, self.max_leaf_count) for tree in trees]
         )
@@ -155,25 +156,29 @@ class NeuralNetworkModel:
         response_parameters = self.network(encoded_trees)
         response_structure = [response._flatten() for response in self.responses[0]]
 
-        predicted_responses = []
+        result = []
 
         for row in response_parameters:
+            predicted_responses = []
             i = 0
+
             for (
                 response_cls,
                 param_names,
                 example_param_values,
-                grad,
             ) in response_structure:
-                param_values = row[i : len(example_param_values)]
+                param_values = row[i : i + len(example_param_values)]
                 predicted_responses.append(
-                    response_cls._from_flat(param_names, param_values, grad)
+                    response_cls._from_flat(param_names, param_values)
                 )
                 i += len(example_param_values)
 
-        return predicted_responses
+            result.append(predicted_responses)
+
+        return result
 
 
+# %%
 if __name__ == "__main__":
     # A test to make sure we can correctly encode the tree
     # in Figure 2a of https://doi.org/10.1038/s41467-022-31511-0
@@ -199,7 +204,7 @@ if __name__ == "__main__":
 
     # Now try training a nnet
 
-    N = 1000
+    N = 100
 
     params = [[poisson.ConstantResponse()] for _ in range(N)]
 
@@ -207,16 +212,16 @@ if __name__ == "__main__":
         utils.sample_trees,
         n=1,
         t=2,
-        birth_rate=poisson.SigmoidResponse(),
-        mutation_rate=poisson.ConstantResponse(),
+        birth_response=poisson.SigmoidResponse(),
+        mutation_response=poisson.ConstantResponse(),
         mutator=mutators.GaussianMutator(-1, 1),
     )
 
-    trees = [sample_tree(death_rate=row[0])[0] for row in params]
+    trees = [sample_tree(death_response=row[0])[0] for row in params]
 
     model = NeuralNetworkModel(trees, params)
     model.fit()
 
-    model.predict(trees)
+    print(model.predict(trees))
 
 # %%
