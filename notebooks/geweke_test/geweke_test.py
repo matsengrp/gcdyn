@@ -30,9 +30,19 @@ PRESENT_TIME = 2
 BIRTH_PROPOSAL_SD = 0.2
 DEATH_PROPOSAL_SD = 0.2
 
+BIRTH_PRIOR_SHAPE = 2
+BIRTH_PRIOR_RATE = 3
+
+DEATH_PRIOR_SHAPE = 3.5
+DEATH_PRIOR_RATE = 3
+
 prior_log_densities = {
-    "birth_response": lambda response: gamma(1).logpdf(response.value),
-    "death_response": lambda response: gamma(1).logpdf(response.value),
+    "birth_response": lambda response: gamma(
+        a=BIRTH_PRIOR_SHAPE, scale=1 / BIRTH_PRIOR_RATE
+    ).logpdf(response.value),
+    "death_response": lambda response: gamma(
+        a=BIRTH_PRIOR_SHAPE, scale=1 / DEATH_PRIOR_RATE
+    ).logpdf(response.value),
 }
 
 proposal_generators = {
