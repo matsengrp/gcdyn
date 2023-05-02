@@ -12,7 +12,7 @@ install-torchdms:
 	pip install git+https://github.com/matsengrp/torchdms
 
 test:
-	pytest
+	pytest tests
 
 notebooks:
 	pytest --nbval notebooks/bdms_replay.ipynb notebooks/bdms_inhomogeneous.ipynb
