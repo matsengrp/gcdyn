@@ -1,4 +1,4 @@
-from gcdyn import bdms, mutators, models, poisson
+from gcdyn import bdms, mutators, models, poisson, utils
 from numpy import log, sqrt, exp, max
 from scipy.stats import expon
 import unittest
@@ -32,20 +32,29 @@ def log_hazard_exp(x, rate):
     return expon.logsf(x, scale=1 / rate)
 
 
-class TestMTBDLikelihood(unittest.TestCase):
-    """Test cases where the MTBD likelihood value matches the BDMS likelihood value."""
+class TestLikelihoods(unittest.TestCase):
+    """Test cases where various MTBD process likelihoods should match."""
 
     def setUp(self):
-        self.λ = poisson.SigmoidResponse()
-        self.μ = poisson.ConstantResponse(1)
-        self.γ = poisson.ConstantResponse(1)
-        self.state_space = (1, 1.5)
+        self.λ = poisson.SigmoidResponse(1.0, 0.0, 2.0, 0.0)
+        self.μ = poisson.ConstantResponse(1.3)
+        self.γ = poisson.ConstantResponse(1.2)
+        self.state_space = (1, 1.5, 2)
         self.mutator = mutators.DiscreteMutator(
-            state_space=self.state_space, transition_matrix=[[0, 1], [1, 0]]
+            state_space=self.state_space,
+            transition_matrix=utils.random_transition_matrix(length=3, seed=10),
         )
         self.ρ = 1
         self.σ = 1
         self.Λ = lambda x: self.λ(x) + self.μ(x) + self.γ(x)
+
+        self.parameter_dict = {
+            "birth_response": self.λ,
+            "death_response": self.μ,
+            "mutation_response": self.γ,
+            "mutator": self.mutator,
+            "extant_sampling_probability": self.ρ,
+        }
 
     def compare_models(self, tree):
         """
@@ -53,18 +62,10 @@ class TestMTBDLikelihood(unittest.TestCase):
         and returns the value should they match.
         """
 
-        parameters = {
-            "birth_response": self.λ,
-            "death_response": self.μ,
-            "mutation_response": self.γ,
-            "mutator": self.mutator,
-        }
-
         # Naive likelihood by code
         naive_ll_code = models.naive_log_likelihood(
             [tree],
-            **parameters,
-            extant_sampling_probability=self.ρ,
+            **self.parameter_dict,
         ).item()
 
         # Stadler approximate likelihood by code
@@ -76,8 +77,7 @@ class TestMTBDLikelihood(unittest.TestCase):
 
         appx_ll_code = models.stadler_appx_log_likelihood(
             [tree],
-            **parameters,
-            extant_sampling_probability=self.ρ,
+            **self.parameter_dict,
             extinct_sampling_probability=self.σ,
             present_time=present_time,
         ).item()
@@ -85,8 +85,7 @@ class TestMTBDLikelihood(unittest.TestCase):
         # Stadler full likelihood by code
         full_ll_code = models.stadler_full_log_likelihood(
             [tree],
-            **parameters,
-            extant_sampling_probability=self.ρ,
+            **self.parameter_dict,
             extinct_sampling_probability=self.σ,
             present_time=present_time,
         ).item()
@@ -225,6 +224,13 @@ class TestMTBDLikelihood(unittest.TestCase):
 
         self.assertAlmostEqual(ll_code, naive_ll_hand, places=TOLERANCE)
         self.assertAlmostEqual(ll_code, appx_ll_hand, places=TOLERANCE)
+
+    def test_full_tree(self):
+        """A fully grown tree."""
+
+        trees = utils.sample_trees(n=1, t=2, init_x=1, **self.parameter_dict, seed=10)
+
+        self.compare_models(trees[0])
 
     def log_f_N(self, event, present_time):
         """The logarithm of the f_N quantity in the Stadler approximate likelihood."""
