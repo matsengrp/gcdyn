@@ -1,21 +1,25 @@
-from gcdyn import models, mutators, poisson, utils
-from scipy.stats import gamma, lognorm
+# %%
+import pickle
 from functools import partial
+
 import numpy as np
-from mcmc import mh_step
+import pandas as pd
+import tqdm
 from jax import disable_jit
 from jax.config import config
-import tqdm
-import pickle
+from mcmc import mh_step
+from scipy.stats import gamma, lognorm
+
+from gcdyn import models, mutators, poisson, utils
 
 config.update("jax_enable_x64", True)
 
-intermediate_samples_file = open("intermediate_samples.pkl", "wb")
-
-
-true_parameters = {
+initial_parameter_values = {
     "birth_response": poisson.ConstantResponse(2),
     "death_response": poisson.ConstantResponse(1),
+}
+
+true_parameters = {
     "mutation_response": poisson.ConstantResponse(0),
     "mutator": mutators.DiscreteMutator(
         state_space=(1, 2, 3),
@@ -24,6 +28,7 @@ true_parameters = {
     "extant_sampling_probability": 1,
 }
 
+NUM_SAMPLES = 2000
 PRESENT_TIME = 2
 
 
@@ -35,6 +40,18 @@ BIRTH_PRIOR_RATE = 3
 
 DEATH_PRIOR_SHAPE = 3.5
 DEATH_PRIOR_RATE = 3
+
+
+def sample_prior():
+    return {
+        "birth_response": poisson.ConstantResponse(
+            gamma(a=BIRTH_PRIOR_SHAPE, scale=1 / BIRTH_PRIOR_RATE).rvs(size=1).item()
+        ),
+        "death_response": poisson.ConstantResponse(
+            gamma(a=BIRTH_PRIOR_SHAPE, scale=1 / DEATH_PRIOR_RATE).rvs(size=1).item()
+        ),
+    }
+
 
 prior_log_densities = {
     "birth_response": lambda response: gamma(
@@ -63,33 +80,6 @@ proposal_log_densities = {
     ),
 }
 
-
-NUM_SAMPLES = 2000
-
-
-# Monte Carlo sampling
-print("Running MC sampling...")
-
-
-def sample_prior():
-    return {
-        "birth_response": poisson.ConstantResponse(gamma(1).rvs(size=1).item()),
-        "death_response": poisson.ConstantResponse(gamma(1).rvs(size=1).item()),
-    }
-
-
-mc_samples = [sample_prior() for _ in range(NUM_SAMPLES)]
-
-mc_samples = {
-    "birth_response": np.hstack([s["birth_response"].value for s in mc_samples]),
-    "death_response": np.hstack([s["death_response"].value for s in mc_samples]),
-}
-
-
-# Gibbs sampling
-print("Running MCMC sampling...")
-
-
 # Function of just birth_rate and death_rate
 sample_tree = partial(
     utils.sample_trees,
@@ -110,11 +100,22 @@ log_likelihood = partial(
     present_time=PRESENT_TIME,
 )
 
+# %%
+# Monte Carlo sampling
+print("Running MC sampling...")
 
-# Initialize with the truth
-mcmc_samples = [
-    {param: true_parameters[param] for param in ("birth_response", "death_response")}
-]
+mc_samples = [sample_prior() for _ in range(NUM_SAMPLES)]
+
+mc_samples = {
+    "birth_response": np.hstack([s["birth_response"].value for s in mc_samples]),
+    "death_response": np.hstack([s["death_response"].value for s in mc_samples]),
+}
+
+# %%
+# Gibbs sampling
+print("Running MCMC sampling...")
+
+mcmc_samples = [initial_parameter_values]
 
 with disable_jit():
     for iteration in tqdm.trange(NUM_SAMPLES):
@@ -133,28 +134,21 @@ with disable_jit():
 
         mcmc_samples.append(params)
 
-        if iteration % 100 == 0:
-            pickle.dump(
-                {
-                    "birth_response": np.hstack(
-                        [s["birth_response"].value for s in mcmc_samples]
-                    ),
-                    "death_response": np.hstack(
-                        [s["death_response"].value for s in mcmc_samples]
-                    ),
-                },
-                intermediate_samples_file,
-            )
-            intermediate_samples_file.flush()
-
 mcmc_samples = {
     "birth_response": np.hstack([s["birth_response"].value for s in mcmc_samples]),
     "death_response": np.hstack([s["death_response"].value for s in mcmc_samples]),
 }
 
+# %%
 print("Exporting samples...")
 
 with open("geweke_samples.pkl", "wb") as f:
     pickle.dump({"mc_samples": mc_samples, "mcmc_samples": mcmc_samples}, f)
+
+mc_samples = pd.DataFrame(mc_samples).assign(Method="MC")
+mc_samples["t"] = mc_samples.index + 1
+mcmc_samples = pd.DataFrame(mcmc_samples).assign(Method="MCMC")
+mcmc_samples["t"] = mcmc_samples.index + 1
+pd.concat([mc_samples, mcmc_samples]).to_csv("geweke_samples.csv")
 
 print("Done.")
