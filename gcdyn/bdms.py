@@ -56,13 +56,6 @@ class TreeNode(ete3.Tree):
 
     _name_generator = itertools.count()
 
-    _time_face = ete3.AttrFace(
-        "dist", fsize=6, ftype="Arial", fgcolor="black", formatter="%0.3g"
-    )
-    _mutation_face = ete3.AttrFace(
-        "n_mutations", fsize=6, ftype="Arial", fgcolor="green"
-    )
-
     def __init__(
         self,
         t: float = 0,
@@ -447,7 +440,7 @@ class TreeNode(ete3.Tree):
                 node.delete(prevent_nondicotomic=False, preserve_branch_length=True)
 
     def render(
-        self, color_by=None, *args: Any, cbar_file: Optional[str] = None, **kwargs: Any
+        self, color_by, *args: Any, cmap: str = "coolwarm_r", vmin: Optional[float] = None, vmax: Optional[float] = None, vcenter: Optional[float] = None, cbar_file: Optional[str] = None, **kwargs: Any
     ) -> Any:
         r"""A thin wrapper around :py:func:`ete3.TreeNode.render` that adds some
         custom decoration and a color bar. As with the base class method, pass
@@ -471,6 +464,13 @@ class TreeNode(ete3.Tree):
         Args:
             color_by: If not ``None``, color tree by this attribute (must be a scalar).
             args: Arguments to pass to :py:func:`ete3.TreeNode.render`.
+            cmap: Colormap name to use for coloring tree nodes.
+            vmin: Set lower bound of color bar. If ``None``, use minimum value of
+                  attribute ``color_by``.
+            vmax: Set upper bound of color bar. If ``None``, use maximum value of
+                  attribute ``color_by``.
+            vcenter: Center value of color bar. If ``None``, use root node attribute
+                     value
             cbar_file: If not ``None``, save color bar to this file.
             kwargs: Keyword arguments to pass to :py:func:`ete3.TreeNode.render`.
         """
@@ -478,16 +478,17 @@ class TreeNode(ete3.Tree):
             kwargs["tree_style"] = ete3.TreeStyle()
             kwargs["tree_style"].show_leaf_name = False
             kwargs["tree_style"].show_scale = False
-        cmap = "coolwarm_r"
         cmap = mpl.cm.get_cmap(cmap)
-        halfrange = max(
-            abs(getattr(node, color_by) - getattr(self, color_by))
-            for node in self.traverse()
-        )
-        norm = mpl.colors.CenteredNorm(
-            vcenter=getattr(self, color_by),
-            halfrange=halfrange if halfrange > 0 else 1,
-        )
+        if vmin is None:
+            vmin=min(getattr(node, color_by) for node in self.traverse())
+        if vmax is None:
+            vmax=max(getattr(node, color_by) for node in self.traverse())
+        if vcenter is None:
+            vcenter = getattr(self, color_by)
+        if vmin < vcenter < vmax:
+            norm = mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=vcenter, vmax=vmax)
+        else:
+            norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
         colormap = {
             node.name: mpl.colors.to_hex(cmap(norm(getattr(node, color_by))))
             for node in self.traverse()
@@ -515,9 +516,6 @@ class TreeNode(ete3.Tree):
             for node in self.traverse():
                 nstyle = ete3.NodeStyle()
                 nstyle["fgcolor"] = colormap[node.name]
-                if not node.is_root() and not getattr(node.faces, "branch-bottom"):
-                    node.add_face(self._time_face, 0, position="branch-top")
-                    node.add_face(self._mutation_face, 0, position="branch-bottom")
                 node.set_style(nstyle)
 
         fig = plt.figure(figsize=(2, 1))
@@ -526,7 +524,7 @@ class TreeNode(ete3.Tree):
             mpl.cm.ScalarMappable(cmap=cmap, norm=norm),
             orientation="horizontal",
             cax=cax,
-            label=r"$x$",
+            label=f"{color_by}",
         )
         if cbar_file is not None:
             plt.savefig(cbar_file)

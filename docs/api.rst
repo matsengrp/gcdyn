@@ -1,6 +1,9 @@
 .. currentmodule:: gcdyn
 
 
+``gcdyn`` package
+=================
+
 Modules
 -------
 

@@ -1,5 +1,7 @@
 .. currentmodule:: phylax
 
+``phylax`` package
+==================
 
 Modules
 -------
@@ -8,4 +10,4 @@ Modules
     :toctree: _autosummary
     :template: custom-module-template.rst
 
-    treemp
+    message

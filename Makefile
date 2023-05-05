@@ -18,7 +18,7 @@ test:
 	pytest --doctest-modules
 
 notebooks:
-	pytest --nbval notebooks/bdms_replay.ipynb notebooks/bdms_inhomogeneous.ipynb
+	pytest --nbval notebooks/bdms-replay.ipynb notebooks/bdms-inhomogeneous.ipynb notebooks/message-passing.ipynb
 
 format:
 	black gcdyn experiments tests phylax

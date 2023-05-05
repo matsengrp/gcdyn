@@ -15,20 +15,22 @@ All code is freely available at `<https://github.com/matsengrp/gcdyn>`_
    :maxdepth: 1
    :caption: Tutorials
 
-   notebooks/bdms_replay
-   notebooks/bdms_inhomogeneous
+   notebooks/bdms-replay
+   notebooks/bdms-inhomogeneous
+   notebooks/message-passing
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: API Documentation
 
    api
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Subpackages
 
    phylax
+   
    experiments
 
 .. toctree::

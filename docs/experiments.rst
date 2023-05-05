@@ -1,5 +1,7 @@
 .. currentmodule:: experiments
 
+``experiments`` package
+=======================
 
 Modules
 -------
