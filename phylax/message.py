@@ -16,12 +16,12 @@ is the set of nodes and :math:`\mathcal{E} \subset \mathcal{V} \times \mathcal{V
 
 Each node :math:`v \in \mathcal{V}` has an input feature vector :math:`x_v \in \mathbb{R}^d`.
 We will compute its representation :math:`h_v \in \mathbb{R}^r` via a message-passing scheme
-with an *update operator* :math:`F_{\uparrow}: \mathbb{R}^d\times\mathbb{R}^m \to \mathbb{R}^r` that
+with an *update operator* :math:`F: \mathbb{R}^d\times\mathbb{R}^m \to \mathbb{R}^r` that
 combines the local feature vector with an incoming message :math:`m_v \in \mathbb{R}^m`.
 
 .. math::
 
-    h_v = F_{\uparrow}\left(x_v, m_v\right).
+    h_v = F\left(x_v, m_v\right).
 
 Post-order message passing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -60,7 +60,7 @@ Implementation
 To facilitate compatibility with :py:func:`jax.jit`, the implementation has
 the following properties:
 
-- Operations are handled via a functional interface (i.e. without stateful updates).
+- Operations are handled via a functional interface (i.e. without stateful updates) built on `equinox <https://docs.kidger.site/equinox/>`_.
 - Although the model specification lends itself to recursion, the termination
   conditions would depend on tree topology, which is not defined at trace time. We
   therefore avoid tree recursion.
