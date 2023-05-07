@@ -23,14 +23,8 @@ All code is freely available at `<https://github.com/matsengrp/gcdyn>`_
    :maxdepth: 3
    :caption: API Documentation
 
-   api
-
-.. toctree::
-   :maxdepth: 3
-   :caption: Subpackages
-
+   gcdyn
    phylax
-   
    experiments
 
 .. toctree::

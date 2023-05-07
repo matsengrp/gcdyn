@@ -440,7 +440,15 @@ class TreeNode(ete3.Tree):
                 node.delete(prevent_nondicotomic=False, preserve_branch_length=True)
 
     def render(
-        self, color_by, *args: Any, cmap: str = "coolwarm_r", vmin: Optional[float] = None, vmax: Optional[float] = None, vcenter: Optional[float] = None, cbar_file: Optional[str] = None, **kwargs: Any
+        self,
+        color_by,
+        *args: Any,
+        cmap: str = "coolwarm_r",
+        vmin: Optional[float] = None,
+        vmax: Optional[float] = None,
+        vcenter: Optional[float] = None,
+        cbar_file: Optional[str] = None,
+        **kwargs: Any,
     ) -> Any:
         r"""A thin wrapper around :py:func:`ete3.TreeNode.render` that adds some
         custom decoration and a color bar. As with the base class method, pass
@@ -480,9 +488,9 @@ class TreeNode(ete3.Tree):
             kwargs["tree_style"].show_scale = False
         cmap = mpl.cm.get_cmap(cmap)
         if vmin is None:
-            vmin=min(getattr(node, color_by) for node in self.traverse())
+            vmin = min(getattr(node, color_by) for node in self.traverse())
         if vmax is None:
-            vmax=max(getattr(node, color_by) for node in self.traverse())
+            vmax = max(getattr(node, color_by) for node in self.traverse())
         if vcenter is None:
             vcenter = getattr(self, color_by)
         if vmin < vcenter < vmax:

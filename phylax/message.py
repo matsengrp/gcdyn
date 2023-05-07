@@ -75,14 +75,6 @@ References
 .. [1] Veronika Thost and Jie Chen. "Directed Acyclic Graph Neural Networks."
        *International Conference on Learning Representations*. 2021.
        https://openreview.net/forum?id=JbuYF437WB6
-
-
-Examples
---------
-
->>> import ete3
->>> import phylax.messenger as msg
-
 """
 
 from __future__ import annotations
@@ -95,8 +87,7 @@ import abc
 import ete3
 import numpy as onp
 
-from typing import Optional, Tuple
-from collections.abc import Callable
+from typing import Optional, Tuple, Sequence
 from jaxtyping import Array, Bool, Int, Float
 
 
@@ -165,30 +156,6 @@ class TreeMessagePasser(eqx.Module):
                  node's updated representation.
         downdater: A function that combines the feature vector of a node with an incoming message and returns the
                    node's updated representation.
-
-    Example:
-
-        Import the necessary modules:
-
-        >>> import ete3
-        >>> import phylax.message as msg
-
-        Define a tree:
-
-        >>> tree = ete3.Tree("((A:1,B:1):1,C:2);")
-
-        Names of tree node attributes to use as features:
-
-        >>> attributes = ("dist",)
-
-        Define the messenger and updater functions:
-
-        >>> messenger = lambda x, y: jnp.sum(x, axis=0)
-        >>> updater = lambda x, y: x + y
-
-        Initialize the message passer:
-
-        >>> message_passer = TreeMessagePasser(tree, attributes, messenger=messenger, updater=updater)
     """
     up_messenger: Messenger
     down_messenger: Messenger
@@ -270,7 +237,10 @@ class TreeMessagePasser(eqx.Module):
                         feature matrix will be ordered according to this sequence.
         """
         return jnp.asarray(
-            [[getattr(node, attribute) for attribute in attributes] for node in tree.traverse(strategy="preorder")]
+            [
+                [getattr(node, attribute) for attribute in attributes]
+                for node in tree.traverse(strategy="preorder")
+            ]
         )
 
     def decorate(
@@ -326,9 +296,13 @@ class TreeMessagePasser(eqx.Module):
         Returns:
             representations: A pre-ordered :math:`n\times r` array of node representations.
         """
-        initial_representations = jnp.full((features.shape[0], self.updater.r), self.up_messenger.null_value)
+        initial_representations = jnp.full(
+            (features.shape[0], self.updater.r), self.up_messenger.null_value
+        )
         carry = (initial_representations, features)
-        (representations, features), representations_trajectory = jax.lax.scan(self._update, carry, self.post_order_idxs)
+        (representations, features), representations_trajectory = jax.lax.scan(
+            self._update, carry, self.post_order_idxs
+        )
         return representations, representations_trajectory
 
     @eqx.filter_jit
@@ -367,16 +341,19 @@ class TreeMessagePasser(eqx.Module):
         Returns:
             representations: A pre-ordered :math:`n\times r` array of node representations.
         """
-        initial_representations = jnp.full((features.shape[0], self.downdater.r), self.down_messenger.null_value)
+        initial_representations = jnp.full(
+            (features.shape[0], self.downdater.r), self.down_messenger.null_value
+        )
         carry = (initial_representations, features)
-        (representations, features), representations_trajectory = jax.lax.scan(self._downdate, carry, self.pre_order_idxs)
+        (representations, features), representations_trajectory = jax.lax.scan(
+            self._downdate, carry, self.pre_order_idxs
+        )
         return representations, representations_trajectory
 
 
-# NOTE: eqx.filter_grad and eqx.filter_jit automatically pick out jax.array pytrees as dynamic arguments, and the
-#       rest as static arguments.
+# NOTE: for jit compilations that persist across trees, we want to pad the various matrices
 
-# NOTE: for jit compilations that persist across trees, maybe we want to pad the various matrices
+# NOTE: filter_jit missing the integer indexing
 
 # NOTE: consider adding a batch 1st dimension, to handle many trees. It might be possible to make this vmap compatible...
 
