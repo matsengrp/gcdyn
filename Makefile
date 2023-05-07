@@ -8,14 +8,11 @@ install-no-pyqt:
 	pip install -r requirements.txt
 	pip install -e .
 
-install-torchdms:
-	pip install git+https://github.com/matsengrp/torchdms
-
 # note: we use seperate pytest commands for notebooks because they are slow
 #       so we don't want to run them on GitHub Actions macos runners. Otherwise
 #       we would put everything into a pytest.ini file.
 test:
-	pytest --doctest-modules
+	pytest --doctest-modules --ignore=archive
 
 notebooks:
 	pytest --nbval notebooks/bdms-replay.ipynb notebooks/bdms-inhomogeneous.ipynb notebooks/message-passing.ipynb
