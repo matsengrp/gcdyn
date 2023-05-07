@@ -15,8 +15,8 @@ sys.path.insert(0, os.path.abspath(".."))  # Source code dir relative to this fi
 # -- Project information -----------------------------------------------------
 
 project = "gcdyn"
-author = "Erick Matsen"
-copyright = '2022, Erick Matsen'
+author = "gcdyn developers"
+copyright = '2022, gcdyn developers'
 
 # No version in docs, doesn't play nice with versioneer
 # The short X.Y version
