@@ -36,7 +36,8 @@ of the child nodes of :math:`v`, denoted :math:`\mathcal{C}_v \subset \mathcal{V
     m_v = G_{\uparrow}\left(\left\{h_u : u \in \mathcal{C_v}\right\}, x_v\right).
 
 The dependence on the *set* of child representations implies that the aggregate operator is
-*permutation-equivariant* wrt child node ordering.
+*permutation-invariant* wrt child node ordering.
+This is required so that the model is *equivariant* wrt tree isomorphism.
 
 Pre-order message passing
 ^^^^^^^^^^^^^^^^^^^^^^^^^
