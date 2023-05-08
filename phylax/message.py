@@ -8,7 +8,9 @@ Mathematical form of models
 
 .. note::
 
-    We adapt notation from Thost and Chen (2021) [1]_.
+    We adapt notation from Thost and Chen (2021) [1]_, such that we consider a rooted
+    tree as a simple DAG and message passing as a single-layer version of their
+    formulation.
 
 We have a rooted tree :math:`\mathcal{T} = (\mathcal{V}, \mathcal{E})` with
 :math:`n = |\mathcal{V}|` nodes and :math:`n-1` edges, where :math:`\mathcal{V} = \{1, \ldots, n\}`
