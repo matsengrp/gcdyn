@@ -31,6 +31,7 @@ setup(
         "jaxopt",
         "biopython",
         "diffrax",
+        "tensorflow",
     ],
     extras_require={
         "PyQt5": [
