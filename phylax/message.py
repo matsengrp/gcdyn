@@ -156,10 +156,10 @@ class TreeMessagePasser(eqx.Module):
                       message. It should be invariant wrt child node permutations.
         down_messenger: A function that aggregates representations of parent nodes and a child node's features to a
                         message. It should be invariant wrt parent node permutations.
-        updater: A function that combines the feature vector of a node with an incoming message and returns the
-                 node's updated representation.
-        downdater: A function that combines the feature vector of a node with an incoming message and returns the
-                   node's updated representation.
+        updater: A function that combines the feature vector of a node with an incoming message in the upward pass
+                 and returns the node's updated representation.
+        downdater: A function that combines the feature vector of a node with an incoming message in the downward
+                   pass and returns the node's updated representation.
     """
     up_messenger: Messenger
     down_messenger: Messenger
