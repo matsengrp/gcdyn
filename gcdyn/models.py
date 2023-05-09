@@ -1,6 +1,6 @@
 r"""BDMS inference."""
 
-import jax.numpy as np
+import jax.numpy as jnp
 import numpy as onp
 import scipy
 from jax import lax
@@ -28,7 +28,7 @@ def _select_where(source, selector):
     """`jax.jit`-compatible version of `source[selector]` for a boolean array
     `selector` with exactly one `True` value."""
 
-    return lax.select(selector, source, np.zeros_like(source)).sum()
+    return lax.select(selector, source, jnp.zeros_like(source)).sum()
 
 
 class NeuralNetworkModel:
@@ -70,7 +70,7 @@ class NeuralNetworkModel:
                 utils.ladderize_tree(tree)
 
         self.trees = trees
-        self.encoded_trees = np.stack(
+        self.encoded_trees = onp.stack(
             [self._encode_tree(tree, self.max_leaf_count) for tree in trees]
         )
         self.responses = responses
@@ -94,7 +94,7 @@ class NeuralNetworkModel:
                 yield from traverse_inorder(child)
 
         assert len(tree.get_leaves()) <= max_leaf_count
-        matrix = np.zeros((4, max_leaf_count))
+        matrix = onp.zeros((4, max_leaf_count))
 
         leaf_index = 0
         ancestor_index = 0
@@ -115,9 +115,9 @@ class NeuralNetworkModel:
 
     @classmethod
     def _encode_responses(cls, responses):
-        return np.array(
+        return onp.array(
             [
-                np.hstack([response._flatten()[2] for response in row])
+                onp.hstack([response._flatten()[2] for response in row])
                 for row in responses
             ]
         )
@@ -160,7 +160,7 @@ class NeuralNetworkModel:
             for tree in trees:
                 utils.ladderize_tree(tree)
 
-        encoded_trees = np.stack(
+        encoded_trees = onp.stack(
             [self._encode_tree(tree, self.max_leaf_count) for tree in trees]
         )
 
@@ -223,26 +223,26 @@ class BirthDeathModel:
         # Fill in defaults if not provided
         if not lower_bounds:
             lower_bounds = {
-                "birth_response": [0.0, -np.inf, 0.0, 0.0],
+                "birth_response": [0.0, -jnp.inf, 0.0, 0.0],
                 "death_response": 0,
                 "mutation_response": 0,
             }
 
         if not upper_bounds:
             upper_bounds = {
-                "birth_response": [np.inf, np.inf, np.inf, np.inf],
-                "death_response": np.inf,
-                "mutation_response": np.inf,
+                "birth_response": [jnp.inf, jnp.inf, jnp.inf, jnp.inf],
+                "death_response": jnp.inf,
+                "mutation_response": jnp.inf,
             }
 
         # Restrict bounds to optimized parameters
         lower_bounds = {
-            param: np.array(lower_bounds[param], dtype=float)
+            param: jnp.array(lower_bounds[param], dtype=float)
             for param in self.parameters
         }
 
         upper_bounds = {
-            param: np.array(upper_bounds[param], dtype=float)
+            param: jnp.array(upper_bounds[param], dtype=float)
             for param in self.parameters
         }
 
@@ -297,13 +297,15 @@ def naive_log_likelihood(
                     rate.waiting_time_logsf(node.up, Δt) for rate in parameters.values()
                 )
                 if node.event in (tree._SAMPLING_EVENT, tree._SURVIVAL_EVENT):
-                    result += np.log(ρ if node.event == tree._SAMPLING_EVENT else 1 - ρ)
+                    result += jnp.log(
+                        ρ if node.event == tree._SAMPLING_EVENT else 1 - ρ
+                    )
                 else:
                     # For the rest of the cases, the likelihood is the product of the likelihood of the time
                     # interval, then the probability of the given event.
                     # Note the log survival function has already been added above.
                     # The next line completes the log pdf of the waiting time for the given event.
-                    result += np.log(parameters[node.event].λ(node.up, Δt))
+                    result += jnp.log(parameters[node.event].λ(node.up, Δt))
 
                     # For mutations, we need to add the log transition probability
                     if node.event == tree._BIRTH_EVENT:
@@ -348,28 +350,30 @@ def stadler_appx_log_likelihood(
             if not (0 <= ρ <= 1 and 0 <= σ <= 1):
                 raise ValueError("sampling_probability must be in [0, 1]")
 
-            c = np.sqrt(Λ**2 - 4 * μ * (1 - σ) * λ)
+            c = jnp.sqrt(Λ**2 - 4 * μ * (1 - σ) * λ)
             x = (-Λ - c) / 2
             y = (-Λ + c) / 2
 
             def helper(t):
-                return (y + λ * (1 - ρ)) * np.exp(-c * t) - x - λ * (1 - ρ)
+                return (y + λ * (1 - ρ)) * jnp.exp(-c * t) - x - λ * (1 - ρ)
 
             t_s = present_time - (node.t - Δt)
             t_e = present_time - node.t
 
-            log_f_N = c * (t_e - t_s) + 2 * (np.log(helper(t_e)) - np.log(helper(t_s)))
+            log_f_N = c * (t_e - t_s) + 2 * (
+                jnp.log(helper(t_e)) - jnp.log(helper(t_s))
+            )
 
             result += log_f_N
 
             if node.event == tree._BIRTH_EVENT:
-                result += np.log(λ)
+                result += jnp.log(λ)
             elif node.event == tree._DEATH_EVENT:
-                result += np.log(σ) + np.log(μ)
+                result += jnp.log(σ) + jnp.log(μ)
             elif node.event == tree._MUTATION_EVENT:
-                result += np.log(γ) + mutator.logprob(node)
+                result += jnp.log(γ) + mutator.logprob(node)
             elif node.event == tree._SAMPLING_EVENT:
-                result += np.log(ρ)
+                result += jnp.log(ρ)
             else:
                 raise ValueError(f"unknown event {node.event}")
 
@@ -399,9 +403,9 @@ def stadler_full_log_likelihood(
 
     # This likelihood requires a discrete type space to be specified
     # assert type(mutator) == mutators.DiscreteMutator
-    type_space = np.array(list(mutator.state_space.keys()))
+    type_space = jnp.array(list(mutator.state_space.keys()))
 
-    # assert np.all(np.diagonal(mutator.transition_matrix) == 0)
+    # assert jnp.all(jnp.diagonal(mutator.transition_matrix) == 0)
     mutation_probs = mutator.transition_matrix
 
     # Relevant values to set aside
@@ -459,7 +463,7 @@ def stadler_full_log_likelihood(
             p, type_space == parent_phenotype
         )
 
-        return np.hstack([dp_dt(t, p), dq_i])
+        return jnp.hstack([dp_dt(t, p), dq_i])
 
     for tree in trees:
         for leaf in tree.iter_leaves():
@@ -469,7 +473,7 @@ def stadler_full_log_likelihood(
                 t0=0,
                 t1=present_time - leaf.t,
                 dt0=0.001,
-                y0=np.ones_like(type_space) - ρ,
+                y0=jnp.ones_like(type_space) - ρ,
                 stepsize_controller=PIDController(rtol=rtol, atol=atol, dtmax=dtmax),
             )
 
@@ -496,11 +500,11 @@ def stadler_full_log_likelihood(
             if event.event == tree._SAMPLING_EVENT:
                 # "a tip at the present t_end == 0"
                 # assert t_end == 0
-                event.q_end = np.array([ρ])
+                event.q_end = jnp.array([ρ])
                 # event.p_end already exists
             elif event.event == tree._DEATH_EVENT:
                 # "a tip at time t_end > 0"
-                event.q_end = np.array([μ(event.up) * σ])
+                event.q_end = jnp.array([μ(event.up) * σ])
                 # event.p_end already exists
             elif event.event == tree._BIRTH_EVENT:
                 event.q_end = (
@@ -523,7 +527,7 @@ def stadler_full_log_likelihood(
                 t0=t_end,
                 t1=t_start,
                 dt0=0.001,
-                y0=np.hstack([event.p_end, event.q_end]),
+                y0=jnp.hstack([event.p_end, event.q_end]),
                 args=event.up.x,
                 stepsize_controller=PIDController(rtol=rtol, atol=atol, dtmax=dtmax),
             )
@@ -531,7 +535,7 @@ def stadler_full_log_likelihood(
             event.q_start = pq.ys[-1, -1]
             event.p_start = pq.ys[-1, :-1]
 
-        result += np.log(tree.children[0].q_start)
+        result += jnp.log(tree.children[0].q_start)
 
     return result
 
@@ -556,8 +560,8 @@ def stadler_full_log_likelihood_scipy(
 
     # This likelihood requires a discrete type space to be specified
     assert type(mutator) == mutators.DiscreteMutator
-    type_space = np.array(list(mutator.state_space.keys()))
-    assert np.all(np.diagonal(mutator.transition_matrix) == 0)
+    type_space = onp.array(list(mutator.state_space.keys()))
+    assert onp.all(onp.diagonal(mutator.transition_matrix) == 0)
     mutation_probs = mutator.transition_matrix
 
     # Relevant values to set aside
@@ -598,7 +602,7 @@ def stadler_full_log_likelihood_scipy(
             p = scipy.integrate.solve_ivp(
                 dp_dt,
                 (0, present_time - leaf.t),
-                np.ones_like(type_space) - ρ,
+                onp.ones_like(type_space) - ρ,
                 **solve_ivp_args,
             )
 
@@ -665,6 +669,6 @@ def stadler_full_log_likelihood_scipy(
             event.q_start = q_grid.y[-1, -1]
             event.p_start = q_grid.y[:-1, -1]
 
-        result += np.log(tree.children[0].q_start)
+        result += onp.log(tree.children[0].q_start)
 
     return result
