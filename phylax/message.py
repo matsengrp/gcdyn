@@ -8,9 +8,9 @@ Mathematical form of models
 
 .. note::
 
-    We adapt notation from Thost and Chen (2021) [1]_, such that we consider a rooted
-    tree as a simple DAG and message passing as a single-layer version of their
-    formulation.
+    We adapt *DAG-NN* notation of Thost and Chen (2021) [1]_ (a rooted tree is a special
+    case of a directed acyclic graph, or DAG). We drop their layer index :math:`\ell`,
+    and use variable names $x$ and $h$ for input and output, respectively.
 
 We have a rooted tree :math:`\mathcal{T} = (\mathcal{V}, \mathcal{E})` with
 :math:`n = |\mathcal{V}|` nodes and :math:`n-1` edges, where :math:`\mathcal{V} = \{1, \ldots, n\}`
@@ -30,13 +30,14 @@ Post-order message passing
 
 Using a post-order traversal over nodes, the message received by node :math:`v` is a vector
 :math:`m_v \in \mathbb{R}^m` computed via an *aggregate operator*
-:math:`G_{\uparrow}: 2^{\mathbb{R}^r}\times\mathbb{R}^{d} \to \mathbb{R}^m` over the representations
-of the child nodes of :math:`v`, denoted :math:`\mathcal{C}_v \subset \mathcal{V}`.
+:math:`G_{\uparrow}: 2^{\mathbb{R}^r}\times\mathbb{R}^{d} \to \mathbb{R}^m` over the set of
+representations of the child nodes which is a member of the power set :math:`2^{\mathbb{R}^r}`.
 
 .. math::
 
     m_v = G_{\uparrow}\left(\left\{h_u : u \in \mathcal{C_v}\right\}, x_v\right).
 
+where :math:`\mathcal{C}_v \subset \mathcal{V}` denotes the set of child nodes of node :math:`v`.
 The dependence on the *set* of child representations implies that the aggregate operator is
 *permutation-invariant* wrt child node ordering.
 This is required so that the model is *equivariant* wrt tree isomorphism.
@@ -179,6 +180,10 @@ class TreeMessagePasser(eqx.Module):
         updater: Optional[Updater] = None,
         downdater: Optional[Updater] = None,
     ) -> None:
+        # NOTE: We will take a pre-order traversal of the tree, and use the
+        # pre-order index of each node as its index in matrix representations.
+        # We will store index arrays that allow traversing in pre-order or in
+        # post-order for downward and upward passes, respectively.
         pre_order_idx_map = {
             node: idx for idx, node in enumerate(tree.traverse(strategy="preorder"))
         }
@@ -201,7 +206,9 @@ class TreeMessagePasser(eqx.Module):
         assert pre_order_idx_map[tree] == 0
         assert post_order_idx_map[tree] == n - 1
 
+        # This will store an indicator array for nodes that are leaves
         self.leaves = jnp.zeros(n, dtype=bool)
+        # These will store pairs consisting of a node's index and its parent (resp. child) index.
         parent_idxs = []
         child_idxs = []
         for node, idx in pre_order_idx_map.items():
@@ -216,7 +223,7 @@ class TreeMessagePasser(eqx.Module):
         assert sum(self.leaves) == len(tree)
         assert len(parent_idxs) == len(child_idxs) == n - 1
 
-        # form sparse matrices
+        # Form sparse matrices from the parent and child index pairs
         # NOTE: 1/0 sparse to bool seems necessary because sparse matrices don't
         #       fully support bool dtype
         self.parents = sparse.BCOO(([1] * len(parent_idxs), parent_idxs), shape=(n, n))
@@ -236,12 +243,12 @@ class TreeMessagePasser(eqx.Module):
 
         Args:
             tree: The tree to initialize messages for.
-            attributes: Names of node attributes to use as features. The columns of the
+            attributes: Names of numerical node attributes to use as features. The columns of the
                         feature matrix will be ordered according to this sequence.
         """
         return jnp.asarray(
             [
-                [getattr(node, attribute) for attribute in attributes]
+                [float(getattr(node, attribute)) for attribute in attributes]
                 for node in tree.traverse(strategy="preorder")
             ]
         )
@@ -294,10 +301,13 @@ class TreeMessagePasser(eqx.Module):
         r"""Generate node representations by propagating messages from leaves to root.
 
         Args:
-            features: A pre-ordered :math:`n\times d` array of node features.
+            features: An :math:`n\times d` array of node features. It is assumed that this
+                      array is row-ordered wrt nodes the same way as the output of a call to
+                      :py:func:`initialize_features`.
 
         Returns:
-            representations: A pre-ordered :math:`n\times r` array of node representations.
+            representations: An :math:`n\times r` array of node representations, with rows
+                             corresponding to nodes in the same order as the input features.
         """
         initial_representations = jnp.full(
             (features.shape[0], self.updater.r), self.up_messenger.null_value
@@ -339,10 +349,13 @@ class TreeMessagePasser(eqx.Module):
         r"""Generate node representations by propagating messages from root to leaves.
 
         Args:
-            features: A pre-ordered :math:`n\times d` array of node features.
+            features: An :math:`n\times d` array of node features. It is assumed that this
+                      array is row-ordered wrt nodes the same way as the output of a call to
+                      :py:func:`initialize_features`.
 
         Returns:
-            representations: A pre-ordered :math:`n\times r` array of node representations.
+            representations: An :math:`n\times r` array of node representations, with rows
+                             corresponding to nodes in the same order as the input features.
         """
         initial_representations = jnp.full(
             (features.shape[0], self.downdater.r), self.down_messenger.null_value
@@ -354,10 +367,7 @@ class TreeMessagePasser(eqx.Module):
         return representations, representations_trajectory
 
 
-# NOTE: for jit compilations that persist across trees, we want to pad the various matrices
-
-# NOTE: filter_jit missing the integer indexing
-
-# NOTE: consider adding a batch 1st dimension, to handle many trees. It might be possible to make this vmap compatible...
-
-# NOTE: TOPOLOGICAL BATCHING as in Thost et al. (2020) https://arxiv.org/pdf/2101.07965.pdf, we could send subtrees to the GPU
+# TODO: for jit compilations that persist across trees, we want to pad the various matrices
+# TODO: filter_jit missing the integer indexing
+# TODO: consider adding a batch 1st dimension, to handle many trees. It might be possible to make this vmap compatible...
+# TODO: TOPOLOGICAL BATCHING as in Thost et al. (2020) https://arxiv.org/pdf/2101.07965.pdf, we could send subtrees to the GPU

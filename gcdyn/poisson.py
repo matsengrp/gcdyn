@@ -149,9 +149,6 @@ class Response(ABC):
 ResponseType = TypeVar("ResponseType", bound=Response)
 
 
-# NOTE: do we need to do this? Can we just use `register_pytree_node` directly?
-#       Or maybe we can use the register_pytree_node_class decorator?
-#       See https://jax.readthedocs.io/en/latest/_autosummary/jax.tree_util.register_pytree_node_class.html#jax.tree_util.register_pytree_node_class
 def _register_with_pytree(response_type: ResponseType) -> None:
     r"""Registers the `Response` subclass `response_type` as a node in JAX
     pytree, if it is not already.
