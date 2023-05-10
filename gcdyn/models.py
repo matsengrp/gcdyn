@@ -62,7 +62,8 @@ class NeuralNetworkModel:
         outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
         self.network = keras.Model(inputs=inputs, outputs=outputs)
 
-        # TODO: should we rescale the trees too?
+        # Note: the original deep learning model rescales trees, but we don't here
+        # because we should always have the same root to tip height.
         self.max_leaf_count = max_leaf_count
 
         if ladderize_trees:
