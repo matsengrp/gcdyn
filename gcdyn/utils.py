@@ -5,6 +5,7 @@ from gcdyn.bdms import TreeNode, TreeError
 import numpy as np
 from collections import defaultdict
 from scipy.stats import uniform
+import matplotlib.pyplot as plt
 
 
 def simple_fivemer_contexts(sequence: str):
@@ -149,3 +150,24 @@ def random_transition_matrix(length, seed=None):
         mat[i, :] /= sum(mat[i, :])
 
     return mat
+
+
+def plot_responses(*responses, x_range=(-10, 10), **named_responses):
+    x_array = np.linspace(*x_range)
+
+    plt.figure()
+
+    for response in responses:
+        plt.plot(x_array, response.λ_phenotype(x_array), color="black", alpha=0.5)
+
+    for name, response in named_responses.items():
+        plt.plot(x_array, response.λ_phenotype(x_array), label=name)
+
+    plt.xlabel(r"$x$")
+    plt.ylabel(r"$f(x)$")
+    plt.xlim(*x_range)
+
+    if named_responses:
+        plt.legend()
+
+    plt.show()
