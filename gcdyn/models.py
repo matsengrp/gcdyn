@@ -256,7 +256,7 @@ class BirthDeathModel:
         r"""Compute the log-likelihood of the rate parameters (optimized and not) given the
         trees."""
 
-        return -self.objective(**self.parameters)
+        return -self.objective(self.parameters)
 
 
 def naive_log_likelihood(
