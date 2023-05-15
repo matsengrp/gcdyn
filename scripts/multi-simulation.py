@@ -6,6 +6,8 @@ import sys
 from Bio import SeqIO
 # import colored_traceback.always  # need to add this to installation stuff, i'm not sure how to do it atm
 import dill
+import time
+import copy
 
 from gcdyn import bdms, gpmap, mutators, poisson, utils
 from experiments import replay
@@ -159,6 +161,7 @@ parser.add_argument('--debug-response-fcn', action='store_true')
 parser.add_argument('--overwrite', action='store_true')
 parser.add_argument('--test', action='store_true', help='sets some default parameter values that run quickly and successfully, i.e. useful for quick tests')
 
+start = time.time()
 args = parser.parse_args()
 
 if args.test:
@@ -245,7 +248,10 @@ for itrial in range(1, args.n_trials + 1):
         naive=replay.NAIVE_SEQUENCE,
     )
     add_seqs(all_seqs, itrial, [{'name' : sname, 'seq' : seq} for sname, seq in seqdict.items()])
-    all_trees.append(tree)
+    renamed_tree = copy.deepcopy(tree)
+    for node in renamed_tree.iter_descendants():
+        node.name = '%d-%s' % (itrial, node.name)
+    all_trees.append(renamed_tree)
 
 asfn = '%s/all-seqs.fasta' % args.outdir
 print('  writing all seqs to %s'%asfn)
@@ -253,9 +259,16 @@ with open(asfn, 'w') as asfile:
     for sfo in all_seqs:
         asfile.write('>%s\n%s\n' % (sfo['name'], sfo['seq']))
 
+tfn = '%s/all-trees.nwk' % args.outdir
+print('  writing all trees to %s'%tfn)
+with open(tfn, 'w') as tfile:
+    for tree in all_trees:
+        tfile.write('%s\n'%tree.write(format=1))
+
 pkfn = '%s/simu.pkl' % args.outdir
 print('  writing %d trees and birth/death responses to %s' % (len(all_trees), pkfn))
 with open(pkfn, 'wb') as pfile:
     pkfo = {'birth-response' : birth_rate, 'death-response' : death_rate, 'trees' : all_trees}
     dill.dump(pkfo, pfile)
 
+print('    total simulation time: %.1f sec' % (time.time()-start))
