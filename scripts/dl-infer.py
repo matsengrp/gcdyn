@@ -23,6 +23,10 @@ from gcdyn.models import NeuralNetworkModel
 from gcdyn.poisson import ConstantResponse
 
 # ----------------------------------------------------------------------------------------
+def csvfn(smpl):
+    return '%s/%s.csv' % (args.outdir, smpl)
+
+# ----------------------------------------------------------------------------------------
 def get_df(smpl, result):
     df = pd.DataFrame(
         {
@@ -32,9 +36,9 @@ def get_df(smpl, result):
             ),
         }
     )
-    ofn = '%s/%s.csv' % (args.outdir, smpl)
-    sns.histplot(df, x='Predicted', hue='Truth', binwidth=0.025)
-    df.to_csv(ofn)
+    plt.clf()
+    sns.histplot(df, x='Predicted', hue='Truth', bins=30, multiple='stack') #binwidth=0.025)
+    df.to_csv(csvfn(smpl))
     plt.savefig('%s/%s-hist.svg' % (args.outdir, smpl))
     return df
 
@@ -42,7 +46,8 @@ def get_df(smpl, result):
 parser = argparse.ArgumentParser()
 parser.add_argument('infname', help='input merge simulation dill pickle file')
 parser.add_argument('outdir')
-parser.add_argument('--epochs', default=100)
+parser.add_argument('--epochs', type=int, default=100)
+parser.add_argument('--train-frac', type=float, default=0.8, help='train on this fraction of the trees')
 parser.add_argument('--test', action='store_true', help='sets things to be super fast, so not useful for real inference, but just to check if things are running properly')
 
 start = time.time()
@@ -52,20 +57,21 @@ if args.test:
 
 # ----------------------------------------------------------------------------------------
 with open(args.infname, 'rb') as f:
-    samples = pickle.load(f)
+    samples = pickle.load(f)  # dict with two keys ('trees' and 'responses'), and a list for each
+print('    read %d trees and %d responses from %s'% (len(samples['trees']), len(samples['responses']), args.infname))
+print('      first response pair:\n        birth: %s\n        death: %s' % (samples['responses'][0][0], samples['responses'][0][1]))
 
-N = len(samples['trees'])
+n_trees = len(samples['trees'])
+idxs, smpldict = {}, {}
+idxs['train'] = random.sample(range(n_trees), int(args.train_frac * n_trees))
+idxs['test'] = [i for i in range(n_trees) if i not in idxs['train']]
 
 sublist = lambda x, idx: [x[i] for i in idx]
-
-idxs, smpldict = {}, {}
-idxs['train'] = random.sample(range(N), int(0.8 * N))
-idxs['test'] = [i for i in range(N) if i not in idxs['train']]
-smpldict['train'] = {key: sublist(val, idxs['train']) for key, val in samples.items()}
-smpldict['test'] = {key: sublist(val, idxs['test']) for key, val in samples.items()}
+for smpl in ['train', 'test']:
+    smpldict[smpl] = {key: [val[i] for i in idxs[smpl]] for key, val in samples.items()}
 
 param_to_predict = [
-    [ConstantResponse(row[0].xscale)] for row in smpldict['train']['responses']
+    [ConstantResponse(birth_resp.xscale)] for birth_resp, death_resp in smpldict['train']['responses']
 ]
 
 model = NeuralNetworkModel(smpldict['train']['trees'], param_to_predict)
