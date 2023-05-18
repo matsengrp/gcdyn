@@ -59,16 +59,16 @@ def generate_sequences_and_tree(
     for iter in range(args.n_max_tries):
         try:
             tree = bdms.TreeNode()
+            tree.x = gp_map(replay.NAIVE_SEQUENCE)
             tree.sequence = replay.NAIVE_SEQUENCE
-            tree.x = gp_map(tree.sequence)
+            tree.sequence_context = replay.seq_to_contexts(replay.NAIVE_SEQUENCE)
             tree.evolve(
                 args.time_to_sampling,
-                birth_rate=birth_rate,
-                death_rate=death_rate,
-                mutation_rate=mutation_rate,
+                birth_response=birth_rate,
+                death_response=death_rate,
+                mutation_response=mutation_rate,
                 mutator=mutator,
                 min_survivors=args.min_survivors,
-                max_leaves=args.max_leaves,
                 birth_mutations=False,
                 seed=seed,
             )
@@ -145,7 +145,6 @@ parser.add_argument('--n-trials', default=51, type=int, help='Number of trials/G
 parser.add_argument('--n-max-tries', default=30, type=int, help='Number of times to retry simulation if it fails due to reaching either the min or max number of leaves.')
 parser.add_argument('--time-to-sampling', default=20, type=int)
 parser.add_argument('--min-survivors', default=100, type=int)
-parser.add_argument('--max-leaves', default=3000, type=int)
 parser.add_argument('--seed', default=0, type=int, help='random seed')
 parser.add_argument('--outdir', default=os.getcwd())
 parser.add_argument('--birth-response', default='soft-relu', choices=['constant', 'soft-relu', 'sigmoid'], help='birth rate response function')
@@ -179,7 +178,7 @@ if not os.path.exists(args.outdir):
     os.makedirs(args.outdir)
 
 gp_map = gpmap.AdditiveGPMap(
-    replay.bind_df, nonsense_phenotype=replay.bind_df.min().min()
+    replay.dms()['affinity'], nonsense_phenotype=replay.dms()['affinity'].min().min()
 )
 assert gp_map(replay.NAIVE_SEQUENCE) == 0
 
@@ -205,15 +204,14 @@ if args.debug_response_fcn:
 
 mutator = mutators.SequencePhenotypeMutator(
     mutators.ContextMutator(
-        mutability=args.mutability_multiplier * replay.mutability,
-        substitution=replay.substitution,
-        seq_to_contexts=replay.seq_to_contexts,
+        mutability=args.mutability_multiplier * replay.mutability(),
+        substitution=replay.substitution(),
     ),
     gp_map,
 )
 
 mutation_rate = poisson.SequenceContextMutationResponse(
-    args.mutability_multiplier * replay.mutability, replay.seq_to_contexts
+    args.mutability_multiplier * replay.mutability(), #replay.seq_to_contexts
 )
 
 all_seqs, all_trees = [], []
