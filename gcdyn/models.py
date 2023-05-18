@@ -32,31 +32,40 @@ def _select_where(source, selector):
 
 
 class NeuralNetworkModel:
-    def __init__(self, trees, responses, max_leaf_count=200, ladderize_trees=True):
+    def __init__(
+        self,
+        trees,
+        responses,
+        network_layers=None,
+        max_leaf_count=200,
+        ladderize_trees=True,
+    ):
         """
         trees: sequence of `bdms.TreeNode`s
         responses: 2D sequence, with first dimension corresponding to trees
                    and second dimension to the Response objects to predict
                    (Responses that aren't being estimated need not be provided)
+        network_layers: layers for the neural network; "None" will give the default network.
         max_leaf_count: will specify the size of the second dimension of encoded trees
         ladderize_trees: if trees are already ladderized, set this to `False` to save computing time
         """
         num_parameters = sum(len(response._param_dict) for response in responses[0])
 
-        network_layers = (
-            # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
-            lambda x: tf.transpose(x, (0, 2, 1)),
-            layers.Conv1D(filters=50, kernel_size=3, activation="elu"),
-            layers.Conv1D(filters=50, kernel_size=10, activation="elu"),
-            layers.MaxPooling1D(pool_size=10, strides=10),
-            layers.Conv1D(filters=80, kernel_size=10, activation="elu"),
-            layers.GlobalAveragePooling1D(),
-            layers.Dense(64, activation="elu"),
-            layers.Dense(32, activation="elu"),
-            layers.Dense(16, activation="elu"),
-            layers.Dense(8, activation="elu"),
-            layers.Dense(num_parameters, activation="elu"),
-        )
+        if network_layers is None:
+            network_layers = (
+                # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
+                lambda x: tf.transpose(x, (0, 2, 1)),
+                layers.Conv1D(filters=50, kernel_size=3, activation="elu"),
+                layers.Conv1D(filters=50, kernel_size=10, activation="elu"),
+                layers.MaxPooling1D(pool_size=10, strides=10),
+                layers.Conv1D(filters=80, kernel_size=10, activation="elu"),
+                layers.GlobalAveragePooling1D(),
+                layers.Dense(64, activation="elu"),
+                layers.Dense(32, activation="elu"),
+                layers.Dense(16, activation="elu"),
+                layers.Dense(8, activation="elu"),
+                layers.Dense(num_parameters, activation="elu"),
+            )
 
         inputs = keras.Input(shape=(4, max_leaf_count))
         outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
