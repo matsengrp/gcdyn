@@ -383,6 +383,7 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.event"><code class="docutils literal notranslate"><span class="pre">TreeNode.event</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.n_mutations"><code class="docutils literal notranslate"><span class="pre">TreeNode.n_mutations</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.evolve"><code class="docutils literal notranslate"><span class="pre">TreeNode.evolve()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.sample_survivors"><code class="docutils literal notranslate"><span class="pre">TreeNode.sample_survivors()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.__add__"><code class="docutils literal notranslate"><span class="pre">TreeNode.__add__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.add_child"><code class="docutils literal notranslate"><span class="pre">TreeNode.add_child()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.add_face"><code class="docutils literal notranslate"><span class="pre">TreeNode.add_face()</span></code></a></li>
@@ -438,11 +439,11 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.remove_sister"><code class="docutils literal notranslate"><span class="pre">TreeNode.remove_sister()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.resolve_polytomy"><code class="docutils literal notranslate"><span class="pre">TreeNode.resolve_polytomy()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.robinson_foulds"><code class="docutils literal notranslate"><span class="pre">TreeNode.robinson_foulds()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.sample_survivors"><code class="docutils literal notranslate"><span class="pre">TreeNode.sample_survivors()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.search_nodes"><code class="docutils literal notranslate"><span class="pre">TreeNode.search_nodes()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.set_outgroup"><code class="docutils literal notranslate"><span class="pre">TreeNode.set_outgroup()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.set_style"><code class="docutils literal notranslate"><span class="pre">TreeNode.set_style()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.show"><code class="docutils literal notranslate"><span class="pre">TreeNode.show()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.slice"><code class="docutils literal notranslate"><span class="pre">TreeNode.slice()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.sort_descendants"><code class="docutils literal notranslate"><span class="pre">TreeNode.sort_descendants()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.standardize"><code class="docutils literal notranslate"><span class="pre">TreeNode.standardize()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.support"><code class="docutils literal notranslate"><span class="pre">TreeNode.support</span></code></a></li>
@@ -451,8 +452,8 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.unroot"><code class="docutils literal notranslate"><span class="pre">TreeNode.unroot()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.up"><code class="docutils literal notranslate"><span class="pre">TreeNode.up</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.write"><code class="docutils literal notranslate"><span class="pre">TreeNode.write()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.slice"><code class="docutils literal notranslate"><span class="pre">TreeNode.slice()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.prune"><code class="docutils literal notranslate"><span class="pre">TreeNode.prune()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.remove_mutation_events"><code class="docutils literal notranslate"><span class="pre">TreeNode.remove_mutation_events()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.render"><code class="docutils literal notranslate"><span class="pre">TreeNode.render()</span></code></a></li>
 </ul>
 </li>
@@ -649,60 +650,63 @@ document.write(`
 <td><p>Generates a random topology by populating current node.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.prune" title="gcdyn.bdms.TreeNode.prune"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prune</span></code></a></p></td>
-<td><p>Prune the tree to the subtree induced by the sampled leaves.</p></td>
+<td><p>Prune the tree to the subtree subtending the sampled leaves, removing unobserved subtrees.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.remove_child" title="gcdyn.bdms.TreeNode.remove_child"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_child</span></code></a></p></td>
 <td><p>Removes a child from this node (parent and child nodes still exit but are no longer connected).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.remove_sister" title="gcdyn.bdms.TreeNode.remove_sister"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_sister</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.remove_mutation_events" title="gcdyn.bdms.TreeNode.remove_mutation_events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_mutation_events</span></code></a></p></td>
+<td><p>Remove unifurcating mutation event nodes, preserving branch length, and annotate mutation counts in child node <code class="docutils literal notranslate"><span class="pre">n_mutations</span></code> attribute.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.remove_sister" title="gcdyn.bdms.TreeNode.remove_sister"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_sister</span></code></a></p></td>
 <td><p>Removes a sister node.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.render" title="gcdyn.bdms.TreeNode.render"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.render" title="gcdyn.bdms.TreeNode.render"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render</span></code></a></p></td>
 <td><p>A thin wrapper around <code class="xref py py-func docutils literal notranslate"><span class="pre">ete3.TreeNode.render()</span></code> that adds some custom decoration and a color bar.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.resolve_polytomy" title="gcdyn.bdms.TreeNode.resolve_polytomy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolve_polytomy</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.resolve_polytomy" title="gcdyn.bdms.TreeNode.resolve_polytomy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolve_polytomy</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.robinson_foulds" title="gcdyn.bdms.TreeNode.robinson_foulds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">robinson_foulds</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.robinson_foulds" title="gcdyn.bdms.TreeNode.robinson_foulds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">robinson_foulds</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.sample_survivors" title="gcdyn.bdms.TreeNode.sample_survivors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_survivors</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.sample_survivors" title="gcdyn.bdms.TreeNode.sample_survivors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_survivors</span></code></a></p></td>
 <td><p>Choose <span class="math notranslate nohighlight">\(n\)</span> survivor leaves from the tree, or each survivor leaf with probability <span class="math notranslate nohighlight">\(p\)</span>, to mark as sampled (via the event attribute).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.search_nodes" title="gcdyn.bdms.TreeNode.search_nodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">search_nodes</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.search_nodes" title="gcdyn.bdms.TreeNode.search_nodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">search_nodes</span></code></a></p></td>
 <td><p>Returns the list of nodes matching a given set of conditions.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.set_outgroup" title="gcdyn.bdms.TreeNode.set_outgroup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_outgroup</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.set_outgroup" title="gcdyn.bdms.TreeNode.set_outgroup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_outgroup</span></code></a></p></td>
 <td><p>Sets a descendant node as the outgroup of a tree.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.set_style" title="gcdyn.bdms.TreeNode.set_style"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_style</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.set_style" title="gcdyn.bdms.TreeNode.set_style"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_style</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.show" title="gcdyn.bdms.TreeNode.show"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.show" title="gcdyn.bdms.TreeNode.show"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show</span></code></a></p></td>
 <td><p>Starts an interactive session to visualize current node structure using provided layout and TreeStyle.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.slice" title="gcdyn.bdms.TreeNode.slice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slice</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.slice" title="gcdyn.bdms.TreeNode.slice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slice</span></code></a></p></td>
 <td><p>Return a list of attribute <code class="docutils literal notranslate"><span class="pre">attr</span></code> at time <span class="math notranslate nohighlight">\(t\)</span> for all lineages alive at that time.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.sort_descendants" title="gcdyn.bdms.TreeNode.sort_descendants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_descendants</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.sort_descendants" title="gcdyn.bdms.TreeNode.sort_descendants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_descendants</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.standardize" title="gcdyn.bdms.TreeNode.standardize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">standardize</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.standardize" title="gcdyn.bdms.TreeNode.standardize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">standardize</span></code></a></p></td>
 <td><p><div class="versionadded">
 <p><span class="versionmodified added">New in version 2.3.</span></p>
 </div>
 </p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.swap_children" title="gcdyn.bdms.TreeNode.swap_children"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_children</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.swap_children" title="gcdyn.bdms.TreeNode.swap_children"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_children</span></code></a></p></td>
 <td><p>Swaps current children order.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.traverse" title="gcdyn.bdms.TreeNode.traverse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">traverse</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.traverse" title="gcdyn.bdms.TreeNode.traverse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">traverse</span></code></a></p></td>
 <td><p>Returns an iterator to traverse the tree structure under this node.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.unroot" title="gcdyn.bdms.TreeNode.unroot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unroot</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.unroot" title="gcdyn.bdms.TreeNode.unroot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unroot</span></code></a></p></td>
 <td><p>Unroots current node.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.write" title="gcdyn.bdms.TreeNode.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.bdms.TreeNode.write" title="gcdyn.bdms.TreeNode.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a></p></td>
 <td><p>Returns the newick representation of current node.</p></td>
 </tr>
 </tbody>
@@ -790,6 +794,28 @@ If <code class="docutils literal notranslate"><span class="pre">None</span></cod
 If an <code class="docutils literal notranslate"><span class="pre">int</span></code>, then it will be used to derive the initial state.
 If a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a>, then it will be used directly.</p></li>
 <li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – Flag to indicate whether to print progress information.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.sample_survivors">
+<span class="sig-name descname"><span class="pre">sample_survivors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.sample_survivors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.sample_survivors" title="Permalink to this definition">#</a></dt>
+<dd><p>Choose <span class="math notranslate nohighlight">\(n\)</span> survivor leaves from the tree, or each survivor leaf with probability
+<span class="math notranslate nohighlight">\(p\)</span>, to mark as sampled (via the event attribute).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Number of leaves to sample.</p></li>
+<li><p><strong>p</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]) – Probability of sampling a leaf.</p></li>
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – A seed to initialize the random number generation.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then fresh, unpredictable entropy will be pulled from the OS.
+If an <code class="docutils literal notranslate"><span class="pre">int</span></code>, then it will be used to derive the initial state.
+If a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a>, then it will be used directly.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1624,9 +1650,9 @@ tree and a different tree instance.</p>
 <li><p><strong>t2</strong> – reference tree</p></li>
 <li><p><strong>attr_t1</strong> (<em>name</em>) – Compare trees using a custom node
 attribute as a node name.</p></li>
-<li><p><strong>attr_t2</strong> (<em>False</em>) – Compare trees using a custom node
+<li><p><strong>attr_t2</strong> (<em>name</em>) – Compare trees using a custom node
 attribute as a node name in target tree.</p></li>
-<li><p><strong>attr_t2</strong> – If True, consider trees as unrooted.</p></li>
+<li><p><strong>unrooted_trees</strong> (<em>False</em>) – If True, consider trees as unrooted.</p></li>
 <li><p><strong>expand_polytomies</strong> (<em>False</em>) – If True, all polytomies in the reference
 and target tree will be expanded into all possible binary
 trees. Robinson-foulds distance will be calculated between all
@@ -1636,28 +1662,6 @@ See also, <code class="xref py py-func docutils literal notranslate"><span class
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>(rf, rf_max, common_attrs, names, edges_t1, edges_t2,  discarded_edges_t1, discarded_edges_t2)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.sample_survivors">
-<span class="sig-name descname"><span class="pre">sample_survivors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.sample_survivors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.sample_survivors" title="Permalink to this definition">#</a></dt>
-<dd><p>Choose <span class="math notranslate nohighlight">\(n\)</span> survivor leaves from the tree, or each survivor leaf with probability
-<span class="math notranslate nohighlight">\(p\)</span>, to mark as sampled (via the event attribute).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Number of leaves to sample.</p></li>
-<li><p><strong>p</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]) – Probability of sampling a leaf.</p></li>
-<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – A seed to initialize the random number generation.
-If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then fresh, unpredictable entropy will be pulled from the OS.
-If an <code class="docutils literal notranslate"><span class="pre">int</span></code>, then it will be used to derive the initial state.
-If a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a>, then it will be used directly.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1696,6 +1700,24 @@ structure that will be used as a basal node.</p>
 <span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ETE'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ete3/coretype/tree.html#TreeNode.show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.show" title="Permalink to this definition">#</a></dt>
 <dd><p>Starts an interactive session to visualize current node
 structure using provided layout and TreeStyle.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.slice">
+<span class="sig-name descname"><span class="pre">slice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.slice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.slice" title="Permalink to this definition">#</a></dt>
+<dd><p>Return a list of attribute <code class="docutils literal notranslate"><span class="pre">attr</span></code> at time <span class="math notranslate nohighlight">\(t\)</span> for all
+lineages alive at that time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Slice the tree at time <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
+<li><p><strong>attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Attribute to extract from slice.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1807,29 +1829,23 @@ documentation.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.slice">
-<span class="sig-name descname"><span class="pre">slice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.slice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.slice" title="Permalink to this definition">#</a></dt>
-<dd><p>Return a list of attribute <code class="docutils literal notranslate"><span class="pre">attr</span></code> at time <span class="math notranslate nohighlight">\(t\)</span> for all
-lineages alive at that time.</p>
+<dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.prune">
+<span class="sig-name descname"><span class="pre">prune</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.prune"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.prune" title="Permalink to this definition">#</a></dt>
+<dd><p>Prune the tree to the subtree subtending the sampled leaves,
+removing unobserved subtrees.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Slice the tree at time <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
-<li><p><strong>attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Attribute to extract from slice.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.prune">
-<span class="sig-name descname"><span class="pre">prune</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.prune"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.prune" title="Permalink to this definition">#</a></dt>
-<dd><p>Prune the tree to the subtree induced by the sampled leaves.</p>
-<p>Also removes mutation events, and annotates mutation counts in
-child node <code class="docutils literal notranslate"><span class="pre">n_mutations</span></code> attribute.</p>
+<dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.remove_mutation_events">
+<span class="sig-name descname"><span class="pre">remove_mutation_events</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.remove_mutation_events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.remove_mutation_events" title="Permalink to this definition">#</a></dt>
+<dd><p>Remove unifurcating mutation event nodes, preserving branch length,
+and annotate mutation counts in child node <code class="docutils literal notranslate"><span class="pre">n_mutations</span></code> attribute.
+The tree must have been pruned first with <a class="reference internal" href="#gcdyn.bdms.TreeNode.prune" title="gcdyn.bdms.TreeNode.prune"><code class="xref py py-meth docutils literal notranslate"><span class="pre">prune()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
@@ -1845,13 +1861,15 @@ custom decoration and a color bar. As with the base class method, pass
 <code class="docutils literal notranslate"><span class="pre">&quot;%%inline&quot;</span></code> for the first argument to render inline in a notebook.
 See also ETE’s tree rendering <a class="reference external" href="http://etetoolkit.org/docs/latest/tutorial/tutorial_drawing.html">tutorial</a> and linked API docs pages
 there.</p>
-<p>If tree is not pruned, then branches
-are colored according to phenotype, extinct lineages are indicated as
-dotted branches, unsampled non-extint lineages are indicated as solid
-branches, and sampled lineages are indicated as thick solid branches
-with. Sampled leaves are indicated with a circle.</p>
-<p>If tree is pruned, then nodes are colored according to phenotype,
-branches are annotated above with branch length (in black text) and below with number of mutations (in green text).</p>
+<p>If tree is not pruned (or is pruned without removing mutation events), then
+branches are colored according to the attribute specified by <code class="docutils literal notranslate"><span class="pre">color_by</span></code>,
+extinct lineages are indicated as dotted branches, unsampled non-extint
+lineages are indicated as solid branches, and sampled lineages are indicated
+as thick solid branches. Sampled leaves are indicated with a circle.</p>
+<p>If tree is pruned without retaining mutation events, then nodes are colored
+according to the attribute specified by <code class="docutils literal notranslate"><span class="pre">color_by</span></code>, branches are annotated
+above with branch length (in black text) and below with number of mutations
+(in green text).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1924,6 +1942,7 @@ branches are annotated above with branch length (in black text) and below with n
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.event"><code class="docutils literal notranslate"><span class="pre">TreeNode.event</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.n_mutations"><code class="docutils literal notranslate"><span class="pre">TreeNode.n_mutations</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.evolve"><code class="docutils literal notranslate"><span class="pre">TreeNode.evolve()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.sample_survivors"><code class="docutils literal notranslate"><span class="pre">TreeNode.sample_survivors()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.__add__"><code class="docutils literal notranslate"><span class="pre">TreeNode.__add__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.add_child"><code class="docutils literal notranslate"><span class="pre">TreeNode.add_child()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.add_face"><code class="docutils literal notranslate"><span class="pre">TreeNode.add_face()</span></code></a></li>
@@ -1979,11 +1998,11 @@ branches are annotated above with branch length (in black text) and below with n
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.remove_sister"><code class="docutils literal notranslate"><span class="pre">TreeNode.remove_sister()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.resolve_polytomy"><code class="docutils literal notranslate"><span class="pre">TreeNode.resolve_polytomy()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.robinson_foulds"><code class="docutils literal notranslate"><span class="pre">TreeNode.robinson_foulds()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.sample_survivors"><code class="docutils literal notranslate"><span class="pre">TreeNode.sample_survivors()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.search_nodes"><code class="docutils literal notranslate"><span class="pre">TreeNode.search_nodes()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.set_outgroup"><code class="docutils literal notranslate"><span class="pre">TreeNode.set_outgroup()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.set_style"><code class="docutils literal notranslate"><span class="pre">TreeNode.set_style()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.show"><code class="docutils literal notranslate"><span class="pre">TreeNode.show()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.slice"><code class="docutils literal notranslate"><span class="pre">TreeNode.slice()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.sort_descendants"><code class="docutils literal notranslate"><span class="pre">TreeNode.sort_descendants()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.standardize"><code class="docutils literal notranslate"><span class="pre">TreeNode.standardize()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.support"><code class="docutils literal notranslate"><span class="pre">TreeNode.support</span></code></a></li>
@@ -1992,8 +2011,8 @@ branches are annotated above with branch length (in black text) and below with n
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.unroot"><code class="docutils literal notranslate"><span class="pre">TreeNode.unroot()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.up"><code class="docutils literal notranslate"><span class="pre">TreeNode.up</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.write"><code class="docutils literal notranslate"><span class="pre">TreeNode.write()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.slice"><code class="docutils literal notranslate"><span class="pre">TreeNode.slice()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.prune"><code class="docutils literal notranslate"><span class="pre">TreeNode.prune()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.remove_mutation_events"><code class="docutils literal notranslate"><span class="pre">TreeNode.remove_mutation_events()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.render"><code class="docutils literal notranslate"><span class="pre">TreeNode.render()</span></code></a></li>
 </ul>
 </li>

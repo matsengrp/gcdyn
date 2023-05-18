@@ -67,6 +67,7 @@ gcdyn.bdms.TreeNode
       ~TreeNode.populate
       ~TreeNode.prune
       ~TreeNode.remove_child
+      ~TreeNode.remove_mutation_events
       ~TreeNode.remove_sister
       ~TreeNode.render
       ~TreeNode.resolve_polytomy

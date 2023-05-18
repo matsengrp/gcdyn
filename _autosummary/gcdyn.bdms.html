@@ -387,6 +387,7 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.sample_survivors"><code class="docutils literal notranslate"><span class="pre">TreeNode.sample_survivors()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.slice"><code class="docutils literal notranslate"><span class="pre">TreeNode.slice()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.prune"><code class="docutils literal notranslate"><span class="pre">TreeNode.prune()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.remove_mutation_events"><code class="docutils literal notranslate"><span class="pre">TreeNode.remove_mutation_events()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.render"><code class="docutils literal notranslate"><span class="pre">TreeNode.render()</span></code></a></li>
 </ul>
 </li>
@@ -557,9 +558,21 @@ lineages alive at that time.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.prune">
 <span class="sig-name descname"><span class="pre">prune</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.prune"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.prune" title="Permalink to this definition">#</a></dt>
-<dd><p>Prune the tree to the subtree induced by the sampled leaves.</p>
-<p>Also removes mutation events, and annotates mutation counts in
-child node <code class="docutils literal notranslate"><span class="pre">n_mutations</span></code> attribute.</p>
+<dd><p>Prune the tree to the subtree subtending the sampled leaves,
+removing unobserved subtrees.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.bdms.TreeNode.remove_mutation_events">
+<span class="sig-name descname"><span class="pre">remove_mutation_events</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/bdms.html#TreeNode.remove_mutation_events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.bdms.TreeNode.remove_mutation_events" title="Permalink to this definition">#</a></dt>
+<dd><p>Remove unifurcating mutation event nodes, preserving branch length,
+and annotate mutation counts in child node <code class="docutils literal notranslate"><span class="pre">n_mutations</span></code> attribute.
+The tree must have been pruned first with <a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.prune" title="gcdyn.bdms.TreeNode.prune"><code class="xref py py-meth docutils literal notranslate"><span class="pre">prune()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
@@ -575,13 +588,15 @@ custom decoration and a color bar. As with the base class method, pass
 <code class="docutils literal notranslate"><span class="pre">&quot;%%inline&quot;</span></code> for the first argument to render inline in a notebook.
 See also ETE’s tree rendering <a class="reference external" href="http://etetoolkit.org/docs/latest/tutorial/tutorial_drawing.html">tutorial</a> and linked API docs pages
 there.</p>
-<p>If tree is not pruned, then branches
-are colored according to phenotype, extinct lineages are indicated as
-dotted branches, unsampled non-extint lineages are indicated as solid
-branches, and sampled lineages are indicated as thick solid branches
-with. Sampled leaves are indicated with a circle.</p>
-<p>If tree is pruned, then nodes are colored according to phenotype,
-branches are annotated above with branch length (in black text) and below with number of mutations (in green text).</p>
+<p>If tree is not pruned (or is pruned without removing mutation events), then
+branches are colored according to the attribute specified by <code class="docutils literal notranslate"><span class="pre">color_by</span></code>,
+extinct lineages are indicated as dotted branches, unsampled non-extint
+lineages are indicated as solid branches, and sampled lineages are indicated
+as thick solid branches. Sampled leaves are indicated with a circle.</p>
+<p>If tree is pruned without retaining mutation events, then nodes are colored
+according to the attribute specified by <code class="docutils literal notranslate"><span class="pre">color_by</span></code>, branches are annotated
+above with branch length (in black text) and below with number of mutations
+(in green text).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -658,6 +673,7 @@ branches are annotated above with branch length (in black text) and below with n
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.sample_survivors"><code class="docutils literal notranslate"><span class="pre">TreeNode.sample_survivors()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.slice"><code class="docutils literal notranslate"><span class="pre">TreeNode.slice()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.prune"><code class="docutils literal notranslate"><span class="pre">TreeNode.prune()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.remove_mutation_events"><code class="docutils literal notranslate"><span class="pre">TreeNode.remove_mutation_events()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.bdms.TreeNode.render"><code class="docutils literal notranslate"><span class="pre">TreeNode.render()</span></code></a></li>
 </ul>
 </li>
