@@ -278,7 +278,7 @@ class BirthDeathModel:
         return result.state
 
     def log_likelihood(self) -> float:
-        r"""Compute the log-likelihood of the rate parameters (optimized and not) given the
+        r"""Compute the log-likelihood of the current rate parameters given the
         trees."""
 
         return -self.objective(self.parameters)
