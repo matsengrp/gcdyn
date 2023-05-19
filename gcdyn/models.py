@@ -32,6 +32,13 @@ def _select_where(source, selector):
 
 
 class NeuralNetworkModel:
+    """
+    Adapts Voznica et. al (2022) for trees with a state attribute.
+
+    Voznica, J., A. Zhukova, V. Boskova, E. Saulnier, F. Lemoine, M. Moslonka-Lefebvre, and O. Gascuel. “Deep Learning from Phylogenies to Uncover the Epidemiological Dynamics of Outbreaks.” Nature Communications 13, no. 1 (July 6, 2022): 3896. https://doi.org/10.1038/s41467-022-31511-0.
+
+    """
+
     def __init__(
         self,
         trees,
@@ -87,8 +94,17 @@ class NeuralNetworkModel:
 
     @classmethod
     def _encode_tree(cls, tree, max_leaf_count):
-        """Returns the "Compact Bijective Ladderized Vector" form of the given
-        ladderized tree."""
+        """
+        Returns the "Compact Bijective Ladderized Vector" form of the given
+        ladderized tree.
+
+        The CBLV has been adapted to include the `x` attribute of every node.
+        Thus, in reference to figure 2a (v) in Voznica et. al (2022), two additional
+        rows have been appended: a third row of `x` for the nodes in row 1, and a
+        fourth row of `x` for the nodes in row 2.
+        """
+
+        # See the pytest for this method in `tests/test_deep_learning.py`
 
         def traverse_inorder(tree):
             """In-order traversal, generalizable to non-binary trees (by
@@ -276,6 +292,12 @@ def naive_log_likelihood(
     mutator: mutators.Mutator,
     extant_sampling_probability: float,
 ) -> float:
+    """
+    A model of fully-observed trees, where all survivors and fossils (sampled or unsampled)
+    are included in the tree.
+
+    Requires that `tree.prune()` has not been called.
+    """
     for tree in trees:
         if tree._pruned:
             raise NotImplementedError("tree must be fully observed, not pruned")
@@ -339,6 +361,14 @@ def stadler_appx_log_likelihood(
     extinct_sampling_probability: float,
     present_time: float,
 ) -> float:
+    """
+    A model over trees that are missing unsampled survivors and fossils.
+    Assumes that mutations do not occur in unsampled parts of the tree.
+
+    Requires that `tree.prune()` has been called.
+
+    Barido-Sottani, Joëlle, Timothy G Vaughan, and Tanja Stadler. “A Multitype Birth–Death Model for Bayesian Inference of Lineage-Specific Birth and Death Rates.” Edited by Adrian Paterson. Systematic Biology 69, no. 5 (September 1, 2020): 973–86. https://doi.org/10.1093/sysbio/syaa016.
+    """
     for tree in trees:
         if not tree._pruned:
             raise NotImplementedError("tree must be pruned")
@@ -390,7 +420,6 @@ def stadler_appx_log_likelihood(
     return result
 
 
-# TODO: can I merge this with scipy somehow and just swap out the integrator
 def stadler_full_log_likelihood(
     trees: list[ete3.TreeNode],
     birth_response: poisson.Response,
@@ -404,6 +433,14 @@ def stadler_full_log_likelihood(
     atol=1e-9,
     dtmax=0.01,
 ) -> float:
+    """
+    A model over trees that are missing unsampled survivors and fossils.
+
+    Requires that `tree.prune()` has been called.
+
+    Barido-Sottani, Joëlle, Timothy G Vaughan, and Tanja Stadler. “A Multitype Birth–Death Model for Bayesian Inference of Lineage-Specific Birth and Death Rates.” Edited by Adrian Paterson. Systematic Biology 69, no. 5 (September 1, 2020): 973–86. https://doi.org/10.1093/sysbio/syaa016.
+    """
+
     # Ensure our trees are compatible with this model
     for tree in trees:
         if not tree._pruned:
@@ -561,6 +598,15 @@ def stadler_full_log_likelihood_scipy(
     present_time: float,
     **solve_ivp_args,
 ) -> float:
+    """
+    A model over trees that are missing unsampled survivors and fossils.
+    (JAX-free implementation)
+
+    Requires that `tree.prune()` has been called.
+
+    Barido-Sottani, Joëlle, Timothy G Vaughan, and Tanja Stadler. “A Multitype Birth–Death Model for Bayesian Inference of Lineage-Specific Birth and Death Rates.” Edited by Adrian Paterson. Systematic Biology 69, no. 5 (September 1, 2020): 973–86. https://doi.org/10.1093/sysbio/syaa016.
+    """
+
     # Ensure our trees are compatible with this model
     for tree in trees:
         if not tree._pruned:
