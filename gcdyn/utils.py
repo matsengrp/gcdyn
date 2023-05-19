@@ -90,6 +90,7 @@ def sample_trees(
     seed=None,
     print_info=True,
     extant_sampling_probability=1,
+    extinct_sampling_probability=1,
     **evolve_kwargs,
 ):
     r"""Returns a sequence of n simulated trees.

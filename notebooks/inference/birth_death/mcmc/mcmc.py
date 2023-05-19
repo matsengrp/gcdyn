@@ -63,20 +63,38 @@ def mh_step(
         if rng.uniform() < np.minimum(1, np.exp(log_mh_ratio)):
             from_values = proposals
 
-    return from_values
+    diagnostics = dict()
+    diagnostics["log_prior"] = sum(
+        log_priors[key](from_values[key]) for key in from_values
+    )
+    diagnostics["log_likelihood"] = log_likelihood(**from_values)
+    diagnostics["log_posterior"] = (
+        diagnostics["log_prior"] + diagnostics["log_likelihood"]
+    )
+
+    return from_values, diagnostics
 
 
 def mh_tour(num_samples, initial_value, **step_kwargs):
     samples = [initial_value]
+    diagnostics = []
 
     step = partial(mh_step, **step_kwargs)
 
     for _ in tqdm.trange(num_samples):
-        samples.append(step(from_values=samples[-1]))
+        sample, diag = step(from_values=samples[-1])
+        samples.append(sample)
+        diagnostics.append(diag)
 
-    return {
+    samples = {
         key: np.hstack([sample[key] for sample in samples]) for key in initial_value
     }
+
+    diagnostics = {
+        key: np.hstack([diag[key] for diag in diagnostics]) for key in diagnostics[0]
+    }
+
+    return samples, diagnostics
 
 
 if __name__ == "__main__":
