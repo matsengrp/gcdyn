@@ -53,7 +53,7 @@ class NeuralNetworkModel:
                    and second dimension to the Response objects to predict
                    (Responses that aren't being estimated need not be provided)
         network_layers: layers for the neural network; "None" will give the default network.
-        max_leaf_count: will specify the size of the second dimension of encoded trees
+        max_leaf_count: the maximum leaf count across trees
         ladderize_trees: if trees are already ladderized, set this to `False` to save computing time
         """
         num_parameters = sum(len(response._param_dict) for response in responses[0])
