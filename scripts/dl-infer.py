@@ -26,11 +26,12 @@ def csvfn(smpl):
 
 # ----------------------------------------------------------------------------------------
 def make_plot(smpl, df):
-    sns.color_palette("hls", 8)
     plt.clf()
-    sns.histplot(df, x='Predicted', hue='Truth', bins=30, multiple='stack') #.set(title=smpl) #binwidth=0.025)
-    df.to_csv(csvfn(smpl))
+    sns.set_palette("viridis", 8)
+    hord = sorted(set(df['Truth']))
+    sns.histplot(df, x='Predicted', hue='Truth', hue_order=hord, palette='tab10', bins=30, multiple='stack') #.set(title=smpl) #binwidth=0.025)
     plt.savefig('%s/%s-hist.svg' % (args.outdir, smpl))
+    df.to_csv(csvfn(smpl))
 
 # ----------------------------------------------------------------------------------------
 def get_df(smpl, result, smpldict):

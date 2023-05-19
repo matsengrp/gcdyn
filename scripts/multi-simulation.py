@@ -10,6 +10,7 @@ import time
 import copy
 
 from gcdyn import bdms, gpmap, mutators, poisson, utils
+import subprocess
 from experiments import replay
 from colors import color
 
@@ -139,12 +140,16 @@ def set_responses():
     return birth_rate, death_rate
 
 # ----------------------------------------------------------------------------------------
+git_dir = os.path.dirname(os.path.realpath(__file__)).replace('/scripts', '/.git')
+print('    gcdyn commit: %s' % subprocess.check_output(['git', '--git-dir', git_dir, 'rev-parse', 'HEAD']).strip())
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--n-seqs', default=70, type=int, help='Number of sequences to observe')
 parser.add_argument('--n-trials', default=51, type=int, help='Number of trials/GCs to simulate')
 parser.add_argument('--n-max-tries', default=30, type=int, help='Number of times to retry simulation if it fails due to reaching either the min or max number of leaves.')
 parser.add_argument('--time-to-sampling', default=20, type=int)
 parser.add_argument('--min-survivors', default=100, type=int)
+parser.add_argument('--max-leaves', default=3000, type=int)
 parser.add_argument('--seed', default=0, type=int, help='random seed')
 parser.add_argument('--outdir', default=os.getcwd())
 parser.add_argument('--birth-response', default='soft-relu', choices=['constant', 'soft-relu', 'sigmoid'], help='birth rate response function')
