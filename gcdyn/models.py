@@ -12,7 +12,7 @@ from jax.typing import ArrayLike
 from functools import reduce
 from diffrax import diffeqsolve, ODETerm, Tsit5, PIDController
 from jaxopt import ScipyBoundedMinimize
-from gcdyn import mutators, poisson, utils, responses, bdms
+from gcdyn import mutators, poisson, utils, bdms
 import ete3
 
 # Pylance can't recognize tf submodules imported the normal way
@@ -42,7 +42,7 @@ class NeuralNetworkModel:
     def __init__(
         self,
         trees: list[ete3.TreeNode],
-        responses: list[list[responses.Response]],
+        responses: list[list[poisson.Response]],
         network_layers: list[callable] = None,
         max_leaf_count: int = 200,
         ladderize_trees: bool = True,
@@ -55,7 +55,7 @@ class NeuralNetworkModel:
         network_layers: layers for the neural network; "None" will give the default network.
                         Input shape should be (4, `max_leaf_count`), corresponding to the output of
                         :py:meth:`encode_tree`. Output should be a vector with length equal to the
-                        number of scalars that parameterize all py:class:`responses.Response` objects
+                        number of scalars that parameterize all py:class:`poisson.Response` objects
                         in a row of the `responses` argument.
         max_leaf_count: the maximum leaf count across trees
         ladderize_trees: if trees are already ladderized, set this to `False` to save computing time
@@ -144,7 +144,7 @@ class NeuralNetworkModel:
 
     @classmethod
     def _encode_responses(
-        cls, responses: list[list[responses.Response]]
+        cls, responses: list[list[poisson.Response]]
     ) -> list[list[float]]:
         return onp.array(
             [
@@ -157,8 +157,8 @@ class NeuralNetworkModel:
     def _decode_responses(
         cls,
         response_parameters: list[list[float]],
-        example_responses: list[responses.Response],
-    ) -> list[list[responses.Response]]:
+        example_responses: list[poisson.Response],
+    ) -> list[list[poisson.Response]]:
         result = []
 
         for row in response_parameters:
@@ -190,7 +190,7 @@ class NeuralNetworkModel:
 
     def predict(
         self, trees: list[bdms.TreeNode], ladderize_trees: bool = True
-    ) -> list[list[responses.Response]]:
+    ) -> list[list[poisson.Response]]:
         """Returns the Response objects predicted for each tree."""
 
         if ladderize_trees:
