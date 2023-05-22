@@ -54,6 +54,11 @@ def write_leaf_sequences_to_fasta(
 def ladderize_tree(tree, attr="x"):
     """
     Ladderizes the given tree.
+    Adapts the procedure described in Voznica et. al (2022) for trees whose leaves
+    may occur at the same time.
+
+    *This is done in place!*
+    Assumes that the `node.t` time attribute is ascending from root to leaf.
 
     First, we compute the following values for each node in the tree:
         1. The time of the leaf in the subtree at/below this node which is
@@ -61,12 +66,10 @@ def ladderize_tree(tree, attr="x"):
         2. The time of the ancestor node immediately prior to that leaf
         3. The attribute value `attr` (given in arguments) of that leaf
 
-    Then, every node has its child subtrees reordered to sort by these values.
+    Then, every node has its child subtrees reordered to sort by these values, decreasing from left to right (which corresponds to most recent and largest `attr` first).
     Values 2 and 3 are tie-breakers for value 1.
 
-    Assumes that the `node.t` time attribute is ascending from root to leaf.
-
-    *This is done in place!*
+    Voznica, J., A. Zhukova, V. Boskova, E. Saulnier, F. Lemoine, M. Moslonka-Lefebvre, and O. Gascuel. “Deep Learning from Phylogenies to Uncover the Epidemiological Dynamics of Outbreaks.” Nature Communications 13, no. 1 (July 6, 2022): 3896. https://doi.org/10.1038/s41467-022-31511-0.
     """
 
     sort_criteria = defaultdict(list)

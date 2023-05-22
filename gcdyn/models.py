@@ -36,7 +36,6 @@ class NeuralNetworkModel:
     Adapts Voznica et. al (2022) for trees with a state attribute.
 
     Voznica, J., A. Zhukova, V. Boskova, E. Saulnier, F. Lemoine, M. Moslonka-Lefebvre, and O. Gascuel. “Deep Learning from Phylogenies to Uncover the Epidemiological Dynamics of Outbreaks.” Nature Communications 13, no. 1 (July 6, 2022): 3896. https://doi.org/10.1038/s41467-022-31511-0.
-
     """
 
     def __init__(
