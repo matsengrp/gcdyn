@@ -51,24 +51,30 @@ def write_leaf_sequences_to_fasta(
             fp.write(f"{sequence}\n")
 
 
-def ladderize_tree(tree):
-    """Ladderizes the given tree.
+def ladderize_tree(tree, attr="x"):
+    """
+    Ladderizes the given tree.
 
-    *NOTE: this is done in place!*
+    *This is done in place!*
     """
 
     # Maps the name of a node to the time of the most
     # recent leaf in the subtree at/below this node
-    time_of_most_recent_leaf = defaultdict(int)
+
+    # Maps the name of a node to its sort criteria values:
+    #   1. Time of the most recent leaf in the subtree at/below this node
+    #   2. Time of the node immediately prior to that leaf
+    #   3. Attribute value (given in arguments) of that leaf
+    sort_criteria = defaultdict(list)
 
     for node in tree.iter_leaves():
         while True:
             if node.is_leaf():
-                time_of_most_recent_leaf[node.name] = node.t
+                sort_criteria[node.name] = [node.t, node.up.t, getattr(node, attr)]
             else:
-                time_of_most_recent_leaf[node.name] = max(
-                    time_of_most_recent_leaf[child.name] for child in node.children
-                )
+                sort_criteria[node.name] = sorted(
+                    (sort_criteria[child.name] for child in node.children), reverse=True
+                )[0]
 
             if node.up:
                 node = node.up
@@ -79,7 +85,7 @@ def ladderize_tree(tree):
         if len(node.children) > 1:
             node.children = sorted(
                 node.children,
-                key=lambda node: time_of_most_recent_leaf[node.name],
+                key=lambda node: sort_criteria[node.name],
                 reverse=True,
             )
 
