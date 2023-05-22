@@ -12,7 +12,7 @@ from jax.typing import ArrayLike
 from functools import reduce
 from diffrax import diffeqsolve, ODETerm, Tsit5, PIDController
 from jaxopt import ScipyBoundedMinimize
-from gcdyn import mutators, poisson, utils
+from gcdyn import mutators, poisson, utils, responses, bdms
 import ete3
 
 # Pylance can't recognize tf submodules imported the normal way
@@ -41,14 +41,14 @@ class NeuralNetworkModel:
 
     def __init__(
         self,
-        trees,
-        responses,
-        network_layers=None,
-        max_leaf_count=200,
-        ladderize_trees=True,
+        trees: list[ete3.TreeNode],
+        responses: list[list[responses.Response]],
+        network_layers: list[callable] = None,
+        max_leaf_count: int = 200,
+        ladderize_trees: bool = True,
     ):
         """
-        trees: sequence of `bdms.TreeNode`s
+        trees: list of `bdms.TreeNode`s
         responses: 2D sequence, with first dimension corresponding to trees
                    and second dimension to the Response objects to predict
                    (Responses that aren't being estimated need not be provided)
@@ -93,7 +93,7 @@ class NeuralNetworkModel:
         self.responses = responses
 
     @classmethod
-    def _encode_tree(cls, tree, max_leaf_count):
+    def _encode_tree(cls, tree: bdms.TreeNode, max_leaf_count: int):
         """
         Returns the "Compact Bijective Ladderized Vector" form of the given
         ladderized tree.
@@ -139,7 +139,9 @@ class NeuralNetworkModel:
         return matrix
 
     @classmethod
-    def _encode_responses(cls, responses):
+    def _encode_responses(
+        cls, responses: list[list[responses.Response]]
+    ) -> list[list[float]]:
         return onp.array(
             [
                 onp.hstack([response._flatten()[2] for response in row])
@@ -148,7 +150,11 @@ class NeuralNetworkModel:
         )
 
     @classmethod
-    def _decode_responses(cls, response_parameters, example_responses):
+    def _decode_responses(
+        cls,
+        response_parameters: list[list[float]],
+        example_responses: list[responses.Response],
+    ) -> list[list[responses.Response]]:
         result = []
 
         for row in response_parameters:
@@ -170,7 +176,7 @@ class NeuralNetworkModel:
 
         return result
 
-    def fit(self, epochs=30):
+    def fit(self, epochs: int = 30):
         """Trains neural network on given trees and response parameters."""
 
         response_parameters = self._encode_responses(self.responses)
@@ -178,7 +184,9 @@ class NeuralNetworkModel:
         self.network.compile(loss="mean_squared_error")
         self.network.fit(self.encoded_trees, response_parameters, epochs=epochs)
 
-    def predict(self, trees, ladderize_trees=True):
+    def predict(
+        self, trees: list[bdms.TreeNode], ladderize_trees: bool = True
+    ) -> list[list[responses.Response]]:
         """Returns the Response objects predicted for each tree."""
 
         if ladderize_trees:
