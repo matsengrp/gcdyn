@@ -107,9 +107,8 @@ class NeuralNetworkModel:
         # See the pytest for this method in `tests/test_deep_learning.py`
 
         def traverse_inorder(tree):
-            """In-order traversal, generalizable to non-binary trees (by
-            partitioning into left and right halves of children to visit)"""
             num_children = len(tree.children)
+            assert num_children <= 2, "Trees with >2 children are currently untested."
 
             for child in tree.children[: num_children // 2]:
                 yield from traverse_inorder(child)
