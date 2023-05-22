@@ -24,7 +24,7 @@ class TestDeepLearning(unittest.TestCase):
 
         utils.ladderize_tree(tree)
 
-        encoded_tree = models.NeuralNetworkModel._encode_tree(tree, max_leaf_count=10)
+        encoded_tree = models.NeuralNetworkModel.encode_tree(tree, max_leaf_count=10)
 
         solution = np.array(
             [

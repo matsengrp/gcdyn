@@ -60,6 +60,8 @@ class TestLikelihoods(unittest.TestCase):
         """
         Compares the likelihoods of the naive, Stadler approximate, and Stadler full models,
         and returns the value should they match.
+
+        `tree` should be unpruned, which is a requirement of the naive model.
         """
 
         # Naive likelihood by code
@@ -69,8 +71,6 @@ class TestLikelihoods(unittest.TestCase):
         ).item()
 
         # Stadler approximate likelihood by code
-
-        # TODO: prune this correctly once `prune` is updated
         tree._pruned = True
 
         present_time = max([node.t for node in tree.iter_leaves()])

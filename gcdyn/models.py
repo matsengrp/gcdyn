@@ -53,6 +53,10 @@ class NeuralNetworkModel:
                    and second dimension to the Response objects to predict
                    (Responses that aren't being estimated need not be provided)
         network_layers: layers for the neural network; "None" will give the default network.
+                        Input shape should be (4, `max_leaf_count`), corresponding to the output of
+                        :py:meth:`encode_tree`. Output should be a vector with length equal to the
+                        number of scalars that parameterize all py:class:`responses.Response` objects
+                        in a row of the `responses` argument.
         max_leaf_count: the maximum leaf count across trees
         ladderize_trees: if trees are already ladderized, set this to `False` to save computing time
         """
@@ -60,7 +64,7 @@ class NeuralNetworkModel:
 
         if network_layers is None:
             network_layers = (
-                # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
+                # Rotate matrix from (4, max_leaf_count) to (max_leaf_count, 4)
                 lambda x: tf.transpose(x, (0, 2, 1)),
                 layers.Conv1D(filters=50, kernel_size=3, activation="elu"),
                 layers.Conv1D(filters=50, kernel_size=10, activation="elu"),
@@ -88,12 +92,12 @@ class NeuralNetworkModel:
 
         self.trees = trees
         self.encoded_trees = onp.stack(
-            [self._encode_tree(tree, self.max_leaf_count) for tree in trees]
+            [self.encode_tree(tree, self.max_leaf_count) for tree in trees]
         )
         self.responses = responses
 
     @classmethod
-    def _encode_tree(cls, tree: bdms.TreeNode, max_leaf_count: int):
+    def encode_tree(cls, tree: bdms.TreeNode, max_leaf_count: int):
         """
         Returns the "Compact Bijective Ladderized Vector" form of the given
         ladderized tree.
@@ -194,7 +198,7 @@ class NeuralNetworkModel:
                 utils.ladderize_tree(tree)
 
         encoded_trees = onp.stack(
-            [self._encode_tree(tree, self.max_leaf_count) for tree in trees]
+            [self.encode_tree(tree, self.max_leaf_count) for tree in trees]
         )
 
         response_parameters = self.network(encoded_trees)
@@ -432,7 +436,7 @@ def stadler_full_log_likelihood(
     birth_response: poisson.Response,
     death_response: poisson.Response,
     mutation_response: poisson.Response,
-    mutator: mutators.Mutator,
+    mutator: mutators.DiscreteMutator,
     extant_sampling_probability: float,
     extinct_sampling_probability: float,
     present_time: float,
@@ -444,6 +448,8 @@ def stadler_full_log_likelihood(
     A model over trees that are missing unsampled survivors and fossils.
 
     Requires that `tree.prune()` has been called.
+    Requires that a py:class:`mutators.DiscreteMutator` be used as the `mutator`, and that the diagonal of the transition matrix is all zero.
+    Currently requires that all py:class:`poisson.Response` objects are homogenous responses.
 
     Barido-Sottani, Joëlle, Timothy G Vaughan, and Tanja Stadler. “A Multitype Birth–Death Model for Bayesian Inference of Lineage-Specific Birth and Death Rates.” Edited by Adrian Paterson. Systematic Biology 69, no. 5 (September 1, 2020): 973–86. https://doi.org/10.1093/sysbio/syaa016.
     """
@@ -456,10 +462,7 @@ def stadler_full_log_likelihood(
             raise RuntimeError("tree must be sampled")
 
     # This likelihood requires a discrete type space to be specified
-    # assert type(mutator) == mutators.DiscreteMutator
     type_space = jnp.array(list(mutator.state_space.keys()))
-
-    # assert jnp.all(jnp.diagonal(mutator.transition_matrix) == 0)
     mutation_probs = mutator.transition_matrix
 
     # Relevant values to set aside
@@ -468,8 +471,6 @@ def stadler_full_log_likelihood(
     γ = mutation_response
     ρ = extant_sampling_probability
     σ = extinct_sampling_probability
-
-    # TODO: assert all rate responses are homogenous, for now
 
     if not (0 <= ρ <= 1 and 0 <= σ <= 1):
         raise ValueError("sampling_probability must be in [0, 1]")
@@ -553,7 +554,6 @@ def stadler_full_log_likelihood(
             # We need to get q_i, but only for the type i belonging to the current branch
             if event.event == tree._SAMPLING_EVENT:
                 # "a tip at the present t_end == 0"
-                # assert t_end == 0
                 event.q_end = jnp.array([ρ])
                 # event.p_end already exists
             elif event.event == tree._DEATH_EVENT:
@@ -610,6 +610,8 @@ def stadler_full_log_likelihood_scipy(
     (JAX-free implementation)
 
     Requires that `tree.prune()` has been called.
+    Requires that a py:class:`mutators.DiscreteMutator` be used as the `mutator`, and that the diagonal of the transition matrix is all zero.
+    Currently requires that all py:class:`poisson.Response` objects are homogenous responses.
 
     Barido-Sottani, Joëlle, Timothy G Vaughan, and Tanja Stadler. “A Multitype Birth–Death Model for Bayesian Inference of Lineage-Specific Birth and Death Rates.” Edited by Adrian Paterson. Systematic Biology 69, no. 5 (September 1, 2020): 973–86. https://doi.org/10.1093/sysbio/syaa016.
     """
@@ -633,8 +635,6 @@ def stadler_full_log_likelihood_scipy(
     γ = mutation_response
     ρ = extant_sampling_probability
     σ = extinct_sampling_probability
-
-    # TODO: assert all rate responses are homogenous, for now
 
     if not (0 <= ρ <= 1 and 0 <= σ <= 1):
         raise ValueError("sampling_probability must be in [0, 1]")
