@@ -55,33 +55,31 @@ def ladderize_tree(tree, attr="x"):
     """
     Ladderizes the given tree.
 
+    First, we compute the following values for each node in the tree:
+        1. The time of the leaf in the subtree at/below this node which is
+           closest to present time
+        2. The time of the ancestor node immediately prior to that leaf
+        3. The attribute value `attr` (given in arguments) of that leaf
+
+    Then, every node has its child subtrees reordered to sort by these values.
+    Values 2 and 3 are tie-breakers for value 1.
+
+    Assumes that the `node.t` time attribute is ascending from root to leaf.
+
     *This is done in place!*
     """
 
-    # Maps the name of a node to the time of the most
-    # recent leaf in the subtree at/below this node
-
-    # Maps the name of a node to its sort criteria values:
-    #   1. Time of the most recent leaf in the subtree at/below this node
-    #   2. Time of the node immediately prior to that leaf
-    #   3. Attribute value (given in arguments) of that leaf
     sort_criteria = defaultdict(list)
 
-    for node in tree.iter_leaves():
-        while True:
-            if node.is_leaf():
-                sort_criteria[node.name] = [node.t, node.up.t, getattr(node, attr)]
-            else:
-                sort_criteria[node.name] = sorted(
-                    (sort_criteria[child.name] for child in node.children), reverse=True
-                )[0]
+    for node in tree.traverse("postorder"):
+        if node.is_leaf():
+            sort_criteria[node.name] = [node.t, node.up.t, getattr(node, attr)]
+        else:
+            sort_criteria[node.name] = sorted(
+                (sort_criteria[child.name] for child in node.children), reverse=True
+            )[0]
 
-            if node.up:
-                node = node.up
-            else:
-                break
-
-    for node in tree.traverse():
+    for node in tree.traverse("postorder"):
         if len(node.children) > 1:
             node.children = sorted(
                 node.children,
