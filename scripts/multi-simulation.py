@@ -20,10 +20,6 @@ def add_seqs(all_seqs, itrial, seqfos):
         all_seqs.append({'name' : '%d-%s'%(itrial, sfo['name']), 'seq' : sfo['seq']})
 
 # ----------------------------------------------------------------------------------------
-def n_expected_seqs(rbirth, rdeath, timeval):
-    return 2**((rbirth - rdeath) * timeval)
-
-# ----------------------------------------------------------------------------------------
 def outfn(ftype, itrial):
     if ftype == 'fasta':
         return f"{args.outdir}/seqs_{itrial}.fasta"
@@ -56,9 +52,10 @@ def generate_sequences_and_tree(
     birth_rate, death_rate, mutation_rate, mutator, seed=0,
 ):
 
-    min_fails, max_fails, success = 0, 0, False
+    err_strs, success = {}, False
     for iter in range(args.n_max_tries):
         try:
+            tree_start = time.time()
             tree = bdms.TreeNode()
             tree.x = gp_map(replay.NAIVE_SEQUENCE)
             tree.sequence = replay.NAIVE_SEQUENCE
@@ -71,31 +68,45 @@ def generate_sequences_and_tree(
                 mutator=mutator,
                 min_survivors=args.min_survivors,
                 birth_mutations=False,
+                capacity=args.carry_cap,
+                capacity_method=args.capacity_method,
                 seed=seed,
+                # verbose=True,
             )
-            print(f"    try {iter + 1} succeeded, tip count: {len(tree)}")
-            if args.debug_response_fcn:
+            print("    try %d succeeded, tip count %d  (%.1fs)" % (iter + 1, len(tree), time.time()-tree_start))
+            if args.debug:
                 print_final_response_vals(tree)
             success = True
             break
         except bdms.TreeError as terr:
-            if terr.value.find('minimum number of survivors') == 0:
-                min_fails += 1
-            elif terr.value.find('maximum number of leaves') == 0:
-                max_fails += 1
-            print('%s%s' % ('failures: ' if min_fails+max_fails==1 else '', '.'), end='', flush=True)
+            estr = terr.value
+            if 'min_survivors' in estr:
+                estr = 'min survivors too small (less than %d)' % args.min_survivors
+            # elif terr.value.find('maximum number of leaves') == 0:
+            #     max_fails += 1
+            if estr not in err_strs:
+                err_strs[estr] = 0
+            err_strs[estr] += 1
+            print('%s%s' % ('failures: ' if sum(err_strs.values())==1 else '', '.'), end='', flush=True)
             continue
-    if min_fails + max_fails > 0:
-        print()
-    if min_fails > 0:
-        print('   %s %d failures dropped below min N survivors %d' % (color('yellow', 'warning'), min_fails, args.min_survivors))
-    if max_fails > 0:
-        print('   %s %d failures exceeded max N leaves %d' % (color('yellow', 'warning'), max_fails, args.max_leaves))
+    print()
+    for estr in sorted([k for k, v in err_strs.items() if v > 0]):
+        print('      %s %d failures with message \'%s\'' % (color('yellow', 'warning'), err_strs[estr], estr))
     if not success:
-        raise Exception('exceeded maximum number of tries %d' % args.n_max_tries)
+        print('  %s exceeded maximum number of tries %d so giving up' % (color('yellow', 'warning'), args.n_max_tries))
+        return None
 
     tree.sample_survivors(n=args.n_seqs, seed=seed)
     tree.prune()
+    tree.remove_mutation_events()
+
+    # check that node sequences and sequence contexts are consistent
+    for node in tree.traverse():
+        for a, b in zip(replay.seq_to_contexts(node.sequence), node.sequence_context):
+            assert a == b
+    # check that node times and branch lengths are consistent
+    for node in tree.iter_descendants():
+        assert np.isclose(node.t - node.up.t, node.dist)
 
     return tree
 
@@ -124,7 +135,6 @@ def print_resp():
     print('   response    f(x=0)    function')
     for rname, rfcn in zip(['birth', 'death'], [birth_rate, death_rate]):
         print('     %s   %7.3f      %s' % (rname, rfcn.λ_phenotype(0), rfcn))
-    print('   expected population at time %d (x=0): %d' % (args.time_to_sampling, n_expected_seqs(birth_rate.λ_phenotype(0), death_rate.λ_phenotype(0), args.time_to_sampling)))
 
 # ----------------------------------------------------------------------------------------
 def set_responses():
@@ -146,10 +156,11 @@ print('    gcdyn commit: %s' % subprocess.check_output(['git', '--git-dir', git_
 parser = argparse.ArgumentParser()
 parser.add_argument('--n-seqs', default=70, type=int, help='Number of sequences to observe')
 parser.add_argument('--n-trials', default=51, type=int, help='Number of trials/GCs to simulate')
-parser.add_argument('--n-max-tries', default=30, type=int, help='Number of times to retry simulation if it fails due to reaching either the min or max number of leaves.')
+parser.add_argument('--n-max-tries', default=10, type=int, help='Number of times to retry simulation if it fails due to reaching either the min or max number of leaves.')
 parser.add_argument('--time-to-sampling', default=20, type=int)
 parser.add_argument('--min-survivors', default=100, type=int)
-parser.add_argument('--max-leaves', default=3000, type=int)
+parser.add_argument('--carry-cap', default=300, type=int)
+parser.add_argument('--capacity-method', default='death', choices=['birth', 'death', 'hard', None])
 parser.add_argument('--seed', default=0, type=int, help='random seed')
 parser.add_argument('--outdir', default=os.getcwd())
 parser.add_argument('--birth-response', default='soft-relu', choices=['constant', 'soft-relu', 'sigmoid'], help='birth rate response function')
@@ -157,11 +168,10 @@ parser.add_argument('--birth-response', default='soft-relu', choices=['constant'
 parser.add_argument('--death-value', default=0.025, type=float, help='value (parameter) for constant death response')
 parser.add_argument('--xscale', default=2, type=float, help='parameters (see also {x,y}{scale,shift}) for birth (consant, sigmoid and soft-relu) response')
 parser.add_argument('--xshift', default=-2.5, type=float)
-parser.add_argument('--yscale', default=0.1, type=float, help='mostly don\'t set this by hand -- better to let the auto scaler below change it to get a reasonable growth rate.')
+parser.add_argument('--yscale', default=1, type=float, help='probably don\'t want to change this')
 parser.add_argument('--yshift', default=0, type=float, help='atm this shouldn\'t (need to, at least) be changed')
-parser.add_argument('--initial-birth-rate', default=0.45, type=float, help='this gives a reasonable growth rate (with death rate 0.025, this gives ~500 seqs at time 20)')
 parser.add_argument('--mutability-multiplier', default=0.68, type=float)
-parser.add_argument('--debug-response-fcn', action='store_true')
+parser.add_argument('--debug', action='store_true')
 parser.add_argument('--overwrite', action='store_true')
 parser.add_argument('--test', action='store_true', help='sets some default parameter values that run quickly and successfully, i.e. useful for quick tests')
 
@@ -169,11 +179,13 @@ start = time.time()
 args = parser.parse_args()
 
 if args.test:
+    args.carry_cap = 100
     args.n_trials = 2
-    args.time_to_sampling = 5
+    args.time_to_sampling = 10
     args.min_survivors = 10
     args.n_seqs = 5
     args.n_max_tries = 5
+    print('  --test: --carry-cap %d --n-trials %d  --time-to-sampling %d  --min-survivors %d  --n-seqs %d  --n-max-tries %d' % (args.carry_cap, args.n_trials, args.time_to_sampling, args.min_survivors, args.n_seqs, args.n_max_tries))
 
 assert args.death_value >= 0
 if args.birth_response == 'sigmoid':
@@ -190,21 +202,7 @@ assert gp_map(replay.NAIVE_SEQUENCE) == 0
 birth_rate, death_rate = set_responses()
 print_resp()
 
-# if necessary, rescale response fcns
-n_exp = n_expected_seqs(birth_rate.λ_phenotype(0), death_rate.λ_phenotype(0), args.time_to_sampling)
-rescale, fuzz_factor = False, 0.5
-if n_exp > fuzz_factor * args.max_leaves:
-    print('  expected number of leaves too high (%d > %.2f * %d), so rescaling response function' % (n_exp, fuzz_factor, args.max_leaves))
-    rescale = True
-if n_exp * fuzz_factor < args.min_survivors:
-    print('  expected number of leaves too small (%d * %.2f < %d), so rescaling response function' % (n_exp, fuzz_factor, args.min_survivors))
-    rescale = True
-if rescale:
-    args.yscale *= args.initial_birth_rate / birth_rate.λ_phenotype(0)
-    birth_rate, death_rate = set_responses()
-    print_resp()
-
-if args.debug_response_fcn:
+if args.debug:
     scan_response()
 
 mutator = mutators.SequencePhenotypeMutator(
@@ -236,6 +234,8 @@ for itrial in range(1, args.n_trials + 1):
     tree = generate_sequences_and_tree(
         birth_rate, death_rate, mutation_rate, mutator, seed=rng
     )
+    if tree is None:
+        continue
 
     tmean, tmin, tmax = get_mut_stats(tree)
     print("   mutations per sequence:  mean %.1f   min %.1f  max %.1f" % (tmean, tmin, tmax))

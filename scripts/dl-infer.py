@@ -75,7 +75,7 @@ def train_and_test():
         [ConstantResponse(birth_resp.xscale)] for birth_resp, death_resp in smpldict['train']['responses']
     ]
 
-    model = NeuralNetworkModel(smpldict['train']['trees'], param_to_predict)
+    model = NeuralNetworkModel(smpldict['train']['trees'], param_to_predict, network_layers='small')
     model.fit(epochs=args.epochs)
 
     if not os.path.exists(args.outdir):
