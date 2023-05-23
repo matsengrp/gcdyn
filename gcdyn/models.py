@@ -96,7 +96,9 @@ class NeuralNetworkModel:
         self.responses = responses
 
     @classmethod
-    def encode_tree(cls, tree: bdms.TreeNode, max_leaf_count: int) -> onp.ndarray[float]:
+    def encode_tree(
+        cls, tree: bdms.TreeNode, max_leaf_count: int
+    ) -> onp.ndarray[float]:
         """
         Returns the "Compact Bijective Ladderized Vector" form of the given
         ladderized tree.
