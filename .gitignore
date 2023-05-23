@@ -166,3 +166,5 @@ cython_debug/
 # Custom
 _ignore
 *.svg
+
+.DS_Store
