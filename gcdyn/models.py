@@ -96,7 +96,7 @@ class NeuralNetworkModel:
         self.responses = responses
 
     @classmethod
-    def encode_tree(cls, tree: bdms.TreeNode, max_leaf_count: int):
+    def encode_tree(cls, tree: bdms.TreeNode, max_leaf_count: int) -> onp.ndarray[float]:
         """
         Returns the "Compact Bijective Ladderized Vector" form of the given
         ladderized tree.
@@ -144,7 +144,7 @@ class NeuralNetworkModel:
     @classmethod
     def _encode_responses(
         cls, responses: list[list[poisson.Response]]
-    ) -> list[list[float]]:
+    ) -> onp.ndarray[float]:
         return onp.array(
             [
                 onp.hstack([response._flatten()[2] for response in row])
