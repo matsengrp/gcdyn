@@ -1,8 +1,10 @@
-from gcdyn import models, utils
-from random import shuffle
-import numpy as np
-import ete3
 import unittest
+from random import shuffle
+
+import ete3
+import numpy as np
+
+from gcdyn import models, utils
 
 
 class TestDeepLearning(unittest.TestCase):
@@ -41,6 +43,9 @@ class TestDeepLearning(unittest.TestCase):
         """Ensures the ladderization+encoding process is invariant under tree isomorphism."""
 
         tree = utils.sample_trees(n=1, t=3, seed=10)[0]
+        tree.prune()
+        tree.remove_mutation_events()
+
         tree2 = tree.copy()
 
         for node in tree2.traverse("postorder"):
@@ -51,12 +56,12 @@ class TestDeepLearning(unittest.TestCase):
 
         encoded_tree = models.NeuralNetworkModel.encode_tree(
             tree,
-            max_leaf_count=20,
+            max_leaf_count=len(tree.get_leaves()),
         )
 
         encoded_tree2 = models.NeuralNetworkModel.encode_tree(
             tree2,
-            max_leaf_count=20,
+            max_leaf_count=len(tree2.get_leaves()),
         )
 
         self.assertTrue(np.all(encoded_tree == encoded_tree2))

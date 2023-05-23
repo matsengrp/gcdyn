@@ -1,23 +1,22 @@
 r"""BDMS inference."""
 
+from functools import reduce
+
+import ete3
 import jax.numpy as jnp
 import numpy as onp
 import scipy
+import tensorflow as tf
+from diffrax import ODETerm, PIDController, Tsit5, diffeqsolve
 from jax import lax
-
 
 # NOTE: sphinx is currently unable to present this in condensed form when the sphinx_autodoc_typehints extension is enabled
 from jax.typing import ArrayLike
-
-from functools import reduce
-from diffrax import diffeqsolve, ODETerm, Tsit5, PIDController
 from jaxopt import ScipyBoundedMinimize
-from gcdyn import mutators, poisson, utils, bdms
-import ete3
+
+from gcdyn import bdms, mutators, poisson, utils
 
 # Pylance can't recognize tf submodules imported the normal way
-import tensorflow as tf
-
 keras = tf.keras
 layers = keras.layers
 
@@ -113,7 +112,10 @@ class NeuralNetworkModel:
 
         def traverse_inorder(tree):
             num_children = len(tree.children)
-            assert num_children <= 2, "Trees with >2 children are currently untested."
+            assert tree.up is None or num_children in {
+                0,
+                2,
+            }, "Only full binary trees are supported."
 
             for child in tree.children[: num_children // 2]:
                 yield from traverse_inorder(child)
