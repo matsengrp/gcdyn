@@ -149,6 +149,7 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.html">gcdyn.poisson</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.set_backend.html">gcdyn.poisson.set_backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.ConstantResponse.html">gcdyn.poisson.ConstantResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.ExponentialResponse.html">gcdyn.poisson.ExponentialResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.HomogeneousResponse.html">gcdyn.poisson.HomogeneousResponse</a></li>
@@ -180,12 +181,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.gpmap.GPMap.html">gcdyn.gpmap.GPMap</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/gcdyn.model.html">gcdyn.model</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.model.BDMSModel.html">gcdyn.model.BDMSModel</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/gcdyn.utils.html">gcdyn.utils</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/gcdyn.utils.html">gcdyn.utils</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.utils.ladderize_tree.html">gcdyn.utils.ladderize_tree</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.utils.padded_fivemer_contexts_of_paired_sequences.html">gcdyn.utils.padded_fivemer_contexts_of_paired_sequences</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.utils.plot_responses.html">gcdyn.utils.plot_responses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.utils.random_transition_matrix.html">gcdyn.utils.random_transition_matrix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.utils.sample_trees.html">gcdyn.utils.sample_trees</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.utils.simple_fivemer_contexts.html">gcdyn.utils.simple_fivemer_contexts</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.utils.write_leaf_sequences_to_fasta.html">gcdyn.utils.write_leaf_sequences_to_fasta</a></li>
 </ul>
@@ -195,8 +196,8 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Experiments subpackage</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../experiments.html">Modules</a><input checked class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/experiments.replay.html">experiments.replay</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-9"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../experiments.html">Modules</a><input checked class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/experiments.replay.html">experiments.replay</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/experiments.replay.NAIVE_SEQUENCE.html">experiments.replay.NAIVE_SEQUENCE</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/experiments.replay.CHAIN_2_START_IDX.html">experiments.replay.CHAIN_2_START_IDX</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/experiments.replay.dms.html">experiments.replay.dms</a></li>
@@ -342,11 +343,12 @@ document.write(`
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Callable</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span> <span class="nn">jax.tree_util</span> <span class="kn">import</span> <span class="n">register_pytree_node</span>
-<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">jnp</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">onp</span>
-<span class="kn">import</span> <span class="nn">jax.scipy.special</span> <span class="k">as</span> <span class="nn">jsp</span>
-<span class="kn">import</span> <span class="nn">scipy.special</span> <span class="k">as</span> <span class="nn">osp</span>
 <span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <span class="n">quad</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">random</span>
+<span class="kn">import</span> <span class="nn">scipy.special</span> <span class="k">as</span> <span class="nn">sp</span>
+
 
 <span class="c1"># imports that are only used for type hints</span>
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -362,19 +364,25 @@ document.write(`
 <span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;jax_enable_x64&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
 
+<div class="viewcode-block" id="set_backend"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.set_backend.html#gcdyn.poisson.set_backend">[docs]</a><span class="k">def</span> <span class="nf">set_backend</span><span class="p">(</span><span class="n">use_jax</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">numpy</span>
+    <span class="kn">import</span> <span class="nn">scipy.special</span>
+    <span class="kn">import</span> <span class="nn">jax.numpy</span>
+    <span class="kn">import</span> <span class="nn">jax.scipy.special</span>
+
+    <span class="k">global</span> <span class="n">np</span><span class="p">,</span> <span class="n">sp</span>
+    <span class="n">np</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">numpy</span> <span class="k">if</span> <span class="n">use_jax</span> <span class="k">else</span> <span class="n">numpy</span>
+    <span class="n">sp</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">scipy</span><span class="o">.</span><span class="n">special</span> <span class="k">if</span> <span class="n">use_jax</span> <span class="k">else</span> <span class="n">scipy</span><span class="o">.</span><span class="n">special</span></div>
+
+
 <div class="viewcode-block" id="Response"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.Response.html#gcdyn.poisson.Response">[docs]</a><span class="k">class</span> <span class="nc">Response</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Abstract base class for mapping :py:class:`bdms.TreeNode` objects to a</span>
 <span class="sd">    Poisson process.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        grad: Enables JAX compilation and gradient for optimizing.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grad</span> <span class="o">=</span> <span class="n">grad</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_np</span> <span class="o">=</span> <span class="n">jnp</span> <span class="k">if</span> <span class="n">grad</span> <span class="k">else</span> <span class="n">onp</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_sp</span> <span class="o">=</span> <span class="n">jsp</span> <span class="k">if</span> <span class="n">grad</span> <span class="k">else</span> <span class="n">osp</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_register_with_pytree</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
@@ -441,7 +449,7 @@ document.write(`
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">node</span><span class="p">:</span> <span class="n">bdms</span><span class="o">.</span><span class="n">TreeNode</span><span class="p">,</span>
         <span class="n">rate_multiplier</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">onp</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sample the waiting time :math:`\Delta t` until the first event,</span>
 <span class="sd">        given the rate process starting at the provided node.</span>
@@ -458,7 +466,7 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">rate_multiplier</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
-        <span class="n">rng</span> <span class="o">=</span> <span class="n">onp</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Λ_inv</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">rng</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="n">rate_multiplier</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="Response.waiting_time_logsf"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.Response.html#gcdyn.poisson.Response.waiting_time_logsf">[docs]</a>    <span class="k">def</span> <span class="nf">waiting_time_logsf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">bdms</span><span class="o">.</span><span class="n">TreeNode</span><span class="p">,</span> <span class="n">Δt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -472,7 +480,27 @@ document.write(`
         <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">Λ</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">Δt</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">))</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">))</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Separates out the components of a Response object so its raw</span>
+<span class="sd">        parameter values can be used in model fitting.&quot;&quot;&quot;</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_param_dict</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">names</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">items</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">names</span><span class="p">,</span> <span class="n">values</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_from_flat</span><span class="p">(</span><span class="n">response_type</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reverses `_flatten`.</span>
+<span class="sd">        Usage:</span>
+<span class="sd">            flat = response._flatten()</span>
+
+<span class="sd">            flat[0]._from_flat(*flat[1:])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_obj</span> <span class="o">=</span> <span class="n">response_type</span><span class="p">()</span>
+        <span class="n">new_obj</span><span class="o">.</span><span class="n">_param_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">values</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">new_obj</span></div>
 
 
 <span class="n">ResponseType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;ResponseType&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Response</span><span class="p">)</span>
@@ -486,22 +514,15 @@ document.write(`
 <span class="sd">    `response_type` to be optimized with JAX.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">flatten</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
-        <span class="c1"># When recreating this object, we need to be able to assign</span>
-        <span class="c1"># correct values to each parameter, and also be able to set</span>
-        <span class="c1"># `grad` to its original boolean value</span>
+    <span class="k">def</span> <span class="nf">flatten</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">_flatten</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">values</span><span class="p">,</span> <span class="n">names</span>
 
-        <span class="n">items</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">_param_dict</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">names</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">items</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">grad</span><span class="p">))</span>
-
-    <span class="k">def</span> <span class="nf">unflatten</span><span class="p">(</span><span class="n">aux_data</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
-        <span class="n">new_obj</span> <span class="o">=</span> <span class="n">response_type</span><span class="p">(</span><span class="n">grad</span><span class="o">=</span><span class="n">aux_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="n">new_obj</span><span class="o">.</span><span class="n">_param_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">aux_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">children</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">new_obj</span>
+    <span class="k">def</span> <span class="nf">unflatten</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">static_data</span><span class="p">,</span> <span class="n">dynamic_data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_from_flat</span><span class="p">(</span><span class="n">static_data</span><span class="p">,</span> <span class="n">dynamic_data</span><span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">register_pytree_node</span><span class="p">(</span><span class="n">response_type</span><span class="p">,</span> <span class="n">flatten</span><span class="p">,</span> <span class="n">unflatten</span><span class="p">)</span>
+        <span class="n">register_pytree_node</span><span class="p">(</span><span class="n">response_type</span><span class="p">,</span> <span class="n">flatten</span><span class="p">,</span> <span class="n">response_type</span><span class="o">.</span><span class="n">_from_flat</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
         <span class="c1"># Already registered this type</span>
         <span class="k">pass</span>
@@ -559,15 +580,14 @@ document.write(`
 
 <span class="sd">    Args:</span>
 <span class="sd">        value: Constant response value.</span>
-<span class="sd">        grad: See :py:class:`Response`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
 
 <div class="viewcode-block" id="ConstantResponse.λ_phenotype"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.ConstantResponse.html#gcdyn.poisson.ConstantResponse.λ_phenotype">[docs]</a>    <span class="k">def</span> <span class="nf">λ_phenotype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
@@ -590,7 +610,6 @@ document.write(`
 <span class="sd">        xshift: :math:`\theta_2`</span>
 <span class="sd">        yscale: :math:`\theta_3`</span>
 <span class="sd">        yshift: :math:`\theta_4`</span>
-<span class="sd">        grad: See :py:class:`Response`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -599,17 +618,16 @@ document.write(`
         <span class="n">xshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
         <span class="n">yscale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">yshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-        <span class="n">grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">=</span> <span class="n">xscale</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span> <span class="o">=</span> <span class="n">xshift</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">=</span> <span class="n">yscale</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span> <span class="o">=</span> <span class="n">yshift</span>
 
 <div class="viewcode-block" id="ExponentialResponse.λ_phenotype"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.ExponentialResponse.html#gcdyn.poisson.ExponentialResponse.λ_phenotype">[docs]</a>    <span class="k">def</span> <span class="nf">λ_phenotype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span></div>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
@@ -640,7 +658,6 @@ document.write(`
 <span class="sd">        xshift: :math:`\theta_2`</span>
 <span class="sd">        yscale: :math:`\theta_3`</span>
 <span class="sd">        yshift: :math:`\theta_4`</span>
-<span class="sd">        grad: See :py:class:`Response`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -649,19 +666,16 @@ document.write(`
         <span class="n">xshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
         <span class="n">yscale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
         <span class="n">yshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-        <span class="n">grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">=</span> <span class="n">xscale</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span> <span class="o">=</span> <span class="n">xshift</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">=</span> <span class="n">yscale</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span> <span class="o">=</span> <span class="n">yshift</span>
 
 <div class="viewcode-block" id="SigmoidResponse.λ_phenotype"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.SigmoidResponse.html#gcdyn.poisson.SigmoidResponse.λ_phenotype">[docs]</a>    <span class="k">def</span> <span class="nf">λ_phenotype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sp</span><span class="o">.</span><span class="n">expit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span>
-        <span class="p">)</span></div>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">*</span> <span class="n">sp</span><span class="o">.</span><span class="n">expit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_param_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
@@ -692,7 +706,6 @@ document.write(`
 <span class="sd">        xshift: :math:`\theta_2`</span>
 <span class="sd">        yscale: :math:`\theta_3`</span>
 <span class="sd">        yshift: :math:`\theta_4`</span>
-<span class="sd">        grad: See :py:class:`Response`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -701,19 +714,17 @@ document.write(`
         <span class="n">xshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
         <span class="n">yscale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">yshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-        <span class="n">grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">=</span> <span class="n">xscale</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span> <span class="o">=</span> <span class="n">xshift</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">=</span> <span class="n">yscale</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span> <span class="o">=</span> <span class="n">yshift</span>
 
 <div class="viewcode-block" id="SoftReluResponse.λ_phenotype"><a class="viewcode-back" href="../../_autosummary/gcdyn.poisson.SoftReluResponse.html#gcdyn.poisson.SoftReluResponse.λ_phenotype">[docs]</a>    <span class="k">def</span> <span class="nf">λ_phenotype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_np</span><span class="o">.</span><span class="n">logaddexp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span><span class="p">))</span>
-            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">yscale</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">logaddexp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xscale</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshift</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">yshift</span>
         <span class="p">)</span></div>
 
     <span class="nd">@property</span>
@@ -744,16 +755,13 @@ document.write(`
 <span class="sd">    Args:</span>
 <span class="sd">        mutability: a mapping from local context to mutation rate (mutations per site per unit time)</span>
 <span class="sd">        mutation_intensity: a scaling factor for the mutability</span>
-<span class="sd">        grad: See :py:class:`Response`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">mutability</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
         <span class="n">mutation_intensity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mutability</span> <span class="o">=</span> <span class="p">(</span><span class="n">mutation_intensity</span> <span class="o">*</span> <span class="n">mutability</span><span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 
     <span class="nd">@property</span>
@@ -780,17 +788,13 @@ document.write(`
 <span class="sd">    respectively.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        grad: See :py:class:`Response`.</span>
 <span class="sd">        tol: Tolerance for root-finding.</span>
 <span class="sd">        maxiter: Maximum number of iterations for root-finding.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="n">maxiter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-    <span class="p">):</span>
-        <span class="k">if</span> <span class="n">grad</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;gradients are not implemented for </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="n">maxiter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># if grad:</span>
+        <span class="c1">#     raise NotImplementedError(f&quot;gradients are not implemented for {type(self)}&quot;)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tol</span> <span class="o">=</span> <span class="n">tol</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">maxiter</span> <span class="o">=</span> <span class="n">maxiter</span>
 
@@ -817,8 +821,8 @@ document.write(`
         <span class="n">converged</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxiter</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">λ</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">Δt</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_np</span><span class="o">.</span><span class="n">inf</span>
-            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">over</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+            <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">over</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">):</span>
                 <span class="n">Δt</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">Δt</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Λ</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">Δt</span><span class="p">)</span> <span class="o">-</span> <span class="n">τ</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">λ</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">Δt</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Λ</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">Δt</span><span class="p">)</span> <span class="o">-</span> <span class="n">τ</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">:</span>
                 <span class="n">converged</span> <span class="o">=</span> <span class="kc">True</span>
@@ -846,7 +850,6 @@ document.write(`
 <span class="sd">        interaction: a function :math:`\phi(x, f(t))` that maps the phenotype and external field to the effective phenotype.</span>
 <span class="sd">        tol: See :py:class:`PhenotypeTimeResponse`.</span>
 <span class="sd">        maxiter: See :py:class:`PhenotypeTimeResponse`.</span>
-<span class="sd">        grad: See :py:class:`Response`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -856,9 +859,7 @@ document.write(`
         <span class="n">interaction</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="n">x</span> <span class="o">-</span> <span class="n">f</span><span class="p">,</span>
         <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
         <span class="n">maxiter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
-        <span class="n">grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grad</span><span class="o">=</span><span class="n">phenotype_response</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">phenotype_response</span> <span class="o">=</span> <span class="n">phenotype_response</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">external_field</span> <span class="o">=</span> <span class="n">external_field</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">interaction</span> <span class="o">=</span> <span class="n">interaction</span>
@@ -888,7 +889,6 @@ document.write(`
 <span class="sd">        modulation: a function :math:`\tilde\lambda(\lambda_x, x, t)` that maps the original rate :math:`\lambda_x`, phenotype :math:`x`, and time :math:`t` to the modulated rate.</span>
 <span class="sd">        tol: See :py:class:`PhenotypeTimeResponse`.</span>
 <span class="sd">        maxiter: See :py:class:`PhenotypeTimeResponse`.</span>
-<span class="sd">        grad: See :py:class:`Response`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -897,9 +897,7 @@ document.write(`
         <span class="n">modulation</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
         <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
         <span class="n">maxiter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
-        <span class="n">grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grad</span><span class="o">=</span><span class="n">phenotype_response</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">phenotype_response</span> <span class="o">=</span> <span class="n">phenotype_response</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">modulation</span> <span class="o">=</span> <span class="n">modulation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tol</span> <span class="o">=</span> <span class="n">tol</span>

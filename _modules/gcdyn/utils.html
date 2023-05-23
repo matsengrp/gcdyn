@@ -149,6 +149,7 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.html">gcdyn.poisson</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.set_backend.html">gcdyn.poisson.set_backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.ConstantResponse.html">gcdyn.poisson.ConstantResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.ExponentialResponse.html">gcdyn.poisson.ExponentialResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.poisson.HomogeneousResponse.html">gcdyn.poisson.HomogeneousResponse</a></li>
@@ -180,12 +181,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.gpmap.GPMap.html">gcdyn.gpmap.GPMap</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/gcdyn.model.html">gcdyn.model</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.model.BDMSModel.html">gcdyn.model.BDMSModel</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/gcdyn.utils.html">gcdyn.utils</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/gcdyn.utils.html">gcdyn.utils</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.utils.ladderize_tree.html">gcdyn.utils.ladderize_tree</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.utils.padded_fivemer_contexts_of_paired_sequences.html">gcdyn.utils.padded_fivemer_contexts_of_paired_sequences</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.utils.plot_responses.html">gcdyn.utils.plot_responses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.utils.random_transition_matrix.html">gcdyn.utils.random_transition_matrix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.utils.sample_trees.html">gcdyn.utils.sample_trees</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.utils.simple_fivemer_contexts.html">gcdyn.utils.simple_fivemer_contexts</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/gcdyn.utils.write_leaf_sequences_to_fasta.html">gcdyn.utils.write_leaf_sequences_to_fasta</a></li>
 </ul>
@@ -195,8 +196,8 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Experiments subpackage</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../experiments.html">Modules</a><input checked class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/experiments.replay.html">experiments.replay</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-9"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../experiments.html">Modules</a><input checked class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/experiments.replay.html">experiments.replay</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/experiments.replay.NAIVE_SEQUENCE.html">experiments.replay.NAIVE_SEQUENCE</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/experiments.replay.CHAIN_2_START_IDX.html">experiments.replay.CHAIN_2_START_IDX</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/experiments.replay.dms.html">experiments.replay.dms</a></li>
@@ -330,7 +331,14 @@ document.write(`
   <h1>Source code for gcdyn.utils</h1><div class="highlight"><pre>
 <span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Utility functions ^^^^^^^^^^^^^^^^^&quot;&quot;&quot;</span>
 
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
 <span class="kn">import</span> <span class="nn">ete3</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">uniform</span>
+
+<span class="kn">from</span> <span class="nn">gcdyn.bdms</span> <span class="kn">import</span> <span class="n">TreeError</span><span class="p">,</span> <span class="n">TreeNode</span>
 
 
 <div class="viewcode-block" id="simple_fivemer_contexts"><a class="viewcode-back" href="../../_autosummary/gcdyn.utils.simple_fivemer_contexts.html#gcdyn.utils.simple_fivemer_contexts">[docs]</a><span class="k">def</span> <span class="nf">simple_fivemer_contexts</span><span class="p">(</span><span class="n">sequence</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
@@ -374,6 +382,136 @@ document.write(`
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">sequence</span> <span class="ow">in</span> <span class="n">sequence_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&gt;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sequence</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ladderize_tree"><a class="viewcode-back" href="../../_autosummary/gcdyn.utils.ladderize_tree.html#gcdyn.utils.ladderize_tree">[docs]</a><span class="k">def</span> <span class="nf">ladderize_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">attr</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Ladderizes the given tree.</span>
+<span class="sd">    Adapts the procedure described in Voznica et. al (2022) for trees whose leaves</span>
+<span class="sd">    may occur at the same time.</span>
+
+<span class="sd">    *This is done in place!*</span>
+<span class="sd">    Assumes that the `node.t` time attribute is ascending from root to leaf.</span>
+
+<span class="sd">    First, we compute the following values for each node in the tree:</span>
+<span class="sd">        1. The time of the leaf in the subtree at/below this node which is</span>
+<span class="sd">           closest to present time</span>
+<span class="sd">        2. The time of the ancestor node immediately prior to that leaf</span>
+<span class="sd">        3. The attribute value `attr` (given in arguments) of that leaf</span>
+
+<span class="sd">    Then, every node has its child subtrees reordered to sort by these values, decreasing from left to right (which corresponds to most recent and largest `attr` first).</span>
+<span class="sd">    Values 2 and 3 are tie-breakers for value 1.</span>
+
+<span class="sd">    Voznica, J., A. Zhukova, V. Boskova, E. Saulnier, F. Lemoine, M. Moslonka-Lefebvre, and O. Gascuel. “Deep Learning from Phylogenies to Uncover the Epidemiological Dynamics of Outbreaks.” Nature Communications 13, no. 1 (July 6, 2022): 3896. https://doi.org/10.1038/s41467-022-31511-0.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sort_criteria</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">tree</span><span class="o">.</span><span class="n">traverse</span><span class="p">(</span><span class="s2">&quot;postorder&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">():</span>
+            <span class="n">sort_criteria</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">up</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">attr</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sort_criteria</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">sort_criteria</span><span class="p">[</span><span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">tree</span><span class="o">.</span><span class="n">traverse</span><span class="p">(</span><span class="s2">&quot;postorder&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">,</span>
+                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">sort_criteria</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
+                <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="sample_trees"><a class="viewcode-back" href="../../_autosummary/gcdyn.utils.sample_trees.html#gcdyn.utils.sample_trees">[docs]</a><span class="k">def</span> <span class="nf">sample_trees</span><span class="p">(</span>
+    <span class="n">n</span><span class="p">,</span>
+    <span class="n">init_x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">print_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">extant_sampling_probability</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">extinct_sampling_probability</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">evolve_kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Returns a sequence of n simulated trees.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        n: Number of trees to evolve.</span>
+<span class="sd">        init_x: Phenotype of the root node of each tree.</span>
+<span class="sd">        seed: A seed to initialize the random number generation.</span>
+<span class="sd">              If ``None``, then fresh, unpredictable entropy will be pulled from the OS.</span>
+<span class="sd">              If an ``int``, then it will be used to derive the initial state.</span>
+<span class="sd">              If a :py:class:`numpy.random.Generator`, then it will be used directly.</span>
+<span class="sd">        print_info: Whether to print a summary statistic of the tree sizes.</span>
+<span class="sd">        extant_sampling_probability: To be passed to :py:meth:`TreeNode.sample_survivors` as argument `p`.</span>
+<span class="sd">        kwargs: Keyword arguments passed to :py:meth:`TreeNode.evolve`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">trees</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">encountered_errors</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">trees</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">tree</span> <span class="o">=</span> <span class="n">TreeNode</span><span class="p">()</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">init_x</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">evolve</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">evolve_kwargs</span><span class="p">)</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">sample_survivors</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="n">extant_sampling_probability</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+            <span class="n">trees</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">TreeError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>  <span class="c1"># not enough survivors</span>
+            <span class="n">encountered_errors</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">continue</span>
+
+    <span class="k">if</span> <span class="n">print_info</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">encountered_errors</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">error</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">encountered_errors</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Notice: obtained error&quot;</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="s2">&quot;times.&quot;</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;Success: average of&quot;</span><span class="p">,</span>
+            <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">traverse</span><span class="p">()))</span> <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">trees</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">trees</span><span class="p">),</span>
+            <span class="s2">&quot;nodes per tree, over&quot;</span><span class="p">,</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">trees</span><span class="p">),</span>
+            <span class="s2">&quot;trees.&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">trees</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="random_transition_matrix"><a class="viewcode-back" href="../../_autosummary/gcdyn.utils.random_transition_matrix.html#gcdyn.utils.random_transition_matrix">[docs]</a><span class="k">def</span> <span class="nf">random_transition_matrix</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">uniform</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">)])</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">):</span>
+        <span class="n">mat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">mat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">mat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:])</span>
+
+    <span class="k">return</span> <span class="n">mat</span></div>
+
+
+<div class="viewcode-block" id="plot_responses"><a class="viewcode-back" href="../../_autosummary/gcdyn.utils.plot_responses.html#gcdyn.utils.plot_responses">[docs]</a><span class="k">def</span> <span class="nf">plot_responses</span><span class="p">(</span><span class="o">*</span><span class="n">responses</span><span class="p">,</span> <span class="n">x_range</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="o">**</span><span class="n">named_responses</span><span class="p">):</span>
+    <span class="n">x_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">*</span><span class="n">x_range</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_array</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">λ_phenotype</span><span class="p">(</span><span class="n">x_array</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">named_responses</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_array</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">λ_phenotype</span><span class="p">(</span><span class="n">x_array</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$x$&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$f(x)$&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">*</span><span class="n">x_range</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">named_responses</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
 </pre></div>
 
                 </article>

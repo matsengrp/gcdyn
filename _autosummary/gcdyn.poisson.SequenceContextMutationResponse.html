@@ -154,6 +154,7 @@
 </ul>
 </li>
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="gcdyn.poisson.html">gcdyn.poisson</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.poisson.set_backend.html">gcdyn.poisson.set_backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.poisson.ConstantResponse.html">gcdyn.poisson.ConstantResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.poisson.ExponentialResponse.html">gcdyn.poisson.ExponentialResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.poisson.HomogeneousResponse.html">gcdyn.poisson.HomogeneousResponse</a></li>
@@ -185,12 +186,12 @@
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.GPMap.html">gcdyn.gpmap.GPMap</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="gcdyn.model.html">gcdyn.model</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="gcdyn.model.BDMSModel.html">gcdyn.model.BDMSModel</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="gcdyn.utils.html">gcdyn.utils</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="gcdyn.utils.html">gcdyn.utils</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.ladderize_tree.html">gcdyn.utils.ladderize_tree</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.padded_fivemer_contexts_of_paired_sequences.html">gcdyn.utils.padded_fivemer_contexts_of_paired_sequences</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.plot_responses.html">gcdyn.utils.plot_responses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.random_transition_matrix.html">gcdyn.utils.random_transition_matrix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.sample_trees.html">gcdyn.utils.sample_trees</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.simple_fivemer_contexts.html">gcdyn.utils.simple_fivemer_contexts</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.write_leaf_sequences_to_fasta.html">gcdyn.utils.write_leaf_sequences_to_fasta</a></li>
 </ul>
@@ -200,8 +201,8 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Experiments subpackage</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../experiments.html">Modules</a><input checked class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="experiments.replay.html">experiments.replay</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-9"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../experiments.html">Modules</a><input checked class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="experiments.replay.html">experiments.replay</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="experiments.replay.NAIVE_SEQUENCE.html">experiments.replay.NAIVE_SEQUENCE</a></li>
 <li class="toctree-l3"><a class="reference internal" href="experiments.replay.CHAIN_2_START_IDX.html">experiments.replay.CHAIN_2_START_IDX</a></li>
 <li class="toctree-l3"><a class="reference internal" href="experiments.replay.dms.html">experiments.replay.dms</a></li>
@@ -403,7 +404,7 @@ document.write(`
 <h1>gcdyn.poisson.SequenceContextMutationResponse<a class="headerlink" href="#gcdyn-poisson-sequencecontextmutationresponse" title="Permalink to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.poisson.SequenceContextMutationResponse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.poisson.</span></span><span class="sig-name descname"><span class="pre">SequenceContextMutationResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mutability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_intensity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/poisson.html#SequenceContextMutationResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.poisson.SequenceContextMutationResponse" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.poisson.</span></span><span class="sig-name descname"><span class="pre">SequenceContextMutationResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mutability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_intensity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/poisson.html#SequenceContextMutationResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.poisson.SequenceContextMutationResponse" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="gcdyn.poisson.HomogeneousResponse.html#gcdyn.poisson.HomogeneousResponse" title="gcdyn.poisson.HomogeneousResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">HomogeneousResponse</span></code></a></p>
 <p>A Response that accepts a sequence and outputs an aggregate mutation
 rate.</p>
@@ -414,7 +415,6 @@ rate.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>mutability</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code>) – a mapping from local context to mutation rate (mutations per site per unit time)</p></li>
 <li><p><strong>mutation_intensity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – a scaling factor for the mutability</p></li>
-<li><p><strong>grad</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – See <a class="reference internal" href="gcdyn.poisson.Response.html#gcdyn.poisson.Response" title="gcdyn.poisson.Response"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></a>.</p></li>
 </ul>
 </dd>
 </dl>

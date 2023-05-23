@@ -152,6 +152,7 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.poisson.html">gcdyn.poisson</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.set_backend.html">gcdyn.poisson.set_backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.ConstantResponse.html">gcdyn.poisson.ConstantResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.ExponentialResponse.html">gcdyn.poisson.ExponentialResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.HomogeneousResponse.html">gcdyn.poisson.HomogeneousResponse</a></li>
@@ -183,12 +184,12 @@
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.gpmap.GPMap.html">gcdyn.gpmap.GPMap</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.model.html">gcdyn.model</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.model.BDMSModel.html">gcdyn.model.BDMSModel</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.utils.html">gcdyn.utils</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.utils.html">gcdyn.utils</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.ladderize_tree.html">gcdyn.utils.ladderize_tree</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.padded_fivemer_contexts_of_paired_sequences.html">gcdyn.utils.padded_fivemer_contexts_of_paired_sequences</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.plot_responses.html">gcdyn.utils.plot_responses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.random_transition_matrix.html">gcdyn.utils.random_transition_matrix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.sample_trees.html">gcdyn.utils.sample_trees</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.simple_fivemer_contexts.html">gcdyn.utils.simple_fivemer_contexts</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.write_leaf_sequences_to_fasta.html">gcdyn.utils.write_leaf_sequences_to_fasta</a></li>
 </ul>
@@ -198,8 +199,8 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Experiments subpackage</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="experiments.html">Modules</a><input checked class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/experiments.replay.html">experiments.replay</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-9"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="experiments.html">Modules</a><input checked class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/experiments.replay.html">experiments.replay</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/experiments.replay.NAIVE_SEQUENCE.html">experiments.replay.NAIVE_SEQUENCE</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/experiments.replay.CHAIN_2_START_IDX.html">experiments.replay.CHAIN_2_START_IDX</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/experiments.replay.dms.html">experiments.replay.dms</a></li>
@@ -394,10 +395,7 @@ document.write(`
 <tr class="row-even"><td><p><a class="reference internal" href="_autosummary/gcdyn.gpmap.html#module-gcdyn.gpmap" title="gcdyn.gpmap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gpmap</span></code></a></p></td>
 <td><p>Genotype-phenotype map GPMap</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/gcdyn.model.html#module-gcdyn.model" title="gcdyn.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">model</span></code></a></p></td>
-<td><p>BDMS inference.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/gcdyn.utils.html#module-gcdyn.utils" title="gcdyn.utils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">utils</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/gcdyn.utils.html#module-gcdyn.utils" title="gcdyn.utils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">utils</span></code></a></p></td>
 <td><p>Utility functions ^^^^^^^^^^^^^^^^^</p></td>
 </tr>
 </tbody>
