@@ -1,11 +1,13 @@
 r"""Utility functions ^^^^^^^^^^^^^^^^^"""
 
-import ete3
-from gcdyn.bdms import TreeNode, TreeError
-import numpy as np
 from collections import defaultdict
-from scipy.stats import uniform
+
+import ete3
 import matplotlib.pyplot as plt
+import numpy as np
+from scipy.stats import uniform
+
+from gcdyn.bdms import TreeError, TreeNode
 
 
 def simple_fivemer_contexts(sequence: str):

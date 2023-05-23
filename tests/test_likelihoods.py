@@ -1,8 +1,9 @@
-from gcdyn import bdms, mutators, models, poisson, utils
-from numpy import log, sqrt, exp, max
-from scipy.stats import expon
 import unittest
 
+from numpy import exp, log, max, sqrt
+from scipy.stats import expon
+
+from gcdyn import bdms, models, mutators, poisson, utils
 
 BIRTH = bdms.TreeNode._BIRTH_EVENT
 DEATH = bdms.TreeNode._DEATH_EVENT
