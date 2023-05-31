@@ -61,6 +61,7 @@ class NeuralNetworkModel:
         num_parameters = sum(len(response._param_dict) for response in responses[0])
 
         if network_layers is None:
+            print('    using default network layers')
             network_layers = (
                 # Rotate matrix from (4, max_leaf_count) to (max_leaf_count, 4)
                 lambda x: tf.transpose(x, (0, 2, 1)),
@@ -75,10 +76,41 @@ class NeuralNetworkModel:
                 layers.Dense(8, activation="elu"),
                 layers.Dense(num_parameters, activation="elu"),
             )
+        elif network_layers == 'small':
+            print('    using small network layers')
+            network_layers = (
+                # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
+                lambda x: tf.transpose(x, (0, 2, 1)),
+                layers.Conv1D(filters=25, kernel_size=3, activation="elu"),
+                layers.Conv1D(filters=25, kernel_size=8, activation="elu"),
+                layers.MaxPooling1D(pool_size=10, strides=10),
+                layers.Conv1D(filters=40, kernel_size=8, activation="elu"),
+                layers.GlobalAveragePooling1D(),
+                layers.Dense(32, activation="elu"),
+                layers.Dense(16, activation="elu"),
+                layers.Dense(8, activation="elu"),
+                layers.Dense(num_parameters, activation="elu"),
+            )
+        elif network_layers == 'tiny':
+            print('    using tiny network layers')
+            network_layers = (
+                # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
+                lambda x: tf.transpose(x, (0, 2, 1)),
+                layers.Conv1D(filters=25, kernel_size=3, activation="elu"),
+                layers.MaxPooling1D(pool_size=10, strides=10),
+                layers.Conv1D(filters=40, kernel_size=8, activation="elu"),
+                layers.GlobalAveragePooling1D(),
+                layers.Dense(16, activation="elu"),
+                layers.Dense(8, activation="elu"),
+                layers.Dense(num_parameters, activation="elu"),
+            )
+        else:
+            raise Exception('unhandled network layer specification \'%s\'' % network_layers)
 
         inputs = keras.Input(shape=(4, max_leaf_count))
         outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
         self.network = keras.Model(inputs=inputs, outputs=outputs)
+        self.network.summary(print_fn=lambda l: print('      %s'%l))
 
         # Note: the original deep learning model rescales trees, but we don't here
         # because we should always have the same root to tip height.
