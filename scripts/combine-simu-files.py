@@ -1,15 +1,7 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import argparse
 import os
-import sys
-from Bio import SeqIO
 # import colored_traceback.always  # need to add this to installation stuff, i'm not sure how to do it atm
 import dill
-
-from gcdyn import bdms, gpmap, mutators, poisson, utils
-from experiments import replay
-from colors import color
 
 # ----------------------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
@@ -33,6 +25,6 @@ with open(args.outfile, 'wb') as pfile:
 with open(args.outfile, 'rb') as pfile:
     dfo = dill.load(pfile)
     treestrs = [str(len(list(tfo['tree'].iter_leaves()))) for tfo in pklfo]
-    birthstrs, deathstrs = [[tfo['%s-response'%k] for tfo in pklfo] for k in ['birth', 'death']]
+    birthstrs, deathstrs = [[tfo['%s-response' % k] for tfo in pklfo] for k in ['birth', 'death']]
     print('    checking info in outfile: %d trees with leaf counts: %s' % (len(pklfo), ' '.join(treestrs)))
     print('        distinct response fcns:  birth %d  death %d' % (len(set(birthstrs)), len(set(deathstrs))))

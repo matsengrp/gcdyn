@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import argparse
 import os
 import sys
@@ -15,10 +14,12 @@ import subprocess
 from experiments import replay
 from colors import color
 
+
 # ----------------------------------------------------------------------------------------
 def add_seqs(all_seqs, itrial, seqfos):
     for sfo in seqfos:
-        all_seqs.append({'name' : sfo['name'] if itrial is None else '%d-%s'%(itrial, sfo['name']), 'seq' : sfo['seq']})
+        all_seqs.append({'name' : sfo['name'] if itrial is None else '%d-%s' % (itrial, sfo['name']), 'seq' : sfo['seq']})
+
 
 # ----------------------------------------------------------------------------------------
 def outfn(ftype, itrial, odir=None):
@@ -29,10 +30,11 @@ def outfn(ftype, itrial, odir=None):
         if ftype == 'pkl':
             tstr = 'simu'
         else:
-            tstr = 'all-%s' % ('seqs' if ftype=='fasta' else 'trees')
+            tstr = 'all-%s' % ('seqs' if ftype == 'fasta' else 'trees')
     else:
-        tstr = '%s_%d' % ('seqs' if ftype=='fasta' else 'tree', itrial)
+        tstr = '%s_%d' % ('seqs' if ftype == 'fasta' else 'tree', itrial)
     return f"{odir}/{tstr}.{ftype}"
+
 
 # ----------------------------------------------------------------------------------------
 def print_final_response_vals(tree, birth_resp, death_resp):
@@ -50,6 +52,7 @@ def print_final_response_vals(tree, birth_resp, death_resp):
     print('       x   %6.2f    %6.2f    %6.2f' % (np.mean(xvals), min(xvals), max(xvals)))
     print('     birth %6.2f    %6.2f    %6.2f' % (np.mean(bvals), min(bvals), max(bvals)))
     print('     death %7.3f   %7.3f   %7.3f' % (np.mean(dvals), min(dvals), max(dvals)))
+
 
 # ----------------------------------------------------------------------------------------
 def generate_sequences_and_tree(
@@ -77,7 +80,7 @@ def generate_sequences_and_tree(
                 seed=seed,
                 # verbose=True,
             )
-            print("    try %d succeeded, tip count %d  (%.1fs)" % (iter + 1, len(tree), time.time()-tree_start))
+            print("    try %d succeeded, tip count %d  (%.1fs)" % (iter + 1, len(tree), time.time() - tree_start))
             if args.debug:
                 print_final_response_vals(tree, birth_resp, death_resp)
             success = True
@@ -91,7 +94,7 @@ def generate_sequences_and_tree(
             if estr not in err_strs:
                 err_strs[estr] = 0
             err_strs[estr] += 1
-            print('%s%s' % ('failures: ' if sum(err_strs.values())==1 else '', '.'), end='', flush=True)
+            print('%s%s' % ('failures: ' if sum(err_strs.values()) == 1 else '', '.'), end='', flush=True)
             continue
     print()
     for estr in sorted([k for k, v in err_strs.items() if v > 0]):
@@ -118,6 +121,7 @@ def generate_sequences_and_tree(
 
     return tree
 
+
 # ----------------------------------------------------------------------------------------
 def get_mut_stats(tree):
     tree.total_mutations = 0
@@ -128,15 +132,17 @@ def get_mut_stats(tree):
     tmut_tots = [leaf.total_mutations for leaf in tree.iter_leaves()]
     return np.mean(tmut_tots), min(tmut_tots), max(tmut_tots)
 
+
 # ----------------------------------------------------------------------------------------
 def scan_response(birth_resp, death_resp, xmin=-5, xmax=2, nsteps=10):  # print output values of response function
-    dx = (xmax-xmin) / nsteps
+    dx = (xmax - xmin) / nsteps
     xvals = list(np.arange(xmin, 0, dx)) + list(np.arange(0, xmax + dx, dx))
     rvals = [birth_resp.λ_phenotype(x) for x in xvals]
-    xstr = '   '.join('%7.2f'%x for x in xvals)
-    rstr = '   '.join('%7.2f'%r for r in rvals)
+    xstr = '   '.join('%7.2f' % x for x in xvals)
+    rstr = '   '.join('%7.2f' % r for r in rvals)
     print('    x:', xstr)
     print('    r:', rstr)
+
 
 # ----------------------------------------------------------------------------------------
 def print_resp(bresp, dresp):
@@ -144,12 +150,13 @@ def print_resp(bresp, dresp):
     for rname, rfcn in zip(['birth', 'death'], [bresp, dresp]):
         print('     %s   %7.3f      %s' % (rname, rfcn.λ_phenotype(0), rfcn))
 
+
 # ----------------------------------------------------------------------------------------
 def get_responses(xscale, xshift):
     # ----------------------------------------------------------------------------------------
     def get_birth(yscl):
         if args.birth_response == 'constant':
-            bresp = poisson.ConstantResponse(yscl) #args.birth_value)
+            bresp = poisson.ConstantResponse(yscl)
         elif args.birth_response in ['soft-relu', 'sigmoid']:
             kwargs = {'xscale' : xscale, 'xshift' : xshift, 'yscale' : yscl, 'yshift' : args.yshift}
             rfcns = {'soft-relu' : poisson.SoftReluResponse, 'sigmoid' : poisson.SigmoidResponse}
@@ -170,24 +177,26 @@ def get_responses(xscale, xshift):
     #     scan_response(bresp, dresp)
     return bresp, dresp
 
+
 # ----------------------------------------------------------------------------------------
 def write_final_outputs(all_seqs, all_trees):
     asfn = '%s/all-seqs.fasta' % args.outdir
-    print('  writing all seqs to %s'%asfn)
+    print('  writing all seqs to %s' % asfn)
     with open(asfn, 'w') as asfile:
         for sfo in all_seqs:
             asfile.write('>%s\n%s\n' % (sfo['name'], sfo['seq']))
 
     tfn = '%s/all-trees.nwk' % args.outdir
-    print('  writing all trees to %s'%tfn)
+    print('  writing all trees to %s' % tfn)
     with open(tfn, 'w') as tfile:
         for pfo in all_trees:
-            tfile.write('%s\n'%pfo['tree'].write(format=1))
+            tfile.write('%s\n' % pfo['tree'].write(format=1))
 
     pkfn = '%s/simu.pkl' % args.outdir
     print('  writing %d trees and birth/death responses to %s' % (len(all_trees), pkfn))
     with open(pkfn, 'wb') as pfile:
         dill.dump(all_trees, pfile)
+
 
 # ----------------------------------------------------------------------------------------
 git_dir = os.path.dirname(os.path.realpath(__file__)).replace('/scripts', '/.git')
@@ -232,14 +241,14 @@ if args.n_sub_procs is not None:  # this stuff is all copied from partis utils.p
         clist[clist.index('--outdir') + 1] = subdir
         clist[clist.index('--n-trials') + 1] = str(n_per_proc)
         isp = clist.index('--n-sub-procs')
-        clist = clist[ : isp] + clist[isp + 2 : ]
+        clist = clist[:isp] + clist[isp + 2:]
         clist += ['--itrial', str(iproc * n_per_proc)]
         cmd_str = ' '.join(clist)
         print('  %s %s' % (color('red', 'run'), cmd_str))
         logfname = '%s/simu.log' % subdir
         if os.path.exists(logfname):
             subprocess.check_call(('mv %s %s.old.%d' % (logfname, logfname, random.randint(100, 999))).split())  # can't be bothered to iterate properly like in the partis code
-        subprocess.check_call('echo %s >%s'%(cmd_str, logfname), shell=True)
+        subprocess.check_call('echo %s >%s' % (cmd_str, logfname), shell=True)
         cmd_str = '%s >>%s' % (cmd_str, logfname)
         procs.append(subprocess.Popen(cmd_str, env=os.environ, shell=True))
     while procs.count(None) != len(procs):  # we set each proc to None when it finishes
@@ -298,7 +307,7 @@ mutator = mutators.SequencePhenotypeMutator(
 )
 
 mutation_rate = poisson.SequenceContextMutationResponse(
-    args.mutability_multiplier * replay.mutability(), #replay.seq_to_contexts
+    args.mutability_multiplier * replay.mutability(),
 )
 
 all_seqs, all_trees = [], []
@@ -307,7 +316,7 @@ rng = np.random.default_rng(seed=args.seed)
 for itrial in range(1, args.n_trials + 1):
     ofn = outfn('fasta', itrial)
     if os.path.exists(ofn) and not args.overwrite:
-        print('    output %s already exists, skipping'%ofn)
+        print('    output %s already exists, skipping' % ofn)
         records = list(SeqIO.parse(ofn, 'fasta'))
         add_seqs(all_seqs, itrial, [{'name' : rcd.id, 'seq' : rcd.seq} for rcd in records])
         with open(outfn('pkl', itrial), 'rb') as pfile:
@@ -319,7 +328,7 @@ for itrial in range(1, args.n_trials + 1):
         continue
     sys.stdout.flush()
     birth_resp, death_resp = get_responses(np.random.choice(args.xscale_list), np.random.choice(args.xshift_list))
-    print(color('blue', "trial %d:"%itrial), end=' ')
+    print(color('blue', "trial %d:" % itrial), end=' ')
     tree = generate_sequences_and_tree(
         birth_resp, death_resp, mutation_rate, mutator, seed=rng
     )
@@ -353,8 +362,8 @@ if n_missing > 0:
 
 if len(args.xscale_list) > 0:
     xscales = [p['birth-response'].xscale for p in all_trees]
-    print('  chosen xscale values: %s' % (',  '.join('%.1f: %d'%(x, xscales.count(x)) for x in sorted(set(xscales)))))
+    print('  chosen xscale values: %s' % (',  '.join('%.1f: %d' % (x, xscales.count(x)) for x in sorted(set(xscales)))))
 
 write_final_outputs(all_seqs, all_trees)
 
-print('    total simulation time: %.1f sec' % (time.time()-start))
+print('    total simulation time: %.1f sec' % (time.time() - start))

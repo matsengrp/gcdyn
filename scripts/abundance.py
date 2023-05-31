@@ -4,7 +4,6 @@ Calculate the sequence abundance frequency for each input fasta and then write i
 
 import collections
 import os
-import sys
 import pandas as pd
 import argparse
 import numpy
@@ -14,10 +13,12 @@ import itertools
 from Bio import SeqIO
 from Bio.SeqUtils.CheckSum import seguid
 
+
 # ----------------------------------------------------------------------------------------
 def hamming_distance(seq1, seq2):  # NOTE doesn't handle ambiguous bases
     assert len(seq1) == len(seq2)
     return sum(x != y for x, y in zip(seq1.upper(), seq2.upper()))
+
 
 # ----------------------------------------------------------------------------------------
 ustr = """
@@ -87,7 +88,7 @@ for fasta_path in args.infiles:
     )
 
     fdicts['hdists'][base] = hdvals
-    fdicts['max-abdn-shm'][base] = [int(numpy.median([hd_dict[u] for l in max_abdn_idlists for u in l]))]
+    fdicts['max-abdn-shm'][base] = [int(numpy.median([hd_dict[u] for x in max_abdn_idlists for u in x]))]
 
 if n_too_small > 0:
     print('    skipped %d files with fewer than %d seqs' % (n_too_small, args.min_seqs))
@@ -96,7 +97,7 @@ if len(init_sizes) > 0:
 if n_removed > 0:
     print('    removed %d seqs with name \'%s\'' % (n_removed, args.naive_name))
 
-print('  writing to %s'%args.outdir)
+print('  writing to %s' % args.outdir)
 if not os.path.exists(args.outdir):
     os.makedirs(args.outdir)
 
@@ -104,7 +105,7 @@ to_write = pd.DataFrame(abundances).fillna(0).astype(int)
 to_write.to_csv('%s/abundances.csv' % args.outdir)
 
 for fstr, fdct in fdicts.items():
-    with open('%s/%s.csv'%(args.outdir, fstr), 'w') as cfile:
+    with open('%s/%s.csv' % (args.outdir, fstr), 'w') as cfile:
         writer = csv.DictWriter(cfile, ['fbase', 'vlist'])
         writer.writeheader()
         for fbase, vlist in fdicts[fstr].items():

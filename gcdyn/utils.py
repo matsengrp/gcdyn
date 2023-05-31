@@ -54,6 +54,7 @@ def write_leaf_sequences_to_fasta(
 
     return sequence_dict
 
+
 def ladderize_tree(tree, attr="x"):
     """
     Ladderizes the given tree.

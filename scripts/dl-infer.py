@@ -4,34 +4,31 @@ import matplotlib.pyplot as plt
 import argparse
 import os
 import sys
-from Bio import SeqIO
 # import colored_traceback.always  # need to add this to installation stuff, i'm not sure how to do it atm
-import dill
 import time
-import copy
 import pickle
 import pandas as pd
 import seaborn as sns
 import random
 
-# if you move this script, you'll need to change this method of getting the imports
-gcd_dir = os.path.dirname(os.path.realpath(__file__)).replace('/scripts', '')
-sys.path.insert(1, gcd_dir + '/gcdyn')
+from gcdyn.models import NeuralNetworkModel
+from gcdyn.poisson import ConstantResponse
 
-from colors import color
 
 # ----------------------------------------------------------------------------------------
 def csvfn(smpl):
     return '%s/%s.csv' % (args.outdir, smpl)
+
 
 # ----------------------------------------------------------------------------------------
 def make_plot(smpl, df):
     plt.clf()
     sns.set_palette("viridis", 8)
     hord = sorted(set(df['Truth']))
-    sns.histplot(df, x='Predicted', hue='Truth', hue_order=hord, palette='tab10', bins=30, multiple='stack').set(title=smpl) #binwidth=0.025)
+    sns.histplot(df, x='Predicted', hue='Truth', hue_order=hord, palette='tab10', bins=30, multiple='stack').set(title=smpl)
     plt.savefig('%s/%s-hist.svg' % (args.outdir, smpl))
     df.to_csv(csvfn(smpl))
+
 
 # ----------------------------------------------------------------------------------------
 def get_df(smpl, result, smpldict):
@@ -46,21 +43,20 @@ def get_df(smpl, result, smpldict):
     make_plot(smpl, df)
     return df
 
+
 # ----------------------------------------------------------------------------------------
 def read_plot_csv():
     for smpl in ['train', 'test']:
         df = pd.read_csv(csvfn(smpl))
         make_plot(smpl, df)
 
+
 # ----------------------------------------------------------------------------------------
 def train_and_test():
-    from gcdyn.models import NeuralNetworkModel
-    from gcdyn.poisson import ConstantResponse
-
     with open(args.infname, 'rb') as f:
         pklfo = pickle.load(f)  # dict with two keys ('trees' and 'responses'), and a list for each
-    samples = {k+'s' : [tfo[k] for tfo in pklfo] for k in ['tree', 'birth-response', 'death-response']}
-    print('    read %d trees/responses from %s'% (len(samples['trees']), args.infname))
+    samples = {k + 's' : [tfo[k] for tfo in pklfo] for k in ['tree', 'birth-response', 'death-response']}
+    print('    read %d trees/responses from %s' % (len(samples['trees']), args.infname))
     print('      first response pair:\n        birth: %s\n        death: %s' % (samples['birth-responses'][0], samples['death-responses'][0]))
 
     n_trees = len(samples['trees'])
@@ -68,7 +64,6 @@ def train_and_test():
     idxs['train'] = random.sample(range(n_trees), int(args.train_frac * n_trees))
     idxs['test'] = [i for i in range(n_trees) if i not in idxs['train']]
 
-    sublist = lambda x, idx: [x[i] for i in idx]
     for smpl in ['train', 'test']:
         smpldict[smpl] = {key: [val[i] for i in idxs[smpl]] for key, val in samples.items()}
 
@@ -88,7 +83,8 @@ def train_and_test():
     result = model.predict(smpldict['test']['trees'])
     get_df('test', result, smpldict)
 
-    print('    total dl inference time: %.1f sec' % (time.time()-start))
+    print('    total dl inference time: %.1f sec' % (time.time() - start))
+
 
 # ----------------------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
@@ -108,6 +104,7 @@ if args.test:
 
 random.seed(args.random_seed)
 np.random.seed(args.random_seed)
+
 
 # ----------------------------------------------------------------------------------------
 if os.path.exists(csvfn('test')) and not args.overwrite:

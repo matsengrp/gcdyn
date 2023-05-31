@@ -110,7 +110,7 @@ class NeuralNetworkModel:
         inputs = keras.Input(shape=(4, max_leaf_count))
         outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
         self.network = keras.Model(inputs=inputs, outputs=outputs)
-        self.network.summary(print_fn=lambda l: print('      %s'%l))
+        self.network.summary(print_fn=lambda x: print('      %s' % x))
 
         # Note: the original deep learning model rescales trees, but we don't here
         # because we should always have the same root to tip height.

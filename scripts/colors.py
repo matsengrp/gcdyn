@@ -21,8 +21,10 @@ ansi_color_table = collections.OrderedDict((
     ('light_blue_bkg', 104),
     ('purple_bkg', 45),
 ))
-Colors = {c : '\033[%sm'%i for c, i in ansi_color_table.items()}
+Colors = {c : '\033[%sm' % i for c, i in ansi_color_table.items()}
 
+
+# ----------------------------------------------------------------------------------------
 def color(col, seq, width=None, padside='left'):
     return_str = [seq]
     if col is not None:
