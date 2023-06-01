@@ -12,3 +12,4 @@ pandoc
 jupyterlab
 seaborn
 biopython
+dill

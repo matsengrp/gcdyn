@@ -18,7 +18,7 @@ notebooks:
 	pytest --nbval notebooks/bdms_replay.ipynb notebooks/bdms_inhomogeneous.ipynb
 
 format:
-	black gcdyn experiments tests
+	black gcdyn experiments tests scripts
 
 lint:
 	# stop the build if there are Python syntax errors or undefined names
