@@ -381,7 +381,9 @@ document.write(`
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">sequence</span> <span class="ow">in</span> <span class="n">sequence_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&gt;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sequence</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+            <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sequence</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sequence_dict</span></div>
 
 
 <div class="viewcode-block" id="ladderize_tree"><a class="viewcode-back" href="../../_autosummary/gcdyn.utils.ladderize_tree.html#gcdyn.utils.ladderize_tree">[docs]</a><span class="k">def</span> <span class="nf">ladderize_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">attr</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">):</span>
