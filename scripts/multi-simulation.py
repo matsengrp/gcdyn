@@ -17,19 +17,6 @@ from colors import color
 
 
 # ----------------------------------------------------------------------------------------
-def add_seqs(all_seqs, itrial, seqfos):
-    for sfo in seqfos:
-        all_seqs.append(
-            {
-                "name": sfo["name"]
-                if itrial is None
-                else "%d-%s" % (itrial, sfo["name"]),
-                "seq": sfo["seq"],
-            }
-        )
-
-
-# ----------------------------------------------------------------------------------------
 def outfn(ftype, itrial, odir=None):
     assert ftype in ["fasta", "nwk", "pkl"]
     if odir is None:
@@ -164,6 +151,10 @@ def generate_sequences_and_tree(
     for node in tree.iter_descendants():
         assert np.isclose(node.t - node.up.t, node.dist)
 
+    # delete the sequence contexts since they make the pickle files six times bigger
+    for node in tree.traverse(strategy="postorder"):
+        delattr(node, 'sequence_context')
+
     return tree
 
 
@@ -257,6 +248,41 @@ def write_final_outputs(all_seqs, all_trees):
     print("  writing %d trees and birth/death responses to %s" % (len(all_trees), pkfn))
     with open(pkfn, "wb") as pfile:
         dill.dump(all_trees, pfile)
+
+
+# ----------------------------------------------------------------------------------------
+def write_single_tree(itrial, tree, birth_resp, death_resp):
+    with open(outfn("pkl", itrial), "wb") as fp:
+        dill.dump(
+            {"tree": tree, "birth-response": birth_resp, "death-response": death_resp},
+            fp,
+        )
+
+
+# ----------------------------------------------------------------------------------------
+def add_seqs(all_seqs, itrial, tree):
+    def getname(nstr):
+        return nstr if itrial is None else "%d-%s" % (itrial, nstr)
+    all_seqs.append(
+        {
+            "name": "naive",
+            "seq": replay.NAIVE_SEQUENCE,
+        }
+    )
+    for leaf in tree.iter_leaves():
+        all_seqs.append(
+            {
+                "name": getname(leaf.name),
+                "seq": leaf.sequence,
+            }
+        )
+
+
+# ----------------------------------------------------------------------------------------
+def add_tree(all_trees, itrial, pfo):
+    for node in pfo['tree'].iter_descendants():
+        node.name = "%d-%s" % (itrial, node.name)
+    all_trees.append(pfo)
 
 
 # ----------------------------------------------------------------------------------------
@@ -411,7 +437,7 @@ if (
 start = time.time()
 if args.test:
     args.carry_cap = 100
-    args.n_trials = 2
+    args.n_trials = 1
     args.time_to_sampling = 10
     args.min_survivors = 10
     args.n_seqs = 5
@@ -458,16 +484,13 @@ all_seqs, all_trees = [], []
 n_missing = 0
 rng = np.random.default_rng(seed=args.seed)
 for itrial in range(1, args.n_trials + 1):
-    ofn = outfn("fasta", itrial)
+    ofn = outfn("pkl", itrial)
     if os.path.exists(ofn) and not args.overwrite:
         print("    output %s already exists, skipping" % ofn)
-        records = list(SeqIO.parse(ofn, "fasta"))
-        add_seqs(
-            all_seqs, itrial, [{"name": rcd.id, "seq": rcd.seq} for rcd in records]
-        )
         with open(outfn("pkl", itrial), "rb") as pfile:
             pfo = dill.load(pfile)
-        all_trees.append(pfo)
+        add_seqs(all_seqs, itrial, pfo['tree'])
+        add_tree(all_trees, itrial, pfo)
         continue
     if args.dont_run_new_simu:
         n_missing += 1
@@ -490,30 +513,22 @@ for itrial in range(1, args.n_trials + 1):
         % (tmean, tmin, tmax)
     )
 
-    with open(outfn("nwk", itrial), "w") as fp:
-        fp.write(tree.write() + "\n")
     with open(outfn("pkl", itrial), "wb") as fp:
         dill.dump(
             {"tree": tree, "birth-response": birth_resp, "death-response": death_resp},
             fp,
         )
 
-    seqdict = utils.write_leaf_sequences_to_fasta(
-        tree,
-        ofn,
-        naive=replay.NAIVE_SEQUENCE,
-    )
     add_seqs(
         all_seqs,
         itrial,
-        [{"name": sname, "seq": seq} for sname, seq in seqdict.items()],
+        tree,
     )
-    renamed_tree = copy.deepcopy(tree)
-    for node in renamed_tree.iter_descendants():
-        node.name = "%d-%s" % (itrial, node.name)
-    all_trees.append(
+    add_tree(
+        all_trees,
+        itrial,
         {
-            "tree": renamed_tree,
+            "tree": tree,
             "birth-response": birth_resp,
             "death-response": death_resp,
         }

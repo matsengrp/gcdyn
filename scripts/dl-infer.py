@@ -110,7 +110,7 @@ def train_and_test():
 
 # ----------------------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
-parser.add_argument("infname", help="input merge simulation dill pickle file")
+parser.add_argument("infname", help="input merged simulation dill pickle file")
 parser.add_argument("outdir")
 parser.add_argument("--epochs", type=int, default=100)
 parser.add_argument(
