@@ -16,7 +16,7 @@ def simple_fivemer_contexts(sequence: str):
     Args:
         sequence: A nucleotide sequence.
     """
-    return [sequence[(i - 2) : (i + 3)] for i in range(2, len(sequence) - 2)]
+    return tuple([sequence[(i - 2) : (i + 3)] for i in range(2, len(sequence) - 2)])
 
 
 def padded_fivemer_contexts_of_paired_sequences(sequence: str, chain_2_start_idx: int):

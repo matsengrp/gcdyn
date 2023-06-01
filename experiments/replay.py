@@ -43,9 +43,7 @@ def seq_to_contexts(seq) -> Tuple[str, ...]:
     Args:
         seq: The sequence to convert.
     """
-    return tuple(
-        utils.padded_fivemer_contexts_of_paired_sequences(seq, CHAIN_2_START_IDX)
-    )
+    return utils.padded_fivemer_contexts_of_paired_sequences(seq, CHAIN_2_START_IDX)
 
 
 def dms(
