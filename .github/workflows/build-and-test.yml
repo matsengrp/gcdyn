@@ -35,7 +35,7 @@ jobs:
 
       - name: Check format with black
         run: |
-          black --check gcdyn tests
+          black --check gcdyn tests scripts
 
       - name: Tests
         run: make test

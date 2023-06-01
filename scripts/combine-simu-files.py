@@ -4,7 +4,10 @@ import os
 import dill
 
 # ----------------------------------------------------------------------------------------
-parser = argparse.ArgumentParser()
+ustr = """
+Read dill pickled trees and response functions from list of input files, and combine (concatenate) them into one output file
+"""
+parser = argparse.ArgumentParser(usage=ustr)
 parser.add_argument('infiles', nargs='+', help='list of files with dill pickled gcdyn simulation')
 parser.add_argument('--outfile', required=True, help='output file name for concatenated simulation info (response functions and trees)')
 args = parser.parse_args()

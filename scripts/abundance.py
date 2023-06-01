@@ -22,7 +22,14 @@ def hamming_distance(seq1, seq2):  # NOTE doesn't handle ambiguous bases
 
 # ----------------------------------------------------------------------------------------
 ustr = """
-python abundance.py <input fasta files> [--outdir <outdir>]
+Collect a variety of abundance and mutation information about the sequences in a list of fasta files.
+Writes three files:
+        abundances.csv: tabular abundance info, one column for each input fasta
+        hdists.csv: hamming distance to naive sequence (i.e. N mutations), colon-separated list over sequences, one row for each input file
+        max-abdn-shm.csv: N mutations in sequences with maximum abundance (median if ties), one row for each input file
+
+usage: python abundance.py <input fasta files> [--outdir <outdir>]
+
 """
 parser = argparse.ArgumentParser(usage=ustr)
 parser.add_argument('infiles', nargs='+')
