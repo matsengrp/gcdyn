@@ -301,17 +301,20 @@ class ContextMutator(SequenceMutator):
         node.sequence = node.sequence[:i] + sub_nt + node.sequence[(i + 1) :]
         # update the modified sequence contexts (assumes they have fixed size)
         context_size = len(node.sequence_context[i])
+        # Convert sequence_context to list for in-place modification
+        sequence_context_list = list(node.sequence_context)
         for pos in range(0, context_size):
             i_offset = i - context_size // 2 + pos
             if (
                 0 <= i_offset <= len(node.sequence) - 1
-                and node.sequence_context[i_offset][context_size - pos - 1] != "N"
+                and sequence_context_list[i_offset][context_size - pos - 1] != "N"
             ):
-                node.sequence_context[i_offset] = (
-                    node.sequence_context[i_offset][: (context_size - pos - 1)]
+                sequence_context_list[i_offset] = (
+                    sequence_context_list[i_offset][: (context_size - pos - 1)]
                     + sub_nt
-                    + node.sequence_context[i_offset][(context_size - pos) :]
+                    + sequence_context_list[i_offset][(context_size - pos) :]
                 )
+        node.sequence_context = tuple(sequence_context_list)
 
     @property
     def mutated_attrs(self) -> Tuple[str]:

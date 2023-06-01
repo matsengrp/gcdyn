@@ -7,10 +7,11 @@ concrete child classes are included.
 """
 
 from __future__ import annotations
-from typing import Any, TypeVar, Optional, Union
+from typing import Any, TypeVar, Optional, Tuple, Union
 from typing import TYPE_CHECKING
 from collections.abc import Callable
 from abc import ABC, abstractmethod
+from functools import lru_cache
 from jax.tree_util import register_pytree_node
 from scipy.integrate import quad
 
@@ -442,7 +443,11 @@ class SequenceContextMutationResponse(HomogeneousResponse):
         self.mutation_intensity = d["mutation_intensity"]
 
     def λ_homogeneous(self, node: bdms.TreeNode) -> float:
-        return sum(self.mutability[context] for context in node.sequence_context)
+        return self._λ_homogeneous_cached(node.sequence_context)
+
+    @lru_cache(maxsize=None)
+    def _λ_homogeneous_cached(self, sequence_context: Tuple[str, ...]) -> float:
+        return sum(self.mutability[context] for context in sequence_context)
 
 
 class PhenotypeTimeResponse(Response):
