@@ -251,15 +251,6 @@ def write_final_outputs(all_seqs, all_trees):
 
 
 # ----------------------------------------------------------------------------------------
-def write_single_tree(itrial, tree, birth_resp, death_resp):
-    with open(outfn("pkl", itrial), "wb") as fp:
-        dill.dump(
-            {"tree": tree, "birth-response": birth_resp, "death-response": death_resp},
-            fp,
-        )
-
-
-# ----------------------------------------------------------------------------------------
 def add_seqs(all_seqs, itrial, tree):
     def getname(nstr):
         return nstr if itrial is None else "%d-%s" % (itrial, nstr)
