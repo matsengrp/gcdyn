@@ -311,7 +311,7 @@ parser.add_argument("--seed", default=0, type=int, help="random seed")
 parser.add_argument("--outdir", default=os.getcwd())
 parser.add_argument(
     "--birth-response",
-    default="soft-relu",
+    default="sigmoid",
     choices=["constant", "soft-relu", "sigmoid"],
     help="birth rate response function",
 )
@@ -353,7 +353,8 @@ parser.add_argument("--n-sub-procs", type=int)
 parser.add_argument(
     "--itrial-start",
     type=int,
-    help="if running sub procs (--n-sub-procs) set this so each sub procs trial index starts at the proper value",
+    default=0,
+    help="if running sub procs (--n-sub-procs) set this so each sub proc\'s trial index starts at the proper value",
 )
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--overwrite", action="store_true")
@@ -370,6 +371,32 @@ parser.add_argument(
 
 args = parser.parse_args()
 
+start = time.time()
+if args.test:
+    if '--carry-cap' not in sys.argv:
+        args.carry_cap = 100
+    if '--n-trials' not in sys.argv:
+        args.n_trials = 1
+    if '--time-to-sampling' not in sys.argv:
+        args.time_to_sampling = 10
+    if '--min-survivors' not in sys.argv:
+        args.min_survivors = 10
+    if '--n-seqs' not in sys.argv:
+        args.n_seqs = 5
+    if '--n-max-tries' not in sys.argv:
+        args.n_max_tries = 5
+    print(
+        "  --test: --carry-cap %d --n-trials %d  --time-to-sampling %d  --min-survivors %d  --n-seqs %d  --n-max-tries %d"
+        % (
+            args.carry_cap,
+            args.n_trials,
+            args.time_to_sampling,
+            args.min_survivors,
+            args.n_seqs,
+            args.n_max_tries,
+        )
+    )
+
 if (
     args.n_sub_procs is not None
 ):  # this stuff is all copied from partis utils.py, gd it this would be like three lines if i could import that
@@ -380,11 +407,12 @@ if (
         subdir = "%s/iproc-%d" % (args.outdir, iproc)
         if not os.path.exists(subdir):
             os.makedirs(subdir)
-        clist[clist.index("--outdir") + 1] = subdir
-        clist[clist.index("--n-trials") + 1] = str(n_per_proc)
-        isp = clist.index("--n-sub-procs")
-        clist = clist[:isp] + clist[isp + 2 :]
-        clist += ["--itrial", str(iproc * n_per_proc)]
+        utils.replace_in_arglist(clist, '--outdir', subdir)
+        istart = iproc * n_per_proc
+        utils.replace_in_arglist(clist, '--seed', str(args.seed + istart))
+        utils.replace_in_arglist(clist, '--n-trials', str(istart + n_per_proc))
+        utils.replace_in_arglist(clist, '--itrial-start', str(istart), insert_after='--n-trials', has_arg=True)
+        utils.remove_from_arglist(clist, '--n-sub-procs', has_arg=True)
         cmd_str = " ".join(clist)
         print("  %s %s" % (color("red", "run"), cmd_str))
         logfname = "%s/simu.log" % subdir
@@ -416,34 +444,14 @@ if (
     all_seqs, all_trees = [], []
     for iproc in range(args.n_sub_procs):
         subdir = "%s/iproc-%d" % (args.outdir, iproc)
-        ofn = outfn("fasta", None, odir=subdir)
-        records = list(SeqIO.parse(ofn, "fasta"))
-        add_seqs(all_seqs, None, [{"name": rcd.id, "seq": rcd.seq} for rcd in records])
-        with open(outfn("pkl", None, odir=subdir), "rb") as pfile:
-            pfo = dill.load(pfile)
-        all_trees += pfo
+        ofn = outfn("pkl", None, odir=subdir)
+        with open(ofn, "rb") as pfile:
+            pfos = dill.load(pfile)
+        for pfo in pfos:
+            add_seqs(all_seqs, None, pfo['tree'])
+        all_trees += pfos
     write_final_outputs(all_seqs, all_trees)
     sys.exit(0)
-
-start = time.time()
-if args.test:
-    args.carry_cap = 100
-    args.n_trials = 1
-    args.time_to_sampling = 10
-    args.min_survivors = 10
-    args.n_seqs = 5
-    args.n_max_tries = 5
-    print(
-        "  --test: --carry-cap %d --n-trials %d  --time-to-sampling %d  --min-survivors %d  --n-seqs %d  --n-max-tries %d"
-        % (
-            args.carry_cap,
-            args.n_trials,
-            args.time_to_sampling,
-            args.min_survivors,
-            args.n_seqs,
-            args.n_max_tries,
-        )
-    )
 
 assert args.death_value >= 0
 if args.birth_response == "sigmoid":
@@ -474,11 +482,11 @@ mutation_rate = poisson.SequenceContextMutationResponse(
 all_seqs, all_trees = [], []
 n_missing = 0
 rng = np.random.default_rng(seed=args.seed)
-for itrial in range(1, args.n_trials + 1):
+for itrial in range(args.itrial_start, args.n_trials):
     ofn = outfn("pkl", itrial)
     if os.path.exists(ofn) and not args.overwrite:
         print("    output %s already exists, skipping" % ofn)
-        with open(outfn("pkl", itrial), "rb") as pfile:
+        with open(ofn, "rb") as pfile:
             pfo = dill.load(pfile)
         add_seqs(all_seqs, itrial, pfo['tree'])
         add_tree(all_trees, itrial, pfo)
@@ -504,7 +512,7 @@ for itrial in range(1, args.n_trials + 1):
         % (tmean, tmin, tmax)
     )
 
-    with open(outfn("pkl", itrial), "wb") as fp:
+    with open(ofn, "wb") as fp:
         dill.dump(
             {"tree": tree, "birth-response": birth_resp, "death-response": death_resp},
             fp,
