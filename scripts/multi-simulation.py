@@ -3,31 +3,33 @@ import argparse
 import os
 import sys
 from Bio import SeqIO
-
+import math
 # import colored_traceback.always  # need to add this to installation stuff, i'm not sure how to do it atm
 import dill
 import time
 import copy
 import random
+import subprocess
 
 from gcdyn import bdms, gpmap, mutators, poisson, utils
-import subprocess
 from experiments import replay
 from colors import color
 
-
 # ----------------------------------------------------------------------------------------
 def outfn(ftype, itrial, odir=None):
-    assert ftype in ["fasta", "nwk", "pkl"]
+    assert ftype in ["fasta", "nwk", "pkl", 'npy']
     if odir is None:
         odir = args.outdir
     if itrial is None:
-        if ftype == "pkl":
-            tstr = "simu"
-        else:
-            tstr = "all-%s" % ("seqs" if ftype == "fasta" else "trees")
+        ftstrs = {
+            'fasta' : 'seqs',
+            'nwk' : 'trees',
+            'npy' : 'encoded-trees',
+            'pkl' : 'responses',
+        }
+        tstr = ftstrs.get(ftype, 'simu')
     else:
-        tstr = "%s_%d" % ("seqs" if ftype == "fasta" else "tree", itrial)
+        tstr = "tree_%d" % itrial
     return f"{odir}/{tstr}.{ftype}"
 
 
@@ -232,22 +234,28 @@ def get_responses(xscale, xshift):
 
 # ----------------------------------------------------------------------------------------
 def write_final_outputs(all_seqs, all_trees):
-    asfn = "%s/all-seqs.fasta" % args.outdir
-    print("  writing all seqs to %s" % asfn)
-    with open(asfn, "w") as asfile:
+    print("  writing all seqs to %s" % outfn('fasta', None))
+    with open(outfn('fasta', None), "w") as asfile:
         for sfo in all_seqs:
             asfile.write(">%s\n%s\n" % (sfo["name"], sfo["seq"]))
 
-    tfn = "%s/all-trees.nwk" % args.outdir
-    print("  writing all trees to %s" % tfn)
-    with open(tfn, "w") as tfile:
+    print("  writing all trees to %s" % outfn('nwk', None))
+    with open(outfn('nwk', None), "w") as tfile:
         for pfo in all_trees:
             tfile.write("%s\n" % pfo["tree"].write(format=1))
 
-    pkfn = "%s/simu.pkl" % args.outdir
-    print("  writing %d trees and birth/death responses to %s" % (len(all_trees), pkfn))
-    with open(pkfn, "wb") as pfile:
-        dill.dump(all_trees, pfile)
+    max_leaf_count = max(len(pfo['tree']) for pfo in all_trees)  # 200
+    max_leaf_count = math.ceil(max_leaf_count / 100.0) * 100  # round up to nearest 100
+    encoded_trees = []
+    for pfo in all_trees:
+        encd_tree = utils.encode_tree(pfo['tree'], max_leaf_count)
+        encoded_trees.append(encd_tree)
+    print("  writing %d encoded trees to %s" % (len(all_trees), outfn('npy', None)))
+    np.save(outfn('npy', None), np.array(encoded_trees))  #, dtype=object))
+
+    print("  writing %d trees and birth/death responses to %s" % (len(all_trees), outfn('pkl', None)))
+    with open(outfn('pkl', None), "wb") as pfile:
+        dill.dump([{k : p['%s-response' % k] for k in ['birth', 'death']} for p in all_trees], pfile)
 
 
 # ----------------------------------------------------------------------------------------

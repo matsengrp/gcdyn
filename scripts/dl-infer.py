@@ -62,15 +62,14 @@ def train_and_test():
     from gcdyn.models import NeuralNetworkModel
     from gcdyn.poisson import ConstantResponse
 
-    with open(args.infname, "rb") as f:
-        pklfo = pickle.load(
-            f
-        )  # dict with two keys ('trees' and 'responses'), and a list for each
+    with open(args.response_file, "rb") as rfile:
+        pklfo = pickle.load(rfile)
     samples = {
-        k + "s": [tfo[k] for tfo in pklfo]
-        for k in ["tree", "birth-response", "death-response"]
+        k + "-responses": [tfo[k] for tfo in pklfo]
+        for k in ["birth", "death"]
     }
-    print("    read %d trees/responses from %s" % (len(samples["trees"]), args.infname))
+    samples["trees"] = np.load(args.tree_file)
+    print("    read %d trees from %s (%d responses from %s)" % (len(samples["trees"]), args.tree_file, len(pklfo), args.response_file))
     print(
         "      first response pair:\n        birth: %s\n        death: %s"
         % (samples["birth-responses"][0], samples["death-responses"][0])
@@ -92,7 +91,7 @@ def train_and_test():
     ]
 
     model = NeuralNetworkModel(
-        smpldict["train"]["trees"], param_to_predict, network_layers=args.model_size
+        None, param_to_predict, network_layers=args.model_size, encoded_trees=smpldict["train"]["trees"]
     )
     model.fit(epochs=args.epochs)
 
@@ -100,9 +99,9 @@ def train_and_test():
         os.makedirs(args.outdir)
     print("  writing train/test results to %s" % args.outdir)
 
-    result = model.predict(smpldict["train"]["trees"], ladderize_trees=False)
+    result = model.predict(None, encoded_trees=smpldict["train"]["trees"])
     get_df("train", result, smpldict)
-    result = model.predict(smpldict["test"]["trees"])
+    result = model.predict(None, encoded_trees=smpldict["test"]["trees"])
     get_df("test", result, smpldict)
 
     print("    total dl inference time: %.1f sec" % (time.time() - start))
@@ -110,8 +109,9 @@ def train_and_test():
 
 # ----------------------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
-parser.add_argument("infname", help="input merged simulation dill pickle file")
-parser.add_argument("outdir")
+parser.add_argument("--tree-file", required=True, help="input file with list of encoded trees in numpy npy format")
+parser.add_argument("--response-file", required=True, help="input file with list of response functions in pickle format")
+parser.add_argument("--outdir", required=True, help='output directory')
 parser.add_argument("--epochs", type=int, default=100)
 parser.add_argument(
     "--train-frac", type=float, default=0.8, help="train on this fraction of the trees"

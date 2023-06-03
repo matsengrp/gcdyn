@@ -43,10 +43,11 @@ class NeuralNetworkModel:
         responses: list[list[poisson.Response]],
         network_layers: list[callable] = None,
         max_leaf_count: int = 200,
+        encoded_trees: list[onp.ndarray] = None,
         ladderize_trees: bool = True,
     ):
         """
-        trees: list of `bdms.TreeNode`s
+        trees: list of `bdms.TreeNode`s (set to None if passing encoded_trees)
         responses: 2D sequence, with first dimension corresponding to trees
                    and second dimension to the Response objects to predict
                    (Responses that aren't being estimated need not be provided)
@@ -56,6 +57,8 @@ class NeuralNetworkModel:
                         number of scalars that parameterize all py:class:`poisson.Response` objects
                         in a row of the `responses` argument.
         max_leaf_count: the maximum leaf count across trees
+        encoded_trees: if encoding trees separately beforehand, pass them in here (and set trees to None).
+                       You must ensure that you pass in the same max_leaf_count as was used to encode them.
         ladderize_trees: if trees are already ladderized, set this to `False` to save computing time
         """
         num_parameters = sum(len(response._param_dict) for response in responses[0])
@@ -118,66 +121,27 @@ class NeuralNetworkModel:
         # because we should always have the same root to tip height.
         self.max_leaf_count = max_leaf_count
 
-        if ladderize_trees:
-            for tree in trees:
-                utils.ladderize_tree(tree)
-
-        self.trees = trees
-        self.encoded_trees = onp.stack(
-            [self.encode_tree(tree, self.max_leaf_count) for tree in trees]
-        )
+        self.encoded_trees = self.get_trees(trees, encoded_trees, ladderize_trees)
         self.responses = responses
 
-    @classmethod
-    def encode_tree(
-        cls, tree: bdms.TreeNode, max_leaf_count: int
-    ) -> onp.ndarray[float]:
-        """
-        Returns the "Compact Bijective Ladderized Vector" form of the given
-        ladderized tree.
+    def get_trees(
+            self,
+            trees: list[ete3.TreeNode],
+            encoded_trees: list[onp.ndarray],
+            ladderize_trees: bool,
+    ):
+        if trees is None and encoded_trees is None:
+            raise Exception('must pass in either trees or encoded_trees')
+        if trees is None:
+            encoded_trees = onp.stack(encoded_trees)
+        elif encoded_trees is None:
+            encoded_trees = onp.stack(
+                [utils.encode_tree(tree, self.max_leaf_count, dont_ladderize=not ladderize_tree) for tree in trees]
+            )
+        else:
+            raise Exception('exactly one of trees and encode_trees must be None')
+        return encoded_trees
 
-        The CBLV has been adapted to include the `x` attribute of every node.
-        Thus, in reference to figure 2a (v) in Voznica et. al (2022), two additional
-        rows have been appended: a third row of `x` for the nodes in row 1, and a
-        fourth row of `x` for the nodes in row 2.
-        """
-
-        # See the pytest for this method in `tests/test_deep_learning.py`
-
-        def traverse_inorder(tree):
-            num_children = len(tree.children)
-            assert tree.up is None or num_children in {
-                0,
-                2,
-            }, "Only full binary trees are supported."
-
-            for child in tree.children[: num_children // 2]:
-                yield from traverse_inorder(child)
-
-            yield tree
-
-            for child in tree.children[num_children // 2 :]:
-                yield from traverse_inorder(child)
-
-        assert len(tree.get_leaves()) <= max_leaf_count
-        matrix = onp.zeros((4, max_leaf_count))
-
-        leaf_index = 0
-        ancestor_index = 0
-        previous_ancestor = tree  # the root
-
-        for node in traverse_inorder(tree):
-            if node.is_leaf():
-                matrix[0, leaf_index] = node.t - previous_ancestor.t
-                matrix[2, leaf_index] = node.x
-                leaf_index += 1
-            else:
-                matrix[1, ancestor_index] = node.t
-                matrix[3, ancestor_index] = node.x
-                ancestor_index += 1
-                previous_ancestor = node
-
-        return matrix
 
     @classmethod
     def _encode_responses(
@@ -226,18 +190,11 @@ class NeuralNetworkModel:
         self.network.fit(self.encoded_trees, response_parameters, epochs=epochs)
 
     def predict(
-        self, trees: list[bdms.TreeNode], ladderize_trees: bool = True
+            self, trees: list[bdms.TreeNode], ladderize_trees: bool = True, encoded_trees: list[onp.ndarray] = None,
     ) -> list[list[poisson.Response]]:
         """Returns the Response objects predicted for each tree."""
 
-        if ladderize_trees:
-            for tree in trees:
-                utils.ladderize_tree(tree)
-
-        encoded_trees = onp.stack(
-            [self.encode_tree(tree, self.max_leaf_count) for tree in trees]
-        )
-
+        encoded_trees = self.get_trees(trees, encoded_trees, ladderize_trees)
         response_parameters = self.network(encoded_trees)
 
         return self._decode_responses(

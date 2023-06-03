@@ -4,7 +4,7 @@ from random import shuffle
 import ete3
 import numpy as np
 
-from gcdyn import models, utils
+from gcdyn import utils
 
 
 class TestDeepLearning(unittest.TestCase):
@@ -25,9 +25,7 @@ class TestDeepLearning(unittest.TestCase):
             node.t = node.up.t + node.dist
             node.x = node.up.x + 1
 
-        utils.ladderize_tree(tree)
-
-        encoded_tree = models.NeuralNetworkModel.encode_tree(tree, max_leaf_count=10)
+        encoded_tree = utils.encode_tree(tree, max_leaf_count=10)
 
         solution = np.array(
             [
@@ -51,15 +49,12 @@ class TestDeepLearning(unittest.TestCase):
         for node in tree2.traverse("postorder"):
             shuffle(node.children)
 
-        utils.ladderize_tree(tree)
-        utils.ladderize_tree(tree2)
-
-        encoded_tree = models.NeuralNetworkModel.encode_tree(
+        encoded_tree = utils.encode_tree(
             tree,
             max_leaf_count=len(tree.get_leaves()),
         )
 
-        encoded_tree2 = models.NeuralNetworkModel.encode_tree(
+        encoded_tree2 = utils.encode_tree(
             tree2,
             max_leaf_count=len(tree2.get_leaves()),
         )

@@ -95,6 +95,59 @@ def ladderize_tree(tree, attr="x"):
             )
 
 
+def encode_tree(
+        tree: TreeNode, max_leaf_count: int, dont_ladderize: bool = False,
+) -> np.ndarray[float]:
+    """
+    Returns the "Compact Bijective Ladderized Vector" form of the given
+    ladderized tree.
+
+    The CBLV has been adapted to include the `x` attribute of every node.
+    Thus, in reference to figure 2a (v) in Voznica et. al (2022), two additional
+    rows have been appended: a third row of `x` for the nodes in row 1, and a
+    fourth row of `x` for the nodes in row 2.
+    """
+
+    # See the pytest for this method in `tests/test_deep_learning.py`
+
+    def traverse_inorder(tree):
+        num_children = len(tree.children)
+        assert tree.up is None or num_children in {
+            0,
+            2,
+        }, "Only full binary trees are supported."
+
+        for child in tree.children[: num_children // 2]:
+            yield from traverse_inorder(child)
+
+        yield tree
+
+        for child in tree.children[num_children // 2 :]:
+            yield from traverse_inorder(child)
+
+    if not dont_ladderize:
+        ladderize_tree(tree)
+
+    assert len(tree.get_leaves()) <= max_leaf_count
+    matrix = np.zeros((4, max_leaf_count))
+
+    leaf_index = 0
+    ancestor_index = 0
+    previous_ancestor = tree  # the root
+
+    for node in traverse_inorder(tree):
+        if node.is_leaf():
+            matrix[0, leaf_index] = node.t - previous_ancestor.t
+            matrix[2, leaf_index] = node.x
+            leaf_index += 1
+        else:
+            matrix[1, ancestor_index] = node.t
+            matrix[3, ancestor_index] = node.x
+            ancestor_index += 1
+            previous_ancestor = node
+
+    return matrix
+
 def sample_trees(
     n,
     init_x=0,
