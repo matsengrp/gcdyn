@@ -357,7 +357,7 @@ parser.add_argument(
     help="initial/default/average growth rate (i.e. when affinity/x=0). Used to set --yscale.",
 )
 parser.add_argument("--mutability-multiplier", default=0.68, type=float)
-parser.add_argument("--n-sub-procs", type=int)
+parser.add_argument("--n-sub-procs", type=int, help='If set, the --n-trials are split among this many sub processes (which are recursively run with this script). Note that in terms of random seeds, results will not be identical with/without --n-sub-procs set (since there\'s no way to synchronize seeds partway through))')
 parser.add_argument(
     "--itrial-start",
     type=int,
@@ -452,12 +452,13 @@ if (
     all_seqs, all_trees = [], []
     for iproc in range(args.n_sub_procs):
         subdir = "%s/iproc-%d" % (args.outdir, iproc)
-        ofn = outfn("pkl", None, odir=subdir)
-        with open(ofn, "rb") as pfile:
-            pfos = dill.load(pfile)
-        for pfo in pfos:
-            add_seqs(all_seqs, None, pfo['tree'])
-        all_trees += pfos
+        istart = iproc * n_per_proc
+        for itrial in range(istart, istart + n_per_proc):
+            ofn = outfn("pkl", itrial, odir=subdir)
+            with open(ofn, "rb") as pfile:
+                pfo = dill.load(pfile)
+            add_seqs(all_seqs, itrial, pfo['tree'])
+            add_tree(all_trees, itrial, pfo)
     write_final_outputs(all_seqs, all_trees)
     sys.exit(0)
 
