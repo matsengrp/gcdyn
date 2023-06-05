@@ -244,14 +244,12 @@ def write_final_outputs(all_seqs, all_trees):
         for pfo in all_trees:
             tfile.write("%s\n" % pfo["tree"].write(format=1))
 
-    max_leaf_count = max(len(pfo['tree']) for pfo in all_trees)  # 200
-    max_leaf_count = math.ceil(max_leaf_count / 100.0) * 100  # round up to nearest 100
     encoded_trees = []
     for pfo in all_trees:
-        encd_tree = utils.encode_tree(pfo['tree'], max_leaf_count)
+        encd_tree = utils.encode_tree(pfo['tree'], len(pfo['tree']))
         encoded_trees.append(encd_tree)
     print("  writing %d encoded trees to %s" % (len(all_trees), outfn('npy', None)))
-    np.save(outfn('npy', None), np.array(encoded_trees))  #, dtype=object))
+    np.save(outfn('npy', None), np.array(encoded_trees))  # maybe should use savez_compressed()?
 
     print("  writing %d trees and birth/death responses to %s" % (len(all_trees), outfn('pkl', None)))
     with open(outfn('pkl', None), "wb") as pfile:
@@ -282,6 +280,17 @@ def add_tree(all_trees, itrial, pfo):
     for node in pfo['tree'].iter_descendants():
         node.name = "%d-%s" % (itrial, node.name)
     all_trees.append(pfo)
+
+
+# ----------------------------------------------------------------------------------------
+def read_dill_file(fname):
+    pfo = None
+    try:
+        with open(fname, "rb") as pfile:
+            pfo = dill.load(pfile)
+    except:
+        print('    %s reading pickle file %s' % (color('red', 'error'), fname))
+    return pfo
 
 
 # ----------------------------------------------------------------------------------------
@@ -413,10 +422,13 @@ if (
     for iproc in range(args.n_sub_procs):
         clist = ["python"] + copy.deepcopy(sys.argv)
         subdir = "%s/iproc-%d" % (args.outdir, iproc)
+        istart = iproc * n_per_proc
+        if all(os.path.exists(outfn("pkl", i, odir=subdir)) for i in range(istart, istart + n_per_proc)):
+            print('    proc %d: all outputs exist' % iproc)
+            continue
         if not os.path.exists(subdir):
             os.makedirs(subdir)
         utils.replace_in_arglist(clist, '--outdir', subdir)
-        istart = iproc * n_per_proc
         utils.replace_in_arglist(clist, '--seed', str(args.seed + istart))
         utils.replace_in_arglist(clist, '--n-trials', str(istart + n_per_proc))
         utils.replace_in_arglist(clist, '--itrial-start', str(istart), insert_after='--n-trials', has_arg=True)
@@ -454,9 +466,10 @@ if (
         subdir = "%s/iproc-%d" % (args.outdir, iproc)
         istart = iproc * n_per_proc
         for itrial in range(istart, istart + n_per_proc):
-            ofn = outfn("pkl", itrial, odir=subdir)
-            with open(ofn, "rb") as pfile:
-                pfo = dill.load(pfile)
+            pfo = read_dill_file(outfn("pkl", itrial, odir=subdir))
+            if pfo is None:
+                print('    %s can\'t rerun here (delete file by hand)' % color('red', 'error'))
+                continue
             add_seqs(all_seqs, itrial, pfo['tree'])
             add_tree(all_trees, itrial, pfo)
     write_final_outputs(all_seqs, all_trees)
@@ -495,11 +508,13 @@ for itrial in range(args.itrial_start, args.n_trials):
     ofn = outfn("pkl", itrial)
     if os.path.exists(ofn) and not args.overwrite:
         print("    output %s already exists, skipping" % ofn)
-        with open(ofn, "rb") as pfile:
-            pfo = dill.load(pfile)
-        add_seqs(all_seqs, itrial, pfo['tree'])
-        add_tree(all_trees, itrial, pfo)
-        continue
+        pfo = read_dill_file(ofn)
+        if pfo is None:  # file is screwed  up and we want to rerun
+            print('    rerunning')
+        else:
+            add_seqs(all_seqs, itrial, pfo['tree'])
+            add_tree(all_trees, itrial, pfo)
+            continue
     if args.dont_run_new_simu:
         n_missing += 1
         continue
