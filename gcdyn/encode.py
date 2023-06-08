@@ -5,11 +5,11 @@ from gcdyn import utils
 
 
 def encode_tree(
-        tree: TreeNode, max_leaf_count: int = None, ladderize: bool = True,
+        intree: TreeNode, max_leaf_count: int = None, ladderize: bool = True,
 ) -> np.ndarray[float]:
     """
     Returns the "Compact Bijective Ladderized Vector" form of the given
-    ladderized tree.
+    tree. Does not modify input tree.
 
     The CBLV has been adapted to include the `x` attribute of every node.
     Thus, in reference to figure 2a (v) in Voznica et. al (2022), two additional
@@ -27,34 +27,37 @@ def encode_tree(
 
     # See the pytest for this method in `tests/test_deep_learning.py`
 
-    def traverse_inorder(tree):
-        num_children = len(tree.children)
-        assert tree.up is None or num_children in {
+    def traverse_inorder(tmptr):
+        num_children = len(tmptr.children)
+        assert tmptr.up is None or num_children in {
             0,
             2,
         }, "Only full binary trees are supported."
 
-        for child in tree.children[: num_children // 2]:
+        for child in tmptr.children[: num_children // 2]:
             yield from traverse_inorder(child)
 
-        yield tree
+        yield tmptr
 
-        for child in tree.children[num_children // 2 :]:
+        for child in tmptr.children[num_children // 2 :]:
             yield from traverse_inorder(child)
 
     if ladderize:
-        utils.ladderize_tree(tree)
+        worktree = intree.copy()  # make a copy so the ladderization doesn't modify the input tree
+        utils.ladderize_tree(worktree)
+    else:
+        worktree = intree
 
     if max_leaf_count is None:
-        max_leaf_count = len(tree.get_leaves())
-    assert len(tree.get_leaves()) <= max_leaf_count
+        max_leaf_count = len(worktree.get_leaves())
+    assert len(worktree.get_leaves()) <= max_leaf_count
     matrix = np.zeros((4, max_leaf_count))
 
     leaf_index = 0
     ancestor_index = 0
-    previous_ancestor = tree  # the root
+    previous_ancestor = worktree  # the root
 
-    for node in traverse_inorder(tree):
+    for node in traverse_inorder(worktree):
         if node.is_leaf():
             matrix[0, leaf_index] = node.t - previous_ancestor.t
             matrix[2, leaf_index] = node.x
@@ -91,7 +94,7 @@ def pad_trees(trees: list[np.ndarray], min_n_max_leaves: int = 100):
 def write_trees(
         filename: str, trees: list[np.ndarray],
         ):
-    np.save(filename, pad_trees(trees))  # maybe should use savez_compressed()? size isn't an issue atm tho
+    np.save(filename, pad_trees(trees))  # maybe should at some point use savez_compressed()? but size isn't an issue atm (have to pad here since np.save() requires arrays of same dimension
 
 
 def read_trees(

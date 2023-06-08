@@ -61,7 +61,7 @@ class TestDeepLearning(unittest.TestCase):
             ttr.prune()
             ttr.remove_mutation_events()
             init_trees.append(encode.encode_tree(ttr))
-        init_trees = encode.pad_trees(init_trees)  # have to pad initial trees since they get padded before writing
+        init_trees = encode.pad_trees(init_trees)  # have to pad initial trees since they get padded in writing fcn
 
         encode.write_trees('%s/test-tree.npy' % test_dir, init_trees)
         read_trees = encode.read_trees('%s/test-tree.npy' % test_dir)
