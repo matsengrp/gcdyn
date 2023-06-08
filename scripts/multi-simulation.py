@@ -11,7 +11,7 @@ import copy
 import random
 import subprocess
 
-from gcdyn import bdms, gpmap, mutators, poisson, utils
+from gcdyn import bdms, gpmap, mutators, poisson, utils, encode
 from experiments import replay
 from colors import color
 
@@ -246,10 +246,9 @@ def write_final_outputs(all_seqs, all_trees):
 
     encoded_trees = []
     for pfo in all_trees:
-        encd_tree = utils.encode_tree(pfo['tree'], len(pfo['tree']))
-        encoded_trees.append(encd_tree)
+        encoded_trees.append(encode.encode_tree(pfo['tree']))
     print("  writing %d encoded trees to %s" % (len(all_trees), outfn('npy', None)))
-    np.save(outfn('npy', None), np.array(encoded_trees))  # maybe should use savez_compressed()?
+    encode.write_trees(outfn('npy', None), encoded_trees)
 
     print("  writing %d trees and birth/death responses to %s" % (len(all_trees), outfn('pkl', None)))
     with open(outfn('pkl', None), "wb") as pfile:

@@ -39,29 +39,26 @@ class NeuralNetworkModel:
 
     def __init__(
         self,
-        trees: list[ete3.TreeNode],
+        trees: list[onp.ndarray],
         responses: list[list[poisson.Response]],
         network_layers: list[callable] = None,
-        max_leaf_count: int = 200,
-        encoded_trees: list[onp.ndarray] = None,
-        ladderize_trees: bool = True,
     ):
         """
-        trees: list of `bdms.TreeNode`s (set to None if passing encoded_trees)
+        trees: list of encoded trees
         responses: 2D sequence, with first dimension corresponding to trees
                    and second dimension to the Response objects to predict
                    (Responses that aren't being estimated need not be provided)
         network_layers: layers for the neural network; "None" will give the default network.
                         Input shape should be (4, `max_leaf_count`), corresponding to the output of
-                        :py:meth:`encode_tree`. Output should be a vector with length equal to the
+                        :py:meth:`encode.encode_tree`. Output should be a vector with length equal to the
                         number of scalars that parameterize all py:class:`poisson.Response` objects
                         in a row of the `responses` argument.
-        max_leaf_count: the maximum leaf count across trees
-        encoded_trees: if encoding trees separately beforehand, pass them in here (and set trees to None).
-                       You must ensure that you pass in the same max_leaf_count as was used to encode them.
-        ladderize_trees: if trees are already ladderized, set this to `False` to save computing time
         """
         num_parameters = sum(len(response._param_dict) for response in responses[0])
+        leaf_counts = set([len(t[0]) for t in trees])  # length of first row in encoded tree
+        if len(leaf_counts) != 1:
+            raise Exception('encoded trees have different lengths: %s' % ' '.join(str(l) for l in leaf_counts))
+        max_leaf_count = list(leaf_counts)[0]
 
         if network_layers is None:
             print("    using default network layers")
@@ -120,27 +117,9 @@ class NeuralNetworkModel:
         # Note: the original deep learning model rescales trees, but we don't here
         # because we should always have the same root to tip height.
         self.max_leaf_count = max_leaf_count
+        self.training_trees = trees
 
-        self.encoded_trees = self.get_trees(trees, encoded_trees, ladderize_trees)
         self.responses = responses
-
-    def get_trees(
-            self,
-            trees: list[ete3.TreeNode],
-            encoded_trees: list[onp.ndarray],
-            ladderize_trees: bool,
-    ):
-        if trees is None and encoded_trees is None:
-            raise Exception('must pass in either trees or encoded_trees')
-        if trees is None:
-            encoded_trees = onp.stack(encoded_trees)
-        elif encoded_trees is None:
-            encoded_trees = onp.stack(
-                [utils.encode_tree(tree, self.max_leaf_count, dont_ladderize=not ladderize_tree) for tree in trees]
-            )
-        else:
-            raise Exception('exactly one of trees and encode_trees must be None')
-        return encoded_trees
 
 
     @classmethod
@@ -183,19 +162,17 @@ class NeuralNetworkModel:
 
     def fit(self, epochs: int = 30):
         """Trains neural network on given trees and response parameters."""
-
         response_parameters = self._encode_responses(self.responses)
 
         self.network.compile(loss="mean_squared_error")
-        self.network.fit(self.encoded_trees, response_parameters, epochs=epochs)
+        self.network.fit(onp.stack(self.training_trees), response_parameters, epochs=epochs)
 
     def predict(
-            self, trees: list[bdms.TreeNode], ladderize_trees: bool = True, encoded_trees: list[onp.ndarray] = None,
+            self, trees: list[onp.ndarray],
     ) -> list[list[poisson.Response]]:
         """Returns the Response objects predicted for each tree."""
 
-        encoded_trees = self.get_trees(trees, encoded_trees, ladderize_trees)
-        response_parameters = self.network(encoded_trees)
+        response_parameters = self.network(onp.stack(trees))
 
         return self._decode_responses(
             response_parameters, example_responses=self.responses[0]

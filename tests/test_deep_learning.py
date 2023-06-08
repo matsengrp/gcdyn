@@ -5,6 +5,7 @@ import ete3
 import numpy as np
 
 from gcdyn import utils
+from gcdyn import encode
 
 
 class TestDeepLearning(unittest.TestCase):
@@ -25,7 +26,7 @@ class TestDeepLearning(unittest.TestCase):
             node.t = node.up.t + node.dist
             node.x = node.up.x + 1
 
-        encoded_tree = utils.encode_tree(tree, max_leaf_count=10)
+        encoded_tree = encode.encode_tree(tree, max_leaf_count=10)
 
         solution = np.array(
             [
@@ -45,21 +46,27 @@ class TestDeepLearning(unittest.TestCase):
         tree.remove_mutation_events()
 
         tree2 = tree.copy()
-
         for node in tree2.traverse("postorder"):
             shuffle(node.children)
 
-        encoded_tree = utils.encode_tree(
-            tree,
-            max_leaf_count=len(tree.get_leaves()),
-        )
-
-        encoded_tree2 = utils.encode_tree(
-            tree2,
-            max_leaf_count=len(tree2.get_leaves()),
-        )
-
+        encoded_tree = encode.encode_tree(tree)
+        encoded_tree2 = encode.encode_tree(tree2)
         self.assertTrue(np.all(encoded_tree == encoded_tree2))
+
+    def test_read_write(self, test_dir='/tmp'):
+        """Make sure that tree encoding doesn't change on reading or writing."""
+
+        init_trees = []
+        for ttr in utils.sample_trees(n=3, t=3, seed=10):
+            ttr.prune()
+            ttr.remove_mutation_events()
+            init_trees.append(encode.encode_tree(ttr))
+        init_trees = encode.pad_trees(init_trees)  # have to pad initial trees since they get padded before writing
+
+        encode.write_trees('%s/test-tree.npy' % test_dir, init_trees)
+        read_trees = encode.read_trees('%s/test-tree.npy' % test_dir)
+
+        self.assertTrue(all(np.all(rt == it) for it, rt in zip(init_trees, read_trees)))
 
 
 if __name__ == "__main__":
