@@ -18,7 +18,7 @@ def gp_map():
 
 def test_simple_fivemer_contexts():
     sequence = "ACTGCA"
-    correct_contexts = ["ACTGC", "CTGCA"]
+    correct_contexts = ("ACTGC", "CTGCA")
     assert utils.simple_fivemer_contexts(sequence) == correct_contexts
 
 
