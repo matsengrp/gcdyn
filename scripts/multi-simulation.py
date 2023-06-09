@@ -4,6 +4,7 @@ import os
 import sys
 from Bio import SeqIO
 import math
+
 # import colored_traceback.always  # need to add this to installation stuff, i'm not sure how to do it atm
 import dill
 import time
@@ -15,19 +16,20 @@ from gcdyn import bdms, gpmap, mutators, poisson, utils, encode
 from experiments import replay
 from colors import color
 
+
 # ----------------------------------------------------------------------------------------
 def outfn(ftype, itrial, odir=None):
-    assert ftype in ["fasta", "nwk", "pkl", 'npy']
+    assert ftype in ["fasta", "nwk", "pkl", "npy"]
     if odir is None:
         odir = args.outdir
     if itrial is None:
         ftstrs = {
-            'fasta' : 'seqs',
-            'nwk' : 'trees',
-            'npy' : 'encoded-trees',
-            'pkl' : 'responses',
+            "fasta": "seqs",
+            "nwk": "trees",
+            "npy": "encoded-trees",
+            "pkl": "responses",
         }
-        tstr = ftstrs.get(ftype, 'simu')
+        tstr = ftstrs.get(ftype, "simu")
     else:
         tstr = "tree_%d" % itrial
     return f"{odir}/{tstr}.{ftype}"
@@ -155,7 +157,7 @@ def generate_sequences_and_tree(
 
     # delete the sequence contexts since they make the pickle files six times bigger
     for node in tree.traverse(strategy="postorder"):
-        delattr(node, 'sequence_context')
+        delattr(node, "sequence_context")
 
     return tree
 
@@ -234,31 +236,38 @@ def get_responses(xscale, xshift):
 
 # ----------------------------------------------------------------------------------------
 def write_final_outputs(all_seqs, all_trees):
-    print("  writing all seqs to %s" % outfn('fasta', None))
-    with open(outfn('fasta', None), "w") as asfile:
+    print("  writing all seqs to %s" % outfn("fasta", None))
+    with open(outfn("fasta", None), "w") as asfile:
         for sfo in all_seqs:
             asfile.write(">%s\n%s\n" % (sfo["name"], sfo["seq"]))
 
-    print("  writing all trees to %s" % outfn('nwk', None))
-    with open(outfn('nwk', None), "w") as tfile:
+    print("  writing all trees to %s" % outfn("nwk", None))
+    with open(outfn("nwk", None), "w") as tfile:
         for pfo in all_trees:
             tfile.write("%s\n" % pfo["tree"].write(format=1))
 
     encoded_trees = []
     for pfo in all_trees:
-        encoded_trees.append(encode.encode_tree(pfo['tree']))
-    print("  writing %d encoded trees to %s" % (len(all_trees), outfn('npy', None)))
-    encode.write_trees(outfn('npy', None), encoded_trees)
+        encoded_trees.append(encode.encode_tree(pfo["tree"]))
+    print("  writing %d encoded trees to %s" % (len(all_trees), outfn("npy", None)))
+    encode.write_trees(outfn("npy", None), encoded_trees)
 
-    print("  writing %d trees and birth/death responses to %s" % (len(all_trees), outfn('pkl', None)))
-    with open(outfn('pkl', None), "wb") as pfile:
-        dill.dump([{k : p['%s-response' % k] for k in ['birth', 'death']} for p in all_trees], pfile)
+    print(
+        "  writing %d trees and birth/death responses to %s"
+        % (len(all_trees), outfn("pkl", None))
+    )
+    with open(outfn("pkl", None), "wb") as pfile:
+        dill.dump(
+            [{k: p["%s-response" % k] for k in ["birth", "death"]} for p in all_trees],
+            pfile,
+        )
 
 
 # ----------------------------------------------------------------------------------------
 def add_seqs(all_seqs, itrial, tree):
     def getname(nstr):
         return nstr if itrial is None else "%d-%s" % (itrial, nstr)
+
     all_seqs.append(
         {
             "name": "naive",
@@ -276,7 +285,7 @@ def add_seqs(all_seqs, itrial, tree):
 
 # ----------------------------------------------------------------------------------------
 def add_tree(all_trees, itrial, pfo):
-    for node in pfo['tree'].iter_descendants():
+    for node in pfo["tree"].iter_descendants():
         node.name = "%d-%s" % (itrial, node.name)
     all_trees.append(pfo)
 
@@ -288,7 +297,7 @@ def read_dill_file(fname):
         with open(fname, "rb") as pfile:
             pfo = dill.load(pfile)
     except:
-        print('    %s reading pickle file %s' % (color('red', 'error'), fname))
+        print("    %s reading pickle file %s" % (color("red", "error"), fname))
     return pfo
 
 
@@ -365,12 +374,16 @@ parser.add_argument(
     help="initial/default/average growth rate (i.e. when affinity/x=0). Used to set --yscale.",
 )
 parser.add_argument("--mutability-multiplier", default=0.68, type=float)
-parser.add_argument("--n-sub-procs", type=int, help='If set, the --n-trials are split among this many sub processes (which are recursively run with this script). Note that in terms of random seeds, results will not be identical with/without --n-sub-procs set (since there\'s no way to synchronize seeds partway through))')
+parser.add_argument(
+    "--n-sub-procs",
+    type=int,
+    help="If set, the --n-trials are split among this many sub processes (which are recursively run with this script). Note that in terms of random seeds, results will not be identical with/without --n-sub-procs set (since there's no way to synchronize seeds partway through))",
+)
 parser.add_argument(
     "--itrial-start",
     type=int,
     default=0,
-    help="if running sub procs (--n-sub-procs) set this so each sub proc\'s trial index starts at the proper value",
+    help="if running sub procs (--n-sub-procs) set this so each sub proc's trial index starts at the proper value",
 )
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--overwrite", action="store_true")
@@ -389,17 +402,17 @@ args = parser.parse_args()
 
 start = time.time()
 if args.test:
-    if '--carry-cap' not in sys.argv:
+    if "--carry-cap" not in sys.argv:
         args.carry_cap = 100
-    if '--n-trials' not in sys.argv:
+    if "--n-trials" not in sys.argv:
         args.n_trials = 1
-    if '--time-to-sampling' not in sys.argv:
+    if "--time-to-sampling" not in sys.argv:
         args.time_to_sampling = 10
-    if '--min-survivors' not in sys.argv:
+    if "--min-survivors" not in sys.argv:
         args.min_survivors = 10
-    if '--n-seqs' not in sys.argv:
+    if "--n-seqs" not in sys.argv:
         args.n_seqs = 5
-    if '--n-max-tries' not in sys.argv:
+    if "--n-max-tries" not in sys.argv:
         args.n_max_tries = 5
     print(
         "  --test: --carry-cap %d --n-trials %d  --time-to-sampling %d  --min-survivors %d  --n-seqs %d  --n-max-tries %d"
@@ -422,16 +435,25 @@ if (
         clist = ["python"] + copy.deepcopy(sys.argv)
         subdir = "%s/iproc-%d" % (args.outdir, iproc)
         istart = iproc * n_per_proc
-        if all(os.path.exists(outfn("pkl", i, odir=subdir)) for i in range(istart, istart + n_per_proc)):
-            print('    proc %d: all outputs exist' % iproc)
+        if all(
+            os.path.exists(outfn("pkl", i, odir=subdir))
+            for i in range(istart, istart + n_per_proc)
+        ):
+            print("    proc %d: all outputs exist" % iproc)
             continue
         if not os.path.exists(subdir):
             os.makedirs(subdir)
-        utils.replace_in_arglist(clist, '--outdir', subdir)
-        utils.replace_in_arglist(clist, '--seed', str(args.seed + istart))
-        utils.replace_in_arglist(clist, '--n-trials', str(istart + n_per_proc))
-        utils.replace_in_arglist(clist, '--itrial-start', str(istart), insert_after='--n-trials', has_arg=True)
-        utils.remove_from_arglist(clist, '--n-sub-procs', has_arg=True)
+        utils.replace_in_arglist(clist, "--outdir", subdir)
+        utils.replace_in_arglist(clist, "--seed", str(args.seed + istart))
+        utils.replace_in_arglist(clist, "--n-trials", str(istart + n_per_proc))
+        utils.replace_in_arglist(
+            clist,
+            "--itrial-start",
+            str(istart),
+            insert_after="--n-trials",
+            has_arg=True,
+        )
+        utils.remove_from_arglist(clist, "--n-sub-procs", has_arg=True)
         cmd_str = " ".join(clist)
         print("  %s %s" % (color("red", "run"), cmd_str))
         logfname = "%s/simu.log" % subdir
@@ -467,9 +489,12 @@ if (
         for itrial in range(istart, istart + n_per_proc):
             pfo = read_dill_file(outfn("pkl", itrial, odir=subdir))
             if pfo is None:
-                print('    %s can\'t rerun here (delete file by hand)' % color('red', 'error'))
+                print(
+                    "    %s can't rerun here (delete file by hand)"
+                    % color("red", "error")
+                )
                 continue
-            add_seqs(all_seqs, itrial, pfo['tree'])
+            add_seqs(all_seqs, itrial, pfo["tree"])
             add_tree(all_trees, itrial, pfo)
     write_final_outputs(all_seqs, all_trees)
     sys.exit(0)
@@ -509,9 +534,9 @@ for itrial in range(args.itrial_start, args.n_trials):
         print("    output %s already exists, skipping" % ofn)
         pfo = read_dill_file(ofn)
         if pfo is None:  # file is screwed  up and we want to rerun
-            print('    rerunning')
+            print("    rerunning")
         else:
-            add_seqs(all_seqs, itrial, pfo['tree'])
+            add_seqs(all_seqs, itrial, pfo["tree"])
             add_tree(all_trees, itrial, pfo)
             continue
     if args.dont_run_new_simu:
@@ -553,7 +578,7 @@ for itrial in range(args.itrial_start, args.n_trials):
             "tree": tree,
             "birth-response": birth_resp,
             "death-response": death_resp,
-        }
+        },
     )
 
 if args.dont_run_new_simu:

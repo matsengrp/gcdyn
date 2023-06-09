@@ -186,51 +186,61 @@ def plot_responses(*responses, x_range=(-10, 10), **named_responses):
 
 
 # return true if <argstr> is in <clist>
-def is_in_arglist(clist, argstr):  # accounts for argparse unique/partial matches (update: we no longer allow partial matches)
+def is_in_arglist(
+    clist, argstr
+):  # accounts for argparse unique/partial matches (update: we no longer allow partial matches)
     return len(arglist_imatches(clist, argstr)) > 0
 
 
 # return list of indices matching <argstr> in <clist>
 def arglist_imatches(clist, argstr):
-    assert argstr[:2] == '--'  # this is necessary since the matching assumes that argparse has ok'd the uniqueness of an abbreviated argument UPDATE now we've disable argparse prefix matching, but whatever
-    return [i for i, c in enumerate(clist) if argstr==c]  # NOTE do *not* try to go back to matching just the start of the argument, in order to make that work you'd need to have access to the whole list of potential arguments in bin/partis, and you'd probably screw it up anyway
+    assert (
+        argstr[:2] == "--"
+    )  # this is necessary since the matching assumes that argparse has ok'd the uniqueness of an abbreviated argument UPDATE now we've disable argparse prefix matching, but whatever
+    return [
+        i for i, c in enumerate(clist) if argstr == c
+    ]  # NOTE do *not* try to go back to matching just the start of the argument, in order to make that work you'd need to have access to the whole list of potential arguments in bin/partis, and you'd probably screw it up anyway
 
 
 # return index of <argstr> in <clist>
 def arglist_index(clist, argstr):
     imatches = arglist_imatches(clist, argstr)
     if len(imatches) == 0:
-        raise Exception('\'%s\' not found in cmd: %s' % (argstr, ' '.join(clist)))
+        raise Exception("'%s' not found in cmd: %s" % (argstr, " ".join(clist)))
     if len(imatches) > 1:
-        raise Exception('too many matches')
+        raise Exception("too many matches")
     return imatches[0]
 
 
 # replace the argument to <argstr> in <clist> with <replace_with>, or if <argstr> isn't there add it. If we need to add it and <insert_after> is set, add it after <insert_after>
 def replace_in_arglist(clist, argstr, replace_with, insert_after=None, has_arg=False):
     if clist.count(None) > 0:
-        raise Exception('None type value in clist %s' % clist)
+        raise Exception("None type value in clist %s" % clist)
     if not is_in_arglist(clist, argstr):
         if insert_after is None or insert_after not in clist:  # just append it
             clist.append(argstr)
             clist.append(replace_with)
         else:  # insert after the arg <insert_after>
-            insert_in_arglist(clist, [argstr, replace_with], insert_after, has_arg=has_arg)
+            insert_in_arglist(
+                clist, [argstr, replace_with], insert_after, has_arg=has_arg
+            )
     else:
         clist[arglist_index(clist, argstr) + 1] = replace_with
 
 
 # insert list <new_arg_strs> after <argstr> (unless <before> is set),  Use <has_arg> if <argstr> has an argument after which the insertion should occur
-def insert_in_arglist(clist, new_arg_strs, argstr, has_arg=False, before=False):  # set <argstr> to None to put it at end (yeah it probably should've been a kwarg)
+def insert_in_arglist(
+    clist, new_arg_strs, argstr, has_arg=False, before=False
+):  # set <argstr> to None to put it at end (yeah it probably should've been a kwarg)
     i_insert = len(clist)
     if argstr is not None:
         i_insert = clist.index(argstr) + (2 if has_arg else 1)
-    clist[i_insert : i_insert] = new_arg_strs
+    clist[i_insert:i_insert] = new_arg_strs
 
 
 def remove_from_arglist(clist, argstr, has_arg=False):
     if clist.count(None) > 0:
-        raise Exception('None type value in clist %s' % clist)
+        raise Exception("None type value in clist %s" % clist)
     imatches = arglist_imatches(clist, argstr)
     if len(imatches) == 0:
         return

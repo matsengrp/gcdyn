@@ -5,7 +5,9 @@ from gcdyn import utils
 
 
 def encode_tree(
-        intree: TreeNode, max_leaf_count: int = None, ladderize: bool = True,
+    intree: TreeNode,
+    max_leaf_count: int = None,
+    ladderize: bool = True,
 ) -> np.ndarray[float]:
     """
     Returns the "Compact Bijective Ladderized Vector" form of the given
@@ -43,7 +45,9 @@ def encode_tree(
             yield from traverse_inorder(child)
 
     if ladderize:
-        worktree = intree.copy()  # make a copy so the ladderization doesn't modify the input tree
+        worktree = (
+            intree.copy()
+        )  # make a copy so the ladderization doesn't modify the input tree
         utils.ladderize_tree(worktree)
     else:
         worktree = intree
@@ -72,17 +76,26 @@ def encode_tree(
 
 
 def pad_trees(trees: list[np.ndarray], min_n_max_leaves: int = 100):
-    """ Pad a list of encoded trees with zeros so that they're all the same length.
+    """Pad a list of encoded trees with zeros so that they're all the same length.
     Returns a new array with the padded trees (does not modify input trees).
     """
-    n_leaf_list = ([len(t[0]) for t in trees])
-    max_leaf_count = max(min_n_max_leaves, max(n_leaf_list))  # model complains if this is 70, i'm not sure why but whatever
-    print('    padding encoded trees to max leaf count %d (all leaf counts: %s)' % (max_leaf_count, ' '.join(str(c) for c in set(n_leaf_list))))
+    n_leaf_list = [len(t[0]) for t in trees]
+    max_leaf_count = max(
+        min_n_max_leaves, max(n_leaf_list)
+    )  # model complains if this is 70, i'm not sure why but whatever
+    print(
+        "    padding encoded trees to max leaf count %d (all leaf counts: %s)"
+        % (max_leaf_count, " ".join(str(c) for c in set(n_leaf_list)))
+    )
     padded_trees = []
     for itree, etree in enumerate(trees):
         assert len(etree) == 4  # make sure there's 4 rows
-        assert len(set(len(r) for r in etree)) == 1  # and that every row is the same length
-        padded_trees.append(np.pad(etree, ((0, 0), (0, max_leaf_count - len(etree[0])))))
+        assert (
+            len(set(len(r) for r in etree)) == 1
+        )  # and that every row is the same length
+        padded_trees.append(
+            np.pad(etree, ((0, 0), (0, max_leaf_count - len(etree[0]))))
+        )
         # if itree == 0:
         #     before_len = len(etree[0])
         #     np.set_printoptions(precision=3, suppress=True, linewidth=99999)
@@ -92,13 +105,13 @@ def pad_trees(trees: list[np.ndarray], min_n_max_leaves: int = 100):
 
 
 def write_trees(
-        filename: str, trees: list[np.ndarray],
-        ):
-    np.save(filename, pad_trees(trees))  # maybe should at some point use savez_compressed()? but size isn't an issue atm (have to pad here since np.save() requires arrays of same dimension
-
-
-def read_trees(
-        filename: str
+    filename: str,
+    trees: list[np.ndarray],
 ):
-    return np.load(filename)
+    np.save(
+        filename, pad_trees(trees)
+    )  # maybe should at some point use savez_compressed()? but size isn't an issue atm (have to pad here since np.save() requires arrays of same dimension
 
+
+def read_trees(filename: str):
+    return np.load(filename)

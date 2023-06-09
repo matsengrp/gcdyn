@@ -20,10 +20,14 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
+
 def tree_fn(idr):
-    return '%s/encoded-trees.npy' % idr
+    return "%s/encoded-trees.npy" % idr
+
+
 def resp_fn(idr):
-    return '%s/responses.pkl' % idr
+    return "%s/responses.pkl" % idr
+
 
 encd_trees, responses = [], []
 for idr in args.indirs:

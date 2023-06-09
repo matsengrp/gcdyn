@@ -55,9 +55,14 @@ class NeuralNetworkModel:
                         in a row of the `responses` argument.
         """
         num_parameters = sum(len(response._param_dict) for response in responses[0])
-        leaf_counts = set([len(t[0]) for t in trees])  # length of first row in encoded tree
+        leaf_counts = set(
+            [len(t[0]) for t in trees]
+        )  # length of first row in encoded tree
         if len(leaf_counts) != 1:
-            raise Exception('encoded trees have different lengths: %s' % ' '.join(str(l) for l in leaf_counts))
+            raise Exception(
+                "encoded trees have different lengths: %s"
+                % " ".join(str(l) for l in leaf_counts)
+            )
         max_leaf_count = list(leaf_counts)[0]
 
         if network_layers is None:
@@ -121,7 +126,6 @@ class NeuralNetworkModel:
 
         self.responses = responses
 
-
     @classmethod
     def _encode_responses(
         cls, responses: list[list[poisson.Response]]
@@ -165,10 +169,13 @@ class NeuralNetworkModel:
         response_parameters = self._encode_responses(self.responses)
 
         self.network.compile(loss="mean_squared_error")
-        self.network.fit(onp.stack(self.training_trees), response_parameters, epochs=epochs)
+        self.network.fit(
+            onp.stack(self.training_trees), response_parameters, epochs=epochs
+        )
 
     def predict(
-            self, trees: list[onp.ndarray],
+        self,
+        trees: list[onp.ndarray],
     ) -> list[list[poisson.Response]]:
         """Returns the Response objects predicted for each tree."""
 

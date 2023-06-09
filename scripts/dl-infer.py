@@ -24,12 +24,19 @@ def make_plot(smpl, df):
     sns.set_palette("viridis", 8)
     hord = sorted(set(df["Truth"]))
     # sns.histplot(df, x="Predicted", hue="Truth", hue_order=hord, palette="tab10", bins=30, multiple="stack", ).set(title=smpl)
-    ax = sns.boxplot(df, x='Truth', y='Predicted', boxprops={'facecolor':'None'})
+    ax = sns.boxplot(df, x="Truth", y="Predicted", boxprops={"facecolor": "None"})
     if len(df) < 2000:
-        ax = sns.swarmplot(df, x='Truth', y='Predicted', size=4, alpha=0.6)
+        ax = sns.swarmplot(df, x="Truth", y="Predicted", size=4, alpha=0.6)
     ax.set(title=smpl)
     for xv, xvl in zip(ax.get_xticks(), ax.get_xticklabels()):
-        plt.plot([xv - 0.5, xv + 0.5], [float(xvl._text), float(xvl._text)], color='darkred', linestyle='--', linewidth=3, alpha=0.7)
+        plt.plot(
+            [xv - 0.5, xv + 0.5],
+            [float(xvl._text), float(xvl._text)],
+            color="darkred",
+            linestyle="--",
+            linewidth=3,
+            alpha=0.7,
+        )
     # sns.scatterplot(df, x='Truth', y='Predicted')
     # xvals, yvals = df['Truth'], df['Predicted']
     # plt.plot([0.95 * min(xvals), 1.05 * max(xvals)], [0.95 * min(yvals), 1.05 * max(yvals)], color='darkred', linestyle='--', linewidth=3, alpha=0.7)
@@ -66,13 +73,13 @@ def train_and_test():
 
     with open(args.response_file, "rb") as rfile:
         pklfo = pickle.load(rfile)
-    samples = {
-        k + "-responses": [tfo[k] for tfo in pklfo]
-        for k in ["birth", "death"]
-    }
+    samples = {k + "-responses": [tfo[k] for tfo in pklfo] for k in ["birth", "death"]}
     samples["trees"] = encode.read_trees(args.tree_file)
     # samples['trees'] = encode.pad_trees(samples['trees'])  # maybe don't need this any more?
-    print("    read %d trees from %s (%d responses from %s)" % (len(samples["trees"]), args.tree_file, len(pklfo), args.response_file))
+    print(
+        "    read %d trees from %s (%d responses from %s)"
+        % (len(samples["trees"]), args.tree_file, len(pklfo), args.response_file)
+    )
     print(
         "      first response pair:\n        birth: %s\n        death: %s"
         % (samples["birth-responses"][0], samples["death-responses"][0])
@@ -93,7 +100,9 @@ def train_and_test():
         for birth_resp in smpldict["train"]["birth-responses"]
     ]
 
-    model = NeuralNetworkModel(smpldict["train"]["trees"], param_to_predict, network_layers=args.model_size)
+    model = NeuralNetworkModel(
+        smpldict["train"]["trees"], param_to_predict, network_layers=args.model_size
+    )
     model.fit(epochs=args.epochs)
 
     if not os.path.exists(args.outdir):
@@ -110,9 +119,17 @@ def train_and_test():
 
 # ----------------------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
-parser.add_argument("--tree-file", required=True, help="input file with list of encoded trees in numpy npy format")
-parser.add_argument("--response-file", required=True, help="input file with list of response functions in pickle format")
-parser.add_argument("--outdir", required=True, help='output directory')
+parser.add_argument(
+    "--tree-file",
+    required=True,
+    help="input file with list of encoded trees in numpy npy format",
+)
+parser.add_argument(
+    "--response-file",
+    required=True,
+    help="input file with list of response functions in pickle format",
+)
+parser.add_argument("--outdir", required=True, help="output directory")
 parser.add_argument("--epochs", type=int, default=100)
 parser.add_argument(
     "--train-frac", type=float, default=0.8, help="train on this fraction of the trees"

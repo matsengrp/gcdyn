@@ -53,7 +53,7 @@ class TestDeepLearning(unittest.TestCase):
         encoded_tree2 = encode.encode_tree(tree2)
         self.assertTrue(np.all(encoded_tree == encoded_tree2))
 
-    def test_read_write(self, test_dir='/tmp'):
+    def test_read_write(self, test_dir="/tmp"):
         """Make sure that tree encoding doesn't change on reading or writing."""
 
         init_trees = []
@@ -61,10 +61,12 @@ class TestDeepLearning(unittest.TestCase):
             ttr.prune()
             ttr.remove_mutation_events()
             init_trees.append(encode.encode_tree(ttr))
-        init_trees = encode.pad_trees(init_trees)  # have to pad initial trees since they get padded in writing fcn
+        init_trees = encode.pad_trees(
+            init_trees
+        )  # have to pad initial trees since they get padded in writing fcn
 
-        encode.write_trees('%s/test-tree.npy' % test_dir, init_trees)
-        read_trees = encode.read_trees('%s/test-tree.npy' % test_dir)
+        encode.write_trees("%s/test-tree.npy" % test_dir, init_trees)
+        read_trees = encode.read_trees("%s/test-tree.npy" % test_dir)
 
         self.assertTrue(all(np.all(rt == it) for it, rt in zip(init_trees, read_trees)))
 
