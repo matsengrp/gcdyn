@@ -185,6 +185,11 @@ def plot_responses(*responses, x_range=(-10, 10), **named_responses):
     plt.show()
 
 
+# ----------------------------------------------------------------------------------------
+# The following functions (mostly with <arglist> in the name) are for manipulating lists of command line arguments
+# (here called "clist", e.g. from sys.argv) to, for instance, allow a script to modify its own arguments for use in running
+# subprocesses of itself with similar command lines. They've been copied from partis/utils.py.
+
 # return true if <argstr> is in <clist>
 def is_in_arglist(
     clist, argstr
@@ -245,7 +250,7 @@ def remove_from_arglist(clist, argstr, has_arg=False):
     if len(imatches) == 0:
         return
     if len(imatches) > 1:
-        assert False  # not copying this fcn from partis (shouldn't get here atm)
+        assert False  # not copying this fcn from partis (shouldn't get here atm, but leaving it commented to provide context in case it does get triggered)
         # imatches = reduce_imatches(imatches, clist, argstr)
     iloc = imatches[0]
     # if clist[iloc] != argstr:

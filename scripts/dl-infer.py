@@ -19,6 +19,7 @@ def csvfn(smpl):
 
 
 # ----------------------------------------------------------------------------------------
+# NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
 def make_plot(smpl, df):
     plt.clf()
     sns.set_palette("viridis", 8)
@@ -75,7 +76,6 @@ def train_and_test():
         pklfo = pickle.load(rfile)
     samples = {k + "-responses": [tfo[k] for tfo in pklfo] for k in ["birth", "death"]}
     samples["trees"] = encode.read_trees(args.tree_file)
-    # samples['trees'] = encode.pad_trees(samples['trees'])  # maybe don't need this any more?
     print(
         "    read %d trees from %s (%d responses from %s)"
         % (len(samples["trees"]), args.tree_file, len(pklfo), args.response_file)

@@ -39,12 +39,12 @@ class NeuralNetworkModel:
 
     def __init__(
         self,
-        trees: list[onp.ndarray],
+        encoded_trees: list[onp.ndarray],
         responses: list[list[poisson.Response]],
         network_layers: list[callable] = None,
     ):
         """
-        trees: list of encoded trees
+        encoded_trees: list of encoded trees
         responses: 2D sequence, with first dimension corresponding to trees
                    and second dimension to the Response objects to predict
                    (Responses that aren't being estimated need not be provided)
@@ -56,7 +56,7 @@ class NeuralNetworkModel:
         """
         num_parameters = sum(len(response._param_dict) for response in responses[0])
         leaf_counts = set(
-            [len(t[0]) for t in trees]
+            [len(t[0]) for t in encoded_trees]
         )  # length of first row in encoded tree
         if len(leaf_counts) != 1:
             raise Exception(
@@ -122,7 +122,7 @@ class NeuralNetworkModel:
         # Note: the original deep learning model rescales trees, but we don't here
         # because we should always have the same root to tip height.
         self.max_leaf_count = max_leaf_count
-        self.training_trees = trees
+        self.training_trees = encoded_trees
 
         self.responses = responses
 
@@ -175,11 +175,11 @@ class NeuralNetworkModel:
 
     def predict(
         self,
-        trees: list[onp.ndarray],
+        encoded_trees: list[onp.ndarray],
     ) -> list[list[poisson.Response]]:
         """Returns the Response objects predicted for each tree."""
 
-        response_parameters = self.network(onp.stack(trees))
+        response_parameters = self.network(onp.stack(encoded_trees))
 
         return self._decode_responses(
             response_parameters, example_responses=self.responses[0]
