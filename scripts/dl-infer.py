@@ -22,7 +22,7 @@ def csvfn(smpl):
 def make_plot(smpl, df):
     plt.clf()
     sns.set_palette("viridis", 8)
-    hord = sorted(set(df["Truth"]))
+    # hord = sorted(set(df["Truth"]))
     # sns.histplot(df, x="Predicted", hue="Truth", hue_order=hord, palette="tab10", bins=30, multiple="stack", ).set(title=smpl)
     ax = sns.boxplot(df, x="Truth", y="Predicted", boxprops={"facecolor": "None"})
     if len(df) < 2000:

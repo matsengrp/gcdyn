@@ -2,8 +2,6 @@ import numpy as np
 import argparse
 import os
 import sys
-from Bio import SeqIO
-import math
 
 # import colored_traceback.always  # need to add this to installation stuff, i'm not sure how to do it atm
 import dill
@@ -296,8 +294,8 @@ def read_dill_file(fname):
     try:
         with open(fname, "rb") as pfile:
             pfo = dill.load(pfile)
-    except:
-        print("    %s reading pickle file %s" % (color("red", "error"), fname))
+    except Exception as ex:
+        print("    %s reading pickle file %s:\n            %s" % (color("red", "error"), fname, ex))
     return pfo
 
 

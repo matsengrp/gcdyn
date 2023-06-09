@@ -14,7 +14,7 @@ from jax import lax
 from jax.typing import ArrayLike
 from jaxopt import ScipyBoundedMinimize
 
-from gcdyn import bdms, mutators, poisson, utils
+from gcdyn import mutators, poisson
 
 # Pylance can't recognize tf submodules imported the normal way
 keras = tf.keras
@@ -61,7 +61,7 @@ class NeuralNetworkModel:
         if len(leaf_counts) != 1:
             raise Exception(
                 "encoded trees have different lengths: %s"
-                % " ".join(str(l) for l in leaf_counts)
+                % " ".join(str(c) for c in leaf_counts)
             )
         max_leaf_count = list(leaf_counts)[0]
 

@@ -245,7 +245,8 @@ def remove_from_arglist(clist, argstr, has_arg=False):
     if len(imatches) == 0:
         return
     if len(imatches) > 1:
-        imatches = reduce_imatches(imatches, clist, argstr)
+        assert False  # not copying this fcn from partis (shouldn't get here atm)
+        # imatches = reduce_imatches(imatches, clist, argstr)
     iloc = imatches[0]
     # if clist[iloc] != argstr:
     #     print '  %s removing abbreviation \'%s\' from sys.argv rather than \'%s\'' % (color('yellow', 'warning'), clist[iloc], argstr)
