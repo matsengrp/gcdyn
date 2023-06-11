@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import argparse
 import os
 import sys
+import operator
 
 # import colored_traceback.always  # need to add this to installation stuff, i'm not sure how to do it atm
 import time
@@ -87,8 +88,18 @@ def train_and_test():
 
     n_trees = len(samples["trees"])
     idxs, smpldict = {}, {}
-    idxs["train"] = random.sample(range(n_trees), int(args.train_frac * n_trees))
-    idxs["test"] = [i for i in range(n_trees) if i not in idxs["train"]]
+    if args.test_xscale_value is None:
+        idxs["train"] = random.sample(range(n_trees), round(args.train_frac * n_trees))
+        idxs["test"] = [i for i in range(n_trees) if i not in idxs["train"]]
+    else:
+        n_test = round((1. - args.train_frac) * n_trees)
+        avail_indices = [i for i, r in enumerate(samples['birth-responses']) if r._param_dict['xscale'] == args.test_xscale_value]  # indices of all trees with the specified xscale value
+        idxs["test"] = random.sample(avail_indices, n_test)  # note that this'll change the distribution of xscale values in the training sample (so make sure that n_test isn't a large fraction of the trees with each xscale value
+        idxs["train"] = [i for i in range(n_trees) if i not in idxs["test"]]
+        all_vals = [r._param_dict['xscale'] for r in samples['birth-responses']]
+        val_counts = {v : all_vals.count(v) for v in set(all_vals)}
+        n_remaining = val_counts[args.test_xscale_value] - n_test
+        print('    --test-xscale-value: chose %d test samples with xscale value %.2f (leaving %d with that value) from %d total samples with xscale value counts: %s' % (n_test, args.test_xscale_value, n_remaining, n_trees, '   '.join('%.2f %d' % (v, c) for v, c in sorted(val_counts.items(), key=operator.itemgetter(0)))))
 
     for smpl in ["train", "test"]:
         smpldict[smpl] = {
@@ -134,6 +145,7 @@ parser.add_argument("--epochs", type=int, default=100)
 parser.add_argument(
     "--train-frac", type=float, default=0.8, help="train on this fraction of the trees"
 )
+parser.add_argument("--test-xscale-value", type=float, help='if set, choose test samples only from among those with this (birth) xscale value.')
 parser.add_argument("--model-size", default="tiny", choices=["small", "tiny", None])
 parser.add_argument(
     "--test",
