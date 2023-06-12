@@ -102,7 +102,7 @@ class NeuralNetworkModel:
                 # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
                 lambda x: tf.transpose(x, (0, 2, 1)),
                 layers.Conv1D(filters=25, kernel_size=3, activation="elu"),
-                layers.MaxPooling1D(pool_size=10, strides=10),
+                layers.MaxPooling1D(pool_size=5, strides=5),
                 layers.Conv1D(filters=40, kernel_size=8, activation="elu"),
                 layers.GlobalAveragePooling1D(),
                 layers.Dense(16, activation="elu"),

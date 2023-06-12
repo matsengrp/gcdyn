@@ -10,40 +10,14 @@ import operator
 import time
 import pickle
 import pandas as pd
-import seaborn as sns
 import random
+
+from gcdyn import utils
 
 
 # ----------------------------------------------------------------------------------------
 def csvfn(smpl):
     return "%s/%s.csv" % (args.outdir, smpl)
-
-
-# ----------------------------------------------------------------------------------------
-# NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
-def make_plot(smpl, df):
-    plt.clf()
-    sns.set_palette("viridis", 8)
-    # hord = sorted(set(df["Truth"]))
-    # sns.histplot(df, x="Predicted", hue="Truth", hue_order=hord, palette="tab10", bins=30, multiple="stack", ).set(title=smpl)
-    ax = sns.boxplot(df, x="Truth", y="Predicted", boxprops={"facecolor": "None"})
-    if len(df) < 2000:
-        ax = sns.swarmplot(df, x="Truth", y="Predicted", size=4, alpha=0.6)
-    ax.set(title=smpl)
-    for xv, xvl in zip(ax.get_xticks(), ax.get_xticklabels()):
-        plt.plot(
-            [xv - 0.5, xv + 0.5],
-            [float(xvl._text), float(xvl._text)],
-            color="darkred",
-            linestyle="--",
-            linewidth=3,
-            alpha=0.7,
-        )
-    # sns.scatterplot(df, x='Truth', y='Predicted')
-    # xvals, yvals = df['Truth'], df['Predicted']
-    # plt.plot([0.95 * min(xvals), 1.05 * max(xvals)], [0.95 * min(yvals), 1.05 * max(yvals)], color='darkred', linestyle='--', linewidth=3, alpha=0.7)
-    plt.savefig("%s/%s-hist.svg" % (args.outdir, smpl))
-    df.to_csv(csvfn(smpl))
 
 
 # ----------------------------------------------------------------------------------------
@@ -56,7 +30,8 @@ def get_df(smpl, result, smpldict):
             ),
         }
     )
-    make_plot(smpl, df)
+    utils.make_dl_plot(smpl, df, args.outdir)
+    df.to_csv(csvfn(smpl))
     return df
 
 
@@ -64,7 +39,7 @@ def get_df(smpl, result, smpldict):
 def read_plot_csv():
     for smpl in ["train", "test"]:
         df = pd.read_csv(csvfn(smpl))
-        make_plot(smpl, df)
+        utils.make_dl_plot(smpl, df, args.outdir)
 
 
 # ----------------------------------------------------------------------------------------
@@ -88,18 +63,18 @@ def train_and_test():
 
     n_trees = len(samples["trees"])
     idxs, smpldict = {}, {}
-    if args.test_xscale_value is None:
+    if args.test_xscale_values is None:
         idxs["train"] = random.sample(range(n_trees), round(args.train_frac * n_trees))
         idxs["test"] = [i for i in range(n_trees) if i not in idxs["train"]]
     else:
         n_test = round((1. - args.train_frac) * n_trees)
-        avail_indices = [i for i, r in enumerate(samples['birth-responses']) if r._param_dict['xscale'] == args.test_xscale_value]  # indices of all trees with the specified xscale value
+        avail_indices = [i for i, r in enumerate(samples['birth-responses']) if r._param_dict['xscale'] in args.test_xscale_values]  # indices of all trees with the specified xscale value
         idxs["test"] = random.sample(avail_indices, n_test)  # note that this'll change the distribution of xscale values in the training sample (so make sure that n_test isn't a large fraction of the trees with each xscale value
         idxs["train"] = [i for i in range(n_trees) if i not in idxs["test"]]
         all_vals = [r._param_dict['xscale'] for r in samples['birth-responses']]
         val_counts = {v : all_vals.count(v) for v in set(all_vals)}
-        n_remaining = val_counts[args.test_xscale_value] - n_test
-        print('    --test-xscale-value: chose %d test samples with xscale value %.2f (leaving %d with that value) from %d total samples with xscale value counts: %s' % (n_test, args.test_xscale_value, n_remaining, n_trees, '   '.join('%.2f %d' % (v, c) for v, c in sorted(val_counts.items(), key=operator.itemgetter(0)))))
+        n_remaining = sum(val_counts[v] for v in args.test_xscale_values) - n_test
+        print('    --test-xscale-value: chose %d test samples with xscale values among %s (leaving %d with those values) from %d total samples with xscale value counts: %s' % (n_test, ' '.join('%.2f'%v for v in args.test_xscale_values), n_remaining, n_trees, '   '.join('%.2f %d' % (v, c) for v, c in sorted(val_counts.items(), key=operator.itemgetter(0)))))
 
     for smpl in ["train", "test"]:
         smpldict[smpl] = {
@@ -145,7 +120,7 @@ parser.add_argument("--epochs", type=int, default=100)
 parser.add_argument(
     "--train-frac", type=float, default=0.8, help="train on this fraction of the trees"
 )
-parser.add_argument("--test-xscale-value", type=float, help='if set, choose test samples only from among those with this (birth) xscale value.')
+parser.add_argument("--test-xscale-values", type=float, nargs='+', help='if set, choose test samples only from among those with this (birth) xscale value.')
 parser.add_argument("--model-size", default="tiny", choices=["small", "tiny", None])
 parser.add_argument(
     "--test",

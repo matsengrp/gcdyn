@@ -6,6 +6,7 @@ import ete3
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import uniform
+import seaborn as sns
 
 from gcdyn.bdms import TreeError, TreeNode
 
@@ -259,3 +260,30 @@ def remove_from_arglist(clist, argstr, has_arg=False):
         clist.pop(iloc + 1)
     clist.pop(iloc)
     return clist  # NOTE usually we don't use the return value (just modify it in memory), but at least in one place we're calling with a just-created list so it's nice to be able to use the return value
+
+
+# ----------------------------------------------------------------------------------------
+# plot scatter + box/whisker plot comparing true and predicted values for deep learning inference
+# NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
+def make_dl_plot(smpl, df, outdir):
+    plt.clf()
+    sns.set_palette("viridis", 8)
+    # hord = sorted(set(df["Truth"]))
+    # sns.histplot(df, x="Predicted", hue="Truth", hue_order=hord, palette="tab10", bins=30, multiple="stack", ).set(title=smpl)
+    ax = sns.boxplot(df, x="Truth", y="Predicted", boxprops={"facecolor": "None"}, order=sorted(set(df['Truth'])))
+    if len(df) < 2000:
+        ax = sns.swarmplot(df, x="Truth", y="Predicted", size=4, alpha=0.6)
+    ax.set(title=smpl)
+    for xv, xvl in zip(ax.get_xticks(), ax.get_xticklabels()):
+        plt.plot(
+            [xv - 0.5, xv + 0.5],
+            [float(xvl._text), float(xvl._text)],
+            color="darkred",
+            linestyle="--",
+            linewidth=3,
+            alpha=0.7,
+        )
+    # sns.scatterplot(df, x='Truth', y='Predicted')
+    # xvals, yvals = df['Truth'], df['Predicted']
+    # plt.plot([0.95 * min(xvals), 1.05 * max(xvals)], [0.95 * min(yvals), 1.05 * max(yvals)], color='darkred', linestyle='--', linewidth=3, alpha=0.7)
+    plt.savefig("%s/%s-hist.svg" % (outdir, smpl))
