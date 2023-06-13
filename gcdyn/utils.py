@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import uniform
 import seaborn as sns
+import platform
+import resource
+import psutil
 
 from gcdyn.bdms import TreeError, TreeNode
 
@@ -287,3 +290,13 @@ def make_dl_plot(smpl, df, outdir):
     # xvals, yvals = df['Truth'], df['Predicted']
     # plt.plot([0.95 * min(xvals), 1.05 * max(xvals)], [0.95 * min(yvals), 1.05 * max(yvals)], color='darkred', linestyle='--', linewidth=3, alpha=0.7)
     plt.savefig("%s/%s-hist.svg" % (outdir, smpl))
+
+# ----------------------------------------------------------------------------------------
+def memory_usage_fraction(extra_str='', debug=False):  # return fraction of total system memory that this process is using (as always with memory things, this is an approximation)
+    if platform.system() != 'Linux':
+        print('\n  note: utils.memory_usage_fraction() needs testing on platform \'%s\' to make sure unit conversions don\'t need changing' % platform.system())
+    current_usage = float(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)  # kb
+    total = float(psutil.virtual_memory().total) / 1000.  # returns bytes, then convert to kb
+    if debug:
+        print('  %susing %.0f / %.0f MB = %.4f' % (extra_str, current_usage / 1000, total / 1000, current_usage / total))
+    return current_usage / total

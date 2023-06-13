@@ -300,6 +300,13 @@ def read_dill_file(fname):
 
 
 # ----------------------------------------------------------------------------------------
+def check_memory(max_frac=0.05):
+    mfrac = utils.memory_usage_fraction(extra_str='trial %3d:  '%itrial, debug=True)
+    if mfrac > max_frac:
+        raise Exception('too much memory: %.3f%% > %.3f%%' % (100 * mfrac, 100 * max_frac))
+        return True
+
+# ----------------------------------------------------------------------------------------
 git_dir = os.path.dirname(os.path.realpath(__file__)).replace("/scripts", "/.git")
 print(
     "    gcdyn commit: %s"
@@ -527,6 +534,7 @@ all_seqs, all_trees = [], []
 n_missing = 0
 rng = np.random.default_rng(seed=args.seed)
 for itrial in range(args.itrial_start, args.n_trials):
+    check_memory()
     ofn = outfn("pkl", itrial)
     if os.path.exists(ofn) and not args.overwrite:
         print("    output %s already exists, skipping" % ofn)
