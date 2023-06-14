@@ -221,6 +221,7 @@ class HomogeneousResponse(Response):
     def Λ(self, node: bdms.TreeNode, Δt: float) -> float:
         return self.λ_homogeneous(node) * Δt
 
+    @np.errstate(divide="ignore")
     def Λ_inv(self, node: bdms.TreeNode, τ: float) -> float:
         return τ / self.λ_homogeneous(node)
 

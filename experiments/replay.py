@@ -4,7 +4,7 @@ Various things relevant for the GC replay experiment.
 import os
 import sys
 import pandas as pd
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
 from gcdyn import utils
 

@@ -1,51 +1,47 @@
 import argparse
 import os
+import numpy as np
 
 # import colored_traceback.always  # need to add this to installation stuff, i'm not sure how to do it atm
 import dill
 
 # ----------------------------------------------------------------------------------------
 ustr = """
-Read dill pickled trees and response functions from list of input files, and combine (concatenate) them into one output file
+Read encoded trees and response functions from list of input dirs, and combine (concatenate) them into one output file
 """
 parser = argparse.ArgumentParser(usage=ustr)
 parser.add_argument(
-    "infiles", nargs="+", help="list of files with dill pickled gcdyn simulation"
+    "indirs", nargs="+", help="list of dirs with gcdyn simulation files"
 )
 parser.add_argument(
-    "--outfile",
+    "--outdir",
     required=True,
-    help="output file name for concatenated simulation info (response functions and trees)",
+    help="output dir name for concatenated simulation info (response functions and trees)",
 )
 args = parser.parse_args()
 
-simfo = []
-for ifn in args.infiles:
-    with open(ifn, "rb") as dfile:
-        pklfo = dill.load(dfile)
-        for tfo in pklfo:
-            simfo.append(tfo)
+
+def tree_fn(idr):
+    return "%s/encoded-trees.npy" % idr
+
+
+def resp_fn(idr):
+    return "%s/responses.pkl" % idr
+
+
+encd_trees, responses = [], []
+for idr in args.indirs:
+    for etree in np.load(tree_fn(idr)):
+        encd_trees.append(etree)
+    with open(resp_fn(idr), "rb") as rfile:
+        responses += dill.load(rfile)
 
 print(
     "  writing %d trees from %d files to %s"
-    % (len(simfo), len(args.infiles), args.outfile)
+    % (len(encd_trees), len(args.indirs), args.outdir)
 )
-if not os.path.exists(os.path.dirname(args.outfile)):
-    os.makedirs(os.path.dirname(args.outfile))
-with open(args.outfile, "wb") as pfile:
-    dill.dump(simfo, pfile)
-
-with open(args.outfile, "rb") as pfile:
-    dfo = dill.load(pfile)
-    treestrs = [str(len(list(tfo["tree"].iter_leaves()))) for tfo in pklfo]
-    birthstrs, deathstrs = [
-        [tfo["%s-response" % k] for tfo in pklfo] for k in ["birth", "death"]
-    ]
-    print(
-        "    checking info in outfile: %d trees with leaf counts: %s"
-        % (len(pklfo), " ".join(treestrs))
-    )
-    print(
-        "        distinct response fcns:  birth %d  death %d"
-        % (len(set(birthstrs)), len(set(deathstrs)))
-    )
+if not os.path.exists(os.path.dirname(args.outdir)):
+    os.makedirs(os.path.dirname(args.outdir))
+with open(resp_fn(args.outdir), "wb") as rfile:
+    dill.dump(responses, rfile)
+np.save(tree_fn(args.outdir), encd_trees)

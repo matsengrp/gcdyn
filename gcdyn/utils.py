@@ -6,6 +6,10 @@ import ete3
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import uniform
+import seaborn as sns
+import platform
+import resource
+import psutil
 
 from gcdyn.bdms import TreeError, TreeNode
 
@@ -183,3 +187,116 @@ def plot_responses(*responses, x_range=(-10, 10), **named_responses):
         plt.legend()
 
     plt.show()
+
+
+# ----------------------------------------------------------------------------------------
+# The following functions (mostly with <arglist> in the name) are for manipulating lists of command line arguments
+# (here called "clist", e.g. from sys.argv) to, for instance, allow a script to modify its own arguments for use in running
+# subprocesses of itself with similar command lines. They've been copied from partis/utils.py.
+
+# return true if <argstr> is in <clist>
+def is_in_arglist(
+    clist, argstr
+):  # accounts for argparse unique/partial matches (update: we no longer allow partial matches)
+    return len(arglist_imatches(clist, argstr)) > 0
+
+
+# return list of indices matching <argstr> in <clist>
+def arglist_imatches(clist, argstr):
+    assert (
+        argstr[:2] == "--"
+    )  # this is necessary since the matching assumes that argparse has ok'd the uniqueness of an abbreviated argument UPDATE now we've disable argparse prefix matching, but whatever
+    return [
+        i for i, c in enumerate(clist) if argstr == c
+    ]  # NOTE do *not* try to go back to matching just the start of the argument, in order to make that work you'd need to have access to the whole list of potential arguments in bin/partis, and you'd probably screw it up anyway
+
+
+# return index of <argstr> in <clist>
+def arglist_index(clist, argstr):
+    imatches = arglist_imatches(clist, argstr)
+    if len(imatches) == 0:
+        raise Exception("'%s' not found in cmd: %s" % (argstr, " ".join(clist)))
+    if len(imatches) > 1:
+        raise Exception("too many matches")
+    return imatches[0]
+
+
+# replace the argument to <argstr> in <clist> with <replace_with>, or if <argstr> isn't there add it. If we need to add it and <insert_after> is set, add it after <insert_after>
+def replace_in_arglist(clist, argstr, replace_with, insert_after=None, has_arg=False):
+    if clist.count(None) > 0:
+        raise Exception("None type value in clist %s" % clist)
+    if not is_in_arglist(clist, argstr):
+        if insert_after is None or insert_after not in clist:  # just append it
+            clist.append(argstr)
+            clist.append(replace_with)
+        else:  # insert after the arg <insert_after>
+            insert_in_arglist(
+                clist, [argstr, replace_with], insert_after, has_arg=has_arg
+            )
+    else:
+        clist[arglist_index(clist, argstr) + 1] = replace_with
+
+
+# insert list <new_arg_strs> after <argstr> (unless <before> is set),  Use <has_arg> if <argstr> has an argument after which the insertion should occur
+def insert_in_arglist(
+    clist, new_arg_strs, argstr, has_arg=False, before=False
+):  # set <argstr> to None to put it at end (yeah it probably should've been a kwarg)
+    i_insert = len(clist)
+    if argstr is not None:
+        i_insert = clist.index(argstr) + (2 if has_arg else 1)
+    clist[i_insert:i_insert] = new_arg_strs
+
+
+def remove_from_arglist(clist, argstr, has_arg=False):
+    if clist.count(None) > 0:
+        raise Exception("None type value in clist %s" % clist)
+    imatches = arglist_imatches(clist, argstr)
+    if len(imatches) == 0:
+        return
+    if len(imatches) > 1:
+        assert False  # not copying this fcn from partis (shouldn't get here atm, but leaving it commented to provide context in case it does get triggered)
+        # imatches = reduce_imatches(imatches, clist, argstr)
+    iloc = imatches[0]
+    # if clist[iloc] != argstr:
+    #     print '  %s removing abbreviation \'%s\' from sys.argv rather than \'%s\'' % (color('yellow', 'warning'), clist[iloc], argstr)
+    if has_arg:
+        clist.pop(iloc + 1)
+    clist.pop(iloc)
+    return clist  # NOTE usually we don't use the return value (just modify it in memory), but at least in one place we're calling with a just-created list so it's nice to be able to use the return value
+
+
+# ----------------------------------------------------------------------------------------
+# plot scatter + box/whisker plot comparing true and predicted values for deep learning inference
+# NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
+def make_dl_plot(smpl, df, outdir):
+    plt.clf()
+    sns.set_palette("viridis", 8)
+    # hord = sorted(set(df["Truth"]))
+    # sns.histplot(df, x="Predicted", hue="Truth", hue_order=hord, palette="tab10", bins=30, multiple="stack", ).set(title=smpl)
+    ax = sns.boxplot(df, x="Truth", y="Predicted", boxprops={"facecolor": "None"}, order=sorted(set(df['Truth'])))
+    if len(df) < 2000:
+        ax = sns.swarmplot(df, x="Truth", y="Predicted", size=4, alpha=0.6)
+    ax.set(title=smpl)
+    for xv, xvl in zip(ax.get_xticks(), ax.get_xticklabels()):
+        plt.plot(
+            [xv - 0.5, xv + 0.5],
+            [float(xvl._text), float(xvl._text)],
+            color="darkred",
+            linestyle="--",
+            linewidth=3,
+            alpha=0.7,
+        )
+    # sns.scatterplot(df, x='Truth', y='Predicted')
+    # xvals, yvals = df['Truth'], df['Predicted']
+    # plt.plot([0.95 * min(xvals), 1.05 * max(xvals)], [0.95 * min(yvals), 1.05 * max(yvals)], color='darkred', linestyle='--', linewidth=3, alpha=0.7)
+    plt.savefig("%s/%s-hist.svg" % (outdir, smpl))
+
+# ----------------------------------------------------------------------------------------
+def memory_usage_fraction(extra_str='', debug=False):  # return fraction of total system memory that this process is using (as always with memory things, this is an approximation)
+    if platform.system() != 'Linux':
+        print('\n  note: utils.memory_usage_fraction() needs testing on platform \'%s\' to make sure unit conversions don\'t need changing' % platform.system())
+    current_usage = float(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)  # kb
+    total = float(psutil.virtual_memory().total) / 1000.  # returns bytes, then convert to kb
+    if debug:
+        print('  %susing %.0f / %.0f MB = %.4f' % (extra_str, current_usage / 1000, total / 1000, current_usage / total))
+    return current_usage / total
