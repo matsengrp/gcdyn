@@ -300,7 +300,7 @@ def read_dill_file(fname):
 
 
 # ----------------------------------------------------------------------------------------
-def check_memory(max_frac=0.05):
+def check_memory(max_frac=0.03):
     mfrac = utils.memory_usage_fraction(extra_str='trial %3d:  '%itrial, debug=True)
     if mfrac > max_frac:
         raise Exception('too much memory: %.3f%% > %.3f%%' % (100 * mfrac, 100 * max_frac))
@@ -606,5 +606,7 @@ if len(args.xscale_list) > 0:
     )
 
 write_final_outputs(all_seqs, all_trees)
+
+utils.plot_trees(args.outdir+'/plots', all_trees)
 
 print("    total simulation time: %.1f sec" % (time.time() - start))

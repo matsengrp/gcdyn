@@ -10,6 +10,8 @@ import seaborn as sns
 import platform
 import resource
 import psutil
+import os
+import glob
 
 from gcdyn.bdms import TreeError, TreeNode
 
@@ -292,6 +294,35 @@ def make_dl_plot(smpl, df, outdir):
     plt.savefig("%s/%s-hist.svg" % (outdir, smpl))
 
 # ----------------------------------------------------------------------------------------
+def plot_trees(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_plot=10):
+    # ----------------------------------------------------------------------------------------
+    def plt_single_tree(itree, pfo, xmin, xmax):
+        plt.clf()
+        fig, ax = plt.subplots()
+        ax2 = ax.twinx()
+        leaves = list(pfo['tree'].iter_leaves())
+        leaf_vals = [n.x for n in leaves]
+        int_vals = [n.x for n in pfo['tree'].iter_descendants() if n not in leaves]
+        sns.histplot({'internal' : int_vals, 'leaves' : leaf_vals}, ax=ax2, multiple='stack')
+
+        all_vals = leaf_vals + int_vals
+        xmin, xmax = min([xmin] + all_vals), max([xmax] + all_vals)
+        dx = (xmax - xmin) / nsteps
+        xvals = list(np.arange(xmin, 0, dx)) + list(np.arange(0, xmax + dx, dx))
+        rvals = [pfo['birth-response'].λ_phenotype(x) for x in xvals]
+        data = {'affinity' : xvals, 'lambda' : rvals}
+        sns.lineplot(data, x='affinity', y='lambda', ax=ax, linewidth=3, color='#990012')
+        ax.set(title='xscale %.1f  xshift %.1f (%d total nodes, %d leaves)' % (pfo['birth-response'].xscale, pfo['birth-response'].xshift, len(all_vals), len(leaf_vals)))
+        plt.savefig("%s/trees-%d.svg" % (plotdir, itree))
+    # ----------------------------------------------------------------------------------------
+    if not os.path.exists(plotdir):
+        os.makedirs(plotdir)
+    for itree, pfo in enumerate(pfo_list[ : n_to_plot]):
+        plt_single_tree(itree, pfo, xmin, xmax)
+    make_html(plotdir, n_columns=4)
+    print('    plotting trees to %s' % plotdir)
+
+# ----------------------------------------------------------------------------------------
 def memory_usage_fraction(extra_str='', debug=False):  # return fraction of total system memory that this process is using (as always with memory things, this is an approximation)
     if platform.system() != 'Linux':
         print('\n  note: utils.memory_usage_fraction() needs testing on platform \'%s\' to make sure unit conversions don\'t need changing' % platform.system())
@@ -300,3 +331,78 @@ def memory_usage_fraction(extra_str='', debug=False):  # return fraction of tota
     if debug:
         print('  %susing %.0f / %.0f MB = %.4f' % (extra_str, current_usage / 1000, total / 1000, current_usage / total))
     return current_usage / total
+
+# ----------------------------------------------------------------------------------------
+def make_html(plotdir, n_columns=3, extension='svg', fnames=None, title='foop', bgcolor='000000', new_table_each_row=False, htmlfname=None, extra_links=None):
+    """ make an html file displaying all the svg (by default) files in <plotdir> """
+    if fnames is not None:  # make sure it's formatted properly
+        for rowfnames in fnames:
+            if not isinstance(rowfnames, list):
+                raise Exception('each entry in fnames should be a list of strings, but got a %s: %s' % (type(rowfnames), rowfnames))
+            for fn in rowfnames:
+                if not isinstance(fn, (str, unicode)):
+                    raise Exception('each entry in each row should be a string (file name), but got a %s: %s' % (type(fn), fn))
+    if plotdir[-1] == '/':  # remove trailings slash, if present
+        plotdir = plotdir[:-1]
+    if not os.path.exists(plotdir):
+        raise Exception('plotdir %s d.n.e.' % plotdir)
+    dirname = os.path.basename(plotdir)
+    extra_link_str = ''
+    if extra_links is not None:
+        extra_link_str = ' '.join(['<a href=%s>%s</a>' % (url, name) for name, url in extra_links])
+    lines = ['<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN>',
+             '<html>',
+             '<head><title>' + title + '</title></head>',
+             '<body bgcolor="%s">' % bgcolor,
+             '<h3 style="text-align:left; color:DD6600;">' + title + '</h3>',
+             extra_link_str,
+             '<table>',
+             '<tr>']
+
+    def add_newline(lines, header=None):
+        if new_table_each_row:
+            endlines, startlines = ['</tr>', '</table>'], ['<table>', '<tr>']
+        else:
+            endlines, startlines = ['</tr>'], ['<tr>']
+        lines += endlines
+        if header is not None:
+            lines += ['<h3 style="text-align:left; color:DD6600;">' + header + '</h3>']
+        lines += startlines
+    def add_fname(lines, fullfname):  # NOTE <fullname> may, or may not, be a base name (i.e. it might have a subdir tacked on the left side)
+        fname = fullfname.replace(plotdir, '').lstrip('/')
+        if htmlfname is None:  # dirname screws it up if we're specifying htmlfname explicitly, since then the files are in a variety of different subdirs
+            fname = dirname + '/' + fname
+        line = '<td><a target="_blank" href="' + fname + '"><img src="' + fname + '" alt="' + fname + '" width="100%"></a></td>'
+        lines.append(line)
+
+    # if <fnames> wasn't used to tell us how to group them into rows, try to guess based on the file base names
+    if fnames is None:
+        fnamelist = [os.path.basename(fn) for fn in sorted(glob.glob(plotdir + '/*.' + extension))]
+        fnames = []
+
+        # then do the rest in groups of <n_columns>
+        while len(fnamelist) > 0:
+            fnames.append(fnamelist[:n_columns])
+            fnamelist = fnamelist[n_columns:]
+
+    # write the meat of the html
+    for rowlist in fnames:
+        if 'header' in rowlist:
+            if len(rowlist) != 2:
+                raise Exception('malformed header row list in fnames (should be len 2 but got %d): %s' % (len(rowlist), rowlist))
+            add_newline(lines, header=rowlist[1])
+            continue
+        for fn in rowlist:
+            add_fname(lines, fn)
+        add_newline(lines)
+
+    lines += ['</tr>',
+              '</table>',
+              '</body>',
+              '</html>']
+
+    if htmlfname is None:
+        htmlfname = os.path.dirname(plotdir) + '/' + dirname + '.html'  # more verbose than necessary
+    with open(htmlfname, 'w') as htmlfile:
+        htmlfile.write('\n'.join(lines))
+    # subprocess.check_call(['chmod', '664', htmlfname])
