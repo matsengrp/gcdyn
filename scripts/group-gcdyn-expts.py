@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import argparse
 import os
-import sys
+
 # import colored_traceback.always
 import numpy
 import csv
@@ -15,37 +15,49 @@ from gcdyn import utils
 
 # ----------------------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
-parser.add_argument('--test-file', required=True)
-parser.add_argument('--outfile', required=True)
-parser.add_argument('--n-trees-per-expt', required=True, type=int)
+parser.add_argument("--test-file", required=True)
+parser.add_argument("--outfile", required=True)
+parser.add_argument("--n-trees-per-expt", required=True, type=int)
 args = parser.parse_args()
 
 true_vals = {}
 n_lines = 0
 with open(args.test_file) as cfile:
-    for cln in csv.DictReader(filter(lambda l: l[0]!='#', cfile)):
+    for cln in csv.DictReader(filter(lambda x: x[0] != "#", cfile)):
         n_lines += 1
-        tval, pval = [float(cln[k]) for k in ['Truth', 'Predicted']]
+        tval, pval = [float(cln[k]) for k in ["Truth", "Predicted"]]
         if tval not in true_vals:
             true_vals[tval] = []
         true_vals[tval].append(pval)
-print('    read %d lines with %d different true values: %s' % (n_lines, len(true_vals), ' '.join('%.2f'%v for v in sorted(true_vals))))
+print(
+    "    read %d lines with %d different true values: %s"
+    % (n_lines, len(true_vals), " ".join("%.2f" % v for v in sorted(true_vals)))
+)
 
 final_vals = []
 for tval, tlist in true_vals.items():
     for ival, istart in enumerate(range(0, len(tlist), args.n_trees_per_expt)):
         subvals = tlist[istart : istart + args.n_trees_per_expt]
-        fline = {'' : ival, 'Truth' : tval, 'Predicted' : numpy.mean(subvals)}
+        fline = {"": ival, "Truth": tval, "Predicted": numpy.mean(subvals)}
         final_vals.append(fline)
-print('      grouped into %d final lines with value counts: %s' % (len(final_vals), '  '.join('%.2f %d'%(v, len([l for l in final_vals if l['Truth']==v])) for v in true_vals)))
+print(
+    "      grouped into %d final lines with value counts: %s"
+    % (
+        len(final_vals),
+        "  ".join(
+            "%.2f %d" % (v, len([x for x in final_vals if x["Truth"] == v]))
+            for v in true_vals
+        ),
+    )
+)
 
-print('    writing %d lines to %s' % (len(final_vals), args.outfile))
+print("    writing %d lines to %s" % (len(final_vals), args.outfile))
 if not os.path.exists(os.path.dirname(args.outfile)):
     os.makedirs(os.path.dirname(args.outfile))
-with open(args.outfile, 'w') as ofile:
+with open(args.outfile, "w") as ofile:
     writer = csv.DictWriter(ofile, final_vals[0].keys())
     writer.writeheader()
     for fline in final_vals:
         writer.writerow(fline)
 
-utils.make_dl_plot('test', pd.read_csv(args.outfile), os.path.dirname(args.outfile))
+utils.make_dl_plot("test", pd.read_csv(args.outfile), os.path.dirname(args.outfile))

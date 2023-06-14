@@ -75,7 +75,9 @@ def encode_tree(
     return matrix
 
 
-def pad_trees(trees: list[np.ndarray], min_n_max_leaves: int = 100, debug: bool = False):
+def pad_trees(
+    trees: list[np.ndarray], min_n_max_leaves: int = 100, debug: bool = False
+):
     """Pad a list of encoded trees with zeros so that they're all the same length.
     Returns a new array with the padded trees (does not modify input trees).
     """
@@ -99,7 +101,7 @@ def pad_trees(trees: list[np.ndarray], min_n_max_leaves: int = 100, debug: bool 
         if debug and itree == 0:
             before_len = len(etree[0])
             np.set_printoptions(precision=3, suppress=True, linewidth=99999)
-            print('  padded length from %d to %d' % (before_len, len(etree[0])))
+            print("  padded length from %d to %d" % (before_len, len(etree[0])))
             print(etree)
     return np.array(padded_trees)
 

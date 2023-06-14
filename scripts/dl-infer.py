@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import numpy as np
-import matplotlib.pyplot as plt
 import argparse
 import os
 import sys
@@ -67,14 +66,32 @@ def train_and_test():
         idxs["train"] = random.sample(range(n_trees), round(args.train_frac * n_trees))
         idxs["test"] = [i for i in range(n_trees) if i not in idxs["train"]]
     else:
-        n_test = round((1. - args.train_frac) * n_trees)
-        avail_indices = [i for i, r in enumerate(samples['birth-responses']) if r._param_dict['xscale'] in args.test_xscale_values]  # indices of all trees with the specified xscale value
-        idxs["test"] = random.sample(avail_indices, n_test)  # note that this'll change the distribution of xscale values in the training sample (so make sure that n_test isn't a large fraction of the trees with each xscale value
+        n_test = round((1.0 - args.train_frac) * n_trees)
+        avail_indices = [
+            i
+            for i, r in enumerate(samples["birth-responses"])
+            if r._param_dict["xscale"] in args.test_xscale_values
+        ]  # indices of all trees with the specified xscale value
+        idxs["test"] = random.sample(
+            avail_indices, n_test
+        )  # note that this'll change the distribution of xscale values in the training sample (so make sure that n_test isn't a large fraction of the trees with each xscale value
         idxs["train"] = [i for i in range(n_trees) if i not in idxs["test"]]
-        all_vals = [r._param_dict['xscale'] for r in samples['birth-responses']]
-        val_counts = {v : all_vals.count(v) for v in set(all_vals)}
+        all_vals = [r._param_dict["xscale"] for r in samples["birth-responses"]]
+        val_counts = {v: all_vals.count(v) for v in set(all_vals)}
         n_remaining = sum(val_counts[v] for v in args.test_xscale_values) - n_test
-        print('    --test-xscale-value: chose %d test samples with xscale values among %s (leaving %d with those values) from %d total samples with xscale value counts: %s' % (n_test, ' '.join('%.2f'%v for v in args.test_xscale_values), n_remaining, n_trees, '   '.join('%.2f %d' % (v, c) for v, c in sorted(val_counts.items(), key=operator.itemgetter(0)))))
+        print(
+            "    --test-xscale-value: chose %d test samples with xscale values among %s (leaving %d with those values) from %d total samples with xscale value counts: %s"
+            % (
+                n_test,
+                " ".join("%.2f" % v for v in args.test_xscale_values),
+                n_remaining,
+                n_trees,
+                "   ".join(
+                    "%.2f %d" % (v, c)
+                    for v, c in sorted(val_counts.items(), key=operator.itemgetter(0))
+                ),
+            )
+        )
 
     for smpl in ["train", "test"]:
         smpldict[smpl] = {
@@ -120,7 +137,12 @@ parser.add_argument("--epochs", type=int, default=100)
 parser.add_argument(
     "--train-frac", type=float, default=0.8, help="train on this fraction of the trees"
 )
-parser.add_argument("--test-xscale-values", type=float, nargs='+', help='if set, choose test samples only from among those with this (birth) xscale value.')
+parser.add_argument(
+    "--test-xscale-values",
+    type=float,
+    nargs="+",
+    help="if set, choose test samples only from among those with this (birth) xscale value.",
+)
 parser.add_argument("--model-size", default="tiny", choices=["small", "tiny", None])
 parser.add_argument(
     "--test",

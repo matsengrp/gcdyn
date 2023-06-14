@@ -295,16 +295,22 @@ def read_dill_file(fname):
         with open(fname, "rb") as pfile:
             pfo = dill.load(pfile)
     except Exception as ex:
-        print("    %s reading pickle file %s:\n            %s" % (color("red", "error"), fname, ex))
+        print(
+            "    %s reading pickle file %s:\n            %s"
+            % (color("red", "error"), fname, ex)
+        )
     return pfo
 
 
 # ----------------------------------------------------------------------------------------
 def check_memory(max_frac=0.03):
-    mfrac = utils.memory_usage_fraction(extra_str='trial %3d:  '%itrial, debug=True)
+    mfrac = utils.memory_usage_fraction(extra_str="trial %3d:  " % itrial, debug=True)
     if mfrac > max_frac:
-        raise Exception('too much memory: %.3f%% > %.3f%%' % (100 * mfrac, 100 * max_frac))
+        raise Exception(
+            "too much memory: %.3f%% > %.3f%%" % (100 * mfrac, 100 * max_frac)
+        )
         return True
+
 
 # ----------------------------------------------------------------------------------------
 git_dir = os.path.dirname(os.path.realpath(__file__)).replace("/scripts", "/.git")
@@ -607,6 +613,6 @@ if len(args.xscale_list) > 0:
 
 write_final_outputs(all_seqs, all_trees)
 
-utils.plot_trees(args.outdir+'/plots', all_trees)
+utils.plot_trees(args.outdir + "/plots", all_trees)
 
 print("    total simulation time: %.1f sec" % (time.time() - start))
