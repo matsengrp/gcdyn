@@ -11,6 +11,7 @@ from typing import Any, TypeVar, Optional, Union
 from typing import TYPE_CHECKING
 from collections.abc import Callable
 from abc import ABC, abstractmethod
+from jax import lax
 from jax.tree_util import register_pytree_node
 from scipy.integrate import quad
 
@@ -265,6 +266,44 @@ class ConstantResponse(PhenotypeResponse):
     @_param_dict.setter
     def _param_dict(self, d):
         self.value = d["value"]
+
+
+class DiscreteResponse(PhenotypeResponse):
+    r"""Returns attribute :math:`\theta\in\mathbb{R}` when an instance is called
+    on any :py:class:`bdms.TreeNode`.
+
+    Args:
+        phenotypes: Vector of constants representing the domain of the response function.
+        values: Vector whose length matches `phenotypes`, containing the response value for each domain element.
+    """
+
+    def __init__(self, phenotypes: list = [1.0], values: list = [1.0]):
+        super().__init__()
+        self.phenotypes = np.array(phenotypes, dtype=float)
+        self.values = np.array(values, dtype=float)
+
+    def _lookup(self, phenotype):
+        return lax.select(
+            self.phenotypes == phenotype, self.values, np.zeros_like(self.values)
+        ).sum()
+
+    def λ_phenotype(self, x: float) -> float:
+        if len(np.array(x).shape):
+            return np.array([self._lookup(x_i) for x_i in x])
+        else:
+            return self._lookup(x)
+
+    @property
+    def _param_dict(self) -> dict:
+        return dict(
+            phenotypes=self.phenotypes,
+            values=self.values,
+        )
+
+    @_param_dict.setter
+    def _param_dict(self, d):
+        self.phenotypes = d["phenotypes"]
+        self.values = d["values"]
 
 
 class ExponentialResponse(PhenotypeResponse):

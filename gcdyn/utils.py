@@ -1,5 +1,6 @@
 r"""Utility functions ^^^^^^^^^^^^^^^^^"""
 
+import sys
 from collections import defaultdict
 
 import ete3
@@ -8,6 +9,11 @@ import numpy as np
 from scipy.stats import uniform
 
 from gcdyn.bdms import TreeError, TreeNode
+
+if hasattr(sys.modules["__main__"], "get_ipython"):
+    from tqdm import notebook as tqdm
+else:
+    import tqdm
 
 
 def simple_fivemer_contexts(sequence: str):
@@ -100,6 +106,7 @@ def sample_trees(
     print_info=True,
     extant_sampling_probability=1,
     extinct_sampling_probability=1,
+    min_survivors=1,
     **evolve_kwargs,
 ):
     r"""Returns a sequence of n simulated trees.
@@ -113,6 +120,7 @@ def sample_trees(
               If a :py:class:`numpy.random.Generator`, then it will be used directly.
         print_info: Whether to print a summary statistic of the tree sizes.
         extant_sampling_probability: To be passed to :py:meth:`TreeNode.sample_survivors` as argument `p`.
+        min_survivors: Argument passed to :py:meth:`TreeNode.evolve`.
         kwargs: Keyword arguments passed to :py:meth:`TreeNode.evolve`.
     """
 
@@ -121,16 +129,20 @@ def sample_trees(
     trees = []
     encountered_errors = defaultdict(int)
 
-    while len(trees) != n:
-        try:
-            tree = TreeNode()
-            tree.x = init_x
-            tree.evolve(seed=rng, **evolve_kwargs)
-            tree.sample_survivors(p=extant_sampling_probability, seed=rng)
-            trees.append(tree)
-        except TreeError as err:  # not enough survivors
-            encountered_errors[str(err)] += 1
-            continue
+    print("Sampling trees...")
+
+    with tqdm.tqdm(total=n) as pbar:
+        while len(trees) != n:
+            try:
+                tree = TreeNode()
+                tree.x = init_x
+                tree.evolve(seed=rng, min_survivors=min_survivors, **evolve_kwargs)
+                tree.sample_survivors(p=extant_sampling_probability, seed=rng)
+                trees.append(tree)
+                pbar.update(1)
+            except TreeError as err:  # not enough survivors
+                encountered_errors[str(err)] += 1
+                continue
 
     if print_info:
         if encountered_errors:
