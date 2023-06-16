@@ -107,6 +107,7 @@ def sample_trees(
     extant_sampling_probability=1,
     extinct_sampling_probability=1,
     min_survivors=1,
+    prune=False,
     **evolve_kwargs,
 ):
     r"""Returns a sequence of n simulated trees.
@@ -121,6 +122,7 @@ def sample_trees(
         print_info: Whether to print a summary statistic of the tree sizes.
         extant_sampling_probability: To be passed to :py:meth:`TreeNode.sample_survivors` as argument `p`.
         min_survivors: Argument passed to :py:meth:`TreeNode.evolve`.
+        prune: Whether to prune the tree after evolving, using :py:meth:`TreeNode.prune`.
         kwargs: Keyword arguments passed to :py:meth:`TreeNode.evolve`.
     """
 
@@ -156,6 +158,50 @@ def sample_trees(
             len(trees),
             "trees.",
         )
+
+        type_counts = defaultdict(int)
+
+        for tree in trees:
+            for node in tree.traverse():
+                type_counts[node.x] += 1
+
+        for type in sorted(type_counts.keys()):
+            print(f"Type {type} exists in {type_counts[type]} nodes")
+
+    if prune:
+        for tree in trees:
+            if extinct_sampling_probability == 1:
+                tree._pruned = True
+            elif extinct_sampling_probability == 0:
+                try:
+                    tree.prune()
+                except TreeError:
+                    # This is likely because we sampled a fully extinct tree, which is fine. Let's make sure, though
+                    for leaf in tree.iter_leaves():
+                        if leaf.event == leaf._SAMPLING_EVENT:
+                            raise
+                    tree._pruned = True
+
+        if print_info:
+            print(
+                "After pruning: average of",
+                sum(len(list(tree.traverse())) for tree in trees) / len(trees),
+                "nodes per tree, and average of",
+                sum(len(list(tree.iter_leaves())) for tree in trees) / len(trees),
+                "leaves per tree, over",
+                len(trees),
+                "trees.",
+                "\n",
+            )
+
+            type_counts = defaultdict(int)
+
+            for tree in trees:
+                for node in tree.traverse():
+                    type_counts[node.x] += 1
+
+            for type in sorted(type_counts.keys()):
+                print(f"Type {type} exists in {type_counts[type]} nodes")
 
     return tuple(trees)
 

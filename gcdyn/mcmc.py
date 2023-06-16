@@ -53,6 +53,11 @@ def mh_step(
 
         proposals = from_values | {name: proposal_generator(from_values[name])}
 
+        # If the proposal distribution is a point mass (ie. we aren't sampling the parameter),
+        # don't bother computing the MH ratio
+        if proposals == from_values:
+            continue
+
         try:
             log_mh_ratio = (
                 log_prior(proposals[name])

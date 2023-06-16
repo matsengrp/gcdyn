@@ -18,15 +18,15 @@ library(kableExtra)
 
 samples <- read_csv("samples.csv") |>
     rename(Iteration = `...1`) |>
-    pivot_longer(starts_with("birth_rate"),
+    pivot_longer(c("xscale", "xshift", "yscale", "yshift", "death_rate"),
         names_to = "Parameter",
         values_to = "Sample"
     ) |>
     mutate(tree = factor(tree))
 
 truth <- tibble(
-    Parameter = c("birth_rate1", "birth_rate2"),
-    Truth = c(1, 4)
+    Parameter = c("xscale", "xshift", "yscale", "yshift", "death_rate"),
+    Truth = c(1, 5, 2, 0.5, 0.5)
 )
 ```
 
@@ -77,13 +77,6 @@ samples |>
 left_join(samples, truth, by = "Parameter") |>
     filter(tree %in% 1:5) |>
     ggplot() +
-    stat_function(
-        aes(fill = "Prior"),
-        fun = dlnorm,
-        args = list(meanlog = 1.5, sdlog = 1),
-        geom = "area",
-        alpha = 0.8
-    ) +
     geom_histogram(
         aes(x = Sample, y = after_stat(density), fill = "Posterior"),
         alpha = 0.8
@@ -96,7 +89,7 @@ left_join(samples, truth, by = "Parameter") |>
     lims(x = c(0, 6)) +
     scale_fill_manual(
         name = "",
-        values = c("Prior" = "grey", "Posterior" = "steelblue")
+        values = c("Posterior" = "steelblue")
     ) +
     facet_grid(paste("Tree", tree) ~ Parameter) +
     theme(legend.position = "bottom")
