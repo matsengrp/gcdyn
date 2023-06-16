@@ -183,6 +183,7 @@ def sample_trees(
                     tree._pruned = True
 
         if print_info:
+            print()
             print(
                 "After pruning: average of",
                 sum(len(list(tree.traverse())) for tree in trees) / len(trees),
@@ -191,7 +192,6 @@ def sample_trees(
                 "leaves per tree, over",
                 len(trees),
                 "trees.",
-                "\n",
             )
 
             type_counts = defaultdict(int)
