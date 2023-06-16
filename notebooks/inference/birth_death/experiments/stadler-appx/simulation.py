@@ -18,7 +18,7 @@ config.update("jax_enable_x64", True)
 
 STATE_SPACE = (1, 3)
 INITIAL_STATE = 3
-PRESENT_TIME = 2
+PRESENT_TIME = 1
 NUM_TREES = 10
 TREE_SEED = 20
 
@@ -154,6 +154,6 @@ for i, result in enumerate(results):
     df = dict(tree=i + 1, **result[0], **result[1])
     dataframes.append(pd.DataFrame(df))
 
-pd.concat(dataframes).to_csv("experiment_samples.csv")
+pd.concat(dataframes).to_csv("samples.csv")
 
 # %%
