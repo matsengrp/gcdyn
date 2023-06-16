@@ -9,6 +9,7 @@ import time
 import copy
 import random
 import subprocess
+import json
 
 from gcdyn import bdms, gpmap, mutators, poisson, utils, encode
 from experiments import replay
@@ -17,7 +18,7 @@ from colors import color
 
 # ----------------------------------------------------------------------------------------
 def outfn(ftype, itrial, odir=None):
-    assert ftype in ["fasta", "nwk", "pkl", "npy"]
+    assert ftype in ["fasta", "nwk", "pkl", "npy", "json"]
     if odir is None:
         odir = args.outdir
     if itrial is None:
@@ -26,6 +27,7 @@ def outfn(ftype, itrial, odir=None):
             "nwk": "trees",
             "npy": "encoded-trees",
             "pkl": "responses",
+            "json": "meta",
         }
         tstr = ftstrs.get(ftype, "simu")
     else:
@@ -243,6 +245,11 @@ def write_final_outputs(all_seqs, all_trees):
     with open(outfn("nwk", None), "w") as tfile:
         for pfo in all_trees:
             tfile.write("%s\n" % pfo["tree"].write(format=1))
+
+    print("  writing meta info to %s" % outfn("json", None))
+    jfo = {n.name: {'affinity' : n.x} for pfo in all_trees for n in pfo['tree'].iter_descendants()}
+    with open(outfn('json', None), 'w') as jfile:
+        json.dump(jfo, jfile)
 
     encoded_trees = []
     for pfo in all_trees:
@@ -613,6 +620,6 @@ if len(args.xscale_list) > 0:
 
 write_final_outputs(all_seqs, all_trees)
 
-utils.plot_trees(args.outdir + "/plots", all_trees)
+# utils.plot_trees(args.outdir + "/plots", all_trees)
 
 print("    total simulation time: %.1f sec" % (time.time() - start))
