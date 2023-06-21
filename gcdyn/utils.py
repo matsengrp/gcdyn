@@ -13,8 +13,6 @@ import psutil
 import os
 import glob
 
-from gcdyn.bdms import TreeError, TreeNode
-
 
 def simple_fivemer_contexts(sequence: str):
     r"""Decompose a sequence into a list of its 5mer contexts.
@@ -37,6 +35,13 @@ def padded_fivemer_contexts_of_paired_sequences(sequence: str, chain_2_start_idx
     chain_1_seq = "NN" + sequence[:chain_2_start_idx] + "NN"
     chain_2_seq = "NN" + sequence[chain_2_start_idx:] + "NN"
     return simple_fivemer_contexts(chain_1_seq) + simple_fivemer_contexts(chain_2_seq)
+
+
+def node_contexts(node: ete3.TreeNode):
+    if node.chain_2_start_idx is None:  # default is set in bdms.TreeNode, indicates single chain
+        return simple_fivemer_contexts(node.sequence)
+    else:
+        return padded_fivemer_contexts_of_paired_sequences(node.sequence, node.chain_2_start_idx)
 
 
 def write_leaf_sequences_to_fasta(
@@ -99,61 +104,6 @@ def ladderize_tree(tree, attr="x"):
                 key=lambda node: sort_criteria[node.name],
                 reverse=True,
             )
-
-
-def sample_trees(
-    n,
-    init_x=0,
-    seed=None,
-    print_info=True,
-    extant_sampling_probability=1,
-    extinct_sampling_probability=1,
-    **evolve_kwargs,
-):
-    r"""Returns a sequence of n simulated trees.
-
-    Args:
-        n: Number of trees to evolve.
-        init_x: Phenotype of the root node of each tree.
-        seed: A seed to initialize the random number generation.
-              If ``None``, then fresh, unpredictable entropy will be pulled from the OS.
-              If an ``int``, then it will be used to derive the initial state.
-              If a :py:class:`numpy.random.Generator`, then it will be used directly.
-        print_info: Whether to print a summary statistic of the tree sizes.
-        extant_sampling_probability: To be passed to :py:meth:`TreeNode.sample_survivors` as argument `p`.
-        kwargs: Keyword arguments passed to :py:meth:`TreeNode.evolve`.
-    """
-
-    rng = np.random.default_rng(seed)
-
-    trees = []
-    encountered_errors = defaultdict(int)
-
-    while len(trees) != n:
-        try:
-            tree = TreeNode()
-            tree.x = init_x
-            tree.evolve(seed=rng, **evolve_kwargs)
-            tree.sample_survivors(p=extant_sampling_probability, seed=rng)
-            trees.append(tree)
-        except TreeError as err:  # not enough survivors
-            encountered_errors[str(err)] += 1
-            continue
-
-    if print_info:
-        if encountered_errors:
-            for error, count in encountered_errors.items():
-                print("Notice: obtained error", error, count, "times.")
-
-        print(
-            "Success: average of",
-            sum(len(list(tree.traverse())) for tree in trees) / len(trees),
-            "nodes per tree, over",
-            len(trees),
-            "trees.",
-        )
-
-    return tuple(trees)
 
 
 def random_transition_matrix(length, seed=None):
@@ -359,8 +309,8 @@ def memory_usage_fraction(
     )  # returns bytes, then convert to kb
     if debug:
         print(
-            "  %susing %.0f / %.0f MB = %.4f"
-            % (extra_str, current_usage / 1000, total / 1000, current_usage / total)
+            "  %susing %.0f / %.0f MB = %.3f%%"
+            % (extra_str, current_usage / 1000, total / 1000, 100 * current_usage / total)
         )
     return current_usage / total
 

@@ -86,7 +86,7 @@ def generate_sequences_and_tree(
             tree = bdms.TreeNode()
             tree.x = gp_map(replay.NAIVE_SEQUENCE)
             tree.sequence = replay.NAIVE_SEQUENCE
-            tree.sequence_context = replay.seq_to_contexts(replay.NAIVE_SEQUENCE)
+            tree.chain_2_start_idx = replay.CHAIN_2_START_IDX
             tree.evolve(
                 args.time_to_sampling,
                 birth_response=birth_resp,
@@ -147,17 +147,9 @@ def generate_sequences_and_tree(
     tree.prune()
     tree.remove_mutation_events()
 
-    # check that node sequences and sequence contexts are consistent
-    for node in tree.traverse():
-        for a, b in zip(replay.seq_to_contexts(node.sequence), node.sequence_context):
-            assert a == b
     # check that node times and branch lengths are consistent
     for node in tree.iter_descendants():
         assert np.isclose(node.t - node.up.t, node.dist)
-
-    # delete the sequence contexts since they make the pickle files six times bigger
-    for node in tree.traverse(strategy="postorder"):
-        delattr(node, "sequence_context")
 
     return tree
 

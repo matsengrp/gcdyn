@@ -4,7 +4,7 @@ from random import shuffle
 import ete3
 import numpy as np
 
-from gcdyn import utils
+from gcdyn import bdms
 from gcdyn import encode
 
 
@@ -41,7 +41,7 @@ class TestDeepLearning(unittest.TestCase):
     def test_encoding_invariance(self):
         """Ensures the ladderization+encoding process is invariant under tree isomorphism."""
 
-        tree = utils.sample_trees(n=1, t=3, seed=10)[0]
+        tree = bdms.sample_trees(n=1, t=3, seed=10)[0]
         tree.prune()
         tree.remove_mutation_events()
 
@@ -57,7 +57,7 @@ class TestDeepLearning(unittest.TestCase):
         """Make sure that tree encoding doesn't change on reading or writing."""
 
         init_trees = []
-        for ttr in utils.sample_trees(n=3, t=3, seed=10):
+        for ttr in bdms.sample_trees(n=3, t=3, seed=10):
             ttr.prune()
             ttr.remove_mutation_events()
             init_trees.append(encode.encode_tree(ttr))

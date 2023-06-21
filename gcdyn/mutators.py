@@ -14,7 +14,9 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm, gaussian_kde
 import ete3
+
 from gcdyn.gpmap import GPMap
+from gcdyn import utils
 
 # NOTE: sphinx is currently unable to present this in condensed form when the sphinx_autodoc_typehints extension is enabled
 from numpy.typing import ArrayLike
@@ -61,6 +63,10 @@ class Mutator(ABC):
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in vars(self).items() if not key.startswith('_'))})"
+
+
+    def reset(self):
+        pass
 
 
 class AttrMutator(Mutator):
@@ -258,8 +264,7 @@ class UniformMutator(SequenceMutator):
 
 class ContextMutator(SequenceMutator):
     """Class for hotspot-aware mutation model using mutability substitution
-    probabilities expressed in terms of context. Nodes must have a
-    ``sequence_context`` attribute.
+    probabilities expressed in terms of context.
 
     Args:
         mutability: Mutability values for each local nucleotide context.
@@ -274,6 +279,13 @@ class ContextMutator(SequenceMutator):
         super().__init__()
         self.mutability = mutability.to_dict()
         self.substitution = substitution.fillna(0.0).T.to_dict()
+        self.cached_ctx_muts = {}
+
+
+    def reset(self):
+        """ clear cached context mutabilities """
+        self.cached_ctx_muts.clear()
+
 
     def mutate(
         self,
@@ -288,37 +300,24 @@ class ContextMutator(SequenceMutator):
             node: node with sequence, consisting of characters ``ACGT``
             seed: See :py:class:`Mutator`.
         """
-        rng = np.random.default_rng(seed)
-        mutabilities = np.asarray(
-            [self.mutability[context] for context in node.sequence_context]
-        )
+        rng = np.random.default_rng(seed)  # would be better not to create a new rng for every call
+        seq_contexts = utils.node_contexts(node)
+        if node.sequence not in self.cached_ctx_muts:
+            self.cached_ctx_muts[node.sequence] = np.asarray(
+                [self.mutability[context] for context in seq_contexts]
+            )
+        mutabilities = self.cached_ctx_muts[node.sequence]
         i = rng.choice(len(mutabilities), p=mutabilities / mutabilities.sum())
-        context = node.sequence_context[i]
+        context = seq_contexts[i]
         sub_nt = rng.choice(
             list(self.substitution[context].keys()),
             p=list(self.substitution[context].values()),
         )
         node.sequence = node.sequence[:i] + sub_nt + node.sequence[(i + 1) :]
-        # update the modified sequence contexts (assumes they have fixed size)
-        context_size = len(node.sequence_context[i])
-        # Convert sequence_context to list for in-place modification
-        sequence_context_list = list(node.sequence_context)
-        for pos in range(0, context_size):
-            i_offset = i - context_size // 2 + pos
-            if (
-                0 <= i_offset <= len(node.sequence) - 1
-                and sequence_context_list[i_offset][context_size - pos - 1] != "N"
-            ):
-                sequence_context_list[i_offset] = (
-                    sequence_context_list[i_offset][: (context_size - pos - 1)]
-                    + sub_nt
-                    + sequence_context_list[i_offset][(context_size - pos) :]
-                )
-        node.sequence_context = tuple(sequence_context_list)
 
     @property
     def mutated_attrs(self) -> Tuple[str]:
-        return super().mutated_attrs + ("sequence_context",)
+        return super().mutated_attrs + ("chain_2_start_idx",)
 
 
 class SequencePhenotypeMutator(AttrMutator):
@@ -341,6 +340,12 @@ class SequencePhenotypeMutator(AttrMutator):
         self.sequence_mutator = sequence_mutator
         self.gp_map = gp_map
         super().__init__(attr=attr)
+
+
+    def reset(self):
+        """ clear cached context mutabilities in sequence_mutator """
+        self.sequence_mutator.reset()
+
 
     def mutate(
         self,
