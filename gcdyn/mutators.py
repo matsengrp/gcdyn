@@ -64,7 +64,6 @@ class Mutator(ABC):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in vars(self).items() if not key.startswith('_'))})"
 
-
     def reset(self):
         pass
 
@@ -281,11 +280,9 @@ class ContextMutator(SequenceMutator):
         self.substitution = substitution.fillna(0.0).T.to_dict()
         self.cached_ctx_muts = {}
 
-
     def reset(self):
-        """ clear cached context mutabilities """
+        """Clear cached context mutabilities"""
         self.cached_ctx_muts.clear()
-
 
     def mutate(
         self,
@@ -300,7 +297,9 @@ class ContextMutator(SequenceMutator):
             node: node with sequence, consisting of characters ``ACGT``
             seed: See :py:class:`Mutator`.
         """
-        rng = np.random.default_rng(seed)  # would be better not to create a new rng for every call
+        rng = np.random.default_rng(
+            seed
+        )  # would be better not to create a new rng for every call
         seq_contexts = utils.node_contexts(node)
         if node.sequence not in self.cached_ctx_muts:
             self.cached_ctx_muts[node.sequence] = np.asarray(
@@ -341,11 +340,9 @@ class SequencePhenotypeMutator(AttrMutator):
         self.gp_map = gp_map
         super().__init__(attr=attr)
 
-
     def reset(self):
-        """ clear cached context mutabilities in sequence_mutator """
+        """Clear cached context mutabilities in sequence_mutator"""
         self.sequence_mutator.reset()
-
 
     def mutate(
         self,

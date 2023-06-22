@@ -7,7 +7,7 @@ concrete child classes are included.
 """
 
 from __future__ import annotations
-from typing import Any, TypeVar, Optional, Tuple, Union
+from typing import Any, TypeVar, Optional, Union
 from typing import TYPE_CHECKING
 from collections.abc import Callable
 from abc import ABC, abstractmethod
@@ -138,7 +138,9 @@ class Response(ABC):
         """
         if rate_multiplier == 0.0:
             return float("inf")
-        rng = random.default_rng(seed)  # TODO we should really not be constructing a new rng on every call here (a short simulation is currently resulting in 1.6 million calls to the constructor), but it's not a huge contributor atm
+        rng = random.default_rng(
+            seed
+        )  # TODO we should really not be constructing a new rng on every call here (a short simulation is currently resulting in 1.6 million calls to the constructor), but it's not a huge contributor atm
         return self.Λ_inv(node, rng.exponential(scale=1 / rate_multiplier))
 
     def waiting_time_logsf(self, node: bdms.TreeNode, Δt: float) -> float:
@@ -439,7 +441,7 @@ class SequenceContextMutationResponse(HomogeneousResponse):
         self.cached_contexts = {}
 
     def reset(self):
-        """ clear cached contexts """
+        """Clear cached contexts"""
         self.cached_contexts.clear()
 
     @property
@@ -452,7 +454,9 @@ class SequenceContextMutationResponse(HomogeneousResponse):
 
     def λ_homogeneous(self, node: bdms.TreeNode) -> float:
         if node.sequence not in self.cached_contexts:
-            self.cached_contexts[node.sequence] = sum(self.mutability[context] for context in gcdyn.utils.node_contexts(node))
+            self.cached_contexts[node.sequence] = sum(
+                self.mutability[context] for context in gcdyn.utils.node_contexts(node)
+            )
         return self.cached_contexts[node.sequence]
 
 

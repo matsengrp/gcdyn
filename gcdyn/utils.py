@@ -38,10 +38,14 @@ def padded_fivemer_contexts_of_paired_sequences(sequence: str, chain_2_start_idx
 
 
 def node_contexts(node: ete3.TreeNode):
-    if node.chain_2_start_idx is None:  # default is set in bdms.TreeNode, indicates single chain
+    if (
+        node.chain_2_start_idx is None
+    ):  # default is set in bdms.TreeNode, indicates single chain
         return simple_fivemer_contexts(node.sequence)
     else:
-        return padded_fivemer_contexts_of_paired_sequences(node.sequence, node.chain_2_start_idx)
+        return padded_fivemer_contexts_of_paired_sequences(
+            node.sequence, node.chain_2_start_idx
+        )
 
 
 def write_leaf_sequences_to_fasta(
@@ -264,7 +268,10 @@ def plot_trees(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_plot=10):
         all_vals = leaf_vals + int_vals
         xmin, xmax = min([xmin] + all_vals), max([xmax] + all_vals)
         sns.histplot(
-            {"internal": int_vals, "leaves": leaf_vals}, ax=ax2, multiple="stack", binwidth=(xmax - xmin) / n_bins,
+            {"internal": int_vals, "leaves": leaf_vals},
+            ax=ax2,
+            multiple="stack",
+            binwidth=(xmax - xmin) / n_bins,
         )
 
         dx = (xmax - xmin) / nsteps
@@ -310,7 +317,12 @@ def memory_usage_fraction(
     if debug:
         print(
             "  %susing %.0f / %.0f MB = %.3f%%"
-            % (extra_str, current_usage / 1000, total / 1000, 100 * current_usage / total)
+            % (
+                extra_str,
+                current_usage / 1000,
+                total / 1000,
+                100 * current_usage / total,
+            )
         )
     return current_usage / total
 

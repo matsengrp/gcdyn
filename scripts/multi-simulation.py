@@ -239,8 +239,12 @@ def write_final_outputs(all_seqs, all_trees):
             tfile.write("%s\n" % pfo["tree"].write(format=1))
 
     print("  writing meta info to %s" % outfn("json", None))
-    jfo = {n.name: {'affinity' : n.x} for pfo in all_trees for n in pfo['tree'].iter_descendants()}
-    with open(outfn('json', None), 'w') as jfile:
+    jfo = {
+        n.name: {"affinity": n.x}
+        for pfo in all_trees
+        for n in pfo["tree"].iter_descendants()
+    }
+    with open(outfn("json", None), "w") as jfile:
         json.dump(jfo, jfile)
 
     encoded_trees = []
