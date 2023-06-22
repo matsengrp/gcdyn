@@ -114,7 +114,8 @@ class Response(ABC):
             τ: Poisson intensity measure of a time interval.
         """
 
-    def reset(self):
+    def clear_context_cache(self):
+        """Needed to allow context cache clearing by one derived class."""
         pass
 
     def waiting_time_rv(
@@ -425,8 +426,6 @@ class SequenceContextMutationResponse(HomogeneousResponse):
 
     The mutability needs to be in units of mutations per unit time.
 
-    A ``sequence_context`` node feature is created when nodes are first operated on.
-
     Args:
         mutability: a mapping from local context to mutation rate (mutations per site per unit time)
         mutation_intensity: a scaling factor for the mutability
@@ -440,7 +439,7 @@ class SequenceContextMutationResponse(HomogeneousResponse):
         self.mutability = (mutation_intensity * mutability).to_dict()
         self.cached_contexts = {}
 
-    def reset(self):
+    def clear_context_cache(self):
         """Clear cached contexts"""
         self.cached_contexts.clear()
 

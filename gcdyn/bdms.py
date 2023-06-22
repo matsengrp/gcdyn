@@ -339,8 +339,8 @@ class TreeNode(ete3.Tree):
             raise TreeError(
                 f"number of survivors {n_survivors} is less than {min_survivors=}"
             )
-        mutation_response.reset()
-        mutator.reset()
+        mutation_response.clear_context_cache()
+        mutator.clear_mutability_cache()
 
     def _aborted_evolve_cleanup(self) -> None:
         """Remove any children added to the root node during an aborted

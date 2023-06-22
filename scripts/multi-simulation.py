@@ -75,7 +75,7 @@ def print_final_response_vals(tree, birth_resp, death_resp):
 def generate_sequences_and_tree(
     birth_resp,
     death_resp,
-    mutation_rate,
+    mutation_resp,
     mutator,
     seed=0,
 ):
@@ -91,7 +91,7 @@ def generate_sequences_and_tree(
                 args.time_to_sampling,
                 birth_response=birth_resp,
                 death_response=death_resp,
-                mutation_response=mutation_rate,
+                mutation_response=mutation_resp,
                 mutator=mutator,
                 min_survivors=args.min_survivors,
                 birth_mutations=False,
@@ -535,7 +535,7 @@ mutator = mutators.SequencePhenotypeMutator(
     gp_map,
 )
 
-mutation_rate = poisson.SequenceContextMutationResponse(
+mutation_resp = poisson.SequenceContextMutationResponse(
     args.mutability_multiplier * replay.mutability(),
 )
 
@@ -563,7 +563,7 @@ for itrial in range(args.itrial_start, args.n_trials):
     )
     print(color("blue", "trial %d:" % itrial), end=" ")
     tree = generate_sequences_and_tree(
-        birth_resp, death_resp, mutation_rate, mutator, seed=rng
+        birth_resp, death_resp, mutation_resp, mutator, seed=rng
     )
     if tree is None:
         n_missing += 1
