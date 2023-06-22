@@ -254,19 +254,19 @@ def make_dl_plot(smpl, df, outdir):
 # ----------------------------------------------------------------------------------------
 def plot_trees(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_plot=10):
     # ----------------------------------------------------------------------------------------
-    def plt_single_tree(itree, pfo, xmin, xmax):
+    def plt_single_tree(itree, pfo, xmin, xmax, n_bins=30):
         plt.clf()
         fig, ax = plt.subplots()
         ax2 = ax.twinx()
         leaves = list(pfo["tree"].iter_leaves())
         leaf_vals = [n.x for n in leaves]
         int_vals = [n.x for n in pfo["tree"].iter_descendants() if n not in leaves]
-        sns.histplot(
-            {"internal": int_vals, "leaves": leaf_vals}, ax=ax2, multiple="stack"
-        )
-
         all_vals = leaf_vals + int_vals
         xmin, xmax = min([xmin] + all_vals), max([xmax] + all_vals)
+        sns.histplot(
+            {"internal": int_vals, "leaves": leaf_vals}, ax=ax2, multiple="stack", binwidth=(xmax - xmin) / n_bins,
+        )
+
         dx = (xmax - xmin) / nsteps
         xvals = list(np.arange(xmin, 0, dx)) + list(np.arange(0, xmax + dx, dx))
         rvals = [pfo["birth-response"].λ_phenotype(x) for x in xvals]

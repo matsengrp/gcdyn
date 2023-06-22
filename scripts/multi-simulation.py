@@ -353,7 +353,7 @@ parser.add_argument(
 # parser.add_argument('--birth-value', default=0.5, type=float, help='value (parameter) for constant birth response')
 parser.add_argument(
     "--death-value",
-    default=0.025,
+    default=0.1,
     type=float,
     help="value (parameter) for constant death response",
 )
