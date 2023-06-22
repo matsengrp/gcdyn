@@ -10,7 +10,7 @@ from jax.config import config
 from mcmc import mh_step
 from scipy.stats import gamma, lognorm
 
-from gcdyn import models, mutators, poisson, utils
+from gcdyn import models, mutators, poisson, utils, bdms
 
 config.update("jax_enable_x64", True)
 
@@ -82,7 +82,7 @@ proposal_log_densities = {
 
 # Function of just birth_rate and death_rate
 sample_tree = partial(
-    utils.sample_trees,
+    bdms.sample_trees,
     n=1,
     t=PRESENT_TIME,
     mutation_response=true_parameters["mutation_response"],

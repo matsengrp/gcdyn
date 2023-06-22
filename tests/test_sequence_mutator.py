@@ -25,10 +25,9 @@ def test_simple_fivemer_contexts():
 def test_sequence_context_mutation_response(mk_rs5nf_mutability):
     node = bdms.TreeNode()
     node.sequence = "ACTGCA"
-    node.sequence_context = utils.simple_fivemer_contexts(node.sequence)
     seq_resp = poisson.SequenceContextMutationResponse(mk_rs5nf_mutability)
     correct_mutabilty = 0.000251042867724124 + 0.00233425857869025
-    assert correct_mutabilty == pytest.approx(seq_resp(node))
+    assert seq_resp(node) == pytest.approx(correct_mutabilty)
 
 
 def test_uniform_mutator(uniform_mutator, gp_map):

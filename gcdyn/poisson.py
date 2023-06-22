@@ -7,18 +7,17 @@ concrete child classes are included.
 """
 
 from __future__ import annotations
-from typing import Any, TypeVar, Optional, Tuple, Union
+from typing import Any, TypeVar, Optional, Union
 from typing import TYPE_CHECKING
 from collections.abc import Callable
 from abc import ABC, abstractmethod
-from functools import lru_cache
 from jax.tree_util import register_pytree_node
 from scipy.integrate import quad
-
 import numpy as np
 from numpy import random
 import scipy.special as sp
 
+import gcdyn.utils
 
 # imports that are only used for type hints
 if TYPE_CHECKING:
@@ -115,6 +114,10 @@ class Response(ABC):
             τ: Poisson intensity measure of a time interval.
         """
 
+    def clear_context_cache(self):
+        """Needed to allow context cache clearing by one derived class."""
+        pass
+
     def waiting_time_rv(
         self,
         node: bdms.TreeNode,
@@ -136,7 +139,9 @@ class Response(ABC):
         """
         if rate_multiplier == 0.0:
             return float("inf")
-        rng = random.default_rng(seed)
+        rng = random.default_rng(
+            seed
+        )  # TODO we should really not be constructing a new rng on every call here (a short simulation is currently resulting in 1.6 million calls to the constructor), but it's not a huge contributor atm
         return self.Λ_inv(node, rng.exponential(scale=1 / rate_multiplier))
 
     def waiting_time_logsf(self, node: bdms.TreeNode, Δt: float) -> float:
@@ -421,8 +426,6 @@ class SequenceContextMutationResponse(HomogeneousResponse):
 
     The mutability needs to be in units of mutations per unit time.
 
-    A ``sequence_context`` node feature is created when nodes are first operated on.
-
     Args:
         mutability: a mapping from local context to mutation rate (mutations per site per unit time)
         mutation_intensity: a scaling factor for the mutability
@@ -434,6 +437,11 @@ class SequenceContextMutationResponse(HomogeneousResponse):
         mutation_intensity: float = 1.0,
     ):
         self.mutability = (mutation_intensity * mutability).to_dict()
+        self.cached_contexts = {}
+
+    def clear_context_cache(self):
+        """Clear cached contexts"""
+        self.cached_contexts.clear()
 
     @property
     def _param_dict(self) -> dict:
@@ -444,11 +452,11 @@ class SequenceContextMutationResponse(HomogeneousResponse):
         self.mutation_intensity = d["mutation_intensity"]
 
     def λ_homogeneous(self, node: bdms.TreeNode) -> float:
-        return self._λ_homogeneous_cached(node.sequence_context)
-
-    @lru_cache(maxsize=None)
-    def _λ_homogeneous_cached(self, sequence_context: Tuple[str, ...]) -> float:
-        return sum(self.mutability[context] for context in sequence_context)
+        if node.sequence not in self.cached_contexts:
+            self.cached_contexts[node.sequence] = sum(
+                self.mutability[context] for context in gcdyn.utils.node_contexts(node)
+            )
+        return self.cached_contexts[node.sequence]
 
 
 class PhenotypeTimeResponse(Response):

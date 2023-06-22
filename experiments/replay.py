@@ -4,9 +4,7 @@ Various things relevant for the GC replay experiment.
 import os
 import sys
 import pandas as pd
-from typing import Dict, Tuple
-
-from gcdyn import utils
+from typing import Dict
 
 NAIVE_SEQUENCE = "GAGGTGCAGCTTCAGGAGTCAGGACCTAGCCTCGTGAAACCTTCTCAGACTCTGTCCCTCACCTGTTCTGTCACTGGCGACTCCATCACCAGTGGTTACTGGAACTGGATCCGGAAATTCCCAGGGAATAAACTTGAGTACATGGGGTACATAAGCTACAGTGGTAGCACTTACTACAATCCATCTCTCAAAAGTCGAATCTCCATCACTCGAGACACATCCAAGAACCAGTACTACCTGCAGTTGAATTCTGTGACTACTGAGGACACAGCCACATATTACTGTGCAAGGGACTTCGATGTCTGGGGCGCAGGGACCACGGTCACCGTCTCCTCAGACATTGTGATGACTCAGTCTCAAAAATTCATGTCCACATCAGTAGGAGACAGGGTCAGCGTCACCTGCAAGGCCAGTCAGAATGTGGGTACTAATGTAGCCTGGTATCAACAGAAACCAGGGCAATCTCCTAAAGCACTGATTTACTCGGCATCCTACAGGTACAGTGGAGTCCCTGATCGCTTCACAGGCAGTGGATCTGGGACAGATTTCACTCTCACCATCAGCAATGTGCAGTCTGAAGACTTGGCAGAGTATTTCTGTCAGCAATATAACAGCTATCCTCTCACGTTCGGCTCGGGGACTAAGCTAGAAATAAAA"
 """The naive sequence used in the GC replay experiment."""
@@ -35,15 +33,6 @@ def substitution(file: str = "MK_RS5NF_substitution.csv") -> pd.DataFrame:
         file: The file to read the substitution matrix from.
     """
     return pd.read_csv(os.path.join(gcdyn_data_dir, file), index_col=0)
-
-
-def seq_to_contexts(seq) -> Tuple[str, ...]:
-    """Convert a replay BCR sequence to a tuple of 5-mer contexts.
-
-    Args:
-        seq: The sequence to convert.
-    """
-    return utils.padded_fivemer_contexts_of_paired_sequences(seq, CHAIN_2_START_IDX)
 
 
 def dms(

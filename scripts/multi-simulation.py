@@ -75,7 +75,7 @@ def print_final_response_vals(tree, birth_resp, death_resp):
 def generate_sequences_and_tree(
     birth_resp,
     death_resp,
-    mutation_rate,
+    mutation_resp,
     mutator,
     seed=0,
 ):
@@ -86,12 +86,12 @@ def generate_sequences_and_tree(
             tree = bdms.TreeNode()
             tree.x = gp_map(replay.NAIVE_SEQUENCE)
             tree.sequence = replay.NAIVE_SEQUENCE
-            tree.sequence_context = replay.seq_to_contexts(replay.NAIVE_SEQUENCE)
+            tree.chain_2_start_idx = replay.CHAIN_2_START_IDX
             tree.evolve(
                 args.time_to_sampling,
                 birth_response=birth_resp,
                 death_response=death_resp,
-                mutation_response=mutation_rate,
+                mutation_response=mutation_resp,
                 mutator=mutator,
                 min_survivors=args.min_survivors,
                 birth_mutations=False,
@@ -147,17 +147,9 @@ def generate_sequences_and_tree(
     tree.prune()
     tree.remove_mutation_events()
 
-    # check that node sequences and sequence contexts are consistent
-    for node in tree.traverse():
-        for a, b in zip(replay.seq_to_contexts(node.sequence), node.sequence_context):
-            assert a == b
     # check that node times and branch lengths are consistent
     for node in tree.iter_descendants():
         assert np.isclose(node.t - node.up.t, node.dist)
-
-    # delete the sequence contexts since they make the pickle files six times bigger
-    for node in tree.traverse(strategy="postorder"):
-        delattr(node, "sequence_context")
 
     return tree
 
@@ -247,8 +239,12 @@ def write_final_outputs(all_seqs, all_trees):
             tfile.write("%s\n" % pfo["tree"].write(format=1))
 
     print("  writing meta info to %s" % outfn("json", None))
-    jfo = {n.name: {'affinity' : n.x} for pfo in all_trees for n in pfo['tree'].iter_descendants()}
-    with open(outfn('json', None), 'w') as jfile:
+    jfo = {
+        n.name: {"affinity": n.x}
+        for pfo in all_trees
+        for n in pfo["tree"].iter_descendants()
+    }
+    with open(outfn("json", None), "w") as jfile:
         json.dump(jfo, jfile)
 
     encoded_trees = []
@@ -361,7 +357,7 @@ parser.add_argument(
 # parser.add_argument('--birth-value', default=0.5, type=float, help='value (parameter) for constant birth response')
 parser.add_argument(
     "--death-value",
-    default=0.025,
+    default=0.1,
     type=float,
     help="value (parameter) for constant death response",
 )
@@ -539,7 +535,7 @@ mutator = mutators.SequencePhenotypeMutator(
     gp_map,
 )
 
-mutation_rate = poisson.SequenceContextMutationResponse(
+mutation_resp = poisson.SequenceContextMutationResponse(
     args.mutability_multiplier * replay.mutability(),
 )
 
@@ -567,7 +563,7 @@ for itrial in range(args.itrial_start, args.n_trials):
     )
     print(color("blue", "trial %d:" % itrial), end=" ")
     tree = generate_sequences_and_tree(
-        birth_resp, death_resp, mutation_rate, mutator, seed=rng
+        birth_resp, death_resp, mutation_resp, mutator, seed=rng
     )
     if tree is None:
         n_missing += 1
