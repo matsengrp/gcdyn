@@ -14,6 +14,7 @@ NAIVE_SEQUENCE = "GAGGTGCAGCTTCAGGAGTCAGGACCTAGCCTCGTGAAACCTTCTCAGACTCTGTCCCTCAC
 CHAIN_2_START_IDX = 336
 """The index of the first nucleotide of the light chain in the naive sequence."""
 
+utils.simple_fivemer_contexts("a")  # keeps lint from crashing on unused import
 gcdyn_data_dir = os.path.join(os.path.dirname(sys.modules["gcdyn"].__file__), "data")
 
 

@@ -238,7 +238,7 @@ def make_dl_plot(smpl, df, outdir):
         order=sorted(set(df["Truth"])),
     )
     if len(df) < 2000:
-        ax = sns.swarmplot(df, x="Truth", y="Predicted", size=4, alpha=0.6)
+        ax = sns.swarmplot(df, x="Truth", y="Predicted", size=4, alpha=0.6, order=sorted(set(df["Truth"])))
     ax.set(title=smpl)
     for xv, xvl in zip(ax.get_xticks(), ax.get_xticklabels()):
         plt.plot(
