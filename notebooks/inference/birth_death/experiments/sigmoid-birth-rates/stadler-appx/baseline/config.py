@@ -4,11 +4,11 @@ from scipy.stats import gamma, lognorm, norm
 from gcdyn import models, mutators, poisson
 from gcdyn.mcmc import Parameter
 
-STATE_SPACE = (3, 7)
-INITIAL_STATE = 3
+STATE_SPACE = (2, 4, 6, 8)
+INITIAL_STATE = 2
 PRESENT_TIME = 2
 NUM_TREES = 10
-TREE_SEED = 10
+TREE_SEED = 11
 
 TRUE_PARAMETERS = {
     "birth_response": poisson.SigmoidResponse(1.0, 5.0, 2.0, 0.5),
@@ -16,7 +16,10 @@ TRUE_PARAMETERS = {
     "mutation_response": poisson.ConstantResponse(0.5),
     "mutator": mutators.DiscreteMutator(
         state_space=STATE_SPACE,
-        transition_matrix=np.array([[0, 1], [1, 0]]),
+        transition_matrix=np.array(
+            [[0, 1, 1, 1], [1, 0, 1, 1], [1, 1, 0, 1], [1, 1, 1, 0]]
+        )
+        / 3,
     ),
     "extant_sampling_probability": 1,
     "extinct_sampling_probability": 0,

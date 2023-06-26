@@ -35,9 +35,10 @@ truth <- tibble(
 #| fig-height: 6
 
 left_join(samples, truth, by = "Parameter") |>
+    filter(Iteration > 100) |>
     ggplot(aes(Iteration, Sample)) +
     geom_line() +
-    geom_hline(aes(yintercept = Truth, color = "red")) +
+    geom_hline(aes(yintercept = Truth, color = "Truth")) +
     facet_wrap(vars(Parameter), ncol = 1)
 ```
 
@@ -48,22 +49,15 @@ samples |>
     group_by(Parameter) |>
     summarise(
         n = n(),
-        ESS = effectiveSize(Sample),
-        quantile_025 = quantile(Sample, 0.025),
-        median = median(Sample),
-        quantile_975 = quantile(Sample, 0.975),
+        ESS = effectiveSize(Sample) |> round(),
+        quantile_025 = quantile(Sample, 0.025) |> round(2),
+        median = median(Sample) |> round(2),
+        quantile_975 = quantile(Sample, 0.975) |> round(2),
     ) |>
     left_join(truth, by = "Parameter") |>
     mutate(
-        `Relative error` = abs((median - Truth) / Truth),
+        `Relative error` = abs((median - Truth) / Truth) |> round(2),
         Coverage = quantile_025 <= Truth & Truth <= quantile_975
-    ) |>
-    group_by(Parameter) |>
-    summarise(
-        n = sum(n),
-        ESS = sum(ESS) |> round(),
-        `Relative error` = mean(`Relative error`),
-        Coverage = glue("{100*mean(Coverage)}%")
     ) |>
     kbl(booktabs = TRUE)
 ```
@@ -121,7 +115,7 @@ for (sig in sampled_sigmoids) {
     p <- p + stat_function(fun = sig, alpha = 0.2)
 }
 
-p + 
+p +
     stat_function(
         aes(color = "Truth"),
         fun = \(x) sigmoid(x, truth |> rename(Sample = Truth)),
