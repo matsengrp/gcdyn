@@ -561,7 +561,7 @@ def stadler_full_log_likelihood(
                 # event.p_end already exists
             elif event.event == tree._DEATH_EVENT:
                 # "a tip at time t_end > 0"
-                event.q_end = jnp.array([μ(event.up) * σ])
+                event.q_end = jnp.array(μ(event.up) * σ)
                 # event.p_end already exists
             elif event.event == tree._BIRTH_EVENT:
                 event.q_end = (

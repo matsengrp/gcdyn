@@ -1,4 +1,4 @@
-#!/usr/bin/env nextflow run -resume
+#!/usr/bin/env -S nextflow run -resume
 
 workflow {
     def experiment_paths = Channel.fromPath("experiments/**/config.py") |

@@ -50,14 +50,15 @@ samples |>
     summarise(
         n = n(),
         ESS = effectiveSize(Sample) |> round(),
-        quantile_025 = quantile(Sample, 0.025) |> round(2),
-        median = median(Sample) |> round(2),
-        quantile_975 = quantile(Sample, 0.975) |> round(2),
+        `Acceptance` = mean(Sample[-1] != Sample[1:length(Sample) - 1]) |> round(2),
+        `Q 25%` = quantile(Sample, 0.025) |> round(2),
+        Median = median(Sample) |> round(2),
+        `Q 75%` = quantile(Sample, 0.975) |> round(2),
     ) |>
     left_join(truth, by = "Parameter") |>
     mutate(
-        `Relative error` = abs((median - Truth) / Truth) |> round(2),
-        Coverage = quantile_025 <= Truth & Truth <= quantile_975
+        `Relative error` = abs((Median - Truth) / Truth) |> round(2),
+        Coverage = `Q 25%` <= Truth & Truth <= `Q 75%`
     ) |>
     kbl(booktabs = TRUE)
 ```
