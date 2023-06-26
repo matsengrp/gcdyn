@@ -1,0 +1,84 @@
+Tree 0
+  Number of total nodes: 98
+  Type 3 exists in 16 nodes
+  Type 7 exists in 82 nodes
+
+  Number of leaves: 46
+  Type 3 exists in 7 leaves
+  Type 7 exists in 39 leaves
+
+Tree 1
+  Number of total nodes: 9
+  Type 3 exists in 1 nodes
+  Type 7 exists in 8 nodes
+
+  Number of leaves: 4
+  Type 7 exists in 4 leaves
+
+Tree 2
+  Number of total nodes: 94
+  Type 3 exists in 24 nodes
+  Type 7 exists in 70 nodes
+
+  Number of leaves: 41
+  Type 3 exists in 11 leaves
+  Type 7 exists in 30 leaves
+
+Tree 3
+  Number of total nodes: 217
+  Type 3 exists in 21 nodes
+  Type 7 exists in 196 nodes
+
+  Number of leaves: 103
+  Type 3 exists in 9 leaves
+  Type 7 exists in 94 leaves
+
+Tree 4
+  Number of total nodes: 4
+  Type 3 exists in 3 nodes
+  Type 7 exists in 1 nodes
+
+  Number of leaves: 1
+  Type 3 exists in 1 leaves
+
+Tree 5
+  Number of total nodes: 228
+  Type 3 exists in 43 nodes
+  Type 7 exists in 185 nodes
+
+  Number of leaves: 103
+  Type 3 exists in 19 leaves
+  Type 7 exists in 84 leaves
+
+Tree 6
+  Number of total nodes: 227
+  Type 3 exists in 24 nodes
+  Type 7 exists in 203 nodes
+
+  Number of leaves: 105
+  Type 3 exists in 9 leaves
+  Type 7 exists in 96 leaves
+
+Tree 7
+  Number of total nodes: 4
+  Type 3 exists in 4 nodes
+
+  Number of leaves: 2
+  Type 3 exists in 2 leaves
+
+Tree 8
+  Number of total nodes: 83
+  Type 3 exists in 23 nodes
+  Type 7 exists in 60 nodes
+
+  Number of leaves: 37
+  Type 3 exists in 10 leaves
+  Type 7 exists in 27 leaves
+
+Tree 9
+  Number of total nodes: 2
+  Type 3 exists in 2 nodes
+
+  Number of leaves: 1
+  Type 3 exists in 1 leaves
+

@@ -1,0 +1,135 @@
+---
+format:
+    pdf:
+        fig-dpi: 300
+echo: false
+highlight-style: github
+monofont: Fira Code
+warning: false
+---
+
+```{r}
+#| include: false
+
+library(tidyverse)
+library(coda)
+library(glue)
+library(kableExtra)
+
+samples <- read_csv("samples.csv") |>
+    rename(Iteration = `...1`) |>
+    pivot_longer(c("xscale", "xshift", "yscale", "yshift", "death_rate"),
+        names_to = "Parameter",
+        values_to = "Sample"
+    )
+
+truth <- tibble(
+    Parameter = c("xscale", "xshift", "yscale", "yshift", "death_rate"),
+    Truth = c(1, 5, 2, 0.5, 0.5)
+)
+```
+
+## Traceplots
+
+```{r}
+#| fig-height: 6
+
+left_join(samples, truth, by = "Parameter") |>
+    ggplot(aes(Iteration, Sample)) +
+    geom_line() +
+    geom_hline(aes(yintercept = Truth, color = "red")) +
+    facet_wrap(vars(Parameter), ncol = 1)
+```
+
+## Summaries
+
+```{r}
+samples |>
+    group_by(Parameter) |>
+    summarise(
+        n = n(),
+        ESS = effectiveSize(Sample),
+        quantile_025 = quantile(Sample, 0.025),
+        median = median(Sample),
+        quantile_975 = quantile(Sample, 0.975),
+    ) |>
+    left_join(truth, by = "Parameter") |>
+    mutate(
+        `Relative error` = abs((median - Truth) / Truth),
+        Coverage = quantile_025 <= Truth & Truth <= quantile_975
+    ) |>
+    group_by(Parameter) |>
+    summarise(
+        n = sum(n),
+        ESS = sum(ESS) |> round(),
+        `Relative error` = mean(`Relative error`),
+        Coverage = glue("{100*mean(Coverage)}%")
+    ) |>
+    kbl(booktabs = TRUE)
+```
+
+\pagebreak
+
+## Densities
+
+```{r}
+#| fig-height: 6
+
+left_join(samples, truth, by = "Parameter") |>
+    ggplot() +
+    geom_histogram(
+        aes(x = Sample, y = after_stat(density), fill = "Posterior")
+    ) +
+    geom_vline(aes(xintercept = Truth),
+        color = "red",
+        linewidth = 1,
+        linetype = "dashed"
+    ) +
+    lims(x = c(0, 6)) +
+    scale_fill_manual(
+        name = "",
+        values = c("Posterior" = "steelblue")
+    ) +
+    facet_wrap(vars(Parameter), ncol = 2) +
+    theme(legend.position = "bottom")
+```
+
+## Sigmoids
+
+```{r}
+sigmoid <- function(x, sample) {
+    theta <- sample |>
+        pivot_wider(
+            names_from = Parameter,
+            values_from = Sample
+        ) |>
+        with(c(xscale, xshift, yscale, yshift))
+
+    theta[3] / (1 + exp(-theta[1] * (x - theta[2]))) + theta[4]
+}
+
+p <- ggplot() +
+    xlim(0, 10) +
+    ylim(0, 3)
+
+sampled_sigmoids <- samples |>
+    filter(Iteration > 1950) |>
+    group_by(Iteration) |>
+    group_map(\(sample, ...) \(x) sigmoid(x, sample))
+
+for (sig in sampled_sigmoids) {
+    p <- p + stat_function(fun = sig, alpha = 0.2)
+}
+
+p + 
+    stat_function(
+        aes(color = "Truth"),
+        fun = \(x) sigmoid(x, truth |> rename(Sample = Truth)),
+        linewidth = 1
+    ) +
+    scale_color_manual(
+        name = "",
+        values = c("Truth" = "red")
+    ) +
+    theme(legend.position = "bottom")
+```

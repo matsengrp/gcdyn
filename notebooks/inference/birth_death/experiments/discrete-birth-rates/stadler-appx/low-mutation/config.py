@@ -1,25 +1,14 @@
-# %%
-
-from functools import partial
-
 import jax.numpy as np
-import pandas as pd
-from jax import jit
-from jax.config import config
 from scipy.stats import lognorm
 
-from gcdyn import models, mutators, poisson, utils
-from gcdyn.mcmc import Parameter, mh_chain
+from gcdyn import models, mutators, poisson
+from gcdyn.mcmc import Parameter
 
-config.update("jax_enable_x64", True)
-
-# %% Configurables
-
-STATE_SPACE = (1, 3)
+STATE_SPACE = (3, 7)
 INITIAL_STATE = 3
-PRESENT_TIME = 1
-NUM_TREES = 5
-TREE_SEED = 20
+PRESENT_TIME = 2
+NUM_TREES = 10
+TREE_SEED = 10
 
 TRUE_PARAMETERS = {
     "birth_response": poisson.DiscreteResponse(phenotypes=STATE_SPACE, values=(1, 4)),
@@ -87,38 +76,3 @@ def log_likelihood(birth_rate1, birth_rate2, death_rate, trees):
         extinct_sampling_probability=TRUE_PARAMETERS["extinct_sampling_probability"],
         present_time=PRESENT_TIME,
     )
-
-
-# %% Run MCMC
-
-trees = utils.sample_trees(
-    n=NUM_TREES,
-    t=PRESENT_TIME,
-    init_x=INITIAL_STATE,
-    **TRUE_PARAMETERS,
-    seed=TREE_SEED,
-    min_survivors=0,
-    prune=True,
-)
-
-
-def mh(tree):
-    return mh_chain(
-        length=2000,
-        parameters=MCMC_PARAMETERS,
-        log_likelihood=jit(partial(log_likelihood, trees=[tree])),
-    )
-
-
-results = map(mh, trees)
-
-dataframes = []
-
-for i, result in enumerate(results):
-    # result == [posterior_samples, stats]
-    df = dict(tree=i + 1, **result[0], **result[1])
-    dataframes.append(pd.DataFrame(df))
-
-pd.concat(dataframes).to_csv("samples.csv")
-
-# %%

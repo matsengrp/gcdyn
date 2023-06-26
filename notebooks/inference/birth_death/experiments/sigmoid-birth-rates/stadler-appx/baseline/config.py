@@ -1,30 +1,19 @@
-# %%
-
-from functools import partial
-
 import jax.numpy as np
-import pandas as pd
-from jax import jit
-from jax.config import config
 from scipy.stats import gamma, lognorm, norm
 
-from gcdyn import models, mutators, poisson, utils
-from gcdyn.mcmc import Parameter, mh_chain
+from gcdyn import models, mutators, poisson
+from gcdyn.mcmc import Parameter
 
-config.update("jax_enable_x64", True)
-
-# %% Configurables
-
-STATE_SPACE = (1, 3)
+STATE_SPACE = (3, 7)
 INITIAL_STATE = 3
-PRESENT_TIME = 5
-NUM_TREES = 5
-TREE_SEED = 20
+PRESENT_TIME = 2
+NUM_TREES = 10
+TREE_SEED = 10
 
 TRUE_PARAMETERS = {
     "birth_response": poisson.SigmoidResponse(1.0, 5.0, 2.0, 0.5),
     "death_response": poisson.ConstantResponse(0.5),
-    "mutation_response": poisson.ConstantResponse(0.2),
+    "mutation_response": poisson.ConstantResponse(0.5),
     "mutator": mutators.DiscreteMutator(
         state_space=STATE_SPACE,
         transition_matrix=np.array([[0, 1], [1, 0]]),
@@ -39,13 +28,16 @@ XSHIFT_PRIOR_MEAN = 5
 XSHIFT_PRIOR_SD = 1
 YSCALE_PRIOR_SHAPE = 2
 YSCALE_PRIOR_SCALE = 1
-DR_PRIOR_SHAPE = 3.5
-DR_PRIOR_SCALE = 1 / 3
+YSHIFT_PRIOR_SHAPE = 1
+YSHIFT_PRIOR_SCALE = 1
+DR_PRIOR_MEAN = -1
+DR_PRIOR_SD = 0.5
 
 XSCALE_PROPOSAL_SD = 3
 XSHIFT_PROPOSAL_SD = 2
 YSCALE_PROPOSAL_SD = 1
-DR_PROPOSAL_SD = 1 / 2
+YSHIFT_PROPOSAL_SD = 1
+DR_PROPOSAL_SD = 0.5
 
 MCMC_PARAMETERS = dict(
     xscale=Parameter(
@@ -79,14 +71,26 @@ MCMC_PARAMETERS = dict(
         proposal_generator=lambda c: lognorm(scale=c, s=YSCALE_PROPOSAL_SD).rvs(1),
     ),
     yshift=Parameter(
-        prior_log_density=lambda y: y == TRUE_PARAMETERS["birth_response"].yshift,
-        prior_generator=lambda n: np.ones(n) * TRUE_PARAMETERS["birth_response"].yshift,
-        proposal_log_density=lambda p, c: p == TRUE_PARAMETERS["birth_response"].yshift,
-        proposal_generator=lambda c: TRUE_PARAMETERS["birth_response"].yshift,
+        prior_log_density=gamma(a=YSHIFT_PRIOR_SHAPE, scale=YSHIFT_PRIOR_SCALE).logpdf,
+        prior_generator=lambda n: gamma(
+            a=YSHIFT_PRIOR_SHAPE, scale=YSHIFT_PRIOR_SCALE
+        ).rvs(n),
+        proposal_log_density=lambda p, c: lognorm(scale=c, s=YSHIFT_PROPOSAL_SD).logpdf(
+            p
+        ),
+        proposal_generator=lambda c: lognorm(scale=c, s=YSHIFT_PROPOSAL_SD).rvs(1),
     ),
+    # yshift=Parameter(
+    #     prior_log_density=lambda y: y == TRUE_PARAMETERS["birth_response"].yshift,
+    #     prior_generator=lambda n: np.ones(n) * TRUE_PARAMETERS["birth_response"].yshift,
+    #     proposal_log_density=lambda p, c: p == TRUE_PARAMETERS["birth_response"].yshift,
+    #     proposal_generator=lambda c: TRUE_PARAMETERS["birth_response"].yshift,
+    # ),
     death_rate=Parameter(
-        prior_log_density=gamma(a=DR_PRIOR_SHAPE, scale=DR_PRIOR_SCALE).logpdf,
-        prior_generator=lambda n: gamma(a=DR_PRIOR_SHAPE, scale=DR_PRIOR_SCALE).rvs(n),
+        prior_log_density=lognorm(scale=np.exp(DR_PRIOR_MEAN), s=DR_PRIOR_SD).logpdf,
+        prior_generator=lambda n: lognorm(
+            scale=np.exp(DR_PRIOR_MEAN), s=DR_PRIOR_SD
+        ).rvs(n),
         proposal_log_density=lambda p, c: lognorm(scale=c, s=DR_PROPOSAL_SD).logpdf(p),
         proposal_generator=lambda c: lognorm(scale=c, s=DR_PROPOSAL_SD).rvs(1),
     ),
@@ -104,38 +108,3 @@ def log_likelihood(death_rate, trees, **birth_params):
         extinct_sampling_probability=TRUE_PARAMETERS["extinct_sampling_probability"],
         present_time=PRESENT_TIME,
     )
-
-
-# %% Run MCMC
-
-trees = utils.sample_trees(
-    n=NUM_TREES,
-    t=PRESENT_TIME,
-    init_x=INITIAL_STATE,
-    **TRUE_PARAMETERS,
-    seed=TREE_SEED,
-    min_survivors=0,
-    prune=True,
-)
-
-
-def mh(tree):
-    return mh_chain(
-        length=2000,
-        parameters=MCMC_PARAMETERS,
-        log_likelihood=jit(partial(log_likelihood, trees=[tree])),
-    )
-
-
-results = map(mh, trees)
-
-dataframes = []
-
-for i, result in enumerate(results):
-    # result == [posterior_samples, stats]
-    df = dict(tree=i + 1, **result[0], **result[1])
-    dataframes.append(pd.DataFrame(df))
-
-pd.concat(dataframes).to_csv("samples.csv")
-
-# %%

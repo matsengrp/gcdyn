@@ -21,8 +21,7 @@ samples <- read_csv("samples.csv") |>
     pivot_longer(c("birth_rate1", "birth_rate2", "death_rate"),
         names_to = "Parameter",
         values_to = "Sample"
-    ) |>
-    mutate(tree = factor(tree))
+    )
 
 truth <- tibble(
     Parameter = c("birth_rate1", "birth_rate2", "death_rate"),
@@ -35,8 +34,10 @@ truth <- tibble(
 ```{r}
 #| fig-height: 6
 
-ggplot(samples, aes(Iteration, Sample, color = tree)) +
+left_join(samples, truth, by = "Parameter") |>
+    ggplot(aes(Iteration, Sample)) +
     geom_line() +
+    geom_hline(aes(yintercept = Truth, color = "red")) +
     facet_wrap(vars(Parameter), ncol = 1)
 ```
 
@@ -44,7 +45,7 @@ ggplot(samples, aes(Iteration, Sample, color = tree)) +
 
 ```{r}
 samples |>
-    group_by(Parameter, tree) |>
+    group_by(Parameter) |>
     summarise(
         n = n(),
         ESS = effectiveSize(Sample),
@@ -72,26 +73,23 @@ samples |>
 ## Densities
 
 ```{r}
-#| fig-height: 7
+#| fig-height: 6
 
 left_join(samples, truth, by = "Parameter") |>
-    filter(tree %in% 1:5) |>
     ggplot() +
     geom_histogram(
-        aes(x = Sample, y = after_stat(density), fill = "Posterior"),
-        alpha = 0.8
+        aes(x = Sample, y = after_stat(density), fill = "Posterior")
     ) +
     geom_vline(aes(xintercept = Truth),
         color = "red",
-        linewidth = 1.5,
+        linewidth = 1,
         linetype = "dashed"
     ) +
     lims(x = c(0, 6)) +
     scale_fill_manual(
         name = "",
-        values = c("Prior" = "grey", "Posterior" = "steelblue")
+        values = c("Posterior" = "steelblue")
     ) +
-    facet_grid(paste("Tree", tree) ~ Parameter) +
+    facet_wrap(vars(Parameter), ncol = 2) +
     theme(legend.position = "bottom")
 ```
-
