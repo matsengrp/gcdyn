@@ -85,8 +85,7 @@ def generate_sequences_and_tree(
             tree_start = time.time()
             tree = bdms.TreeNode()
             tree.x = gp_map(replay.NAIVE_SEQUENCE)
-            tree.sequence = replay.NAIVE_SEQUENCE
-            tree.chain_2_start_idx = replay.CHAIN_2_START_IDX
+            tree.set_seq(replay.NAIVE_SEQUENCE, replay.CHAIN_2_START_IDX)
             tree.evolve(
                 args.time_to_sampling,
                 birth_response=birth_resp,
