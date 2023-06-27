@@ -45,9 +45,10 @@ class NeuralNetworkModel:
     ):
         """
         encoded_trees: list of encoded trees
-        responses: 2D sequence, with first dimension corresponding to trees
-                   and second dimension to the Response objects to predict
-                   (Responses that aren't being estimated need not be provided)
+        responses: list of response objects for each tree, i.e. list of lists of responses, with
+                   first dimension the same length as encoded_trees, and second dimension length the
+                   number of parameters to predict. Each response (atm) should just be a constant response
+                   with one parameter. (Responses that aren't being estimated need not be provided)
         network_layers: layers for the neural network; "None" will give the default network.
                         Input shape should be (4, `max_leaf_count`), corresponding to the output of
                         :py:meth:`encode.encode_tree`. Output should be a vector with length equal to the
