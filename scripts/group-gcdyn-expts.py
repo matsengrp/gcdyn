@@ -18,6 +18,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--test-file", required=True)
 parser.add_argument("--outfile", required=True)
 parser.add_argument("--n-trees-per-expt", required=True, type=int)
+parser.add_argument("--params-to-predict", default=['xscale', 'xshift'], nargs='+')
 args = parser.parse_args()
 
 true_vals = {}
@@ -25,27 +26,29 @@ n_lines = 0
 with open(args.test_file) as cfile:
     for cln in csv.DictReader(filter(lambda x: x[0] != "#", cfile)):
         n_lines += 1
-        tval, pval = [float(cln[k]) for k in ["Truth", "Predicted"]]
-        if tval not in true_vals:
-            true_vals[tval] = []
-        true_vals[tval].append(pval)
+        tvals, pvals = [tuple(float(cln['%s-%s'%(p, k)]) for p in args.params_to_predict) for k in ["truth", "predicted"]]
+        if tvals not in true_vals:
+            true_vals[tvals] = []
+        true_vals[tvals].append(pvals)
 print(
     "    read %d lines with %d different true values: %s"
-    % (n_lines, len(true_vals), " ".join("%.2f" % v for v in sorted(true_vals)))
+    % (n_lines, len(true_vals), " ".join('('+', '.join("%.2f" % v for v in vals)+')' for vals in true_vals))
 )
 
 final_vals = []
-for tval, tlist in true_vals.items():
-    for ival, istart in enumerate(range(0, len(tlist), args.n_trees_per_expt)):
-        subvals = tlist[istart : istart + args.n_trees_per_expt]
-        fline = {"": ival, "Truth": tval, "Predicted": numpy.mean(subvals)}
+for tvals, pvlist in true_vals.items():
+    for ival, istart in enumerate(range(0, len(pvlist), args.n_trees_per_expt)):
+        subvals = pvlist[istart : istart + args.n_trees_per_expt]
+        fline = {"": ival}
+        for ip, param in enumerate(args.params_to_predict):
+            fline.update({"%s-truth"%param: tvals[ip], "%s-predicted"%param: numpy.median([vlist[ip] for vlist in subvals])})
         final_vals.append(fline)
 print(
     "      grouped into %d final lines with value counts: %s"
     % (
         len(final_vals),
         "  ".join(
-            "%.2f %d" % (v, len([x for x in final_vals if x["Truth"] == v]))
+            "%s %d" % (v, len([x for x in final_vals if tuple(x["%s-truth"%p] for p in args.params_to_predict) == v]))
             for v in true_vals
         ),
     )
@@ -60,4 +63,5 @@ with open(args.outfile, "w") as ofile:
     for fline in final_vals:
         writer.writerow(fline)
 
-utils.make_dl_plot("test", pd.read_csv(args.outfile), os.path.dirname(args.outfile))
+prdfs = {'test' : pd.read_csv(args.outfile)}
+utils.make_dl_plots(prdfs, args.params_to_predict, os.path.dirname(args.outfile) + '/plots', xtra_txt=' (groups of %d trees)'%args.n_trees_per_expt)

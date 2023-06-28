@@ -239,7 +239,7 @@ def mpl_init(fsize=20, label_fsize=15):
 # ----------------------------------------------------------------------------------------
 # plot scatter + box/whisker plot comparing true and predicted values for deep learning inference
 # NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
-def make_dl_plots(prdfs, params_to_predict, outdir, fsize=20, label_fsize=15):
+def make_dl_plots(prdfs, params_to_predict, outdir, xtra_txt=None, fsize=20, label_fsize=15):
     def single_plot(param, smpl):
         plt.clf()
         df = prdfs[smpl]
@@ -277,7 +277,10 @@ def make_dl_plots(prdfs, params_to_predict, outdir, fsize=20, label_fsize=15):
         # plt.plot([0.95 * min(xvals), 1.05 * max(xvals)], [0.95 * min(yvals), 1.05 * max(yvals)], color='darkred', linestyle='--', linewidth=3, alpha=0.7)
         plt.xlabel('true value')
         plt.ylabel('predicted value')
-        plt.title('%s %s' % (param, smpl), fontweight='bold', fontsize=20) # if len(title) < 25 else 15)
+        titlestr = '%s %s' % (param, smpl)
+        if xtra_txt is not None:
+            titlestr += xtra_txt
+        plt.title(titlestr, fontweight='bold', fontsize=20) # if len(title) < 25 else 15)
         fn = "%s/%s-%s-hist.svg" % (outdir, param, smpl)
         plt.savefig(fn)
         return fn
