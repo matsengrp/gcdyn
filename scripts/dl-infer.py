@@ -39,7 +39,7 @@ def read_plot_csv():
     prdfs = {}
     for smpl in ["train", "test"]:
         prdfs[smpl] = pd.read_csv(csvfn(smpl))
-    utils.make_dl_plots(prdfs, args.params_to_predict, args.outdir)
+    utils.make_dl_plots(prdfs, args.params_to_predict, args.outdir + '/plots')
 
 
 # ----------------------------------------------------------------------------------------
@@ -134,7 +134,7 @@ def train_and_test():
     prdfs = {}
     for smpl in ['train', 'test']:
         prdfs[smpl] = get_prediction(smpl, model, smpldict)
-    utils.make_dl_plots(prdfs, args.params_to_predict, args.outdir)
+    utils.make_dl_plots(prdfs, args.params_to_predict, args.outdir + '/plots')
 
     print("    total dl inference time: %.1f sec" % (time.time() - start))
 
@@ -169,7 +169,7 @@ parser.add_argument(
     help="if set, choose test samples only from among those with this (birth) xshift value.",
 )
 parser.add_argument("--model-size", default="tiny", choices=["small", "tiny", None], help="Parameters from the birth model that we should try to predict.")
-parser.add_argument("--params-to-predict", default=["xscale", 'shift'], nargs='+', choices=["xscale", "xshift"])
+parser.add_argument("--params-to-predict", default=["xscale", 'xshift'], nargs='+', choices=["xscale", "xshift"])
 parser.add_argument(
     "--test",
     action="store_true",

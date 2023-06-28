@@ -46,8 +46,8 @@ class NeuralNetworkModel:
         """
         encoded_trees: list of encoded trees
         responses: list of response objects for each tree, i.e. list of lists of responses, with
-                   first dimension the same length as encoded_trees, and second dimension length the
-                   number of parameters to predict. Each response (atm) should just be a constant response
+                   first dimension the same length as encoded_trees, and second dimension with length the
+                   number of parameters to predict for each tree. Each response (atm) should just be a constant response
                    with one parameter. (Responses that aren't being estimated need not be provided)
         network_layers: layers for the neural network; "None" will give the default network.
                         Input shape should be (4, `max_leaf_count`), corresponding to the output of

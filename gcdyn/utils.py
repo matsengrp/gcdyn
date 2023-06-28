@@ -224,6 +224,19 @@ def remove_from_arglist(clist, argstr, has_arg=False):
 
 
 # ----------------------------------------------------------------------------------------
+def mpl_init(fsize=20, label_fsize=15):
+    sns.set_style('ticks')
+    # sns.set_palette("viridis", 8)
+    mpl.rcParams.update({
+        'font.size': fsize, 'axes.titlesize': fsize, 'axes.labelsize': fsize,
+        'xtick.labelsize': label_fsize, 'ytick.labelsize': label_fsize,  # NOTE this gets (maybe always?) overriden by xticklabelsize/yticklabelsize in mpl_finis()
+        'legend.fontsize': fsize,
+        'font.family': 'Lato', 'font.weight': 600,
+        'axes.labelweight': 600, 'axes.titleweight': 600,
+        'figure.autolayout': True})
+
+
+# ----------------------------------------------------------------------------------------
 # plot scatter + box/whisker plot comparing true and predicted values for deep learning inference
 # NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
 def make_dl_plots(prdfs, params_to_predict, outdir, fsize=20, label_fsize=15):
@@ -269,15 +282,9 @@ def make_dl_plots(prdfs, params_to_predict, outdir, fsize=20, label_fsize=15):
         plt.savefig(fn)
         return fn
 
-    sns.set_style('ticks')
-    # sns.set_palette("viridis", 8)
-    mpl.rcParams.update({
-        'font.size': fsize, 'axes.titlesize': fsize, 'axes.labelsize': fsize,
-        'xtick.labelsize': label_fsize, 'ytick.labelsize': label_fsize,  # NOTE this gets (maybe always?) overriden by xticklabelsize/yticklabelsize in mpl_finis()
-        'legend.fontsize': fsize,
-        'font.family': 'Lato', 'font.weight': 600,
-        'axes.labelweight': 600, 'axes.titleweight': 600,
-        'figure.autolayout': True})
+    mpl_init()
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
     fnames = []
     for param in params_to_predict:
         fnames.append([])
@@ -314,17 +321,18 @@ def plot_trees(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_plot=10):
             data, x="affinity", y="lambda", ax=ax, linewidth=3, color="#990012"
         )
         ax.set(
-            title="xscale %.1f  xshift %.1f (%d total nodes, %d leaves)"
+            title="xscale %.1f  xshift %.1f (%d leaves, %d internal)"
             % (
                 pfo["birth-response"].xscale,
                 pfo["birth-response"].xshift,
-                len(all_vals),
                 len(leaf_vals),
+                len(all_vals) - len(leaf_vals),
             )
         )
         plt.savefig("%s/trees-%d.svg" % (plotdir, itree))
 
     # ----------------------------------------------------------------------------------------
+    mpl_init()
     if not os.path.exists(plotdir):
         os.makedirs(plotdir)
     for itree, pfo in enumerate(pfo_list[:n_to_plot]):
