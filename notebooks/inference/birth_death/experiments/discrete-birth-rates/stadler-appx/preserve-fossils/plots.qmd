@@ -39,8 +39,35 @@ left_join(samples, truth, by = "Parameter") |>
     ggplot(aes(Iteration, Sample)) +
     geom_line() +
     geom_hline(aes(yintercept = Truth, color = "Truth")) +
-    facet_wrap(vars(Parameter), ncol = 1)
+    facet_wrap(vars(Parameter), ncol = 1, scales = "free")
 ```
+
+\pagebreak
+
+## Densities
+
+```{r}
+#| fig-height: 6
+
+left_join(samples, truth, by = "Parameter") |>
+    filter(Sample < quantile(Sample, 0.975), .by = "Parameter") |>
+    ggplot() +
+    geom_histogram(
+        aes(x = Sample, y = after_stat(density), fill = "Posterior")
+    ) +
+    geom_vline(aes(xintercept = Truth),
+        color = "red",
+        linewidth = 1
+    ) +
+    scale_fill_manual(
+        name = "",
+        values = c("Posterior" = "steelblue")
+    ) +
+    facet_wrap(vars(Parameter), ncol = 2, scales = "free") +
+    theme(legend.position = "bottom")
+```
+
+\pagebreak
 
 ## Summaries
 
@@ -57,34 +84,7 @@ samples |>
     ) |>
     left_join(truth, by = "Parameter") |>
     mutate(
-        `Relative error` = abs((Median - Truth) / Truth) |> round(2),
-        Coverage = `Q 25%` <= Truth & Truth <= `Q 75%`
+        `Relative error` = abs((Median - Truth) / Truth) |> round(2)
     ) |>
     kbl(booktabs = TRUE)
-```
-
-\pagebreak
-
-## Densities
-
-```{r}
-#| fig-height: 6
-
-left_join(samples, truth, by = "Parameter") |>
-    ggplot() +
-    geom_histogram(
-        aes(x = Sample, y = after_stat(density), fill = "Posterior")
-    ) +
-    geom_vline(aes(xintercept = Truth),
-        color = "red",
-        linewidth = 1,
-        linetype = "dashed"
-    ) +
-    lims(x = c(0, 6)) +
-    scale_fill_manual(
-        name = "",
-        values = c("Posterior" = "steelblue")
-    ) +
-    facet_wrap(vars(Parameter), ncol = 2) +
-    theme(legend.position = "bottom")
 ```
