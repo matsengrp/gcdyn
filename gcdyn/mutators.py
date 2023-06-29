@@ -263,7 +263,7 @@ class UniformMutator(SequenceMutator):
 
 
 class ContextMutator(SequenceMutator):
-    """Class for hotspot-aware mutation model using mutability substitution
+    """Class to mutate a node's sequence using a hotspot-aware mutation model with mutability substitution
     probabilities expressed in terms of context.
 
     Args:
@@ -319,8 +319,8 @@ class ContextMutator(SequenceMutator):
 
 
 class SequencePhenotypeMutator(AttrMutator):
-    r"""Mutations on a DNA sequence that get translated into a functional
-    phenotype.
+    r"""Class to mutate a node's sequence, and then translate that sequence
+    modification into a modification of the node's phenotype (attribute).
 
     Args:
         sequence_mutator: A SequenceMutator object.

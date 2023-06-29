@@ -253,7 +253,7 @@ def make_dl_plots(prdfs, params_to_predict, outdir, xtra_txt=None, fsize=20, lab
             boxprops={"facecolor": "None"},
             order=sorted(set(df[xkey])),
         )
-        if len(df) < 2000:
+        if len(df) < 500:
             ax = sns.swarmplot(
                 df,
                 x=xkey,
