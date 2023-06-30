@@ -225,27 +225,37 @@ def remove_from_arglist(clist, argstr, has_arg=False):
 
 # ----------------------------------------------------------------------------------------
 def mpl_init(fsize=20, label_fsize=15):
-    sns.set_style('ticks')
+    sns.set_style("ticks")
     # sns.set_palette("viridis", 8)
-    mpl.rcParams.update({
-        'font.size': fsize, 'axes.titlesize': fsize, 'axes.labelsize': fsize,
-        'xtick.labelsize': label_fsize, 'ytick.labelsize': label_fsize,  # NOTE this gets (maybe always?) overriden by xticklabelsize/yticklabelsize in mpl_finis()
-        'legend.fontsize': fsize,
-        'font.family': 'Lato', 'font.weight': 600,
-        'axes.labelweight': 600, 'axes.titleweight': 600,
-        'figure.autolayout': True})
+    mpl.rcParams.update(
+        {
+            "font.size": fsize,
+            "axes.titlesize": fsize,
+            "axes.labelsize": fsize,
+            "xtick.labelsize": label_fsize,
+            "ytick.labelsize": label_fsize,  # NOTE this gets (maybe always?) overriden by xticklabelsize/yticklabelsize in mpl_finis()
+            "legend.fontsize": fsize,
+            "font.family": "Lato",
+            "font.weight": 600,
+            "axes.labelweight": 600,
+            "axes.titleweight": 600,
+            "figure.autolayout": True,
+        }
+    )
 
 
 # ----------------------------------------------------------------------------------------
 # plot scatter + box/whisker plot comparing true and predicted values for deep learning inference
 # NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
-def make_dl_plots(prdfs, params_to_predict, outdir, xtra_txt=None, fsize=20, label_fsize=15):
+def make_dl_plots(
+    prdfs, params_to_predict, outdir, xtra_txt=None, fsize=20, label_fsize=15
+):
     def single_plot(param, smpl):
         plt.clf()
         df = prdfs[smpl]
         # hord = sorted(set(df["Truth"]))
         # sns.histplot(df, x="Predicted", hue="Truth", hue_order=hord, palette="tab10", bins=30, multiple="stack", ).set(title=smpl)
-        xkey, ykey = ["%s-%s"%(param, vtype) for vtype in ['truth', 'predicted']]
+        xkey, ykey = ["%s-%s" % (param, vtype) for vtype in ["truth", "predicted"]]
         ax = sns.boxplot(
             df,
             x=xkey,
@@ -275,12 +285,14 @@ def make_dl_plots(prdfs, params_to_predict, outdir, xtra_txt=None, fsize=20, lab
         # sns.scatterplot(df, x=xkey, y=ykey)
         # xvals, yvals = df[xkey], df[ykey]
         # plt.plot([0.95 * min(xvals), 1.05 * max(xvals)], [0.95 * min(yvals), 1.05 * max(yvals)], color='darkred', linestyle='--', linewidth=3, alpha=0.7)
-        plt.xlabel('true value')
-        plt.ylabel('predicted value')
-        titlestr = '%s %s' % (param, smpl)
+        plt.xlabel("true value")
+        plt.ylabel("predicted value")
+        titlestr = "%s %s" % (param, smpl)
         if xtra_txt is not None:
             titlestr += xtra_txt
-        plt.title(titlestr, fontweight='bold', fontsize=20) # if len(title) < 25 else 15)
+        plt.title(
+            titlestr, fontweight="bold", fontsize=20
+        )  # if len(title) < 25 else 15)
         fn = "%s/%s-%s-hist.svg" % (outdir, param, smpl)
         plt.savefig(fn)
         return fn

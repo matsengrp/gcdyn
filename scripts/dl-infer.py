@@ -23,12 +23,16 @@ def csvfn(smpl):
 def get_prediction(smpl, model, smpldict):
     pred_resps = model.predict(smpldict[smpl]["trees"])
     true_resps = smpldict[smpl]["birth-responses"]
-    dfdata = {'%s-%s'%(param, ptype) : [] for param in args.params_to_predict for ptype in ['truth', 'predicted']}
+    dfdata = {
+        "%s-%s" % (param, ptype): []
+        for param in args.params_to_predict
+        for ptype in ["truth", "predicted"]
+    }
     assert len(pred_resps) == len(true_resps)
     for tr_resp, prlist in zip(true_resps, pred_resps):
         for ip, param in enumerate(args.params_to_predict):
-            dfdata['%s-truth'%param].append(getattr(tr_resp, param))
-            dfdata['%s-predicted'%param].append(float(prlist[ip].value))
+            dfdata["%s-truth" % param].append(getattr(tr_resp, param))
+            dfdata["%s-predicted" % param].append(float(prlist[ip].value))
     df = pd.DataFrame(dfdata)
     df.to_csv(csvfn(smpl))
     return df
@@ -39,7 +43,7 @@ def read_plot_csv():
     prdfs = {}
     for smpl in ["train", "test"]:
         prdfs[smpl] = pd.read_csv(csvfn(smpl))
-    utils.make_dl_plots(prdfs, args.params_to_predict, args.outdir + '/plots')
+    utils.make_dl_plots(prdfs, args.params_to_predict, args.outdir + "/plots")
 
 
 # ----------------------------------------------------------------------------------------
@@ -51,23 +55,30 @@ def get_traintest_indices(samples):
         return True
 
     def print_stats():
-        for pname in args.test_param_vals: #samples["bith-responses"][0]._param_dict:
+        for pname in args.test_param_vals:
             all_vals = [r._param_dict[pname] for r in samples["birth-responses"]]
             val_counts = {v: all_vals.count(v) for v in set(all_vals)}
-            n_remaining = sum(val_counts.get(v, 0) for v in args.test_param_vals[pname]) - n_test
-            print('      --test-%s-values: restricted to %d / %d %s values (%s), choosing %d / %d with these values from original value counts: %s' % (
-                pname,
-                len(args.test_param_vals[pname]),
-                len(set(all_vals)),
-                pname,
-                " ".join("%.2f" % v for v in args.test_param_vals[pname]),
-                n_test,
-                n_remaining + n_test,
-                "   ".join(
-                    "%.2f %d" % (v, c)
-                    for v, c in sorted(val_counts.items(), key=operator.itemgetter(0))
-                ),
-            ))
+            n_remaining = (
+                sum(val_counts.get(v, 0) for v in args.test_param_vals[pname]) - n_test
+            )
+            print(
+                "      --test-%s-values: restricted to %d / %d %s values (%s), choosing %d / %d with these values from original value counts: %s"
+                % (
+                    pname,
+                    len(args.test_param_vals[pname]),
+                    len(set(all_vals)),
+                    pname,
+                    " ".join("%.2f" % v for v in args.test_param_vals[pname]),
+                    n_test,
+                    n_remaining + n_test,
+                    "   ".join(
+                        "%.2f %d" % (v, c)
+                        for v, c in sorted(
+                            val_counts.items(), key=operator.itemgetter(0)
+                        )
+                    ),
+                )
+            )
 
     n_trees = len(samples["trees"])
     n_test = round((1.0 - args.train_frac) * n_trees)
@@ -77,9 +88,7 @@ def get_traintest_indices(samples):
         idxs["test"] = [i for i in range(n_trees) if i not in idxs["train"]]
     else:
         avail_indices = [
-            i
-            for i, r in enumerate(samples["birth-responses"])
-            if is_avail(r)
+            i for i, r in enumerate(samples["birth-responses"]) if is_avail(r)
         ]  # indices of all trees with the specified xscale value
         idxs["test"] = random.sample(
             avail_indices, n_test
@@ -115,7 +124,10 @@ def train_and_test():
         smpldict[smpl] = {
             key: [val[i] for i in idxs[smpl]] for key, val in samples.items()
         }
-    print('      N trees: %d train   %d test' % (len(smpldict['train']['trees']), len(smpldict['test']['trees'])))
+    print(
+        "      N trees: %d train   %d test"
+        % (len(smpldict["train"]["trees"]), len(smpldict["test"]["trees"]))
+    )
 
     pred_resps = [
         [ConstantResponse(getattr(birth_resp, p)) for p in args.params_to_predict]
@@ -132,9 +144,9 @@ def train_and_test():
     print("  writing train/test results to %s" % args.outdir)
 
     prdfs = {}
-    for smpl in ['train', 'test']:
+    for smpl in ["train", "test"]:
         prdfs[smpl] = get_prediction(smpl, model, smpldict)
-    utils.make_dl_plots(prdfs, args.params_to_predict, args.outdir + '/plots')
+    utils.make_dl_plots(prdfs, args.params_to_predict, args.outdir + "/plots")
 
     print("    total dl inference time: %.1f sec" % (time.time() - start))
 
@@ -168,8 +180,18 @@ parser.add_argument(
     nargs="+",
     help="if set, choose test samples only from among those with this (birth) xshift value.",
 )
-parser.add_argument("--model-size", default="tiny", choices=["small", "tiny", None], help="Parameters from the birth model that we should try to predict.")
-parser.add_argument("--params-to-predict", default=["xscale", 'xshift'], nargs='+', choices=["xscale", "xshift"])
+parser.add_argument(
+    "--model-size",
+    default="tiny",
+    choices=["small", "tiny", None],
+    help="Parameters from the birth model that we should try to predict.",
+)
+parser.add_argument(
+    "--params-to-predict",
+    default=["xscale", "xshift"],
+    nargs="+",
+    choices=["xscale", "xshift"],
+)
 parser.add_argument(
     "--test",
     action="store_true",
@@ -184,11 +206,11 @@ args.test_param_vals = None
 if args.test_xscale_values is not None or args.test_xshift_values is not None:
     args.test_param_vals = {}
     if args.test_xscale_values is not None:
-        args.test_param_vals.update({'xscale' : args.test_xscale_values})
-        delattr(args, 'test_xscale_values')
+        args.test_param_vals.update({"xscale": args.test_xscale_values})
+        delattr(args, "test_xscale_values")
     if args.test_xshift_values is not None:
-        args.test_param_vals.update({'xshift' : args.test_xshift_values})
-        delattr(args, 'test_xshift_values')
+        args.test_param_vals.update({"xshift": args.test_xshift_values})
+        delattr(args, "test_xshift_values")
 if args.test:
     args.epochs = 10
 
