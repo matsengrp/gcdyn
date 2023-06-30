@@ -48,7 +48,7 @@ def mh_step(from_values, parameters, log_likelihood, rng=None):
         proposal_log_density = param.proposal_log_density
         proposal_generator = param.proposal_generator
 
-        proposals = from_values | {name: proposal_generator(from_values[name])}
+        proposals = from_values | {name: proposal_generator(from_values[name], rng)}
 
         # If the proposal distribution is a point mass (ie. we aren't sampling the parameter),
         # don't bother computing the MH ratio
@@ -70,8 +70,6 @@ def mh_step(from_values, parameters, log_likelihood, rng=None):
             print("The proposed values at time of failure were", proposals)
             print("The exception raised was:")
             raise
-
-        rng = random.default_rng()
 
         if rng.uniform() < np.minimum(1, np.exp(log_mh_ratio)):
             from_values = proposals
