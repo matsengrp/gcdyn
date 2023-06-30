@@ -11,7 +11,7 @@ NUM_TREES = 10
 TREE_SEED = 11
 
 TRUE_PARAMETERS = {
-    "birth_response": poisson.SigmoidResponse(1.0, 5.0, 2.0, 0.5),
+    "birth_response": poisson.SigmoidResponse(1.0, 5.0, 3.0, 1.0),
     "death_response": poisson.ConstantResponse(0.5),
     "mutation_response": poisson.ConstantResponse(0.5),
     "mutator": mutators.DiscreteMutator(
@@ -73,22 +73,22 @@ MCMC_PARAMETERS = dict(
         ),
         proposal_generator=lambda c: lognorm(scale=c, s=YSCALE_PROPOSAL_SD).rvs(1),
     ),
-    yshift=Parameter(
-        prior_log_density=gamma(a=YSHIFT_PRIOR_SHAPE, scale=YSHIFT_PRIOR_SCALE).logpdf,
-        prior_generator=lambda n: gamma(
-            a=YSHIFT_PRIOR_SHAPE, scale=YSHIFT_PRIOR_SCALE
-        ).rvs(n),
-        proposal_log_density=lambda p, c: lognorm(scale=c, s=YSHIFT_PROPOSAL_SD).logpdf(
-            p
-        ),
-        proposal_generator=lambda c: lognorm(scale=c, s=YSHIFT_PROPOSAL_SD).rvs(1),
-    ),
     # yshift=Parameter(
-    #     prior_log_density=lambda y: y == TRUE_PARAMETERS["birth_response"].yshift,
-    #     prior_generator=lambda n: np.ones(n) * TRUE_PARAMETERS["birth_response"].yshift,
-    #     proposal_log_density=lambda p, c: p == TRUE_PARAMETERS["birth_response"].yshift,
-    #     proposal_generator=lambda c: TRUE_PARAMETERS["birth_response"].yshift,
+    #     prior_log_density=gamma(a=YSHIFT_PRIOR_SHAPE, scale=YSHIFT_PRIOR_SCALE).logpdf,
+    #     prior_generator=lambda n: gamma(
+    #         a=YSHIFT_PRIOR_SHAPE, scale=YSHIFT_PRIOR_SCALE
+    #     ).rvs(n),
+    #     proposal_log_density=lambda p, c: lognorm(scale=c, s=YSHIFT_PROPOSAL_SD).logpdf(
+    #         p
+    #     ),
+    #     proposal_generator=lambda c: lognorm(scale=c, s=YSHIFT_PROPOSAL_SD).rvs(1),
     # ),
+    yshift=Parameter(
+        prior_log_density=lambda y: y == TRUE_PARAMETERS["birth_response"].yshift,
+        prior_generator=lambda n: np.ones(n) * TRUE_PARAMETERS["birth_response"].yshift,
+        proposal_log_density=lambda p, c: p == TRUE_PARAMETERS["birth_response"].yshift,
+        proposal_generator=lambda c: TRUE_PARAMETERS["birth_response"].yshift,
+    ),
     death_rate=Parameter(
         prior_log_density=lognorm(scale=np.exp(DR_PRIOR_MEAN), s=DR_PRIOR_SD).logpdf,
         prior_generator=lambda n: lognorm(

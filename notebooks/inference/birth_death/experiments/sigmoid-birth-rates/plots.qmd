@@ -25,7 +25,7 @@ samples <- read_csv("samples.csv") |>
 
 truth <- tibble(
     Parameter = c("xscale", "xshift", "yscale", "yshift", "death_rate"),
-    Truth = c(1, 5, 2, 0.5, 0.5)
+    Truth = c(1, 5, 3, 1, 0.5)
 )
 ```
 
@@ -108,7 +108,7 @@ sigmoid <- function(x, sample) {
 
 p <- ggplot() +
     xlim(0, 10) +
-    ylim(0, 3)
+    ylim(0, 5)
 
 sampled_sigmoids <- samples |>
     filter(Iteration > 1950) |>
