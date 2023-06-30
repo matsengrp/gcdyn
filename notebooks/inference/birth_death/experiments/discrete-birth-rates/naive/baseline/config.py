@@ -7,7 +7,7 @@ from gcdyn.mcmc import Parameter
 STATE_SPACE = (2, 4, 6, 8)
 INITIAL_STATE = 2
 PRESENT_TIME = 2
-NUM_TREES = 10
+NUM_TREES = 20
 TREE_SEED = 11
 
 TRUE_PARAMETERS = {
@@ -32,10 +32,11 @@ BR_PRIOR_SD = 1
 DR_PRIOR_MEAN = -1
 DR_PRIOR_SD = 0.5
 
-BR_PROPOSAL_SD = 0.5
-DR_PROPOSAL_SD = 0.5
+BR_PROPOSAL_SD = 0.2
+DR_PROPOSAL_SD = 0.2
 
 MCMC_SEED = 10
+NUM_MCMC_SAMPLES = 5000
 
 MCMC_PARAMETERS = dict(
     # Note that lognorm(a, b) in R is lognorm(scale=exp(a), s=b) in scipy
@@ -45,7 +46,9 @@ MCMC_PARAMETERS = dict(
             scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD
         ).rvs(n, random_state=rng),
         proposal_log_density=lambda p, c: lognorm(scale=c, s=BR_PROPOSAL_SD).logpdf(p),
-        proposal_generator=lambda c, rng: lognorm(scale=c, s=BR_PROPOSAL_SD).rvs(1, random_state=rng),
+        proposal_generator=lambda c, rng: lognorm(scale=c, s=BR_PROPOSAL_SD).rvs(
+            1, random_state=rng
+        ),
     ),
     birth_rate2=Parameter(
         prior_log_density=lognorm(scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD).logpdf,
@@ -53,7 +56,9 @@ MCMC_PARAMETERS = dict(
             scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD
         ).rvs(n, random_state=rng),
         proposal_log_density=lambda p, c: lognorm(scale=c, s=BR_PROPOSAL_SD).logpdf(p),
-        proposal_generator=lambda c, rng: lognorm(scale=c, s=BR_PROPOSAL_SD).rvs(1, random_state=rng),
+        proposal_generator=lambda c, rng: lognorm(scale=c, s=BR_PROPOSAL_SD).rvs(
+            1, random_state=rng
+        ),
     ),
     birth_rate3=Parameter(
         prior_log_density=lognorm(scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD).logpdf,
@@ -61,7 +66,9 @@ MCMC_PARAMETERS = dict(
             scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD
         ).rvs(n, random_state=rng),
         proposal_log_density=lambda p, c: lognorm(scale=c, s=BR_PROPOSAL_SD).logpdf(p),
-        proposal_generator=lambda c, rng: lognorm(scale=c, s=BR_PROPOSAL_SD).rvs(1, random_state=rng),
+        proposal_generator=lambda c, rng: lognorm(scale=c, s=BR_PROPOSAL_SD).rvs(
+            1, random_state=rng
+        ),
     ),
     birth_rate4=Parameter(
         prior_log_density=lognorm(scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD).logpdf,
@@ -69,7 +76,9 @@ MCMC_PARAMETERS = dict(
             scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD
         ).rvs(n, random_state=rng),
         proposal_log_density=lambda p, c: lognorm(scale=c, s=BR_PROPOSAL_SD).logpdf(p),
-        proposal_generator=lambda c, rng: lognorm(scale=c, s=BR_PROPOSAL_SD).rvs(1, random_state=rng),
+        proposal_generator=lambda c, rng: lognorm(scale=c, s=BR_PROPOSAL_SD).rvs(
+            1, random_state=rng
+        ),
     ),
     death_rate=Parameter(
         prior_log_density=lognorm(scale=np.exp(DR_PRIOR_MEAN), s=DR_PRIOR_SD).logpdf,
@@ -77,7 +86,9 @@ MCMC_PARAMETERS = dict(
             scale=np.exp(DR_PRIOR_MEAN), s=DR_PRIOR_SD
         ).rvs(n, random_state=rng),
         proposal_log_density=lambda p, c: lognorm(scale=c, s=DR_PROPOSAL_SD).logpdf(p),
-        proposal_generator=lambda c, rng: lognorm(scale=c, s=DR_PROPOSAL_SD).rvs(1, random_state=rng),
+        proposal_generator=lambda c, rng: lognorm(scale=c, s=DR_PROPOSAL_SD).rvs(
+            1, random_state=rng
+        ),
     ),
 )
 

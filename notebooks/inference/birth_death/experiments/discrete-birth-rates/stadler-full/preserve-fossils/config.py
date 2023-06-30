@@ -6,7 +6,7 @@ from gcdyn.mcmc import Parameter
 
 STATE_SPACE = (2, 4, 6, 8)
 INITIAL_STATE = 2
-PRESENT_TIME = 2
+PRESENT_TIME = 1
 NUM_TREES = 4
 TREE_SEED = 11
 
@@ -32,10 +32,11 @@ BR_PRIOR_SD = 1
 DR_PRIOR_MEAN = -1
 DR_PRIOR_SD = 0.5
 
-BR_PROPOSAL_SD = 0.5
-DR_PROPOSAL_SD = 0.5
+BR_PROPOSAL_SD = 0.2
+DR_PROPOSAL_SD = 0.2
 
 MCMC_SEED = 10
+NUM_MCMC_SAMPLES = 5000
 
 MCMC_PARAMETERS = dict(
     # Note that lognorm(a, b) in R is lognorm(scale=exp(a), s=b) in scipy

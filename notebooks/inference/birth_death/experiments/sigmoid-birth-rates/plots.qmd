@@ -64,7 +64,7 @@ left_join(samples, truth, by = "Parameter") |>
     ) +
     facet_wrap(vars(Parameter), ncol = 2, scales = "free") +
     scale_x_sqrt() +
-    xlab("sqrt(Sample)") +
+    xlab("Sample (on sqrt scale)") +
     theme(legend.position = "bottom")
 ```
 
@@ -111,7 +111,7 @@ p <- ggplot() +
     ylim(0, 5)
 
 sampled_sigmoids <- samples |>
-    filter(Iteration > 1950) |>
+    filter(Iteration > max(Iteration) - 50) |>
     group_by(Iteration) |>
     group_map(\(sample, ...) \(x) sigmoid(x, sample))
 

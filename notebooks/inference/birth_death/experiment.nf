@@ -34,6 +34,7 @@ process simulate {
         TRUE_PARAMETERS,
         TREE_SEED,
         MCMC_SEED,
+        NUM_MCMC_SAMPLES,
         MCMC_PARAMETERS,
         log_likelihood
     )
@@ -59,7 +60,7 @@ process simulate {
     config.update("jax_enable_x64", True)
 
     posterior_samples, stats = mh_chain(
-        length=2000,
+        length=NUM_MCMC_SAMPLES,
         parameters=MCMC_PARAMETERS,
         log_likelihood=jit(partial(log_likelihood, trees=trees)),
         seed=MCMC_SEED

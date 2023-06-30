@@ -7,7 +7,7 @@ from gcdyn.mcmc import Parameter
 STATE_SPACE = (2, 4, 6, 8)
 INITIAL_STATE = 2
 PRESENT_TIME = 2
-NUM_TREES = 10
+NUM_TREES = 20
 TREE_SEED = 11
 
 TRUE_PARAMETERS = {
@@ -36,13 +36,14 @@ YSHIFT_PRIOR_SCALE = 1
 DR_PRIOR_MEAN = -1
 DR_PRIOR_SD = 0.5
 
-XSCALE_PROPOSAL_SD = 3
-XSHIFT_PROPOSAL_SD = 2
-YSCALE_PROPOSAL_SD = 1
-YSHIFT_PROPOSAL_SD = 1
+XSCALE_PROPOSAL_SD = 2
+XSHIFT_PROPOSAL_SD = 1
+YSCALE_PROPOSAL_SD = 0.5
+YSHIFT_PROPOSAL_SD = 0.5
 DR_PROPOSAL_SD = 0.5
 
 MCMC_SEED = 10
+NUM_MCMC_SAMPLES = 5000
 
 MCMC_PARAMETERS = dict(
     xscale=Parameter(
@@ -81,23 +82,25 @@ MCMC_PARAMETERS = dict(
             1, random_state=rng
         ),
     ),
-    # yshift=Parameter(
-    #     prior_log_density=gamma(a=YSHIFT_PRIOR_SHAPE, scale=YSHIFT_PRIOR_SCALE).logpdf,
-    #     prior_generator=lambda n, rng: gamma(
-    #         a=YSHIFT_PRIOR_SHAPE, scale=YSHIFT_PRIOR_SCALE
-    #     ).rvs(n, random_state=rng),
-    #     proposal_log_density=lambda p, c: lognorm(scale=c, s=YSHIFT_PROPOSAL_SD).logpdf(
-    #         p
-    #     ),
-    #     proposal_generator=lambda c, rng: lognorm(scale=c, s=YSHIFT_PROPOSAL_SD).rvs(1, random_state=rng),
-    # ),
     yshift=Parameter(
-        prior_log_density=lambda y: y == TRUE_PARAMETERS["birth_response"].yshift,
-        prior_generator=lambda n, rng: np.ones(n)
-        * TRUE_PARAMETERS["birth_response"].yshift,
-        proposal_log_density=lambda p, c: p == TRUE_PARAMETERS["birth_response"].yshift,
-        proposal_generator=lambda c, rng: TRUE_PARAMETERS["birth_response"].yshift,
+        prior_log_density=gamma(a=YSHIFT_PRIOR_SHAPE, scale=YSHIFT_PRIOR_SCALE).logpdf,
+        prior_generator=lambda n, rng: gamma(
+            a=YSHIFT_PRIOR_SHAPE, scale=YSHIFT_PRIOR_SCALE
+        ).rvs(n, random_state=rng),
+        proposal_log_density=lambda p, c: lognorm(scale=c, s=YSHIFT_PROPOSAL_SD).logpdf(
+            p
+        ),
+        proposal_generator=lambda c, rng: lognorm(scale=c, s=YSHIFT_PROPOSAL_SD).rvs(
+            1, random_state=rng
+        ),
     ),
+    # yshift=Parameter(
+    #     prior_log_density=lambda y: y == TRUE_PARAMETERS["birth_response"].yshift,
+    #     prior_generator=lambda n, rng: np.ones(n)
+    #     * TRUE_PARAMETERS["birth_response"].yshift,
+    #     proposal_log_density=lambda p, c: p == TRUE_PARAMETERS["birth_response"].yshift,
+    #     proposal_generator=lambda c, rng: TRUE_PARAMETERS["birth_response"].yshift,
+    # ),
     death_rate=Parameter(
         prior_log_density=lognorm(scale=np.exp(DR_PRIOR_MEAN), s=DR_PRIOR_SD).logpdf,
         prior_generator=lambda n, rng: lognorm(

@@ -64,7 +64,7 @@ left_join(samples, truth, by = "Parameter") |>
     ) +
     facet_wrap(vars(Parameter), ncol = 2, scales = "free") +
     scale_x_sqrt() +
-    xlab("sqrt(Sample)") +
+    xlab("Sample (on sqrt scale)") +
     theme(legend.position = "bottom")
 ```
 
