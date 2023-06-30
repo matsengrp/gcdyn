@@ -19,10 +19,10 @@ class Parameter:
     ):
         """
         prior_log_density: function(parameter value)
-        prior_generator: function(num samples)
+        prior_generator: function(num samples, :py:class:`numpy.random.Generator`)
         proposal_log_density: function(proposed value, current value)
             If None, assumed to be a symmetric proposal
-        proposal_generator: function(current value)
+        proposal_generator: function(current value, :py:class:`numpy.random.Generator`)
         """
         self.prior_log_density = prior_log_density
         self.prior_generator = prior_generator
@@ -33,15 +33,12 @@ class Parameter:
             self.proposal_log_density = lambda p, c: 0
 
 
-def mh_step(
-    from_values,
-    parameters,
-    log_likelihood,
-):
+def mh_step(from_values, parameters, log_likelihood, rng=None):
     """
-    from_values (dict): parameter key => current parameter value
-    parameter_config (dict): parameter key => `Parameter` object
-    log_likelihood (callable): function with named args for every parameter key
+    from_values (`dict`): parameter key => current parameter value
+    parameter_config (`dict`): parameter key => `Parameter` object
+    log_likelihood (`callable`): function with named args for every parameter key
+    rng (`None` or :py:class:`numpy.random.Generator`)
     """
 
     assert from_values.keys() == parameters.keys()
@@ -82,10 +79,12 @@ def mh_step(
     return from_values
 
 
-def mh_chain(length, parameters, log_likelihood, initial_value=None):
+def mh_chain(length, parameters, log_likelihood, initial_value=None, seed=None):
+    rng = np.random.default_rng(seed)
+
     if not initial_value:
         initial_value = {
-            name: param.prior_generator(1) for name, param in parameters.items()
+            name: param.prior_generator(1, rng) for name, param in parameters.items()
         }
 
     chain = [initial_value]
@@ -97,6 +96,7 @@ def mh_chain(length, parameters, log_likelihood, initial_value=None):
             from_values=chain[-1],
             parameters=parameters,
             log_likelihood=log_likelihood,
+            rng=rng,
         )
         chain.append(sample)
 

@@ -32,51 +32,62 @@ BR_PRIOR_SD = 1
 DR_PRIOR_MEAN = -1
 DR_PRIOR_SD = 0.5
 
-BR1_PROPOSAL_SD = 0.5
-BR2_PROPOSAL_SD = 0.5
+BR_PROPOSAL_SD = 0.5
 DR_PROPOSAL_SD = 0.5
+
+MCMC_SEED = 10
 
 MCMC_PARAMETERS = dict(
     # Note that lognorm(a, b) in R is lognorm(scale=exp(a), s=b) in scipy
     birth_rate1=Parameter(
         prior_log_density=lognorm(scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD).logpdf,
-        prior_generator=lambda n: lognorm(
+        prior_generator=lambda n, rng: lognorm(
             scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD
-        ).rvs(n),
-        proposal_log_density=lambda p, c: lognorm(scale=c, s=BR1_PROPOSAL_SD).logpdf(p),
-        proposal_generator=lambda c: lognorm(scale=c, s=BR1_PROPOSAL_SD).rvs(1),
+        ).rvs(n, random_state=rng),
+        proposal_log_density=lambda p, c: lognorm(scale=c, s=BR_PROPOSAL_SD).logpdf(p),
+        proposal_generator=lambda c, rng: lognorm(scale=c, s=BR_PROPOSAL_SD).rvs(
+            1, random_state=rng
+        ),
     ),
     birth_rate2=Parameter(
         prior_log_density=lognorm(scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD).logpdf,
-        prior_generator=lambda n: lognorm(
+        prior_generator=lambda n, rng: lognorm(
             scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD
-        ).rvs(n),
-        proposal_log_density=lambda p, c: lognorm(scale=c, s=BR2_PROPOSAL_SD).logpdf(p),
-        proposal_generator=lambda c: lognorm(scale=c, s=BR2_PROPOSAL_SD).rvs(1),
+        ).rvs(n, random_state=rng),
+        proposal_log_density=lambda p, c: lognorm(scale=c, s=BR_PROPOSAL_SD).logpdf(p),
+        proposal_generator=lambda c, rng: lognorm(scale=c, s=BR_PROPOSAL_SD).rvs(
+            1, random_state=rng
+        ),
     ),
     birth_rate3=Parameter(
         prior_log_density=lognorm(scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD).logpdf,
-        prior_generator=lambda n: lognorm(
+        prior_generator=lambda n, rng: lognorm(
             scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD
-        ).rvs(n),
-        proposal_log_density=lambda p, c: lognorm(scale=c, s=BR2_PROPOSAL_SD).logpdf(p),
-        proposal_generator=lambda c: lognorm(scale=c, s=BR2_PROPOSAL_SD).rvs(1),
+        ).rvs(n, random_state=rng),
+        proposal_log_density=lambda p, c: lognorm(scale=c, s=BR_PROPOSAL_SD).logpdf(p),
+        proposal_generator=lambda c, rng: lognorm(scale=c, s=BR_PROPOSAL_SD).rvs(
+            1, random_state=rng
+        ),
     ),
     birth_rate4=Parameter(
         prior_log_density=lognorm(scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD).logpdf,
-        prior_generator=lambda n: lognorm(
+        prior_generator=lambda n, rng: lognorm(
             scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD
-        ).rvs(n),
-        proposal_log_density=lambda p, c: lognorm(scale=c, s=BR2_PROPOSAL_SD).logpdf(p),
-        proposal_generator=lambda c: lognorm(scale=c, s=BR2_PROPOSAL_SD).rvs(1),
+        ).rvs(n, random_state=rng),
+        proposal_log_density=lambda p, c: lognorm(scale=c, s=BR_PROPOSAL_SD).logpdf(p),
+        proposal_generator=lambda c, rng: lognorm(scale=c, s=BR_PROPOSAL_SD).rvs(
+            1, random_state=rng
+        ),
     ),
     death_rate=Parameter(
         prior_log_density=lognorm(scale=np.exp(DR_PRIOR_MEAN), s=DR_PRIOR_SD).logpdf,
-        prior_generator=lambda n: lognorm(
+        prior_generator=lambda n, rng: lognorm(
             scale=np.exp(DR_PRIOR_MEAN), s=DR_PRIOR_SD
-        ).rvs(n),
+        ).rvs(n, random_state=rng),
         proposal_log_density=lambda p, c: lognorm(scale=c, s=DR_PROPOSAL_SD).logpdf(p),
-        proposal_generator=lambda c: lognorm(scale=c, s=DR_PROPOSAL_SD).rvs(1),
+        proposal_generator=lambda c, rng: lognorm(scale=c, s=DR_PROPOSAL_SD).rvs(
+            1, random_state=rng
+        ),
     ),
 )
 

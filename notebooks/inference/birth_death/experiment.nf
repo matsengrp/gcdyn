@@ -33,6 +33,7 @@ process simulate {
         INITIAL_STATE,
         TRUE_PARAMETERS,
         TREE_SEED,
+        MCMC_SEED,
         MCMC_PARAMETERS,
         log_likelihood
     )
@@ -61,6 +62,7 @@ process simulate {
         length=2000,
         parameters=MCMC_PARAMETERS,
         log_likelihood=jit(partial(log_likelihood, trees=trees)),
+        seed=MCMC_SEED
     )
 
     pd.DataFrame(dict(**posterior_samples, **stats)).to_csv("samples.csv")
