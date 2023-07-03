@@ -6,8 +6,8 @@ from gcdyn.mcmc import Parameter
 
 STATE_SPACE = (2, 4, 6, 8)
 INITIAL_STATE = 2
-PRESENT_TIME = 2
-NUM_TREES = 10
+PRESENT_TIME = 1
+NUM_TREES = 7
 TREE_SEED = 10
 
 TRUE_PARAMETERS = {

@@ -14,6 +14,7 @@ warning: false
 library(tidyverse)
 library(coda)
 library(glue)
+library(patchwork)
 library(kableExtra)
 
 samples <- read_csv("samples.csv") |>
@@ -105,29 +106,85 @@ sigmoid <- function(x, sample) {
 
     theta[3] / (1 + exp(-theta[1] * (x - theta[2]))) + theta[4]
 }
+```
 
-p <- ggplot() +
+```{r}
+posterior_plot <- ggplot() +
     xlim(0, 10) +
-    ylim(0, 5)
+    ylim(0, 7)
 
 sampled_sigmoids <- samples |>
-    filter(Iteration > max(Iteration) - 50) |>
+    filter(Iteration > max(Iteration) - 200) |>
     group_by(Iteration) |>
     group_map(\(sample, ...) \(x) sigmoid(x, sample))
 
 for (sig in sampled_sigmoids) {
-    p <- p + stat_function(fun = sig, alpha = 0.2)
+    posterior_plot <- posterior_plot + stat_function(fun = sig, alpha = 0.03, linewidth = 1)
 }
 
-p +
+posterior_plot <- posterior_plot +
     stat_function(
         aes(color = "Truth"),
         fun = \(x) sigmoid(x, truth |> rename(Sample = Truth)),
-        linewidth = 1
+        linewidth = 1.5
     ) +
     scale_color_manual(
         name = "",
         values = c("Truth" = "red")
     ) +
+    labs(
+        title = "Posterior",
+        x = "x",
+        y = expression(paste(lambda, "(x)"))
+    ) +
+    theme_classic() +
     theme(legend.position = "bottom")
+```
+
+```{r}
+num_samples <- 200
+
+samples <- tibble(
+    Iteration = seq_len(num_samples),
+    xscale = rgamma(num_samples, shape = 2, scale = 1),
+    xshift = rnorm(num_samples, 5, 1),
+    yscale = rgamma(num_samples, shape = 2, scale = 1),
+    yshift = rgamma(num_samples, shape = 1, scale = 1)
+)
+
+sampled_sigmoids <- samples |>
+    group_by(Iteration) |>
+    group_map(\(row, ...) \(x) with(row, yscale / (1 + exp(-xscale * (x - xshift))) + yshift))
+
+prior_plot <- ggplot() +
+    xlim(0, 10) +
+    ylim(0, 7)
+
+for (sig in sampled_sigmoids) {
+    prior_plot <- prior_plot + stat_function(fun = sig, alpha = 0.03, linewidth = 1)
+}
+
+prior_plot <- prior_plot +
+    stat_function(
+        aes(color = "Truth"),
+        fun = \(x) sigmoid(x, truth |> rename(Sample = Truth)),
+        linewidth = 1.5
+    ) +
+    scale_color_manual(
+        name = "",
+        values = c("Truth" = "red")
+    ) +
+    labs(
+        title = "Prior",
+        x = "x",
+        y = expression(paste(lambda, "(x)"))
+    ) +
+    theme_classic() +
+    theme(legend.position = "bottom")
+```
+
+```{r}
+#| fig-height: 7.5
+
+prior_plot / posterior_plot
 ```

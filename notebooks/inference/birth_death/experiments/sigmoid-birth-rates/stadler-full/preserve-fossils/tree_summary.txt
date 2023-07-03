@@ -1,0 +1,85 @@
+Tree 0
+  Number of total nodes: 38
+  Type 2 exists in 9 nodes
+  Type 4 exists in 4 nodes
+  Type 6 exists in 4 nodes
+  Type 8 exists in 21 nodes
+
+  Number of leaves: 15
+  Type 2 exists in 4 leaves
+  Type 4 exists in 1 leaves
+  Type 6 exists in 2 leaves
+  Type 8 exists in 8 leaves
+
+Tree 1
+  Number of total nodes: 138
+  Type 2 exists in 17 nodes
+  Type 4 exists in 18 nodes
+  Type 6 exists in 46 nodes
+  Type 8 exists in 57 nodes
+
+  Number of leaves: 54
+  Type 2 exists in 7 leaves
+  Type 4 exists in 7 leaves
+  Type 6 exists in 19 leaves
+  Type 8 exists in 21 leaves
+
+Tree 2
+  Number of total nodes: 9
+  Type 2 exists in 2 nodes
+  Type 4 exists in 5 nodes
+  Type 6 exists in 2 nodes
+
+  Number of leaves: 3
+  Type 4 exists in 2 leaves
+  Type 6 exists in 1 leaves
+
+Tree 3
+  Number of total nodes: 63
+  Type 2 exists in 9 nodes
+  Type 4 exists in 9 nodes
+  Type 6 exists in 14 nodes
+  Type 8 exists in 31 nodes
+
+  Number of leaves: 27
+  Type 2 exists in 4 leaves
+  Type 4 exists in 4 leaves
+  Type 6 exists in 6 leaves
+  Type 8 exists in 13 leaves
+
+Tree 4
+  Number of total nodes: 33
+  Type 2 exists in 8 nodes
+  Type 4 exists in 7 nodes
+  Type 6 exists in 10 nodes
+  Type 8 exists in 8 nodes
+
+  Number of leaves: 12
+  Type 2 exists in 3 leaves
+  Type 4 exists in 3 leaves
+  Type 6 exists in 2 leaves
+  Type 8 exists in 4 leaves
+
+Tree 5
+  Number of total nodes: 12
+  Type 2 exists in 1 nodes
+  Type 4 exists in 2 nodes
+  Type 6 exists in 1 nodes
+  Type 8 exists in 8 nodes
+
+  Number of leaves: 4
+  Type 8 exists in 4 leaves
+
+Tree 6
+  Number of total nodes: 38
+  Type 2 exists in 5 nodes
+  Type 4 exists in 7 nodes
+  Type 6 exists in 4 nodes
+  Type 8 exists in 22 nodes
+
+  Number of leaves: 14
+  Type 2 exists in 1 leaves
+  Type 4 exists in 3 leaves
+  Type 6 exists in 2 leaves
+  Type 8 exists in 8 leaves
+
