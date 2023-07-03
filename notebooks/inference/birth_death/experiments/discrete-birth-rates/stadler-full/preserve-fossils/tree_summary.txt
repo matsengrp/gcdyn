@@ -1,0 +1,31 @@
+Tree 0
+  Number of total nodes: 6
+  Type 2 exists in 6 nodes
+
+  Number of leaves: 3
+  Type 2 exists in 3 leaves
+
+Tree 1
+  Number of total nodes: 15
+  Type 2 exists in 7 nodes
+  Type 6 exists in 8 nodes
+
+  Number of leaves: 6
+  Type 2 exists in 3 leaves
+  Type 6 exists in 3 leaves
+
+Tree 2
+  Number of total nodes: 43
+  Type 2 exists in 1 nodes
+  Type 6 exists in 42 nodes
+
+  Number of leaves: 21
+  Type 6 exists in 21 leaves
+
+Tree 3
+  Number of total nodes: 6
+  Type 2 exists in 6 nodes
+
+  Number of leaves: 3
+  Type 2 exists in 3 leaves
+
