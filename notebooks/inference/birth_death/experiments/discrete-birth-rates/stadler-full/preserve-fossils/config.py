@@ -8,7 +8,7 @@ STATE_SPACE = (2, 4, 6, 8)
 INITIAL_STATE = 2
 PRESENT_TIME = 1
 NUM_TREES = 4
-TREE_SEED = 11
+TREE_SEED = 10
 
 TRUE_PARAMETERS = {
     "birth_response": poisson.DiscreteResponse(
