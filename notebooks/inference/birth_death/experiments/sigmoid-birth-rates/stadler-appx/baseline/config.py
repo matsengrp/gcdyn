@@ -7,13 +7,13 @@ from gcdyn.mcmc import Parameter
 STATE_SPACE = (2, 4, 6, 8)
 INITIAL_STATE = 2
 PRESENT_TIME = 2
-NUM_TREES = 20
+NUM_TREES = 10
 TREE_SEED = 11
 
 TRUE_PARAMETERS = {
     "birth_response": poisson.SigmoidResponse(1.0, 5.0, 3.0, 1.0),
-    "death_response": poisson.ConstantResponse(0.5),
-    "mutation_response": poisson.ConstantResponse(0.5),
+    "death_response": poisson.ConstantResponse(1.3),
+    "mutation_response": poisson.ConstantResponse(2),
     "mutator": mutators.DiscreteMutator(
         state_space=STATE_SPACE,
         transition_matrix=np.array(
@@ -36,10 +36,10 @@ YSHIFT_PRIOR_SCALE = 1
 DR_PRIOR_MEAN = -1
 DR_PRIOR_SD = 0.5
 
-XSCALE_PROPOSAL_SD = 2
-XSHIFT_PROPOSAL_SD = 1
-YSCALE_PROPOSAL_SD = 0.5
-YSHIFT_PROPOSAL_SD = 0.5
+XSCALE_PROPOSAL_SD = 3
+XSHIFT_PROPOSAL_SD = 2
+YSCALE_PROPOSAL_SD = 1
+YSHIFT_PROPOSAL_SD = 1
 DR_PROPOSAL_SD = 0.5
 
 MCMC_SEED = 10

@@ -7,15 +7,15 @@ from gcdyn.mcmc import Parameter
 STATE_SPACE = (2, 4, 6, 8)
 INITIAL_STATE = 2
 PRESENT_TIME = 2
-NUM_TREES = 20
+NUM_TREES = 10
 TREE_SEED = 11
 
 TRUE_PARAMETERS = {
     "birth_response": poisson.DiscreteResponse(
         phenotypes=STATE_SPACE, values=(1, 2, 3, 4)
     ),
-    "death_response": poisson.ConstantResponse(0.5),
-    "mutation_response": poisson.ConstantResponse(0.5),
+    "death_response": poisson.ConstantResponse(1.3),
+    "mutation_response": poisson.ConstantResponse(2),
     "mutator": mutators.DiscreteMutator(
         state_space=STATE_SPACE,
         transition_matrix=np.array(
