@@ -26,7 +26,7 @@ samples <- read_csv("samples.csv") |>
 
 truth <- tibble(
     Parameter = c("xscale", "xshift", "yscale", "yshift", "death_rate"),
-    Truth = c(1, 5, 3, 1, 2)
+    Truth = c(1, 5, 3, 1, 1.3)
 )
 ```
 
