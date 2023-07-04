@@ -239,7 +239,7 @@ def write_final_outputs(all_seqs, all_trees):
 
     print("  writing meta info to %s" % outfn("json", None))
     jfo = {
-        n.name: {"affinity": n.x}
+        n.name: {"affinity": n.x, 'n_muts': n.total_mutations}
         for pfo in all_trees
         for n in pfo["tree"].iter_descendants()
     }
@@ -270,7 +270,7 @@ def add_seqs(all_seqs, itrial, tree):
 
     all_seqs.append(
         {
-            "name": "naive",
+            "name": getname("naive"),
             "seq": replay.NAIVE_SEQUENCE,
         }
     )
