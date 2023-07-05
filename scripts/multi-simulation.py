@@ -4,12 +4,13 @@ import os
 import sys
 
 # import colored_traceback.always  # need to add this to installation stuff, i'm not sure how to do it atm
-import dill
+import pickle
 import time
 import copy
 import random
 import subprocess
 import json
+import dill
 
 from gcdyn import bdms, gpmap, mutators, poisson, utils, encode
 from experiments import replay
@@ -412,6 +413,8 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
+random.seed(args.seed)
+np.random.seed(args.seed)
 
 start = time.time()
 if args.test:
@@ -495,21 +498,32 @@ if (
                     )
         sys.stdout.flush()
         time.sleep(0.01 / max(1, len(procs)))
-    all_seqs, all_trees = [], []
-    for iproc in range(args.n_sub_procs):
-        subdir = "%s/iproc-%d" % (args.outdir, iproc)
-        istart = iproc * n_per_proc
-        for itrial in range(istart, istart + n_per_proc):
-            pfo = read_dill_file(outfn("pkl", itrial, odir=subdir))
-            if pfo is None:
-                print(
-                    "    %s can't rerun here (delete file by hand)"
-                    % color("red", "error")
-                )
-                continue
-            add_seqs(all_seqs, itrial, pfo["tree"])
-            add_tree(all_trees, itrial, pfo)
-    write_final_outputs(all_seqs, all_trees)
+    print('    writing merged files to %s' % args.outdir)
+    for ftype in ['fasta', 'nwk', 'json', 'npy', 'pkl']:
+        ofn = outfn(ftype, None)
+        fnames = [outfn(ftype, None, odir="%s/iproc-%d" % (args.outdir, i)) for i in range(args.n_sub_procs)]
+        if ftype in ['fasta', 'nwk']:
+            subprocess.check_call('cat %s >%s' % (' '.join(fnames), ofn), shell=True)
+        elif ftype in ['json']:
+            jfo = {}
+            for fn in fnames:
+                with open(fn) as jfile:
+                    jfo.update(json.load(jfile))
+            with open(ofn, 'w') as mfile:
+                json.dump(jfo, mfile)
+        elif ftype in ['npy']:
+            all_etrees = [e for fn in fnames for e in encode.read_trees(fn)]
+            encode.write_trees(ofn, all_etrees)
+        elif ftype in ['pkl']:
+            all_responses = []
+            for fn in fnames:
+                with open(fn, "rb") as rfile:
+                    all_responses += pickle.load(rfile)
+            with open(ofn, 'wb') as rfile:
+                dill.dump(all_responses, rfile)
+        else:
+            assert False
+
     sys.exit(0)
 
 assert args.death_value >= 0
@@ -547,7 +561,7 @@ for itrial in range(args.itrial_start, args.n_trials):
     if os.path.exists(ofn) and not args.overwrite:
         print("    output %s already exists, skipping" % ofn)
         pfo = read_dill_file(ofn)
-        if pfo is None:  # file is screwed  up and we want to rerun
+        if pfo is None:  # file is screwed up and we want to rerun
             print("    rerunning")
         else:
             add_seqs(all_seqs, itrial, pfo["tree"])
