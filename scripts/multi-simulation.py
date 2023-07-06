@@ -394,6 +394,11 @@ parser.add_argument(
     help="If set, the --n-trials are split among this many sub processes (which are recursively run with this script). Note that in terms of random seeds, results will not be identical with/without --n-sub-procs set (since there's no way to synchronize seeds partway through))",
 )
 parser.add_argument(
+    "--n-max-procs",
+    type=int,
+    help="If set (and --n-sub-procs is set), only run this many sub procs at a time.",
+)
+parser.add_argument(
     "--itrial-start",
     type=int,
     default=0,
@@ -482,6 +487,8 @@ if (
         subprocess.check_call("echo %s >%s" % (cmd_str, logfname), shell=True)
         cmd_str = "%s >>%s" % (cmd_str, logfname)
         procs.append(subprocess.Popen(cmd_str, env=os.environ, shell=True))
+        if args.n_max_procs is not None:
+            utils.limit_procs(procs, args.n_max_procs)
     while procs.count(None) != len(procs):  # we set each proc to None when it finishes
         for iproc in range(len(procs)):
             if procs[iproc] is None:  # already finished

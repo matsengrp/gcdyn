@@ -13,6 +13,7 @@ import resource
 import psutil
 import os
 import glob
+import time
 
 
 def simple_fivemer_contexts(sequence: str):
@@ -380,6 +381,19 @@ def memory_usage_fraction(
             )
         )
     return current_usage / total
+
+
+# ----------------------------------------------------------------------------------------
+def limit_procs(procs, n_max_procs, sleep_time=1, debug=False):
+    """Count number of <procs> that are currently running, and sleep until it's less than <n_max_procs>."""
+    def n_running_jobs():
+        return [p.poll() for p in procs].count(None)
+    n_jobs = n_running_jobs()
+    while n_jobs >= n_max_procs:
+        if debug:
+            print('%d (>=%d) running jobs' % (n_jobs, n_max_procs))
+        time.sleep(sleep_time)
+        n_jobs = n_running_jobs()
 
 
 # ----------------------------------------------------------------------------------------
