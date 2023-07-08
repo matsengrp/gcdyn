@@ -14,7 +14,6 @@ import dill
 
 from gcdyn import bdms, gpmap, mutators, poisson, utils, encode
 from experiments import replay
-from colors import color
 
 
 # ----------------------------------------------------------------------------------------
@@ -127,12 +126,12 @@ def generate_sequences_and_tree(
     for estr in sorted([k for k, v in err_strs.items() if v > 0]):
         print(
             "      %s %d failures with message '%s'"
-            % (color("yellow", "warning"), err_strs[estr], estr)
+            % (utils.color("yellow", "warning"), err_strs[estr], estr)
         )
     if not success:
         print(
             "  %s exceeded maximum number of tries %d so giving up"
-            % (color("yellow", "warning"), args.n_max_tries)
+            % (utils.color("yellow", "warning"), args.n_max_tries)
         )
         return None
 
@@ -140,7 +139,7 @@ def generate_sequences_and_tree(
     if len(tree) < n_to_sample:
         print(
             "  %s --n-seqs set to %d but tree has only %d tips, so just sampling all of them"
-            % (color("yellow", "warning"), n_to_sample, len(tree))
+            % (utils.color("yellow", "warning"), n_to_sample, len(tree))
         )
         n_to_sample = len(tree)
     tree.sample_survivors(n=n_to_sample, seed=seed)
@@ -300,7 +299,7 @@ def read_dill_file(fname):
     except Exception as ex:
         print(
             "    %s reading pickle file %s:\n            %s"
-            % (color("red", "error"), fname, ex)
+            % (utils.color("red", "error"), fname, ex)
         )
     return pfo
 
@@ -476,7 +475,7 @@ if (
         )
         utils.remove_from_arglist(clist, "--n-sub-procs", has_arg=True)
         cmd_str = " ".join(clist)
-        print("  %s %s" % (color("red", "run"), cmd_str))
+        print("  %s %s" % (utils.color("red", "run"), cmd_str))
         logfname = "%s/simu.log" % subdir
         if os.path.exists(logfname):
             subprocess.check_call(
@@ -581,7 +580,7 @@ for itrial in range(args.itrial_start, args.n_trials):
     birth_resp, death_resp = get_responses(
         np.random.choice(args.xscale_list), np.random.choice(args.xshift_list)
     )
-    print(color("blue", "trial %d:" % itrial), end=" ")
+    print(utils.color("blue", "trial %d:" % itrial), end=" ")
     tree = generate_sequences_and_tree(
         birth_resp, death_resp, mutation_resp, mutator, seed=rng
     )
@@ -624,7 +623,7 @@ if args.dont_run_new_simu:
 if n_missing > 0:
     print(
         "    %s missing %d / %d trees (it's generally expected that some will fail, so this is probably ok if it's not too many)"
-        % (color("yellow", "warning"), n_missing, args.n_trials)
+        % (utils.color("yellow", "warning"), n_missing, args.n_trials)
     )
 
 if len(args.xscale_list) > 0:
