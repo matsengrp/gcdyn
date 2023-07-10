@@ -723,11 +723,11 @@ def stadler_full_log_likelihood_dense(
             # We need to get q_i, but only for the type i belonging to the current branch
             if event.event == tree._SAMPLING_EVENT:
                 # "a tip at the present t_end == 0"
-                event.q_end = jnp.array(ρ)
+                event.q_end = jnp.array([ρ])
                 # event.p_end already exists
             elif event.event == tree._DEATH_EVENT:
                 # "a tip at time t_end > 0"
-                event.q_end = jnp.array(μ(event.up) * σ)
+                event.q_end = jnp.array([μ(event.up) * σ])
                 # event.p_end already exists
             elif event.event == tree._BIRTH_EVENT:
                 event.q_end = (
