@@ -7,7 +7,7 @@ import jax.numpy as jnp
 import numpy as onp
 import scipy
 import tensorflow as tf
-from diffrax import ODETerm, PIDController, Tsit5, diffeqsolve
+from diffrax import ODETerm, PIDController, SaveAt, Tsit5, diffeqsolve
 from jax import lax
 
 # NOTE: sphinx is currently unable to present this in condensed form when the sphinx_autodoc_typehints extension is enabled
@@ -478,8 +478,7 @@ def stadler_full_log_likelihood(
     if not (0 <= ρ <= 1 and 0 <= σ <= 1):
         raise ValueError("sampling_probability must be in [0, 1]")
 
-    # Compute q along the tree. The likelihood for the tree will be
-    # q at the root, times the probabilities of the observed events
+    # Compute q along the tree. The likelihood for the tree will be q at the root
 
     result = 0
 
@@ -597,6 +596,173 @@ def stadler_full_log_likelihood(
     return result
 
 
+def stadler_full_log_likelihood_dense(
+    trees: list[ete3.TreeNode],
+    birth_response: poisson.Response,
+    death_response: poisson.Response,
+    mutation_response: poisson.Response,
+    mutator: mutators.DiscreteMutator,
+    extant_sampling_probability: float,
+    extinct_sampling_probability: float,
+    present_time: float,
+    rtol=1e-5,
+    atol=1e-9,
+    dtmax=0.01,
+) -> float:
+    """
+    A model over trees that are missing unsampled survivors and fossils.
+
+    Requires that `tree.prune()` has been called.
+    Requires that a py:class:`mutators.DiscreteMutator` be used as the `mutator`, and that the diagonal of the transition matrix is all zero.
+    Currently requires that all py:class:`poisson.Response` objects are homogenous responses.
+
+    Barido-Sottani, Joëlle, Timothy G Vaughan, and Tanja Stadler. “A Multitype Birth–Death Model for Bayesian Inference of Lineage-Specific Birth and Death Rates.” Edited by Adrian Paterson. Systematic Biology 69, no. 5 (September 1, 2020): 973–86. https://doi.org/10.1093/sysbio/syaa016.
+    """
+
+    # Ensure our trees are compatible with this model
+    for tree in trees:
+        if not tree._pruned:
+            raise NotImplementedError("tree must be pruned")
+        if not tree._sampled:
+            raise RuntimeError("tree must be sampled")
+
+    # This likelihood requires a discrete type space to be specified
+    type_space = jnp.array(list(mutator.state_space.keys()))
+    mutation_probs = mutator.transition_matrix
+
+    # Relevant values to set aside
+    λ = birth_response
+    μ = death_response
+    γ = mutation_response
+    ρ = extant_sampling_probability
+    σ = extinct_sampling_probability
+
+    if not (0 <= ρ <= 1 and 0 <= σ <= 1):
+        raise ValueError("sampling_probability must be in [0, 1]")
+
+    # Compute q along the tree. The likelihood for the tree will be q at the root
+
+    result = 0
+
+    def dp_dt(t, p, args=None):
+        # t is a scalar
+        # p is a vector matching `type_space`
+
+        return (
+            -(
+                γ.λ_phenotype(type_space)
+                + λ.λ_phenotype(type_space)
+                + μ.λ_phenotype(type_space)
+            )
+            * p
+            + μ.λ_phenotype(type_space) * (1 - σ)
+            + λ.λ_phenotype(type_space) * p**2
+            + γ.λ_phenotype(type_space) * (mutation_probs * p).sum(axis=1)
+        )
+
+    def dq_dt(t, q_i, args):
+        # Note: if `args` is a jnp.array or np.array for event.up.x, diffrax will trace it for jit
+        # and it will have the potential to run quickly (except we can't index into state_space[parent_phenotype])
+        # with a tracer object
+        # elseif `args` is the TreeNode object directly, diffrax will treat it as a static arg, and this function
+        # will recompile every time :( (see equinox filter_jit for details on this automatic dynamic/static detection)
+        # Therefore we set args to be event.up.x directly
+
+        # t is a scalar
+        # q is a scalar
+
+        parent_phenotype = args
+
+        p_t = p.evaluate(t)
+
+        dq_i = -(
+            γ.λ_phenotype(parent_phenotype)
+            + λ.λ_phenotype(parent_phenotype)
+            + μ.λ_phenotype(parent_phenotype)
+        ) * q_i + 2 * λ.λ_phenotype(parent_phenotype) * q_i * _select_where(
+            p_t, type_space == parent_phenotype
+        )
+
+        return dq_i
+
+    # p can be solved now with a dense (grid-free) solution,
+    # and evaluated at any point later
+    p = diffeqsolve(
+        ODETerm(dp_dt),
+        solver=Tsit5(),
+        t0=0,
+        t1=present_time,
+        # dt0=0.001,
+        dt0=None,
+        y0=jnp.ones_like(type_space) - ρ,
+        stepsize_controller=PIDController(rtol=rtol, atol=atol, dtmax=dtmax),
+        saveat=SaveAt(dense=True),
+    )
+
+    for tree in trees:
+        for leaf in tree.iter_leaves():
+            leaf.p_end = p.evaluate(present_time - leaf.t)
+
+        # Postorder over the tree should ensure we integrate from present to past,
+        # with initial values computed in correct order & available for every branch
+        for event in tree.iter_descendants("postorder"):
+            # An event contains the following:
+            #  - event.t is the time of the event
+            #  - event.dist is the time since the last event
+            #  - event.event is the event type
+            #  - event.x is the type after this event
+            #  - event.up.x is the type that determined the rate parameters that generated this event
+            # so the event represents the end of a branch, but contains the type of the next branch
+
+            # Reframe the timing of the branch that leads to this event
+            # Note: don't use event.dist here, it introduces more subtractions
+            # and we will have floating point issues
+            t_start = present_time - event.up.t
+            t_end = present_time - event.t
+
+            # We need to get q_i, but only for the type i belonging to the current branch
+            if event.event == tree._SAMPLING_EVENT:
+                # "a tip at the present t_end == 0"
+                event.q_end = jnp.array(ρ)
+                # event.p_end already exists
+            elif event.event == tree._DEATH_EVENT:
+                # "a tip at time t_end > 0"
+                event.q_end = jnp.array(μ(event.up) * σ)
+                # event.p_end already exists
+            elif event.event == tree._BIRTH_EVENT:
+                event.q_end = (
+                    λ(event.up) * event.children[0].q_start * event.children[1].q_start
+                )
+                event.p_end = event.children[0].p_start
+            elif event.event == tree._MUTATION_EVENT:
+                event.q_end = (
+                    γ(event.up)
+                    * mutator.prob(event.up.x, event.x)
+                    * event.children[0].q_start
+                )
+                event.p_end = event.children[0].p_start
+            else:
+                raise ValueError(f"unknown event {event.event}")
+
+            q = diffeqsolve(
+                ODETerm(dq_dt),
+                solver=Tsit5(),
+                t0=t_end,
+                t1=t_start,
+                dt0=0.001,
+                y0=event.q_end,
+                args=event.up.x,
+                stepsize_controller=PIDController(rtol=rtol, atol=atol, dtmax=dtmax),
+            )
+
+            event.q_start = q.ys[-1]
+            event.p_start = p.evaluate(t_start)
+
+        result += jnp.log(tree.children[0].q_start)
+
+    return result
+
+
 def stadler_full_log_likelihood_scipy(
     trees: list[ete3.TreeNode],
     birth_response: poisson.Response,
@@ -642,8 +808,7 @@ def stadler_full_log_likelihood_scipy(
     if not (0 <= ρ <= 1 and 0 <= σ <= 1):
         raise ValueError("sampling_probability must be in [0, 1]")
 
-    # Compute q along the tree. The likelihood for the tree will be
-    # q at the root, times the probabilities of the observed events
+    # Compute q along the tree. The likelihood for the tree will be q at the root
 
     result = 0
 
