@@ -451,6 +451,7 @@ if (
 ):  # this stuff is all copied from partis utils.py, gd it this would be like three lines if i could import that
     procs = []
     n_per_proc = int(args.n_trials / float(args.n_sub_procs))
+    print('    starting %d procs with %d events per proc' % (args.n_sub_procs, n_per_proc))
     for iproc in range(args.n_sub_procs):
         clist = ["python"] + copy.deepcopy(sys.argv)
         subdir = "%s/iproc-%d" % (args.outdir, iproc)
@@ -459,7 +460,7 @@ if (
             os.path.exists(outfn("pkl", i, odir=subdir))
             for i in range(istart, istart + n_per_proc)
         ):
-            print("    proc %d: all outputs exist" % iproc)
+            print("        proc %d: all outputs exist" % iproc)
             continue
         if not os.path.exists(subdir):
             os.makedirs(subdir)
@@ -475,7 +476,8 @@ if (
         )
         utils.remove_from_arglist(clist, "--n-sub-procs", has_arg=True)
         cmd_str = " ".join(clist)
-        print("  %s %s" % (utils.color("red", "run"), cmd_str))
+        print("      %s %s" % (utils.color("red", "run"), cmd_str))
+        sys.stdout.flush()
         logfname = "%s/simu.log" % subdir
         if os.path.exists(logfname):
             subprocess.check_call(
@@ -505,9 +507,11 @@ if (
         sys.stdout.flush()
         time.sleep(0.01 / max(1, len(procs)))
     print('    writing merged files to %s' % args.outdir)
+    print('        ftype  N files   time (s)  memory usage')
     for ftype in ['fasta', 'nwk', 'json', 'npy', 'pkl']:
         ofn = outfn(ftype, None)
         fnames = [outfn(ftype, None, odir="%s/iproc-%d" % (args.outdir, i)) for i in range(args.n_sub_procs)]
+        start = time.time()
         if ftype in ['fasta', 'nwk']:
             subprocess.check_call('cat %s >%s' % (' '.join(fnames), ofn), shell=True)
         elif ftype in ['json']:
@@ -529,6 +533,7 @@ if (
                 dill.dump(all_responses, rfile)
         else:
             assert False
+        print('      %7s  %3d        %5.2f    %5.2f' % (ftype, len(fnames), time.time() - start, utils.memory_usage_fraction()))
 
     sys.exit(0)
 

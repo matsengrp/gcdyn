@@ -85,10 +85,11 @@ def pad_trees(
     max_leaf_count = max(
         min_n_max_leaves, max(n_leaf_list)
     )  # model complains if this is 70, i'm not sure why but whatever
-    print(
-        "    padding encoded trees to max leaf count %d (all leaf counts: %s)"
-        % (max_leaf_count, " ".join(str(c) for c in set(n_leaf_list)))
-    )
+    if debug:
+        print(
+            "    padding encoded trees to max leaf count %d (all leaf counts: %s)"
+            % (max_leaf_count, " ".join(str(c) for c in set(n_leaf_list)))
+        )
     padded_trees = []
     for itree, etree in enumerate(trees):
         assert len(etree) == 4  # make sure there's 4 rows

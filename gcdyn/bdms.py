@@ -36,7 +36,7 @@ import itertools
 import copy
 from collections import defaultdict
 
-from gcdyn import mutators, poisson
+from gcdyn import mutators, poisson, utils
 
 
 class TreeNode(ete3.Tree):
