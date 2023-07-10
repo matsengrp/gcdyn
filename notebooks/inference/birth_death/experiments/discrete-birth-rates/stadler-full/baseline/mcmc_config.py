@@ -1,6 +1,6 @@
 import jax.numpy as np
 from scipy.stats import lognorm
-from tree_config import STATE_SPACE, TRUE_PARAMETERS
+from tree_config import PRESENT_TIME, STATE_SPACE, TRUE_PARAMETERS
 
 from gcdyn import models, poisson
 from gcdyn.mcmc import Parameter
@@ -62,7 +62,7 @@ MCMC_PARAMETERS = dict(
 
 
 def log_likelihood(birth_rate1, birth_rate2, birth_rate3, death_rate, trees):
-    return models.naive_log_likelihood(
+    return models.stadler_full_log_likelihood(
         trees=trees,
         birth_response=poisson.DiscreteResponse(
             phenotypes=STATE_SPACE,
@@ -72,4 +72,6 @@ def log_likelihood(birth_rate1, birth_rate2, birth_rate3, death_rate, trees):
         mutation_response=TRUE_PARAMETERS["mutation_response"],
         mutator=TRUE_PARAMETERS["mutator"],
         extant_sampling_probability=TRUE_PARAMETERS["extant_sampling_probability"],
+        extinct_sampling_probability=TRUE_PARAMETERS["extinct_sampling_probability"],
+        present_time=PRESENT_TIME,
     )

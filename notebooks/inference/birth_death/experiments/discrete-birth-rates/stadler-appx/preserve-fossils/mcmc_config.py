@@ -7,10 +7,10 @@ from gcdyn.mcmc import Parameter
 
 BR_PRIOR_MEAN = 1.5
 BR_PRIOR_SD = 1
-DR_PRIOR_MEAN = -1
-DR_PRIOR_SD = 0.5
+DR_PRIOR_MEAN = 0  # -1
+DR_PRIOR_SD = 0.3  # 0.5
 
-BR_PROPOSAL_SD = 0.2
+BR_PROPOSAL_SD = 0.1
 DR_PROPOSAL_SD = 0.2
 
 MCMC_SEED = 10
@@ -48,16 +48,6 @@ MCMC_PARAMETERS = dict(
             1, random_state=rng
         ),
     ),
-    birth_rate4=Parameter(
-        prior_log_density=lognorm(scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD).logpdf,
-        prior_generator=lambda n, rng: lognorm(
-            scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD
-        ).rvs(n, random_state=rng),
-        proposal_log_density=lambda p, c: lognorm(scale=c, s=BR_PROPOSAL_SD).logpdf(p),
-        proposal_generator=lambda c, rng: lognorm(scale=c, s=BR_PROPOSAL_SD).rvs(
-            1, random_state=rng
-        ),
-    ),
     death_rate=Parameter(
         prior_log_density=lognorm(scale=np.exp(DR_PRIOR_MEAN), s=DR_PRIOR_SD).logpdf,
         prior_generator=lambda n, rng: lognorm(
@@ -71,14 +61,12 @@ MCMC_PARAMETERS = dict(
 )
 
 
-def log_likelihood(
-    birth_rate1, birth_rate2, birth_rate3, birth_rate4, death_rate, trees
-):
+def log_likelihood(birth_rate1, birth_rate2, birth_rate3, death_rate, trees):
     return models.stadler_appx_log_likelihood(
         trees=trees,
         birth_response=poisson.DiscreteResponse(
             phenotypes=STATE_SPACE,
-            values=np.hstack((birth_rate1, birth_rate2, birth_rate3, birth_rate4)),
+            values=np.hstack((birth_rate1, birth_rate2, birth_rate3)),
         ),
         death_response=poisson.ConstantResponse(death_rate),
         mutation_response=TRUE_PARAMETERS["mutation_response"],
