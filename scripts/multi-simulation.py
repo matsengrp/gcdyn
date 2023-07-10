@@ -150,18 +150,25 @@ def generate_sequences_and_tree(
     for node in tree.iter_descendants():
         assert np.isclose(node.t - node.up.t, node.dist)
 
+    set_mut_stats(tree)
+
     return tree
 
 
 # ----------------------------------------------------------------------------------------
-def get_mut_stats(tree):
+def set_mut_stats(tree):
     tree.total_mutations = 0
 
     for node in tree.iter_descendants(strategy="preorder"):
         node.total_mutations = node.n_mutations + node.up.total_mutations
 
     tmut_tots = [leaf.total_mutations for leaf in tree.iter_leaves()]
-    return np.mean(tmut_tots), min(tmut_tots), max(tmut_tots)
+
+    tmean, tmin, tmax = np.mean(tmut_tots), min(tmut_tots), max(tmut_tots)
+    print(
+        "   mutations per sequence:  mean %.1f   min %.1f  max %.1f"
+        % (tmean, tmin, tmax)
+    )
 
 
 # ----------------------------------------------------------------------------------------
@@ -592,12 +599,6 @@ for itrial in range(args.itrial_start, args.n_trials):
     if tree is None:
         n_missing += 1
         continue
-
-    tmean, tmin, tmax = get_mut_stats(tree)
-    print(
-        "   mutations per sequence:  mean %.1f   min %.1f  max %.1f"
-        % (tmean, tmin, tmax)
-    )
 
     with open(ofn, "wb") as fp:
         dill.dump(
