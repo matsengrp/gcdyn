@@ -1,48 +1,41 @@
 #!/usr/bin/env -S nextflow run -resume
 
 workflow {
-    def experiment_paths = Channel.fromPath("experiments/**/config.py") |
+    def experiment_paths = Channel.fromPath("experiments/**/mcmc_config.py") |
         map { it.parent.toString() }
         // Store as string to avoid hashing the entire directory for caching
     
     def simulation_results = experiment_paths |
-        map { [ it, file(it) / "config.py"] } |
-        simulate
+        map { [it, file(it) / "tree_config.py"] } |
+        sample_trees |
+        map { [it[0], it[1], file(it[0]) / "mcmc_config.py", it[2]] } |
+        run_mcmc
 
-    simulation_results | map { it[0..2] } | summarize_trees
+    simulation_results | map { it[0..1] } | summarize_trees
 
-    simulation_results | map { [it[0], file(it[0]) / "plots.qmd", it[3]] } | visualize
+    simulation_results | map { [it[0], file(it[0]) / "plots.qmd", it[2]] } | visualize
 }
 
-process simulate {
+process sample_trees {
     input:
-    tuple val(experiment_path), path(config_file)
+    tuple val(experiment_path), path(tree_config_file)
 
     output:
-    tuple val(experiment_path), path(config_file), path("trees.pkl"), path("samples.csv")
+    tuple val(experiment_path), path(tree_config_file), path("trees.pkl")
  
     """
     #!/usr/bin/env python
 
     import pickle
-    import pandas as pd
-    
-    from ${config_file.baseName} import (
+
+    from ${tree_config_file.baseName} import (
         NUM_TREES,
         PRESENT_TIME,
         INITIAL_STATE,
         TRUE_PARAMETERS,
         TREE_SEED,
-        MCMC_SEED,
-        NUM_MCMC_SAMPLES,
-        MCMC_PARAMETERS,
-        log_likelihood
     )
     from gcdyn.utils import sample_trees
-    from gcdyn.mcmc import mh_chain
-    from functools import partial
-    from jax import jit
-    from jax.config import config
 
     trees = sample_trees(
         n=NUM_TREES,
@@ -56,8 +49,37 @@ process simulate {
 
     with open("trees.pkl", "wb") as f:
         pickle.dump(trees, f)
+    """
+}
+
+process run_mcmc {
+    input:
+    tuple val(experiment_path), path(tree_config_file), path(mcmc_config_file), path("trees.pkl")
+
+    output:
+    tuple val(experiment_path), path("trees.pkl"), path("samples.csv")
+ 
+    """
+    #!/usr/bin/env python
+
+    import pickle
+    import pandas as pd
+
+    from ${mcmc_config_file.baseName} import (
+        MCMC_SEED,
+        NUM_MCMC_SAMPLES,
+        MCMC_PARAMETERS,
+        log_likelihood
+    )
+    from gcdyn.mcmc import mh_chain
+    from functools import partial
+    from jax import jit
+    from jax.config import config
 
     config.update("jax_enable_x64", True)
+
+    with open("trees.pkl", "rb") as f:
+        trees = pickle.load(f)
 
     posterior_samples, stats = mh_chain(
         length=NUM_MCMC_SAMPLES,
@@ -74,7 +96,7 @@ process summarize_trees {
     publishDir "$experiment_path", mode: "copy"
 
     input:
-    tuple val(experiment_path), path(config_file), path("trees.pkl")
+    tuple val(experiment_path), path("trees.pkl")
 
     output:
     path "tree_summary.txt"
