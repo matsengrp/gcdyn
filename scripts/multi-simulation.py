@@ -77,6 +77,7 @@ def generate_sequences_and_tree(
     death_resp,
     mutation_resp,
     mutator,
+    itrial,
     seed=0,
 ):
     err_strs, success = {}, False
@@ -134,6 +135,9 @@ def generate_sequences_and_tree(
             % (utils.color("yellow", "warning"), args.n_max_tries)
         )
         return None
+
+    if args.make_plots:
+        utils.plot_tree_slices(args.outdir + '/plots', tree, args.time_to_sampling, itrial)
 
     n_to_sample = args.n_seqs
     if len(tree) < n_to_sample:
@@ -422,6 +426,11 @@ parser.add_argument(
     action="store_true",
     help="sets some default parameter values that run quickly and successfully, i.e. useful for quick tests",
 )
+parser.add_argument(
+    "--make-plots",
+    action="store_true",
+    help='note that you\'ll need to install joypy with: conda install -c conda-forge joypy'
+)
 
 args = parser.parse_args()
 random.seed(args.seed)
@@ -463,11 +472,9 @@ if (
         clist = ["python"] + copy.deepcopy(sys.argv)
         subdir = "%s/iproc-%d" % (args.outdir, iproc)
         istart = iproc * n_per_proc
-        if all(
-            os.path.exists(outfn("pkl", i, odir=subdir))
-            for i in range(istart, istart + n_per_proc)
-        ):
-            print("        proc %d: all outputs exist" % iproc)
+        if all(os.path.exists(outfn(sfx, None, odir=subdir)) for sfx in ['fasta', 'npy', 'pkl']):
+            print("        proc %d: final outputs exist" % iproc)
+            sys.stdout.flush()
             continue
         if not os.path.exists(subdir):
             os.makedirs(subdir)
@@ -579,6 +586,8 @@ for itrial in range(args.itrial_start, args.n_trials):
     if os.path.exists(ofn) and not args.overwrite:
         print("    output %s already exists, skipping" % ofn)
         pfo = read_dill_file(ofn)
+        if args.make_plots:
+            print('    note: can\'t make tree slice plots when reading pickle files, since we write pruned trees')
         if pfo is None:  # file is screwed up and we want to rerun
             print("    rerunning")
         else:
@@ -594,7 +603,7 @@ for itrial in range(args.itrial_start, args.n_trials):
     )
     print(utils.color("blue", "trial %d:" % itrial), end=" ")
     tree = generate_sequences_and_tree(
-        birth_resp, death_resp, mutation_resp, mutator, seed=rng
+        birth_resp, death_resp, mutation_resp, mutator, itrial, seed=rng
     )
     if tree is None:
         n_missing += 1
@@ -641,6 +650,7 @@ if len(args.xscale_list) > 0:
 
 write_final_outputs(all_seqs, all_trees)
 
-# utils.plot_trees(args.outdir + "/plots", all_trees)
+if args.make_plots:
+    utils.plot_phenotype_response(args.outdir + "/plots", all_trees)
 
 print("    total simulation time: %.1f sec" % (time.time() - start))

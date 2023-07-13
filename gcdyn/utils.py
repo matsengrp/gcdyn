@@ -14,6 +14,8 @@ import psutil
 import os
 import glob
 import time
+import pandas as pd
+import warnings
 
 
 def simple_fivemer_contexts(sequence: str):
@@ -368,7 +370,43 @@ def make_dl_plots(
 
 
 # ----------------------------------------------------------------------------------------
-def plot_trees(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_plot=10):
+def plot_tree_slices(plotdir, tree, max_time, itrial):
+    n_plots = 5
+    dt = round(max_time / float(n_plots))
+    tdata = {'time' : [], 'affinity' : []}
+    for stime in list(range(dt, max_time, dt)) + [max_time]:
+        for aval in tree.slice(stime):
+            tdata['time'].append(stime)
+            tdata['affinity'].append(aval)
+
+    mpl_init()
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')  # i don't know why it has to warn me that it's clearing the fig/ax I'm passing in, and I don't know how else to stop it
+        sns.set_theme(style="white", rc={"axes.facecolor": (0, 0, 0, 0), 'axes.linewidth':2})
+        palette = None #sns.color_palette("Set2", 12)
+        g = sns.FacetGrid(pd.DataFrame(tdata), palette=palette, row="time", hue="time", aspect=9, height=1.2)  # create a grid with a row for each 'time'
+        g.map_dataframe(sns.kdeplot, x="affinity", fill=True, alpha=0.6)
+        g.map_dataframe(sns.kdeplot, x="affinity", color='black')
+
+        def label_fn(x, color, label):
+            ax = plt.gca() #get current axis
+            ax.text(0, .2, label, color='black', fontsize=13,
+                    ha="left", va="center", transform=ax.transAxes)
+        g.map(label_fn, "time")  # iterate grid to plot labels
+
+        g.fig.subplots_adjust(hspace=-.7)  # adjust subplots to create overlap
+        g.set_titles("")  # remove subplot titles
+        g.set(yticks=[], xlabel="affinity", ylabel='time')  # remove yticks and set xlabel
+        g.despine(left=True)
+        plt.suptitle('affinity vs time (tree %d)' % itrial, y=0.98)
+
+    if not os.path.exists(plotdir):
+        os.makedirs(plotdir)
+    plt.savefig("%s/phenotype-slices-tree-%d.svg" % (plotdir, itrial))
+
+
+# ----------------------------------------------------------------------------------------
+def plot_phenotype_response(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_plot=10):
     # ----------------------------------------------------------------------------------------
     def plt_single_tree(itree, pfo, xmin, xmax, n_bins=30):
         plt.clf()
