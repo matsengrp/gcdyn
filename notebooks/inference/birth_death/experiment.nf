@@ -6,14 +6,14 @@ workflow {
         // Store as string to avoid hashing the entire directory for caching
     
     def simulation_results = experiment_paths |
-        map { [it, file(it) / "tree_config.py"] } |
+        map { [it, file(it).parent / "tree_config.py"] } |
         sample_trees |
         map { [it[0], it[1], file(it[0]) / "mcmc_config.py", it[2]] } |
         run_mcmc
 
     simulation_results | map { it[0..1] } | summarize_trees
 
-    simulation_results | map { [it[0], file(it[0]) / "plots.qmd", it[2]] } | visualize
+    //simulation_results | map { [it[0], file(it[0]).parent.parent / "plots.qmd", it[2]] } | visualize
 }
 
 process sample_trees {
@@ -33,22 +33,26 @@ process sample_trees {
         PRESENT_TIME,
         INITIAL_STATE,
         TRUE_PARAMETERS,
-        TREE_SEED,
     )
     from gcdyn.utils import sample_trees
 
-    trees = sample_trees(
-        n=NUM_TREES,
-        t=PRESENT_TIME,
-        init_x=INITIAL_STATE,
-        **TRUE_PARAMETERS,
-        seed=TREE_SEED,
-        min_survivors=1,
-        prune=True,
-    )
+    tree_collections = []
+
+    for tree_seed in range(100):
+        trees = sample_trees(
+            n=NUM_TREES,
+            t=PRESENT_TIME,
+            init_x=INITIAL_STATE,
+            **TRUE_PARAMETERS,
+            seed=tree_seed,
+            min_survivors=1,
+            prune=True,
+        )
+
+        tree_collections.append(trees)
 
     with open("trees.pkl", "wb") as f:
-        pickle.dump(trees, f)
+        pickle.dump(tree_collections, f)
     """
 }
 
@@ -79,16 +83,21 @@ process run_mcmc {
     config.update("jax_enable_x64", True)
 
     with open("trees.pkl", "rb") as f:
-        trees = pickle.load(f)
+        tree_collections = pickle.load(f)
 
-    posterior_samples, stats = mh_chain(
-        length=NUM_MCMC_SAMPLES,
-        parameters=MCMC_PARAMETERS,
-        log_likelihood=jit(partial(log_likelihood, trees=trees)),
-        seed=MCMC_SEED
-    )
+    samples = pd.DataFrame()
 
-    pd.DataFrame(dict(**posterior_samples, **stats)).to_csv("samples.csv")
+    for run, trees in enumerate(tree_collections):
+        posterior_samples, stats = mh_chain(
+            length=NUM_MCMC_SAMPLES,
+            parameters=MCMC_PARAMETERS,
+            log_likelihood=jit(partial(log_likelihood, trees=trees)),
+            seed=MCMC_SEED
+        )
+
+        samples = pd.concat((samples, pd.DataFrame(dict(**posterior_samples, **stats, run=run))))
+
+    samples.to_csv("samples.csv")
     """
 }
 
@@ -109,35 +118,28 @@ process summarize_trees {
     from collections import defaultdict
 
     with open("trees.pkl", "rb") as f:
-        trees = pickle.load(f)
+        tree_collections = pickle.load(f)
 
     with open("tree_summary.txt", "w") as f:
-        for i, tree in enumerate(trees):
-            f.write(f"Tree {i}\\n")
-            f.write(f"  Number of total nodes: {sum(1 for _ in tree.traverse())}\\n")
-            
+        type_counts_nodes = defaultdict(int)
+        type_counts_leaves = defaultdict(int)
 
-            type_counts = defaultdict(int)
+        for collection in tree_collections:
+            for tree in collection:
+                for node in tree.traverse():
+                    type_counts[node.x] += 1
+                    
+                    if node.is_leaf():
+                        type_counts_leaves[node.x] += 1
 
-            for node in tree.traverse():
-                type_counts[node.x] += 1
+        f.write(f"Number of total nodes: {sum(1 for _ in tree.traverse())}\\n")
+        for type in sorted(type_counts_nodes.keys()):
+            f.write(f"  Type {type} exists in {type_counts[type]} nodes\\n")
+        f.write("\\n")
+        f.write(f"Number of leaves: {sum(1 for _ in tree.iter_leaves())}\\n")
+        for type in sorted(type_counts_leaves.keys()):
+            f.write(f"  Type {type} exists in {type_counts[type]} leaves\\n")
 
-            for type in sorted(type_counts.keys()):
-                f.write(f"  Type {type} exists in {type_counts[type]} nodes\\n")
-
-            f.write("\\n")
-
-            f.write(f"  Number of leaves: {sum(1 for _ in tree.iter_leaves())}\\n")
-
-            type_counts = defaultdict(int)
-
-            for node in tree.iter_leaves():
-                type_counts[node.x] += 1
-
-            for type in sorted(type_counts.keys()):
-                f.write(f"  Type {type} exists in {type_counts[type]} leaves\\n")
-            
-            f.write("\\n")
     """
 }
 
