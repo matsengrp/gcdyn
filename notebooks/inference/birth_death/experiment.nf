@@ -13,7 +13,7 @@ workflow {
 
     simulation_results | map { it[0..1] } | summarize_trees
 
-    //simulation_results | map { [it[0], file(it[0]).parent.parent / "plots.qmd", it[2]] } | visualize
+    simulation_results | map { [it[0], file(it[0]).parent.parent / "plots.qmd", it[2]] } | visualize
 }
 
 process sample_trees {
@@ -127,18 +127,18 @@ process summarize_trees {
         for collection in tree_collections:
             for tree in collection:
                 for node in tree.traverse():
-                    type_counts[node.x] += 1
+                    type_counts_nodes[node.x] += 1
                     
                     if node.is_leaf():
                         type_counts_leaves[node.x] += 1
 
         f.write(f"Number of total nodes: {sum(1 for _ in tree.traverse())}\\n")
         for type in sorted(type_counts_nodes.keys()):
-            f.write(f"  Type {type} exists in {type_counts[type]} nodes\\n")
+            f.write(f"  Type {type} exists in {type_counts_nodes[type]} nodes\\n")
         f.write("\\n")
         f.write(f"Number of leaves: {sum(1 for _ in tree.iter_leaves())}\\n")
         for type in sorted(type_counts_leaves.keys()):
-            f.write(f"  Type {type} exists in {type_counts[type]} leaves\\n")
+            f.write(f"  Type {type} exists in {type_counts_leaves[type]} leaves\\n")
 
     """
 }

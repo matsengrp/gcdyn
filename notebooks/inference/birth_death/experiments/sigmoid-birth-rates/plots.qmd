@@ -36,7 +36,7 @@ truth <- tibble(
 #| fig-height: 6
 
 left_join(samples, truth, by = "Parameter") |>
-    filter(Iteration > 100) |>
+    filter(Iteration > 100 & run == 1) |>
     ggplot(aes(Iteration, Sample)) +
     geom_line() +
     geom_hline(aes(yintercept = Truth, color = "Truth")) +
@@ -51,6 +51,7 @@ left_join(samples, truth, by = "Parameter") |>
 #| fig-height: 6
 
 left_join(samples, truth, by = "Parameter") |>
+    filter(run == 1) |>
     ggplot() +
     geom_histogram(
         aes(x = Sample, y = after_stat(density), fill = "Posterior")
@@ -75,6 +76,7 @@ left_join(samples, truth, by = "Parameter") |>
 
 ```{r}
 samples |>
+    filter(run == 1) |>
     group_by(Parameter) |>
     summarise(
         n = n(),
@@ -114,7 +116,7 @@ posterior_plot <- ggplot() +
     ylim(0, 7)
 
 sampled_sigmoids <- samples |>
-    filter(Iteration > max(Iteration) - 200) |>
+    filter(Iteration > max(Iteration) - 200 & run == 1) |>
     group_by(Iteration) |>
     group_map(\(sample, ...) \(x) sigmoid(x, sample))
 

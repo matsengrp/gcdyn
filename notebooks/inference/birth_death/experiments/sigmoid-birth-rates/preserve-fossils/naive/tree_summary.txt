@@ -1,0 +1,11 @@
+Number of total nodes: 26
+  Type 2 exists in 7732 nodes
+  Type 4 exists in 5826 nodes
+  Type 6 exists in 8657 nodes
+  Type 8 exists in 11599 nodes
+
+Number of leaves: 7
+  Type 2 exists in 2498 leaves
+  Type 4 exists in 2247 leaves
+  Type 6 exists in 3356 leaves
+  Type 8 exists in 4528 leaves
