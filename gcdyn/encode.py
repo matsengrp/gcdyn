@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 
 from gcdyn.bdms import TreeNode
 from gcdyn import utils
@@ -19,7 +20,7 @@ def encode_tree(
     fourth row of `x` for the nodes in row 2.
 
     Note that by default this ladderizes the tree first, so if you've already done
-    this you should set ladderizes to False.
+    this you should set ladderize to False.
 
     If max_leaf_count is not set, it defaults to the number of leaves in the tree.
     It often makes more sense to pad encoded trees to the same size right before passing
@@ -34,15 +35,17 @@ def encode_tree(
         assert tmptr.up is None or num_children in {
             0,
             2,
-        }, "Only full binary trees are supported."
+        }, "Only full binary trees are supported, but found node with %d children" % num_children
 
-        for child in tmptr.children[: num_children // 2]:
+        for child in tmptr.children[: num_children // 2]:  # trivial loop over single lefthand subtree/node
             yield from traverse_inorder(child)
 
         yield tmptr
 
-        for child in tmptr.children[num_children // 2 :]:
+        for child in tmptr.children[num_children // 2 :]:  # trivial loop over single rightand subtree/node
             yield from traverse_inorder(child)
+
+    assert utils.isclose(np.mean([lf.t for lf in intree.iter_leaves()]), 1), "trees must be scaled to 1 before encoding"
 
     if ladderize:
         worktree = (
@@ -73,6 +76,34 @@ def encode_tree(
             previous_ancestor = node
 
     return matrix
+
+
+def scale_tree(
+    intree: TreeNode,
+) -> (float, TreeNode):
+    """Scale intree to average branch length 1, i.e. divide all branches by the average branch length.
+       Returns initial average branch length brlen and scaled tree outtree."""
+    mean_brlen = np.mean([lf.t for lf in intree.iter_leaves()])
+    outtree = copy.copy(intree)
+    for node in outtree.iter_descendants():
+        node.t /= mean_brlen
+    assert utils.isclose(np.mean([lf.t for lf in outtree.iter_leaves()]), 1)
+    return mean_brlen, outtree
+
+
+def encode_trees(
+    intrees: list[TreeNode],
+    max_leaf_count: int = None,
+    ladderize: bool = True,
+) -> (list[float], list[np.ndarray[float]]):
+    """Scale and then encode each tree in intrees, returning list of scale vals (average branch length
+    for each tree) and list of scaled, encoded trees."""
+    scale_vals, enc_trees = [], []
+    for intr in intrees:
+        brlen, sctree = scale_tree(intr)
+        scale_vals.append(brlen)
+        enc_trees.append(encode_tree(sctree, max_leaf_count=max_leaf_count, ladderize=ladderize))
+    return scale_vals, enc_trees
 
 
 def pad_trees(

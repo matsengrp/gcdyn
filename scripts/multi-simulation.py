@@ -2,6 +2,7 @@ import numpy as np
 import argparse
 import os
 import sys
+import csv
 
 # import colored_traceback.always  # need to add this to installation stuff, i'm not sure how to do it atm
 import pickle
@@ -16,23 +17,27 @@ from gcdyn import bdms, gpmap, mutators, poisson, utils, encode
 from experiments import replay
 
 
+final_ofn_strs = ['seqs', 'trees', 'leaf-meta', 'encoded-trees', 'responses', 'summary-stats']
 # ----------------------------------------------------------------------------------------
 def outfn(ftype, itrial, odir=None):
-    assert ftype in ["fasta", "nwk", "pkl", "npy", "json"]
+    assert ftype in final_ofn_strs + [None]
     if odir is None:
         odir = args.outdir
     if itrial is None:
-        ftstrs = {
-            "fasta": "seqs",
-            "nwk": "trees",
-            "npy": "encoded-trees",
-            "pkl": "responses",
-            "json": "meta",
+        suffixes = {
+            "seqs": "fasta",
+            "trees": "nwk",
+            "encoded-trees": "npy",
+            "responses": "pkl",
+            "leaf-meta": "csv",
+            "summary-stats": "csv",
         }
-        tstr = ftstrs.get(ftype, "simu")
+        sfx = suffixes.get(ftype, "simu")
     else:
-        tstr = "tree_%d" % itrial
-    return f"{odir}/{tstr}.{ftype}"
+        assert ftype is None
+        ftype = "tree_%d" % itrial
+        sfx = 'pkl'
+    return f"{odir}/{ftype}.{sfx}"
 
 
 # ----------------------------------------------------------------------------------------
@@ -238,36 +243,37 @@ def get_responses(xscale, xshift):
 
 # ----------------------------------------------------------------------------------------
 def write_final_outputs(all_seqs, all_trees):
-    print("  writing all seqs to %s" % outfn("fasta", None))
-    with open(outfn("fasta", None), "w") as asfile:
+    print("  writing final outputs to %s" % args.outdir)
+
+    with open(outfn("seqs", None), "w") as asfile:
         for sfo in all_seqs:
             asfile.write(">%s\n%s\n" % (sfo["name"], sfo["seq"]))
 
-    print("  writing all trees to %s" % outfn("nwk", None))
-    with open(outfn("nwk", None), "w") as tfile:
+    with open(outfn("trees", None), "w") as tfile:
         for pfo in all_trees:
             tfile.write("%s\n" % pfo["tree"].write(format=1))
 
-    print("  writing meta info to %s" % outfn("json", None))
     jfo = {
         n.name: {"affinity": n.x, 'n_muts': n.total_mutations}
         for pfo in all_trees
         for n in pfo["tree"].iter_descendants()
     }
-    with open(outfn("json", None), "w") as jfile:
-        json.dump(jfo, jfile)
+    with open(outfn("leaf-meta", None), "w") as jfile:
+        writer = csv.DictWriter(jfile, ['name', 'affinity', 'n_muts'])
+        writer.writeheader()
+        for pfo in all_trees:
+            for node in pfo["tree"].iter_descendants():
+                writer.writerow({'name': node.name, "affinity": node.x, 'n_muts': node.total_mutations})
 
-    encoded_trees = []
-    for pfo in all_trees:
-        encoded_trees.append(encode.encode_tree(pfo["tree"]))
-    print("  writing %d encoded trees to %s" % (len(all_trees), outfn("npy", None)))
-    encode.write_trees(outfn("npy", None), encoded_trees)
+    scale_vals, encoded_trees = encode.encode_trees([pfo['tree'] for pfo in all_trees])
+    encode.write_trees(outfn("encoded-trees", None), encoded_trees)
+    with open(outfn("summary-stats", None), "w") as jfile:
+        writer = csv.DictWriter(jfile, ['tree', 'mean_branch_length'])
+        writer.writeheader()
+        for itr, sval in enumerate(scale_vals):
+            writer.writerow({'tree': itr, 'mean_branch_length': sval})
 
-    print(
-        "  writing %d trees and birth/death responses to %s"
-        % (len(all_trees), outfn("pkl", None))
-    )
-    with open(outfn("pkl", None), "wb") as pfile:
+    with open(outfn("responses", None), "wb") as pfile:
         dill.dump(
             [{k: p["%s-response" % k] for k in ["birth", "death"]} for p in all_trees],
             pfile,
@@ -429,7 +435,7 @@ parser.add_argument(
 parser.add_argument(
     "--make-plots",
     action="store_true",
-    help='note that you\'ll need to install joypy with: conda install -c conda-forge joypy'
+    help='',
 )
 
 args = parser.parse_args()
@@ -472,7 +478,7 @@ if (
         clist = ["python"] + copy.deepcopy(sys.argv)
         subdir = "%s/iproc-%d" % (args.outdir, iproc)
         istart = iproc * n_per_proc
-        if all(os.path.exists(outfn(sfx, None, odir=subdir)) for sfx in ['fasta', 'npy', 'pkl']):
+        if all(os.path.exists(outfn(ft, None, odir=subdir)) for ft in final_ofn_strs):
             print("        proc %d: final outputs exist" % iproc)
             sys.stdout.flush()
             continue
@@ -522,23 +528,22 @@ if (
         time.sleep(0.01 / max(1, len(procs)))
     print('    writing merged files to %s' % args.outdir)
     print('        ftype  N files   time (s)  memory usage')
-    for ftype in ['fasta', 'nwk', 'json', 'npy', 'pkl']:
+    for ftype in final_ofn_strs:
         ofn = outfn(ftype, None)
         fnames = [outfn(ftype, None, odir="%s/iproc-%d" % (args.outdir, i)) for i in range(args.n_sub_procs)]
         start = time.time()
-        if ftype in ['fasta', 'nwk']:
-            subprocess.check_call('cat %s >%s' % (' '.join(fnames), ofn), shell=True)
-        elif ftype in ['json']:
-            jfo = {}
-            for fn in fnames:
-                with open(fn) as jfile:
-                    jfo.update(json.load(jfile))
-            with open(ofn, 'w') as mfile:
-                json.dump(jfo, mfile)
-        elif ftype in ['npy']:
+        if ftype in ['seqs', 'trees', 'leaf-meta']:
+            if ftype == 'leaf-meta':
+                cmds = ['head -n1 %s >%s' % (fnames, ofn),
+                        'tail -n+1 %s >>%s' % (' '.join(fnames), ofn)]
+            else:
+                cmds = ['cat %s >%s' % (' '.join(fnames), ofn)]
+            for cmd in cmds:
+                subprocess.check_call(cmd, shell=True)
+        elif ftype in ['encoded-trees']:
             all_etrees = [e for fn in fnames for e in encode.read_trees(fn)]
             encode.write_trees(ofn, all_etrees)
-        elif ftype in ['pkl']:
+        elif ftype in ['responses']:
             all_responses = []
             for fn in fnames:
                 with open(fn, "rb") as rfile:
@@ -582,7 +587,7 @@ n_missing = 0
 rng = np.random.default_rng(seed=args.seed)
 for itrial in range(args.itrial_start, args.n_trials):
     check_memory()
-    ofn = outfn("pkl", itrial)
+    ofn = outfn(None, itrial)
     if os.path.exists(ofn) and not args.overwrite:
         print("    output %s already exists, skipping" % ofn)
         pfo = read_dill_file(ofn)
