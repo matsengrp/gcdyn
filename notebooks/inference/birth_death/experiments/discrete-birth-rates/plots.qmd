@@ -29,6 +29,34 @@ truth <- tibble(
 )
 ```
 
+## Posterior median sampling distributions
+
+```{r}
+#| fig-height: 6
+
+samples |>
+    group_by(run, Parameter) |>
+    summarise(Estimate = median(Sample)) |>
+    left_join(truth, by = "Parameter") |>
+    ggplot() +
+    geom_histogram(
+        aes(x = Estimate, y = after_stat(density), fill = "Sampling distribution")
+    ) +
+    geom_vline(aes(xintercept = Truth),
+        color = "red",
+        linewidth = 1
+    ) +
+    scale_fill_manual(
+        name = "",
+        values = c("Sampling distribution" = "steelblue")
+    ) +
+    facet_wrap(vars(Parameter), ncol = 2, scales = "free") +
+    xlab("Estimate") +
+    theme(legend.position = "bottom")
+```
+
+\pagebreak
+
 ## Traceplots (full)
 
 ```{r}

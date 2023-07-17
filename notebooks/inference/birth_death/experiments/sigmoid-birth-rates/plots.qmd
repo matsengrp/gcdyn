@@ -30,7 +30,88 @@ truth <- tibble(
 )
 ```
 
-## Traceplots
+## Posterior median sampling distributions
+
+```{r}
+#| fig-height: 6
+
+samples |>
+    group_by(run, Parameter) |>
+    summarise(Estimate = median(Sample)) |>
+    left_join(truth, by = "Parameter") |>
+    ggplot() +
+    geom_histogram(
+        aes(x = Estimate, y = after_stat(density), fill = "Sampling distribution")
+    ) +
+    geom_vline(aes(xintercept = Truth),
+        color = "red",
+        linewidth = 1
+    ) +
+    scale_fill_manual(
+        name = "",
+        values = c("Sampling distribution" = "steelblue")
+    ) +
+    facet_wrap(vars(Parameter), ncol = 2, scales = "free") +
+    xlab("Estimate") +
+    theme(legend.position = "bottom")
+```
+
+\pagebreak
+
+```{r}
+sigmoid <- function(x, estimate) {
+    theta <- estimate |>
+        pivot_wider(
+            names_from = Parameter,
+            values_from = Estimate
+        ) |>
+        with(c(xscale, xshift, yscale, yshift))
+
+    theta[3] / (1 + exp(-theta[1] * (x - theta[2]))) + theta[4]
+}
+```
+
+```{r}
+#| fig-height: 3.5
+
+sampling_dist_plot <- ggplot() +
+    xlim(0, 10) +
+    ylim(0, 7)
+
+sampled_sigmoids <- samples |>
+    group_by(run, Parameter) |>
+    summarise(Estimate = median(Sample)) |>
+    group_by(run) |>
+    group_map(\(estimate, ...) \(x) sigmoid(x, estimate))
+
+for (sig in sampled_sigmoids) {
+    sampling_dist_plot <- sampling_dist_plot + stat_function(fun = sig, alpha = 0.03, linewidth = 1)
+}
+
+sampling_dist_plot <- sampling_dist_plot +
+    stat_function(
+        aes(color = "Truth"),
+        fun = \(x) sigmoid(x, truth |> rename(Estimate = Truth)),
+        linewidth = 1.5
+    ) +
+    scale_color_manual(
+        name = "",
+        values = c("Truth" = "red")
+    ) +
+    labs(
+        title = "Sampling distribution",
+        x = "x",
+        y = expression(paste(lambda, "(x)"))
+    ) +
+    theme_classic() +
+    theme(legend.position = "bottom")
+
+sampling_dist_plot
+```
+
+\pagebreak
+
+## Traceplots (one run)
 
 ```{r}
 #| fig-height: 6
@@ -45,7 +126,7 @@ left_join(samples, truth, by = "Parameter") |>
 
 \pagebreak
 
-## Densities
+## Densities (one run)
 
 ```{r}
 #| fig-height: 6
@@ -72,7 +153,7 @@ left_join(samples, truth, by = "Parameter") |>
 
 \pagebreak
 
-## Summaries
+## Summaries (one run)
 
 ```{r}
 samples |>
@@ -95,7 +176,7 @@ samples |>
 
 \pagebreak
 
-## Sigmoids
+## Sigmoids (one run)
 
 ```{r}
 sigmoid <- function(x, sample) {
