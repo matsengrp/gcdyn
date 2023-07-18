@@ -11,6 +11,8 @@ workflow {
         map { [it[0], it[1], file(it[0]) / "mcmc_config.py", it[2]] } |
         run_mcmc
 
+    publish(simulation_results)
+
     simulation_results | map { it[0..1] } | summarize_trees
 
     simulation_results | map { [it[0], file(it[0]).parent.parent / "plots.qmd", it[2]] } | visualize
@@ -132,14 +134,28 @@ process summarize_trees {
                     if node.is_leaf():
                         type_counts_leaves[node.x] += 1
 
-        f.write(f"Number of total nodes: {sum(1 for _ in tree.traverse())}\\n")
+        f.write(f"Number of total nodes: {sum(type_counts_nodes.values())}\\n")
         for type in sorted(type_counts_nodes.keys()):
             f.write(f"  Type {type} exists in {type_counts_nodes[type]} nodes\\n")
         f.write("\\n")
-        f.write(f"Number of leaves: {sum(1 for _ in tree.iter_leaves())}\\n")
+        f.write(f"Number of leaves: {sum(type_counts_leaves.values())}\\n")
         for type in sorted(type_counts_leaves.keys()):
             f.write(f"  Type {type} exists in {type_counts_leaves[type]} leaves\\n")
 
+    """
+}
+
+process publish {
+    publishDir "$experiment_path", mode: "copy"
+
+    input:
+    tuple val(experiment_path), path("trees.pkl"), path("samples.csv")
+
+    output:
+    tuple path("trees.pkl"), path("samples.csv")
+ 
+    """
+    echo "Exporting tree and parameter samples..."
     """
 }
 
