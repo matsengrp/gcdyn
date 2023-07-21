@@ -527,14 +527,14 @@ if (
         sys.stdout.flush()
         time.sleep(0.01 / max(1, len(procs)))
     print('    writing merged files to %s' % args.outdir)
-    print('        ftype  N files   time (s)  memory usage')
+    print('        N files   time (s)  memory %   ftype')
     for ftype in final_ofn_strs:
         ofn = outfn(ftype, None)
         fnames = [outfn(ftype, None, odir="%s/iproc-%d" % (args.outdir, i)) for i in range(args.n_sub_procs)]
         start = time.time()
-        if ftype in ['seqs', 'trees', 'leaf-meta']:
-            if ftype == 'leaf-meta':
-                cmds = ['head -n1 %s >%s' % (fnames, ofn),
+        if ftype in ['seqs', 'trees', 'leaf-meta', 'summary-stats']:
+            if ftype in ['leaf-meta', 'summary-stats']:
+                cmds = ['head -n1 %s >%s' % (fnames[0], ofn),
                         'tail -n+1 %s >>%s' % (' '.join(fnames), ofn)]
             else:
                 cmds = ['cat %s >%s' % (' '.join(fnames), ofn)]
@@ -551,8 +551,8 @@ if (
             with open(ofn, 'wb') as rfile:
                 dill.dump(all_responses, rfile)
         else:
-            assert False
-        print('      %7s  %3d        %5.2f    %5.2f' % (ftype, len(fnames), time.time() - start, utils.memory_usage_fraction()))
+            raise Exception('unexpected file type %s' % ftype)
+        print('         %3d      %5.2f   %7.2f      %s' % (len(fnames), time.time() - start, 100 * utils.memory_usage_fraction(), ftype))
 
     sys.exit(0)
 

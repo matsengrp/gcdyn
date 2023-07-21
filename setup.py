@@ -32,6 +32,7 @@ setup(
         "biopython",
         "diffrax",
         "tensorflow",
+        "scikit-learn",
     ],
     extras_require={
         "PyQt5": [

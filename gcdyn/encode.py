@@ -106,6 +106,24 @@ def encode_trees(
     return scale_vals, enc_trees
 
 
+def trivialize_encodings(encoded_trees, param_vals, debug=False):
+    """Convert encoded_trees to a "trivialized" encoding, i.e. one that replaces the actual tree
+    information with the response parameter values that we're trying to predict."""
+
+    if debug:
+        print(' trivializing encodings')
+        np.set_printoptions(edgeitems=30, linewidth=100000, formatter=dict(float=lambda x: "%.3g" % x))
+    for itree, entr in enumerate(encoded_trees):
+        if debug:
+            print('  itree %d' % itree)
+            print('    before: ' + '\n            '.join(str(l) for l in entr))
+        for irow in range(len(entr)):
+            for icol in range(len(entr[irow])):
+                entr[irow][icol] = param_vals[itree][icol % len(param_vals[itree])]
+        if debug:
+            print('     after: ' + '\n            '.join(str(l) for l in entr))
+
+
 def pad_trees(
     trees: list[np.ndarray], min_n_max_leaves: int = 100, debug: bool = False
 ):

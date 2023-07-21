@@ -4,12 +4,15 @@ import argparse
 import os
 import sys
 import operator
+from sklearn import preprocessing
+import sys
 
 # import colored_traceback.always  # need to add this to installation stuff, i'm not sure how to do it atm
 import time
 import pickle
 import pandas as pd
 import random
+import csv
 
 from gcdyn import utils
 
@@ -20,7 +23,30 @@ def csvfn(smpl):
 
 
 # ----------------------------------------------------------------------------------------
-def get_prediction(smpl, model, smpldict):
+def scale_vals(pvals, scaler=None, inverse=False, dont_scale=False, debug=True):
+    """Scale pvals to mean 0 and variance 1. To reverse a scaling, pass in the original scaler and set inverse=True"""
+    def get_lists(pvs):  # picks values from rows/columns to get a list of values for each parameter
+        return [[plist[i] for plist in pvs] for i in range(len(args.params_to_predict))]
+    def fnstr(pvs, fn):  # apply fn to each list from get_lists(), returns resulting combined str
+        return ' '.join('%7.3f'%fn(l) for l in get_lists(pvs))
+    def lstr(lst):  # print nice str for values in list lst
+        return ' '.join('%5.2f'%v for v in sorted(set(lst)))
+    def print_debug(pvs, dstr):
+        print('    %6s: %s   %s   (%s)' % (dstr, fnstr(pvs, np.mean), fnstr(pvs, np.var), lstr(get_lists(pvs)[0])))
+    if debug:
+        print_debug(pvals, 'before')
+    if scaler is None:
+        scaler = preprocessing.StandardScaler().fit(pvals)
+    if dont_scale:
+        return pvals, scaler
+    pscaled = scaler.inverse_transform(pvals) if inverse else scaler.transform(pvals)
+    if debug:
+        print_debug(pscaled, 'after')
+    return pscaled, scaler
+
+
+# ----------------------------------------------------------------------------------------
+def get_prediction(smpl, model, smpldict, scaler):
     pred_resps = model.predict(smpldict[smpl]["trees"])
     true_resps = smpldict[smpl]["birth-responses"]
     dfdata = {
@@ -29,10 +55,12 @@ def get_prediction(smpl, model, smpldict):
         for ptype in ["truth", "predicted"]
     }
     assert len(pred_resps) == len(true_resps)
-    for tr_resp, prlist in zip(true_resps, pred_resps):
+    pvals = [[float(resp.value) for resp in plist] for plist in pred_resps]
+    pscaled, scaler = scale_vals(pvals, scaler=scaler, inverse=True, dont_scale=args.dont_scale_params)
+    for tr_resp, prlist in zip(true_resps, pscaled):
         for ip, param in enumerate(args.params_to_predict):
             dfdata["%s-truth" % param].append(getattr(tr_resp, param))
-            dfdata["%s-predicted" % param].append(float(prlist[ip].value))
+            dfdata["%s-predicted" % param].append(prlist[ip])
     df = pd.DataFrame(dfdata)
     df.to_csv(csvfn(smpl))
     return df
@@ -105,13 +133,20 @@ def train_and_test():
     from gcdyn.poisson import ConstantResponse
     from gcdyn import encode
 
-    with open(args.response_file, "rb") as rfile:
+    rfn, tfn, sfn = ['%s/%s' % (args.indir, s) for s in ['responses.pkl', 'encoded-trees.npy', 'summary-stats.csv']]
+    with open(rfn, "rb") as rfile:
         pklfo = pickle.load(rfile)
     samples = {k + "-responses": [tfo[k] for tfo in pklfo] for k in ["birth", "death"]}
-    samples["trees"] = encode.read_trees(args.tree_file)
+    samples["trees"] = encode.read_trees(tfn)
+    sstats = []
+    with open(sfn) as sfile:
+        reader = csv.DictReader(sfile)
+        for line in reader:
+            sstats.append(line)
+# TODO not using sstats yet, need to implement a way to scale any future summary stats that depend on branch length
     print(
         "    read %d trees from %s (%d responses from %s)"
-        % (len(samples["trees"]), args.tree_file, len(pklfo), args.response_file)
+        % (len(samples["trees"]), tfn, len(pklfo), rfn)
     )
     print(
         "      first response pair:\n        birth: %s\n        death: %s"
@@ -129,11 +164,13 @@ def train_and_test():
         % (len(smpldict["train"]["trees"]), len(smpldict["test"]["trees"]))
     )
 
-    pred_resps = [
-        [ConstantResponse(getattr(birth_resp, p)) for p in args.params_to_predict]
-        for birth_resp in smpldict["train"]["birth-responses"]
-    ]
+    pvals = [[getattr(birth_resp, pname) for pname in args.params_to_predict] for birth_resp in smpldict["train"]["birth-responses"]]
+    pscaled, scaler = scale_vals(pvals, dont_scale=args.dont_scale_params)
+    if args.use_trivial_encoding:
+        for smpl in smpldict:
+            encode.trivialize_encodings(smpldict[smpl]['trees'], pscaled, debug=True)
 
+    pred_resps = [[ConstantResponse(v) for v in vlist] for vlist in pscaled]
     model = NeuralNetworkModel(
         smpldict["train"]["trees"], pred_resps, network_layers=args.model_size
     )
@@ -145,7 +182,7 @@ def train_and_test():
 
     prdfs = {}
     for smpl in ["train", "test"]:
-        prdfs[smpl] = get_prediction(smpl, model, smpldict)
+        prdfs[smpl] = get_prediction(smpl, model, smpldict, scaler)
     utils.make_dl_plots(prdfs, args.params_to_predict, args.outdir + "/plots")
 
     print("    total dl inference time: %.1f sec" % (time.time() - start))
@@ -154,14 +191,9 @@ def train_and_test():
 # ----------------------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "--tree-file",
+    "--indir",
     required=True,
-    help="input file with list of encoded trees in numpy npy format",
-)
-parser.add_argument(
-    "--response-file",
-    required=True,
-    help="input file with list of response functions in pickle format",
+    help="input directory with simulation output (uses encoded trees .npy, summary stats .csv, and response .pkl files)",
 )
 parser.add_argument("--outdir", required=True, help="output directory")
 parser.add_argument("--epochs", type=int, default=100)
@@ -183,7 +215,7 @@ parser.add_argument(
 parser.add_argument(
     "--model-size",
     default="tiny",
-    choices=["small", "tiny", None],
+    choices=["small", "tiny", 'trivial', None],
     help="Parameters from the birth model that we should try to predict.",
 )
 parser.add_argument(
@@ -199,6 +231,8 @@ parser.add_argument(
 )
 parser.add_argument("--random-seed", default=0, type=int, help="random seed")
 parser.add_argument("--overwrite", action="store_true")
+parser.add_argument("--use-trivial-encoding", action="store_true")
+parser.add_argument("--dont-scale-params", action="store_true")
 
 start = time.time()
 args = parser.parse_args()

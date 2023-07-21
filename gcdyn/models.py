@@ -110,6 +110,12 @@ class NeuralNetworkModel:
                 layers.Dense(8, activation="elu"),
                 layers.Dense(num_parameters, activation="elu"),
             )
+        elif network_layers == "trivial":
+            network_layers = (
+                # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
+                lambda x: tf.transpose(x, (0, 2, 1)),
+                layers.Dense(num_parameters, activation="elu"),
+            )
         else:
             raise Exception(
                 "unhandled network layer specification '%s'" % network_layers
@@ -133,7 +139,7 @@ class NeuralNetworkModel:
     ) -> onp.ndarray[float]:
         return onp.array(
             [
-                onp.hstack([response._flatten()[2] for response in row])
+                onp.hstack([response._flatten()[2] for response in row])  # [2] is the list of parameter values
                 for row in responses
             ]
         )
