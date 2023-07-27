@@ -155,7 +155,7 @@ process publish {
     tuple path("trees.pkl"), path("samples.csv")
  
     """
-    echo "Exporting tree and parameter samples..."
+    echo "Exporting tree and parameter samples."
     """
 }
 

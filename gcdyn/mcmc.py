@@ -71,7 +71,7 @@ def mh_step(from_values, parameters, log_likelihood, rng=None):
             print("The exception raised was:")
             raise
 
-        if rng.uniform() < np.minimum(1, np.exp(log_mh_ratio)):
+        if np.log(rng.uniform()) < log_mh_ratio:
             from_values = proposals
 
     return from_values
