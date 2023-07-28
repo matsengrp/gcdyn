@@ -38,26 +38,6 @@ MCMC_PARAMETERS = dict(
             1, random_state=rng
         ),
     ),
-    birth_rate3=Parameter(
-        prior_log_density=lognorm(scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD).logpdf,
-        prior_generator=lambda n, rng: lognorm(
-            scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD
-        ).rvs(n, random_state=rng),
-        proposal_log_density=lambda p, c: lognorm(scale=c, s=BR_PROPOSAL_SD).logpdf(p),
-        proposal_generator=lambda c, rng: lognorm(scale=c, s=BR_PROPOSAL_SD).rvs(
-            1, random_state=rng
-        ),
-    ),
-    birth_rate4=Parameter(
-        prior_log_density=lognorm(scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD).logpdf,
-        prior_generator=lambda n, rng: lognorm(
-            scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD
-        ).rvs(n, random_state=rng),
-        proposal_log_density=lambda p, c: lognorm(scale=c, s=BR_PROPOSAL_SD).logpdf(p),
-        proposal_generator=lambda c, rng: lognorm(scale=c, s=BR_PROPOSAL_SD).rvs(
-            1, random_state=rng
-        ),
-    ),
     death_rate=Parameter(
         prior_log_density=lognorm(scale=np.exp(DR_PRIOR_MEAN), s=DR_PRIOR_SD).logpdf,
         prior_generator=lambda n, rng: lognorm(
@@ -71,9 +51,7 @@ MCMC_PARAMETERS = dict(
 )
 
 
-def log_likelihood(
-    birth_rate1, birth_rate2, birth_rate3, birth_rate4, death_rate, trees
-):
+def log_likelihood(birth_rate1, birth_rate2, death_rate, trees):
     return models.stadler_appx_log_likelihood(
         trees=trees,
         birth_response=poisson.DiscreteResponse(
@@ -82,8 +60,6 @@ def log_likelihood(
                 (
                     birth_rate1,
                     birth_rate2,
-                    birth_rate3,
-                    birth_rate4,
                 )
             ),
         ),
