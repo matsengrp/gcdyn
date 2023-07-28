@@ -47,8 +47,6 @@ process sample_trees {
             init_x=INITIAL_STATE,
             **TRUE_PARAMETERS,
             seed=tree_seed,
-            min_survivors=1,
-            prune=True,
         )
 
         tree_collections.append(trees)
@@ -72,7 +70,6 @@ process run_mcmc {
     import pandas as pd
 
     from ${mcmc_config_file.baseName} import (
-        MCMC_SEED,
         NUM_MCMC_SAMPLES,
         MCMC_PARAMETERS,
         log_likelihood
@@ -94,7 +91,6 @@ process run_mcmc {
             length=NUM_MCMC_SAMPLES,
             parameters=MCMC_PARAMETERS,
             log_likelihood=jit(partial(log_likelihood, trees=trees)),
-            seed=MCMC_SEED
         )
 
         samples = pd.concat((samples, pd.DataFrame(dict(**posterior_samples, **stats, run=run))))

@@ -106,11 +106,14 @@ def sample_trees(
     print_info=True,
     extant_sampling_probability=1,
     extinct_sampling_probability=1,
-    min_survivors=1,
-    prune=False,
+    preserve_unsampled_lineages=False,
     **evolve_kwargs,
 ):
-    r"""Returns a sequence of n simulated trees.
+    r"""
+    Returns a sequence of n simulated trees.
+
+    This function samples while conditioning on at least one leaf being present in the tree.
+    To avoid this, set `preserve_unsampled_lineages` to `True` and handle unsampled lineages manually.
 
     Args:
         n: Number of trees to evolve.
@@ -121,8 +124,7 @@ def sample_trees(
               If a :py:class:`numpy.random.Generator`, then it will be used directly.
         print_info: Whether to print a summary statistic of the tree sizes.
         extant_sampling_probability: To be passed to :py:meth:`TreeNode.sample_survivors` as argument `p`.
-        min_survivors: Argument passed to :py:meth:`TreeNode.evolve`.
-        prune: Whether to prune the tree after evolving, using :py:meth:`TreeNode.prune`.
+        preserve_unsampled_lineages: If `False`, will :py:meth:`TreeNode.prune` each tree.
         kwargs: Keyword arguments passed to :py:meth:`TreeNode.evolve`.
     """
 
@@ -131,18 +133,31 @@ def sample_trees(
     trees = []
     encountered_errors = defaultdict(int)
 
-    print("Sampling trees...")
-
     with tqdm.tqdm(total=n) as pbar:
         while len(trees) != n:
             try:
                 tree = TreeNode()
                 tree.x = init_x
-                tree.evolve(seed=rng, min_survivors=min_survivors, **evolve_kwargs)
+                tree.evolve(seed=rng, min_survivors=0, **evolve_kwargs)
                 tree.sample_survivors(p=extant_sampling_probability, seed=rng)
+
+                if not preserve_unsampled_lineages:
+                    assert extinct_sampling_probability == 0 or (
+                        extant_sampling_probability == 1
+                        and extinct_sampling_probability == 1
+                    ), "σ>0 without preserving unsampled lineages is not supported at this time (unless σ=ρ=1)."
+
+                    if (
+                        extinct_sampling_probability == 1
+                        and extant_sampling_probability == 1
+                    ):
+                        tree._pruned = True
+                    else:
+                        tree.prune()
+
                 trees.append(tree)
                 pbar.update(1)
-            except TreeError as err:  # not enough survivors
+            except TreeError as err:  # attempted to prune when no leaves were sampled
                 encountered_errors[str(err)] += 1
                 continue
 
@@ -152,9 +167,11 @@ def sample_trees(
                 print("Notice: obtained error", error, count, "times.")
 
         print(
-            "Success: average of",
+            "Average of",
             sum(len(list(tree.traverse())) for tree in trees) / len(trees),
-            "nodes per tree, over",
+            "nodes per tree, and average of",
+            sum(len(list(tree.iter_leaves())) for tree in trees) / len(trees),
+            "leaves per tree, over",
             len(trees),
             "trees.",
         )
@@ -167,41 +184,6 @@ def sample_trees(
 
         for type in sorted(type_counts.keys()):
             print(f"Type {type} exists in {type_counts[type]} nodes")
-
-    if prune:
-        for tree in trees:
-            if extinct_sampling_probability == 1:
-                tree._pruned = True
-            elif extinct_sampling_probability == 0:
-                try:
-                    tree.prune()
-                except TreeError:
-                    # This is likely because we sampled a fully extinct tree, which is fine. Let's make sure, though
-                    for leaf in tree.iter_leaves():
-                        if leaf.event == leaf._SAMPLING_EVENT:
-                            raise
-                    tree._pruned = True
-
-        if print_info:
-            print()
-            print(
-                "After pruning: average of",
-                sum(len(list(tree.traverse())) for tree in trees) / len(trees),
-                "nodes per tree, and average of",
-                sum(len(list(tree.iter_leaves())) for tree in trees) / len(trees),
-                "leaves per tree, over",
-                len(trees),
-                "trees.",
-            )
-
-            type_counts = defaultdict(int)
-
-            for tree in trees:
-                for node in tree.traverse():
-                    type_counts[node.x] += 1
-
-            for type in sorted(type_counts.keys()):
-                print(f"Type {type} exists in {type_counts[type]} nodes")
 
     return tuple(trees)
 

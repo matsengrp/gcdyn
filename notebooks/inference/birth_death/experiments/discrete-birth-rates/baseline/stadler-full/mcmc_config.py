@@ -1,6 +1,6 @@
 import jax.numpy as np
 from scipy.stats import lognorm
-from tree_config import STATE_SPACE, TRUE_PARAMETERS
+from tree_config import PRESENT_TIME, STATE_SPACE, TRUE_PARAMETERS
 
 from gcdyn import models, poisson
 from gcdyn.mcmc import Parameter
@@ -38,6 +38,26 @@ MCMC_PARAMETERS = dict(
             1, random_state=rng
         ),
     ),
+    birth_rate3=Parameter(
+        prior_log_density=lognorm(scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD).logpdf,
+        prior_generator=lambda n, rng: lognorm(
+            scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD
+        ).rvs(n, random_state=rng),
+        proposal_log_density=lambda p, c: lognorm(scale=c, s=BR_PROPOSAL_SD).logpdf(p),
+        proposal_generator=lambda c, rng: lognorm(scale=c, s=BR_PROPOSAL_SD).rvs(
+            1, random_state=rng
+        ),
+    ),
+    birth_rate4=Parameter(
+        prior_log_density=lognorm(scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD).logpdf,
+        prior_generator=lambda n, rng: lognorm(
+            scale=np.exp(BR_PRIOR_MEAN), s=BR_PRIOR_SD
+        ).rvs(n, random_state=rng),
+        proposal_log_density=lambda p, c: lognorm(scale=c, s=BR_PROPOSAL_SD).logpdf(p),
+        proposal_generator=lambda c, rng: lognorm(scale=c, s=BR_PROPOSAL_SD).rvs(
+            1, random_state=rng
+        ),
+    ),
     death_rate=Parameter(
         prior_log_density=lognorm(scale=np.exp(DR_PRIOR_MEAN), s=DR_PRIOR_SD).logpdf,
         prior_generator=lambda n, rng: lognorm(
@@ -51,15 +71,26 @@ MCMC_PARAMETERS = dict(
 )
 
 
-def log_likelihood(birth_rate1, birth_rate2, death_rate, trees):
-    return models.naive_log_likelihood(
+def log_likelihood(
+    birth_rate1, birth_rate2, birth_rate3, birth_rate4, death_rate, trees
+):
+    return models.stadler_full_log_likelihood(
         trees=trees,
         birth_response=poisson.DiscreteResponse(
             phenotypes=STATE_SPACE,
-            values=np.hstack((birth_rate1, birth_rate2)),
+            values=np.hstack(
+                (
+                    birth_rate1,
+                    birth_rate2,
+                    birth_rate3,
+                    birth_rate4,
+                )
+            ),
         ),
         death_response=poisson.ConstantResponse(death_rate),
         mutation_response=TRUE_PARAMETERS["mutation_response"],
         mutator=TRUE_PARAMETERS["mutator"],
         extant_sampling_probability=TRUE_PARAMETERS["extant_sampling_probability"],
+        extinct_sampling_probability=TRUE_PARAMETERS["extinct_sampling_probability"],
+        present_time=PRESENT_TIME,
     )

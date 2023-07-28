@@ -362,6 +362,7 @@ def naive_log_likelihood(
                         result += mutator.logprob(node)
                     else:
                         raise ValueError(f"unknown event {node.event}")
+
     return result
 
 
@@ -430,6 +431,34 @@ def stadler_appx_log_likelihood(
                 result += jnp.log(ρ)
             else:
                 raise ValueError(f"unknown event {node.event}")
+
+        # Now we must compute the probability of the tree having any observable
+        # history (similar to non-extinction, but generalized to any ρ and σ).
+        # This is 1 - p_i(t) evaluated at i = root node, t = root time
+
+        # p = 1 - (λ - μ) / (λ - μ * jnp.exp(-(λ - μ) * present_time))
+
+        λ = birth_response(tree)
+        μ = death_response(tree)
+        γ = mutation_response(tree)
+        Λ = λ + μ + γ
+        ρ = extant_sampling_probability
+        σ = extinct_sampling_probability
+
+        root_time = present_time - 0
+
+        c = jnp.sqrt(Λ**2 - 4 * μ * (1 - σ) * λ)
+        x = (-Λ - c) / 2
+        y = (-Λ + c) / 2
+
+        p = (
+            -1
+            / λ
+            * ((y + λ * (1 - ρ)) * x * jnp.exp(-c * root_time) - y * (x + λ * (1 - ρ)))
+            / ((y + λ * (1 - ρ)) * jnp.exp(-c * root_time) - (x + λ * (1 - ρ)))
+        )
+
+        result -= jnp.log(1 - p)
 
     return result
 
@@ -592,6 +621,20 @@ def stadler_full_log_likelihood(
             event.p_start = pq.ys[-1, :-1]
 
         result += jnp.log(tree.children[0].q_start)
+
+        # Non-extinction probability
+
+        p = diffeqsolve(
+            ODETerm(dp_dt),
+            solver=Tsit5(),
+            t0=0,
+            t1=present_time,
+            dt0=0.001,
+            y0=jnp.ones_like(type_space) - ρ,
+            stepsize_controller=PIDController(rtol=rtol, atol=atol, dtmax=dtmax),
+        )
+
+        result -= jnp.log(1 - _select_where(p.ys[-1, :], type_space == tree.x))
 
     return result
 

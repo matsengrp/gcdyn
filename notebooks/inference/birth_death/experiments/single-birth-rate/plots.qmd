@@ -57,26 +57,13 @@ samples |>
 
 \pagebreak
 
-## Traceplots (full)
+## Example traceplots (after burn-in)
 
 ```{r}
 #| fig-height: 6
 
 left_join(samples, truth, by = "Parameter") |>
-    filter(run == 1) |>
-    ggplot(aes(Iteration, Sample)) +
-    geom_line() +
-    geom_hline(aes(yintercept = Truth, color = "Truth")) +
-    facet_wrap(vars(Parameter), ncol = 1, scales = "free")
-```
-
-## Traceplots (after burn-in)
-
-```{r}
-#| fig-height: 6
-
-left_join(samples, truth, by = "Parameter") |>
-    filter(Iteration > 2500 & run == 1) |>
+    filter(Iteration > 100 & run == 1) |>
     ggplot(aes(Iteration, Sample)) +
     geom_line() +
     geom_hline(aes(yintercept = Truth, color = "Truth")) +
@@ -85,7 +72,7 @@ left_join(samples, truth, by = "Parameter") |>
 
 \pagebreak
 
-## Densities
+## Example densities
 
 ```{r}
 #| fig-height: 3
@@ -112,7 +99,7 @@ left_join(samples, truth, by = "Parameter") |>
 
 \pagebreak
 
-## Summaries
+## Example summaries
 
 ```{r}
 samples |>

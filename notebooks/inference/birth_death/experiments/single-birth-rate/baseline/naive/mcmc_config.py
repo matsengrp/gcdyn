@@ -13,8 +13,7 @@ DR_PRIOR_SD = 0.3  # 0.5
 BR_PROPOSAL_SD = 0.1
 DR_PROPOSAL_SD = 0.2
 
-MCMC_SEED = 10
-NUM_MCMC_SAMPLES = 5000
+NUM_MCMC_SAMPLES = 2000
 
 MCMC_PARAMETERS = dict(
     # Note that lognorm(a, b) in R is lognorm(scale=exp(a), s=b) in scipy
