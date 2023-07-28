@@ -9,6 +9,7 @@ import scipy
 import tensorflow as tf
 from diffrax import ODETerm, PIDController, Tsit5, diffeqsolve
 from jax import lax
+import time
 
 # NOTE: sphinx is currently unable to present this in condensed form when the sphinx_autodoc_typehints extension is enabled
 from jax.typing import ArrayLike
@@ -28,6 +29,30 @@ def _select_where(source, selector):
     `selector` with exactly one `True` value."""
 
     return lax.select(selector, source, jnp.zeros_like(source)).sum()
+
+
+class Callback(tf.keras.callbacks.Callback):
+    """Class for control Keras verbosity"""
+    SHOW_NUMBER = 3
+    counter = 0
+    epoch = 0
+    start_time = time.time()
+    last_time = time.time()
+
+    def on_train_begin(epoch, logs=None):
+        print('                 epoch  total')
+        print('   epoch  loss   time   time')
+
+    def on_epoch_begin(self, epoch, logs=None):
+        self.epoch = epoch
+
+    def on_epoch_end(self, batch, logs=None):
+        if self.counter == self.SHOW_NUMBER or self.epoch == 1:
+            print('  %3d    %7.5f    %.1f     %.1f' % (self.epoch, logs['loss'], time.time() - self.last_time, time.time() - self.start_time))
+            if self.epoch > 1:
+                self.counter = 0
+        self.counter += 1
+        self.last_time = time.time()
 
 
 class NeuralNetworkModel:
@@ -98,17 +123,18 @@ class NeuralNetworkModel:
                 layers.Dense(num_parameters, activation="elu"),
             )
         elif network_layers == "tiny":
+            actfn = None #'elu'  # NOTE 'elu' was causing a bad lower threshold when scaling input variables
             print("    using tiny network layers")
             network_layers = (
                 # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
                 lambda x: tf.transpose(x, (0, 2, 1)),
-                layers.Conv1D(filters=25, kernel_size=3, activation="elu"),
+                layers.Conv1D(filters=25, kernel_size=3, activation=actfn),
                 layers.MaxPooling1D(pool_size=5, strides=5),
-                layers.Conv1D(filters=40, kernel_size=8, activation="elu"),
+                layers.Conv1D(filters=40, kernel_size=8, activation=actfn),
                 layers.GlobalAveragePooling1D(),
-                layers.Dense(16, activation="elu"),
-                layers.Dense(8, activation="elu"),
-                layers.Dense(num_parameters, activation="elu"),
+                layers.Dense(16, activation=actfn),
+                layers.Dense(8, activation=actfn),
+                layers.Dense(num_parameters, activation=actfn),
             )
         elif network_layers == "trivial":
             network_layers = (
@@ -177,7 +203,7 @@ class NeuralNetworkModel:
 
         self.network.compile(loss="mean_squared_error")
         self.network.fit(
-            onp.stack(self.training_trees), response_parameters, epochs=epochs
+            onp.stack(self.training_trees), response_parameters, epochs=epochs, callbacks=[Callback()], verbose=0,
         )
 
     def predict(

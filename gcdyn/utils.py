@@ -313,38 +313,38 @@ def make_dl_plots(
     def single_plot(param, smpl):
         plt.clf()
         df = prdfs[smpl]
-        # hord = sorted(set(df["Truth"]))
-        # sns.histplot(df, x="Predicted", hue="Truth", hue_order=hord, palette="tab10", bins=30, multiple="stack", ).set(title=smpl)
         xkey, ykey = ["%s-%s" % (param, vtype) for vtype in ["truth", "predicted"]]
-        ax = sns.boxplot(
-            df,
-            x=xkey,
-            y=ykey,
-            boxprops={"facecolor": "None"},
-            order=sorted(set(df[xkey])),
-        )
-        if len(df) < 500:
-            ax = sns.swarmplot(
+        if len(set(df['%s-truth' % param])) < 10:  # if simulation has discrete parameter values
+            ax = sns.boxplot(
                 df,
                 x=xkey,
                 y=ykey,
-                size=4,
-                alpha=0.6,
+                boxprops={"facecolor": "None"},
                 order=sorted(set(df[xkey])),
             )
-        # ax.set(title=smpl)
-        for xv, xvl in zip(ax.get_xticks(), ax.get_xticklabels()):
-            plt.plot(
-                [xv - 0.5, xv + 0.5],
-                [float(xvl._text), float(xvl._text)],
-                color="darkred",
-                linestyle="--",
-                linewidth=3,
-                alpha=0.7,
-            )
-        # sns.scatterplot(df, x=xkey, y=ykey)
-        # xvals, yvals = df[xkey], df[ykey]
-        # plt.plot([0.95 * min(xvals), 1.05 * max(xvals)], [0.95 * min(yvals), 1.05 * max(yvals)], color='darkred', linestyle='--', linewidth=3, alpha=0.7)
+            if len(df) < 500:
+                ax = sns.swarmplot(
+                    df,
+                    x=xkey,
+                    y=ykey,
+                    size=4,
+                    alpha=0.6,
+                    order=sorted(set(df[xkey])),
+                )
+            # ax.set(title=smpl)
+            for xv, xvl in zip(ax.get_xticks(), ax.get_xticklabels()):
+                plt.plot(
+                    [xv - 0.5, xv + 0.5],
+                    [float(xvl._text), float(xvl._text)],
+                    color="darkred",
+                    linestyle="--",
+                    linewidth=3,
+                    alpha=0.7,
+                )
+        else:
+            ax = sns.scatterplot(df, x=xkey, y=ykey, alpha=0.6)
+            xvals, yvals = df[xkey], df[ykey]
+            plt.plot([0.95 * min(xvals), 1.05 * max(xvals)], [0.95 * min(xvals), 1.05 * max(xvals)], color='darkred', linestyle='--', linewidth=3, alpha=0.7)
         plt.xlabel("true value")
         plt.ylabel("predicted value")
         titlestr = "%s %s" % (param, smpl)

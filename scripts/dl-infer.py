@@ -28,15 +28,16 @@ def scale_vals(pvals, scaler=None, inverse=False, dont_scale=False, debug=True):
     def get_lists(pvs):  # picks values from rows/columns to get a list of values for each parameter
         return [[plist[i] for plist in pvs] for i in range(len(args.params_to_predict))]
     def fnstr(pvs, fn):  # apply fn to each list from get_lists(), returns resulting combined str
-        return ' '.join('%7.3f'%fn(l) for l in get_lists(pvs))
+        return ' '.join('%-7.3f'%fn(l) for l in get_lists(pvs))
     def lstr(lst):  # print nice str for values in list lst
         return ' '.join('%5.2f'%v for v in sorted(set(lst)))
     def print_debug(pvs, dstr):
-        print('    %6s: %s   %s   (%s)' % (dstr, fnstr(pvs, np.mean), fnstr(pvs, np.var), lstr(get_lists(pvs)[0])))
+        print('    %6s:  mean %s  var %s   min %s  max %s' % (dstr, fnstr(pvs, np.mean), fnstr(pvs, np.var), fnstr(pvs, min), fnstr(pvs, max)))  # , lstr(get_lists(pvs)[0])))
     if debug:
         print_debug(pvals, 'before')
     if scaler is None:
         scaler = preprocessing.StandardScaler().fit(pvals)
+        # scaler = preprocessing.MinMaxScaler(feature_range=(-10, 10)).fit(pvals)
     if dont_scale:
         return pvals, scaler
     pscaled = scaler.inverse_transform(pvals) if inverse else scaler.transform(pvals)
@@ -168,7 +169,7 @@ def train_and_test():
     pscaled, scaler = scale_vals(pvals, dont_scale=args.dont_scale_params)
     if args.use_trivial_encoding:
         for smpl in smpldict:
-            encode.trivialize_encodings(smpldict[smpl]['trees'], pscaled, debug=True)
+            encode.trivialize_encodings(smpldict[smpl]['trees'], pscaled, noise=True) #, debug=True)
 
     pred_resps = [[ConstantResponse(v) for v in vlist] for vlist in pscaled]
     model = NeuralNetworkModel(
