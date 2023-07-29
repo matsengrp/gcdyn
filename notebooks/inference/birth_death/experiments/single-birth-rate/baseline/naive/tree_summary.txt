@@ -1,0 +1,5 @@
+Number of total nodes: 29174
+  Type 2 exists in 29174 nodes
+
+Number of leaves: 14587
+  Type 2 exists in 14587 leaves
