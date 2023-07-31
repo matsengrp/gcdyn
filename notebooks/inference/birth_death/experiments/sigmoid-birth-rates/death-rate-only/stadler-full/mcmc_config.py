@@ -34,16 +34,11 @@ MCMC_PARAMETERS = dict(
         proposal_generator=lambda c, rng: TRUE_PARAMETERS["birth_response"].xscale,
     ),
     xshift=Parameter(
-        prior_log_density=norm(loc=XSHIFT_PRIOR_MEAN, scale=XSHIFT_PRIOR_SD).logpdf,
-        prior_generator=lambda n, rng: norm(
-            loc=XSHIFT_PRIOR_MEAN, scale=XSHIFT_PRIOR_SD
-        ).rvs(n, random_state=rng),
-        proposal_log_density=lambda p, c: norm(loc=c, scale=XSHIFT_PROPOSAL_SD).logpdf(
-            p
-        ),
-        proposal_generator=lambda c, rng: norm(loc=c, scale=XSHIFT_PROPOSAL_SD).rvs(
-            1, random_state=rng
-        ),
+        prior_log_density=lambda y: y == TRUE_PARAMETERS["birth_response"].xshift,
+        prior_generator=lambda n, rng: np.ones(n)
+        * TRUE_PARAMETERS["birth_response"].xshift,
+        proposal_log_density=lambda p, c: p == TRUE_PARAMETERS["birth_response"].xshift,
+        proposal_generator=lambda c, rng: TRUE_PARAMETERS["birth_response"].xshift,
     ),
     yscale=Parameter(
         prior_log_density=lambda y: y == TRUE_PARAMETERS["birth_response"].yscale,
@@ -55,7 +50,7 @@ MCMC_PARAMETERS = dict(
     yshift=Parameter(
         prior_log_density=lambda y: y == TRUE_PARAMETERS["birth_response"].yshift,
         prior_generator=lambda n, rng: np.ones(n)
-        * TRUE_PARAMETERS["birth_response"].xscale,
+        * TRUE_PARAMETERS["birth_response"].yshift,
         proposal_log_density=lambda p, c: p == TRUE_PARAMETERS["birth_response"].yshift,
         proposal_generator=lambda c, rng: TRUE_PARAMETERS["birth_response"].yshift,
     ),
@@ -73,7 +68,7 @@ MCMC_PARAMETERS = dict(
 
 
 def log_likelihood(death_rate, trees, **birth_params):
-    return models.stadler_appx_log_likelihood(
+    return models.stadler_full_log_likelihood(
         trees=trees,
         birth_response=poisson.SigmoidResponse(**birth_params),
         death_response=poisson.ConstantResponse(death_rate),
