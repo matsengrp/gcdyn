@@ -201,12 +201,24 @@ def print_resp(bresp, dresp):
 
 
 # ----------------------------------------------------------------------------------------
+def choose_val(vcfg):
+    if 'vals' in vcfg:
+        return np.random.choice(vcfg['vals'])
+    elif 'min' in vcfg:
+        return np.random.uniform(vcfg['min'], vcfg['max'])
+    else:
+        assert False
+
+
+# ----------------------------------------------------------------------------------------
 def get_responses(xscale, xshift):
     # ----------------------------------------------------------------------------------------
     def get_birth(yscl):
         if args.birth_response == "constant":
             bresp = poisson.ConstantResponse(yscl)
         elif args.birth_response in ["soft-relu", "sigmoid"]:
+            if args.birth_response == 'sigmoid':
+                assert xscale > 0 and yscl > 0, ("xscale and yscale must both be greater than zero for sigmoid response function, but got xscale %.2f, yscale %.2f" % (xscale, yscl))
             kwargs = {
                 "xscale": xscale,
                 "xshift": xshift,
@@ -377,14 +389,8 @@ parser.add_argument(
     type=float,
     help="value (parameter) for constant death response",
 )
-parser.add_argument(
-    "--xscale-list",
-    default=[2],
-    type=float,
-    nargs="+",
-    help="parameters (see also {x,y}{scale,shift}) for birth (constant, sigmoid and soft-relu) response. If more than one is specified, one is chosen at random for each tree.",
-)
-parser.add_argument("--xshift-list", default=[-2.5], type=float, nargs="+")
+parser.add_argument("--xscale-values", default="2", help="birth response scale parameter")
+parser.add_argument("--xshift-values", default="-2.5", help="birth response shift parameter")
 parser.add_argument(
     "--yscale",
     default=1,
@@ -439,6 +445,14 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
+for pname in ['xscale_values', 'xshift_values']:
+    pval = getattr(args, pname)
+    if '-' in pval:  # range with two values for continuous
+        assert pval.count('-') == 1
+        minv, maxv = [float(v) for v in pval.split('-')]
+        setattr(args, pname, {'min' : minv, 'max' : maxv})
+    else:  # discrete values
+        setattr(args, pname, {'vals' : [float(v) for v in pval.split(',')]})
 random.seed(args.seed)
 np.random.seed(args.seed)
 
@@ -557,10 +571,6 @@ if (
     sys.exit(0)
 
 assert args.death_value >= 0
-if args.birth_response == "sigmoid":
-    assert (
-        all(x > 0 for x in args.xscale_list) and args.yscale > 0
-    )  # necessary so that the phenotype increases with phenotype (e.g. affinity)
 
 if not os.path.exists(args.outdir):
     os.makedirs(args.outdir)
@@ -604,7 +614,7 @@ for itrial in range(args.itrial_start, args.n_trials):
         continue
     sys.stdout.flush()
     birth_resp, death_resp = get_responses(
-        np.random.choice(args.xscale_list), np.random.choice(args.xshift_list)
+        choose_val(args.xscale_values), choose_val(args.xshift_values),
     )
     print(utils.color("blue", "trial %d:" % itrial), end=" ")
     tree = generate_sequences_and_tree(
@@ -646,7 +656,7 @@ if n_missing > 0:
         % (utils.color("yellow", "warning"), n_missing, args.n_trials)
     )
 
-if len(args.xscale_list) > 0:
+if True: #len(args.xscale_values) > 0:
     xscales = [p["birth-response"].xscale for p in all_trees]
     print(
         "  chosen xscale values: %s"
