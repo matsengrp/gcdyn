@@ -165,15 +165,16 @@ def train_and_test():
         % (len(smpldict["train"]["trees"]), len(smpldict["test"]["trees"]))
     )
 
-    pvals = [[getattr(birth_resp, pname) for pname in args.params_to_predict] for birth_resp in smpldict["train"]["birth-responses"]]
-    pscaled, scaler = scale_vals(pvals, dont_scale=args.dont_scale_params)
+    pscaled, scalers = {}, {}  # scaled parameters and scalers
+    for smpl in smpldict:
+        pvals = [[getattr(birth_resp, pname) for pname in args.params_to_predict] for birth_resp in smpldict[smpl]["birth-responses"]]
+        pscaled[smpl], scalers[smpl] = scale_vals(pvals, dont_scale=args.dont_scale_params)
     if args.use_trivial_encoding:
         for smpl in smpldict:
-            encode.trivialize_encodings(smpldict[smpl]['trees'], pscaled, noise=True) #, debug=True)
+            encode.trivialize_encodings(smpldict[smpl]['trees'], pscaled[smpl], noise=True) #, n_debug=3)
 
-    pred_resps = [[ConstantResponse(v) for v in vlist] for vlist in pscaled]
     model = NeuralNetworkModel(
-        smpldict["train"]["trees"], pred_resps, network_layers=args.model_size
+        smpldict["train"]["trees"], [[ConstantResponse(v) for v in vlist] for vlist in pscaled['train']], network_layers=args.model_size
     )
     model.fit(epochs=args.epochs)
 
@@ -183,7 +184,7 @@ def train_and_test():
 
     prdfs = {}
     for smpl in ["train", "test"]:
-        prdfs[smpl] = get_prediction(smpl, model, smpldict, scaler)
+        prdfs[smpl] = get_prediction(smpl, model, smpldict, scalers['train'])
     utils.make_dl_plots(prdfs, args.params_to_predict, args.outdir + "/plots")
 
     print("    total dl inference time: %.1f sec" % (time.time() - start))

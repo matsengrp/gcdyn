@@ -106,7 +106,7 @@ def encode_trees(
     return scale_vals, enc_trees
 
 
-def trivialize_encodings(encoded_trees, param_vals, noise=False, max_print=10, debug=False):
+def trivialize_encodings(encoded_trees, param_vals, noise=False, max_print=10, n_debug=0, debug=False):
     """Convert encoded_trees to a "trivialized" encoding, i.e. one that replaces the actual tree
     information with the response parameter values that we're trying to predict."""
 
@@ -118,17 +118,17 @@ def trivialize_encodings(encoded_trees, param_vals, noise=False, max_print=10, d
     def estr(tstr, entr):
         return '    %6s: %s' % (tstr, '\n            '.join(' '.join('%5.2f'%v for v in list(l[:max_print])) + ' ...' for l in entr))
 
-    if debug:
+    if debug or n_debug > 0:
         print(' trivializing encodings')
         np.set_printoptions(edgeitems=30, linewidth=100000, formatter=dict(float=lambda x: "%.3g" % x))
     for itree, entr in enumerate(encoded_trees):
-        if debug:
+        if debug or itree < n_debug:
             print('  itree %d' % itree)
             print(estr('before', entr))
         for irow in range(len(entr)):
             for icol in range(len(entr[irow])):
                 entr[irow][icol] = getval(itree, icol)
-        if debug:
+        if debug or itree < n_debug:
             print(estr('after', entr))
 
 

@@ -33,25 +33,24 @@ def _select_where(source, selector):
 
 class Callback(tf.keras.callbacks.Callback):
     """Class for control Keras verbosity"""
-    SHOW_NUMBER = 3
-    counter = 0
     epoch = 0
     start_time = time.time()
     last_time = time.time()
 
+    def __init__(self, max_epochs):
+        self.n_between = (5 if max_epochs > 30 else 3) if max_epochs > 10 else 1
+
     def on_train_begin(epoch, logs=None):
-        print('                 epoch  total')
-        print('   epoch  loss   time   time')
+        print('                  epoch   total')
+        print('   epoch  loss    time    time')
 
     def on_epoch_begin(self, epoch, logs=None):
         self.epoch = epoch
 
     def on_epoch_end(self, batch, logs=None):
-        if self.counter == self.SHOW_NUMBER or self.epoch == 1:
-            print('  %3d    %7.5f    %.1f     %.1f' % (self.epoch, logs['loss'], time.time() - self.last_time, time.time() - self.start_time))
-            if self.epoch > 1:
-                self.counter = 0
-        self.counter += 1
+        if self.epoch == 0 or self.epoch % self.n_between == 0:
+            def lfmt(lv): return ('%7.3f' if lv < 1 else '%7.2f') % lv
+            print('  %3d  %s    %.1f     %.1f' % (self.epoch, lfmt(logs['loss']), time.time() - self.last_time, time.time() - self.start_time))
         self.last_time = time.time()
 
 
@@ -203,7 +202,7 @@ class NeuralNetworkModel:
 
         self.network.compile(loss="mean_squared_error")
         self.network.fit(
-            onp.stack(self.training_trees), response_parameters, epochs=epochs, callbacks=[Callback()], verbose=0,
+            onp.stack(self.training_trees), response_parameters, epochs=epochs, callbacks=[Callback(epochs)], verbose=0,
         )
 
     def predict(
