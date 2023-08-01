@@ -283,7 +283,7 @@ def write_final_outputs(all_seqs, all_trees):
         writer = csv.DictWriter(jfile, ['tree', 'mean_branch_length'])
         writer.writeheader()
         for itr, sval in enumerate(scale_vals):
-            writer.writerow({'tree': itr, 'mean_branch_length': sval})
+            writer.writerow({'tree': itr + args.itrial_start, 'mean_branch_length': sval})
 
     with open(outfn("responses", None), "wb") as pfile:
         dill.dump(
@@ -389,8 +389,8 @@ parser.add_argument(
     type=float,
     help="value (parameter) for constant death response",
 )
-parser.add_argument("--xscale-values", default="2", help="birth response scale parameter")
-parser.add_argument("--xshift-values", default="-2.5", help="birth response shift parameter")
+parser.add_argument("--xscale-values", default="2", nargs='+', help="birth response scale parameter")
+parser.add_argument("--xshift-values", default="-2.5", nargs='+', help="birth response shift parameter")
 parser.add_argument(
     "--yscale",
     default=1,
@@ -446,13 +446,13 @@ parser.add_argument(
 
 args = parser.parse_args()
 for pname in ['xscale_values', 'xshift_values']:
-    pval = getattr(args, pname)
-    if '-' in pval:  # range with two values for continuous
-        assert pval.count('-') == 1
-        minv, maxv = [float(v) for v in pval.split('-')]
+    pvals = getattr(args, pname)
+    if len(pvals) == 1 and ',' in pvals[0]:  # range with two values for continuous
+        assert pvals[0].count(',') == 1
+        minv, maxv = [float(v) for v in pvals[0].split(',')]
         setattr(args, pname, {'min' : minv, 'max' : maxv})
     else:  # discrete values
-        setattr(args, pname, {'vals' : [float(v) for v in pval.split(',')]})
+        setattr(args, pname, {'vals' : [float(v) for v in pvals]})
 random.seed(args.seed)
 np.random.seed(args.seed)
 
@@ -549,7 +549,7 @@ if (
         if ftype in ['seqs', 'trees', 'leaf-meta', 'summary-stats']:
             if ftype in ['leaf-meta', 'summary-stats']:
                 cmds = ['head -n1 %s >%s' % (fnames[0], ofn),
-                        'tail -n+1 %s >>%s' % (' '.join(fnames), ofn)]
+                        'tail --quiet -n+2 %s >>%s' % (' '.join(fnames), ofn)]
             else:
                 cmds = ['cat %s >%s' % (' '.join(fnames), ofn)]
             for cmd in cmds:
