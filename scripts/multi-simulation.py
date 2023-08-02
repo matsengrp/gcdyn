@@ -280,10 +280,10 @@ def write_final_outputs(all_seqs, all_trees):
     scale_vals, encoded_trees = encode.encode_trees([pfo['tree'] for pfo in all_trees])
     encode.write_trees(outfn("encoded-trees", None), encoded_trees)
     with open(outfn("summary-stats", None), "w") as jfile:
-        writer = csv.DictWriter(jfile, ['tree', 'mean_branch_length'])
+        writer = csv.DictWriter(jfile, ['tree', 'mean_branch_length', 'total_branch_length'])
         writer.writeheader()
-        for itr, sval in enumerate(scale_vals):
-            writer.writerow({'tree': itr + args.itrial_start, 'mean_branch_length': sval})
+        for itr, (sval, pfo) in enumerate(zip(scale_vals, all_trees)):
+            writer.writerow({'tree': itr + args.itrial_start, 'mean_branch_length': sval, 'total_branch_length' : sum(n.dist for n in pfo['tree'].iter_descendants())})
 
     with open(outfn("responses", None), "wb") as pfile:
         dill.dump(

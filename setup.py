@@ -33,6 +33,7 @@ setup(
         "diffrax",
         "tensorflow",
         "scikit-learn",
+        "colored-traceback",
     ],
     extras_require={
         "PyQt5": [
