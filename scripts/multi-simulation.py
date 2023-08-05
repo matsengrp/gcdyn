@@ -18,6 +18,7 @@ from experiments import replay
 
 
 final_ofn_strs = ['seqs', 'trees', 'leaf-meta', 'encoded-trees', 'responses', 'summary-stats']
+
 # ----------------------------------------------------------------------------------------
 def outfn(ftype, itrial, odir=None):
     assert ftype in final_ofn_strs + [None]
@@ -41,12 +42,12 @@ def outfn(ftype, itrial, odir=None):
 
 
 # ----------------------------------------------------------------------------------------
-def print_final_response_vals(tree, birth_resp, death_resp):
+def print_final_response_vals(tree, birth_resp, death_resp, final_time):
     print("                           x         birth           death")
     print("      time   N seqs.   min   max    min  max       min     max")
     xvals, bvals, dvals = [], [], []
     for tval in range(
-        args.time_to_sampling + 1
+        final_time + 1
     ):  # kind of weird/arbitrary to take integer values
         txv = sorted(tree.slice(tval))
         tbv, tdv = [[r.λ_phenotype(x) for x in txv] for r in [birth_resp, death_resp]]
@@ -78,6 +79,7 @@ def print_final_response_vals(tree, birth_resp, death_resp):
 
 # ----------------------------------------------------------------------------------------
 def generate_sequences_and_tree(
+    sample_time,
     birth_resp,
     death_resp,
     mutation_resp,
@@ -93,7 +95,7 @@ def generate_sequences_and_tree(
             tree.x = gp_map(replay.NAIVE_SEQUENCE)
             tree.set_seq(replay.NAIVE_SEQUENCE, replay.CHAIN_2_START_IDX)
             tree.evolve(
-                args.time_to_sampling,
+                sample_time,
                 birth_response=birth_resp,
                 death_response=death_resp,
                 mutation_response=mutation_resp,
@@ -110,7 +112,7 @@ def generate_sequences_and_tree(
                 % (iter + 1, len(tree), time.time() - tree_start)
             )
             if args.debug:
-                print_final_response_vals(tree, birth_resp, death_resp)
+                print_final_response_vals(tree, birth_resp, death_resp, sample_time)
             success = True
             break
         except bdms.TreeError as terr:
@@ -142,7 +144,7 @@ def generate_sequences_and_tree(
         return None
 
     if args.make_plots:
-        utils.plot_tree_slices(args.outdir + '/plots', tree, args.time_to_sampling, itrial)
+        utils.plot_tree_slices(args.outdir + '/plots', tree, sample_time, itrial)
 
     n_to_sample = args.n_seqs
     if len(tree) < n_to_sample:
@@ -365,7 +367,7 @@ parser.add_argument(
     type=int,
     help="Number of times to retry simulation if it fails due to reaching either the min or max number of leaves.",
 )
-parser.add_argument("--time-to-sampling", default=20, type=int)
+parser.add_argument("--time-to-sampling", default='20', nargs='+')
 parser.add_argument("--min-survivors", default=100, type=int)
 parser.add_argument("--carry-cap", default=300, type=int)
 parser.add_argument(
@@ -445,14 +447,19 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
-for pname in ['xscale_values', 'xshift_values']:
+# handle args that can have either a list of a few values, or choose from a uniform interval specified with two (min, max) values
+for pname in ['xscale_values', 'xshift_values', 'time_to_sampling']:
+    cfcn = int if pname == 'time_to_sampling' else float
     pvals = getattr(args, pname)
     if len(pvals) == 1 and ',' in pvals[0]:  # range with two values for continuous
         assert pvals[0].count(',') == 1
-        minv, maxv = [float(v) for v in pvals[0].split(',')]
-        setattr(args, pname, {'min' : minv, 'max' : maxv})
+        minv, maxv = [cfcn(v) for v in pvals[0].split(',')]
+        if cfcn == int:
+            setattr(args, pname, {'vals' : list(range(minv, maxv))})
+        else:
+            setattr(args, pname, {'min' : minv, 'max' : maxv})
     else:  # discrete values
-        setattr(args, pname, {'vals' : [float(v) for v in pvals]})
+        setattr(args, pname, {'vals' : [cfcn(v) for v in pvals]})
 random.seed(args.seed)
 np.random.seed(args.seed)
 
@@ -463,7 +470,7 @@ if args.test:
     if "--n-trials" not in sys.argv:
         args.n_trials = 1
     if "--time-to-sampling" not in sys.argv:
-        args.time_to_sampling = 10
+        args.time_to_sampling = {'vals' : 10}
     if "--min-survivors" not in sys.argv:
         args.min_survivors = 10
     if "--n-seqs" not in sys.argv:
@@ -471,7 +478,7 @@ if args.test:
     if "--n-max-tries" not in sys.argv:
         args.n_max_tries = 5
     print(
-        "  --test: --carry-cap %d --n-trials %d  --time-to-sampling %d  --min-survivors %d  --n-seqs %d  --n-max-tries %d"
+        "  --test: --carry-cap %d --n-trials %d  --time-to-sampling %s  --min-survivors %d  --n-seqs %d  --n-max-tries %d"
         % (
             args.carry_cap,
             args.n_trials,
@@ -492,7 +499,7 @@ if (
         clist = ["python"] + copy.deepcopy(sys.argv)
         subdir = "%s/iproc-%d" % (args.outdir, iproc)
         istart = iproc * n_per_proc
-        if all(os.path.exists(outfn(ft, None, odir=subdir)) for ft in final_ofn_strs):
+        if all(os.path.exists(outfn(ft, None, odir=subdir)) for ft in final_ofn_strs) and not args.overwrite:
             print("        proc %d: final outputs exist" % iproc)
             sys.stdout.flush()
             continue
@@ -618,7 +625,7 @@ for itrial in range(args.itrial_start, args.n_trials):
     )
     print(utils.color("blue", "trial %d:" % itrial), end=" ")
     tree = generate_sequences_and_tree(
-        birth_resp, death_resp, mutation_resp, mutator, itrial, seed=rng
+        choose_val(args.time_to_sampling), birth_resp, death_resp, mutation_resp, mutator, itrial, seed=rng
     )
     if tree is None:
         n_missing += 1
