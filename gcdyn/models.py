@@ -463,6 +463,77 @@ def stadler_appx_log_likelihood(
     return result
 
 
+def stadler_appx_log_likelihood_original(
+    trees: list[ete3.TreeNode],
+    birth_response: poisson.Response,
+    death_response: poisson.Response,
+    mutation_response: poisson.Response,
+    mutator: mutators.Mutator,
+    extant_sampling_probability: float,
+    extinct_sampling_probability: float,
+    present_time: float,
+) -> float:
+    """
+    A model over trees that are missing unsampled survivors and fossils.
+    Assumes that mutations do not occur in unsampled parts of the tree.
+
+    Does not condition on the tree having any observable history.
+
+    Requires that `tree.prune()` has been called.
+
+    Barido-Sottani, Joëlle, Timothy G Vaughan, and Tanja Stadler. “A Multitype Birth–Death Model for Bayesian Inference of Lineage-Specific Birth and Death Rates.” Edited by Adrian Paterson. Systematic Biology 69, no. 5 (September 1, 2020): 973–86. https://doi.org/10.1093/sysbio/syaa016.
+    """
+    for tree in trees:
+        if not tree._pruned:
+            raise NotImplementedError("tree must be pruned")
+        if not tree._sampled:
+            raise RuntimeError("tree must be sampled")
+
+    result = 0
+
+    for tree in trees:
+        for node in tree.iter_descendants():
+            Δt = node.dist
+            λ = birth_response(node.up)
+            μ = death_response(node.up)
+            γ = mutation_response(node.up)
+            Λ = λ + μ + γ
+            ρ = extant_sampling_probability
+            σ = extinct_sampling_probability
+
+            if not (0 <= ρ <= 1 and 0 <= σ <= 1):
+                raise ValueError("sampling_probability must be in [0, 1]")
+
+            c = jnp.sqrt(Λ**2 - 4 * μ * (1 - σ) * λ)
+            x = (-Λ - c) / 2
+            y = (-Λ + c) / 2
+
+            def helper(t):
+                return (y + λ * (1 - ρ)) * jnp.exp(-c * t) - x - λ * (1 - ρ)
+
+            t_s = present_time - (node.t - Δt)
+            t_e = present_time - node.t
+
+            log_f_N = c * (t_e - t_s) + 2 * (
+                jnp.log(helper(t_e)) - jnp.log(helper(t_s))
+            )
+
+            result += log_f_N
+
+            if node.event == tree._BIRTH_EVENT:
+                result += jnp.log(λ)
+            elif node.event == tree._DEATH_EVENT:
+                result += jnp.log(σ) + jnp.log(μ)
+            elif node.event == tree._MUTATION_EVENT:
+                result += jnp.log(γ) + mutator.logprob(node)
+            elif node.event == tree._SAMPLING_EVENT:
+                result += jnp.log(ρ)
+            else:
+                raise ValueError(f"unknown event {node.event}")
+
+    return result
+
+
 def stadler_full_log_likelihood(
     trees: list[ete3.TreeNode],
     birth_response: poisson.Response,

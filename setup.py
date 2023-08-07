@@ -30,7 +30,9 @@ setup(
         "jax[cpu]",
         "jaxopt",
         "biopython",
-        "diffrax",
+        # Until https://github.com/patrick-kidger/diffrax/commit/b71f8f is merged in
+        "diffrax==0.3.1",
+        "equinox==0.10.2",
         "tensorflow",
     ],
     extras_require={

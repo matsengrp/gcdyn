@@ -4,7 +4,7 @@ from gcdyn import mutators, poisson
 
 STATE_SPACE = (2, 4, 6, 8)
 INITIAL_STATE = 2
-PRESENT_TIME = 1
+PRESENT_TIME = 2
 NUM_TREES = 15
 
 TRUE_PARAMETERS = {
