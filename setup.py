@@ -34,6 +34,7 @@ setup(
         "diffrax==0.3.1",
         "equinox==0.10.2",
         "tensorflow",
+        "tqdm",
     ],
     extras_require={
         "PyQt5": [
