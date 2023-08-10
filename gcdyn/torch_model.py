@@ -50,6 +50,15 @@ class TorchModel(NeuralNetworkModel, nn.Module):
         self.fc3 = nn.Linear(16, 8)
         self.fc4 = nn.Linear(8, num_parameters)
 
+        if torch.backends.cudnn.is_available():
+            self.device = torch.device("cuda")
+        elif torch.backends.mps.is_available():
+            self.device = torch.device("mps")
+        else:
+            self.device = torch.device("cpu")
+        self.to(self.device)  # Optionally, move the model to the device during initialization
+
+
     def forward(self, x):
         # We are not doing any permuting because nn.Conv1d expects the input to be of shape (N, C, L)
         # x = x.permute(0, 2, 1)
@@ -71,8 +80,8 @@ class TorchModel(NeuralNetworkModel, nn.Module):
         criterion = nn.MSELoss()
         optimizer = optim.Adam(self.parameters()) 
         
-        training_data = torch.tensor(onp.stack(self.training_trees)).float()
-        response_parameters = torch.tensor(self._encode_responses(self.responses)).float()
+        training_data = torch.tensor(onp.stack(self.training_trees)).float().to(self.device)
+        response_parameters = torch.tensor(self._encode_responses(self.responses)).float().to(self.device)
         
         print("Data shape:", training_data.shape)
         print("Response shape:", response_parameters.shape)
@@ -91,5 +100,6 @@ class TorchModel(NeuralNetworkModel, nn.Module):
 
     def predict(self, encoded_trees):
         with torch.no_grad():
-            response_parameters = self(torch.tensor(onp.stack(encoded_trees)).float())  # Use self instead of self.network
+            input_data = torch.tensor(onp.stack(encoded_trees)).float().to(self.device)
+            response_parameters = self(input_data)
         return self._decode_responses(response_parameters, example_responses=self.responses[0])
