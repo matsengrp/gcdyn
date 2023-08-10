@@ -90,39 +90,39 @@ class NeuralNetworkModel:
             )
         max_leaf_count = list(leaf_counts)[0]
 
+        actfn = None #'elu'  # NOTE 'elu' was causing a bad lower threshold when scaling input variables
         if network_layers is None:
             print("    using default network layers")
             network_layers = (
                 # Rotate matrix from (4, max_leaf_count) to (max_leaf_count, 4)
                 lambda x: tf.transpose(x, (0, 2, 1)),
-                layers.Conv1D(filters=50, kernel_size=3, activation="elu"),
-                layers.Conv1D(filters=50, kernel_size=10, activation="elu"),
+                layers.Conv1D(filters=50, kernel_size=3, activation=actfn),
+                layers.Conv1D(filters=50, kernel_size=10, activation=actfn),
                 layers.MaxPooling1D(pool_size=10, strides=10),
-                layers.Conv1D(filters=80, kernel_size=10, activation="elu"),
+                layers.Conv1D(filters=80, kernel_size=10, activation=actfn),
                 layers.GlobalAveragePooling1D(),
-                layers.Dense(64, activation="elu"),
-                layers.Dense(32, activation="elu"),
-                layers.Dense(16, activation="elu"),
-                layers.Dense(8, activation="elu"),
-                layers.Dense(num_parameters, activation="elu"),
+                layers.Dense(64, activation=actfn),
+                layers.Dense(32, activation=actfn),
+                layers.Dense(16, activation=actfn),
+                layers.Dense(8, activation=actfn),
+                layers.Dense(num_parameters, activation=actfn),
             )
         elif network_layers == "small":
             print("    using small network layers")
             network_layers = (
                 # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
                 lambda x: tf.transpose(x, (0, 2, 1)),
-                layers.Conv1D(filters=25, kernel_size=3, activation="elu"),
-                layers.Conv1D(filters=25, kernel_size=8, activation="elu"),
+                layers.Conv1D(filters=25, kernel_size=3, activation=actfn),
+                layers.Conv1D(filters=25, kernel_size=8, activation=actfn),
                 layers.MaxPooling1D(pool_size=10, strides=10),
-                layers.Conv1D(filters=40, kernel_size=8, activation="elu"),
+                layers.Conv1D(filters=40, kernel_size=8, activation=actfn),
                 layers.GlobalAveragePooling1D(),
-                layers.Dense(32, activation="elu"),
-                layers.Dense(16, activation="elu"),
-                layers.Dense(8, activation="elu"),
-                layers.Dense(num_parameters, activation="elu"),
+                layers.Dense(32, activation=actfn),
+                layers.Dense(16, activation=actfn),
+                layers.Dense(8, activation=actfn),
+                layers.Dense(num_parameters, activation=actfn),
             )
         elif network_layers == "tiny":
-            actfn = None #'elu'  # NOTE 'elu' was causing a bad lower threshold when scaling input variables
             print("    using tiny network layers")
             network_layers = (
                 # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
@@ -139,7 +139,7 @@ class NeuralNetworkModel:
             network_layers = (
                 # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
                 lambda x: tf.transpose(x, (0, 2, 1)),
-                layers.Dense(num_parameters, activation="elu"),
+                layers.Dense(num_parameters, activation=actfn),
             )
         else:
             raise Exception(

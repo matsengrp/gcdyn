@@ -5,6 +5,7 @@ import numpy as np
 # import colored_traceback.always  # need to add this to installation stuff, i'm not sure how to do it atm
 import dill
 
+raise Exception('needs updating for new file formats')
 # ----------------------------------------------------------------------------------------
 ustr = """
 Read encoded trees and response functions from list of input dirs, and combine (concatenate) them into one output file

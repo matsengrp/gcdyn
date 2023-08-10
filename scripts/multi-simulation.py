@@ -203,13 +203,15 @@ def print_resp(bresp, dresp):
 
 
 # ----------------------------------------------------------------------------------------
-def choose_val(vcfg):
-    if 'vals' in vcfg:
-        return np.random.choice(vcfg['vals'])
-    elif 'min' in vcfg:
-        return np.random.uniform(vcfg['min'], vcfg['max'])
-    else:
-        assert False
+def choose_val(pname):
+    minmax, vals = [getattr(args, pname + '_' + str) for str in ['range', 'values']]
+    if minmax is not None:  # range with two values for continuous
+        if pname == 'time_to_sampling':
+            return np.random.choice(range(minmax[0], minmax[1] + 1))  # integers (note that this is inclusive)
+        else:
+            return np.random.uniform(minmax[0], minmax[1])  # floats
+    else:  # discrete values
+        return np.random.choice(vals)
 
 
 # ----------------------------------------------------------------------------------------
@@ -367,7 +369,8 @@ parser.add_argument(
     type=int,
     help="Number of times to retry simulation if it fails due to reaching either the min or max number of leaves.",
 )
-parser.add_argument("--time-to-sampling", default='20', nargs='+')
+parser.add_argument("--time-to-sampling-values", default='20', nargs='+', type=int, help="List of values from which to choose for time to sampling.")
+parser.add_argument("--time-to-sampling-range", nargs='+', type=int, help="Pair of values (min/max) between which to choose at uniform random the time to sampling for each tree. Overrides --time-to-sampling-values.")
 parser.add_argument("--min-survivors", default=100, type=int)
 parser.add_argument("--carry-cap", default=300, type=int)
 parser.add_argument(
@@ -391,8 +394,10 @@ parser.add_argument(
     type=float,
     help="value (parameter) for constant death response",
 )
-parser.add_argument("--xscale-values", default="2", nargs='+', help="birth response scale parameter")
-parser.add_argument("--xshift-values", default="-2.5", nargs='+', help="birth response shift parameter")
+parser.add_argument("--xscale-values", default="2", nargs='+', type=float, help="list of birth response xscale parameter values from which to choose")
+parser.add_argument("--xshift-values", default="-2.5", nargs='+', type=float, help="list of birth response xshift parameter values from which to choose")
+parser.add_argument("--xscale-range", nargs='+', type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response xscale parameter for each tree. Overrides --xscale-values.")
+parser.add_argument("--xshift-range", nargs='+', type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response xshift parameter for each tree. Overrides --xshift-values")
 parser.add_argument(
     "--yscale",
     default=1,
@@ -448,18 +453,10 @@ parser.add_argument(
 
 args = parser.parse_args()
 # handle args that can have either a list of a few values, or choose from a uniform interval specified with two (min, max) values
-for pname in ['xscale_values', 'xshift_values', 'time_to_sampling']:
-    cfcn = int if pname == 'time_to_sampling' else float
-    pvals = getattr(args, pname)
-    if len(pvals) == 1 and ',' in pvals[0]:  # range with two values for continuous
-        assert pvals[0].count(',') == 1
-        minv, maxv = [cfcn(v) for v in pvals[0].split(',')]
-        if cfcn == int:
-            setattr(args, pname, {'vals' : list(range(minv, maxv))})
-        else:
-            setattr(args, pname, {'min' : minv, 'max' : maxv})
-    else:  # discrete values
-        setattr(args, pname, {'vals' : [cfcn(v) for v in pvals]})
+for pname in ['xscale', 'xshift', 'time_to_sampling']:
+    rangevals = getattr(args, pname + '_range')
+    if rangevals is not None and len(rangevals) != 2:  # range with two values for continuous
+        raise Exception('range must consist of two values but got %d' % len(rangevals))
 random.seed(args.seed)
 np.random.seed(args.seed)
 
@@ -621,11 +618,11 @@ for itrial in range(args.itrial_start, args.n_trials):
         continue
     sys.stdout.flush()
     birth_resp, death_resp = get_responses(
-        choose_val(args.xscale_values), choose_val(args.xshift_values),
+        choose_val('xscale'), choose_val('xshift'),
     )
     print(utils.color("blue", "trial %d:" % itrial), end=" ")
     tree = generate_sequences_and_tree(
-        choose_val(args.time_to_sampling), birth_resp, death_resp, mutation_resp, mutator, itrial, seed=rng
+        choose_val('time_to_sampling'), birth_resp, death_resp, mutation_resp, mutator, itrial, seed=rng
     )
     if tree is None:
         n_missing += 1
