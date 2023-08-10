@@ -26,8 +26,16 @@ samples <- read_csv("samples.csv") |>
 
 truth <- tibble(
     Parameter = c("xscale", "xshift", "yscale", "yshift", "death_rate"),
-    Truth = c(1, 5, 3, 1, 1.3)
+    Truth = c(1, 5, 1.5, 1, 1.3)
 )
+
+priors <- list(
+    xscale = \(x) dgamma(x, 2, scale=1),
+    xshift = \(x) dnorm(x, 5, 1),
+    yscale = \(x) dgamma(x, 2, scale=1),
+    yshift = \(x) dnorm(x, 1, 1),
+    death_rate = \(x) dlnorm(x, 0, 0.3)
+) 
 ```
 
 ## Posterior median sampling distributions
@@ -37,11 +45,11 @@ truth <- tibble(
 
 samples |>
     group_by(run, Parameter) |>
-    summarise(Estimate = median(Sample)) |>
+    summarise(Sample = median(Sample)) |>
     left_join(truth, by = "Parameter") |>
     ggplot() +
     geom_histogram(
-        aes(x = Estimate, y = after_stat(density), fill = "Sampling distribution")
+        aes(x = Sample, y = after_stat(density), fill = "Sampling distribution")
     ) +
     geom_vline(aes(xintercept = Truth),
         color = "red",
@@ -76,7 +84,7 @@ sigmoid <- function(x, estimate) {
 
 sampling_dist_plot <- ggplot() +
     xlim(0, 10) +
-    ylim(0, 7)
+    ylim(0, 4)
 
 sampled_sigmoids <- samples |>
     group_by(run, Parameter) |>
@@ -125,149 +133,3 @@ left_join(samples, truth, by = "Parameter") |>
 ```
 
 \pagebreak
-
-## Densities (one run)
-
-```{r}
-#| fig-height: 6
-
-left_join(samples, truth, by = "Parameter") |>
-    filter(run == 1) |>
-    ggplot() +
-    geom_histogram(
-        aes(x = Sample, y = after_stat(density), fill = "Posterior")
-    ) +
-    geom_vline(aes(xintercept = Truth),
-        color = "red",
-        linewidth = 1
-    ) +
-    scale_fill_manual(
-        name = "",
-        values = c("Posterior" = "steelblue")
-    ) +
-    facet_wrap(vars(Parameter), ncol = 2, scales = "free") +
-    scale_x_sqrt() +
-    xlab("Sample (on sqrt scale)") +
-    theme(legend.position = "bottom")
-```
-
-\pagebreak
-
-## Summaries (one run)
-
-```{r}
-samples |>
-    filter(run == 1) |>
-    group_by(Parameter) |>
-    summarise(
-        n = n(),
-        ESS = effectiveSize(Sample) |> round(),
-        `Acceptance` = mean(Sample[-1] != Sample[1:length(Sample) - 1]) |> round(2),
-        `Q 25%` = quantile(Sample, 0.025) |> round(2),
-        Median = median(Sample) |> round(2),
-        `Q 75%` = quantile(Sample, 0.975) |> round(2),
-    ) |>
-    left_join(truth, by = "Parameter") |>
-    mutate(
-        `Relative error` = abs((Median - Truth) / Truth) |> round(2)
-    ) |>
-    kbl(booktabs = TRUE)
-```
-
-\pagebreak
-
-## Sigmoids (one run)
-
-```{r}
-sigmoid <- function(x, sample) {
-    theta <- sample |>
-        pivot_wider(
-            names_from = Parameter,
-            values_from = Sample
-        ) |>
-        with(c(xscale, xshift, yscale, yshift))
-
-    theta[3] / (1 + exp(-theta[1] * (x - theta[2]))) + theta[4]
-}
-```
-
-```{r}
-posterior_plot <- ggplot() +
-    xlim(0, 10) +
-    ylim(0, 7)
-
-sampled_sigmoids <- samples |>
-    filter(Iteration > max(Iteration) - 200 & run == 1) |>
-    group_by(Iteration) |>
-    group_map(\(sample, ...) \(x) sigmoid(x, sample))
-
-for (sig in sampled_sigmoids) {
-    posterior_plot <- posterior_plot + stat_function(fun = sig, alpha = 0.03, linewidth = 1)
-}
-
-posterior_plot <- posterior_plot +
-    stat_function(
-        aes(color = "Truth"),
-        fun = \(x) sigmoid(x, truth |> rename(Sample = Truth)),
-        linewidth = 1.5
-    ) +
-    scale_color_manual(
-        name = "",
-        values = c("Truth" = "red")
-    ) +
-    labs(
-        title = "Posterior",
-        x = "x",
-        y = expression(paste(lambda, "(x)"))
-    ) +
-    theme_classic() +
-    theme(legend.position = "bottom")
-```
-
-```{r}
-num_samples <- 200
-
-samples <- tibble(
-    Iteration = seq_len(num_samples),
-    xscale = rgamma(num_samples, shape = 2, scale = 1),
-    xshift = rnorm(num_samples, 5, 1),
-    yscale = rgamma(num_samples, shape = 2, scale = 1),
-    yshift = rgamma(num_samples, shape = 1, scale = 1)
-)
-
-sampled_sigmoids <- samples |>
-    group_by(Iteration) |>
-    group_map(\(row, ...) \(x) with(row, yscale / (1 + exp(-xscale * (x - xshift))) + yshift))
-
-prior_plot <- ggplot() +
-    xlim(0, 10) +
-    ylim(0, 7)
-
-for (sig in sampled_sigmoids) {
-    prior_plot <- prior_plot + stat_function(fun = sig, alpha = 0.03, linewidth = 1)
-}
-
-prior_plot <- prior_plot +
-    stat_function(
-        aes(color = "Truth"),
-        fun = \(x) sigmoid(x, truth |> rename(Sample = Truth)),
-        linewidth = 1.5
-    ) +
-    scale_color_manual(
-        name = "",
-        values = c("Truth" = "red")
-    ) +
-    labs(
-        title = "Prior",
-        x = "x",
-        y = expression(paste(lambda, "(x)"))
-    ) +
-    theme_classic() +
-    theme(legend.position = "bottom")
-```
-
-```{r}
-#| fig-height: 7.5
-
-prior_plot / posterior_plot
-```
