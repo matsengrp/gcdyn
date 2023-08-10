@@ -24,8 +24,7 @@ class TorchModel(NeuralNetworkModel, nn.Module):
                    with one parameter. (Responses that aren't being estimated need not be provided)
         network_layers: Ignored.
         """
-        NeuralNetworkModel.__init__(self, encoded_trees, responses, network_layers)
-        nn.Module.__init__(self)  # Initialize the PyTorch Module separately
+        nn.Module.__init__(self)  # Initialize the PyTorch Module
         
         num_parameters = sum(len(response._param_dict) for response in responses[0])
         leaf_counts = set(
@@ -38,6 +37,9 @@ class TorchModel(NeuralNetworkModel, nn.Module):
             )
         max_leaf_count = list(leaf_counts)[0]
         print("Leaf counts:", leaf_counts)
+        self.max_leaf_count = max_leaf_count
+        self.training_trees = encoded_trees
+        self.responses = responses
         
         # Add activations as desired!
         self.conv1 = nn.Conv1d(in_channels=4, out_channels=25, kernel_size=3)
@@ -51,8 +53,10 @@ class TorchModel(NeuralNetworkModel, nn.Module):
         self.fc4 = nn.Linear(8, num_parameters)
 
         if torch.backends.cudnn.is_available():
+            print("Using CUDA")
             self.device = torch.device("cuda")
         elif torch.backends.mps.is_available():
+            print("Using Metal Performance Shaders")
             self.device = torch.device("mps")
         else:
             self.device = torch.device("cpu")
