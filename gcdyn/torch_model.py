@@ -2,15 +2,14 @@
 from functools import reduce
 import numpy as onp
 
-# CUT
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers
+import torch
+import torch.nn as nn
+import torch.optim as optim
 
 from gcdyn import poisson
 from gcdyn.models import NeuralNetworkModel
 
-class TorchModel(NeuralNetworkModel):
+class TorchModel(NeuralNetworkModel, nn.Module):
     def __init__(
         self,
         encoded_trees: list[onp.ndarray],
@@ -25,6 +24,9 @@ class TorchModel(NeuralNetworkModel):
                    with one parameter. (Responses that aren't being estimated need not be provided)
         network_layers: Ignored.
         """
+        NeuralNetworkModel.__init__(self, encoded_trees, responses, network_layers)
+        nn.Module.__init__(self)  # Initialize the PyTorch Module separately
+        
         num_parameters = sum(len(response._param_dict) for response in responses[0])
         leaf_counts = set(
             [len(t[0]) for t in encoded_trees]
@@ -35,51 +37,59 @@ class TorchModel(NeuralNetworkModel):
                 % " ".join(str(c) for c in leaf_counts)
             )
         max_leaf_count = list(leaf_counts)[0]
+        print("Leaf counts:", leaf_counts)
+        
+        # Add activations as desired!
+        self.conv1 = nn.Conv1d(in_channels=4, out_channels=25, kernel_size=3)
+        self.conv2 = nn.Conv1d(in_channels=25, out_channels=25, kernel_size=8)
+        self.maxpool = nn.MaxPool1d(kernel_size=10, stride=10)
+        self.conv3 = nn.Conv1d(in_channels=25, out_channels=40, kernel_size=8)
+        self.avgpool = nn.AdaptiveAvgPool1d(1)
+        self.fc1 = nn.Linear(40, 32)
+        self.fc2 = nn.Linear(32, 16)
+        self.fc3 = nn.Linear(16, 8)
+        self.fc4 = nn.Linear(8, num_parameters)
 
-        actfn = None #'elu'  # NOTE 'elu' was causing a bad lower threshold when scaling input variables
-        network_layers = (
-            # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
-            lambda x: tf.transpose(x, (0, 2, 1)),
-            layers.Conv1D(filters=25, kernel_size=3, activation=actfn),
-            layers.Conv1D(filters=25, kernel_size=8, activation=actfn),
-            layers.MaxPooling1D(pool_size=10, strides=10),
-            layers.Conv1D(filters=40, kernel_size=8, activation=actfn),
-            layers.GlobalAveragePooling1D(),
-            layers.Dense(32, activation=actfn),
-            layers.Dense(16, activation=actfn),
-            layers.Dense(8, activation=actfn),
-            layers.Dense(num_parameters, activation=actfn),
-        )
+    def forward(self, x):
+        # We are not doing any permuting because nn.Conv1d expects the input to be of shape (N, C, L)
+        # x = x.permute(0, 2, 1)
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.maxpool(x)
+        x = self.conv3(x)
+        x = self.avgpool(x)
+        x = x.view(x.size(0), -1)  # Flatten the tensor
+        x = self.fc1(x)
+        x = self.fc2(x)
+        x = self.fc3(x)
+        x = self.fc4(x)
+        
+        return x
 
-        inputs = keras.Input(shape=(4, max_leaf_count))
-        outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
-        self.network = keras.Model(inputs=inputs, outputs=outputs)
-        self.network.summary(print_fn=lambda x: print("      %s" % x))
+    def fit(self, epochs=30):
+        # Define loss function and optimizer
+        criterion = nn.MSELoss()
+        optimizer = optim.Adam(self.parameters()) 
+        
+        training_data = torch.tensor(onp.stack(self.training_trees)).float()
+        response_parameters = torch.tensor(self._encode_responses(self.responses)).float()
+        
+        print("Data shape:", training_data.shape)
+        print("Response shape:", response_parameters.shape)
+        
+        for _ in range(epochs):
+            # Zero the gradients
+            optimizer.zero_grad()
+            # Forward pass
+            outputs = self(training_data)
+            # Calculate loss
+            loss = criterion(outputs, response_parameters)
+            # Backward pass
+            loss.backward()
+            # Update weights
+            optimizer.step()
 
-        # Note: the original deep learning model rescales trees, but we don't here
-        # because we should always have the same root to tip height.
-        self.max_leaf_count = max_leaf_count
-        self.training_trees = encoded_trees
-
-        self.responses = responses
-
-    def fit(self, epochs: int = 30):
-        """Trains neural network on given trees and response parameters."""
-        response_parameters = self._encode_responses(self.responses)
-
-        self.network.compile(loss="mean_squared_error")
-        self.network.fit(
-            onp.stack(self.training_trees), response_parameters, epochs=epochs, verbose=0,
-        )
-
-    def predict(
-        self,
-        encoded_trees: list[onp.ndarray],
-    ) -> list[list[poisson.Response]]:
-        """Returns the Response objects predicted for each tree."""
-
-        response_parameters = self.network(onp.stack(encoded_trees))
-
-        return self._decode_responses(
-            response_parameters, example_responses=self.responses[0]
-        )
+    def predict(self, encoded_trees):
+        with torch.no_grad():
+            response_parameters = self(torch.tensor(onp.stack(encoded_trees)).float())  # Use self instead of self.network
+        return self._decode_responses(response_parameters, example_responses=self.responses[0])
