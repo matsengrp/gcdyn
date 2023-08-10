@@ -295,7 +295,7 @@ def mpl_init(fsize=20, label_fsize=15):
             "xtick.labelsize": label_fsize,
             "ytick.labelsize": label_fsize,  # NOTE this gets (maybe always?) overriden by xticklabelsize/yticklabelsize in mpl_finis()
             "legend.fontsize": fsize,
-            "font.family": "Lato",
+            #"font.family": "Lato",
             "font.weight": 600,
             "axes.labelweight": 600,
             "axes.titleweight": 600,

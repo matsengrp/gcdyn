@@ -141,7 +141,7 @@ def get_param(pname, bresp, sts):
 
 # ----------------------------------------------------------------------------------------
 def train_and_test():
-    from gcdyn.models import NeuralNetworkModel
+    from gcdyn.torch_model import TorchModel
     from gcdyn.poisson import ConstantResponse
     from gcdyn import encode
 
@@ -187,7 +187,7 @@ def train_and_test():
             encode.trivialize_encodings(smpldict[smpl]['trees'], pscaled[smpl], noise=True) #, n_debug=3)
 
     # train
-    model = NeuralNetworkModel(
+    model = TorchModel(
         smpldict["train"]["trees"], [[ConstantResponse(v) for v in vlist] for vlist in pscaled['train']], network_layers=args.model_size
     )
     model.fit(epochs=args.epochs)
