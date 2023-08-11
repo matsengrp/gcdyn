@@ -197,9 +197,9 @@ def scan_response(
 
 # ----------------------------------------------------------------------------------------
 def print_resp(bresp, dresp):
-    print("   response    f(x=0)    function")
+    print("        response    f(x=0)    function")
     for rname, rfcn in zip(["birth", "death"], [bresp, dresp]):
-        print("     %s   %7.3f      %s" % (rname, rfcn.λ_phenotype(0), rfcn))
+        print("          %s   %7.3f      %s" % (rname, rfcn.λ_phenotype(0), rfcn))
 
 
 # ----------------------------------------------------------------------------------------
@@ -246,7 +246,7 @@ def get_responses(xscale, xshift):
     )  # have to set it once so we can get the value at x=0 (at least i don't know how else to do it)
     yscl = args.yscale * args.initial_birth_rate / bresp.λ_phenotype(0)
     print(
-        "    setting yscale so resp(x=0) equals --inital-birth-rate: <yscale> * <--initial-birth-rate>/<birth rate at x=0> = %.2f * %.2f / %.4f = %.2f"
+        "        setting yscale so resp(x=0) equals --inital-birth-rate: <yscale> * <--initial-birth-rate>/<birth rate at x=0> = %.2f * %.2f / %.4f = %.2f"
         % (args.yscale, args.initial_birth_rate, bresp.λ_phenotype(0), yscl)
     )
     bresp = get_birth(yscl)
@@ -369,8 +369,9 @@ parser.add_argument(
     type=int,
     help="Number of times to retry simulation if it fails due to reaching either the min or max number of leaves.",
 )
-parser.add_argument("--time-to-sampling-values", default='20', nargs='+', type=int, help="List of values from which to choose for time to sampling.")
+parser.add_argument("--time-to-sampling-values", default=[20], nargs='+', type=int, help="List of values from which to choose for time to sampling.")
 parser.add_argument("--time-to-sampling-range", nargs='+', type=int, help="Pair of values (min/max) between which to choose at uniform random the time to sampling for each tree. Overrides --time-to-sampling-values.")
+parser.add_argument("--n-trees-per-param-set", default=1, type=int, help='By default, we choose a new set of parameters for each tree. If this arg is set, once we\'ve chosen a set of parameter values, we simulate this many trees with those values.')
 parser.add_argument("--min-survivors", default=100, type=int)
 parser.add_argument("--carry-cap", default=300, type=int)
 parser.add_argument(
@@ -394,8 +395,8 @@ parser.add_argument(
     type=float,
     help="value (parameter) for constant death response",
 )
-parser.add_argument("--xscale-values", default="2", nargs='+', type=float, help="list of birth response xscale parameter values from which to choose")
-parser.add_argument("--xshift-values", default="-2.5", nargs='+', type=float, help="list of birth response xshift parameter values from which to choose")
+parser.add_argument("--xscale-values", default=[2], nargs='+', type=float, help="list of birth response xscale parameter values from which to choose")
+parser.add_argument("--xshift-values", default=[-2.5], nargs='+', type=float, help="list of birth response xshift parameter values from which to choose")
 parser.add_argument("--xscale-range", nargs='+', type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response xscale parameter for each tree. Overrides --xscale-values.")
 parser.add_argument("--xshift-range", nargs='+', type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response xshift parameter for each tree. Overrides --xshift-values")
 parser.add_argument(
@@ -599,6 +600,7 @@ mutation_resp = poisson.SequenceContextMutationResponse(
 all_seqs, all_trees = [], []
 n_missing = 0
 rng = np.random.default_rng(seed=args.seed)
+params, n_times_used = None, 0  # parameter values, and number of trees that we've simulated with these parameter values
 for itrial in range(args.itrial_start, args.n_trials):
     check_memory()
     ofn = outfn(None, itrial)
@@ -617,12 +619,17 @@ for itrial in range(args.itrial_start, args.n_trials):
         n_missing += 1
         continue
     sys.stdout.flush()
+    if params is None or n_times_used == args.n_trees_per_param_set:
+        params = {p : choose_val(p) for p in ['xscale', 'xshift', 'time_to_sampling']}
+        print('    chose new parameter values: %s' % '  '.join('%s %s'%(p, ('%d' if p == 'time_to_sampling' else '%.2f') % v) for p, v in sorted(params.items())))
+        n_times_used = 0
+    n_times_used += 1
     birth_resp, death_resp = get_responses(
-        choose_val('xscale'), choose_val('xshift'),
+        params['xscale'], params['xshift'],
     )
     print(utils.color("blue", "trial %d:" % itrial), end=" ")
     tree = generate_sequences_and_tree(
-        choose_val('time_to_sampling'), birth_resp, death_resp, mutation_resp, mutator, itrial, seed=rng
+        params['time_to_sampling'], birth_resp, death_resp, mutation_resp, mutator, itrial, seed=rng
     )
     if tree is None:
         n_missing += 1

@@ -91,7 +91,7 @@ class NeuralNetworkModel:
         max_leaf_count = list(leaf_counts)[0]
 
         actfn = 'elu'
-        if network_layers is None:
+        if network_layers == 'None':
             print("    using default network layers")
             network_layers = (
                 # Rotate matrix from (4, max_leaf_count) to (max_leaf_count, 4)
@@ -123,6 +123,7 @@ class NeuralNetworkModel:
                 layers.Dense(num_parameters),
             )
         elif network_layers == "tiny":
+# NOTE at least in some circumstances, this is *vastly* worse than the "small" one, and doesn't even improve with more epochs (maybe because I did something dumb in simplifying it?)
             print("    using tiny network layers")
             network_layers = (
                 # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
