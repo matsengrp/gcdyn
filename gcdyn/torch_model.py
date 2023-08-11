@@ -1,4 +1,3 @@
-
 from functools import reduce
 import numpy as onp
 
@@ -8,6 +7,7 @@ import torch.optim as optim
 
 from gcdyn import poisson
 from gcdyn.models import NeuralNetworkModel
+
 
 class TorchModel(NeuralNetworkModel, nn.Module):
     def __init__(
@@ -25,7 +25,7 @@ class TorchModel(NeuralNetworkModel, nn.Module):
         network_layers: Ignored.
         """
         nn.Module.__init__(self)  # Initialize the PyTorch Module
-        
+
         num_parameters = sum(len(response._param_dict) for response in responses[0])
         leaf_counts = set(
             [len(t[0]) for t in encoded_trees]
@@ -40,7 +40,7 @@ class TorchModel(NeuralNetworkModel, nn.Module):
         self.max_leaf_count = max_leaf_count
         self.training_trees = encoded_trees
         self.responses = responses
-        
+
         # Add activations as desired!
         self.conv1 = nn.Conv1d(in_channels=4, out_channels=25, kernel_size=3)
         self.conv2 = nn.Conv1d(in_channels=25, out_channels=25, kernel_size=8)
@@ -61,12 +61,10 @@ class TorchModel(NeuralNetworkModel, nn.Module):
             self.device = torch.device("mps")
         else:
             self.device = torch.device("cpu")
-        self.to(self.device)  # Optionally, move the model to the device during initialization
-
+        self.to(self.device)
 
     def forward(self, x):
         # We are not doing any permuting because nn.Conv1d expects the input to be of shape (N, C, L)
-        # x = x.permute(0, 2, 1)
         x = self.activation(self.conv1(x))
         x = self.activation(self.conv2(x))
         x = self.maxpool(x)
@@ -82,28 +80,29 @@ class TorchModel(NeuralNetworkModel, nn.Module):
     def fit(self, epochs=30):
         # Define loss function and optimizer
         criterion = nn.MSELoss()
-        optimizer = optim.Adam(self.parameters()) 
-        
-        training_data = torch.tensor(onp.stack(self.training_trees)).float().to(self.device)
-        response_parameters = torch.tensor(self._encode_responses(self.responses)).float().to(self.device)
-        
+        optimizer = optim.Adam(self.parameters())
+
+        training_data = (
+            torch.tensor(onp.stack(self.training_trees)).float().to(self.device)
+        )
+        response_parameters = (
+            torch.tensor(self._encode_responses(self.responses)).float().to(self.device)
+        )
+
         print("Data shape:", training_data.shape)
         print("Response shape:", response_parameters.shape)
-        
+
         for _ in range(epochs):
-            # Zero the gradients
             optimizer.zero_grad()
-            # Forward pass
             outputs = self(training_data)
-            # Calculate loss
             loss = criterion(outputs, response_parameters)
-            # Backward pass
             loss.backward()
-            # Update weights
             optimizer.step()
 
     def predict(self, encoded_trees):
         with torch.no_grad():
             input_data = torch.tensor(onp.stack(encoded_trees)).float().to(self.device)
             response_parameters = self(input_data)
-        return self._decode_responses(response_parameters, example_responses=self.responses[0])
+        return self._decode_responses(
+            response_parameters, example_responses=self.responses[0]
+        )
