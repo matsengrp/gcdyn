@@ -188,7 +188,8 @@ def train_and_test():
 
     # train
     model = TorchModel(
-        smpldict["train"]["trees"], [[ConstantResponse(v) for v in vlist] for vlist in pscaled['train']], network_layers=args.model_size
+        smpldict["train"]["trees"],
+        [[ConstantResponse(v) for v in vlist] for vlist in pscaled["train"]],
     )
     model.fit(epochs=args.epochs)
 

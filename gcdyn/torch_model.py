@@ -14,7 +14,6 @@ class TorchModel(NeuralNetworkModel, nn.Module):
         self,
         encoded_trees: list[onp.ndarray],
         responses: list[list[poisson.Response]],
-        network_layers: list[callable] = None,
     ):
         """
         encoded_trees: list of encoded trees
