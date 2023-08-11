@@ -90,7 +90,7 @@ class NeuralNetworkModel:
             )
         max_leaf_count = list(leaf_counts)[0]
 
-        actfn = None #'elu'  # NOTE 'elu' was causing a bad lower threshold when scaling input variables
+        actfn = 'elu'
         if network_layers is None:
             print("    using default network layers")
             network_layers = (
@@ -105,7 +105,7 @@ class NeuralNetworkModel:
                 layers.Dense(32, activation=actfn),
                 layers.Dense(16, activation=actfn),
                 layers.Dense(8, activation=actfn),
-                layers.Dense(num_parameters, activation=actfn),
+                layers.Dense(num_parameters),
             )
         elif network_layers == "small":
             print("    using small network layers")
@@ -120,7 +120,7 @@ class NeuralNetworkModel:
                 layers.Dense(32, activation=actfn),
                 layers.Dense(16, activation=actfn),
                 layers.Dense(8, activation=actfn),
-                layers.Dense(num_parameters, activation=actfn),
+                layers.Dense(num_parameters),
             )
         elif network_layers == "tiny":
             print("    using tiny network layers")
@@ -133,13 +133,13 @@ class NeuralNetworkModel:
                 layers.GlobalAveragePooling1D(),
                 layers.Dense(16, activation=actfn),
                 layers.Dense(8, activation=actfn),
-                layers.Dense(num_parameters, activation=actfn),
+                layers.Dense(num_parameters),
             )
         elif network_layers == "trivial":
             network_layers = (
                 # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
                 lambda x: tf.transpose(x, (0, 2, 1)),
-                layers.Dense(num_parameters, activation=actfn),
+                layers.Dense(num_parameters),
             )
         else:
             raise Exception(
