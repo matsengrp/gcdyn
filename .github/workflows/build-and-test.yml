@@ -5,7 +5,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-    branches-ignore: 65-mutator-speed
+    branches-ignore: [ 65-mutator-speed ]
 
 jobs:
   build-and-test:
