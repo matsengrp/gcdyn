@@ -167,6 +167,14 @@ def train_and_test():
 
     # separate train/test samples
     idxs = get_traintest_indices(samples)
+    
+    # BEGIN HACK to do a "train test split" that preserves the bundles of trees
+    sample_count = len(samples["trees"])
+    train_count = int(sample_count * args.train_frac)
+    idxs['train'] = range(train_count)
+    idxs['test'] = range(train_count, sample_count)
+    # END HACK
+
     smpldict = {}  # separate train/test trees and responses by index
     for smpl in ["train", "test"]:
         smpldict[smpl] = {

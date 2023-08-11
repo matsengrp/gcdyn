@@ -10,6 +10,30 @@ from gcdyn.models import NeuralNetworkModel
 
 
 class TorchModel(NeuralNetworkModel, nn.Module):
+
+    @staticmethod
+    def _partition_list(input_list, sublist_len):
+        """
+        Partitions a given list into sublists of size sublist_len.
+        """
+        if len(input_list) % sublist_len != 0:
+            raise ValueError(f"The length of the input list ({len(input_list)}) is not divisible by {sublist_len}")
+        return [input_list[i:i+sublist_len] for i in range(0, len(input_list), sublist_len)]
+
+    @staticmethod
+    def _collapse_identical_list(lst):
+        if not lst:
+            raise ValueError("List is empty")
+
+        first_element = lst[0]
+
+        for item in lst:
+            if item != first_element:
+                raise ValueError("All items in the list are not identical")
+
+        return first_element
+
+
     def __init__(
         self,
         encoded_trees: list[onp.ndarray],
@@ -40,7 +64,6 @@ class TorchModel(NeuralNetworkModel, nn.Module):
         self.training_trees = encoded_trees
         self.responses = responses
 
-        # Add activations as desired!
         self.conv1 = nn.Conv1d(in_channels=4, out_channels=25, kernel_size=3)
         self.conv2 = nn.Conv1d(in_channels=25, out_channels=25, kernel_size=8)
         self.maxpool = nn.MaxPool1d(kernel_size=10, stride=10)
@@ -76,17 +99,16 @@ class TorchModel(NeuralNetworkModel, nn.Module):
         x = self.fc4(x)
         return x
 
+    def _make_tensor(self, array_list):
+        return torch.tensor(onp.stack(array_list)).float().to(self.device)
+
     def fit(self, epochs=30):
         # Define loss function and optimizer
         criterion = nn.MSELoss()
         optimizer = optim.Adam(self.parameters())
 
-        training_data = (
-            torch.tensor(onp.stack(self.training_trees)).float().to(self.device)
-        )
-        response_parameters = (
-            torch.tensor(self._encode_responses(self.responses)).float().to(self.device)
-        )
+        training_data = self._make_tensor(self.training_trees)
+        response_parameters = self._make_tensor(self._encode_responses(self.responses))
 
         print("Data shape:", training_data.shape)
         print("Response shape:", response_parameters.shape)
