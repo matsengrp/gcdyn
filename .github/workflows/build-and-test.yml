@@ -4,8 +4,10 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
-    branches-ignore: [ 65-mutator-speed ]
+    branches:
+      - 'main'
+      - '!65-mutator-speed'
+
 
 jobs:
   build-and-test:
