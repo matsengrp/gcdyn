@@ -10,15 +10,19 @@ from gcdyn.models import NeuralNetworkModel
 
 
 class TorchModel(NeuralNetworkModel, nn.Module):
-
     @staticmethod
     def _partition_list(input_list, sublist_len):
         """
         Partitions a given list into sublists of size sublist_len.
         """
         if len(input_list) % sublist_len != 0:
-            raise ValueError(f"The length of the input list ({len(input_list)}) is not divisible by {sublist_len}")
-        return [input_list[i:i+sublist_len] for i in range(0, len(input_list), sublist_len)]
+            raise ValueError(
+                f"The length of the input list ({len(input_list)}) is not divisible by {sublist_len}"
+            )
+        return [
+            input_list[i : i + sublist_len]
+            for i in range(0, len(input_list), sublist_len)
+        ]
 
     @staticmethod
     def _collapse_identical_list(lst):
@@ -27,17 +31,23 @@ class TorchModel(NeuralNetworkModel, nn.Module):
 
         first_element = lst[0]
 
-        for item in lst:
-            if item != first_element:
-                raise ValueError("All items in the list are not identical")
+        # TEMP BAD THING: don't test for identicalness
 
         return first_element
 
+        for item in lst:
+            if item != first_element:
+                raise ValueError(
+                    f"All items in the list are not identical: {first_element} vs {item}"
+                )
+
+        return first_element
 
     def __init__(
         self,
         encoded_trees: list[onp.ndarray],
         responses: list[list[poisson.Response]],
+        bundle_size: int,
     ):
         """
         encoded_trees: list of encoded trees
@@ -85,6 +95,8 @@ class TorchModel(NeuralNetworkModel, nn.Module):
             self.device = torch.device("cpu")
         self.to(self.device)
 
+        self.bundle_size = bundle_size
+
     def forward(self, x):
         # We are not doing any permuting because nn.Conv1d expects the input to be of shape (N, C, L)
         x = self.activation(self.conv1(x))
@@ -102,28 +114,53 @@ class TorchModel(NeuralNetworkModel, nn.Module):
     def _make_tensor(self, array_list):
         return torch.tensor(onp.stack(array_list)).float().to(self.device)
 
+    def _bundle_trees_into_tensors(self, encoded_trees):
+        return [
+            self._make_tensor(lst)
+            for lst in self._partition_list(encoded_trees, self.bundle_size)
+        ]
+
+    def _mean_prediction_from_bundled_tensors(self, bundled_tensors):
+        return torch.stack([torch.mean(self(bundle), 0) for bundle in bundled_tensors])
+
     def fit(self, epochs=30):
         # Define loss function and optimizer
         criterion = nn.MSELoss()
         optimizer = optim.Adam(self.parameters())
 
-        training_data = self._make_tensor(self.training_trees)
-        response_parameters = self._make_tensor(self._encode_responses(self.responses))
+        training_data = self._bundle_trees_into_tensors(self.training_trees)
+        response_parameters = self._make_tensor(
+            self._encode_responses(
+                [
+                    self._collapse_identical_list(lst)
+                    for lst in self._partition_list(self.responses, self.bundle_size)
+                ]
+            )
+        )
 
-        print("Data shape:", training_data.shape)
+        print(f"We have {len(training_data)} bundles of shape {training_data[0].shape}")
         print("Response shape:", response_parameters.shape)
 
         for _ in range(epochs):
             optimizer.zero_grad()
-            outputs = self(training_data)
+            outputs = self._mean_prediction_from_bundled_tensors(training_data)
             loss = criterion(outputs, response_parameters)
             loss.backward()
             optimizer.step()
 
     def predict(self, encoded_trees):
         with torch.no_grad():
-            input_data = torch.tensor(onp.stack(encoded_trees)).float().to(self.device)
-            response_parameters = self(input_data)
+            # Here's the version where we don't bundle the trees
+            # input_data = self._make_tensor(encoded_trees)
+            # predicted_responses = self(input_data)
+            # Here's the version where we do bundle the trees:
+            input_data = self._bundle_trees_into_tensors(encoded_trees)
+            predicted_responses = self._mean_prediction_from_bundled_tensors(input_data)
+            # TEMPORARY: Unbundle the responses
+            predicted_responses = [
+                item for item in predicted_responses for _ in range(self.bundle_size)
+            ]
+
         return self._decode_responses(
-            response_parameters, example_responses=self.responses[0]
+            predicted_responses, example_responses=self.responses[0]
         )

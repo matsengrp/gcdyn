@@ -198,6 +198,7 @@ def train_and_test():
     model = TorchModel(
         smpldict["train"]["trees"],
         [[ConstantResponse(v) for v in vlist] for vlist in pscaled["train"]],
+        10, # HACK - this is the bundle size
     )
     model.fit(epochs=args.epochs)
 
