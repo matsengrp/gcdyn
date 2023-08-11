@@ -51,6 +51,7 @@ class TorchModel(NeuralNetworkModel, nn.Module):
         self.fc2 = nn.Linear(32, 16)
         self.fc3 = nn.Linear(16, 8)
         self.fc4 = nn.Linear(8, num_parameters)
+        self.activation = nn.LeakyReLU(negative_slope=0.1)
 
         if torch.backends.cudnn.is_available():
             print("Using CUDA")
@@ -66,17 +67,16 @@ class TorchModel(NeuralNetworkModel, nn.Module):
     def forward(self, x):
         # We are not doing any permuting because nn.Conv1d expects the input to be of shape (N, C, L)
         # x = x.permute(0, 2, 1)
-        x = self.conv1(x)
-        x = self.conv2(x)
+        x = self.activation(self.conv1(x))
+        x = self.activation(self.conv2(x))
         x = self.maxpool(x)
-        x = self.conv3(x)
+        x = self.activation(self.conv3(x))
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)  # Flatten the tensor
-        x = self.fc1(x)
-        x = self.fc2(x)
-        x = self.fc3(x)
+        x = self.activation(self.fc1(x))
+        x = self.activation(self.fc2(x))
+        x = self.activation(self.fc3(x))
         x = self.fc4(x)
-        
         return x
 
     def fit(self, epochs=30):
