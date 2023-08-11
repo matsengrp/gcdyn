@@ -198,11 +198,17 @@ def isclose(num1, num2, eps=1e-8, debug=False, fail=False, warn=False):
     """Return true if num1 and num2 are closer to each other than eps (numpy version is super slow."""
     if abs(num1 - num2) < eps:
         return True
-    dbgstr = '%snumbers %.10f and %.10f not closer than eps %.10f (abs diff %.10f)' % (color('yellow', 'warning ') if warn else '', num1, num2, eps, abs(num1 - num2))
+    dbgstr = "%snumbers %.10f and %.10f not closer than eps %.10f (abs diff %.10f)" % (
+        color("yellow", "warning ") if warn else "",
+        num1,
+        num2,
+        eps,
+        abs(num1 - num2),
+    )
     if fail:
         raise Exception(dbgstr)
     if debug or warn:
-        print('    ' + dbgstr)
+        print("    " + dbgstr)
     return False
 
 
@@ -295,7 +301,8 @@ def mpl_init(fsize=20, label_fsize=15):
             "xtick.labelsize": label_fsize,
             "ytick.labelsize": label_fsize,  # NOTE this gets (maybe always?) overriden by xticklabelsize/yticklabelsize in mpl_finis()
             "legend.fontsize": fsize,
-            #"font.family": "Lato",
+            "font.family": "sans-serif",
+            "font.sans-serif": ["Lato", "DejaVu Sans"],
             "font.weight": 600,
             "axes.labelweight": 600,
             "axes.titleweight": 600,
@@ -314,7 +321,9 @@ def make_dl_plots(
         plt.clf()
         df = prdfs[smpl]
         xkey, ykey = ["%s-%s" % (param, vtype) for vtype in ["truth", "predicted"]]
-        if len(set(df['%s-truth' % param])) < 10:  # if simulation has discrete parameter values
+        if (
+            len(set(df["%s-truth" % param])) < 10
+        ):  # if simulation has discrete parameter values
             ax = sns.boxplot(
                 df,
                 x=xkey,
@@ -344,7 +353,14 @@ def make_dl_plots(
         else:
             ax = sns.scatterplot(df, x=xkey, y=ykey, alpha=0.6)
             xvals, yvals = df[xkey], df[ykey]
-            plt.plot([0.95 * min(xvals), 1.05 * max(xvals)], [0.95 * min(xvals), 1.05 * max(xvals)], color='darkred', linestyle='--', linewidth=3, alpha=0.7)
+            plt.plot(
+                [0.95 * min(xvals), 1.05 * max(xvals)],
+                [0.95 * min(xvals), 1.05 * max(xvals)],
+                color="darkred",
+                linestyle="--",
+                linewidth=3,
+                alpha=0.7,
+            )
         plt.xlabel("true value")
         plt.ylabel("predicted value")
         titlestr = "%s %s" % (param, smpl)
@@ -373,32 +389,54 @@ def make_dl_plots(
 def plot_tree_slices(plotdir, tree, max_time, itrial):
     n_plots = 5
     dt = round(max_time / float(n_plots))
-    tdata = {'time' : [], 'affinity' : []}
+    tdata = {"time": [], "affinity": []}
     for stime in list(range(dt, max_time, dt)) + [max_time]:
         for aval in tree.slice(stime):
-            tdata['time'].append(stime)
-            tdata['affinity'].append(aval)
+            tdata["time"].append(stime)
+            tdata["affinity"].append(aval)
 
     mpl_init()
     with warnings.catch_warnings():
-        warnings.simplefilter('ignore')  # i don't know why it has to warn me that it's clearing the fig/ax I'm passing in, and I don't know how else to stop it
-        sns.set_theme(style="white", rc={"axes.facecolor": (0, 0, 0, 0), 'axes.linewidth':2})
-        palette = None #sns.color_palette("Set2", 12)
-        g = sns.FacetGrid(pd.DataFrame(tdata), palette=palette, row="time", hue="time", aspect=9, height=1.2)  # create a grid with a row for each 'time'
+        warnings.simplefilter(
+            "ignore"
+        )  # i don't know why it has to warn me that it's clearing the fig/ax I'm passing in, and I don't know how else to stop it
+        sns.set_theme(
+            style="white", rc={"axes.facecolor": (0, 0, 0, 0), "axes.linewidth": 2}
+        )
+        palette = None  # sns.color_palette("Set2", 12)
+        g = sns.FacetGrid(
+            pd.DataFrame(tdata),
+            palette=palette,
+            row="time",
+            hue="time",
+            aspect=9,
+            height=1.2,
+        )  # create a grid with a row for each 'time'
         g.map_dataframe(sns.kdeplot, x="affinity", fill=True, alpha=0.6)
-        g.map_dataframe(sns.kdeplot, x="affinity", color='black')
+        g.map_dataframe(sns.kdeplot, x="affinity", color="black")
 
         def label_fn(x, color, label):
-            ax = plt.gca() #get current axis
-            ax.text(0, .2, label, color='black', fontsize=13,
-                    ha="left", va="center", transform=ax.transAxes)
+            ax = plt.gca()  # get current axis
+            ax.text(
+                0,
+                0.2,
+                label,
+                color="black",
+                fontsize=13,
+                ha="left",
+                va="center",
+                transform=ax.transAxes,
+            )
+
         g.map(label_fn, "time")  # iterate grid to plot labels
 
-        g.fig.subplots_adjust(hspace=-.7)  # adjust subplots to create overlap
+        g.fig.subplots_adjust(hspace=-0.7)  # adjust subplots to create overlap
         g.set_titles("")  # remove subplot titles
-        g.set(yticks=[], xlabel="affinity", ylabel='time')  # remove yticks and set xlabel
+        g.set(
+            yticks=[], xlabel="affinity", ylabel="time"
+        )  # remove yticks and set xlabel
         g.despine(left=True)
-        plt.suptitle('affinity vs time (tree %d)' % itrial, y=0.98)
+        plt.suptitle("affinity vs time (tree %d)" % itrial, y=0.98)
 
     if not os.path.exists(plotdir):
         os.makedirs(plotdir)
@@ -406,7 +444,9 @@ def plot_tree_slices(plotdir, tree, max_time, itrial):
 
 
 # ----------------------------------------------------------------------------------------
-def plot_phenotype_response(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_plot=10):
+def plot_phenotype_response(
+    plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_plot=10
+):
     # ----------------------------------------------------------------------------------------
     def plt_single_tree(itree, pfo, xmin, xmax, n_bins=30):
         plt.clf()
@@ -481,12 +521,14 @@ def memory_usage_fraction(
 # ----------------------------------------------------------------------------------------
 def limit_procs(procs, n_max_procs, sleep_time=1, debug=False):
     """Count number of <procs> that are currently running, and sleep until it's less than <n_max_procs>."""
+
     def n_running_jobs():
         return [p.poll() for p in procs].count(None)
+
     n_jobs = n_running_jobs()
     while n_jobs >= n_max_procs:
         if debug:
-            print('%d (>=%d) running jobs' % (n_jobs, n_max_procs))
+            print("%d (>=%d) running jobs" % (n_jobs, n_max_procs))
         time.sleep(sleep_time)
         n_jobs = n_running_jobs()
 
