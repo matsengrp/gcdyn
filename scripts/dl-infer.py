@@ -13,11 +13,13 @@ import pickle
 import pandas as pd
 import random
 import csv
+import copy
 
 from gcdyn import utils
 
 # ----------------------------------------------------------------------------------------
 sum_stat_scaled = {'total_branch_length' : True}  # whether to scale summary stats with branch length
+smplist = ["train", "test"]
 
 # ----------------------------------------------------------------------------------------
 def csvfn(smpl):
@@ -25,23 +27,29 @@ def csvfn(smpl):
 
 
 # ----------------------------------------------------------------------------------------
-def scale_vals(pvals, scaler=None, inverse=False, debug=True):
-    """Scale pvals to mean 0 and variance 1. To reverse a scaling, pass in the original scaler and set inverse=True"""
+def scale_vals(smpl, pvals, scaler=None, inverse=False, debug=True):
+    """Scale pvals for a single sample to mean 0 and variance 1. To reverse a scaling, pass in the original scaler and set inverse=True"""
+    # ----------------------------------------------------------------------------------------
     def get_lists(pvs):  # picks values from rows/columns to get a list of values for each parameter
         return [[plist[i] for plist in pvs] for i in range(len(args.params_to_predict))]
     def fnstr(pvs, fn):  # apply fn to each list from get_lists(), returns resulting combined str
-        return ' '.join('%-7.3f'%fn(l) for l in get_lists(pvs))
+        return ' '.join('%7.3f'%fn(l) for l in get_lists(pvs))
     def lstr(lst):  # print nice str for values in list lst
         return ' '.join('%5.2f'%v for v in sorted(set(lst)))
     def print_debug(pvs, dstr):
-        print('    %6s:  mean %s  var %s   min %s  max %s' % (dstr, fnstr(pvs, np.mean), fnstr(pvs, np.var), fnstr(pvs, min), fnstr(pvs, max)))  # , lstr(get_lists(pvs)[0])))
+        print('%s %s%s %s%s' % (('        %7s'%smpl) if dstr=='before' else '   ', fnstr(pvs, np.mean), fnstr(pvs, np.var), fnstr(pvs, min), fnstr(pvs, max)), end='' if dstr == 'before' else '\n')
+
+    # ----------------------------------------------------------------------------------------
+    if debug and smpl == smplist[0]:
+        print('                          before                             after')
+        print('                   mean   var     min   max         mean   var     min   max')
     if debug:
         print_debug(pvals, 'before')
     if scaler is None:
         scaler = preprocessing.StandardScaler().fit(pvals)
-        # scaler = preprocessing.MinMaxScaler(feature_range=(0, 10)).fit(pvals)
+        # scaler = preprocessing.MinMaxScaler(feature_range=(0, 10)).fit(pvals])
     if args.dont_scale_params:
-        return pvals, scaler
+        return copy.copy(pvals), scaler
     pscaled = scaler.inverse_transform(pvals) if inverse else scaler.transform(pvals)
     if debug:
         print_debug(pscaled, 'after')
@@ -59,7 +67,7 @@ def get_prediction(smpl, model, smpldict, scaler):
     }
     assert len(pred_resps) == len(true_resps)
     pvals = [[float(resp.value) for resp in plist] for plist in pred_resps]
-    pscaled, scaler = scale_vals(pvals, scaler=scaler, inverse=True)
+    pscaled, _ = scale_vals(smpl, pvals, scaler=scaler, inverse=True)
     for tr_resp, prlist, sum_stats in zip(true_resps, pscaled, true_sstats):
         for ip, param in enumerate(args.params_to_predict):
             dfdata["%s-truth" % param].append(get_param(param, tr_resp, sum_stats))
@@ -173,22 +181,22 @@ def train_and_test():
     # separate train/test samples
     idxs = get_traintest_indices(samples)
     smpldict = {}  # separate train/test trees and responses by index
-    for smpl in ["train", "test"]:
+    for smpl in smplist:
         smpldict[smpl] = {
             key: [val[i] for i in idxs[smpl]] for key, val in samples.items()
         }
     print(
-        "      N trees: %d train   %d test"
-        % (len(smpldict["train"]["trees"]), len(smpldict["test"]["trees"]))
+        "      N trees: %s"
+        % "   ".join("%s %d" % (s, len(smpldict[s]["trees"])) for s in smplist)
     )
 
     # handle various scaling/re-encoding stuff
     pscaled, scalers = {}, {}  # scaled parameters and scalers
-    for smpl in smpldict:
+    for smpl in smplist:
         pvals = [[get_param(pname, bresp, sts) for pname in args.params_to_predict] for bresp, sts in zip(smpldict[smpl]['birth-responses'], smpldict[smpl]['sstats'])]
-        pscaled[smpl], scalers[smpl] = scale_vals(pvals)
+        pscaled[smpl], scalers[smpl] = scale_vals(smpl, pvals)
     if args.use_trivial_encoding:  # silly encodings for testing that essentially train on the output values
-        for smpl in smpldict:
+        for smpl in smplist:
             encode.trivialize_encodings(smpldict[smpl]['trees'], pscaled[smpl], noise=True) #, n_debug=3)
 
     # train
