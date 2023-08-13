@@ -41,8 +41,8 @@ class Callback(tf.keras.callbacks.Callback):
         self.n_between = (5 if max_epochs > 30 else 3) if max_epochs > 10 else 1
 
     def on_train_begin(epoch, logs=None):
-        print('                  epoch   total')
-        print('   epoch  loss    time    time')
+        print('                 valid   epoch   total')
+        print('   epoch  loss    loss    time    time')
 
     def on_epoch_begin(self, epoch, logs=None):
         self.epoch = epoch
@@ -50,7 +50,7 @@ class Callback(tf.keras.callbacks.Callback):
     def on_epoch_end(self, batch, logs=None):
         if self.epoch == 0 or self.epoch % self.n_between == 0:
             def lfmt(lv): return ('%7.3f' if lv < 1 else '%7.2f') % lv
-            print('  %3d  %s    %.1f     %.1f' % (self.epoch, lfmt(logs['loss']), time.time() - self.last_time, time.time() - self.start_time))
+            print('  %3d  %s %s    %.1f     %.1f' % (self.epoch, lfmt(logs['loss']), lfmt(logs['val_loss']), time.time() - self.last_time, time.time() - self.start_time))
         self.last_time = time.time()
 
 
@@ -197,13 +197,13 @@ class NeuralNetworkModel:
 
         return result
 
-    def fit(self, epochs: int = 30):
+    def fit(self, epochs: int = 30, validation_split: float = 0.2):
         """Trains neural network on given trees and response parameters."""
         response_parameters = self._encode_responses(self.responses)
 
         self.network.compile(loss="mean_squared_error")
         self.network.fit(
-            onp.stack(self.training_trees), response_parameters, epochs=epochs, callbacks=[Callback(epochs)], verbose=0,
+            onp.stack(self.training_trees), response_parameters, validation_split=validation_split, epochs=epochs, callbacks=[Callback(epochs)], verbose=0,
         )
 
     def predict(

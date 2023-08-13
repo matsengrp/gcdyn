@@ -47,7 +47,7 @@ def scale_vals(smpl, pvals, scaler=None, inverse=False, debug=True):
         print_debug(pvals, 'before')
     if scaler is None:
         scaler = preprocessing.StandardScaler().fit(pvals)
-        # scaler = preprocessing.MinMaxScaler(feature_range=(0, 10)).fit(pvals])
+        # scaler = preprocessing.MinMaxScaler(feature_range=(0, 10)).fit(pvals)
     if args.dont_scale_params:
         return copy.copy(pvals), scaler
     pscaled = scaler.inverse_transform(pvals) if inverse else scaler.transform(pvals)
