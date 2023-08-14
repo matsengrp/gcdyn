@@ -93,18 +93,38 @@ class TorchModel(NeuralNetworkModel, nn.Module):
 
         self.bundle_size = bundle_size
 
-    def forward(self, x):
+    def forward_per_bundle(self, x):
+        """The x's are a bundle of trees."""
         # We are not doing any permuting because nn.Conv1d expects the input to be of shape (N, C, L)
-        x = self.activation(self.conv1(x))
-        x = self.activation(self.conv2(x))
-        x = self.maxpool(x)
-        x = self.activation(self.conv3(x))
-        x = self.avgpool(x)
-        x = x.view(x.size(0), -1)  # Flatten the tensor
+        # here shape is [10, 4, 100]: 10 trees, 4 channels, 100 max leaf count
+        x = self.activation(self.conv1(x)) # 25 convolutions with kernel size 3
+        # here shape is [10, 25, 98]: 10 trees, 25 convolutions, and the convolutions have shrunk the length by 2
+        x = self.activation(self.conv2(x)) # 25 convolutions with kernel size 8
+        # here shape is [10, 25, 91]: 10 trees, 25 convolutions, and the convolutions have shrunk the length by 7
+        x = self.maxpool(x) # kernel size 10, stride 10: take the max over 10 disjoint blocks of length 10
+        # here shape is [10, 25, 9]: 10 trees, 25 convolutions, and after the max-ing step we have 9 blocks of length 1
+        x = self.activation(self.conv3(x)) # 40 convolutions with kernel size 8
+        # here shape is [10, 40, 2]: 10 trees, 40 convolutions, and the convolutions have shrunk the length by 7
+        x = self.avgpool(x) # kernel size 1, stride 1: take the average over the sequence, now of length 2
+        # here shape is [10, 40, 1]: 10 trees, 40 convolutions, and after the avg-ing step we have 1 block of length 1
+        # The following line flattens the tensor from shape [10, 40, 1] to shape [10, 40]. 
+        # The -1 in the view call means to put whatever is needed there so that the total number of elements is the same and we get to a 2D tensor.
+        # In this case the last dimension is fake so we can just get rid of it.
+        x = x.view(x.size(0), -1)  
+        x = torch.mean(x, 0) # mean over the 10 trees
+        return x
+        
+    def forward(self, x):
+        x = torch.stack([self.forward_per_bundle(bundle) for bundle in x])
+        # With 400 training bundles, this is shape [400, 40]
         x = self.activation(self.fc1(x))
+        # Then shape [400, 32]
         x = self.activation(self.fc2(x))
+        # Then shape [400, 16]
         x = self.activation(self.fc3(x))
+        # Then shape [400, 8]
         x = self.fc4(x)
+        # Then shape [400, num_parameters]
         return x
 
     def _make_tensor(self, array_list):
@@ -138,7 +158,8 @@ class TorchModel(NeuralNetworkModel, nn.Module):
 
         for _ in range(epochs):
             optimizer.zero_grad()
-            outputs = self._mean_prediction_from_bundled_tensors(training_data)
+            outputs = self.forward(training_data)
+            # outputs = self._mean_prediction_from_bundled_tensors(training_data)
             loss = criterion(outputs, response_parameters)
             loss.backward()
             optimizer.step()
@@ -150,7 +171,7 @@ class TorchModel(NeuralNetworkModel, nn.Module):
             # predicted_responses = self(input_data)
             # Here's the version where we do bundle the trees:
             input_data = self._bundle_trees_into_tensors(encoded_trees)
-            predicted_responses = self._mean_prediction_from_bundled_tensors(input_data)
+            predicted_responses = self.forward(input_data)
             # TEMPORARY: Unbundle the responses
             predicted_responses = [
                 item for item in predicted_responses for _ in range(self.bundle_size)
