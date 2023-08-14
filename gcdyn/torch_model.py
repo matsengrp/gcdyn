@@ -31,10 +31,6 @@ class TorchModel(NeuralNetworkModel, nn.Module):
 
         first_element = lst[0]
 
-        # TEMP BAD THING: don't test for identicalness
-
-        return first_element
-
         for item in lst:
             if item != first_element:
                 raise ValueError(
@@ -124,7 +120,6 @@ class TorchModel(NeuralNetworkModel, nn.Module):
         return torch.stack([torch.mean(self(bundle), 0) for bundle in bundled_tensors])
 
     def fit(self, epochs=30):
-        # Define loss function and optimizer
         criterion = nn.MSELoss()
         optimizer = optim.Adam(self.parameters())
 
