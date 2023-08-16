@@ -33,6 +33,7 @@ setup(
         "diffrax",
         "tensorflow",
         "scikit-learn",
+        "tqdm",
         "colored-traceback",
     ],
     extras_require={
