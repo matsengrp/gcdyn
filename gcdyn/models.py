@@ -70,6 +70,50 @@ class BundleMeanLayer(layers.Layer):
         
         return mean_result
 
+def sample_bundled_indices(total_samples, bundle_size, minibatch_size):
+    assert minibatch_size % bundle_size == 0, "minibatch_size must be divisible by bundle_size"
+
+    bundle_count = minibatch_size // bundle_size
+    sampled_bundles = onp.random.choice(total_samples // bundle_size, bundle_count, replace=False)
+
+    indices = []
+    for bundle in sampled_bundles:
+        for i in range(bundle_size):
+            indices.append(bundle * bundle_size + i)
+
+    return onp.array(indices)
+
+class BundledDataGenerator(keras.utils.Sequence):
+    """A data generator that samples minibatches of bundled indices.
+    
+    Note that the batch size is in terms of total number of examples, not bundles.
+    So if you want batches of 10 bundles, with each bundle being of size 50, you want batch_size=500.
+    """
+    def __init__(self, data, labels, batch_size, bundle_size):
+        self.data = data
+        self.labels = labels
+        self.batch_size = batch_size
+        self.bundle_size = bundle_size
+        self.indices = onp.arange(data.shape[0])
+        self.on_epoch_end()
+
+    def __len__(self):
+        return len(self.indices) // self.batch_size
+
+    def __getitem__(self, index):
+        # Sample a batch of bundled indices
+        indices = sample_bundled_indices(len(self.indices), self.bundle_size, self.batch_size)
+        
+        # Fetch corresponding data and labels
+        X = self.data[indices]
+        y = self.labels[indices]
+
+        return X, y
+
+    def on_epoch_end(self):
+        # If you want to shuffle the data after each epoch, you can do so here
+        pass
+
 
 class NeuralNetworkModel:
     """
@@ -226,8 +270,11 @@ class NeuralNetworkModel:
         response_parameters = self._encode_responses(self.responses)
 
         self.network.compile(loss="mean_squared_error")
-        self.network.fit(
-            onp.stack(self.training_trees), response_parameters, validation_split=validation_split, epochs=epochs, #callbacks=[Callback(epochs)], verbose=0,
+
+        data_generator = BundledDataGenerator(
+            onp.stack(self.training_trees), response_parameters, batch_size=500, bundle_size=self.bundle_size)
+
+        self.network.fit(data_generator, epochs=epochs, # validation_split=validation_split, #callbacks=[Callback(epochs)], verbose=0,
         )
 
     def predict(
