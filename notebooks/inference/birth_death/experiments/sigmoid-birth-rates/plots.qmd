@@ -43,25 +43,38 @@ priors <- list(
 ```{r}
 #| fig-height: 6
 
-samples |>
-    group_by(run, Parameter) |>
-    summarise(Sample = median(Sample)) |>
-    left_join(truth, by = "Parameter") |>
-    ggplot() +
-    geom_histogram(
-        aes(x = Sample, y = after_stat(density), fill = "Sampling distribution")
-    ) +
-    geom_vline(aes(xintercept = Truth),
-        color = "red",
-        linewidth = 1
-    ) +
-    scale_fill_manual(
-        name = "",
-        values = c("Sampling distribution" = "steelblue")
-    ) +
-    facet_wrap(vars(Parameter), ncol = 2, scales = "free") +
-    xlab("Estimate") +
-    theme(legend.position = "bottom")
+plot_hist <- function(parameter_name) {
+    samples |>
+        filter(Parameter == parameter_name) |>
+        group_by(run, Parameter) |>
+        summarise(Sample = median(Sample)) |>
+        left_join(truth, by = "Parameter") |>
+        ggplot() +
+        geom_histogram(
+            aes(x = Sample, y = after_stat(density), fill = "Sampling distribution")
+        ) +
+        geom_vline(aes(xintercept = Truth),
+            color = "red",
+            linewidth = 1
+        ) +
+        stat_function(
+            aes(fill = "Prior"),
+            geom = "area",
+            fun = priors[[parameter_name]],
+            alpha = 0.8
+        ) +
+        scale_fill_manual(
+            name = "",
+            values = c("Sampling distribution" = "steelblue", "Prior" = "grey")
+        ) +
+        facet_wrap(vars(Parameter)) +
+        xlab("Estimate") +
+        expand_limits(x = c(0, 4)) +
+        theme_minimal() +
+        theme(legend.position = "none")
+}
+
+(plot_hist("xscale") + plot_hist("xshift")) / (plot_hist("yscale") + plot_hist("yshift")) / plot_hist("death_rate")
 ```
 
 \pagebreak
