@@ -70,6 +70,21 @@ class BundleMeanLayer(layers.Layer):
         
         return mean_result
 
+class BundleExpandLayer(layers.Layer):
+    def __init__(self, bundle_size, **kwargs):
+        super(BundleExpandLayer, self).__init__(**kwargs)
+        self.bundle_size = bundle_size
+
+    def call(self, inputs):
+        # Expand the tensor along the first dimension by repeating each entry `bundle_size` times
+        return tf.tile(inputs, [self.bundle_size, 1])
+
+    def compute_output_shape(self, input_shape):
+        # The output shape is `bundle_size` times the first dimension of the input
+        return (input_shape[0] * self.bundle_size, input_shape[1])
+
+
+
 def sample_bundled_indices(total_samples, bundle_size, minibatch_size):
     assert minibatch_size % bundle_size == 0, "minibatch_size must be divisible by bundle_size"
 
@@ -173,6 +188,7 @@ class NeuralNetworkModel:
                 layers.Dense(16, activation=actfn),
                 layers.Dense(8, activation=actfn),
                 layers.Dense(num_parameters),
+                BundleExpandLayer(self.bundle_size),
             )
         elif network_layers == "small":
             print("    using small network layers")
@@ -189,6 +205,7 @@ class NeuralNetworkModel:
                 layers.Dense(16, activation=actfn),
                 layers.Dense(8, activation=actfn),
                 layers.Dense(num_parameters),
+                BundleExpandLayer(self.bundle_size),
             )
         elif network_layers == "tiny":
 # NOTE at least in some circumstances, this is *vastly* worse than the "small" one, and doesn't even improve with more epochs (maybe because I did something dumb in simplifying it?)
@@ -204,6 +221,7 @@ class NeuralNetworkModel:
                 layers.Dense(16, activation=actfn),
                 layers.Dense(8, activation=actfn),
                 layers.Dense(num_parameters),
+                BundleExpandLayer(self.bundle_size),
             )
         elif network_layers == "trivial":
             network_layers = (
@@ -303,7 +321,10 @@ class NeuralNetworkModel:
 
     def fit(self, epochs: int = 30, validation_split: float = 0.2):
         """Trains neural network on given trees and response parameters."""
-        response_parameters = self._encode_responses(self._take_one_identical_item_per_bundle(self.responses))
+        # Check to make sure that the responses are identical for each bundle
+        # We aren't using the results... definitely a faster way to do this.
+        self._take_one_identical_item_per_bundle(self.responses)
+        response_parameters = self._encode_responses(self.responses)
 
         self.network.compile(loss="mean_squared_error")
 
