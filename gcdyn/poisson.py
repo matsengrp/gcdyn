@@ -74,6 +74,14 @@ class Response(ABC):
         """
         return self.λ(node, 0.0)
 
+    def __eq__(self, other):
+        """Define equality of two Response objects by comparing their parameter
+        dictionaries."""
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+
+        return self._param_dict == other._param_dict
+
     @abstractmethod
     def λ(self, node: bdms.TreeNode, Δt: float) -> float:
         r"""Evaluate the Poisson intensity :math:`\lambda(t+\Delta t)` for a

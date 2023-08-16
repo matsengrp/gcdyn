@@ -112,6 +112,7 @@ class BundledDataGenerator(keras.utils.Sequence):
 
     def on_epoch_end(self):
         # If you want to shuffle the data after each epoch, you can do so here
+        # If you do this, respect the bundles!
         pass
 
 
@@ -127,7 +128,7 @@ class NeuralNetworkModel:
         encoded_trees: list[onp.ndarray],
         responses: list[list[poisson.Response]],
         network_layers: list[callable] = None,
-        bundle_size: int = 1,
+        bundle_size: int = 50,
     ):
         """
         encoded_trees: list of encoded trees
@@ -265,9 +266,44 @@ class NeuralNetworkModel:
 
         return result
 
+    @staticmethod
+    def _partition_list(input_list, sublist_len):
+        """
+        Partitions a given list into sublists of size sublist_len.
+        """
+        if len(input_list) % sublist_len != 0:
+            raise ValueError(
+                f"The length of the input list ({len(input_list)}) is not divisible by {sublist_len}"
+            )
+        return [
+            input_list[i : i + sublist_len]
+            for i in range(0, len(input_list), sublist_len)
+        ]
+
+    @staticmethod
+    def _collapse_identical_list(lst):
+        if not lst:
+            raise ValueError("List is empty")
+
+        first_element = lst[0]
+
+        for item in lst:
+            if item != first_element:
+                raise ValueError(
+                    f"All items in the list are not identical: {first_element} vs {item}"
+                )
+
+        return first_element
+
+    def _take_one_identical_item_per_bundle(self, list_of_bundles):
+        """
+        list_of_bundles is a flat list with bundles of identical items, e.g. [3,3,5,5,8,8].
+        """
+        return [self._collapse_identical_list(lst) for lst in self._partition_list(list_of_bundles, self.bundle_size)]
+
     def fit(self, epochs: int = 30, validation_split: float = 0.2):
         """Trains neural network on given trees and response parameters."""
-        response_parameters = self._encode_responses(self.responses)
+        response_parameters = self._encode_responses(self._take_one_identical_item_per_bundle(self.responses))
 
         self.network.compile(loss="mean_squared_error")
 
