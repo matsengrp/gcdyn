@@ -54,6 +54,23 @@ class Callback(tf.keras.callbacks.Callback):
         self.last_time = time.time()
 
 
+class BundleMeanLayer(layers.Layer):
+    """This layer assumes that the the first (batch) axis is divisible by bundle_size, and computes the mean along that axis.""" 
+    def __init__(self, bundle_size, **kwargs):
+        super(BundleMeanLayer, self).__init__(**kwargs)
+        self.bundle_size = bundle_size
+
+    def call(self, inputs):
+        # Ensure that inputs shape is divisible by bundle_size
+        tf.debugging.assert_equal(tf.shape(inputs)[0] % self.bundle_size, 0)
+        
+        # Reshape and compute the mean along the appropriate axis
+        bundled = tf.reshape(inputs, [-1, self.bundle_size] + inputs.shape[1:].as_list())
+        mean_result = tf.reduce_mean(bundled, axis=1)
+        
+        return mean_result
+
+
 class NeuralNetworkModel:
     """
     Adapts Voznica et. al (2022) for trees with a state attribute.
@@ -66,6 +83,7 @@ class NeuralNetworkModel:
         encoded_trees: list[onp.ndarray],
         responses: list[list[poisson.Response]],
         network_layers: list[callable] = None,
+        bundle_size: int = 1,
     ):
         """
         encoded_trees: list of encoded trees
@@ -78,6 +96,8 @@ class NeuralNetworkModel:
                         :py:meth:`encode.encode_tree`. Output should be a vector with length equal to the
                         number of scalars that parameterize all py:class:`poisson.Response` objects
                         in a row of the `responses` argument.
+        bundle_size: number of trees to bundle together. The per-bundle mean of predictions is applied to the 
+                     convolutional output and then passed to the dense layers.
         """
         num_parameters = sum(len(response._param_dict) for response in responses[0])
         leaf_counts = set(
@@ -89,6 +109,7 @@ class NeuralNetworkModel:
                 % " ".join(str(c) for c in leaf_counts)
             )
         max_leaf_count = list(leaf_counts)[0]
+        self.bundle_size = bundle_size
 
         actfn = 'elu'
         if network_layers == 'None':
@@ -101,6 +122,7 @@ class NeuralNetworkModel:
                 layers.MaxPooling1D(pool_size=10, strides=10),
                 layers.Conv1D(filters=80, kernel_size=10, activation=actfn),
                 layers.GlobalAveragePooling1D(),
+                BundleMeanLayer(self.bundle_size),
                 layers.Dense(64, activation=actfn),
                 layers.Dense(32, activation=actfn),
                 layers.Dense(16, activation=actfn),
@@ -117,6 +139,7 @@ class NeuralNetworkModel:
                 layers.MaxPooling1D(pool_size=10, strides=10),
                 layers.Conv1D(filters=40, kernel_size=8, activation=actfn),
                 layers.GlobalAveragePooling1D(),
+                BundleMeanLayer(self.bundle_size),
                 layers.Dense(32, activation=actfn),
                 layers.Dense(16, activation=actfn),
                 layers.Dense(8, activation=actfn),
@@ -132,6 +155,7 @@ class NeuralNetworkModel:
                 layers.MaxPooling1D(pool_size=5, strides=5),
                 layers.Conv1D(filters=40, kernel_size=8, activation=actfn),
                 layers.GlobalAveragePooling1D(),
+                BundleMeanLayer(self.bundle_size),
                 layers.Dense(16, activation=actfn),
                 layers.Dense(8, activation=actfn),
                 layers.Dense(num_parameters),
@@ -203,7 +227,7 @@ class NeuralNetworkModel:
 
         self.network.compile(loss="mean_squared_error")
         self.network.fit(
-            onp.stack(self.training_trees), response_parameters, validation_split=validation_split, epochs=epochs, callbacks=[Callback(epochs)], verbose=0,
+            onp.stack(self.training_trees), response_parameters, validation_split=validation_split, epochs=epochs, #callbacks=[Callback(epochs)], verbose=0,
         )
 
     def predict(
