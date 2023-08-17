@@ -83,7 +83,11 @@ plot_hist <- function(parameter_name) {
         theme(legend.position = "none")
 }
 
-(plot_hist("xscale") + plot_hist("xshift")) / (plot_hist("yscale") + plot_hist("yshift")) / plot_hist("death_rate")
+if ("mutation_rate" %in% samples$Parameter) {
+    (plot_hist("xscale") + plot_hist("xshift")) / (plot_hist("yscale") + plot_hist("yshift")) / (plot_hist("death_rate") + plot_hist("mutation_rate"))
+} else {
+    (plot_hist("xscale") + plot_hist("xshift")) / (plot_hist("yscale") + plot_hist("yshift")) / plot_hist("death_rate")
+}
 ```
 
 \pagebreak
