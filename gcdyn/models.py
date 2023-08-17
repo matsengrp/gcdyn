@@ -108,20 +108,22 @@ class NeuralNetworkModel:
 
         actfn = 'elu'
 
+        network_layers = [
+            layers.Lambda(lambda x: tf.transpose(x, (0, 1, 3, 2))),
+            layers.TimeDistributed(layers.Conv1D(filters=25, kernel_size=3, activation=actfn)),
+            layers.TimeDistributed(layers.Conv1D(filters=25, kernel_size=8, activation=actfn)),
+            layers.TimeDistributed(layers.MaxPooling1D(pool_size=10, strides=10)),
+            layers.TimeDistributed(layers.Conv1D(filters=40, kernel_size=8, activation=actfn)),
+            layers.TimeDistributed(layers.GlobalAveragePooling1D()),
+            BundleMeanLayer(),
+            layers.Dense(32, activation=actfn),
+            layers.Dense(16, activation=actfn),
+            layers.Dense(8, activation=actfn),
+            layers.Dense(num_parameters)
+        ]
+
         inputs = keras.Input(shape=(self.bundle_size, 4, max_leaf_count))
-        # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
-        x = layers.Lambda(lambda x: tf.transpose(x, (0, 1, 3, 2)))(inputs)  # Adjusting the transpose operation
-        # The TimeDistributed wrapper is used here to apply the 1D convolutional operations across each sequence in the bundle independently.
-        x = layers.TimeDistributed(layers.Conv1D(filters=25, kernel_size=3, activation=actfn))(x)
-        x = layers.TimeDistributed(layers.Conv1D(filters=25, kernel_size=8, activation=actfn))(x)
-        x = layers.TimeDistributed(layers.MaxPooling1D(pool_size=10, strides=10))(x)
-        x = layers.TimeDistributed(layers.Conv1D(filters=40, kernel_size=8, activation=actfn))(x)
-        x = layers.TimeDistributed(layers.GlobalAveragePooling1D())(x)
-        x = BundleMeanLayer()(x)
-        x = layers.Dense(32, activation=actfn)(x)
-        x = layers.Dense(16, activation=actfn)(x)
-        x = layers.Dense(8, activation=actfn)(x)
-        outputs = layers.Dense(num_parameters)(x)
+        outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
         self.network = keras.Model(inputs=inputs, outputs=outputs)
 
         self.network.summary(print_fn=lambda x: print("      %s" % x))
