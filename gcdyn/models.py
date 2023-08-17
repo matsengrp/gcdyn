@@ -41,8 +41,11 @@ class Callback(tf.keras.callbacks.Callback):
         self.n_between = (5 if max_epochs > 30 else 3) if max_epochs > 10 else 1
 
     def on_train_begin(epoch, logs=None):
-        print('                 valid   epoch   total')
-        print('   epoch  loss    loss    time    time')
+        # version with validation loss
+        # print('                 valid   epoch   total')
+        # print('   epoch  loss    loss    time    time')
+        print('                 epoch   total')
+        print('   epoch  loss    time    time')
 
     def on_epoch_begin(self, epoch, logs=None):
         self.epoch = epoch
@@ -50,7 +53,9 @@ class Callback(tf.keras.callbacks.Callback):
     def on_epoch_end(self, batch, logs=None):
         if self.epoch == 0 or self.epoch % self.n_between == 0:
             def lfmt(lv): return ('%7.3f' if lv < 1 else '%7.2f') % lv
-            print('  %3d  %s %s    %.1f     %.1f' % (self.epoch, lfmt(logs['loss']), lfmt(logs['val_loss']), time.time() - self.last_time, time.time() - self.start_time))
+            # version with validation loss
+            # print('  %3d  %s %s    %.1f     %.1f' % (self.epoch, lfmt(logs['loss']), lfmt(logs['val_loss']), time.time() - self.last_time, time.time() - self.start_time))
+            print('  %3d  %s    %.1f     %.1f' % (self.epoch, lfmt(logs['loss']), time.time() - self.last_time, time.time() - self.start_time))
         self.last_time = time.time()
 
 
@@ -116,14 +121,18 @@ class NeuralNetworkModel:
 
         network_layers = [
             layers.Lambda(lambda x: tf.transpose(x, (0, 1, 3, 2))),
-            layers.TimeDistributed(layers.Conv1D(filters=25, kernel_size=3, activation=actfn)),
-            layers.TimeDistributed(layers.Conv1D(filters=25, kernel_size=8, activation=actfn)),
-            layers.TimeDistributed(layers.MaxPooling1D(pool_size=10, strides=10)),
-            layers.TimeDistributed(layers.Conv1D(filters=40, kernel_size=8, activation=actfn)),
+            layers.TimeDistributed(layers.Conv1D(filters=25, kernel_size=4, activation=actfn)),
+            layers.TimeDistributed(layers.Conv1D(filters=25, kernel_size=4, activation=actfn)),
+            layers.TimeDistributed(layers.MaxPooling1D(pool_size=2, strides=2)),  # Downsampling by a factor of 2
+            layers.TimeDistributed(layers.Conv1D(filters=40, kernel_size=4, activation=actfn)),
             layers.TimeDistributed(layers.GlobalAveragePooling1D()),
             BundleMeanLayer(),
+            layers.Dense(48, activation=actfn),
+            layers.Dropout(0.5),
             layers.Dense(32, activation=actfn),
+            layers.Dropout(0.5),
             layers.Dense(16, activation=actfn),
+            layers.Dropout(0.5),
             layers.Dense(8, activation=actfn),
             layers.Dense(num_parameters)
         ]
@@ -226,7 +235,7 @@ class NeuralNetworkModel:
         """
         return self._reshape_data_wrt_bundle_size(onp.stack(trees))
 
-    def fit(self, epochs: int = 30, validation_split: float = 0.2):
+    def fit(self, epochs: int = 30, validation_split: float = 0.):
         """Trains neural network on given trees and response parameters."""
 
         self.network.compile(loss="mean_squared_error")
