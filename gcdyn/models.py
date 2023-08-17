@@ -108,6 +108,12 @@ class NeuralNetworkModel:
 
         actfn = 'elu'
 
+        # The TimeDistributed layer wrapper allows us to apply the inner layer (e.g., Conv1D) to each "time step" 
+        # of the input tensor independently. In our specific context, our data is structured in the format of:
+        # (number_of_examples, bundle_size, feature_dim, max_leaf_count). We're essentially treating the 
+        # 'bundle_size' dimension as if it were the "time" or "sequence length" dimension. This means that 
+        # for every example, the inner layer is applied to each item within a bundle independently. 
+
         network_layers = [
             layers.Lambda(lambda x: tf.transpose(x, (0, 1, 3, 2))),
             layers.TimeDistributed(layers.Conv1D(filters=25, kernel_size=3, activation=actfn)),
@@ -125,14 +131,12 @@ class NeuralNetworkModel:
         inputs = keras.Input(shape=(self.bundle_size, 4, max_leaf_count))
         outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
         self.network = keras.Model(inputs=inputs, outputs=outputs)
-
         self.network.summary(print_fn=lambda x: print("      %s" % x))
 
         # Note: the original deep learning model rescales trees, but we don't here
         # because we should always have the same root to tip height.
         self.max_leaf_count = max_leaf_count
         self.training_trees = encoded_trees
-
         self.responses = responses
 
     @classmethod
@@ -229,7 +233,9 @@ class NeuralNetworkModel:
 
         response_parameters = self._encode_responses(self._take_one_identical_item_per_bundle(self.responses))
 
-        self.network.fit(self._prepare_trees_for_network_input(self.training_trees), response_parameters, epochs=epochs) #, validation_split=0.2, verbose=0)
+        self.network.fit(self._prepare_trees_for_network_input(self.training_trees), response_parameters, 
+                         epochs=epochs, callbacks=[Callback(epochs)], verbose=0, validation_split=validation_split
+                         ) 
 
     def predict(
         self,
