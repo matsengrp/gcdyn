@@ -17,28 +17,11 @@ from gcdyn import bdms, gpmap, mutators, poisson, utils, encode
 from experiments import replay
 
 
-final_ofn_strs = ['seqs', 'trees', 'leaf-meta', 'encoded-trees', 'responses', 'summary-stats']
-
 # ----------------------------------------------------------------------------------------
 def outfn(ftype, itrial, odir=None):
-    assert ftype in final_ofn_strs + [None]
     if odir is None:
         odir = args.outdir
-    if itrial is None:
-        suffixes = {
-            "seqs": "fasta",
-            "trees": "nwk",
-            "encoded-trees": "npy",
-            "responses": "pkl",
-            "leaf-meta": "csv",
-            "summary-stats": "csv",
-        }
-        sfx = suffixes.get(ftype, "simu")
-    else:
-        assert ftype is None
-        ftype = "tree_%d" % itrial
-        sfx = 'pkl'
-    return f"{odir}/{ftype}.{sfx}"
+    return encode.simfn(odir, ftype, itrial)
 
 
 # ----------------------------------------------------------------------------------------
@@ -282,18 +265,11 @@ def write_final_outputs(all_seqs, all_trees):
                 writer.writerow({'name': node.name, "affinity": node.x, 'n_muts': node.total_mutations})
 
     scale_vals, encoded_trees = encode.encode_trees([pfo['tree'] for pfo in all_trees])
-    encode.write_trees(outfn("encoded-trees", None), encoded_trees)
-    with open(outfn("summary-stats", None), "w") as jfile:
-        writer = csv.DictWriter(jfile, ['tree', 'mean_branch_length', 'total_branch_length'])
-        writer.writeheader()
-        for itr, (sval, pfo) in enumerate(zip(scale_vals, all_trees)):
-            writer.writerow({'tree': itr + args.itrial_start, 'mean_branch_length': sval, 'total_branch_length' : sum(n.dist for n in pfo['tree'].iter_descendants())})
-
-    with open(outfn("responses", None), "wb") as pfile:
-        dill.dump(
-            [{k: p["%s-response" % k] for k in ["birth", "death"]} for p in all_trees],
-            pfile,
-        )
+    sstats = []
+    for itr, (sval, pfo) in enumerate(zip(scale_vals, all_trees)):
+        sstats.append({'tree': itr + args.itrial_start, 'mean_branch_length': sval, 'total_branch_length' : sum(n.dist for n in pfo['tree'].iter_descendants())})
+    responses = [{k: p["%s-response" % k] for k in ["birth", "death"]} for p in all_trees]
+    encode.write_training_files(args.outdir, encoded_trees, responses, sstats)
 
 
 # ----------------------------------------------------------------------------------------
@@ -503,7 +479,7 @@ if (
         clist = ["python"] + copy.deepcopy(sys.argv)
         subdir = "%s/iproc-%d" % (args.outdir, iproc)
         istart = iproc * n_per_proc
-        if all(os.path.exists(outfn(ft, None, odir=subdir)) for ft in final_ofn_strs) and not args.overwrite:
+        if all(os.path.exists(outfn(ft, None, odir=subdir)) for ft in encode.final_ofn_strs) and not args.overwrite:
             print("        proc %d: final outputs exist" % iproc)
             sys.stdout.flush()
             continue
@@ -553,7 +529,7 @@ if (
         time.sleep(0.01 / max(1, len(procs)))
     print('    writing merged files to %s' % args.outdir)
     print('        N files   time (s)  memory %   ftype')
-    for ftype in final_ofn_strs:
+    for ftype in encode.final_ofn_strs:
         ofn = outfn(ftype, None)
         fnames = [outfn(ftype, None, odir="%s/iproc-%d" % (args.outdir, i)) for i in range(args.n_sub_procs)]
         start = time.time()

@@ -1,5 +1,8 @@
 import numpy as np
 import copy
+import csv
+import dill
+import os
 
 from gcdyn.bdms import TreeNode
 from gcdyn import utils
@@ -175,3 +178,43 @@ def write_trees(
 
 def read_trees(filename: str):
     return np.load(filename)
+
+
+final_ofn_strs = ['seqs', 'trees', 'leaf-meta', 'encoded-trees', 'responses', 'summary-stats']
+
+
+def simfn(odir, ftype, itrial):
+    """Return file name for simulation files of various types."""
+    assert ftype in final_ofn_strs + [None]
+    if itrial is None:
+        suffixes = {
+            "seqs": "fasta",
+            "trees": "nwk",
+            "encoded-trees": "npy",
+            "responses": "pkl",
+            "leaf-meta": "csv",
+            "summary-stats": "csv",
+        }
+        sfx = suffixes.get(ftype, "simu")
+    else:
+        assert ftype is None
+        ftype = "tree_%d" % itrial
+        sfx = 'pkl'
+    return f"{odir}/{ftype}.{sfx}"
+
+
+def write_training_files(outdir, encoded_trees, responses, sstats, dbgstr=''):
+    """Write encoded tree .npy, response fcn .pkl, and summary stat .csv files."""
+    if dbgstr != '':
+        print('      writing %s files to %s' % (dbgstr, outdir))
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+    write_trees(simfn(outdir, "encoded-trees", None), encoded_trees)
+    with open(simfn(outdir, "summary-stats", None), "w") as jfile:
+        fieldnames = ['tree', 'mean_branch_length', 'total_branch_length']
+        writer = csv.DictWriter(jfile, fieldnames)
+        writer.writeheader()
+        for sline in sstats:
+            writer.writerow({k : v for k, v in sline.items() if k in fieldnames})
+    with open(simfn(outdir, "responses", None), "wb") as pfile:
+        dill.dump(responses, pfile)

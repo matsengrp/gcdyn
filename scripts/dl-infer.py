@@ -15,7 +15,7 @@ import random
 import csv
 import copy
 
-from gcdyn import utils
+from gcdyn import utils, encode
 
 # ----------------------------------------------------------------------------------------
 sum_stat_scaled = {'total_branch_length' : True}  # whether to scale summary stats with branch length
@@ -149,10 +149,16 @@ def get_param(pname, bresp, sts):
         assert False
 
 # ----------------------------------------------------------------------------------------
+def write_traintest_samples(smpldict):
+    for smpl in smplist:
+        subdict = smpldict[smpl]
+        responses = [{k : subdict[k + '-responses'][i] for k in ['birth', 'death']} for i in range(len(subdict['trees']))]
+        encode.write_training_files('%s/%s-samples' % (args.outdir, smpl), subdict['trees'], subdict['sstats'], responses, dbgstr=smpl)
+
+# ----------------------------------------------------------------------------------------
 def train_and_test():
     from gcdyn.models import NeuralNetworkModel
     from gcdyn.poisson import ConstantResponse
-    from gcdyn import encode
 
     # read from various input files
     rfn, tfn, sfn = ['%s/%s' % (args.indir, s) for s in ['responses.pkl', 'encoded-trees.npy', 'summary-stats.csv']]
@@ -185,6 +191,8 @@ def train_and_test():
         "      N trees: %s"
         % "   ".join("%s %d" % (s, len(smpldict[s]["trees"])) for s in smplist)
     )
+
+    write_traintest_samples(smpldict)
 
     # handle various scaling/re-encoding stuff
     pscaled, scalers = {}, {}  # scaled parameters and scalers
