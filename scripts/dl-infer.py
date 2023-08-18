@@ -123,12 +123,8 @@ def get_traintest_indices(samples):
     n_test = round((1.0 - args.train_frac) * n_trees)
     idxs = {}
     if args.test_param_vals is None:
-        if args.no_shuffle:
-            idxs["train"] = range(round(args.train_frac * n_trees))
-            print('    taking first %d trees to train' % len(idxs['train']))
-        else:
-            idxs["train"] = random.sample(range(n_trees), round(args.train_frac * n_trees))
-            print('    taking %d randomly sampled trees to train' % len(idxs['train']))
+        idxs["train"] = range(round(args.train_frac * n_trees))
+        print('    taking first %d trees to train' % len(idxs['train']))
         idxs["test"] = [i for i in range(n_trees) if i not in idxs["train"]]
     else:
         avail_indices = [
@@ -257,11 +253,6 @@ parser.add_argument(
     "--test",
     action="store_true",
     help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly",
-)
-parser.add_argument(
-    "--no-shuffle",
-    action="store_true",
-    help="Instead of random sampling to assign trees to train/test samples, train on the first trees as ordered in the input file",
 )
 parser.add_argument("--random-seed", default=0, type=int, help="random seed")
 parser.add_argument("--overwrite", action="store_true")

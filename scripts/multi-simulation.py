@@ -4,7 +4,7 @@ import os
 import sys
 import csv
 
-# import colored_traceback.always  # need to add this to installation stuff, i'm not sure how to do it atm
+import colored_traceback.always
 import pickle
 import time
 import copy
@@ -491,11 +491,14 @@ if (
     args.n_sub_procs is not None
 ):  # this stuff is all copied from partis utils.py, gd it this would be like three lines if i could import that
     procs = []
+    if args.n_trials % args.n_sub_procs != 0:
+        raise Exception('--n-trials %d has to be divisible by --n-sub-procs %d, but got remainder %d (otherwise it\'s too easy to run into issues with bundling)' % (args.n_trials, args.n_sub_procs, args.n_trials % args.n_sub_procs))
     n_per_proc = int(args.n_trials / float(args.n_sub_procs))
     print('    starting %d procs with %d events per proc' % (args.n_sub_procs, n_per_proc))
     if args.n_trees_per_param_set != 1:  # make sure that all chunks of trees with same parameters are of same length, i.e. that last chunk isn't smaller (especially important if this is a subproc whose output will be smashed together with others)
         if n_per_proc % args.n_trees_per_param_set != 0:
             raise Exception('--n-trees-per-param-set %d has to evenly divide N trees per proc %d ( = --n-trials / --n-sub-procs = %d / %d), but got remainder %d' % (args.n_trees_per_param_set, n_per_proc, args.n_trials, args.n_sub_procs, n_per_proc % args.n_trees_per_param_set))
+        print('      bundling %d trees per set of parameter values (%d bundles per sub proc)' % (args.n_trees_per_param_set, n_per_proc / args.n_trees_per_param_set))
     for iproc in range(args.n_sub_procs):
         clist = ["python"] + copy.deepcopy(sys.argv)
         subdir = "%s/iproc-%d" % (args.outdir, iproc)

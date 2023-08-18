@@ -41,8 +41,11 @@ class Callback(tf.keras.callbacks.Callback):
         self.n_between = (5 if max_epochs > 30 else 3) if max_epochs > 10 else 1
 
     def on_train_begin(epoch, logs=None):
-        print('                 valid   epoch   total')
-        print('   epoch  loss    loss    time    time')
+        # version with validation loss
+        # print('                 valid   epoch   total')
+        # print('   epoch  loss    loss    time    time')
+        print('                 epoch   total')
+        print('   epoch  loss    time    time')
 
     def on_epoch_begin(self, epoch, logs=None):
         self.epoch = epoch
@@ -50,8 +53,22 @@ class Callback(tf.keras.callbacks.Callback):
     def on_epoch_end(self, batch, logs=None):
         if self.epoch == 0 or self.epoch % self.n_between == 0:
             def lfmt(lv): return ('%7.3f' if lv < 1 else '%7.2f') % lv
-            print('  %3d  %s %s    %.1f     %.1f' % (self.epoch, lfmt(logs['loss']), lfmt(logs['val_loss']), time.time() - self.last_time, time.time() - self.start_time))
+            # version with validation loss
+            # print('  %3d  %s %s    %.1f     %.1f' % (self.epoch, lfmt(logs['loss']), lfmt(logs['val_loss']), time.time() - self.last_time, time.time() - self.start_time))
+            print('  %3d  %s    %.1f     %.1f' % (self.epoch, lfmt(logs['loss']), time.time() - self.last_time, time.time() - self.start_time))
         self.last_time = time.time()
+
+
+class BundleMeanLayer(layers.Layer):
+    """Assume that the input is of shape (number_of_bundles, bundle_size, feature_dim)."""
+    def __init__(self, **kwargs):
+        super(BundleMeanLayer, self).__init__(**kwargs)
+
+    def call(self, inputs):
+        return tf.reduce_mean(inputs, axis=1)  # compute mean over the bundle_size axis
+
+    def compute_output_shape(self, input_shape):
+        return (input_shape[0], input_shape[2])  # output shape is (number_of_bundles, feature_dim)
 
 
 class NeuralNetworkModel:
@@ -66,6 +83,7 @@ class NeuralNetworkModel:
         encoded_trees: list[onp.ndarray],
         responses: list[list[poisson.Response]],
         network_layers: list[callable] = None,
+        bundle_size: int = 50,
     ):
         """
         encoded_trees: list of encoded trees
@@ -78,6 +96,8 @@ class NeuralNetworkModel:
                         :py:meth:`encode.encode_tree`. Output should be a vector with length equal to the
                         number of scalars that parameterize all py:class:`poisson.Response` objects
                         in a row of the `responses` argument.
+        bundle_size: number of trees to bundle together. The per-bundle mean of predictions is applied to the 
+                     convolutional output and then passed to the dense layers.
         """
         num_parameters = sum(len(response._param_dict) for response in responses[0])
         leaf_counts = set(
@@ -89,65 +109,35 @@ class NeuralNetworkModel:
                 % " ".join(str(c) for c in leaf_counts)
             )
         max_leaf_count = list(leaf_counts)[0]
+        self.bundle_size = bundle_size
 
         actfn = 'elu'
-        if network_layers == 'None':
-            print("    using default network layers")
-            network_layers = (
-                # Rotate matrix from (4, max_leaf_count) to (max_leaf_count, 4)
-                lambda x: tf.transpose(x, (0, 2, 1)),
-                layers.Conv1D(filters=50, kernel_size=3, activation=actfn),
-                layers.Conv1D(filters=50, kernel_size=10, activation=actfn),
-                layers.MaxPooling1D(pool_size=10, strides=10),
-                layers.Conv1D(filters=80, kernel_size=10, activation=actfn),
-                layers.GlobalAveragePooling1D(),
-                layers.Dense(64, activation=actfn),
-                layers.Dense(32, activation=actfn),
-                layers.Dense(16, activation=actfn),
-                layers.Dense(8, activation=actfn),
-                layers.Dense(num_parameters),
-            )
-        elif network_layers == "small":
-            print("    using small network layers")
-            network_layers = (
-                # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
-                lambda x: tf.transpose(x, (0, 2, 1)),
-                layers.Conv1D(filters=25, kernel_size=3, activation=actfn),
-                layers.Conv1D(filters=25, kernel_size=8, activation=actfn),
-                layers.MaxPooling1D(pool_size=10, strides=10),
-                layers.Conv1D(filters=40, kernel_size=8, activation=actfn),
-                layers.GlobalAveragePooling1D(),
-                layers.Dense(32, activation=actfn),
-                layers.Dense(16, activation=actfn),
-                layers.Dense(8, activation=actfn),
-                layers.Dense(num_parameters),
-            )
-        elif network_layers == "tiny":
-# NOTE at least in some circumstances, this is *vastly* worse than the "small" one, and doesn't even improve with more epochs (maybe because I did something dumb in simplifying it?)
-            print("    using tiny network layers")
-            network_layers = (
-                # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
-                lambda x: tf.transpose(x, (0, 2, 1)),
-                layers.Conv1D(filters=25, kernel_size=3, activation=actfn),
-                layers.MaxPooling1D(pool_size=5, strides=5),
-                layers.Conv1D(filters=40, kernel_size=8, activation=actfn),
-                layers.GlobalAveragePooling1D(),
-                layers.Dense(16, activation=actfn),
-                layers.Dense(8, activation=actfn),
-                layers.Dense(num_parameters),
-            )
-        elif network_layers == "trivial":
-            network_layers = (
-                # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
-                lambda x: tf.transpose(x, (0, 2, 1)),
-                layers.Dense(num_parameters),
-            )
-        else:
-            raise Exception(
-                "unhandled network layer specification '%s'" % network_layers
-            )
 
-        inputs = keras.Input(shape=(4, max_leaf_count))
+        # The TimeDistributed layer wrapper allows us to apply the inner layer (e.g., Conv1D) to each "time step" 
+        # of the input tensor independently. In our specific context, our data is structured in the format of:
+        # (number_of_examples, bundle_size, feature_dim, max_leaf_count). We're essentially treating the 
+        # 'bundle_size' dimension as if it were the "time" or "sequence length" dimension. This means that 
+        # for every example, the inner layer is applied to each item within a bundle independently. 
+
+        network_layers = [
+            layers.Lambda(lambda x: tf.transpose(x, (0, 1, 3, 2))),
+            layers.TimeDistributed(layers.Conv1D(filters=25, kernel_size=4, activation=actfn)),
+            layers.TimeDistributed(layers.Conv1D(filters=25, kernel_size=4, activation=actfn)),
+            layers.TimeDistributed(layers.MaxPooling1D(pool_size=2, strides=2)),  # Downsampling by a factor of 2
+            layers.TimeDistributed(layers.Conv1D(filters=40, kernel_size=4, activation=actfn)),
+            layers.TimeDistributed(layers.GlobalAveragePooling1D()),
+            BundleMeanLayer(),
+            layers.Dense(48, activation=actfn),
+            layers.Dropout(0.5),
+            layers.Dense(32, activation=actfn),
+            layers.Dropout(0.5),
+            layers.Dense(16, activation=actfn),
+            layers.Dropout(0.5),
+            layers.Dense(8, activation=actfn),
+            layers.Dense(num_parameters)
+        ]
+
+        inputs = keras.Input(shape=(self.bundle_size, 4, max_leaf_count))
         outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
         self.network = keras.Model(inputs=inputs, outputs=outputs)
         self.network.summary(print_fn=lambda x: print("      %s" % x))
@@ -156,7 +146,6 @@ class NeuralNetworkModel:
         # because we should always have the same root to tip height.
         self.max_leaf_count = max_leaf_count
         self.training_trees = encoded_trees
-
         self.responses = responses
 
     @classmethod
@@ -197,14 +186,65 @@ class NeuralNetworkModel:
 
         return result
 
-    def fit(self, epochs: int = 30, validation_split: float = 0.2):
+    @staticmethod
+    def _partition_list(input_list, sublist_len):
+        """
+        Partitions a given list into sublists of size sublist_len.
+        """
+        if len(input_list) % sublist_len != 0:
+            raise ValueError(
+                f"The length of the input list ({len(input_list)}) is not divisible by {sublist_len}"
+            )
+        return [
+            input_list[i : i + sublist_len]
+            for i in range(0, len(input_list), sublist_len)
+        ]
+
+    @staticmethod
+    def _collapse_identical_list(lst):
+        if not lst:
+            raise ValueError("List is empty")
+
+        first_element = lst[0]
+
+        for item in lst:
+            if item != first_element:
+                raise ValueError(
+                    f"All items in the list are not identical: {first_element} vs {item}"
+                )
+
+        return first_element
+
+    def _take_one_identical_item_per_bundle(self, list_of_bundles):
+        """
+        list_of_bundles is a flat list with bundles of identical items, e.g. [3,3,5,5,8,8].
+        """
+        return [self._collapse_identical_list(lst) for lst in self._partition_list(list_of_bundles, self.bundle_size)]
+
+    def _reshape_data_wrt_bundle_size(self, data):
+        """
+        Reshape data to be of shape (num_bundles, bundle_size, 4, max_leaf_count).
+        """
+        assert data.shape[0] % self.bundle_size == 0
+        num_bundles = data.shape[0] // self.bundle_size
+        return data.reshape((num_bundles, self.bundle_size, data.shape[1], data.shape[2]))
+
+    def _prepare_trees_for_network_input(self, trees):
+        """
+        Stack trees and reshape to be of shape (num_bundles, bundle_size, 4, max_leaf_count).
+        """
+        return self._reshape_data_wrt_bundle_size(onp.stack(trees))
+
+    def fit(self, epochs: int = 30, validation_split: float = 0.):
         """Trains neural network on given trees and response parameters."""
-        response_parameters = self._encode_responses(self.responses)
 
         self.network.compile(loss="mean_squared_error")
-        self.network.fit(
-            onp.stack(self.training_trees), response_parameters, validation_split=validation_split, epochs=epochs, callbacks=[Callback(epochs)], verbose=0,
-        )
+
+        response_parameters = self._encode_responses(self._take_one_identical_item_per_bundle(self.responses))
+
+        self.network.fit(self._prepare_trees_for_network_input(self.training_trees), response_parameters, 
+                         epochs=epochs, callbacks=[Callback(epochs)], verbose=0, validation_split=validation_split
+                         ) 
 
     def predict(
         self,
@@ -212,10 +252,15 @@ class NeuralNetworkModel:
     ) -> list[list[poisson.Response]]:
         """Returns the Response objects predicted for each tree."""
 
-        response_parameters = self.network(onp.stack(encoded_trees))
+        predicted_responses = self.network(self._prepare_trees_for_network_input(encoded_trees))
+
+        # HACK: expanding responses so I don't have to change downstream code
+        predicted_responses_expanded = [
+                item for item in predicted_responses for _ in range(self.bundle_size)
+            ]
 
         return self._decode_responses(
-            response_parameters, example_responses=self.responses[0]
+            predicted_responses_expanded, example_responses=self.responses[0]
         )
 
 
