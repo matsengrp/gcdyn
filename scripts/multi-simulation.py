@@ -347,7 +347,7 @@ parser.add_argument(
 )
 parser.add_argument("--time-to-sampling-values", default=[20], nargs='+', type=int, help="List of values from which to choose for time to sampling.")
 parser.add_argument("--time-to-sampling-range", nargs='+', type=int, help="Pair of values (min/max) between which to choose at uniform random the time to sampling for each tree. Overrides --time-to-sampling-values.")
-parser.add_argument("--n-trees-per-param-set", default=1, type=int, help='By default, we choose a new set of parameters for each tree. If this arg is set, once we\'ve chosen a set of parameter values, we simulate this many trees with those values.')
+parser.add_argument("--bundle-size", default=1, type=int, help='By default, we choose a new set of parameters for each tree. If this arg is set, once we\'ve chosen a set of parameter values, we simulate this many trees with those values.')
 parser.add_argument("--min-survivors", default=100, type=int)
 parser.add_argument("--carry-cap", default=300, type=int)
 parser.add_argument(
@@ -471,10 +471,10 @@ if (
         raise Exception('--n-trials %d has to be divisible by --n-sub-procs %d, but got remainder %d (otherwise it\'s too easy to run into issues with bundling)' % (args.n_trials, args.n_sub_procs, args.n_trials % args.n_sub_procs))
     n_per_proc = int(args.n_trials / float(args.n_sub_procs))
     print('    starting %d procs with %d events per proc' % (args.n_sub_procs, n_per_proc))
-    if args.n_trees_per_param_set != 1:  # make sure that all chunks of trees with same parameters are of same length, i.e. that last chunk isn't smaller (especially important if this is a subproc whose output will be smashed together with others)
-        if n_per_proc % args.n_trees_per_param_set != 0:
-            raise Exception('--n-trees-per-param-set %d has to evenly divide N trees per proc %d ( = --n-trials / --n-sub-procs = %d / %d), but got remainder %d' % (args.n_trees_per_param_set, n_per_proc, args.n_trials, args.n_sub_procs, n_per_proc % args.n_trees_per_param_set))
-        print('      bundling %d trees per set of parameter values (%d bundles per sub proc)' % (args.n_trees_per_param_set, n_per_proc / args.n_trees_per_param_set))
+    if args.bundle_size != 1:  # make sure that all chunks of trees with same parameters are of same length, i.e. that last chunk isn't smaller (especially important if this is a subproc whose output will be smashed together with others)
+        if n_per_proc % args.bundle_size != 0:
+            raise Exception('--n-trees-per-param-set %d has to evenly divide N trees per proc %d ( = --n-trials / --n-sub-procs = %d / %d), but got remainder %d' % (args.bundle_size, n_per_proc, args.n_trials, args.n_sub_procs, n_per_proc % args.bundle_size))
+        print('      bundling %d trees per set of parameter values (%d bundles per sub proc)' % (args.bundle_size, n_per_proc / args.bundle_size))
     for iproc in range(args.n_sub_procs):
         clist = ["python"] + copy.deepcopy(sys.argv)
         subdir = "%s/iproc-%d" % (args.outdir, iproc)
@@ -601,7 +601,7 @@ for itrial in range(args.itrial_start, args.n_trials):
         n_missing += 1
         continue
     sys.stdout.flush()
-    if params is None or n_times_used == args.n_trees_per_param_set:
+    if params is None or n_times_used == args.bundle_size:
         params = {p : choose_val(p) for p in ['xscale', 'xshift', 'time_to_sampling']}
         print('    chose new parameter values: %s' % '  '.join('%s %s'%(p, ('%d' if p == 'time_to_sampling' else '%.2f') % v) for p, v in sorted(params.items())))
         n_times_used = 0
