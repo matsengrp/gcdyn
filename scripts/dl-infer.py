@@ -87,54 +87,12 @@ def read_plot_csv():
 
 # ----------------------------------------------------------------------------------------
 def get_traintest_indices(samples):
-    def is_avail(resp):
-        for pname in args.test_param_vals:
-            if resp._param_dict[pname] not in args.test_param_vals[pname]:
-                return False  # if this response's e.g. xscale value isn't in the allowed values from the command line, skip it
-        return True
-
-    def print_stats():
-        for pname in args.test_param_vals:
-            all_vals = [r._param_dict[pname] for r in samples["birth-responses"]]
-            val_counts = {v: all_vals.count(v) for v in set(all_vals)}
-            n_remaining = (
-                sum(val_counts.get(v, 0) for v in args.test_param_vals[pname]) - n_test
-            )
-            print(
-                "      --test-%s-values: restricted to %d / %d %s values (%s), choosing %d / %d with these values from original value counts: %s"
-                % (
-                    pname,
-                    len(args.test_param_vals[pname]),
-                    len(set(all_vals)),
-                    pname,
-                    " ".join("%.2f" % v for v in args.test_param_vals[pname]),
-                    n_test,
-                    n_remaining + n_test,
-                    "   ".join(
-                        "%.2f %d" % (v, c)
-                        for v, c in sorted(
-                            val_counts.items(), key=operator.itemgetter(0)
-                        )
-                    ),
-                )
-            )
-
     n_trees = len(samples["trees"])
     n_test = round((1.0 - args.train_frac) * n_trees)
     idxs = {}
-    if args.test_param_vals is None:
-        idxs["train"] = range(round(args.train_frac * n_trees))
-        print('    taking first %d trees to train' % len(idxs['train']))
-        idxs["test"] = [i for i in range(n_trees) if i not in idxs["train"]]
-    else:
-        avail_indices = [
-            i for i, r in enumerate(samples["birth-responses"]) if is_avail(r)
-        ]  # indices of all trees with the specified xscale value
-        idxs["test"] = random.sample(
-            avail_indices, n_test
-        )  # note that this'll change the distribution of xscale values in the training sample (so make sure that n_test isn't a large fraction of the trees with each xscale value
-        idxs["train"] = [i for i in range(n_trees) if i not in idxs["test"]]
-        print_stats()
+    idxs["train"] = range(round(args.train_frac * n_trees))
+    print('    taking first %d trees to train' % len(idxs['train']))
+    idxs["test"] = [i for i in range(n_trees) if i not in idxs["train"]]
     print("    chose %d test samples (from %d total)" % (n_test, n_trees))
     return idxs
 
@@ -205,7 +163,7 @@ def train_and_test():
 
     # train
     model = NeuralNetworkModel(
-        smpldict["train"]["trees"], [[ConstantResponse(v) for v in vlist] for vlist in pscaled['train']], network_layers=args.model_size
+        smpldict["train"]["trees"], [[ConstantResponse(v) for v in vlist] for vlist in pscaled['train']],
     )
     model.fit(epochs=args.epochs)
 
@@ -234,24 +192,6 @@ parser.add_argument(
     "--train-frac", type=float, default=0.8, help="train on this fraction of the trees"
 )
 parser.add_argument(
-    "--test-xscale-values",
-    type=float,
-    nargs="+",
-    help="if set, choose test samples only from among those with this (birth) xscale value.",
-)
-parser.add_argument(
-    "--test-xshift-values",
-    type=float,
-    nargs="+",
-    help="if set, choose test samples only from among those with this (birth) xshift value.",
-)
-parser.add_argument(
-    "--model-size",
-    default="tiny",
-    choices=["small", "tiny", 'trivial', 'None'],
-    help="Parameters from the birth model that we should try to predict.",
-)
-parser.add_argument(
     "--params-to-predict",
     default=["xscale", "xshift"],
     nargs="+",
@@ -269,15 +209,6 @@ parser.add_argument("--dont-scale-params", action="store_true")
 
 start = time.time()
 args = parser.parse_args()
-args.test_param_vals = None
-if args.test_xscale_values is not None or args.test_xshift_values is not None:
-    args.test_param_vals = {}
-    if args.test_xscale_values is not None:
-        args.test_param_vals.update({"xscale": args.test_xscale_values})
-        delattr(args, "test_xscale_values")
-    if args.test_xshift_values is not None:
-        args.test_param_vals.update({"xshift": args.test_xshift_values})
-        delattr(args, "test_xshift_values")
 if args.test:
     args.epochs = 10
 
