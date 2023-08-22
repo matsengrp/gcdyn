@@ -78,8 +78,10 @@ class NeuralNetworkModel:
         self,
         encoded_trees: list[onp.ndarray],
         responses: list[list[poisson.Response]],
-        network_layers: list[callable] = None,
         bundle_size: int = 50,
+        dropout_rate: float = 0.2,
+        learning_rate: float = 0.01,
+        ema_momentum: float = 0.9,
     ):
         """
         encoded_trees: list of encoded trees
@@ -87,15 +89,9 @@ class NeuralNetworkModel:
                    first dimension the same length as encoded_trees, and second dimension with length the
                    number of parameters to predict for each tree. Each response (atm) should just be a constant response
                    with one parameter. (Responses that aren't being estimated need not be provided)
-        network_layers: layers for the neural network; "None" will give the default network.
-                        Input shape should be (4, `max_leaf_count`), corresponding to the output of
-                        :py:meth:`encode.encode_tree`. Output should be a vector with length equal to the
-                        number of scalars that parameterize all py:class:`poisson.Response` objects
-                        in a row of the `responses` argument.
         bundle_size: number of trees to bundle together. The per-bundle mean of predictions is applied to the 
                      convolutional output and then passed to the dense layers.
         """
-        num_parameters = sum(len(response._param_dict) for response in responses[0])
         leaf_counts = set(
             [len(t[0]) for t in encoded_trees]
         )  # length of first row in encoded tree
@@ -106,14 +102,20 @@ class NeuralNetworkModel:
             )
         max_leaf_count = list(leaf_counts)[0]
         self.bundle_size = bundle_size
+        self.max_leaf_count = max_leaf_count
+        self.training_trees = encoded_trees
+        self.responses = responses
 
-        actfn = 'elu'
+        self.build_model(dropout_rate, learning_rate, ema_momentum)
 
+    def build_model(self, dropout_rate, learning_rate, ema_momentum, actfn = 'elu'):
         # The TimeDistributed layer wrapper allows us to apply the inner layer (e.g., Conv1D) to each "time step" 
         # of the input tensor independently. In our specific context, our data is structured in the format of:
         # (number_of_examples, bundle_size, feature_dim, max_leaf_count). We're essentially treating the 
         # 'bundle_size' dimension as if it were the "time" or "sequence length" dimension. This means that 
         # for every example, the inner layer is applied to each item within a bundle independently. 
+
+        num_parameters = sum(len(response._param_dict) for response in self.responses[0])
 
         network_layers = [
             layers.Lambda(lambda x: tf.transpose(x, (0, 1, 3, 2))),
@@ -124,25 +126,21 @@ class NeuralNetworkModel:
             layers.TimeDistributed(layers.GlobalAveragePooling1D()),
             BundleMeanLayer(),
             layers.Dense(48, activation=actfn),
-            layers.Dropout(0.5),
+            layers.Dropout(dropout_rate),
             layers.Dense(32, activation=actfn),
-            layers.Dropout(0.5),
+            layers.Dropout(dropout_rate),
             layers.Dense(16, activation=actfn),
-            layers.Dropout(0.5),
+            layers.Dropout(dropout_rate),
             layers.Dense(8, activation=actfn),
             layers.Dense(num_parameters)
         ]
 
-        inputs = keras.Input(shape=(self.bundle_size, 4, max_leaf_count))
+        inputs = keras.Input(shape=(self.bundle_size, 4, self.max_leaf_count))
         outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
         self.network = keras.Model(inputs=inputs, outputs=outputs)
         self.network.summary(print_fn=lambda x: print("      %s" % x))
-
-        # Note: the original deep learning model rescales trees, but we don't here
-        # because we should always have the same root to tip height.
-        self.max_leaf_count = max_leaf_count
-        self.training_trees = encoded_trees
-        self.responses = responses
+        optimizer = keras.optimizers.Adam(learning_rate=learning_rate, use_ema=True, ema_momentum=ema_momentum)
+        self.network.compile(loss="mean_squared_error", optimizer=optimizer)
 
     @classmethod
     def _encode_responses(
@@ -233,12 +231,7 @@ class NeuralNetworkModel:
 
     def fit(self, epochs: int = 30, validation_split: float = 0.):
         """Trains neural network on given trees and response parameters."""
-
-        # optimizer = keras.optimizers.Adam(learning_rate=0.01, use_ema=True, ema_momentum=0.9)
-        self.network.compile(loss="mean_squared_error") #optimizer=optimizer)
-
         response_parameters = self._encode_responses(self._take_one_identical_item_per_bundle(self.responses))
-
         self.network.fit(self._prepare_trees_for_network_input(self.training_trees), response_parameters, 
                          epochs=epochs, callbacks=[Callback(epochs, use_validation=validation_split > 0)], verbose=0, validation_split=validation_split
                          ) 

@@ -163,7 +163,12 @@ def train_and_test():
 
     # train
     model = NeuralNetworkModel(
-        smpldict["train"]["trees"], [[ConstantResponse(v) for v in vlist] for vlist in pscaled['train']],
+        smpldict["train"]["trees"],
+        [[ConstantResponse(v) for v in vlist] for vlist in pscaled['train']],
+        bundle_size=args.bundle_size,
+        dropout_rate=args.dropout_rate,
+        learning_rate=args.learning_rate,
+        ema_momentum=args.ema_momentum
     )
     model.fit(epochs=args.epochs, validation_split=0.1)
 
@@ -181,27 +186,16 @@ def train_and_test():
 
 # ----------------------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--indir",
-    required=True,
-    help="input directory with simulation output (uses encoded trees .npy, summary stats .csv, and response .pkl files)",
-)
+parser.add_argument("--indir", required=True, help="input directory with simulation output (uses encoded trees .npy, summary stats .csv, and response .pkl files)")
 parser.add_argument("--outdir", required=True, help="output directory")
-parser.add_argument("--epochs", type=int, default=100)
-parser.add_argument(
-    "--train-frac", type=float, default=0.8, help="train on this fraction of the trees"
-)
-parser.add_argument(
-    "--params-to-predict",
-    default=["xscale", "xshift"],
-    nargs="+",
-    choices=["xscale", "xshift"] + [k for k in sum_stat_scaled],
-)
-parser.add_argument(
-    "--test",
-    action="store_true",
-    help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly",
-)
+parser.add_argument("--epochs", type=int, default=30)
+parser.add_argument("--bundle-size", type=int, default=50)
+parser.add_argument("--dropout-rate", type=int, default=0.2)
+parser.add_argument("--learning-rate", type=int, default=0.01)
+parser.add_argument("--ema-momentum", type=int, default=0.9)
+parser.add_argument("--train-frac", type=float, default=0.8, help="train on this fraction of the trees")
+parser.add_argument("--params-to-predict", default=["xscale", "xshift"], nargs="+", choices=["xscale", "xshift"] + [k for k in sum_stat_scaled])
+parser.add_argument("--test", action="store_true", help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly")
 parser.add_argument("--random-seed", default=0, type=int, help="random seed")
 parser.add_argument("--overwrite", action="store_true")
 parser.add_argument("--use-trivial-encoding", action="store_true")
