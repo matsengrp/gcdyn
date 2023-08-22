@@ -115,6 +115,8 @@ class NeuralNetworkModel:
         # 'bundle_size' dimension as if it were the "time" or "sequence length" dimension. This means that 
         # for every example, the inner layer is applied to each item within a bundle independently. 
 
+        print('    building model with bundle size %d (%d training trees in %d bundles): dropout %.2f   learn rate %.4f   momentum %.4f' % (self.bundle_size, len(self.training_trees), len(self.training_trees) / self.bundle_size, dropout_rate, learning_rate, ema_momentum))
+
         num_parameters = sum(len(response._param_dict) for response in self.responses[0])
 
         network_layers = [

@@ -649,13 +649,6 @@ if n_missing > 0:
         % (utils.color("yellow", "warning"), n_missing, args.n_trials)
     )
 
-if True: #len(args.xscale_values) > 0:
-    xscales = [p["birth-response"].xscale for p in all_trees]
-    print(
-        "  chosen xscale values: %s"
-        % (",  ".join("%.1f: %d" % (x, xscales.count(x)) for x in sorted(set(xscales))))
-    )
-
 write_final_outputs(all_seqs, all_trees)
 
 if args.make_plots:
