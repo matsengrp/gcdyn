@@ -37,15 +37,13 @@ class Callback(tf.keras.callbacks.Callback):
     start_time = time.time()
     last_time = time.time()
 
-    def __init__(self, max_epochs):
+    def __init__(self, max_epochs, use_validation=False):
         self.n_between = (5 if max_epochs > 30 else 3) if max_epochs > 10 else 1
+        self.use_validation = use_validation
 
-    def on_train_begin(epoch, logs=None):
-        # version with validation loss
-        # print('                 valid   epoch   total')
-        # print('   epoch  loss    loss    time    time')
-        print('                 epoch   total')
-        print('   epoch  loss    time    time')
+    def on_train_begin(self, epoch, logs=None):
+        print('              %s   epoch   total' % ('   valid' if self.use_validation else ''))
+        print('   epoch  loss%s    time    time' % ('    loss' if self.use_validation else ''))
 
     def on_epoch_begin(self, epoch, logs=None):
         self.epoch = epoch
@@ -53,9 +51,7 @@ class Callback(tf.keras.callbacks.Callback):
     def on_epoch_end(self, batch, logs=None):
         if self.epoch == 0 or self.epoch % self.n_between == 0:
             def lfmt(lv): return ('%7.3f' if lv < 1 else '%7.2f') % lv
-            # version with validation loss
-            # print('  %3d  %s %s    %.1f     %.1f' % (self.epoch, lfmt(logs['loss']), lfmt(logs['val_loss']), time.time() - self.last_time, time.time() - self.start_time))
-            print('  %3d  %s    %.1f     %.1f' % (self.epoch, lfmt(logs['loss']), time.time() - self.last_time, time.time() - self.start_time))
+            print('  %3d  %s%s    %.1f     %.1f' % (self.epoch, lfmt(logs['loss']), ' ' + lfmt(logs['val_loss']) if self.use_validation else '', time.time() - self.last_time, time.time() - self.start_time))
         self.last_time = time.time()
 
 
@@ -238,12 +234,13 @@ class NeuralNetworkModel:
     def fit(self, epochs: int = 30, validation_split: float = 0.):
         """Trains neural network on given trees and response parameters."""
 
-        self.network.compile(loss="mean_squared_error")
+        # optimizer = keras.optimizers.Adam(learning_rate=0.01, use_ema=True, ema_momentum=0.9)
+        self.network.compile(loss="mean_squared_error") #optimizer=optimizer)
 
         response_parameters = self._encode_responses(self._take_one_identical_item_per_bundle(self.responses))
 
         self.network.fit(self._prepare_trees_for_network_input(self.training_trees), response_parameters, 
-                         epochs=epochs, callbacks=[Callback(epochs)], verbose=0, validation_split=validation_split
+                         epochs=epochs, callbacks=[Callback(epochs, use_validation=validation_split > 0)], verbose=0, validation_split=validation_split
                          ) 
 
     def predict(

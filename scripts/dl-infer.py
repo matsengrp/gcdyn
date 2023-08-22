@@ -165,7 +165,7 @@ def train_and_test():
     model = NeuralNetworkModel(
         smpldict["train"]["trees"], [[ConstantResponse(v) for v in vlist] for vlist in pscaled['train']],
     )
-    model.fit(epochs=args.epochs)
+    model.fit(epochs=args.epochs, validation_split=0.1)
 
     # evaluate/predict
     if not os.path.exists(args.outdir):
