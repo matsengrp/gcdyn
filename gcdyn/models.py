@@ -246,13 +246,8 @@ class NeuralNetworkModel:
 
         predicted_responses = self.network(self._prepare_trees_for_network_input(encoded_trees))
 
-        # HACK: expanding responses so I don't have to change downstream code
-        predicted_responses_expanded = [
-                item for item in predicted_responses for _ in range(self.bundle_size)
-            ]
-
         return self._decode_responses(
-            predicted_responses_expanded, example_responses=self.responses[0]
+            predicted_responses, example_responses=self.responses[0]
         )
 
 

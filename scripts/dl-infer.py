@@ -60,14 +60,16 @@ def scale_vals(smpl, pvals, scaler=None, inverse=False, debug=True):
 def get_prediction(smpl, model, smpldict, scaler):
     pred_resps = model.predict(smpldict[smpl]["trees"])
     true_resps, true_sstats = [smpldict[smpl][tk] for tk in ["birth-responses", 'sstats']]
+    true_resps = [true_resps[i] for i in range(0, len(true_resps), args.bundle_size)]
+    true_sstats = [{k : (min if k == 'tree' else np.mean)([float(true_sstats[i + j][k]) for j in range(args.bundle_size)]) for k in true_sstats[i]} for i in range(0, len(true_sstats), args.bundle_size)]  # mean of each summary stat over trees in each bundle
+    assert len(pred_resps) == len(true_resps)
+    pvals = [[float(resp.value) for resp in plist] for plist in pred_resps]
+    pscaled, _ = scale_vals(smpl, pvals, scaler=scaler, inverse=True)
     dfdata = {
         "%s-%s" % (param, ptype): []
         for param in args.params_to_predict
         for ptype in ["truth", "predicted"]
     }
-    assert len(pred_resps) == len(true_resps)
-    pvals = [[float(resp.value) for resp in plist] for plist in pred_resps]
-    pscaled, _ = scale_vals(smpl, pvals, scaler=scaler, inverse=True)
     for tr_resp, prlist, sum_stats in zip(true_resps, pscaled, true_sstats):
         for ip, param in enumerate(args.params_to_predict):
             dfdata["%s-truth" % param].append(get_param(param, tr_resp, sum_stats))
