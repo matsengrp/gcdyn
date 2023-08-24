@@ -652,6 +652,6 @@ if n_missing > 0:
 write_final_outputs(all_seqs, all_trees)
 
 if args.make_plots:
-    utils.plot_phenotype_response(args.outdir + "/plots", all_trees)
+    utils.plot_phenotype_response(args.outdir + "/plots", all_trees, bundle_size=args.bundle_size)
 
 print("    total simulation time: %.1f sec" % (time.time() - start))

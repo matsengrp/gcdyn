@@ -414,7 +414,7 @@ def plot_tree_slices(plotdir, tree, max_time, itrial):
 
 
 # ----------------------------------------------------------------------------------------
-def plot_phenotype_response(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_plot=10):
+def plot_phenotype_response(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_plot=10, bundle_size=1):
     # ----------------------------------------------------------------------------------------
     def plt_single_tree(itree, pfo, xmin, xmax, n_bins=30):
         plt.clf()
@@ -440,22 +440,31 @@ def plot_phenotype_response(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_
             data, x="affinity", y="lambda", ax=ax, linewidth=3, color="#990012"
         )
         ax.set(
-            title="xscale %.1f  xshift %.1f (%d leaves, %d internal)"
+            title="itree %d: xscale %.1f  xshift %.1f (%d nodes)"
             % (
+                itree,
                 pfo["birth-response"].xscale,
                 pfo["birth-response"].xshift,
-                len(leaf_vals),
-                len(all_vals) - len(leaf_vals),
+                len(all_vals),
             )
         )
-        plt.savefig("%s/trees-%d.svg" % (plotdir, itree))
+        fn = "%s/trees-%d.svg" % (plotdir, itree)
+        plt.savefig(fn)
+        return fn
 
     # ----------------------------------------------------------------------------------------
     mpl_init()
     if not os.path.exists(plotdir):
+        # NOTE don't rm old svgs here since atm we plot tree slices beforehand to the same dir
+        # for sfn in glob.glob('%s/*.svg' % plotdir):
+        #     os.remove(sfn)
         os.makedirs(plotdir)
-    for itree, pfo in enumerate(pfo_list[:n_to_plot]):
-        plt_single_tree(itree, pfo, xmin, xmax)
+    if bundle_size == 1:
+        plt_indices = range(n_to_plot)
+    else:
+        plt_indices = range(0, min(n_to_plot * bundle_size, len(pfo_list)), bundle_size)
+    for itree in plt_indices:
+        plt_single_tree(itree, pfo_list[itree], xmin, xmax)
     make_html(plotdir, n_columns=4)
     print("    plotting trees to %s" % plotdir)
 
