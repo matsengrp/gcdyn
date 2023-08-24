@@ -229,7 +229,7 @@ class NeuralNetworkModel:
         """
         return self._reshape_data_wrt_bundle_size(onp.stack(trees))
 
-    def fit(self, epochs: int = 30, validation_split: float = 0.):
+    def fit(self, epochs: int = 30, validation_split: float = 0):
         """Trains neural network on given trees and response parameters."""
         response_parameters = self._encode_responses(self._take_one_identical_item_per_bundle(self.responses))
         self.network.fit(self._prepare_trees_for_network_input(self.training_trees), response_parameters, 

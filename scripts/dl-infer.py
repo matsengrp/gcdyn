@@ -86,7 +86,7 @@ def read_plot_csv():
     prdfs = {}
     for smpl in ["train", "test"]:
         prdfs[smpl] = pd.read_csv(csvfn(smpl))
-    utils.make_dl_plots(prdfs, args.params_to_predict, args.outdir + "/plots")
+    utils.make_dl_plots(prdfs, args.params_to_predict, args.outdir + "/plots", validation_split=args.validation_split)
 
 
 # ----------------------------------------------------------------------------------------
@@ -174,7 +174,7 @@ def train_and_test():
         learning_rate=args.learning_rate,
         ema_momentum=args.ema_momentum
     )
-    model.fit(epochs=args.epochs, validation_split=0.1)
+    model.fit(epochs=args.epochs, validation_split=args.validation_split)
 
     # evaluate/predict
     if not os.path.exists(args.outdir):
@@ -183,7 +183,7 @@ def train_and_test():
     prdfs = {}
     for smpl in ["train", "test"]:
         prdfs[smpl] = get_prediction(smpl, model, smpldict, scalers['train'])
-    utils.make_dl_plots(prdfs, args.params_to_predict, args.outdir + "/plots")
+    utils.make_dl_plots(prdfs, args.params_to_predict, args.outdir + "/plots", validation_split=args.validation_split)
 
     print("    total dl inference time: %.1f sec" % (time.time() - start))
 
@@ -198,6 +198,7 @@ parser.add_argument("--dropout-rate", type=float, default=0.2)
 parser.add_argument("--learning-rate", type=float, default=0.01)
 parser.add_argument("--ema-momentum", type=float, default=0.9)
 parser.add_argument("--train-frac", type=float, default=0.8, help="train on this fraction of the trees")
+parser.add_argument("--validation-split", type=float, default=0.1, help="fraction of training sample to tell keras to hold out for validation during training")
 parser.add_argument("--params-to-predict", default=["xscale", "xshift"], nargs="+", choices=["xscale", "xshift"] + [k for k in sum_stat_scaled])
 parser.add_argument("--test", action="store_true", help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly")
 parser.add_argument("--random-seed", default=0, type=int, help="random seed")

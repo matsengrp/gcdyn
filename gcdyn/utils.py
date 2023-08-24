@@ -309,13 +309,15 @@ def mpl_init(fsize=20, label_fsize=15):
 # plot scatter + box/whisker plot comparing true and predicted values for deep learning inference
 # NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
 def make_dl_plots(
-    prdfs, params_to_predict, outdir, xtra_txt=None, fsize=20, label_fsize=15
+    prdfs, params_to_predict, outdir, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15
 ):
     def single_plot(param, smpl):
         plt.clf()
         df = prdfs[smpl]
         xkey, ykey = ["%s-%s" % (param, vtype) for vtype in ["truth", "predicted"]]
         if len(set(df['%s-truth' % param])) < 10:  # if simulation has discrete parameter values
+            if validation_split > 0:
+                raise Exception('not implemented here')
             ax = sns.boxplot(
                 df,
                 x=xkey,
@@ -343,9 +345,14 @@ def make_dl_plots(
                     alpha=0.7,
                 )
         else:
-            ax = sns.scatterplot(df, x=xkey, y=ykey, alpha=0.6)
+            plt_df = df
+            if smpl == 'train' and validation_split != 0:
+                plt_df = df[: len(df) - int(validation_split * len(df))]
+                vld_df = df[len(df) - int(validation_split * len(df)) :]
+                ax = sns.scatterplot(vld_df, x=xkey, y=ykey, alpha=0.6, color='red')
+            ax = sns.scatterplot(plt_df, x=xkey, y=ykey, alpha=0.6)
             xvals, yvals = df[xkey], df[ykey]
-            plt.plot([0.95 * min(xvals), 1.05 * max(xvals)], [0.95 * min(xvals), 1.05 * max(xvals)], color='darkred', linestyle='--', linewidth=3, alpha=0.7)
+            plt.plot([0.95 * min(xvals), 1.05 * max(xvals)], [0.95 * min(xvals), 1.05 * max(xvals)], color='darkgreen', linestyle='--', linewidth=3, alpha=0.7)
         plt.xlabel("true value")
         plt.ylabel("predicted value")
         titlestr = "%s %s" % (param, smpl)
