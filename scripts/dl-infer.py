@@ -6,6 +6,7 @@ import sys
 import operator
 from sklearn import preprocessing
 import sys
+import tensorflow as tf
 
 import colored_traceback.always  # need to add this to installation stuff, i'm not sure how to do it atm
 import time
@@ -60,8 +61,9 @@ def scale_vals(smpl, pvals, scaler=None, inverse=False, debug=True):
 def get_prediction(smpl, model, smpldict, scaler):
     pred_resps = model.predict(smpldict[smpl]["trees"])
     true_resps, true_sstats = [smpldict[smpl][tk] for tk in ["birth-responses", 'sstats']]
-    true_resps = [true_resps[i] for i in range(0, len(true_resps), args.bundle_size)]
-    true_sstats = [{k : (min if k == 'tree' else np.mean)([float(true_sstats[i + j][k]) for j in range(args.bundle_size)]) for k in true_sstats[i]} for i in range(0, len(true_sstats), args.bundle_size)]  # mean of each summary stat over trees in each bundle
+    if args.bundle_size > 1:
+        true_resps = [true_resps[i] for i in range(0, len(true_resps), args.bundle_size)]
+        true_sstats = [{k : (min if k == 'tree' else np.mean)([float(true_sstats[i + j][k]) for j in range(args.bundle_size)]) for k in true_sstats[i]} for i in range(0, len(true_sstats), args.bundle_size)]  # mean of each summary stat over trees in each bundle ('tree' is an index, so take min/index of first one)
     assert len(pred_resps) == len(true_resps)
     pvals = [[float(resp.value) for resp in plist] for plist in pred_resps]
     pscaled, _ = scale_vals(smpl, pvals, scaler=scaler, inverse=True)
@@ -210,6 +212,7 @@ if args.test:
 
 random.seed(args.random_seed)
 np.random.seed(args.random_seed)
+tf.keras.utils.set_random_seed(args.random_seed)
 
 
 # ----------------------------------------------------------------------------------------

@@ -81,7 +81,7 @@ class NeuralNetworkModel:
         bundle_size: int = 50,
         dropout_rate: float = 0.2,
         learning_rate: float = 0.01,
-        ema_momentum: float = 0.9,
+        ema_momentum: float = 0.99,
     ):
         """
         encoded_trees: list of encoded trees
@@ -127,15 +127,13 @@ class NeuralNetworkModel:
             layers.TimeDistributed(layers.Conv1D(filters=40, kernel_size=4, activation=actfn)),
             layers.TimeDistributed(layers.GlobalAveragePooling1D()),
             BundleMeanLayer(),
-            layers.Dense(48, activation=actfn),
-            layers.Dropout(dropout_rate),
-            layers.Dense(32, activation=actfn),
-            layers.Dropout(dropout_rate),
-            layers.Dense(16, activation=actfn),
-            layers.Dropout(dropout_rate),
-            layers.Dense(8, activation=actfn),
-            layers.Dense(num_parameters)
         ]
+        dense_unit_list = [48, 32, 16, 8]
+        for idense, n_units in enumerate(dense_unit_list):
+            network_layers.append(layers.Dense(n_units, activation=actfn))
+            if dropout_rate != 0 and idense < len(dense_unit_list) - 1:  # add a dropout layer after each one except the last
+                network_layers.append(layers.Dropout(dropout_rate))
+        network_layers.append(layers.Dense(num_parameters))
 
         inputs = keras.Input(shape=(self.bundle_size, 4, self.max_leaf_count))
         outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
