@@ -31,21 +31,21 @@ def csvfn(smpl):
 def scale_vals(smpl, pvals, scaler=None, inverse=False, debug=True):
     """Scale pvals for a single sample to mean 0 and variance 1. To reverse a scaling, pass in the original scaler and set inverse=True"""
     # ----------------------------------------------------------------------------------------
-    def get_lists(pvs):  # picks values from rows/columns to get a list of values for each parameter
-        return [[plist[i] for plist in pvs] for i in range(len(args.params_to_predict))]
-    def fnstr(pvs, fn):  # apply fn to each list from get_lists(), returns resulting combined str
-        return ' '.join('%7.3f'%fn(l) for l in get_lists(pvs))
-    def lstr(lst):  # print nice str for values in list lst
-        return ' '.join('%5.2f'%v for v in sorted(set(lst)))
-    def print_debug(pvs, dstr):
-        print('%s %s%s %s%s' % (('        %7s'%smpl) if dstr=='before' else '   ', fnstr(pvs, np.mean), fnstr(pvs, np.var), fnstr(pvs, min), fnstr(pvs, max)), end='' if dstr == 'before' else '\n')
+    def print_debug(pvals_before, pvals_scaled):
+        def get_lists(pvs):  # picks values from rows/columns to get a list of values for each parameter
+            return [[plist[ivar] for plist in pvs]]
+        def fnstr(pvs, fn):  # apply fn to each list from get_lists(), returns resulting combined str
+            return ' '.join('%7.3f'%fn(l) for l in get_lists(pvs))
+        for ivar, vname in enumerate(args.params_to_predict):
+            for dstr, pvs in zip(('before', 'after'), (pvals_before, pvals_scaled)):
+                bstr = '   ' if dstr!='before' else '      %10s %7s' % (vname, smpl)
+                print('%s %s%s %s%s' % (bstr, fnstr(pvs, np.mean), fnstr(pvs, np.var), fnstr(pvs, min), fnstr(pvs, max)), end='' if dstr == 'before' else '\n')
 
     # ----------------------------------------------------------------------------------------
     if debug and smpl == smplist[0]:
-        print('                          before                             after')
-        print('                   mean   var     min   max         mean   var     min   max')
-    if debug:
-        print_debug(pvals, 'before')
+        print('    %sscaling %d variables: %s' % ('reverse ' if inverse else '', len(args.params_to_predict), args.params_to_predict))
+        print('                                  before                             after')
+        print('                           mean   var     min   max         mean   var     min   max')
     if scaler is None:
         scaler = preprocessing.StandardScaler().fit(pvals)
         # scaler = preprocessing.MinMaxScaler(feature_range=(0, 10)).fit(pvals)
@@ -53,7 +53,7 @@ def scale_vals(smpl, pvals, scaler=None, inverse=False, debug=True):
         return copy.copy(pvals), scaler
     pscaled = scaler.inverse_transform(pvals) if inverse else scaler.transform(pvals)
     if debug:
-        print_debug(pscaled, 'after')
+        print_debug(pvals, pscaled)
     return pscaled, scaler
 
 
@@ -199,7 +199,7 @@ parser.add_argument("--learning-rate", type=float, default=0.01)
 parser.add_argument("--ema-momentum", type=float, default=0.9)
 parser.add_argument("--train-frac", type=float, default=0.8, help="train on this fraction of the trees")
 parser.add_argument("--validation-split", type=float, default=0.1, help="fraction of training sample to tell keras to hold out for validation during training")
-parser.add_argument("--params-to-predict", default=["xscale", "xshift"], nargs="+", choices=["xscale", "xshift"] + [k for k in sum_stat_scaled])
+parser.add_argument("--params-to-predict", default=["xscale", "xshift"], nargs="+", choices=["xscale", "xshift", "yscale"] + [k for k in sum_stat_scaled])
 parser.add_argument("--test", action="store_true", help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly")
 parser.add_argument("--random-seed", default=0, type=int, help="random seed")
 parser.add_argument("--overwrite", action="store_true")

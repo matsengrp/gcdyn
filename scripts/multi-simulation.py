@@ -554,7 +554,8 @@ if (
         else:
             raise Exception('unexpected file type %s' % ftype)
         print('         %3d      %5.2f   %7.2f      %s' % (len(fnames), time.time() - start, 100 * utils.memory_usage_fraction(), ftype))
-
+    if args.make_plots:
+        print('  note: can\'t make plots in main process when --n-sub-procs is set')
     sys.exit(0)
 
 assert args.death_value >= 0
@@ -590,7 +591,7 @@ for itrial in range(args.itrial_start, args.n_trials):
         print("    output %s already exists, skipping" % ofn)
         pfo = read_dill_file(ofn)
         if args.make_plots:
-            print('    note: can\'t make tree slice plots when reading pickle files, since we write pruned trees')
+            print('    note: can\'t make tree slice plots when reading pickle files (i.e. you need to rm/overwrite to actually rerun the simulation), since we write pruned trees')
         if pfo is None:  # file is screwed up and we want to rerun
             print("    rerunning")
         else:

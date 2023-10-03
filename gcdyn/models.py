@@ -10,6 +10,7 @@ import tensorflow as tf
 from diffrax import ODETerm, PIDController, Tsit5, diffeqsolve
 from jax import lax
 import time
+import sys
 
 # NOTE: sphinx is currently unable to present this in condensed form when the sphinx_autodoc_typehints extension is enabled
 from jax.typing import ArrayLike
@@ -52,6 +53,7 @@ class Callback(tf.keras.callbacks.Callback):
         if self.epoch == 0 or self.epoch % self.n_between == 0:
             def lfmt(lv): return ('%7.3f' if lv < 1 else '%7.2f') % lv
             print('  %3d  %s%s    %.1f     %.1f' % (self.epoch, lfmt(logs['loss']), ' ' + lfmt(logs['val_loss']) if self.use_validation else '', time.time() - self.last_time, time.time() - self.start_time))
+            sys.stdout.flush()
         self.last_time = time.time()
 
 
