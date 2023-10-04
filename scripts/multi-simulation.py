@@ -3,7 +3,6 @@ import argparse
 import os
 import sys
 import csv
-
 import colored_traceback.always
 import pickle
 import time
@@ -12,6 +11,7 @@ import random
 import subprocess
 import json
 import dill
+import math
 
 from gcdyn import bdms, gpmap, mutators, poisson, utils, encode
 from experiments import replay
@@ -186,30 +186,70 @@ def print_resp(bresp, dresp):
 
 
 # ----------------------------------------------------------------------------------------
-def choose_val(pname):
+def choose_val(pname, extra_bounds=None):
     minmax, vals = [getattr(args, pname + '_' + str) for str in ['range', 'values']]
     if minmax is not None:  # range with two values for continuous
+        minv, maxv = minmax
+        if extra_bounds is not None:
+            minv = max(minv, extra_bounds[0])  # use the more restrictive (larger lo, smaller hi) values
+            maxv = min(maxv, extra_bounds[1])
+        print('    choosing %s within [%.2f, %.2f]' % (pname, minv, maxv))
         if pname == 'time_to_sampling':
-            return np.random.choice(range(minmax[0], minmax[1] + 1))  # integers (note that this is inclusive)
+            return np.random.choice(range(minv, maxv + 1))  # integers (note that this is inclusive)
         else:
-            return np.random.uniform(minmax[0], minmax[1])  # floats
+            return np.random.uniform(minv, maxv)  # floats
     else:  # discrete values
         return np.random.choice(vals)
 
 
 # ----------------------------------------------------------------------------------------
-def get_responses(xscale, xshift):
+def get_xshift_bounds(xscale):  # see algebra here https://photos.app.goo.gl/i8jM5Aa8QXvbDD267
+    assert args.birth_response == 'sigmoid'
+    ysc_lo, ysc_hi = args.yscale_range
+    br_lo, br_hi = args.initial_birth_rate_range
+    lo = math.log(ysc_lo / br_hi - 1.) / xscale if ysc_lo / br_hi > 1 else -float('inf')
+    hi = math.log(ysc_hi / br_lo - 1.) / xscale if ysc_hi / br_lo > 1 else +float('inf')
+    print('        additional xshift bounds from sigmoid/xscale: %.2f  %.2f' % (lo, hi))
+    return (lo, hi)
+
+# ----------------------------------------------------------------------------------------
+def get_yscale_bounds(xscale, xshift):  # similar to previous fcn
+    assert args.birth_response == 'sigmoid'
+    br_lo, br_hi = args.initial_birth_rate_range
+    lo = br_lo * (1 + math.exp(xscale * xshift))
+    hi = br_hi * (1 + math.exp(xscale * xshift))
+    print('        additional yscale bounds from sigmoid/xscale/xshift: %.2f  %.2f' % (lo, hi))
+    return (lo, hi)
+
+
+# ----------------------------------------------------------------------------------------
+def choose_params():
+    params = {}
+    for pname in ['xscale', 'xshift', 'yscale', 'time_to_sampling']:  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
+        extra_bounds = None
+        if args.birth_response == 'sigmoid':
+            if pname == 'xshift':
+                extra_bounds = get_xshift_bounds(params['xscale'])
+            if pname == 'yscale':
+                extra_bounds = get_yscale_bounds(params['xscale'], params['xshift'])
+        params[pname] = choose_val(pname, extra_bounds=extra_bounds)  # get_xshift_bounds(params['xscale']) if pname=='xshift' else None)
+    print('    chose new parameter values: %s' % '  '.join('%s %s'%(p, ('%d' if p == 'time_to_sampling' else '%.2f') % v) for p, v in sorted(params.items())))
+    return params
+
+
+# ----------------------------------------------------------------------------------------
+def get_responses(xscale, xshift, yscale):
     # ----------------------------------------------------------------------------------------
-    def get_birth(yscl):
+    def get_birth():
         if args.birth_response == "constant":
-            bresp = poisson.ConstantResponse(yscl)
+            bresp = poisson.ConstantResponse(yscale)
         elif args.birth_response in ["soft-relu", "sigmoid"]:
             if args.birth_response == 'sigmoid':
-                assert xscale > 0 and yscl > 0, ("xscale and yscale must both be greater than zero for sigmoid response function, but got xscale %.2f, yscale %.2f" % (xscale, yscl))
+                assert xscale > 0 and yscale > 0, ("xscale and yscale must both be greater than zero for sigmoid response function, but got xscale %.2f, yscale %.2f" % (xscale, yscale))
             kwargs = {
                 "xscale": xscale,
                 "xshift": xshift,
-                "yscale": yscl,
+                "yscale": yscale,
                 "yshift": args.yshift,
             }
             rfcns = {
@@ -223,16 +263,10 @@ def get_responses(xscale, xshift):
 
     # ----------------------------------------------------------------------------------------
     dresp = poisson.ConstantResponse(args.death_value)
-
-    bresp = get_birth(
-        args.yscale
-    )  # have to set it once so we can get the value at x=0 (at least i don't know how else to do it)
-    yscl = args.yscale * args.initial_birth_rate / bresp.λ_phenotype(0)
-    print(
-        "        setting yscale so resp(x=0) equals --inital-birth-rate: <yscale> * <--initial-birth-rate>/<birth rate at x=0> = %.2f * %.2f / %.4f = %.2f"
-        % (args.yscale, args.initial_birth_rate, bresp.λ_phenotype(0), yscl)
-    )
-    bresp = get_birth(yscl)
+    bresp = get_birth()
+    print('      initial birth rate %.2f (range %s)' % (bresp.λ_phenotype(0), args.initial_birth_rate_range))
+    if args.birth_response == 'sigmoid':
+        assert bresp.λ_phenotype(0) > args.initial_birth_rate_range[0] - 1e-8 and bresp.λ_phenotype(0) < args.initial_birth_rate_range[1] + 1e-8
     print_resp(bresp, dresp)
 
     # if args.debug:
@@ -373,26 +407,12 @@ parser.add_argument(
 )
 parser.add_argument("--xscale-values", default=[2], nargs='+', type=float, help="list of birth response xscale parameter values from which to choose")
 parser.add_argument("--xshift-values", default=[-2.5], nargs='+', type=float, help="list of birth response xshift parameter values from which to choose")
+parser.add_argument("--yscale-values", default=[1], nargs='+', type=float, help="list of birth response yscale parameter values from which to choose")
 parser.add_argument("--xscale-range", nargs='+', type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response xscale parameter for each tree. Overrides --xscale-values.")
-parser.add_argument("--xshift-range", nargs='+', type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response xshift parameter for each tree. Overrides --xshift-values")
-parser.add_argument(
-    "--yscale",
-    default=1,
-    type=float,
-    help="probably don't want to set this, it's rescaled automatically below",
-)
-parser.add_argument(
-    "--yshift",
-    default=0,
-    type=float,
-    help="atm this shouldn't (need to, at least) be changed",
-)
-parser.add_argument(
-    "--initial-birth-rate",
-    default=5.0,
-    type=float,
-    help="initial/default/average growth rate (i.e. when affinity/x=0). Used to set --yscale.",
-)
+parser.add_argument("--xshift-range", nargs='+', type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response xshift parameter for each tree. Overrides --xshift-values.")
+parser.add_argument("--yscale-range", nargs='+', type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response yscale parameter for each tree. Overrides --yscale-values.")
+parser.add_argument("--initial-birth-rate-range", default=[2, 10], nargs='+', type=float, help="Pair of values (min/max) for initial/default/average growth rate (i.e. when affinity/x=0). Used to set --yscale.")
+parser.add_argument("--yshift", default=0, type=float, help="atm this shouldn't (need to, at least) be changed")
 parser.add_argument("--mutability-multiplier", default=0.68, type=float)
 parser.add_argument(
     "--n-sub-procs",
@@ -430,7 +450,7 @@ parser.add_argument(
 
 args = parser.parse_args()
 # handle args that can have either a list of a few values, or choose from a uniform interval specified with two (min, max) values
-for pname in ['xscale', 'xshift', 'time_to_sampling']:
+for pname in ['xscale', 'xshift', 'yscale', 'time_to_sampling']:
     rangevals = getattr(args, pname + '_range')
     if rangevals is not None and len(rangevals) != 2:  # range with two values for continuous
         raise Exception('range must consist of two values but got %d' % len(rangevals))
@@ -602,14 +622,11 @@ for itrial in range(args.itrial_start, args.n_trials):
         n_missing += 1
         continue
     sys.stdout.flush()
-    if params is None or n_times_used == args.simu_bundle_size:
-        params = {p : choose_val(p) for p in ['xscale', 'xshift', 'time_to_sampling']}
-        print('    chose new parameter values: %s' % '  '.join('%s %s'%(p, ('%d' if p == 'time_to_sampling' else '%.2f') % v) for p, v in sorted(params.items())))
+    if params is None or n_times_used == args.simu_bundle_size:  # first time through loop or start of a new bundle
+        params = choose_params()
         n_times_used = 0
     n_times_used += 1
-    birth_resp, death_resp = get_responses(
-        params['xscale'], params['xshift'],
-    )
+    birth_resp, death_resp = get_responses(params['xscale'], params['xshift'], params['yscale'])
     print(utils.color("blue", "trial %d:" % itrial), end=" ")
     tree = generate_sequences_and_tree(
         params['time_to_sampling'], birth_resp, death_resp, mutation_resp, mutator, itrial, seed=rng
