@@ -669,7 +669,7 @@ if n_missing > 0:
 
 write_final_outputs(all_seqs, all_trees)
 
-if args.make_plots:
+if args.make_plots and args.birth_response == 'sigmoid':  # could plot other ones, but I think I need to modify some things, and I don't need it atm
     utils.plot_phenotype_response(args.outdir + "/plots", all_trees, bundle_size=args.simu_bundle_size)
 
 print("    total simulation time: %.1f sec" % (time.time() - start))
