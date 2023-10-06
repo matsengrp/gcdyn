@@ -1,16 +1,3 @@
----
-format:
-    pdf:
-        fig-dpi: 300
-echo: false
-highlight-style: github
-monofont: Fira Code
-warning: false
----
-
-```{r}
-#| include: false
-
 library(tidyverse)
 library(coda)
 library(glue)
@@ -45,12 +32,6 @@ priors <- list(
     death_rate = \(x) dlnorm(x, 0, 0.3),
     mutation_rate = \(x) dlnorm(x, 0, 0.5)
 )
-```
-
-## Posterior median sampling distributions
-
-```{r}
-#| fig-height: 6
 
 plot_hist <- function(parameter_name) {
     samples |>
@@ -88,74 +69,5 @@ if ("mutation_rate" %in% samples$Parameter) {
 } else {
     (plot_hist("xscale") + plot_hist("xshift")) / (plot_hist("yscale") + plot_hist("yshift")) / plot_hist("death_rate")
 }
-```
 
-\pagebreak
-
-```{r}
-sigmoid <- function(x, estimate) {
-    theta <- estimate |>
-        pivot_wider(
-            names_from = Parameter,
-            values_from = Estimate
-        ) |>
-        with(c(xscale, xshift, yscale, yshift))
-
-    theta[3] / (1 + exp(-theta[1] * (x - theta[2]))) + theta[4]
-}
-```
-
-```{r}
-#| fig-height: 3.5
-
-sampling_dist_plot <- ggplot() +
-    xlim(0, 10) +
-    ylim(0, 4)
-
-sampled_sigmoids <- samples |>
-    group_by(run, Parameter) |>
-    summarise(Estimate = median(Sample)) |>
-    group_by(run) |>
-    group_map(\(estimate, ...) \(x) sigmoid(x, estimate))
-
-for (sig in sampled_sigmoids) {
-    sampling_dist_plot <- sampling_dist_plot + stat_function(fun = sig, alpha = 0.03, linewidth = 1)
-}
-
-sampling_dist_plot <- sampling_dist_plot +
-    stat_function(
-        aes(color = "Truth"),
-        fun = \(x) sigmoid(x, truth |> rename(Estimate = Truth)),
-        linewidth = 1.5
-    ) +
-    scale_color_manual(
-        name = "",
-        values = c("Truth" = "red")
-    ) +
-    labs(
-        title = "Sampling distribution",
-        x = "x",
-        y = expression(paste(lambda, "(x)"))
-    ) +
-    theme_classic() +
-    theme(legend.position = "bottom")
-
-sampling_dist_plot
-```
-
-\pagebreak
-
-## Traceplots (one run)
-
-```{r}
-#| fig-height: 6
-
-left_join(samples, truth, by = "Parameter") |>
-    filter(Iteration > 100 & run == 1) |>
-    ggplot(aes(Iteration, Sample)) +
-    geom_line() +
-    geom_hline(aes(yintercept = Truth, color = "Truth")) +
-    facet_wrap(vars(Parameter), ncol = 1, scales = "free")
-```
-
-\pagebreak
+ggsave("plots.png", width = 10, height = 6, dpi = 300)

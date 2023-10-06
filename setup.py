@@ -1,6 +1,6 @@
 from setuptools import setup
-import versioneer
 
+import versioneer
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -30,9 +30,8 @@ setup(
         "jax[cpu]",
         "jaxopt",
         "biopython",
-        # Until https://github.com/patrick-kidger/diffrax/commit/b71f8f is merged in
-        "diffrax==0.3.1",
-        "equinox==0.10.2",
+        "diffrax",
+        "equinox",
         "tensorflow",
         "tqdm",
     ],
