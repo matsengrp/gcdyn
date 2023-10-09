@@ -119,7 +119,7 @@ def write_traintest_samples(smpldict):
 
 # ----------------------------------------------------------------------------------------
 def train_and_test():
-    from gcdyn.models import NeuralNetworkModel
+    from gcdyn.nn import NeuralNetworkModel
     from gcdyn.poisson import ConstantResponse
 
     # read from various input files
