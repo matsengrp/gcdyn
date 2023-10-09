@@ -35,7 +35,7 @@ def scale_vals(smpl, pvals, scaler=None, inverse=False, debug=True):
         def get_lists(pvs):  # picks values from rows/columns to get a list of values for each parameter
             return [[plist[ivar] for plist in pvs]]
         def fnstr(pvs, fn):  # apply fn to each list from get_lists(), returns resulting combined str
-            return ' '.join('%7.3f'%fn(l) for l in get_lists(pvs))
+            return ' '.join('%7.2f'%fn(l) for l in get_lists(pvs))
         for ivar, vname in enumerate(args.params_to_predict):
             for dstr, pvs in zip(('before', 'after'), (pvals_before, pvals_scaled)):
                 bstr = '   ' if dstr!='before' else '      %10s %7s' % (vname, smpl)
@@ -194,9 +194,9 @@ parser.add_argument("--indir", required=True, help="input directory with simulat
 parser.add_argument("--outdir", required=True, help="output directory")
 parser.add_argument("--epochs", type=int, default=30)
 parser.add_argument("--bundle-size", type=int, default=50)
-parser.add_argument("--dropout-rate", type=float, default=0.2)
-parser.add_argument("--learning-rate", type=float, default=0.01)
-parser.add_argument("--ema-momentum", type=float, default=0.9)
+parser.add_argument("--dropout-rate", type=float, default=0)
+parser.add_argument("--learning-rate", type=float, default=0.001)
+parser.add_argument("--ema-momentum", type=float, default=0.99)
 parser.add_argument("--train-frac", type=float, default=0.8, help="train on this fraction of the trees")
 parser.add_argument("--validation-split", type=float, default=0.1, help="fraction of training sample to tell keras to hold out for validation during training")
 parser.add_argument("--params-to-predict", default=["xscale", "xshift"], nargs="+", choices=["xscale", "xshift", "yscale"] + [k for k in sum_stat_scaled])

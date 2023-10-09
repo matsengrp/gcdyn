@@ -414,7 +414,7 @@ def plot_tree_slices(plotdir, tree, max_time, itrial):
 
 
 # ----------------------------------------------------------------------------------------
-def plot_phenotype_response(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_plot=10, bundle_size=1):
+def plot_phenotype_response(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_plot=30, bundle_size=1):
     # ----------------------------------------------------------------------------------------
     def plt_single_tree(itree, pfo, xmin, xmax, n_bins=30):
         plt.clf()
@@ -440,14 +440,14 @@ def plot_phenotype_response(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_
             data, x="affinity", y="lambda", ax=ax, linewidth=3, color="#990012"
         )
         ax.set(
-            title="itree %d: xscale %.1f  xshift %.1f (%d nodes)"
+            title="itree %d (%d nodes)"
             % (
                 itree,
-                pfo["birth-response"].xscale,
-                pfo["birth-response"].xshift,
                 len(all_vals),
             )
         )
+        param_text = 'xscale %.1f\nxshift %.1f\nyscale %.1f' % (pfo["birth-response"].xscale, pfo["birth-response"].xshift, pfo["birth-response"].yscale)
+        fig.text(0.6, 0.25, param_text, fontsize=17)
         fn = "%s/trees-%d.svg" % (plotdir, itree)
         plt.savefig(fn)
         return fn
@@ -459,6 +459,7 @@ def plot_phenotype_response(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_
         # for sfn in glob.glob('%s/*.svg' % plotdir):
         #     os.remove(sfn)
         os.makedirs(plotdir)
+    n_to_plot = min(len(pfo_list), n_to_plot)
     if bundle_size == 1:
         plt_indices = range(n_to_plot)
     else:
