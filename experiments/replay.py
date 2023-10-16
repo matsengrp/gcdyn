@@ -39,7 +39,8 @@ def substitution(file: str = "MK_RS5NF_substitution.csv") -> pd.DataFrame:
 
 
 def dms(
-    file: str = "https://media.githubusercontent.com/media/jbloomlab/Ab-CGGnaive_DMS/main/results/final_variant_scores/final_variant_scores.csv",
+    # file: str = "https://media.githubusercontent.com/media/jbloomlab/Ab-CGGnaive_DMS/main/results/final_variant_scores/final_variant_scores.csv",
+    file: str = os.path.dirname(os.path.realpath(__file__)) + '/final_variant_scores.csv',
 ) -> Dict[str, pd.DataFrame]:
     """The DMS data for the GC replay experiment.
 

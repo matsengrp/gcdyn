@@ -104,7 +104,7 @@ class NeuralNetworkModel:
 
         num_parameters = sum(len(response._param_dict) for response in self.responses[0])
 
-        network_layers = [
+        network_layers = [  # if you want to add alternate model layer architectures, do it with subclassing
             layers.Lambda(lambda x: tf.transpose(x, (0, 1, 3, 2))),
             layers.TimeDistributed(layers.Conv1D(filters=25, kernel_size=4, activation=actfn)),
             layers.TimeDistributed(layers.Conv1D(filters=25, kernel_size=4, activation=actfn)),

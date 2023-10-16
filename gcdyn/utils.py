@@ -410,11 +410,58 @@ def plot_tree_slices(plotdir, tree, max_time, itrial):
 
     if not os.path.exists(plotdir):
         os.makedirs(plotdir)
-    plt.savefig("%s/phenotype-slices-tree-%d.svg" % (plotdir, itrial))
+    fn = "%s/phenotype-slices-tree-%d.svg" % (plotdir, itrial)
+    plt.savefig(fn)
+    return fn
 
 
 # ----------------------------------------------------------------------------------------
-def plot_phenotype_response(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_plot=30, bundle_size=1):
+def addfn(fnames, fn, n_columns=4):
+    if len(fnames[-1]) >= n_columns:
+        fnames.append([])
+    fnames[-1].append(fn)
+
+
+# ----------------------------------------------------------------------------------------
+def plot_chosen_params(plotdir, param_counters, pbounds, fnames=None):
+    # ----------------------------------------------------------------------------------------
+    def plot_param(pname):
+        plt.clf()
+        fig, ax = plt.subplots()
+        sns.histplot(
+            {pname: param_counters[pname]},
+            bins=15,
+            # binwidth=(xmax - xmin) / n_bins,
+        )
+        plt.legend([],[], frameon=False)  # remove legend since we only have one hist atm
+        ax.set(xlabel=pname)
+        if pname in pbounds and pbounds[pname] is not None:
+            print('  %s   %s' % (pname, pbounds[pname]))
+            for pbd in pbounds[pname]:
+                ax.plot([pbd, pbd], [0, 0.9*ax.get_ylim()[1]], color='red', linestyle='--', linewidth=3)
+        # param_text = 'xscale %.1f\nxshift %.1f\nyscale %.1f' % (pfo["birth-response"].xscale, pfo["birth-response"].xshift, pfo["birth-response"].yscale)
+        # fig.text(0.6, 0.25, param_text, fontsize=17)
+        fn = "%s/chosen-%s-values.svg" % (plotdir, pname)
+        plt.savefig(fn)
+        return fn
+    # ----------------------------------------------------------------------------------------
+    print("    plotting chosen parameter values to %s" % plotdir)
+    mpl_init()
+    for sfn in glob.glob('%s/*.svg' % plotdir):
+        os.remove(sfn)
+    if not os.path.exists(plotdir):
+        os.makedirs(plotdir)
+    if fnames is None:
+        fnames = [[]]
+    if len(fnames[-1]) > 0:  # add an empty row if there's already file names there
+        fnames.append([])
+    for pname in param_counters:
+        fn = plot_param(pname)
+        addfn(fnames, fn)
+
+
+# ----------------------------------------------------------------------------------------
+def plot_phenotype_response(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_plot=30, bundle_size=1, fnames=None):
     # ----------------------------------------------------------------------------------------
     def plt_single_tree(itree, pfo, xmin, xmax, n_bins=30):
         plt.clf()
@@ -453,22 +500,24 @@ def plot_phenotype_response(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_
         return fn
 
     # ----------------------------------------------------------------------------------------
+    print("    plotting trees to %s" % plotdir)
     mpl_init()
+    for sfn in glob.glob('%s/*.svg' % plotdir):
+        os.remove(sfn)
     if not os.path.exists(plotdir):
-        # NOTE don't rm old svgs here since atm we plot tree slices beforehand to the same dir
-        # for sfn in glob.glob('%s/*.svg' % plotdir):
-        #     os.remove(sfn)
         os.makedirs(plotdir)
     n_to_plot = min(len(pfo_list), n_to_plot)
     if bundle_size == 1:
         plt_indices = range(n_to_plot)
     else:
         plt_indices = range(0, min(n_to_plot * bundle_size, len(pfo_list)), bundle_size)
+    if fnames is None:
+        fnames = [[]]
+    if len(fnames[-1]) > 0:  # add an empty row if there's already file names there
+        fnames.append([])
     for itree in plt_indices:
-        plt_single_tree(itree, pfo_list[itree], xmin, xmax)
-    make_html(plotdir, n_columns=4)
-    print("    plotting trees to %s" % plotdir)
-
+        fn = plt_single_tree(itree, pfo_list[itree], xmin, xmax)
+        addfn(fnames, fn)
 
 # ----------------------------------------------------------------------------------------
 def memory_usage_fraction(

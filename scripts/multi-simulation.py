@@ -12,6 +12,7 @@ import subprocess
 import json
 import dill
 import math
+import glob
 
 from gcdyn import bdms, gpmap, mutators, poisson, utils, encode
 from experiments import replay
@@ -124,10 +125,10 @@ def generate_sequences_and_tree(
             "  %s exceeded maximum number of tries %d so giving up"
             % (utils.color("yellow", "warning"), args.n_max_tries)
         )
-        return None
+        return None, None
 
     if args.make_plots:
-        utils.plot_tree_slices(args.outdir + '/plots', tree, sample_time, itrial)
+        fn = utils.plot_tree_slices(args.outdir + '/plots/tree-slices', tree, sample_time, itrial)
 
     n_to_sample = args.n_seqs
     if len(tree) < n_to_sample:
@@ -146,7 +147,7 @@ def generate_sequences_and_tree(
 
     set_mut_stats(tree)
 
-    return tree
+    return fn, tree
 
 
 # ----------------------------------------------------------------------------------------
@@ -223,6 +224,12 @@ def get_yscale_bounds(xscale, xshift):  # similar to previous fcn
 
 
 # ----------------------------------------------------------------------------------------
+def add_pval(pname, pval):
+    if pname not in param_counters:
+        param_counters[pname] = []
+    param_counters[pname].append(pval)
+
+# ----------------------------------------------------------------------------------------
 def choose_params():
     params = {}
     for pname in ['xscale', 'xshift', 'yscale', 'time_to_sampling']:  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
@@ -233,6 +240,7 @@ def choose_params():
             if pname == 'yscale':
                 extra_bounds = get_yscale_bounds(params['xscale'], params['xshift'])
         params[pname] = choose_val(pname, extra_bounds=extra_bounds)  # get_xshift_bounds(params['xscale']) if pname=='xshift' else None)
+        add_pval(pname, params[pname])
     print('    chose new parameter values: %s' % '  '.join('%s %s'%(p, ('%d' if p == 'time_to_sampling' else '%.2f') % v) for p, v in sorted(params.items())))
     return params
 
@@ -268,6 +276,7 @@ def get_responses(xscale, xshift, yscale):
     if args.birth_response == 'sigmoid':
         assert bresp.λ_phenotype(0) > args.initial_birth_rate_range[0] - 1e-8 and bresp.λ_phenotype(0) < args.initial_birth_rate_range[1] + 1e-8
     print_resp(bresp, dresp)
+    add_pval('initial_birth_rate', bresp.λ_phenotype(0))
 
     # if args.debug:
     #     scan_response(bresp, dresp)
@@ -442,11 +451,8 @@ parser.add_argument(
     action="store_true",
     help="sets some default parameter values that run quickly and successfully, i.e. useful for quick tests",
 )
-parser.add_argument(
-    "--make-plots",
-    action="store_true",
-    help='',
-)
+parser.add_argument("--make-plots", action="store_true", help='')
+parser.add_argument("--n-to-plot", type=int, default=10, help='number of tree slice plots to make')
 
 args = parser.parse_args()
 # handle args that can have either a list of a few values, or choose from a uniform interval specified with two (min, max) values
@@ -582,6 +588,9 @@ assert args.death_value >= 0
 
 if not os.path.exists(args.outdir):
     os.makedirs(args.outdir)
+if args.make_plots:
+    for sfn in glob.glob('%s/plots/tree-slices/*.svg' % args.outdir):
+        os.remove(sfn)
 
 gp_map = gpmap.AdditiveGPMap(
     replay.dms()["affinity"], nonsense_phenotype=replay.dms()["affinity"].min().min()
@@ -603,7 +612,8 @@ mutation_resp = poisson.SequenceContextMutationResponse(
 all_seqs, all_trees = [], []
 n_missing = 0
 rng = np.random.default_rng(seed=args.seed)
-params, n_times_used = None, 0  # parameter values, and number of trees that we've simulated with these parameter values
+params, n_times_used, param_counters = None, 0, {}  # parameter values, and number of trees that we've simulated with these parameter values
+all_fns = [[]]  # just for plotting
 for itrial in range(args.itrial_start, args.n_trials):
     check_memory()
     ofn = outfn(None, itrial)
@@ -628,12 +638,13 @@ for itrial in range(args.itrial_start, args.n_trials):
     n_times_used += 1
     birth_resp, death_resp = get_responses(params['xscale'], params['xshift'], params['yscale'])
     print(utils.color("blue", "trial %d:" % itrial), end=" ")
-    tree = generate_sequences_and_tree(
+    fn, tree = generate_sequences_and_tree(
         params['time_to_sampling'], birth_resp, death_resp, mutation_resp, mutator, itrial, seed=rng
     )
     if tree is None:
         n_missing += 1
         continue
+    utils.addfn(all_fns, fn)
 
     with open(ofn, "wb") as fp:
         dill.dump(
@@ -670,6 +681,12 @@ if n_missing > 0:
 write_final_outputs(all_seqs, all_trees)
 
 if args.make_plots and args.birth_response == 'sigmoid':  # could plot other ones, but I think I need to modify some things, and I don't need it atm
-    utils.plot_phenotype_response(args.outdir + "/plots", all_trees, bundle_size=args.simu_bundle_size)
+    utils.plot_phenotype_response(args.outdir + "/plots/responses", all_trees, bundle_size=args.simu_bundle_size, fnames=all_fns)
+    utils.plot_chosen_params(args.outdir + "/plots/params", param_counters, {p : getattr(args, p.replace('-', '_')+'_range') for p in param_counters}, fnames=all_fns)
+    utils.make_html(args.outdir + '/plots', fnames=all_fns)
+
+print('    sampled parameter values:               min      max')
+for pname, pvals in sorted(param_counters.items()):
+    print('                      %17s  %7.2f  %7.2f' % (pname, min(pvals), max(pvals)))
 
 print("    total simulation time: %.1f sec" % (time.time() - start))
