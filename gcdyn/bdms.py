@@ -78,7 +78,6 @@ class TreeNode(ete3.Tree):
         super().__init__(**kwargs)
         self.t = t
         """Time of the node."""
-        self.set_seq("", None)
         self.event = None
         """Event at this node."""
         self.n_mutations = 0
@@ -93,16 +92,6 @@ class TreeNode(ete3.Tree):
         """
         self._pruned = False
 
-    def set_seq(self, seq, second_chain_index):
-        """
-        Set sequence and (if needed) index of second chain start. Set index
-        to None for single chain seqs. Note that I'm making second_chain_index
-        positional (required) to make sure you think about whether you want to
-        set it, since the whole point of having this function is to make it
-        harder to make the catastrophic having seq and index out of sync.
-        """
-        self.sequence = seq
-        self.chain_2_start_idx = second_chain_index
 
     def _birth_outcome(
         self, birth_mutations: bool, mutator: mutators.Mutator, rng: np.random.Generator

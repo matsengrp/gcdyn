@@ -42,14 +42,12 @@ def padded_fivemer_contexts_of_paired_sequences(sequence: str, chain_2_start_idx
 
 
 def node_contexts(node: ete3.TreeNode):
-    if (
-        node.chain_2_start_idx is None
-    ):  # default is set in bdms.TreeNode, indicates single chain
-        return simple_fivemer_contexts(node.sequence)
-    else:
+    if hasattr(node, 'chain_2_start_idx'):
         return padded_fivemer_contexts_of_paired_sequences(
             node.sequence, node.chain_2_start_idx
         )
+    else:
+        return simple_fivemer_contexts(node.sequence)
 
 
 def write_leaf_sequences_to_fasta(

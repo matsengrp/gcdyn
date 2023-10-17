@@ -12,6 +12,7 @@ def encode_tree(
     intree: TreeNode,
     max_leaf_count: int = None,
     ladderize: bool = True,
+    dont_scale: bool = False,
 ) -> np.ndarray[float]:
     """
     Returns the "Compact Bijective Ladderized Vector" form of the given
@@ -48,7 +49,10 @@ def encode_tree(
         for child in tmptr.children[num_children // 2 :]:  # trivial loop over single rightand subtree/node
             yield from traverse_inorder(child)
 
-    assert utils.isclose(np.mean([lf.t for lf in intree.iter_leaves()]), 1), "trees must be scaled to 1 before encoding"
+    if not dont_scale:
+        _, intree = scale_tree(intree)
+
+    # assert utils.isclose(np.mean([lf.t for lf in intree.iter_leaves()]), 1), "trees must be scaled to 1 before encoding"
 
     if ladderize:
         worktree = (
@@ -103,9 +107,9 @@ def encode_trees(
     for each tree) and list of scaled, encoded trees."""
     scale_vals, enc_trees = [], []
     for intr in intrees:
-        brlen, sctree = scale_tree(intr)
+        brlen, sctree = scale_tree(intr)  # rescale separately so we can store the branch len
         scale_vals.append(brlen)
-        enc_trees.append(encode_tree(sctree, max_leaf_count=max_leaf_count, ladderize=ladderize))
+        enc_trees.append(encode_tree(sctree, max_leaf_count=max_leaf_count, ladderize=ladderize, dont_scale=True))
     return scale_vals, enc_trees
 
 

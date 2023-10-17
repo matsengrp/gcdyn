@@ -236,6 +236,11 @@ class SequenceMutator(AttrMutator):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(attr="sequence")
 
+    def check_node(self, node: ete3.TreeNode):
+        for tattr in self.mutated_attrs:
+            if not hasattr(node, tattr):
+                raise Exception('required attributed \'%s\' not found on node' % tattr)
+
     def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
         raise NotImplementedError
 
@@ -254,6 +259,7 @@ class UniformMutator(SequenceMutator):
         node: ete3.TreeNode,
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
+        super().check_node(node)
         alphabet = "ACGT"
         rng = np.random.default_rng(seed)
         sequence = list(node.sequence)
@@ -298,6 +304,7 @@ class ContextMutator(SequenceMutator):
             node: node with sequence, consisting of characters ``ACGT``
             seed: See :py:class:`Mutator`.
         """
+        super().check_node(node)
         rng = np.random.default_rng(seed)
         seq_contexts = utils.node_contexts(node)
         if node.sequence not in self.cached_ctx_muts:
@@ -315,6 +322,7 @@ class ContextMutator(SequenceMutator):
 
     @property
     def mutated_attrs(self) -> Tuple[str]:
+        # chain_2_start_idx doesn't get mutated, but we need it copied in bdms.evolve(), and this is how that's set up
         return super().mutated_attrs + ("chain_2_start_idx",)
 
 

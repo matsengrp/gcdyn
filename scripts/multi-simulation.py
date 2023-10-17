@@ -77,7 +77,8 @@ def generate_sequences_and_tree(
             tree_start = time.time()
             tree = bdms.TreeNode()
             tree.x = gp_map(replay.NAIVE_SEQUENCE)
-            tree.set_seq(replay.NAIVE_SEQUENCE, replay.CHAIN_2_START_IDX)
+            tree.sequence = replay.NAIVE_SEQUENCE
+            tree.chain_2_start_idx = replay.CHAIN_2_START_IDX
             tree.evolve(
                 sample_time,
                 birth_response=birth_resp,
@@ -89,7 +90,7 @@ def generate_sequences_and_tree(
                 capacity=args.carry_cap,
                 capacity_method=args.capacity_method,
                 seed=seed,
-                # verbose=True,
+                verbose=args.debug > 1,
             )
             print(
                 "    try %d succeeded, tip count %d  (%.1fs)"
@@ -439,7 +440,7 @@ parser.add_argument(
     default=0,
     help="if running sub procs (--n-sub-procs) set this so each sub proc's trial index starts at the proper value",
 )
-parser.add_argument("--debug", action="store_true")
+parser.add_argument("--debug", type=int, default=0, help='Verbosity level; set to 1 or 2 for more debug output.')
 parser.add_argument("--overwrite", action="store_true")
 parser.add_argument(
     "--dont-run-new-simu",

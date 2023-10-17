@@ -26,7 +26,7 @@ class TestDeepLearning(unittest.TestCase):
             node.t = node.up.t + node.dist
             node.x = node.up.x + 1
 
-        encoded_tree = encode.encode_tree(tree, max_leaf_count=10)
+        encoded_tree = encode.encode_tree(tree, max_leaf_count=10, dont_scale=True)
 
         solution = np.array(
             [
