@@ -18,39 +18,46 @@ utils.simple_fivemer_contexts("a")  # keeps lint from crashing on unused import
 gcdyn_data_dir = os.path.join(os.path.dirname(sys.modules["gcdyn"].__file__), "data")
 
 
-def mutability(file: str = "MK_RS5NF_mutability.csv") -> pd.Series:
+def mutability(fname: str = "MK_RS5NF_mutability.csv") -> pd.Series:
     """The mutability of each position in the naive sequence.
 
     Args:
-        file: The file to read the mutability from.
+        fname: The file to read the mutability from.
     """
-    return pd.read_csv(os.path.join(gcdyn_data_dir, file), index_col=0).squeeze(
+    return pd.read_csv(os.path.join(gcdyn_data_dir, fname), index_col=0).squeeze(
         "columns"
     )
 
 
-def substitution(file: str = "MK_RS5NF_substitution.csv") -> pd.DataFrame:
+def substitution(fname: str = "MK_RS5NF_substitution.csv") -> pd.DataFrame:
     """The substitution matrix for the naive sequence.
 
     Args:
-        file: The file to read the substitution matrix from.
+        fname: The file to read the substitution matrix from.
     """
-    return pd.read_csv(os.path.join(gcdyn_data_dir, file), index_col=0)
+    return pd.read_csv(os.path.join(gcdyn_data_dir, fname), index_col=0)
 
 
 def dms(
-    # file: str = "https://media.githubusercontent.com/media/jbloomlab/Ab-CGGnaive_DMS/main/results/final_variant_scores/final_variant_scores.csv",
-    file: str = os.path.dirname(os.path.realpath(__file__)) + '/final_variant_scores.csv',
+    fname: str = "https://media.githubusercontent.com/media/jbloomlab/Ab-CGGnaive_DMS/main/results/final_variant_scores/final_variant_scores.csv",
+    cache_fname: str = os.path.dirname(os.path.realpath(__file__)) + '/final_variant_scores.csv',
 ) -> Dict[str, pd.DataFrame]:
     """The DMS data for the GC replay experiment.
 
     Args:
-        file: The file to read the DMS data from.
+        fname: The file to read the DMS data from.
+        cache_fname: local path to which to copy file from <fname>. If present, we use this.
 
     Returns:
         A dictionary with the DMS data for each of the three phenotypes.
     """
-    dms_df = pd.read_csv(file, index_col="mutation")
+    if os.path.exists(cache_fname):
+        print('  using existing dms cache file %s' % cache_fname)
+        fname = cache_fname
+    dms_df = pd.read_csv(fname, index_col="mutation")
+    if not os.path.exists(cache_fname):
+        print('  caching dms info to %s' % cache_fname)
+        dms_df.to_csv(cache_fname, sep=',')
     # remove linker sites
     dms_df = dms_df[dms_df.chain != "link"]
 
