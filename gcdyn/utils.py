@@ -192,6 +192,11 @@ def color(col, seq, width=None, padside="left"):
 
 
 # ----------------------------------------------------------------------------------------
+def color_mutants(ref_seq, qseq):  # crappy version of fcn in partis utils
+    assert len(ref_seq) == len(qseq)
+    return ''.join([color(None if q==r else 'red', q) for r, q in zip(ref_seq, qseq)])
+
+# ----------------------------------------------------------------------------------------
 def isclose(num1, num2, eps=1e-8, debug=False, fail=False, warn=False):
     """Return true if num1 and num2 are closer to each other than eps (numpy version is super slow."""
     if abs(num1 - num2) < eps:
