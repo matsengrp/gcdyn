@@ -22,6 +22,16 @@ def test_simple_fivemer_contexts():
     assert utils.simple_fivemer_contexts(sequence) == correct_contexts
 
 
+def test_paired_fivemer_contexts():
+    pairseqs = ["ACTGCA", "GCATCA"]
+    def ctxfn(s): return tuple([s[(i - 2) : (i + 3)] for i in range(2, len(s) - 2)])
+    correct_contexts = tuple([c for s in pairseqs for c in ctxfn("NN%sNN" % s)])
+    node = bdms.TreeNode()
+    node.sequence = ''.join(pairseqs)
+    node.chain_2_start_idx = len(pairseqs[0])
+    assert utils.node_contexts(node) == correct_contexts
+
+
 def test_sequence_context_mutation_response(mk_rs5nf_mutability):
     node = bdms.TreeNode()
     node.sequence = "ACTGCA"
