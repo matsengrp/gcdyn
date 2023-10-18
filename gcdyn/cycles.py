@@ -468,7 +468,7 @@ class GC:
         rng: np.random.Generator = default_rng(),
     ):
         self.tree = TreeNode(dist=0)
-        self.tree.set_seq(sequence, None)
+        self.tree.sequence = sequence
         self.tree.terminated = False
         self.proliferator = proliferator
         self.mutator = mutator
@@ -480,7 +480,7 @@ class GC:
             for _ in range(N0):
                 child = TreeNode()
                 child.dist = 0
-                child.set_seq(sequence, None)
+                child.sequence = sequence
                 child.terminated = False
                 self.tree.add_child(child)
 
@@ -596,7 +596,7 @@ def binary_proliferator(
         for _ in range(2):
             child = TreeNode()
             child.dist = 1
-            child.set_seq(treenode.sequence, None)
+            child.sequence = treenode.sequence
             child.terminated = False
             treenode.add_child(child)
 
@@ -624,7 +624,7 @@ def simple_proliferator(
         for _ in range(2):
             child = TreeNode()
             child.dist = dist
-            child.set_seq(treenode.sequence, None)
+            child.sequence = treenode.sequence
             child.terminated = False
             treenode.add_child(child)
             simple_proliferator(child, cell_divisions - 1, dist)

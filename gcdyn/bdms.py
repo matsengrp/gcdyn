@@ -113,7 +113,7 @@ class TreeNode(ete3.Tree):
                 dist=0,
                 name=next(self._name_generator),
             )
-            for attr in mutator.mutated_attrs:
+            for attr in mutator.node_attrs:
                 setattr(child, attr, copy.copy(getattr(self, attr)))
             if birth_mutations:
                 child.event = self._MUTATION_EVENT
@@ -123,7 +123,7 @@ class TreeNode(ete3.Tree):
                     dist=0,
                     name=next(self._name_generator),
                 )
-                for attr in mutator.mutated_attrs:
+                for attr in mutator.node_attrs:
                     setattr(grandchild, attr, copy.copy(getattr(child, attr)))
                 child.add_child(grandchild)
                 yield grandchild
@@ -150,7 +150,7 @@ class TreeNode(ete3.Tree):
             dist=0,
             name=next(self._name_generator),
         )
-        for attr in mutator.mutated_attrs:
+        for attr in mutator.node_attrs:
             setattr(child, attr, copy.copy(getattr(self, attr)))
         self.add_child(child)
         yield child
@@ -206,7 +206,7 @@ class TreeNode(ete3.Tree):
             )
         if init_population > capacity:
             raise ValueError(f"{init_population=} must be less than {capacity=}")
-        for attr in mutator.mutated_attrs:
+        for attr in mutator.node_attrs:
             if not hasattr(self, attr):
                 raise ValueError(
                     f"node {self.name} does not have attribute {attr} specified in mutator"
@@ -243,7 +243,7 @@ class TreeNode(ete3.Tree):
                 dist=0,
                 name=next(self._name_generator),
             )
-            for attr in mutator.mutated_attrs:
+            for attr in mutator.node_attrs:
                 setattr(start_node, attr, copy.copy(getattr(self, attr)))
             self.add_child(start_node)
             active_nodes[start_node.name] = start_node

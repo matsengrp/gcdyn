@@ -57,9 +57,8 @@ class Mutator(ABC):
 
     @property
     @abstractmethod
-    def mutated_attrs(self) -> Tuple[str]:
-        """Tuple of node attribute names that may be mutated by this
-        mutator."""
+    def node_attrs(self) -> Tuple[str]:
+        """Tuple of node attribute names that need to be propagated to child nodes."""
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in vars(self).items() if not key.startswith('_'))})"
@@ -81,7 +80,7 @@ class AttrMutator(Mutator):
         self.attr = attr
 
     @property
-    def mutated_attrs(self) -> Tuple[str]:
+    def node_attrs(self) -> Tuple[str]:
         return (self.attr,)
 
     def logprob(self, node: ete3.TreeNode) -> float:
@@ -237,7 +236,7 @@ class SequenceMutator(AttrMutator):
         super().__init__(attr="sequence")
 
     def check_node(self, node: ete3.TreeNode):
-        for tattr in self.mutated_attrs:
+        for tattr in self.node_attrs:
             if not hasattr(node, tattr):
                 raise Exception('required attributed \'%s\' not found on node' % tattr)
 
@@ -321,9 +320,8 @@ class ContextMutator(SequenceMutator):
         node.sequence = node.sequence[:i] + sub_nt + node.sequence[(i + 1) :]
 
     @property
-    def mutated_attrs(self) -> Tuple[str]:
-        # chain_2_start_idx doesn't get mutated, but we need it copied in bdms.evolve(), and this is how that's set up
-        return super().mutated_attrs + ("chain_2_start_idx",)
+    def node_attrs(self) -> Tuple[str]:
+        return super().node_attrs + ("chain_2_start_idx",)
 
 
 class SequencePhenotypeMutator(AttrMutator):
@@ -374,5 +372,5 @@ class SequencePhenotypeMutator(AttrMutator):
         )
 
     @property
-    def mutated_attrs(self) -> Tuple[str]:
-        return (self.attr,) + self.sequence_mutator.mutated_attrs
+    def node_attrs(self) -> Tuple[str]:
+        return (self.attr,) + self.sequence_mutator.node_attrs
