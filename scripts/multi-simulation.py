@@ -9,7 +9,6 @@ import time
 import copy
 import random
 import subprocess
-import json
 import dill
 import math
 import glob
@@ -333,11 +332,6 @@ def write_final_outputs(all_seqs, all_trees):
         for pfo in all_trees:
             tfile.write("%s\n" % pfo["tree"].write(format=1))
 
-    jfo = {
-        n.name: {"affinity": n.x, "n_muts": n.total_mutations}
-        for pfo in all_trees
-        for n in pfo["tree"].iter_descendants()
-    }
     with open(outfn("leaf-meta", None), "w") as jfile:
         writer = csv.DictWriter(jfile, ["name", "affinity", "n_muts"])
         writer.writeheader()

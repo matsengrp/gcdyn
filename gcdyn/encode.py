@@ -145,8 +145,8 @@ def trivialize_encodings(
         return "    %6s: %s" % (
             tstr,
             "\n            ".join(
-                " ".join("%5.2f" % v for v in list(l[:max_print])) + " ..."
-                for l in entr
+                " ".join("%5.2f" % v for v in list(le[:max_print])) + " ..."
+                for le in entr
             ),
         )
 

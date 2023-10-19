@@ -369,7 +369,7 @@ def make_dl_plots(
                 vld_df = df[len(df) - int(validation_split * len(df)) :]
                 ax = sns.scatterplot(vld_df, x=xkey, y=ykey, alpha=0.6, color="red")
             ax = sns.scatterplot(plt_df, x=xkey, y=ykey, alpha=0.6)
-            xvals, yvals = df[xkey], df[ykey]
+            xvals = df[xkey]
             plt.plot(
                 [0.95 * min(xvals), 1.05 * max(xvals)],
                 [0.95 * min(xvals), 1.05 * max(xvals)],

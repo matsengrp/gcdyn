@@ -3,9 +3,7 @@ import numpy as np
 import argparse
 import os
 import sys
-import operator
 from sklearn import preprocessing
-import sys
 import tensorflow as tf
 
 import colored_traceback.always  # need to add this to installation stuff, i'm not sure how to do it atm
@@ -44,7 +42,7 @@ def scale_vals(smpl, pvals, scaler=None, inverse=False, debug=True):
         def fnstr(
             pvs, fn
         ):  # apply fn to each list from get_lists(), returns resulting combined str
-            return " ".join("%7.2f" % fn(l) for l in get_lists(pvs))
+            return " ".join("%7.2f" % fn(vl) for vl in get_lists(pvs))
 
         for ivar, vname in enumerate(args.params_to_predict):
             for dstr, pvs in zip(("before", "after"), (pvals_before, pvals_scaled)):
