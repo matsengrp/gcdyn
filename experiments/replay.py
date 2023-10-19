@@ -40,7 +40,8 @@ def substitution(fname: str = "MK_RS5NF_substitution.csv") -> pd.DataFrame:
 
 def dms(
     fname: str = "https://media.githubusercontent.com/media/jbloomlab/Ab-CGGnaive_DMS/main/results/final_variant_scores/final_variant_scores.csv",
-    cache_fname: str = os.path.dirname(os.path.realpath(__file__)) + '/final_variant_scores.csv',
+    cache_fname: str = os.path.dirname(os.path.realpath(__file__))
+    + "/final_variant_scores.csv",
     debug: bool = False,
 ) -> Dict[str, pd.DataFrame]:
     """The DMS data for the GC replay experiment.
@@ -54,13 +55,13 @@ def dms(
     """
     if os.path.exists(cache_fname):
         if debug:
-            print('  using existing dms cache file %s' % cache_fname)
+            print("  using existing dms cache file %s" % cache_fname)
         fname = cache_fname
     dms_df = pd.read_csv(fname, index_col="mutation")
     if not os.path.exists(cache_fname):
         if debug:
-            print('  caching dms info to %s' % cache_fname)
-        dms_df.to_csv(cache_fname, sep=',')
+            print("  caching dms info to %s" % cache_fname)
+        dms_df.to_csv(cache_fname, sep=",")
     # remove linker sites
     dms_df = dms_df[dms_df.chain != "link"]
 

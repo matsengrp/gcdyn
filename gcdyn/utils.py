@@ -42,7 +42,7 @@ def padded_fivemer_contexts_of_paired_sequences(sequence: str, chain_2_start_idx
 
 
 def node_contexts(node: ete3.TreeNode):
-    if hasattr(node, 'chain_2_start_idx'):
+    if hasattr(node, "chain_2_start_idx"):
         return padded_fivemer_contexts_of_paired_sequences(
             node.sequence, node.chain_2_start_idx
         )
@@ -194,18 +194,25 @@ def color(col, seq, width=None, padside="left"):
 # ----------------------------------------------------------------------------------------
 def color_mutants(ref_seq, qseq):  # crappy version of fcn in partis utils
     assert len(ref_seq) == len(qseq)
-    return ''.join([color(None if q==r else 'red', q) for r, q in zip(ref_seq, qseq)])
+    return "".join([color(None if q == r else "red", q) for r, q in zip(ref_seq, qseq)])
+
 
 # ----------------------------------------------------------------------------------------
 def isclose(num1, num2, eps=1e-8, debug=False, fail=False, warn=False):
     """Return true if num1 and num2 are closer to each other than eps (numpy version is super slow."""
     if abs(num1 - num2) < eps:
         return True
-    dbgstr = '%snumbers %.10f and %.10f not closer than eps %.10f (abs diff %.10f)' % (color('yellow', 'warning ') if warn else '', num1, num2, eps, abs(num1 - num2))
+    dbgstr = "%snumbers %.10f and %.10f not closer than eps %.10f (abs diff %.10f)" % (
+        color("yellow", "warning ") if warn else "",
+        num1,
+        num2,
+        eps,
+        abs(num1 - num2),
+    )
     if fail:
         raise Exception(dbgstr)
     if debug or warn:
-        print('    ' + dbgstr)
+        print("    " + dbgstr)
     return False
 
 
@@ -312,15 +319,23 @@ def mpl_init(fsize=20, label_fsize=15):
 # plot scatter + box/whisker plot comparing true and predicted values for deep learning inference
 # NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
 def make_dl_plots(
-    prdfs, params_to_predict, outdir, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15
+    prdfs,
+    params_to_predict,
+    outdir,
+    validation_split=0,
+    xtra_txt=None,
+    fsize=20,
+    label_fsize=15,
 ):
     def single_plot(param, smpl):
         plt.clf()
         df = prdfs[smpl]
         xkey, ykey = ["%s-%s" % (param, vtype) for vtype in ["truth", "predicted"]]
-        if len(set(df['%s-truth' % param])) < 10:  # if simulation has discrete parameter values
+        if (
+            len(set(df["%s-truth" % param])) < 10
+        ):  # if simulation has discrete parameter values
             if validation_split > 0:
-                raise Exception('not implemented here')
+                raise Exception("not implemented here")
             ax = sns.boxplot(
                 df,
                 x=xkey,
@@ -349,13 +364,20 @@ def make_dl_plots(
                 )
         else:
             plt_df = df
-            if smpl == 'train' and validation_split != 0:
+            if smpl == "train" and validation_split != 0:
                 plt_df = df[: len(df) - int(validation_split * len(df))]
                 vld_df = df[len(df) - int(validation_split * len(df)) :]
-                ax = sns.scatterplot(vld_df, x=xkey, y=ykey, alpha=0.6, color='red')
+                ax = sns.scatterplot(vld_df, x=xkey, y=ykey, alpha=0.6, color="red")
             ax = sns.scatterplot(plt_df, x=xkey, y=ykey, alpha=0.6)
             xvals, yvals = df[xkey], df[ykey]
-            plt.plot([0.95 * min(xvals), 1.05 * max(xvals)], [0.95 * min(xvals), 1.05 * max(xvals)], color='darkgreen', linestyle='--', linewidth=3, alpha=0.7)
+            plt.plot(
+                [0.95 * min(xvals), 1.05 * max(xvals)],
+                [0.95 * min(xvals), 1.05 * max(xvals)],
+                color="darkgreen",
+                linestyle="--",
+                linewidth=3,
+                alpha=0.7,
+            )
         plt.xlabel("true value")
         plt.ylabel("predicted value")
         titlestr = "%s %s" % (param, smpl)
@@ -384,32 +406,54 @@ def make_dl_plots(
 def plot_tree_slices(plotdir, tree, max_time, itrial):
     n_plots = 5
     dt = round(max_time / float(n_plots))
-    tdata = {'time' : [], 'affinity' : []}
+    tdata = {"time": [], "affinity": []}
     for stime in list(range(dt, max_time, dt)) + [max_time]:
         for aval in tree.slice(stime):
-            tdata['time'].append(stime)
-            tdata['affinity'].append(aval)
+            tdata["time"].append(stime)
+            tdata["affinity"].append(aval)
 
     mpl_init()
     with warnings.catch_warnings():
-        warnings.simplefilter('ignore')  # i don't know why it has to warn me that it's clearing the fig/ax I'm passing in, and I don't know how else to stop it
-        sns.set_theme(style="white", rc={"axes.facecolor": (0, 0, 0, 0), 'axes.linewidth':2})
-        palette = None #sns.color_palette("Set2", 12)
-        g = sns.FacetGrid(pd.DataFrame(tdata), palette=palette, row="time", hue="time", aspect=9, height=1.2)  # create a grid with a row for each 'time'
+        warnings.simplefilter(
+            "ignore"
+        )  # i don't know why it has to warn me that it's clearing the fig/ax I'm passing in, and I don't know how else to stop it
+        sns.set_theme(
+            style="white", rc={"axes.facecolor": (0, 0, 0, 0), "axes.linewidth": 2}
+        )
+        palette = None  # sns.color_palette("Set2", 12)
+        g = sns.FacetGrid(
+            pd.DataFrame(tdata),
+            palette=palette,
+            row="time",
+            hue="time",
+            aspect=9,
+            height=1.2,
+        )  # create a grid with a row for each 'time'
         g.map_dataframe(sns.kdeplot, x="affinity", fill=True, alpha=0.6)
-        g.map_dataframe(sns.kdeplot, x="affinity", color='black')
+        g.map_dataframe(sns.kdeplot, x="affinity", color="black")
 
         def label_fn(x, color, label):
-            ax = plt.gca() #get current axis
-            ax.text(0, .2, label, color='black', fontsize=13,
-                    ha="left", va="center", transform=ax.transAxes)
+            ax = plt.gca()  # get current axis
+            ax.text(
+                0,
+                0.2,
+                label,
+                color="black",
+                fontsize=13,
+                ha="left",
+                va="center",
+                transform=ax.transAxes,
+            )
+
         g.map(label_fn, "time")  # iterate grid to plot labels
 
-        g.fig.subplots_adjust(hspace=-.7)  # adjust subplots to create overlap
+        g.fig.subplots_adjust(hspace=-0.7)  # adjust subplots to create overlap
         g.set_titles("")  # remove subplot titles
-        g.set(yticks=[], xlabel="affinity", ylabel='time')  # remove yticks and set xlabel
+        g.set(
+            yticks=[], xlabel="affinity", ylabel="time"
+        )  # remove yticks and set xlabel
         g.despine(left=True)
-        plt.suptitle('affinity vs time (tree %d)' % itrial, y=0.98)
+        plt.suptitle("affinity vs time (tree %d)" % itrial, y=0.98)
 
     if not os.path.exists(plotdir):
         os.makedirs(plotdir)
@@ -436,21 +480,30 @@ def plot_chosen_params(plotdir, param_counters, pbounds, fnames=None):
             bins=15,
             # binwidth=(xmax - xmin) / n_bins,
         )
-        plt.legend([],[], frameon=False)  # remove legend since we only have one hist atm
+        plt.legend(
+            [], [], frameon=False
+        )  # remove legend since we only have one hist atm
         ax.set(xlabel=pname)
         if pname in pbounds and pbounds[pname] is not None:
-            print('  %s   %s' % (pname, pbounds[pname]))
+            print("  %s   %s" % (pname, pbounds[pname]))
             for pbd in pbounds[pname]:
-                ax.plot([pbd, pbd], [0, 0.9*ax.get_ylim()[1]], color='red', linestyle='--', linewidth=3)
+                ax.plot(
+                    [pbd, pbd],
+                    [0, 0.9 * ax.get_ylim()[1]],
+                    color="red",
+                    linestyle="--",
+                    linewidth=3,
+                )
         # param_text = 'xscale %.1f\nxshift %.1f\nyscale %.1f' % (pfo["birth-response"].xscale, pfo["birth-response"].xshift, pfo["birth-response"].yscale)
         # fig.text(0.6, 0.25, param_text, fontsize=17)
         fn = "%s/chosen-%s-values.svg" % (plotdir, pname)
         plt.savefig(fn)
         return fn
+
     # ----------------------------------------------------------------------------------------
     print("    plotting chosen parameter values to %s" % plotdir)
     mpl_init()
-    for sfn in glob.glob('%s/*.svg' % plotdir):
+    for sfn in glob.glob("%s/*.svg" % plotdir):
         os.remove(sfn)
     if not os.path.exists(plotdir):
         os.makedirs(plotdir)
@@ -464,7 +517,16 @@ def plot_chosen_params(plotdir, param_counters, pbounds, fnames=None):
 
 
 # ----------------------------------------------------------------------------------------
-def plot_phenotype_response(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_plot=30, bundle_size=1, fnames=None):
+def plot_phenotype_response(
+    plotdir,
+    pfo_list,
+    xmin=-5,
+    xmax=5,
+    nsteps=40,
+    n_to_plot=30,
+    bundle_size=1,
+    fnames=None,
+):
     # ----------------------------------------------------------------------------------------
     def plt_single_tree(itree, pfo, xmin, xmax, n_bins=30):
         plt.clf()
@@ -496,7 +558,11 @@ def plot_phenotype_response(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_
                 len(all_vals),
             )
         )
-        param_text = 'xscale %.1f\nxshift %.1f\nyscale %.1f' % (pfo["birth-response"].xscale, pfo["birth-response"].xshift, pfo["birth-response"].yscale)
+        param_text = "xscale %.1f\nxshift %.1f\nyscale %.1f" % (
+            pfo["birth-response"].xscale,
+            pfo["birth-response"].xshift,
+            pfo["birth-response"].yscale,
+        )
         fig.text(0.6, 0.25, param_text, fontsize=17)
         fn = "%s/trees-%d.svg" % (plotdir, itree)
         plt.savefig(fn)
@@ -505,7 +571,7 @@ def plot_phenotype_response(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_
     # ----------------------------------------------------------------------------------------
     print("    plotting trees to %s" % plotdir)
     mpl_init()
-    for sfn in glob.glob('%s/*.svg' % plotdir):
+    for sfn in glob.glob("%s/*.svg" % plotdir):
         os.remove(sfn)
     if not os.path.exists(plotdir):
         os.makedirs(plotdir)
@@ -521,6 +587,7 @@ def plot_phenotype_response(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_
     for itree in plt_indices:
         fn = plt_single_tree(itree, pfo_list[itree], xmin, xmax)
         addfn(fnames, fn)
+
 
 # ----------------------------------------------------------------------------------------
 def memory_usage_fraction(
@@ -551,12 +618,14 @@ def memory_usage_fraction(
 # ----------------------------------------------------------------------------------------
 def limit_procs(procs, n_max_procs, sleep_time=1, debug=False):
     """Count number of <procs> that are currently running, and sleep until it's less than <n_max_procs>."""
+
     def n_running_jobs():
         return [p.poll() for p in procs].count(None)
+
     n_jobs = n_running_jobs()
     while n_jobs >= n_max_procs:
         if debug:
-            print('%d (>=%d) running jobs' % (n_jobs, n_max_procs))
+            print("%d (>=%d) running jobs" % (n_jobs, n_max_procs))
         time.sleep(sleep_time)
         n_jobs = n_running_jobs()
 

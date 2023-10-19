@@ -238,7 +238,7 @@ class SequenceMutator(AttrMutator):
     def check_node(self, node: ete3.TreeNode):
         for tattr in self.node_attrs:
             if not hasattr(node, tattr):
-                raise Exception('required attributed \'%s\' not found on node' % tattr)
+                raise Exception("required attributed '%s' not found on node" % tattr)
 
     def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
         raise NotImplementedError

@@ -30,9 +30,7 @@ def print_final_response_vals(tree, birth_resp, death_resp, final_time):
     print("                           x         birth           death")
     print("      time   N seqs.   min   max    min  max       min     max")
     xvals, bvals, dvals = [], [], []
-    for tval in range(
-        final_time + 1
-    ):  # kind of weird/arbitrary to take integer values
+    for tval in range(final_time + 1):  # kind of weird/arbitrary to take integer values
         txv = sorted(tree.slice(tval))
         tbv, tdv = [[r.λ_phenotype(x) for x in txv] for r in [birth_resp, death_resp]]
         xvals += txv
@@ -129,7 +127,9 @@ def generate_sequences_and_tree(
         return None, None
 
     if args.make_plots:
-        fn = utils.plot_tree_slices(args.outdir + '/plots/tree-slices', tree, sample_time, itrial)
+        fn = utils.plot_tree_slices(
+            args.outdir + "/plots/tree-slices", tree, sample_time, itrial
+        )
 
     n_to_sample = args.n_seqs
     if len(tree) < n_to_sample:
@@ -189,15 +189,19 @@ def print_resp(bresp, dresp):
 
 # ----------------------------------------------------------------------------------------
 def choose_val(pname, extra_bounds=None):
-    minmax, vals = [getattr(args, pname + '_' + str) for str in ['range', 'values']]
+    minmax, vals = [getattr(args, pname + "_" + str) for str in ["range", "values"]]
     if minmax is not None:  # range with two values for continuous
         minv, maxv = minmax
         if extra_bounds is not None:
-            minv = max(minv, extra_bounds[0])  # use the more restrictive (larger lo, smaller hi) values
+            minv = max(
+                minv, extra_bounds[0]
+            )  # use the more restrictive (larger lo, smaller hi) values
             maxv = min(maxv, extra_bounds[1])
-        print('    choosing %s within [%.2f, %.2f]' % (pname, minv, maxv))
-        if pname == 'time_to_sampling':
-            return np.random.choice(range(minv, maxv + 1))  # integers (note that this is inclusive)
+        print("    choosing %s within [%.2f, %.2f]" % (pname, minv, maxv))
+        if pname == "time_to_sampling":
+            return np.random.choice(
+                range(minv, maxv + 1)
+            )  # integers (note that this is inclusive)
         else:
             return np.random.uniform(minv, maxv)  # floats
     else:  # discrete values
@@ -205,22 +209,32 @@ def choose_val(pname, extra_bounds=None):
 
 
 # ----------------------------------------------------------------------------------------
-def get_xshift_bounds(xscale):  # see algebra here https://photos.app.goo.gl/i8jM5Aa8QXvbDD267
-    assert args.birth_response == 'sigmoid'
+def get_xshift_bounds(
+    xscale,
+):  # see algebra here https://photos.app.goo.gl/i8jM5Aa8QXvbDD267
+    assert args.birth_response == "sigmoid"
     ysc_lo, ysc_hi = args.yscale_range
     br_lo, br_hi = args.initial_birth_rate_range
-    lo = math.log(ysc_lo / br_hi - 1.) / xscale if ysc_lo / br_hi > 1 else -float('inf')
-    hi = math.log(ysc_hi / br_lo - 1.) / xscale if ysc_hi / br_lo > 1 else +float('inf')
-    print('        additional xshift bounds from sigmoid/xscale: %.2f  %.2f' % (lo, hi))
+    lo = (
+        math.log(ysc_lo / br_hi - 1.0) / xscale if ysc_lo / br_hi > 1 else -float("inf")
+    )
+    hi = (
+        math.log(ysc_hi / br_lo - 1.0) / xscale if ysc_hi / br_lo > 1 else +float("inf")
+    )
+    print("        additional xshift bounds from sigmoid/xscale: %.2f  %.2f" % (lo, hi))
     return (lo, hi)
+
 
 # ----------------------------------------------------------------------------------------
 def get_yscale_bounds(xscale, xshift):  # similar to previous fcn
-    assert args.birth_response == 'sigmoid'
+    assert args.birth_response == "sigmoid"
     br_lo, br_hi = args.initial_birth_rate_range
     lo = br_lo * (1 + math.exp(xscale * xshift))
     hi = br_hi * (1 + math.exp(xscale * xshift))
-    print('        additional yscale bounds from sigmoid/xscale/xshift: %.2f  %.2f' % (lo, hi))
+    print(
+        "        additional yscale bounds from sigmoid/xscale/xshift: %.2f  %.2f"
+        % (lo, hi)
+    )
     return (lo, hi)
 
 
@@ -230,19 +244,33 @@ def add_pval(pname, pval):
         param_counters[pname] = []
     param_counters[pname].append(pval)
 
+
 # ----------------------------------------------------------------------------------------
 def choose_params():
     params = {}
-    for pname in ['xscale', 'xshift', 'yscale', 'time_to_sampling']:  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
+    for pname in [
+        "xscale",
+        "xshift",
+        "yscale",
+        "time_to_sampling",
+    ]:  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
         extra_bounds = None
-        if args.birth_response == 'sigmoid':
-            if pname == 'xshift':
-                extra_bounds = get_xshift_bounds(params['xscale'])
-            if pname == 'yscale':
-                extra_bounds = get_yscale_bounds(params['xscale'], params['xshift'])
-        params[pname] = choose_val(pname, extra_bounds=extra_bounds)  # get_xshift_bounds(params['xscale']) if pname=='xshift' else None)
+        if args.birth_response == "sigmoid":
+            if pname == "xshift":
+                extra_bounds = get_xshift_bounds(params["xscale"])
+            if pname == "yscale":
+                extra_bounds = get_yscale_bounds(params["xscale"], params["xshift"])
+        params[pname] = choose_val(
+            pname, extra_bounds=extra_bounds
+        )  # get_xshift_bounds(params['xscale']) if pname=='xshift' else None)
         add_pval(pname, params[pname])
-    print('    chose new parameter values: %s' % '  '.join('%s %s'%(p, ('%d' if p == 'time_to_sampling' else '%.2f') % v) for p, v in sorted(params.items())))
+    print(
+        "    chose new parameter values: %s"
+        % "  ".join(
+            "%s %s" % (p, ("%d" if p == "time_to_sampling" else "%.2f") % v)
+            for p, v in sorted(params.items())
+        )
+    )
     return params
 
 
@@ -253,8 +281,11 @@ def get_responses(xscale, xshift, yscale):
         if args.birth_response == "constant":
             bresp = poisson.ConstantResponse(yscale)
         elif args.birth_response in ["soft-relu", "sigmoid"]:
-            if args.birth_response == 'sigmoid':
-                assert xscale > 0 and yscale > 0, ("xscale and yscale must both be greater than zero for sigmoid response function, but got xscale %.2f, yscale %.2f" % (xscale, yscale))
+            if args.birth_response == "sigmoid":
+                assert xscale > 0 and yscale > 0, (
+                    "xscale and yscale must both be greater than zero for sigmoid response function, but got xscale %.2f, yscale %.2f"
+                    % (xscale, yscale)
+                )
             kwargs = {
                 "xscale": xscale,
                 "xshift": xshift,
@@ -273,11 +304,17 @@ def get_responses(xscale, xshift, yscale):
     # ----------------------------------------------------------------------------------------
     dresp = poisson.ConstantResponse(args.death_value)
     bresp = get_birth()
-    print('      initial birth rate %.2f (range %s)' % (bresp.λ_phenotype(0), args.initial_birth_rate_range))
-    if args.birth_response == 'sigmoid':
-        assert bresp.λ_phenotype(0) > args.initial_birth_rate_range[0] - 1e-8 and bresp.λ_phenotype(0) < args.initial_birth_rate_range[1] + 1e-8
+    print(
+        "      initial birth rate %.2f (range %s)"
+        % (bresp.λ_phenotype(0), args.initial_birth_rate_range)
+    )
+    if args.birth_response == "sigmoid":
+        assert (
+            bresp.λ_phenotype(0) > args.initial_birth_rate_range[0] - 1e-8
+            and bresp.λ_phenotype(0) < args.initial_birth_rate_range[1] + 1e-8
+        )
     print_resp(bresp, dresp)
-    add_pval('initial_birth_rate', bresp.λ_phenotype(0))
+    add_pval("initial_birth_rate", bresp.λ_phenotype(0))
 
     # if args.debug:
     #     scan_response(bresp, dresp)
@@ -297,22 +334,38 @@ def write_final_outputs(all_seqs, all_trees):
             tfile.write("%s\n" % pfo["tree"].write(format=1))
 
     jfo = {
-        n.name: {"affinity": n.x, 'n_muts': n.total_mutations}
+        n.name: {"affinity": n.x, "n_muts": n.total_mutations}
         for pfo in all_trees
         for n in pfo["tree"].iter_descendants()
     }
     with open(outfn("leaf-meta", None), "w") as jfile:
-        writer = csv.DictWriter(jfile, ['name', 'affinity', 'n_muts'])
+        writer = csv.DictWriter(jfile, ["name", "affinity", "n_muts"])
         writer.writeheader()
         for pfo in all_trees:
             for node in pfo["tree"].iter_descendants():
-                writer.writerow({'name': node.name, "affinity": node.x, 'n_muts': node.total_mutations})
+                writer.writerow(
+                    {
+                        "name": node.name,
+                        "affinity": node.x,
+                        "n_muts": node.total_mutations,
+                    }
+                )
 
-    scale_vals, encoded_trees = encode.encode_trees([pfo['tree'] for pfo in all_trees])
+    scale_vals, encoded_trees = encode.encode_trees([pfo["tree"] for pfo in all_trees])
     sstats = []
     for itr, (sval, pfo) in enumerate(zip(scale_vals, all_trees)):
-        sstats.append({'tree': itr + args.itrial_start, 'mean_branch_length': sval, 'total_branch_length' : sum(n.dist for n in pfo['tree'].iter_descendants())})
-    responses = [{k: p["%s-response" % k] for k in ["birth", "death"]} for p in all_trees]
+        sstats.append(
+            {
+                "tree": itr + args.itrial_start,
+                "mean_branch_length": sval,
+                "total_branch_length": sum(
+                    n.dist for n in pfo["tree"].iter_descendants()
+                ),
+            }
+        )
+    responses = [
+        {k: p["%s-response" % k] for k in ["birth", "death"]} for p in all_trees
+    ]
     encode.write_training_files(args.outdir, encoded_trees, responses, sstats)
 
 
@@ -389,9 +442,25 @@ parser.add_argument(
     type=int,
     help="Number of times to retry simulation if it fails due to reaching either the min or max number of leaves.",
 )
-parser.add_argument("--time-to-sampling-values", default=[20], nargs='+', type=int, help="List of values from which to choose for time to sampling.")
-parser.add_argument("--time-to-sampling-range", nargs='+', type=int, help="Pair of values (min/max) between which to choose at uniform random the time to sampling for each tree. Overrides --time-to-sampling-values.")
-parser.add_argument("--simu-bundle-size", default=1, type=int, help='By default, we choose a new set of parameters for each tree. If this arg is set, once we\'ve chosen a set of parameter values, we simulate this many trees with those values.')
+parser.add_argument(
+    "--time-to-sampling-values",
+    default=[20],
+    nargs="+",
+    type=int,
+    help="List of values from which to choose for time to sampling.",
+)
+parser.add_argument(
+    "--time-to-sampling-range",
+    nargs="+",
+    type=int,
+    help="Pair of values (min/max) between which to choose at uniform random the time to sampling for each tree. Overrides --time-to-sampling-values.",
+)
+parser.add_argument(
+    "--simu-bundle-size",
+    default=1,
+    type=int,
+    help="By default, we choose a new set of parameters for each tree. If this arg is set, once we've chosen a set of parameter values, we simulate this many trees with those values.",
+)
 parser.add_argument("--min-survivors", default=100, type=int)
 parser.add_argument("--carry-cap", default=300, type=int)
 parser.add_argument(
@@ -415,14 +484,58 @@ parser.add_argument(
     type=float,
     help="value (parameter) for constant death response",
 )
-parser.add_argument("--xscale-values", default=[2], nargs='+', type=float, help="list of birth response xscale parameter values from which to choose")
-parser.add_argument("--xshift-values", default=[-2.5], nargs='+', type=float, help="list of birth response xshift parameter values from which to choose")
-parser.add_argument("--yscale-values", default=[1], nargs='+', type=float, help="list of birth response yscale parameter values from which to choose")
-parser.add_argument("--xscale-range", nargs='+', type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response xscale parameter for each tree. Overrides --xscale-values.")
-parser.add_argument("--xshift-range", nargs='+', type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response xshift parameter for each tree. Overrides --xshift-values.")
-parser.add_argument("--yscale-range", nargs='+', type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response yscale parameter for each tree. Overrides --yscale-values.")
-parser.add_argument("--initial-birth-rate-range", default=[2, 10], nargs='+', type=float, help="Pair of values (min/max) for initial/default/average growth rate (i.e. when affinity/x=0). Used to set --yscale.")
-parser.add_argument("--yshift", default=0, type=float, help="atm this shouldn't (need to, at least) be changed")
+parser.add_argument(
+    "--xscale-values",
+    default=[2],
+    nargs="+",
+    type=float,
+    help="list of birth response xscale parameter values from which to choose",
+)
+parser.add_argument(
+    "--xshift-values",
+    default=[-2.5],
+    nargs="+",
+    type=float,
+    help="list of birth response xshift parameter values from which to choose",
+)
+parser.add_argument(
+    "--yscale-values",
+    default=[1],
+    nargs="+",
+    type=float,
+    help="list of birth response yscale parameter values from which to choose",
+)
+parser.add_argument(
+    "--xscale-range",
+    nargs="+",
+    type=float,
+    help="Pair of values (min/max) between which to choose at uniform random the birth response xscale parameter for each tree. Overrides --xscale-values.",
+)
+parser.add_argument(
+    "--xshift-range",
+    nargs="+",
+    type=float,
+    help="Pair of values (min/max) between which to choose at uniform random the birth response xshift parameter for each tree. Overrides --xshift-values.",
+)
+parser.add_argument(
+    "--yscale-range",
+    nargs="+",
+    type=float,
+    help="Pair of values (min/max) between which to choose at uniform random the birth response yscale parameter for each tree. Overrides --yscale-values.",
+)
+parser.add_argument(
+    "--initial-birth-rate-range",
+    default=[2, 10],
+    nargs="+",
+    type=float,
+    help="Pair of values (min/max) for initial/default/average growth rate (i.e. when affinity/x=0). Used to set --yscale.",
+)
+parser.add_argument(
+    "--yshift",
+    default=0,
+    type=float,
+    help="atm this shouldn't (need to, at least) be changed",
+)
 parser.add_argument("--mutability-multiplier", default=0.68, type=float)
 parser.add_argument(
     "--n-sub-procs",
@@ -440,7 +553,12 @@ parser.add_argument(
     default=0,
     help="if running sub procs (--n-sub-procs) set this so each sub proc's trial index starts at the proper value",
 )
-parser.add_argument("--debug", type=int, default=0, help='Verbosity level; set to 1 or 2 for more debug output.')
+parser.add_argument(
+    "--debug",
+    type=int,
+    default=0,
+    help="Verbosity level; set to 1 or 2 for more debug output.",
+)
 parser.add_argument("--overwrite", action="store_true")
 parser.add_argument(
     "--dont-run-new-simu",
@@ -452,15 +570,19 @@ parser.add_argument(
     action="store_true",
     help="sets some default parameter values that run quickly and successfully, i.e. useful for quick tests",
 )
-parser.add_argument("--make-plots", action="store_true", help='')
-parser.add_argument("--n-to-plot", type=int, default=10, help='number of tree slice plots to make')
+parser.add_argument("--make-plots", action="store_true", help="")
+parser.add_argument(
+    "--n-to-plot", type=int, default=10, help="number of tree slice plots to make"
+)
 
 args = parser.parse_args()
 # handle args that can have either a list of a few values, or choose from a uniform interval specified with two (min, max) values
-for pname in ['xscale', 'xshift', 'yscale', 'time_to_sampling']:
-    rangevals = getattr(args, pname + '_range')
-    if rangevals is not None and len(rangevals) != 2:  # range with two values for continuous
-        raise Exception('range must consist of two values but got %d' % len(rangevals))
+for pname in ["xscale", "xshift", "yscale", "time_to_sampling"]:
+    rangevals = getattr(args, pname + "_range")
+    if (
+        rangevals is not None and len(rangevals) != 2
+    ):  # range with two values for continuous
+        raise Exception("range must consist of two values but got %d" % len(rangevals))
 random.seed(args.seed)
 np.random.seed(args.seed)
 
@@ -471,7 +593,7 @@ if args.test:
     if "--n-trials" not in sys.argv:
         args.n_trials = 1
     if "--time-to-sampling" not in sys.argv:
-        args.time_to_sampling = {'vals' : 10}
+        args.time_to_sampling = {"vals": 10}
     if "--min-survivors" not in sys.argv:
         args.min_survivors = 10
     if "--n-seqs" not in sys.argv:
@@ -495,18 +617,43 @@ if (
 ):  # this stuff is all copied from partis utils.py, gd it this would be like three lines if i could import that
     procs = []
     if args.n_trials % args.n_sub_procs != 0:
-        raise Exception('--n-trials %d has to be divisible by --n-sub-procs %d, but got remainder %d (otherwise it\'s too easy to run into issues with bundling)' % (args.n_trials, args.n_sub_procs, args.n_trials % args.n_sub_procs))
+        raise Exception(
+            "--n-trials %d has to be divisible by --n-sub-procs %d, but got remainder %d (otherwise it's too easy to run into issues with bundling)"
+            % (args.n_trials, args.n_sub_procs, args.n_trials % args.n_sub_procs)
+        )
     n_per_proc = int(args.n_trials / float(args.n_sub_procs))
-    print('    starting %d procs with %d events per proc' % (args.n_sub_procs, n_per_proc))
-    if args.simu_bundle_size != 1:  # make sure that all chunks of trees with same parameters are of same length, i.e. that last chunk isn't smaller (especially important if this is a subproc whose output will be smashed together with others)
+    print(
+        "    starting %d procs with %d events per proc" % (args.n_sub_procs, n_per_proc)
+    )
+    if (
+        args.simu_bundle_size != 1
+    ):  # make sure that all chunks of trees with same parameters are of same length, i.e. that last chunk isn't smaller (especially important if this is a subproc whose output will be smashed together with others)
         if n_per_proc % args.simu_bundle_size != 0:
-            raise Exception('--n-trees-per-param-set %d has to evenly divide N trees per proc %d ( = --n-trials / --n-sub-procs = %d / %d), but got remainder %d' % (args.simu_bundle_size, n_per_proc, args.n_trials, args.n_sub_procs, n_per_proc % args.simu_bundle_size))
-        print('      bundling %d trees per set of parameter values (%d bundles per sub proc)' % (args.simu_bundle_size, n_per_proc / args.simu_bundle_size))
+            raise Exception(
+                "--n-trees-per-param-set %d has to evenly divide N trees per proc %d ( = --n-trials / --n-sub-procs = %d / %d), but got remainder %d"
+                % (
+                    args.simu_bundle_size,
+                    n_per_proc,
+                    args.n_trials,
+                    args.n_sub_procs,
+                    n_per_proc % args.simu_bundle_size,
+                )
+            )
+        print(
+            "      bundling %d trees per set of parameter values (%d bundles per sub proc)"
+            % (args.simu_bundle_size, n_per_proc / args.simu_bundle_size)
+        )
     for iproc in range(args.n_sub_procs):
         clist = ["python"] + copy.deepcopy(sys.argv)
         subdir = "%s/iproc-%d" % (args.outdir, iproc)
         istart = iproc * n_per_proc
-        if all(os.path.exists(outfn(ft, None, odir=subdir)) for ft in encode.final_ofn_strs) and not args.overwrite:
+        if (
+            all(
+                os.path.exists(outfn(ft, None, odir=subdir))
+                for ft in encode.final_ofn_strs
+            )
+            and not args.overwrite
+        ):
             print("        proc %d: final outputs exist" % iproc)
             sys.stdout.flush()
             continue
@@ -554,35 +701,48 @@ if (
                     )
         sys.stdout.flush()
         time.sleep(0.01 / max(1, len(procs)))
-    print('    writing merged files to %s' % args.outdir)
-    print('        N files   time (s)  memory %   ftype')
+    print("    writing merged files to %s" % args.outdir)
+    print("        N files   time (s)  memory %   ftype")
     for ftype in encode.final_ofn_strs:
         ofn = outfn(ftype, None)
-        fnames = [outfn(ftype, None, odir="%s/iproc-%d" % (args.outdir, i)) for i in range(args.n_sub_procs)]
+        fnames = [
+            outfn(ftype, None, odir="%s/iproc-%d" % (args.outdir, i))
+            for i in range(args.n_sub_procs)
+        ]
         start = time.time()
-        if ftype in ['seqs', 'trees', 'leaf-meta', 'summary-stats']:
-            if ftype in ['leaf-meta', 'summary-stats']:
-                cmds = ['head -n1 %s >%s' % (fnames[0], ofn),
-                        'tail --quiet -n+2 %s >>%s' % (' '.join(fnames), ofn)]
+        if ftype in ["seqs", "trees", "leaf-meta", "summary-stats"]:
+            if ftype in ["leaf-meta", "summary-stats"]:
+                cmds = [
+                    "head -n1 %s >%s" % (fnames[0], ofn),
+                    "tail --quiet -n+2 %s >>%s" % (" ".join(fnames), ofn),
+                ]
             else:
-                cmds = ['cat %s >%s' % (' '.join(fnames), ofn)]
+                cmds = ["cat %s >%s" % (" ".join(fnames), ofn)]
             for cmd in cmds:
                 subprocess.check_call(cmd, shell=True)
-        elif ftype in ['encoded-trees']:
+        elif ftype in ["encoded-trees"]:
             all_etrees = [e for fn in fnames for e in encode.read_trees(fn)]
             encode.write_trees(ofn, all_etrees)
-        elif ftype in ['responses']:
+        elif ftype in ["responses"]:
             all_responses = []
             for fn in fnames:
                 with open(fn, "rb") as rfile:
                     all_responses += pickle.load(rfile)
-            with open(ofn, 'wb') as rfile:
+            with open(ofn, "wb") as rfile:
                 dill.dump(all_responses, rfile)
         else:
-            raise Exception('unexpected file type %s' % ftype)
-        print('         %3d      %5.2f   %7.2f      %s' % (len(fnames), time.time() - start, 100 * utils.memory_usage_fraction(), ftype))
+            raise Exception("unexpected file type %s" % ftype)
+        print(
+            "         %3d      %5.2f   %7.2f      %s"
+            % (
+                len(fnames),
+                time.time() - start,
+                100 * utils.memory_usage_fraction(),
+                ftype,
+            )
+        )
     if args.make_plots:
-        print('  note: can\'t make plots in main process when --n-sub-procs is set')
+        print("  note: can't make plots in main process when --n-sub-procs is set")
     sys.exit(0)
 
 assert args.death_value >= 0
@@ -590,7 +750,7 @@ assert args.death_value >= 0
 if not os.path.exists(args.outdir):
     os.makedirs(args.outdir)
 if args.make_plots:
-    for sfn in glob.glob('%s/plots/tree-slices/*.svg' % args.outdir):
+    for sfn in glob.glob("%s/plots/tree-slices/*.svg" % args.outdir):
         os.remove(sfn)
 
 dmsfo = replay.dms(debug=True)
@@ -614,7 +774,11 @@ mutation_resp = poisson.SequenceContextMutationResponse(
 all_seqs, all_trees = [], []
 n_missing = 0
 rng = np.random.default_rng(seed=args.seed)
-params, n_times_used, param_counters = None, 0, {}  # parameter values, and number of trees that we've simulated with these parameter values
+params, n_times_used, param_counters = (
+    None,
+    0,
+    {},
+)  # parameter values, and number of trees that we've simulated with these parameter values
 all_fns = [[]]  # just for plotting
 for itrial in range(args.itrial_start, args.n_trials):
     check_memory()
@@ -623,7 +787,9 @@ for itrial in range(args.itrial_start, args.n_trials):
         print("    output %s already exists, skipping" % ofn)
         pfo = read_dill_file(ofn)
         if args.make_plots:
-            print('    note: can\'t make tree slice plots when reading pickle files (i.e. you need to rm/overwrite to actually rerun the simulation), since we write pruned trees')
+            print(
+                "    note: can't make tree slice plots when reading pickle files (i.e. you need to rm/overwrite to actually rerun the simulation), since we write pruned trees"
+            )
         if pfo is None:  # file is screwed up and we want to rerun
             print("    rerunning")
         else:
@@ -634,14 +800,24 @@ for itrial in range(args.itrial_start, args.n_trials):
         n_missing += 1
         continue
     sys.stdout.flush()
-    if params is None or n_times_used == args.simu_bundle_size:  # first time through loop or start of a new bundle
+    if (
+        params is None or n_times_used == args.simu_bundle_size
+    ):  # first time through loop or start of a new bundle
         params = choose_params()
         n_times_used = 0
     n_times_used += 1
-    birth_resp, death_resp = get_responses(params['xscale'], params['xshift'], params['yscale'])
+    birth_resp, death_resp = get_responses(
+        params["xscale"], params["xshift"], params["yscale"]
+    )
     print(utils.color("blue", "trial %d:" % itrial), end=" ")
     fn, tree = generate_sequences_and_tree(
-        params['time_to_sampling'], birth_resp, death_resp, mutation_resp, mutator, itrial, seed=rng
+        params["time_to_sampling"],
+        birth_resp,
+        death_resp,
+        mutation_resp,
+        mutator,
+        itrial,
+        seed=rng,
     )
     if tree is None:
         n_missing += 1
@@ -682,13 +858,25 @@ if n_missing > 0:
 
 write_final_outputs(all_seqs, all_trees)
 
-if args.make_plots and args.birth_response == 'sigmoid':  # could plot other ones, but I think I need to modify some things, and I don't need it atm
-    utils.plot_phenotype_response(args.outdir + "/plots/responses", all_trees, bundle_size=args.simu_bundle_size, fnames=all_fns)
-    utils.plot_chosen_params(args.outdir + "/plots/params", param_counters, {p : getattr(args, p.replace('-', '_')+'_range') for p in param_counters}, fnames=all_fns)
-    utils.make_html(args.outdir + '/plots', fnames=all_fns)
+if (
+    args.make_plots and args.birth_response == "sigmoid"
+):  # could plot other ones, but I think I need to modify some things, and I don't need it atm
+    utils.plot_phenotype_response(
+        args.outdir + "/plots/responses",
+        all_trees,
+        bundle_size=args.simu_bundle_size,
+        fnames=all_fns,
+    )
+    utils.plot_chosen_params(
+        args.outdir + "/plots/params",
+        param_counters,
+        {p: getattr(args, p.replace("-", "_") + "_range") for p in param_counters},
+        fnames=all_fns,
+    )
+    utils.make_html(args.outdir + "/plots", fnames=all_fns)
 
-print('    sampled parameter values:               min      max')
+print("    sampled parameter values:               min      max")
 for pname, pvals in sorted(param_counters.items()):
-    print('                      %17s  %7.2f  %7.2f' % (pname, min(pvals), max(pvals)))
+    print("                      %17s  %7.2f  %7.2f" % (pname, min(pvals), max(pvals)))
 
 print("    total simulation time: %.1f sec" % (time.time() - start))

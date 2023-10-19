@@ -92,7 +92,6 @@ class TreeNode(ete3.Tree):
         """
         self._pruned = False
 
-
     def _birth_outcome(
         self, birth_mutations: bool, mutator: mutators.Mutator, rng: np.random.Generator
     ) -> Iterator[TreeNode]:

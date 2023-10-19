@@ -17,6 +17,7 @@ layers = keras.layers
 
 class Callback(tf.keras.callbacks.Callback):
     """Class for control Keras verbosity"""
+
     epoch = 0
     start_time = time.time()
     last_time = time.time()
@@ -26,22 +27,41 @@ class Callback(tf.keras.callbacks.Callback):
         self.use_validation = use_validation
 
     def on_train_begin(self, epoch, logs=None):
-        print('              %s   epoch   total' % ('   valid' if self.use_validation else ''))
-        print('   epoch  loss%s    time    time' % ('    loss' if self.use_validation else ''))
+        print(
+            "              %s   epoch   total"
+            % ("   valid" if self.use_validation else "")
+        )
+        print(
+            "   epoch  loss%s    time    time"
+            % ("    loss" if self.use_validation else "")
+        )
 
     def on_epoch_begin(self, epoch, logs=None):
         self.epoch = epoch
 
     def on_epoch_end(self, batch, logs=None):
         if self.epoch == 0 or self.epoch % self.n_between == 0:
-            def lfmt(lv): return ('%7.3f' if lv < 1 else '%7.2f') % lv
-            print('  %3d  %s%s    %.1f     %.1f' % (self.epoch, lfmt(logs['loss']), ' ' + lfmt(logs['val_loss']) if self.use_validation else '', time.time() - self.last_time, time.time() - self.start_time))
+
+            def lfmt(lv):
+                return ("%7.3f" if lv < 1 else "%7.2f") % lv
+
+            print(
+                "  %3d  %s%s    %.1f     %.1f"
+                % (
+                    self.epoch,
+                    lfmt(logs["loss"]),
+                    " " + lfmt(logs["val_loss"]) if self.use_validation else "",
+                    time.time() - self.last_time,
+                    time.time() - self.start_time,
+                )
+            )
             sys.stdout.flush()
         self.last_time = time.time()
 
 
 class BundleMeanLayer(layers.Layer):
     """Assume that the input is of shape (number_of_bundles, bundle_size, feature_dim)."""
+
     def __init__(self, **kwargs):
         super(BundleMeanLayer, self).__init__(**kwargs)
 
@@ -49,7 +69,10 @@ class BundleMeanLayer(layers.Layer):
         return tf.reduce_mean(inputs, axis=1)  # compute mean over the bundle_size axis
 
     def compute_output_shape(self, input_shape):
-        return (input_shape[0], input_shape[2])  # output shape is (number_of_bundles, feature_dim)
+        return (
+            input_shape[0],
+            input_shape[2],
+        )  # output shape is (number_of_bundles, feature_dim)
 
 
 class NeuralNetworkModel:
@@ -93,30 +116,52 @@ class NeuralNetworkModel:
 
         self.build_model(dropout_rate, learning_rate, ema_momentum)
 
-    def build_model(self, dropout_rate, learning_rate, ema_momentum, actfn = 'elu'):
+    def build_model(self, dropout_rate, learning_rate, ema_momentum, actfn="elu"):
         # The TimeDistributed layer wrapper allows us to apply the inner layer (e.g., Conv1D) to each "time step"
         # of the input tensor independently. In our specific context, our data is structured in the format of:
         # (number_of_examples, bundle_size, feature_dim, max_leaf_count). We're essentially treating the
         # 'bundle_size' dimension as if it were the "time" or "sequence length" dimension. This means that
         # for every example, the inner layer is applied to each item within a bundle independently.
 
-        print('    building model with bundle size %d (%d training trees in %d bundles): dropout %.2f   learn rate %.4f   momentum %.4f' % (self.bundle_size, len(self.training_trees), len(self.training_trees) / self.bundle_size, dropout_rate, learning_rate, ema_momentum))
+        print(
+            "    building model with bundle size %d (%d training trees in %d bundles): dropout %.2f   learn rate %.4f   momentum %.4f"
+            % (
+                self.bundle_size,
+                len(self.training_trees),
+                len(self.training_trees) / self.bundle_size,
+                dropout_rate,
+                learning_rate,
+                ema_momentum,
+            )
+        )
 
-        num_parameters = sum(len(response._param_dict) for response in self.responses[0])
+        num_parameters = sum(
+            len(response._param_dict) for response in self.responses[0]
+        )
 
         network_layers = [  # if you want to add alternate model layer architectures, do it with subclassing
             layers.Lambda(lambda x: tf.transpose(x, (0, 1, 3, 2))),
-            layers.TimeDistributed(layers.Conv1D(filters=25, kernel_size=4, activation=actfn)),
-            layers.TimeDistributed(layers.Conv1D(filters=25, kernel_size=4, activation=actfn)),
-            layers.TimeDistributed(layers.MaxPooling1D(pool_size=2, strides=2)),  # Downsampling by a factor of 2
-            layers.TimeDistributed(layers.Conv1D(filters=40, kernel_size=4, activation=actfn)),
+            layers.TimeDistributed(
+                layers.Conv1D(filters=25, kernel_size=4, activation=actfn)
+            ),
+            layers.TimeDistributed(
+                layers.Conv1D(filters=25, kernel_size=4, activation=actfn)
+            ),
+            layers.TimeDistributed(
+                layers.MaxPooling1D(pool_size=2, strides=2)
+            ),  # Downsampling by a factor of 2
+            layers.TimeDistributed(
+                layers.Conv1D(filters=40, kernel_size=4, activation=actfn)
+            ),
             layers.TimeDistributed(layers.GlobalAveragePooling1D()),
             BundleMeanLayer(),
         ]
         dense_unit_list = [48, 32, 16, 8]
         for idense, n_units in enumerate(dense_unit_list):
             network_layers.append(layers.Dense(n_units, activation=actfn))
-            if dropout_rate != 0 and idense < len(dense_unit_list) - 1:  # add a dropout layer after each one except the last
+            if (
+                dropout_rate != 0 and idense < len(dense_unit_list) - 1
+            ):  # add a dropout layer after each one except the last
                 network_layers.append(layers.Dropout(dropout_rate))
         network_layers.append(layers.Dense(num_parameters))
 
@@ -124,7 +169,9 @@ class NeuralNetworkModel:
         outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
         self.network = keras.Model(inputs=inputs, outputs=outputs)
         self.network.summary(print_fn=lambda x: print("      %s" % x))
-        optimizer = keras.optimizers.Adam(learning_rate=learning_rate, use_ema=True, ema_momentum=ema_momentum)
+        optimizer = keras.optimizers.Adam(
+            learning_rate=learning_rate, use_ema=True, ema_momentum=ema_momentum
+        )
         self.network.compile(loss="mean_squared_error", optimizer=optimizer)
 
     @classmethod
@@ -133,7 +180,9 @@ class NeuralNetworkModel:
     ) -> onp.ndarray[float]:
         return onp.array(
             [
-                onp.hstack([response._flatten()[2] for response in row])  # [2] is the list of parameter values
+                onp.hstack(
+                    [response._flatten()[2] for response in row]
+                )  # [2] is the list of parameter values
                 for row in responses
             ]
         )
@@ -198,7 +247,10 @@ class NeuralNetworkModel:
         """
         list_of_bundles is a flat list with bundles of identical items, e.g. [3,3,5,5,8,8].
         """
-        return [self._collapse_identical_list(lst) for lst in self._partition_list(list_of_bundles, self.bundle_size)]
+        return [
+            self._collapse_identical_list(lst)
+            for lst in self._partition_list(list_of_bundles, self.bundle_size)
+        ]
 
     def _reshape_data_wrt_bundle_size(self, data):
         """
@@ -206,7 +258,9 @@ class NeuralNetworkModel:
         """
         assert data.shape[0] % self.bundle_size == 0
         num_bundles = data.shape[0] // self.bundle_size
-        return data.reshape((num_bundles, self.bundle_size, data.shape[1], data.shape[2]))
+        return data.reshape(
+            (num_bundles, self.bundle_size, data.shape[1], data.shape[2])
+        )
 
     def _prepare_trees_for_network_input(self, trees):
         """
@@ -216,10 +270,17 @@ class NeuralNetworkModel:
 
     def fit(self, epochs: int = 30, validation_split: float = 0):
         """Trains neural network on given trees and response parameters."""
-        response_parameters = self._encode_responses(self._take_one_identical_item_per_bundle(self.responses))
-        self.network.fit(self._prepare_trees_for_network_input(self.training_trees), response_parameters,
-                         epochs=epochs, callbacks=[Callback(epochs, use_validation=validation_split > 0)], verbose=0, validation_split=validation_split
-                         )
+        response_parameters = self._encode_responses(
+            self._take_one_identical_item_per_bundle(self.responses)
+        )
+        self.network.fit(
+            self._prepare_trees_for_network_input(self.training_trees),
+            response_parameters,
+            epochs=epochs,
+            callbacks=[Callback(epochs, use_validation=validation_split > 0)],
+            verbose=0,
+            validation_split=validation_split,
+        )
 
     def predict(
         self,
@@ -227,7 +288,9 @@ class NeuralNetworkModel:
     ) -> list[list[poisson.Response]]:
         """Returns the Response objects predicted for each tree."""
 
-        predicted_responses = self.network(self._prepare_trees_for_network_input(encoded_trees))
+        predicted_responses = self.network(
+            self._prepare_trees_for_network_input(encoded_trees)
+        )
 
         return self._decode_responses(
             predicted_responses, example_responses=self.responses[0]

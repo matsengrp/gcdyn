@@ -21,11 +21,12 @@ parser.add_argument("--n-trees-per-expt", required=True, type=int)
 parser.add_argument("--params-to-predict", default=["xscale", "xshift"], nargs="+")
 args = parser.parse_args()
 
+
 # ----------------------------------------------------------------------------------------
 def read_values(vtype):
     vtvals = {}
     n_lines = 0
-    with open('%s/%s.csv' % (args.indir, vtype)) as cfile:
+    with open("%s/%s.csv" % (args.indir, vtype)) as cfile:
         for cln in csv.DictReader(filter(lambda x: x[0] != "#", cfile)):
             n_lines += 1
             tvals, pvals = [
@@ -41,13 +42,17 @@ def read_values(vtype):
             vtype,
             n_lines,
             len(vtvals),
-            " ".join("(" + " ".join("%.2f," % v for v in vals) + ")" for vals in sorted(vtvals)),
+            " ".join(
+                "(" + " ".join("%.2f," % v for v in vals) + ")"
+                for vals in sorted(vtvals)
+            ),
         )
     )
     return vtvals
 
+
 # ----------------------------------------------------------------------------------------
-vtypes = ['train', 'test']
+vtypes = ["train", "test"]
 
 prdfs = {}
 for vtp in vtypes:
@@ -67,7 +72,10 @@ for vtp in vtypes:
                     }
                 )
             final_vals.append(fline)
-    def tstr(tpl): return '(' + ' '.join(['%.2f,'%v for v in tpl]) + ')'
+
+    def tstr(tpl):
+        return "(" + " ".join(["%.2f," % v for v in tpl]) + ")"
+
     print(
         "       grouped into %d final lines with value counts: %s"
         % (
@@ -80,7 +88,8 @@ for vtp in vtypes:
                         [
                             x
                             for x in final_vals
-                            if tuple(x["%s-truth" % p] for p in args.params_to_predict) == v
+                            if tuple(x["%s-truth" % p] for p in args.params_to_predict)
+                            == v
                         ]
                     ),
                 )
@@ -89,7 +98,7 @@ for vtp in vtypes:
         )
     )
 
-    ofn = '%s/%s.csv' % (args.outdir, vtp)
+    ofn = "%s/%s.csv" % (args.outdir, vtp)
     print("       writing %d lines to %s" % (len(final_vals), ofn))
     if not os.path.exists(args.outdir):
         os.makedirs(args.outdir)

@@ -39,14 +39,21 @@ def encode_tree(
         assert tmptr.up is None or num_children in {
             0,
             2,
-        }, "Only full binary trees are supported, but found node with %d children" % num_children
+        }, (
+            "Only full binary trees are supported, but found node with %d children"
+            % num_children
+        )
 
-        for child in tmptr.children[: num_children // 2]:  # trivial loop over single lefthand subtree/node
+        for child in tmptr.children[
+            : num_children // 2
+        ]:  # trivial loop over single lefthand subtree/node
             yield from traverse_inorder(child)
 
         yield tmptr
 
-        for child in tmptr.children[num_children // 2 :]:  # trivial loop over single rightand subtree/node
+        for child in tmptr.children[
+            num_children // 2 :
+        ]:  # trivial loop over single rightand subtree/node
             yield from traverse_inorder(child)
 
     if not dont_scale:
@@ -89,7 +96,7 @@ def scale_tree(
     intree: TreeNode,
 ) -> (float, TreeNode):
     """Scale intree to average branch length 1, i.e. divide all branches by the average branch length.
-       Returns initial average branch length brlen and scaled tree outtree."""
+    Returns initial average branch length brlen and scaled tree outtree."""
     mean_brlen = np.mean([lf.t for lf in intree.iter_leaves()])
     outtree = copy.copy(intree)
     for node in outtree.iter_descendants():
@@ -107,13 +114,24 @@ def encode_trees(
     for each tree) and list of scaled, encoded trees."""
     scale_vals, enc_trees = [], []
     for intr in intrees:
-        brlen, sctree = scale_tree(intr)  # rescale separately so we can store the branch len
+        brlen, sctree = scale_tree(
+            intr
+        )  # rescale separately so we can store the branch len
         scale_vals.append(brlen)
-        enc_trees.append(encode_tree(sctree, max_leaf_count=max_leaf_count, ladderize=ladderize, dont_scale=True))
+        enc_trees.append(
+            encode_tree(
+                sctree,
+                max_leaf_count=max_leaf_count,
+                ladderize=ladderize,
+                dont_scale=True,
+            )
+        )
     return scale_vals, enc_trees
 
 
-def trivialize_encodings(encoded_trees, param_vals, noise=False, max_print=10, n_debug=0, debug=False):
+def trivialize_encodings(
+    encoded_trees, param_vals, noise=False, max_print=10, n_debug=0, debug=False
+):
     """Convert encoded_trees to a "trivialized" encoding, i.e. one that replaces the actual tree
     information with the response parameter values that we're trying to predict."""
 
@@ -122,21 +140,30 @@ def trivialize_encodings(encoded_trees, param_vals, noise=False, max_print=10, n
         if noise:
             rval += np.random.uniform(-0.1 * rval, 0.1 * rval)
         return rval
+
     def estr(tstr, entr):
-        return '    %6s: %s' % (tstr, '\n            '.join(' '.join('%5.2f'%v for v in list(l[:max_print])) + ' ...' for l in entr))
+        return "    %6s: %s" % (
+            tstr,
+            "\n            ".join(
+                " ".join("%5.2f" % v for v in list(l[:max_print])) + " ..."
+                for l in entr
+            ),
+        )
 
     if debug or n_debug > 0:
-        print(' trivializing encodings')
-        np.set_printoptions(edgeitems=30, linewidth=100000, formatter=dict(float=lambda x: "%.3g" % x))
+        print(" trivializing encodings")
+        np.set_printoptions(
+            edgeitems=30, linewidth=100000, formatter=dict(float=lambda x: "%.3g" % x)
+        )
     for itree, entr in enumerate(encoded_trees):
         if debug or itree < n_debug:
-            print('  itree %d' % itree)
-            print(estr('before', entr))
+            print("  itree %d" % itree)
+            print(estr("before", entr))
         for irow in range(len(entr)):
             for icol in range(len(entr[irow])):
                 entr[irow][icol] = getval(itree, icol)
         if debug or itree < n_debug:
-            print(estr('after', entr))
+            print(estr("after", entr))
 
 
 def pad_trees(
@@ -184,7 +211,14 @@ def read_trees(filename: str):
     return np.load(filename)
 
 
-final_ofn_strs = ['seqs', 'trees', 'leaf-meta', 'encoded-trees', 'responses', 'summary-stats']
+final_ofn_strs = [
+    "seqs",
+    "trees",
+    "leaf-meta",
+    "encoded-trees",
+    "responses",
+    "summary-stats",
+]
 
 
 def simfn(odir, ftype, itrial):
@@ -203,22 +237,22 @@ def simfn(odir, ftype, itrial):
     else:
         assert ftype is None
         ftype = "tree_%d" % itrial
-        sfx = 'pkl'
+        sfx = "pkl"
     return f"{odir}/{ftype}.{sfx}"
 
 
-def write_training_files(outdir, encoded_trees, responses, sstats, dbgstr=''):
+def write_training_files(outdir, encoded_trees, responses, sstats, dbgstr=""):
     """Write encoded tree .npy, response fcn .pkl, and summary stat .csv files."""
-    if dbgstr != '':
-        print('      writing %s files to %s' % (dbgstr, outdir))
+    if dbgstr != "":
+        print("      writing %s files to %s" % (dbgstr, outdir))
     if not os.path.exists(outdir):
         os.makedirs(outdir)
     write_trees(simfn(outdir, "encoded-trees", None), encoded_trees)
     with open(simfn(outdir, "summary-stats", None), "w") as jfile:
-        fieldnames = ['tree', 'mean_branch_length', 'total_branch_length']
+        fieldnames = ["tree", "mean_branch_length", "total_branch_length"]
         writer = csv.DictWriter(jfile, fieldnames)
         writer.writeheader()
         for sline in sstats:
-            writer.writerow({k : v for k, v in sline.items() if k in fieldnames})
+            writer.writerow({k: v for k, v in sline.items() if k in fieldnames})
     with open(simfn(outdir, "responses", None), "wb") as pfile:
         dill.dump(responses, pfile)
