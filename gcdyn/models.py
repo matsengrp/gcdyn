@@ -439,7 +439,9 @@ def stadler_full_log_likelihood_scipy(
             raise RuntimeError("tree must be sampled")
 
     # This likelihood requires a discrete type space to be specified
-    assert isinstance(mutator, mutators.DiscreteMutator)  # NOTE lint is forcing me (duncan) to use isinstance instead of comparing types, but I don't know anything about this fcn and I don't think it runs in tests
+    assert isinstance(
+        mutator, mutators.DiscreteMutator
+    )  # NOTE lint is forcing me (duncan) to use isinstance instead of comparing types, but I don't know anything about this fcn and I don't think it runs in tests
     type_space = onp.array(list(mutator.state_space.keys()))
     assert onp.all(onp.diagonal(mutator.transition_matrix) == 0)
     mutation_probs = mutator.transition_matrix
