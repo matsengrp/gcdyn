@@ -593,8 +593,9 @@ if args.make_plots:
     for sfn in glob.glob('%s/plots/tree-slices/*.svg' % args.outdir):
         os.remove(sfn)
 
+dmsfo = replay.dms(debug=True)
 gp_map = gpmap.AdditiveGPMap(
-    replay.dms()["affinity"], nonsense_phenotype=replay.dms()["affinity"].min().min()
+    dmsfo["affinity"], nonsense_phenotype=dmsfo["affinity"].min().min()
 )
 assert gp_map(replay.NAIVE_SEQUENCE) == 0
 
