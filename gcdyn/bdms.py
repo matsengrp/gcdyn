@@ -295,7 +295,7 @@ class TreeNode(ete3.Tree):
             )
             Δt = min(waiting_time, end_time - current_time)
             current_time += Δt
-            # current_time <= end_time  # turning off since it got triggered, should at some point investigate this
+            # assert current_time <= end_time  # turning off since it got triggered, should at some point investigate this
             for node in active_nodes.values():
                 node.dist += Δt
                 node.t = current_time
