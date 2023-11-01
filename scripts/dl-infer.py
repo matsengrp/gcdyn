@@ -277,7 +277,10 @@ def get_parser():  # needed for sphinx docs
     parser.add_argument("--learning-rate", type=float, default=0.001)
     parser.add_argument("--ema-momentum", type=float, default=0.99)
     parser.add_argument(
-        "--train-frac", type=float, default=0.8, help="train on this fraction of the trees"
+        "--train-frac",
+        type=float,
+        default=0.8,
+        help="train on this fraction of the trees",
     )
     parser.add_argument(
         "--validation-split",
@@ -302,8 +305,9 @@ def get_parser():  # needed for sphinx docs
     parser.add_argument("--dont-scale-params", action="store_true")
     return parser
 
+
 # ----------------------------------------------------------------------------------------
-if __name__ == 'main':
+if __name__ == "main":
     parser = get_parser()
     start = time.time()
     args = parser.parse_args()

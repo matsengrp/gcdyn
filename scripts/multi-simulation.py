@@ -563,8 +563,9 @@ def get_parser():  # needed for sphinx docs
     )
     return parser
 
+
 # ----------------------------------------------------------------------------------------
-if __name__ == 'main':
+if __name__ == "main":  # noqa C901
     git_dir = os.path.dirname(os.path.realpath(__file__)).replace("/scripts", "/.git")
     print(
         "    gcdyn commit: %s"
@@ -580,10 +581,12 @@ if __name__ == 'main':
         if (
             rangevals is not None and len(rangevals) != 2
         ):  # range with two values for continuous
-            raise Exception("range must consist of two values but got %d" % len(rangevals))
+            raise Exception(
+                "range must consist of two values but got %d" % len(rangevals)
+            )
     random.seed(args.seed)
     np.random.seed(args.seed)
-    np.seterr(divide='ignore')
+    np.seterr(divide="ignore")
 
     start = time.time()
     if args.test:
@@ -622,7 +625,8 @@ if __name__ == 'main':
             )
         n_per_proc = int(args.n_trials / float(args.n_sub_procs))
         print(
-            "    starting %d procs with %d events per proc" % (args.n_sub_procs, n_per_proc)
+            "    starting %d procs with %d events per proc"
+            % (args.n_sub_procs, n_per_proc)
         )
         if (
             args.simu_bundle_size != 1
@@ -676,7 +680,8 @@ if __name__ == 'main':
             if os.path.exists(logfname):
                 subprocess.check_call(
                     (
-                        "mv %s %s.old.%d" % (logfname, logfname, random.randint(100, 999))
+                        "mv %s %s.old.%d"
+                        % (logfname, logfname, random.randint(100, 999))
                     ).split()
                 )  # can't be bothered to iterate properly like in the partis code
             subprocess.check_call("echo %s >%s" % (cmd_str, logfname), shell=True)
@@ -684,7 +689,9 @@ if __name__ == 'main':
             procs.append(subprocess.Popen(cmd_str, env=os.environ, shell=True))
             if args.n_max_procs is not None:
                 utils.limit_procs(procs, args.n_max_procs)
-        while procs.count(None) != len(procs):  # we set each proc to None when it finishes
+        while procs.count(None) != len(
+            procs
+        ):  # we set each proc to None when it finishes
             for iproc in range(len(procs)):
                 if procs[iproc] is None:  # already finished
                     continue
@@ -825,7 +832,11 @@ if __name__ == 'main':
 
         with open(ofn, "wb") as fp:
             dill.dump(
-                {"tree": tree, "birth-response": birth_resp, "death-response": death_resp},
+                {
+                    "tree": tree,
+                    "birth-response": birth_resp,
+                    "death-response": death_resp,
+                },
                 fp,
             )
 
@@ -876,6 +887,8 @@ if __name__ == 'main':
 
     print("    sampled parameter values:               min      max")
     for pname, pvals in sorted(param_counters.items()):
-        print("                      %17s  %7.2f  %7.2f" % (pname, min(pvals), max(pvals)))
+        print(
+            "                      %17s  %7.2f  %7.2f" % (pname, min(pvals), max(pvals))
+        )
 
     print("    total simulation time: %.1f sec" % (time.time() - start))

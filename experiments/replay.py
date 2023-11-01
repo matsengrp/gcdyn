@@ -14,7 +14,9 @@ NAIVE_SEQUENCE = "GAGGTGCAGCTTCAGGAGTCAGGACCTAGCCTCGTGAAACCTTCTCAGACTCTGTCCCTCAC
 CHAIN_2_START_IDX = 336
 """The index of the first nucleotide of the light chain in the naive sequence."""
 
-gcdyn_data_dir = os.path.join(os.path.dirname(sys.modules["gcdyn"].__file__), "data")  # NOTE uses utils import
+gcdyn_data_dir = os.path.join(
+    os.path.dirname(sys.modules["gcdyn"].__file__), "data"
+)  # NOTE uses utils import
 
 
 def mutability(fname: str = "MK_RS5NF_mutability.csv") -> pd.Series:

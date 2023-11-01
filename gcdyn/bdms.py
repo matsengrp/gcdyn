@@ -295,8 +295,13 @@ class TreeNode(ete3.Tree):
             )
             Δt = min(waiting_time, end_time - current_time)
             current_time += Δt
-            if current_time > end_time + 1e-8:  # 1e-8 is arbitrary, to account for floating point error
-                raise Exception('current time %f exceeded end time %f by more than %e' % (current_time, end_time, 1e-8))
+            if (
+                current_time > end_time + 1e-8
+            ):  # 1e-8 is arbitrary, to account for floating point error
+                raise Exception(
+                    "current time %f exceeded end time %f by more than %e"
+                    % (current_time, end_time, 1e-8)
+                )
             for node in active_nodes.values():
                 node.dist += Δt
                 node.t = current_time
