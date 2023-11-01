@@ -56,7 +56,6 @@ extensions = [
     "myst_nb",
 ]
 
-
 # -- Options for myst ----------------------------------------------
 myst_heading_anchors = 3  # auto-generate 3 levels of heading anchors
 myst_enable_extensions = ['dollarmath']

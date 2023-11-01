@@ -6,7 +6,7 @@ import sys
 from sklearn import preprocessing
 import tensorflow as tf
 
-import colored_traceback.always  # need to add this to installation stuff, i'm not sure how to do it atm
+import colored_traceback.always  # noqa: F401
 import time
 import pickle
 import pandas as pd
@@ -263,60 +263,64 @@ def train_and_test():
 
 
 # ----------------------------------------------------------------------------------------
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--indir",
-    required=True,
-    help="input directory with simulation output (uses encoded trees .npy, summary stats .csv, and response .pkl files)",
-)
-parser.add_argument("--outdir", required=True, help="output directory")
-parser.add_argument("--epochs", type=int, default=30)
-parser.add_argument("--bundle-size", type=int, default=50)
-parser.add_argument("--dropout-rate", type=float, default=0)
-parser.add_argument("--learning-rate", type=float, default=0.001)
-parser.add_argument("--ema-momentum", type=float, default=0.99)
-parser.add_argument(
-    "--train-frac", type=float, default=0.8, help="train on this fraction of the trees"
-)
-parser.add_argument(
-    "--validation-split",
-    type=float,
-    default=0.1,
-    help="fraction of training sample to tell keras to hold out for validation during training",
-)
-parser.add_argument(
-    "--params-to-predict",
-    default=["xscale", "xshift"],
-    nargs="+",
-    choices=["xscale", "xshift", "yscale"] + [k for k in sum_stat_scaled],
-)
-parser.add_argument(
-    "--test",
-    action="store_true",
-    help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly",
-)
-parser.add_argument("--random-seed", default=0, type=int, help="random seed")
-parser.add_argument("--overwrite", action="store_true")
-parser.add_argument("--use-trivial-encoding", action="store_true")
-parser.add_argument("--dont-scale-params", action="store_true")
-
-start = time.time()
-args = parser.parse_args()
-if args.test:
-    args.epochs = 10
-
-random.seed(args.random_seed)
-np.random.seed(args.random_seed)
-tf.keras.utils.set_random_seed(args.random_seed)
-
+def get_parser():  # needed for sphinx docs
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--indir",
+        required=True,
+        help="input directory with simulation output (uses encoded trees .npy, summary stats .csv, and response .pkl files)",
+    )
+    parser.add_argument("--outdir", required=True, help="output directory")
+    parser.add_argument("--epochs", type=int, default=30)
+    parser.add_argument("--bundle-size", type=int, default=50)
+    parser.add_argument("--dropout-rate", type=float, default=0)
+    parser.add_argument("--learning-rate", type=float, default=0.001)
+    parser.add_argument("--ema-momentum", type=float, default=0.99)
+    parser.add_argument(
+        "--train-frac", type=float, default=0.8, help="train on this fraction of the trees"
+    )
+    parser.add_argument(
+        "--validation-split",
+        type=float,
+        default=0.1,
+        help="fraction of training sample to tell keras to hold out for validation during training",
+    )
+    parser.add_argument(
+        "--params-to-predict",
+        default=["xscale", "xshift"],
+        nargs="+",
+        choices=["xscale", "xshift", "yscale"] + [k for k in sum_stat_scaled],
+    )
+    parser.add_argument(
+        "--test",
+        action="store_true",
+        help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly",
+    )
+    parser.add_argument("--random-seed", default=0, type=int, help="random seed")
+    parser.add_argument("--overwrite", action="store_true")
+    parser.add_argument("--use-trivial-encoding", action="store_true")
+    parser.add_argument("--dont-scale-params", action="store_true")
+    return parser
 
 # ----------------------------------------------------------------------------------------
-if os.path.exists(csvfn("test")) and not args.overwrite:
-    print(
-        "    csv files already exist, so just replotting (override with --overwrite): %s"
-        % csvfn("test")
-    )
-    read_plot_csv()
-    sys.exit(0)
+if __name__ == 'main':
+    parser = get_parser()
+    start = time.time()
+    args = parser.parse_args()
+    if args.test:
+        args.epochs = 10
 
-train_and_test()
+    random.seed(args.random_seed)
+    np.random.seed(args.random_seed)
+    tf.keras.utils.set_random_seed(args.random_seed)
+
+    # ----------------------------------------------------------------------------------------
+    if os.path.exists(csvfn("test")) and not args.overwrite:
+        print(
+            "    csv files already exist, so just replotting (override with --overwrite): %s"
+            % csvfn("test")
+        )
+        read_plot_csv()
+        sys.exit(0)
+
+    train_and_test()

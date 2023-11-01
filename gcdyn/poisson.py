@@ -122,8 +122,8 @@ class Response(ABC):
             τ: Poisson intensity measure of a time interval.
         """
 
-    def clear_context_cache(self):
-        """Needed to allow context cache clearing by one derived class."""
+    def cleanup(self):
+        """Perform any cleanup required when finishing the simulation of each tree."""
         pass
 
     def waiting_time_rv(
@@ -147,9 +147,7 @@ class Response(ABC):
         """
         if rate_multiplier == 0.0:
             return float("inf")
-        rng = random.default_rng(
-            seed
-        )  # TODO we should really not be constructing a new rng on every call here (a short simulation is currently resulting in 1.6 million calls to the constructor), but it's not a huge contributor atm
+        rng = random.default_rng(seed)
         return self.Λ_inv(node, rng.exponential(scale=1 / rate_multiplier))
 
     def waiting_time_logsf(self, node: bdms.TreeNode, Δt: float) -> float:
@@ -234,7 +232,6 @@ class HomogeneousResponse(Response):
     def Λ(self, node: bdms.TreeNode, Δt: float) -> float:
         return self.λ_homogeneous(node) * Δt
 
-    @np.errstate(divide="ignore")
     def Λ_inv(self, node: bdms.TreeNode, τ: float) -> float:
         return τ / self.λ_homogeneous(node)
 
@@ -447,7 +444,7 @@ class SequenceContextMutationResponse(HomogeneousResponse):
         self.mutability = (mutation_intensity * mutability).to_dict()
         self.cached_contexts = {}
 
-    def clear_context_cache(self):
+    def cleanup(self):
         """Clear cached contexts"""
         self.cached_contexts.clear()
 

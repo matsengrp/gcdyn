@@ -22,6 +22,7 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires="==3.9.*",
+    scripts=['scripts/multi-simulation.py', 'scripts/dl-infer.py'],
     install_requires=[
         "ete3",
         "matplotlib",
@@ -34,6 +35,7 @@ setup(
         "tensorflow",
         "scikit-learn",
         "colored-traceback",
+        "sphinx-argparse",
     ],
     extras_require={
         "PyQt5": [

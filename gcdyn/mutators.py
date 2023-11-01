@@ -63,8 +63,8 @@ class Mutator(ABC):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in vars(self).items() if not key.startswith('_'))})"
 
-    def clear_mutability_cache(self):
-        """Needed to allow cache clearing in a derived class."""
+    def cleanup(self):
+        """Perform any cleanup required when finishing the simulation of each tree."""
         pass
 
 
@@ -258,7 +258,7 @@ class UniformMutator(SequenceMutator):
         node: ete3.TreeNode,
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
-        super().check_node(node)
+        self.check_node(node)
         alphabet = "ACGT"
         rng = np.random.default_rng(seed)
         sequence = list(node.sequence)
@@ -286,7 +286,7 @@ class ContextMutator(SequenceMutator):
         self.substitution = substitution.fillna(0.0).T.to_dict()
         self.cached_ctx_muts = {}
 
-    def clear_mutability_cache(self):
+    def cleanup(self):
         """Clear cached context mutabilities"""
         self.cached_ctx_muts.clear()
 
@@ -303,7 +303,7 @@ class ContextMutator(SequenceMutator):
             node: node with sequence, consisting of characters ``ACGT``
             seed: See :py:class:`Mutator`.
         """
-        super().check_node(node)
+        self.check_node(node)
         rng = np.random.default_rng(seed)
         seq_contexts = utils.node_contexts(node)
         if node.sequence not in self.cached_ctx_muts:
@@ -345,9 +345,9 @@ class SequencePhenotypeMutator(AttrMutator):
         self.gp_map = gp_map
         super().__init__(attr=attr)
 
-    def clear_mutability_cache(self):
+    def cleanup(self):
         """Clear cached context mutabilities in sequence_mutator"""
-        self.sequence_mutator.clear_mutability_cache()
+        self.sequence_mutator.cleanup()
 
     def mutate(
         self,

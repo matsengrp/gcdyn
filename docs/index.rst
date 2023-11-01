@@ -20,6 +20,12 @@ All code is freely available at `<https://github.com/matsengrp/gcdyn>`_
 
 .. toctree::
    :maxdepth: 2
+   :caption: Command line tools
+
+   argparse
+
+.. toctree::
+   :maxdepth: 2
    :caption: API Documentation
 
    api

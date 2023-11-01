@@ -9,8 +9,11 @@ Modules
     :template: custom-module-template.rst
 
     bdms
-    poisson
-    mutators
+    encode
+    fitness
     gpmap
-    model
+    models
+    mutators
+    nn
+    poisson
     utils
