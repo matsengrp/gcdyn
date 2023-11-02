@@ -4,7 +4,6 @@ import argparse
 import os
 import sys
 from sklearn import preprocessing
-import tensorflow as tf
 
 import colored_traceback.always  # noqa: F401
 import time
@@ -263,8 +262,16 @@ def train_and_test():
 
 
 # ----------------------------------------------------------------------------------------
-def get_parser():  # needed for sphinx docs
-    parser = argparse.ArgumentParser()
+def get_parser():
+    helpstr = """
+    Infer affinity response function on gcdyn simulation using deep learning neural networks.
+    Example usage sampling parameter values from within ranges:
+        dl-infer --indir <input dir with gcdyn simulation output> --outdir <output di> --params-to-predict xscale xshift yscale
+    """
+    class MultiplyInheritedFormatter(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+        pass
+    formatter_class = MultiplyInheritedFormatter
+    parser = argparse.ArgumentParser(formatter_class=MultiplyInheritedFormatter, description=helpstr)
     parser.add_argument(
         "--indir",
         required=True,
@@ -307,7 +314,7 @@ def get_parser():  # needed for sphinx docs
 
 
 # ----------------------------------------------------------------------------------------
-if __name__ == "main":
+def main():
     parser = get_parser()
     start = time.time()
     args = parser.parse_args()
@@ -316,6 +323,7 @@ if __name__ == "main":
 
     random.seed(args.random_seed)
     np.random.seed(args.random_seed)
+    import tensorflow as tf  # this is super slow, don't want to wait for this to get help message
     tf.keras.utils.set_random_seed(args.random_seed)
 
     # ----------------------------------------------------------------------------------------

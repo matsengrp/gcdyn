@@ -1,9 +1,9 @@
 .. argparse::
-   :filename: ../scripts/dl-infer.py
+   :filename: ../scripts/dl_infer.py
    :func: get_parser
-   :prog: dl-infer.py
+   :prog: dl-infer
 
 .. argparse::
-   :filename: ../scripts/multi-simulation.py
+   :filename: ../scripts/multi_simulation.py
    :func: get_parser
-   :prog: multi-simulation.py
+   :prog: multi-simulation

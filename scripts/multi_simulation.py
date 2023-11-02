@@ -415,8 +415,19 @@ def check_memory(max_frac=0.03):
         return True
 
 
-def get_parser():  # needed for sphinx docs
-    parser = argparse.ArgumentParser()
+def get_parser():
+    helpstr = """
+    Simulate B cell trees in germinal centers using the birth-death-mutation model.
+    Example usage sampling parameter values from within ranges:
+        multi-simulation --debug 1 --outdir <outdir> --xscale-range 0.5 5 --xshift-range -0.5 3 --yscale-range 1 50 --initial-birth-rate-range 2 10 --carry-cap 150 --time-to-sampling-values 10 --n-trials 1
+    Example usage with multiple subprocesses:
+        multi-simulation --debug 1 --outdir <outdir> --carry-cap 150 --time-to-sampling-values 10 --n-trials 100 --n-sub-procs 10
+
+    """
+    class MultiplyInheritedFormatter(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+        pass
+    formatter_class = MultiplyInheritedFormatter
+    parser = argparse.ArgumentParser(formatter_class=MultiplyInheritedFormatter, description=helpstr)
     parser.add_argument(
         "--n-seqs", default=70, type=int, help="Number of sequences to observe"
     )
@@ -532,7 +543,7 @@ def get_parser():  # needed for sphinx docs
     parser.add_argument(
         "--n-max-procs",
         type=int,
-        help="If set (and --n-sub-procs is set), only run this many sub procs at a time.",
+        help="If set (and --n-sub-procs is set), only run this many sub procs at a time (e.g. to conserve memory).",
     )
     parser.add_argument(
         "--itrial-start",
@@ -565,7 +576,7 @@ def get_parser():  # needed for sphinx docs
 
 
 # ----------------------------------------------------------------------------------------
-if __name__ == "main":  # noqa C901
+def main():  # noqa C901
     git_dir = os.path.dirname(os.path.realpath(__file__)).replace("/scripts", "/.git")
     print(
         "    gcdyn commit: %s"

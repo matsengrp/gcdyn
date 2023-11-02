@@ -22,7 +22,12 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires="==3.9.*",
-    scripts=['scripts/multi-simulation.py', 'scripts/dl-infer.py'],
+    entry_points = {
+        'console_scripts': [
+            'dl-infer = scripts.dl_infer:main',
+            'multi-simulation = scripts.multi_simulation:main',
+        ],
+    },
     install_requires=[
         "ete3",
         "matplotlib",
