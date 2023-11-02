@@ -18,7 +18,7 @@ from experiments import replay
 
 
 # ----------------------------------------------------------------------------------------
-def outfn(ftype, itrial, odir=None):
+def outfn(args, ftype, itrial, odir=None):
     if odir is None:
         odir = args.outdir
     return encode.simfn(odir, ftype, itrial)
@@ -60,11 +60,13 @@ def print_final_response_vals(tree, birth_resp, death_resp, final_time):
 
 # ----------------------------------------------------------------------------------------
 def generate_sequences_and_tree(
+    args,
     sample_time,
     birth_resp,
     death_resp,
     mutation_resp,
     mutator,
+    gp_map,
     itrial,
     seed=0,
 ):
@@ -120,7 +122,7 @@ def generate_sequences_and_tree(
         )
     if not success:
         print(
-            "  %s exceeded maximum number of tries %d so giving up"
+            "    %s exceeded maximum number of tries %d so giving up"
             % (utils.color("yellow", "warning"), args.n_max_tries)
         )
         return None, None
@@ -188,14 +190,13 @@ def print_resp(bresp, dresp):
 
 
 # ----------------------------------------------------------------------------------------
-def choose_val(pname, extra_bounds=None):
+def choose_val(args, pname, extra_bounds=None):
     minmax, vals = [getattr(args, pname + "_" + str) for str in ["range", "values"]]
     if minmax is not None:  # range with two values for continuous
         minv, maxv = minmax
         if extra_bounds is not None:
-            minv = max(
-                minv, extra_bounds[0]
-            )  # use the more restrictive (larger lo, smaller hi) values
+            # use the more restrictive (larger lo, smaller hi) values
+            minv = max(minv, extra_bounds[0])
             maxv = min(maxv, extra_bounds[1])
         print("    choosing %s within [%.2f, %.2f]" % (pname, minv, maxv))
         if pname == "time_to_sampling":
@@ -210,7 +211,7 @@ def choose_val(pname, extra_bounds=None):
 
 # ----------------------------------------------------------------------------------------
 def get_xshift_bounds(
-    xscale,
+    args, xscale,
 ):  # see algebra here https://photos.app.goo.gl/i8jM5Aa8QXvbDD267
     assert args.birth_response == "sigmoid"
     ysc_lo, ysc_hi = args.yscale_range
@@ -226,7 +227,7 @@ def get_xshift_bounds(
 
 
 # ----------------------------------------------------------------------------------------
-def get_yscale_bounds(xscale, xshift):  # similar to previous fcn
+def get_yscale_bounds(args, xscale, xshift):  # similar to previous fcn
     assert args.birth_response == "sigmoid"
     br_lo, br_hi = args.initial_birth_rate_range
     lo = br_lo * (1 + math.exp(xscale * xshift))
@@ -239,14 +240,14 @@ def get_yscale_bounds(xscale, xshift):  # similar to previous fcn
 
 
 # ----------------------------------------------------------------------------------------
-def add_pval(pname, pval):
-    if pname not in param_counters:
-        param_counters[pname] = []
-    param_counters[pname].append(pval)
+def add_pval(pcounts, pname, pval):
+    if pname not in pcounts:
+        pcounts[pname] = []
+    pcounts[pname].append(pval)
 
 
 # ----------------------------------------------------------------------------------------
-def choose_params():
+def choose_params(args, pcounts):
     params = {}
     for pname in [
         "xscale",
@@ -255,15 +256,15 @@ def choose_params():
         "time_to_sampling",
     ]:  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
         extra_bounds = None
-        if args.birth_response == "sigmoid":
+        if args.use_generated_parameter_bounds:
             if pname == "xshift":
-                extra_bounds = get_xshift_bounds(params["xscale"])
+                extra_bounds = get_xshift_bounds(args, params["xscale"])
             if pname == "yscale":
-                extra_bounds = get_yscale_bounds(params["xscale"], params["xshift"])
+                extra_bounds = get_yscale_bounds(args, params["xscale"], params["xshift"])
         params[pname] = choose_val(
-            pname, extra_bounds=extra_bounds
-        )  # get_xshift_bounds(params['xscale']) if pname=='xshift' else None)
-        add_pval(pname, params[pname])
+            args, pname, extra_bounds=extra_bounds
+        )
+        add_pval(pcounts, pname, params[pname])
     print(
         "    chose new parameter values: %s"
         % "  ".join(
@@ -275,7 +276,7 @@ def choose_params():
 
 
 # ----------------------------------------------------------------------------------------
-def get_responses(xscale, xshift, yscale):
+def get_responses(args, xscale, xshift, yscale, pcounts):
     # ----------------------------------------------------------------------------------------
     def get_birth():
         if args.birth_response == "constant":
@@ -308,13 +309,13 @@ def get_responses(xscale, xshift, yscale):
         "      initial birth rate %.2f (range %s)"
         % (bresp.λ_phenotype(0), args.initial_birth_rate_range)
     )
-    if args.birth_response == "sigmoid":
+    if args.use_generated_parameter_bounds:
         assert (
             bresp.λ_phenotype(0) > args.initial_birth_rate_range[0] - 1e-8
             and bresp.λ_phenotype(0) < args.initial_birth_rate_range[1] + 1e-8
         )
     print_resp(bresp, dresp)
-    add_pval("initial_birth_rate", bresp.λ_phenotype(0))
+    add_pval(pcounts, "initial_birth_rate", bresp.λ_phenotype(0))
 
     # if args.debug:
     #     scan_response(bresp, dresp)
@@ -322,18 +323,18 @@ def get_responses(xscale, xshift, yscale):
 
 
 # ----------------------------------------------------------------------------------------
-def write_final_outputs(all_seqs, all_trees):
+def write_final_outputs(args, all_seqs, all_trees):
     print("  writing final outputs to %s" % args.outdir)
 
-    with open(outfn("seqs", None), "w") as asfile:
+    with open(outfn(args, "seqs", None), "w") as asfile:
         for sfo in all_seqs:
             asfile.write(">%s\n%s\n" % (sfo["name"], sfo["seq"]))
 
-    with open(outfn("trees", None), "w") as tfile:
+    with open(outfn(args, "trees", None), "w") as tfile:
         for pfo in all_trees:
             tfile.write("%s\n" % pfo["tree"].write(format=1))
 
-    with open(outfn("leaf-meta", None), "w") as jfile:
+    with open(outfn(args, "leaf-meta", None), "w") as jfile:
         writer = csv.DictWriter(jfile, ["name", "affinity", "n_muts"])
         writer.writeheader()
         for pfo in all_trees:
@@ -406,7 +407,7 @@ def read_dill_file(fname):
 
 
 # ----------------------------------------------------------------------------------------
-def check_memory(max_frac=0.03):
+def check_memory(itrial, max_frac=0.03):
     mfrac = utils.memory_usage_fraction(extra_str="trial %3d:  " % itrial, debug=True)
     if mfrac > max_frac:
         raise Exception(
@@ -418,7 +419,7 @@ def check_memory(max_frac=0.03):
 def get_parser():
     helpstr = """
     Simulate B cell trees in germinal centers using the birth-death-mutation model.
-    Example usage sampling parameter values from within ranges:
+    Example usage that samples parameter values from within ranges:
         multi-simulation --debug 1 --outdir <outdir> --xscale-range 0.5 5 --xshift-range -0.5 3 --yscale-range 1 50 --initial-birth-rate-range 2 10 --carry-cap 150 --time-to-sampling-values 10 --n-trials 1
     Example usage with multiple subprocesses:
         multi-simulation --debug 1 --outdir <outdir> --carry-cap 150 --time-to-sampling-values 10 --n-trials 100 --n-sub-procs 10
@@ -507,19 +508,19 @@ def get_parser():
         "--xscale-range",
         nargs="+",
         type=float,
-        help="Pair of values (min/max) between which to choose at uniform random the birth response xscale parameter for each tree. Overrides --xscale-values.",
+        help="Pair of values (min/max) between which to choose at uniform random the birth response xscale parameter for each tree. Overrides --xscale-values. Suggest 0.5 5",
     )
     parser.add_argument(
         "--xshift-range",
         nargs="+",
         type=float,
-        help="Pair of values (min/max) between which to choose at uniform random the birth response xshift parameter for each tree. Overrides --xshift-values.",
+        help="Pair of values (min/max) between which to choose at uniform random the birth response xshift parameter for each tree. Overrides --xshift-values. Suggest -0.5 3",
     )
     parser.add_argument(
         "--yscale-range",
         nargs="+",
         type=float,
-        help="Pair of values (min/max) between which to choose at uniform random the birth response yscale parameter for each tree. Overrides --yscale-values.",
+        help="Pair of values (min/max) between which to choose at uniform random the birth response yscale parameter for each tree. Overrides --yscale-values. Suggest 1 50",
     )
     parser.add_argument(
         "--initial-birth-rate-range",
@@ -576,7 +577,170 @@ def get_parser():
 
 
 # ----------------------------------------------------------------------------------------
-def main():  # noqa C901
+def set_test_args(args):
+    if "--carry-cap" not in sys.argv:
+        args.carry_cap = 100
+    if "--n-trials" not in sys.argv:
+        args.n_trials = 1
+    if "--time-to-sampling" not in sys.argv:
+        args.time_to_sampling = {"vals": 10}
+    if "--min-survivors" not in sys.argv:
+        args.min_survivors = 10
+    if "--n-seqs" not in sys.argv:
+        args.n_seqs = 5
+    if "--n-max-tries" not in sys.argv:
+        args.n_max_tries = 5
+    print(
+        "  --test: --carry-cap %d --n-trials %d  --time-to-sampling %s  --min-survivors %d  --n-seqs %d  --n-max-tries %d"
+        % (
+            args.carry_cap,
+            args.n_trials,
+            args.time_to_sampling,
+            args.min_survivors,
+            args.n_seqs,
+            args.n_max_tries,
+        )
+    )
+
+
+# ----------------------------------------------------------------------------------------
+def run_sub_procs(args):
+    procs = []
+    if args.n_trials % args.n_sub_procs != 0:
+        raise Exception(
+            "--n-trials %d has to be divisible by --n-sub-procs %d, but got remainder %d (otherwise it's too easy to run into issues with bundling)"
+            % (args.n_trials, args.n_sub_procs, args.n_trials % args.n_sub_procs)
+        )
+    n_per_proc = int(args.n_trials / float(args.n_sub_procs))
+    print(
+        "    starting %d procs with %d events per proc"
+        % (args.n_sub_procs, n_per_proc)
+    )
+    if (
+        args.simu_bundle_size != 1
+    ):  # make sure that all chunks of trees with same parameters are of same length, i.e. that last chunk isn't smaller (especially important if this is a subproc whose output will be smashed together with others)
+        if n_per_proc % args.simu_bundle_size != 0:
+            raise Exception(
+                "--n-trees-per-param-set %d has to evenly divide N trees per proc %d ( = --n-trials / --n-sub-procs = %d / %d), but got remainder %d"
+                % (
+                    args.simu_bundle_size,
+                    n_per_proc,
+                    args.n_trials,
+                    args.n_sub_procs,
+                    n_per_proc % args.simu_bundle_size,
+                )
+            )
+        print(
+            "      bundling %d trees per set of parameter values (%d bundles per sub proc)"
+            % (args.simu_bundle_size, n_per_proc / args.simu_bundle_size)
+        )
+    for iproc in range(args.n_sub_procs):
+        clist = ["python"] + copy.deepcopy(sys.argv)
+        subdir = "%s/iproc-%d" % (args.outdir, iproc)
+        istart = iproc * n_per_proc
+        if (
+            all(
+                os.path.exists(outfn(args, ft, None, odir=subdir))
+                for ft in encode.final_ofn_strs
+            )
+            and not args.overwrite
+        ):
+            print("        proc %d: final outputs exist" % iproc)
+            sys.stdout.flush()
+            continue
+        if not os.path.exists(subdir):
+            os.makedirs(subdir)
+        utils.replace_in_arglist(clist, "--outdir", subdir)
+        utils.replace_in_arglist(clist, "--seed", str(args.seed + istart))
+        utils.replace_in_arglist(clist, "--n-trials", str(istart + n_per_proc))
+        utils.replace_in_arglist(
+            clist,
+            "--itrial-start",
+            str(istart),
+            insert_after="--n-trials",
+            has_arg=True,
+        )
+        utils.remove_from_arglist(clist, "--n-sub-procs", has_arg=True)
+        cmd_str = " ".join(clist)
+        print("      %s %s" % (utils.color("red", "run"), cmd_str))
+        sys.stdout.flush()
+        logfname = "%s/simu.log" % subdir
+        if os.path.exists(logfname):
+            subprocess.check_call(
+                (
+                    "mv %s %s.old.%d"
+                    % (logfname, logfname, random.randint(100, 999))
+                ).split()
+            )  # can't be bothered to iterate properly like in the partis code
+        subprocess.check_call("echo %s >%s" % (cmd_str, logfname), shell=True)
+        cmd_str = "%s >>%s" % (cmd_str, logfname)
+        procs.append(subprocess.Popen(cmd_str, env=os.environ, shell=True))
+        if args.n_max_procs is not None:
+            utils.limit_procs(procs, args.n_max_procs)
+    while procs.count(None) != len(
+        procs
+    ):  # we set each proc to None when it finishes
+        for iproc in range(len(procs)):
+            if procs[iproc] is None:  # already finished
+                continue
+            if procs[iproc].poll() is not None:  # it just finished
+                procs[iproc].communicate()
+                if procs[iproc].returncode == 0:
+                    procs[iproc] = None  # job succeeded
+                    print("    proc %d finished" % iproc)
+                else:
+                    raise Exception(
+                        "process %d failed with exit code %d"
+                        % (iproc, procs[iproc].returncode)
+                    )
+        sys.stdout.flush()
+        time.sleep(0.01 / max(1, len(procs)))
+    print("    writing merged files to %s" % args.outdir)
+    print("        N files   time (s)  memory %   ftype")
+    for ftype in encode.final_ofn_strs:
+        ofn = outfn(args, ftype, None)
+        fnames = [
+            outfn(args, ftype, None, odir="%s/iproc-%d" % (args.outdir, i))
+            for i in range(args.n_sub_procs)
+        ]
+        start = time.time()
+        if ftype in ["seqs", "trees", "leaf-meta", "summary-stats"]:
+            if ftype in ["leaf-meta", "summary-stats"]:
+                cmds = [
+                    "head -n1 %s >%s" % (fnames[0], ofn),
+                    "tail --quiet -n+2 %s >>%s" % (" ".join(fnames), ofn),
+                ]
+            else:
+                cmds = ["cat %s >%s" % (" ".join(fnames), ofn)]
+            for cmd in cmds:
+                subprocess.check_call(cmd, shell=True)
+        elif ftype in ["encoded-trees"]:
+            all_etrees = [e for fn in fnames for e in encode.read_trees(fn)]
+            encode.write_trees(ofn, all_etrees)
+        elif ftype in ["responses"]:
+            all_responses = []
+            for fn in fnames:
+                with open(fn, "rb") as rfile:
+                    all_responses += pickle.load(rfile)
+            with open(ofn, "wb") as rfile:
+                dill.dump(all_responses, rfile)
+        else:
+            raise Exception("unexpected file type %s" % ftype)
+        print(
+            "         %3d      %5.2f   %7.2f      %s"
+            % (
+                len(fnames),
+                time.time() - start,
+                100 * utils.memory_usage_fraction(),
+                ftype,
+            )
+        )
+    if args.make_plots:
+        print("  note: can't make plots in main process when --n-sub-procs is set")
+
+
+# ----------------------------------------------------------------------------------------
+def main():
     git_dir = os.path.dirname(os.path.realpath(__file__)).replace("/scripts", "/.git")
     print(
         "    gcdyn commit: %s"
@@ -586,6 +750,11 @@ def main():  # noqa C901
     )
     parser = get_parser()
     args = parser.parse_args()
+    args.use_generated_parameter_bounds = args.birth_response == "sigmoid" and None not in [args.yscale_range, args.initial_birth_rate_range]
+    if args.use_generated_parameter_bounds:
+        print('    using additional generated parameter bounds')
+    else:
+        print('  note: not using additional generated parameter bounds since at least one of --yscale-range, --initial-birth-rate-range was unset (this may result in lots of failed simulation runs if the initial birth rate is either too small or too large)')
     # handle args that can have either a list of a few values, or choose from a uniform interval specified with two (min, max) values
     for pname in ["xscale", "xshift", "yscale", "time_to_sampling"]:
         rangevals = getattr(args, pname + "_range")
@@ -601,165 +770,9 @@ def main():  # noqa C901
 
     start = time.time()
     if args.test:
-        if "--carry-cap" not in sys.argv:
-            args.carry_cap = 100
-        if "--n-trials" not in sys.argv:
-            args.n_trials = 1
-        if "--time-to-sampling" not in sys.argv:
-            args.time_to_sampling = {"vals": 10}
-        if "--min-survivors" not in sys.argv:
-            args.min_survivors = 10
-        if "--n-seqs" not in sys.argv:
-            args.n_seqs = 5
-        if "--n-max-tries" not in sys.argv:
-            args.n_max_tries = 5
-        print(
-            "  --test: --carry-cap %d --n-trials %d  --time-to-sampling %s  --min-survivors %d  --n-seqs %d  --n-max-tries %d"
-            % (
-                args.carry_cap,
-                args.n_trials,
-                args.time_to_sampling,
-                args.min_survivors,
-                args.n_seqs,
-                args.n_max_tries,
-            )
-        )
-
-    if (
-        args.n_sub_procs is not None
-    ):  # this stuff is all copied from partis utils.py, gd it this would be like three lines if i could import that
-        procs = []
-        if args.n_trials % args.n_sub_procs != 0:
-            raise Exception(
-                "--n-trials %d has to be divisible by --n-sub-procs %d, but got remainder %d (otherwise it's too easy to run into issues with bundling)"
-                % (args.n_trials, args.n_sub_procs, args.n_trials % args.n_sub_procs)
-            )
-        n_per_proc = int(args.n_trials / float(args.n_sub_procs))
-        print(
-            "    starting %d procs with %d events per proc"
-            % (args.n_sub_procs, n_per_proc)
-        )
-        if (
-            args.simu_bundle_size != 1
-        ):  # make sure that all chunks of trees with same parameters are of same length, i.e. that last chunk isn't smaller (especially important if this is a subproc whose output will be smashed together with others)
-            if n_per_proc % args.simu_bundle_size != 0:
-                raise Exception(
-                    "--n-trees-per-param-set %d has to evenly divide N trees per proc %d ( = --n-trials / --n-sub-procs = %d / %d), but got remainder %d"
-                    % (
-                        args.simu_bundle_size,
-                        n_per_proc,
-                        args.n_trials,
-                        args.n_sub_procs,
-                        n_per_proc % args.simu_bundle_size,
-                    )
-                )
-            print(
-                "      bundling %d trees per set of parameter values (%d bundles per sub proc)"
-                % (args.simu_bundle_size, n_per_proc / args.simu_bundle_size)
-            )
-        for iproc in range(args.n_sub_procs):
-            clist = ["python"] + copy.deepcopy(sys.argv)
-            subdir = "%s/iproc-%d" % (args.outdir, iproc)
-            istart = iproc * n_per_proc
-            if (
-                all(
-                    os.path.exists(outfn(ft, None, odir=subdir))
-                    for ft in encode.final_ofn_strs
-                )
-                and not args.overwrite
-            ):
-                print("        proc %d: final outputs exist" % iproc)
-                sys.stdout.flush()
-                continue
-            if not os.path.exists(subdir):
-                os.makedirs(subdir)
-            utils.replace_in_arglist(clist, "--outdir", subdir)
-            utils.replace_in_arglist(clist, "--seed", str(args.seed + istart))
-            utils.replace_in_arglist(clist, "--n-trials", str(istart + n_per_proc))
-            utils.replace_in_arglist(
-                clist,
-                "--itrial-start",
-                str(istart),
-                insert_after="--n-trials",
-                has_arg=True,
-            )
-            utils.remove_from_arglist(clist, "--n-sub-procs", has_arg=True)
-            cmd_str = " ".join(clist)
-            print("      %s %s" % (utils.color("red", "run"), cmd_str))
-            sys.stdout.flush()
-            logfname = "%s/simu.log" % subdir
-            if os.path.exists(logfname):
-                subprocess.check_call(
-                    (
-                        "mv %s %s.old.%d"
-                        % (logfname, logfname, random.randint(100, 999))
-                    ).split()
-                )  # can't be bothered to iterate properly like in the partis code
-            subprocess.check_call("echo %s >%s" % (cmd_str, logfname), shell=True)
-            cmd_str = "%s >>%s" % (cmd_str, logfname)
-            procs.append(subprocess.Popen(cmd_str, env=os.environ, shell=True))
-            if args.n_max_procs is not None:
-                utils.limit_procs(procs, args.n_max_procs)
-        while procs.count(None) != len(
-            procs
-        ):  # we set each proc to None when it finishes
-            for iproc in range(len(procs)):
-                if procs[iproc] is None:  # already finished
-                    continue
-                if procs[iproc].poll() is not None:  # it just finished
-                    procs[iproc].communicate()
-                    if procs[iproc].returncode == 0:
-                        procs[iproc] = None  # job succeeded
-                        print("    proc %d finished" % iproc)
-                    else:
-                        raise Exception(
-                            "process %d failed with exit code %d"
-                            % (iproc, procs[iproc].returncode)
-                        )
-            sys.stdout.flush()
-            time.sleep(0.01 / max(1, len(procs)))
-        print("    writing merged files to %s" % args.outdir)
-        print("        N files   time (s)  memory %   ftype")
-        for ftype in encode.final_ofn_strs:
-            ofn = outfn(ftype, None)
-            fnames = [
-                outfn(ftype, None, odir="%s/iproc-%d" % (args.outdir, i))
-                for i in range(args.n_sub_procs)
-            ]
-            start = time.time()
-            if ftype in ["seqs", "trees", "leaf-meta", "summary-stats"]:
-                if ftype in ["leaf-meta", "summary-stats"]:
-                    cmds = [
-                        "head -n1 %s >%s" % (fnames[0], ofn),
-                        "tail --quiet -n+2 %s >>%s" % (" ".join(fnames), ofn),
-                    ]
-                else:
-                    cmds = ["cat %s >%s" % (" ".join(fnames), ofn)]
-                for cmd in cmds:
-                    subprocess.check_call(cmd, shell=True)
-            elif ftype in ["encoded-trees"]:
-                all_etrees = [e for fn in fnames for e in encode.read_trees(fn)]
-                encode.write_trees(ofn, all_etrees)
-            elif ftype in ["responses"]:
-                all_responses = []
-                for fn in fnames:
-                    with open(fn, "rb") as rfile:
-                        all_responses += pickle.load(rfile)
-                with open(ofn, "wb") as rfile:
-                    dill.dump(all_responses, rfile)
-            else:
-                raise Exception("unexpected file type %s" % ftype)
-            print(
-                "         %3d      %5.2f   %7.2f      %s"
-                % (
-                    len(fnames),
-                    time.time() - start,
-                    100 * utils.memory_usage_fraction(),
-                    ftype,
-                )
-            )
-        if args.make_plots:
-            print("  note: can't make plots in main process when --n-sub-procs is set")
+        set_test_args(args)
+    if args.n_sub_procs is not None:
+        run_sub_procs(args)
         sys.exit(0)
 
     assert args.death_value >= 0
@@ -791,15 +804,15 @@ def main():  # noqa C901
     all_seqs, all_trees = [], []
     n_missing = 0
     rng = np.random.default_rng(seed=args.seed)
-    params, n_times_used, param_counters = (
+    params, n_times_used, pcounts = (
         None,
         0,
         {},
     )  # parameter values, and number of trees that we've simulated with these parameter values
     all_fns = [[]]  # just for plotting
     for itrial in range(args.itrial_start, args.n_trials):
-        check_memory()
-        ofn = outfn(None, itrial)
+        check_memory(itrial)
+        ofn = outfn(args, None, itrial)
         if os.path.exists(ofn) and not args.overwrite:
             print("    output %s already exists, skipping" % ofn)
             pfo = read_dill_file(ofn)
@@ -820,19 +833,21 @@ def main():  # noqa C901
         if (
             params is None or n_times_used == args.simu_bundle_size
         ):  # first time through loop or start of a new bundle
-            params = choose_params()
+            params = choose_params(args, pcounts)
             n_times_used = 0
         n_times_used += 1
         birth_resp, death_resp = get_responses(
-            params["xscale"], params["xshift"], params["yscale"]
+            args, params["xscale"], params["xshift"], params["yscale"], pcounts
         )
         print(utils.color("blue", "trial %d:" % itrial), end=" ")
         fn, tree = generate_sequences_and_tree(
+            args,
             params["time_to_sampling"],
             birth_resp,
             death_resp,
             mutation_resp,
             mutator,
+            gp_map,
             itrial,
             seed=rng,
         )
@@ -876,8 +891,11 @@ def main():  # noqa C901
             "    %s missing %d / %d trees (it's generally expected that some will fail, so this is probably ok if it's not too many)"
             % (utils.color("yellow", "warning"), n_missing, args.n_trials)
         )
+    if len(all_trees) == 0:
+        print('  %s no resulting trees, exiting without writing or plotting anything' % utils.color('yellow', 'warning'))
+        sys.exit(0)
 
-    write_final_outputs(all_seqs, all_trees)
+    write_final_outputs(args, all_seqs, all_trees)
 
     if (
         args.make_plots and args.birth_response == "sigmoid"
@@ -890,14 +908,14 @@ def main():  # noqa C901
         )
         utils.plot_chosen_params(
             args.outdir + "/plots/params",
-            param_counters,
-            {p: getattr(args, p.replace("-", "_") + "_range") for p in param_counters},
+            pcounts,
+            {p: getattr(args, p.replace("-", "_") + "_range") for p in pcounts},
             fnames=all_fns,
         )
         utils.make_html(args.outdir + "/plots", fnames=all_fns)
 
     print("    sampled parameter values:               min      max")
-    for pname, pvals in sorted(param_counters.items()):
+    for pname, pvals in sorted(pcounts.items()):
         print(
             "                      %17s  %7.2f  %7.2f" % (pname, min(pvals), max(pvals))
         )

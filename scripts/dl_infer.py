@@ -265,8 +265,8 @@ def train_and_test():
 def get_parser():
     helpstr = """
     Infer affinity response function on gcdyn simulation using deep learning neural networks.
-    Example usage sampling parameter values from within ranges:
-        dl-infer --indir <input dir with gcdyn simulation output> --outdir <output di> --params-to-predict xscale xshift yscale
+    Example usage:
+        dl-infer --indir <input dir with gcdyn simulation output> --outdir <output dir> --params-to-predict xscale xshift yscale
     """
     class MultiplyInheritedFormatter(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
         pass
