@@ -24,8 +24,8 @@ setup(
     python_requires="==3.9.*",
     entry_points = {
         'console_scripts': [
-            'dl-infer = scripts.dl_infer:main',
-            'multi-simulation = scripts.multi_simulation:main',
+            'gcd-dl-infer = scripts.dl_infer:main',
+            'gcd-simulate = scripts.multi_simulation:main',
         ],
     },
     install_requires=[

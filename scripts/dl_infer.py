@@ -23,12 +23,12 @@ smplist = ["train", "test"]
 
 
 # ----------------------------------------------------------------------------------------
-def csvfn(smpl):
+def csvfn(args, smpl):
     return "%s/%s.csv" % (args.outdir, smpl)
 
 
 # ----------------------------------------------------------------------------------------
-def scale_vals(smpl, pvals, scaler=None, inverse=False, debug=True):
+def scale_vals(args, smpl, pvals, scaler=None, inverse=False, debug=True):
     """Scale pvals for a single sample to mean 0 and variance 1. To reverse a scaling, pass in the original scaler and set inverse=True"""
 
     # ----------------------------------------------------------------------------------------
@@ -86,7 +86,7 @@ def scale_vals(smpl, pvals, scaler=None, inverse=False, debug=True):
 
 
 # ----------------------------------------------------------------------------------------
-def get_prediction(smpl, model, smpldict, scaler):
+def get_prediction(args, smpl, model, smpldict, scaler):
     pred_resps = model.predict(smpldict[smpl]["trees"])
     true_resps, true_sstats = [
         smpldict[smpl][tk] for tk in ["birth-responses", "sstats"]
@@ -106,7 +106,7 @@ def get_prediction(smpl, model, smpldict, scaler):
         ]  # mean of each summary stat over trees in each bundle ('tree' is an index, so take min/index of first one)
     assert len(pred_resps) == len(true_resps)
     pvals = [[float(resp.value) for resp in plist] for plist in pred_resps]
-    pscaled, _ = scale_vals(smpl, pvals, scaler=scaler, inverse=True)
+    pscaled, _ = scale_vals(args, smpl, pvals, scaler=scaler, inverse=True)
     dfdata = {
         "%s-%s" % (param, ptype): []
         for param in args.params_to_predict
@@ -117,15 +117,15 @@ def get_prediction(smpl, model, smpldict, scaler):
             dfdata["%s-truth" % param].append(get_param(param, tr_resp, sum_stats))
             dfdata["%s-predicted" % param].append(prlist[ip])
     df = pd.DataFrame(dfdata)
-    df.to_csv(csvfn(smpl))
+    df.to_csv(csvfn(args, smpl))
     return df
 
 
 # ----------------------------------------------------------------------------------------
-def read_plot_csv():
+def read_plot_csv(args):
     prdfs = {}
     for smpl in ["train", "test"]:
-        prdfs[smpl] = pd.read_csv(csvfn(smpl))
+        prdfs[smpl] = pd.read_csv(csvfn(args, smpl))
     utils.make_dl_plots(
         prdfs,
         args.params_to_predict,
@@ -135,7 +135,7 @@ def read_plot_csv():
 
 
 # ----------------------------------------------------------------------------------------
-def get_traintest_indices(samples):
+def get_traintest_indices(args, samples):
     n_trees = len(samples["trees"])
     n_test = round((1.0 - args.train_frac) * n_trees)
     idxs = {}
@@ -157,7 +157,7 @@ def get_param(pname, bresp, sts):
 
 
 # ----------------------------------------------------------------------------------------
-def write_traintest_samples(smpldict):
+def write_traintest_samples(args, smpldict):
     for smpl in smplist:
         subdict = smpldict[smpl]
         responses = [
@@ -174,7 +174,7 @@ def write_traintest_samples(smpldict):
 
 
 # ----------------------------------------------------------------------------------------
-def train_and_test():
+def train_and_test(args):
     from gcdyn.nn import NeuralNetworkModel
     from gcdyn.poisson import ConstantResponse
 
@@ -202,7 +202,7 @@ def train_and_test():
     )
 
     # separate train/test samples
-    idxs = get_traintest_indices(samples)
+    idxs = get_traintest_indices(args, samples)
     smpldict = {}  # separate train/test trees and responses by index
     for smpl in smplist:
         smpldict[smpl] = {
@@ -213,7 +213,7 @@ def train_and_test():
         % "   ".join("%s %d" % (s, len(smpldict[s]["trees"])) for s in smplist)
     )
 
-    write_traintest_samples(smpldict)
+    write_traintest_samples(args, smpldict)
 
     # handle various scaling/re-encoding stuff
     pscaled, scalers = {}, {}  # scaled parameters and scalers
@@ -224,7 +224,7 @@ def train_and_test():
                 smpldict[smpl]["birth-responses"], smpldict[smpl]["sstats"]
             )
         ]
-        pscaled[smpl], scalers[smpl] = scale_vals(smpl, pvals)
+        pscaled[smpl], scalers[smpl] = scale_vals(args, smpl, pvals)
     if (
         args.use_trivial_encoding
     ):  # silly encodings for testing that essentially train on the output values
@@ -250,7 +250,7 @@ def train_and_test():
     print("  writing train/test results to %s" % args.outdir)
     prdfs = {}
     for smpl in ["train", "test"]:
-        prdfs[smpl] = get_prediction(smpl, model, smpldict, scalers["train"])
+        prdfs[smpl] = get_prediction(args, smpl, model, smpldict, scalers["train"])
     utils.make_dl_plots(
         prdfs,
         args.params_to_predict,
@@ -266,12 +266,18 @@ def get_parser():
     helpstr = """
     Infer affinity response function on gcdyn simulation using deep learning neural networks.
     Example usage:
-        dl-infer --indir <input dir with gcdyn simulation output> --outdir <output dir> --params-to-predict xscale xshift yscale
+        gcd-dl-infer --indir <input dir with gcdyn simulation output> --outdir <output dir> --params-to-predict xscale xshift yscale
     """
-    class MultiplyInheritedFormatter(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+
+    class MultiplyInheritedFormatter(
+        argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter
+    ):
         pass
+
     formatter_class = MultiplyInheritedFormatter
-    parser = argparse.ArgumentParser(formatter_class=MultiplyInheritedFormatter, description=helpstr)
+    parser = argparse.ArgumentParser(
+        formatter_class=MultiplyInheritedFormatter, description=helpstr
+    )
     parser.add_argument(
         "--indir",
         required=True,
@@ -324,15 +330,16 @@ def main():
     random.seed(args.random_seed)
     np.random.seed(args.random_seed)
     import tensorflow as tf  # this is super slow, don't want to wait for this to get help message
+
     tf.keras.utils.set_random_seed(args.random_seed)
 
     # ----------------------------------------------------------------------------------------
-    if os.path.exists(csvfn("test")) and not args.overwrite:
+    if os.path.exists(csvfn(args, "test")) and not args.overwrite:
         print(
             "    csv files already exist, so just replotting (override with --overwrite): %s"
-            % csvfn("test")
+            % csvfn(args, "test")
         )
-        read_plot_csv()
+        read_plot_csv(args)
         sys.exit(0)
 
-    train_and_test()
+    train_and_test(args)

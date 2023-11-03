@@ -335,7 +335,7 @@ def make_dl_plots(
             len(set(df["%s-truth" % param])) < 10
         ):  # if simulation has discrete parameter values
             if validation_split > 0:
-                raise Exception("not implemented here")
+                raise Exception("validation split not implemented here")
             ax = sns.boxplot(
                 df,
                 x=xkey,

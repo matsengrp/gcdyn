@@ -211,7 +211,8 @@ def choose_val(args, pname, extra_bounds=None):
 
 # ----------------------------------------------------------------------------------------
 def get_xshift_bounds(
-    args, xscale,
+    args,
+    xscale,
 ):  # see algebra here https://photos.app.goo.gl/i8jM5Aa8QXvbDD267
     assert args.birth_response == "sigmoid"
     ysc_lo, ysc_hi = args.yscale_range
@@ -260,10 +261,10 @@ def choose_params(args, pcounts):
             if pname == "xshift":
                 extra_bounds = get_xshift_bounds(args, params["xscale"])
             if pname == "yscale":
-                extra_bounds = get_yscale_bounds(args, params["xscale"], params["xshift"])
-        params[pname] = choose_val(
-            args, pname, extra_bounds=extra_bounds
-        )
+                extra_bounds = get_yscale_bounds(
+                    args, params["xscale"], params["xshift"]
+                )
+        params[pname] = choose_val(args, pname, extra_bounds=extra_bounds)
         add_pval(pcounts, pname, params[pname])
     print(
         "    chose new parameter values: %s"
@@ -420,15 +421,21 @@ def get_parser():
     helpstr = """
     Simulate B cell trees in germinal centers using the birth-death-mutation model.
     Example usage that samples parameter values from within ranges:
-        multi-simulation --debug 1 --outdir <outdir> --xscale-range 0.5 5 --xshift-range -0.5 3 --yscale-range 1 50 --initial-birth-rate-range 2 10 --carry-cap 150 --time-to-sampling-values 10 --n-trials 1
+        gcd-simulate --debug 1 --outdir <outdir> --xscale-range 0.5 5 --xshift-range -0.5 3 --yscale-range 1 50 --initial-birth-rate-range 2 10 --carry-cap 150 --time-to-sampling-values 10 --n-trials 1
     Example usage with multiple subprocesses:
-        multi-simulation --debug 1 --outdir <outdir> --carry-cap 150 --time-to-sampling-values 10 --n-trials 100 --n-sub-procs 10
+        gcd-simulate --debug 1 --outdir <outdir> --carry-cap 150 --time-to-sampling-values 10 --n-trials 100 --n-sub-procs 10
 
     """
-    class MultiplyInheritedFormatter(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+
+    class MultiplyInheritedFormatter(
+        argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter
+    ):
         pass
+
     formatter_class = MultiplyInheritedFormatter
-    parser = argparse.ArgumentParser(formatter_class=MultiplyInheritedFormatter, description=helpstr)
+    parser = argparse.ArgumentParser(
+        formatter_class=MultiplyInheritedFormatter, description=helpstr
+    )
     parser.add_argument(
         "--n-seqs", default=70, type=int, help="Number of sequences to observe"
     )
@@ -613,8 +620,7 @@ def run_sub_procs(args):
         )
     n_per_proc = int(args.n_trials / float(args.n_sub_procs))
     print(
-        "    starting %d procs with %d events per proc"
-        % (args.n_sub_procs, n_per_proc)
+        "    starting %d procs with %d events per proc" % (args.n_sub_procs, n_per_proc)
     )
     if (
         args.simu_bundle_size != 1
@@ -668,8 +674,7 @@ def run_sub_procs(args):
         if os.path.exists(logfname):
             subprocess.check_call(
                 (
-                    "mv %s %s.old.%d"
-                    % (logfname, logfname, random.randint(100, 999))
+                    "mv %s %s.old.%d" % (logfname, logfname, random.randint(100, 999))
                 ).split()
             )  # can't be bothered to iterate properly like in the partis code
         subprocess.check_call("echo %s >%s" % (cmd_str, logfname), shell=True)
@@ -677,9 +682,7 @@ def run_sub_procs(args):
         procs.append(subprocess.Popen(cmd_str, env=os.environ, shell=True))
         if args.n_max_procs is not None:
             utils.limit_procs(procs, args.n_max_procs)
-    while procs.count(None) != len(
-        procs
-    ):  # we set each proc to None when it finishes
+    while procs.count(None) != len(procs):  # we set each proc to None when it finishes
         for iproc in range(len(procs)):
             if procs[iproc] is None:  # already finished
                 continue
@@ -750,11 +753,16 @@ def main():
     )
     parser = get_parser()
     args = parser.parse_args()
-    args.use_generated_parameter_bounds = args.birth_response == "sigmoid" and None not in [args.yscale_range, args.initial_birth_rate_range]
+    args.use_generated_parameter_bounds = (
+        args.birth_response == "sigmoid"
+        and None not in [args.yscale_range, args.initial_birth_rate_range]
+    )
     if args.use_generated_parameter_bounds:
-        print('    using additional generated parameter bounds')
+        print("    using additional generated parameter bounds")
     else:
-        print('  note: not using additional generated parameter bounds since at least one of --yscale-range, --initial-birth-rate-range was unset (this may result in lots of failed simulation runs if the initial birth rate is either too small or too large)')
+        print(
+            "  note: not using additional generated parameter bounds since at least one of --yscale-range, --initial-birth-rate-range was unset (this may result in lots of failed simulation runs if the initial birth rate is either too small or too large)"
+        )
     # handle args that can have either a list of a few values, or choose from a uniform interval specified with two (min, max) values
     for pname in ["xscale", "xshift", "yscale", "time_to_sampling"]:
         rangevals = getattr(args, pname + "_range")
@@ -892,7 +900,10 @@ def main():
             % (utils.color("yellow", "warning"), n_missing, args.n_trials)
         )
     if len(all_trees) == 0:
-        print('  %s no resulting trees, exiting without writing or plotting anything' % utils.color('yellow', 'warning'))
+        print(
+            "  %s no resulting trees, exiting without writing or plotting anything"
+            % utils.color("yellow", "warning")
+        )
         sys.exit(0)
 
     write_final_outputs(args, all_seqs, all_trees)
