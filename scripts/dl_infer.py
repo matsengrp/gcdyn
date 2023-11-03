@@ -174,7 +174,7 @@ def write_traintest_samples(args, smpldict):
 
 
 # ----------------------------------------------------------------------------------------
-def train_and_test(args):
+def train_and_test(args, start_time):
     from gcdyn.nn import NeuralNetworkModel
     from gcdyn.poisson import ConstantResponse
 
@@ -258,7 +258,7 @@ def train_and_test(args):
         validation_split=args.validation_split,
     )
 
-    print("    total dl inference time: %.1f sec" % (time.time() - start))
+    print("    total dl inference time: %.1f sec" % (time.time() - start_time))
 
 
 # ----------------------------------------------------------------------------------------
@@ -274,7 +274,6 @@ def get_parser():
     ):
         pass
 
-    formatter_class = MultiplyInheritedFormatter
     parser = argparse.ArgumentParser(
         formatter_class=MultiplyInheritedFormatter, description=helpstr
     )
@@ -322,7 +321,7 @@ def get_parser():
 # ----------------------------------------------------------------------------------------
 def main():
     parser = get_parser()
-    start = time.time()
+    start_time = time.time()
     args = parser.parse_args()
     if args.test:
         args.epochs = 10
@@ -342,4 +341,4 @@ def main():
         read_plot_csv(args)
         sys.exit(0)
 
-    train_and_test(args)
+    train_and_test(args, start_time)

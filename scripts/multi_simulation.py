@@ -432,7 +432,6 @@ def get_parser():
     ):
         pass
 
-    formatter_class = MultiplyInheritedFormatter
     parser = argparse.ArgumentParser(
         formatter_class=MultiplyInheritedFormatter, description=helpstr
     )
