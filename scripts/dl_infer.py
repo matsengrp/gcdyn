@@ -266,7 +266,7 @@ def get_parser():
     helpstr = """
     Infer affinity response function on gcdyn simulation using deep learning neural networks.
     Example usage:
-        gcd-dl-infer --indir <input dir with gcdyn simulation output> --outdir <output dir> --params-to-predict xscale xshift yscale
+        gcd-dl-infer --indir <input dir> --outdir <output dir> --params-to-predict xscale xshift yscale
     """
 
     class MultiplyInheritedFormatter(
@@ -280,7 +280,7 @@ def get_parser():
     parser.add_argument(
         "--indir",
         required=True,
-        help="input directory with simulation output (uses encoded trees .npy, summary stats .csv, and response .pkl files)",
+        help="input directory with gcdyn simulation output (uses encoded trees .npy, summary stats .csv, and response .pkl files)",
     )
     parser.add_argument("--outdir", required=True, help="output directory")
     parser.add_argument("--epochs", type=int, default=30)
