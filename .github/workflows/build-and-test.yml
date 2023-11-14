@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'main'
-      - '!65-mutator-speed'
   pull_request:
     branches: [ main ]
 
