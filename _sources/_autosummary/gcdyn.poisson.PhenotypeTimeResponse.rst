@@ -16,6 +16,7 @@ gcdyn.poisson.PhenotypeTimeResponse
    .. autosummary::
       :nosignatures:
    
+      ~PhenotypeTimeResponse.cleanup
       ~PhenotypeTimeResponse.waiting_time_logsf
       ~PhenotypeTimeResponse.waiting_time_rv
       ~PhenotypeTimeResponse.Λ

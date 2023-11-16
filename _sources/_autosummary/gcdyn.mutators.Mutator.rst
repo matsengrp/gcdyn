@@ -16,6 +16,7 @@ gcdyn.mutators.Mutator
    .. autosummary::
       :nosignatures:
    
+      ~Mutator.cleanup
       ~Mutator.logprob
       ~Mutator.mutate
    
@@ -27,6 +28,6 @@ gcdyn.mutators.Mutator
 
    .. autosummary::
    
-      ~Mutator.mutated_attrs
+      ~Mutator.node_attrs
    
    

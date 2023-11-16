@@ -16,6 +16,7 @@ gcdyn.mutators.GaussianMutator
    .. autosummary::
       :nosignatures:
    
+      ~GaussianMutator.cleanup
       ~GaussianMutator.logprob
       ~GaussianMutator.mutate
       ~GaussianMutator.prob
@@ -28,6 +29,6 @@ gcdyn.mutators.GaussianMutator
 
    .. autosummary::
    
-      ~GaussianMutator.mutated_attrs
+      ~GaussianMutator.node_attrs
    
    

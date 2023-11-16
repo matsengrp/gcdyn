@@ -16,6 +16,7 @@ gcdyn.poisson.SigmoidResponse
    .. autosummary::
       :nosignatures:
    
+      ~SigmoidResponse.cleanup
       ~SigmoidResponse.waiting_time_logsf
       ~SigmoidResponse.waiting_time_rv
       ~SigmoidResponse.Λ

@@ -16,6 +16,7 @@ gcdyn.poisson.ConstantResponse
    .. autosummary::
       :nosignatures:
    
+      ~ConstantResponse.cleanup
       ~ConstantResponse.waiting_time_logsf
       ~ConstantResponse.waiting_time_rv
       ~ConstantResponse.Λ

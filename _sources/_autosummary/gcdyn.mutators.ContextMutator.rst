@@ -16,6 +16,8 @@ gcdyn.mutators.ContextMutator
    .. autosummary::
       :nosignatures:
    
+      ~ContextMutator.check_node
+      ~ContextMutator.cleanup
       ~ContextMutator.logprob
       ~ContextMutator.mutate
       ~ContextMutator.prob
@@ -28,6 +30,6 @@ gcdyn.mutators.ContextMutator
 
    .. autosummary::
    
-      ~ContextMutator.mutated_attrs
+      ~ContextMutator.node_attrs
    
    

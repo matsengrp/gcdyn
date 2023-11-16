@@ -16,6 +16,7 @@ gcdyn.poisson.ExponentialResponse
    .. autosummary::
       :nosignatures:
    
+      ~ExponentialResponse.cleanup
       ~ExponentialResponse.waiting_time_logsf
       ~ExponentialResponse.waiting_time_rv
       ~ExponentialResponse.Λ

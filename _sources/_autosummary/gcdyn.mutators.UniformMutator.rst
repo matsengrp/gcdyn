@@ -16,6 +16,8 @@ gcdyn.mutators.UniformMutator
    .. autosummary::
       :nosignatures:
    
+      ~UniformMutator.check_node
+      ~UniformMutator.cleanup
       ~UniformMutator.logprob
       ~UniformMutator.mutate
       ~UniformMutator.prob
@@ -28,6 +30,6 @@ gcdyn.mutators.UniformMutator
 
    .. autosummary::
    
-      ~UniformMutator.mutated_attrs
+      ~UniformMutator.node_attrs
    
    

@@ -16,6 +16,7 @@ gcdyn.poisson.SequenceContextMutationResponse
    .. autosummary::
       :nosignatures:
    
+      ~SequenceContextMutationResponse.cleanup
       ~SequenceContextMutationResponse.waiting_time_logsf
       ~SequenceContextMutationResponse.waiting_time_rv
       ~SequenceContextMutationResponse.Λ

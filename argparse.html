@@ -1,0 +1,785 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Named Arguments &#8212; gcdyn  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" href="_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6" />
+  <script src="_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=365ca57ee442770a23c6"></script>
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'argparse';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Modules" href="api.html" />
+    <link rel="prev" title="Inhomogeneous processes" href="notebooks/bdms_inhomogeneous.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="gcdyn  documentation - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="gcdyn  documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cite.html">Citing <code class="docutils literal notranslate"><span class="pre">gcdyn</span></code></a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="notebooks/bdms_replay.html">Germinal center replay modeling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/bdms_inhomogeneous.html">Inhomogeneous processes</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Command line tools</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Named Arguments</a></li>
+
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="api.html">Modules</a><input checked class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.bdms.html">gcdyn.bdms</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.bdms.sample_trees.html">gcdyn.bdms.sample_trees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.bdms.TreeNode.html">gcdyn.bdms.TreeNode</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.encode.html">gcdyn.encode</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.encode.encode_tree.html">gcdyn.encode.encode_tree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.encode.encode_trees.html">gcdyn.encode.encode_trees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.encode.pad_trees.html">gcdyn.encode.pad_trees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.encode.read_trees.html">gcdyn.encode.read_trees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.encode.scale_tree.html">gcdyn.encode.scale_tree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.encode.simfn.html">gcdyn.encode.simfn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.encode.trivialize_encodings.html">gcdyn.encode.trivialize_encodings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.encode.write_training_files.html">gcdyn.encode.write_training_files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.encode.write_trees.html">gcdyn.encode.write_trees</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.fitness.html">gcdyn.fitness</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.fitness.Fitness.html">gcdyn.fitness.Fitness</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.gpmap.html">gcdyn.gpmap</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.gpmap.AdditiveGPMap.html">gcdyn.gpmap.AdditiveGPMap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.gpmap.ConstantGPMap.html">gcdyn.gpmap.ConstantGPMap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.gpmap.GPMap.html">gcdyn.gpmap.GPMap</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.models.html">gcdyn.models</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.models.naive_log_likelihood.html">gcdyn.models.naive_log_likelihood</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.models.stadler_appx_log_likelihood.html">gcdyn.models.stadler_appx_log_likelihood</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.models.stadler_full_log_likelihood.html">gcdyn.models.stadler_full_log_likelihood</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.models.stadler_full_log_likelihood_scipy.html">gcdyn.models.stadler_full_log_likelihood_scipy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.models.BirthDeathModel.html">gcdyn.models.BirthDeathModel</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.mutators.html">gcdyn.mutators</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.AttrMutator.html">gcdyn.mutators.AttrMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.ContextMutator.html">gcdyn.mutators.ContextMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.DiscreteMutator.html">gcdyn.mutators.DiscreteMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.GaussianMutator.html">gcdyn.mutators.GaussianMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.KdeMutator.html">gcdyn.mutators.KdeMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.Mutator.html">gcdyn.mutators.Mutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.SequenceMutator.html">gcdyn.mutators.SequenceMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.SequencePhenotypeMutator.html">gcdyn.mutators.SequencePhenotypeMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.UniformMutator.html">gcdyn.mutators.UniformMutator</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.nn.html">gcdyn.nn</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.nn.BundleMeanLayer.html">gcdyn.nn.BundleMeanLayer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.nn.Callback.html">gcdyn.nn.Callback</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.nn.NeuralNetworkModel.html">gcdyn.nn.NeuralNetworkModel</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.poisson.html">gcdyn.poisson</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-9"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.set_backend.html">gcdyn.poisson.set_backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.ConstantResponse.html">gcdyn.poisson.ConstantResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.ExponentialResponse.html">gcdyn.poisson.ExponentialResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.HomogeneousResponse.html">gcdyn.poisson.HomogeneousResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.ModulatedPhenotypeResponse.html">gcdyn.poisson.ModulatedPhenotypeResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.ModulatedRateResponse.html">gcdyn.poisson.ModulatedRateResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.PhenotypeResponse.html">gcdyn.poisson.PhenotypeResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.PhenotypeTimeResponse.html">gcdyn.poisson.PhenotypeTimeResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.Response.html">gcdyn.poisson.Response</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.SequenceContextMutationResponse.html">gcdyn.poisson.SequenceContextMutationResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.SigmoidResponse.html">gcdyn.poisson.SigmoidResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.SoftReluResponse.html">gcdyn.poisson.SoftReluResponse</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.utils.html">gcdyn.utils</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-10"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.addfn.html">gcdyn.utils.addfn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.arglist_imatches.html">gcdyn.utils.arglist_imatches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.arglist_index.html">gcdyn.utils.arglist_index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.color.html">gcdyn.utils.color</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.color_mutants.html">gcdyn.utils.color_mutants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.insert_in_arglist.html">gcdyn.utils.insert_in_arglist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.is_in_arglist.html">gcdyn.utils.is_in_arglist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.isclose.html">gcdyn.utils.isclose</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.ladderize_tree.html">gcdyn.utils.ladderize_tree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.limit_procs.html">gcdyn.utils.limit_procs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.make_dl_plots.html">gcdyn.utils.make_dl_plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.make_html.html">gcdyn.utils.make_html</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.memory_usage_fraction.html">gcdyn.utils.memory_usage_fraction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.mpl_init.html">gcdyn.utils.mpl_init</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.node_contexts.html">gcdyn.utils.node_contexts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.padded_fivemer_contexts_of_paired_sequences.html">gcdyn.utils.padded_fivemer_contexts_of_paired_sequences</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.plot_chosen_params.html">gcdyn.utils.plot_chosen_params</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.plot_phenotype_response.html">gcdyn.utils.plot_phenotype_response</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.plot_responses.html">gcdyn.utils.plot_responses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.plot_tree_slices.html">gcdyn.utils.plot_tree_slices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.random_transition_matrix.html">gcdyn.utils.random_transition_matrix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.remove_from_arglist.html">gcdyn.utils.remove_from_arglist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.replace_in_arglist.html">gcdyn.utils.replace_in_arglist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.simple_fivemer_contexts.html">gcdyn.utils.simple_fivemer_contexts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.write_leaf_sequences_to_fasta.html">gcdyn.utils.write_leaf_sequences_to_fasta</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Experiments subpackage</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="experiments.html">Modules</a><input checked class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-11"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/experiments.replay.html">experiments.replay</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-12"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/experiments.replay.NAIVE_SEQUENCE.html">experiments.replay.NAIVE_SEQUENCE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/experiments.replay.CHAIN_2_START_IDX.html">experiments.replay.CHAIN_2_START_IDX</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/experiments.replay.dms.html">experiments.replay.dms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/experiments.replay.mutability.html">experiments.replay.mutability</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/experiments.replay.substitution.html">experiments.replay.substitution</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="todo.html">To-do list</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/matsengrp/gcdyn" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/argparse.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Named Arguments</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Named Arguments</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments">Named Arguments</a></li>
+</ul>
+
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <p><blockquote>
+<div><p>Infer affinity response function on gcdyn simulation using deep learning neural networks.
+Example usage:</p>
+<blockquote>
+<div><p>gcd-dl-infer –indir &lt;input dir&gt; –outdir &lt;output dir&gt; –params-to-predict xscale xshift yscale</p>
+</div></blockquote>
+</div></blockquote>
+</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">gcd</span><span class="o">-</span><span class="n">dl</span><span class="o">-</span><span class="n">infer</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="o">--</span><span class="n">indir</span> <span class="n">INDIR</span> <span class="o">--</span><span class="n">outdir</span> <span class="n">OUTDIR</span> <span class="p">[</span><span class="o">--</span><span class="n">epochs</span> <span class="n">EPOCHS</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">bundle</span><span class="o">-</span><span class="n">size</span> <span class="n">BUNDLE_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">dropout</span><span class="o">-</span><span class="n">rate</span> <span class="n">DROPOUT_RATE</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">learning</span><span class="o">-</span><span class="n">rate</span> <span class="n">LEARNING_RATE</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">ema</span><span class="o">-</span><span class="n">momentum</span> <span class="n">EMA_MOMENTUM</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">train</span><span class="o">-</span><span class="n">frac</span> <span class="n">TRAIN_FRAC</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">validation</span><span class="o">-</span><span class="n">split</span> <span class="n">VALIDATION_SPLIT</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">params</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">predict</span> <span class="p">{</span><span class="n">xscale</span><span class="p">,</span><span class="n">xshift</span><span class="p">,</span><span class="n">yscale</span><span class="p">,</span><span class="n">total_branch_length</span><span class="p">}</span> <span class="p">[{</span><span class="n">xscale</span><span class="p">,</span><span class="n">xshift</span><span class="p">,</span><span class="n">yscale</span><span class="p">,</span><span class="n">total_branch_length</span><span class="p">}</span> <span class="o">...</span><span class="p">]]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">test</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">random</span><span class="o">-</span><span class="n">seed</span> <span class="n">RANDOM_SEED</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">overwrite</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">use</span><span class="o">-</span><span class="n">trivial</span><span class="o">-</span><span class="n">encoding</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">dont</span><span class="o">-</span><span class="n">scale</span><span class="o">-</span><span class="n">params</span><span class="p">]</span>
+</pre></div>
+</div>
+<section id="named-arguments">
+<h1>Named Arguments<a class="headerlink" href="#named-arguments" title="Permalink to this heading">#</a></h1>
+<dl class="option-list">
+<dt><kbd>--indir</kbd></dt>
+<dd><p>input directory with gcdyn simulation output (uses encoded trees .npy, summary stats .csv, and response .pkl files)</p>
+</dd>
+<dt><kbd>--outdir</kbd></dt>
+<dd><p>output directory</p>
+</dd>
+<dt><kbd>--epochs</kbd></dt>
+<dd><p>Default: 30</p>
+</dd>
+<dt><kbd>--bundle-size</kbd></dt>
+<dd><p>Default: 50</p>
+</dd>
+<dt><kbd>--dropout-rate</kbd></dt>
+<dd><p>Default: 0</p>
+</dd>
+<dt><kbd>--learning-rate</kbd></dt>
+<dd><p>Default: 0.001</p>
+</dd>
+<dt><kbd>--ema-momentum</kbd></dt>
+<dd><p>Default: 0.99</p>
+</dd>
+<dt><kbd>--train-frac</kbd></dt>
+<dd><p>train on this fraction of the trees</p>
+<p>Default: 0.8</p>
+</dd>
+<dt><kbd>--validation-split</kbd></dt>
+<dd><p>fraction of training sample to tell keras to hold out for validation during training</p>
+<p>Default: 0.1</p>
+</dd>
+<dt><kbd>--params-to-predict</kbd></dt>
+<dd><p>Possible choices: xscale, xshift, yscale, total_branch_length</p>
+<p>Default: [‘xscale’, ‘xshift’]</p>
+</dd>
+<dt><kbd>--test</kbd></dt>
+<dd><p>sets things to be super fast, so not useful for real inference, but just to check if things are running properly</p>
+<p>Default: False</p>
+</dd>
+<dt><kbd>--random-seed</kbd></dt>
+<dd><p>random seed</p>
+<p>Default: 0</p>
+</dd>
+<dt><kbd>--overwrite</kbd></dt>
+<dd><p>Default: False</p>
+</dd>
+<dt><kbd>--use-trivial-encoding</kbd></dt>
+<dd><p>Default: False</p>
+</dd>
+<dt><kbd>--dont-scale-params</kbd></dt>
+<dd><p>Default: False</p>
+</dd>
+</dl>
+</section>
+<p><blockquote>
+<div><p>Simulate B cell trees in germinal centers using the birth-death-mutation model.
+Example usage that samples parameter values from within ranges:</p>
+<blockquote>
+<div><p>gcd-simulate –debug 1 –outdir &lt;outdir&gt; –xscale-range 0.5 5 –xshift-range -0.5 3 –yscale-range 1 50 –initial-birth-rate-range 2 10 –carry-cap 150 –time-to-sampling-values 10 –n-trials 1</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Example usage with multiple subprocesses:</dt><dd><p>gcd-simulate –debug 1 –outdir &lt;outdir&gt; –carry-cap 150 –time-to-sampling-values 10 –n-trials 100 –n-sub-procs 10</p>
+</dd>
+</dl>
+</div></blockquote>
+</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">gcd</span><span class="o">-</span><span class="n">simulate</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">n</span><span class="o">-</span><span class="n">seqs</span> <span class="n">N_SEQS</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">n</span><span class="o">-</span><span class="n">trials</span> <span class="n">N_TRIALS</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">n</span><span class="o">-</span><span class="nb">max</span><span class="o">-</span><span class="n">tries</span> <span class="n">N_MAX_TRIES</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">time</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">sampling</span><span class="o">-</span><span class="n">values</span> <span class="n">TIME_TO_SAMPLING_VALUES</span> <span class="p">[</span><span class="n">TIME_TO_SAMPLING_VALUES</span> <span class="o">...</span><span class="p">]]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">time</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">sampling</span><span class="o">-</span><span class="nb">range</span> <span class="n">TIME_TO_SAMPLING_RANGE</span> <span class="p">[</span><span class="n">TIME_TO_SAMPLING_RANGE</span> <span class="o">...</span><span class="p">]]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">simu</span><span class="o">-</span><span class="n">bundle</span><span class="o">-</span><span class="n">size</span> <span class="n">SIMU_BUNDLE_SIZE</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="nb">min</span><span class="o">-</span><span class="n">survivors</span> <span class="n">MIN_SURVIVORS</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">carry</span><span class="o">-</span><span class="n">cap</span> <span class="n">CARRY_CAP</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">capacity</span><span class="o">-</span><span class="n">method</span> <span class="p">{</span><span class="n">birth</span><span class="p">,</span><span class="n">death</span><span class="p">,</span><span class="n">hard</span><span class="p">,</span><span class="kc">None</span><span class="p">}]</span> <span class="p">[</span><span class="o">--</span><span class="n">seed</span> <span class="n">SEED</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">outdir</span> <span class="n">OUTDIR</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">birth</span><span class="o">-</span><span class="n">response</span> <span class="p">{</span><span class="n">constant</span><span class="p">,</span><span class="n">soft</span><span class="o">-</span><span class="n">relu</span><span class="p">,</span><span class="n">sigmoid</span><span class="p">}]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">death</span><span class="o">-</span><span class="n">value</span> <span class="n">DEATH_VALUE</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">xscale</span><span class="o">-</span><span class="n">values</span> <span class="n">XSCALE_VALUES</span> <span class="p">[</span><span class="n">XSCALE_VALUES</span> <span class="o">...</span><span class="p">]]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">xshift</span><span class="o">-</span><span class="n">values</span> <span class="n">XSHIFT_VALUES</span> <span class="p">[</span><span class="n">XSHIFT_VALUES</span> <span class="o">...</span><span class="p">]]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">yscale</span><span class="o">-</span><span class="n">values</span> <span class="n">YSCALE_VALUES</span> <span class="p">[</span><span class="n">YSCALE_VALUES</span> <span class="o">...</span><span class="p">]]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">xscale</span><span class="o">-</span><span class="nb">range</span> <span class="n">XSCALE_RANGE</span> <span class="p">[</span><span class="n">XSCALE_RANGE</span> <span class="o">...</span><span class="p">]]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">xshift</span><span class="o">-</span><span class="nb">range</span> <span class="n">XSHIFT_RANGE</span> <span class="p">[</span><span class="n">XSHIFT_RANGE</span> <span class="o">...</span><span class="p">]]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">yscale</span><span class="o">-</span><span class="nb">range</span> <span class="n">YSCALE_RANGE</span> <span class="p">[</span><span class="n">YSCALE_RANGE</span> <span class="o">...</span><span class="p">]]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">initial</span><span class="o">-</span><span class="n">birth</span><span class="o">-</span><span class="n">rate</span><span class="o">-</span><span class="nb">range</span> <span class="n">INITIAL_BIRTH_RATE_RANGE</span> <span class="p">[</span><span class="n">INITIAL_BIRTH_RATE_RANGE</span> <span class="o">...</span><span class="p">]]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">yshift</span> <span class="n">YSHIFT</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">mutability</span><span class="o">-</span><span class="n">multiplier</span> <span class="n">MUTABILITY_MULTIPLIER</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">n</span><span class="o">-</span><span class="n">sub</span><span class="o">-</span><span class="n">procs</span> <span class="n">N_SUB_PROCS</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">n</span><span class="o">-</span><span class="nb">max</span><span class="o">-</span><span class="n">procs</span> <span class="n">N_MAX_PROCS</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">itrial</span><span class="o">-</span><span class="n">start</span> <span class="n">ITRIAL_START</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">debug</span> <span class="n">DEBUG</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">overwrite</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">dont</span><span class="o">-</span><span class="n">run</span><span class="o">-</span><span class="n">new</span><span class="o">-</span><span class="n">simu</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">test</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">--</span><span class="n">make</span><span class="o">-</span><span class="n">plots</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">n</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">plot</span> <span class="n">N_TO_PLOT</span><span class="p">]</span>
+</pre></div>
+</div>
+<section id="named-arguments">
+<h1>Named Arguments<a class="headerlink" href="#named-arguments" title="Permalink to this heading">#</a></h1>
+<dl class="option-list">
+<dt><kbd>--n-seqs</kbd></dt>
+<dd><p>Number of sequences to observe</p>
+<p>Default: 70</p>
+</dd>
+<dt><kbd>--n-trials</kbd></dt>
+<dd><p>Number of trials/GCs to simulate</p>
+<p>Default: 51</p>
+</dd>
+<dt><kbd>--n-max-tries</kbd></dt>
+<dd><p>Number of times to retry simulation if it fails due to reaching either the min or max number of leaves.</p>
+<p>Default: 10</p>
+</dd>
+<dt><kbd>--time-to-sampling-values</kbd></dt>
+<dd><p>List of values from which to choose for time to sampling.</p>
+<p>Default: [20]</p>
+</dd>
+<dt><kbd>--time-to-sampling-range</kbd></dt>
+<dd><p>Pair of values (min/max) between which to choose at uniform random the time to sampling for each tree. Overrides –time-to-sampling-values.</p>
+</dd>
+<dt><kbd>--simu-bundle-size</kbd></dt>
+<dd><p>By default, we choose a new set of parameters for each tree. If this arg is set, once we’ve chosen a set of parameter values, we simulate this many trees with those values.</p>
+<p>Default: 1</p>
+</dd>
+<dt><kbd>--min-survivors</kbd></dt>
+<dd><p>Default: 100</p>
+</dd>
+<dt><kbd>--carry-cap</kbd></dt>
+<dd><p>Default: 300</p>
+</dd>
+<dt><kbd>--capacity-method</kbd></dt>
+<dd><p>Possible choices: birth, death, hard, None</p>
+<p>see bdms.evolve() docs. Note that ‘death’ often involves a ton of churn, which makes for very slow simulations.</p>
+<p>Default: “birth”</p>
+</dd>
+<dt><kbd>--seed</kbd></dt>
+<dd><p>random seed</p>
+<p>Default: 0</p>
+</dd>
+<dt><kbd>--outdir</kbd></dt>
+<dd><p>Default: “/home/runner/work/gcdyn/gcdyn/docs”</p>
+</dd>
+<dt><kbd>--birth-response</kbd></dt>
+<dd><p>Possible choices: constant, soft-relu, sigmoid</p>
+<p>birth rate response function</p>
+<p>Default: “sigmoid”</p>
+</dd>
+<dt><kbd>--death-value</kbd></dt>
+<dd><p>value (parameter) for constant death response</p>
+<p>Default: 0.1</p>
+</dd>
+<dt><kbd>--xscale-values</kbd></dt>
+<dd><p>list of birth response xscale parameter values from which to choose</p>
+<p>Default: [2]</p>
+</dd>
+<dt><kbd>--xshift-values</kbd></dt>
+<dd><p>list of birth response xshift parameter values from which to choose</p>
+<p>Default: [-2.5]</p>
+</dd>
+<dt><kbd>--yscale-values</kbd></dt>
+<dd><p>list of birth response yscale parameter values from which to choose</p>
+<p>Default: [1]</p>
+</dd>
+<dt><kbd>--xscale-range</kbd></dt>
+<dd><p>Pair of values (min/max) between which to choose at uniform random the birth response xscale parameter for each tree. Overrides –xscale-values. Suggest 0.5 5</p>
+</dd>
+<dt><kbd>--xshift-range</kbd></dt>
+<dd><p>Pair of values (min/max) between which to choose at uniform random the birth response xshift parameter for each tree. Overrides –xshift-values. Suggest -0.5 3</p>
+</dd>
+<dt><kbd>--yscale-range</kbd></dt>
+<dd><p>Pair of values (min/max) between which to choose at uniform random the birth response yscale parameter for each tree. Overrides –yscale-values. Suggest 1 50</p>
+</dd>
+<dt><kbd>--initial-birth-rate-range</kbd></dt>
+<dd><p>Pair of values (min/max) for initial/default/average growth rate (i.e. when affinity/x=0). Used to set –yscale.</p>
+<p>Default: [2, 10]</p>
+</dd>
+<dt><kbd>--yshift</kbd></dt>
+<dd><p>atm this shouldn’t (need to, at least) be changed</p>
+<p>Default: 0</p>
+</dd>
+<dt><kbd>--mutability-multiplier</kbd></dt>
+<dd><p>Default: 0.68</p>
+</dd>
+<dt><kbd>--n-sub-procs</kbd></dt>
+<dd><p>If set, the –n-trials are split among this many sub processes (which are recursively run with this script). Note that in terms of random seeds, results will not be identical with/without –n-sub-procs set (since there’s no way to synchronize seeds partway through))</p>
+</dd>
+<dt><kbd>--n-max-procs</kbd></dt>
+<dd><p>If set (and –n-sub-procs is set), only run this many sub procs at a time (e.g. to conserve memory).</p>
+</dd>
+<dt><kbd>--itrial-start</kbd></dt>
+<dd><p>if running sub procs (–n-sub-procs) set this so each sub proc’s trial index starts at the proper value</p>
+<p>Default: 0</p>
+</dd>
+<dt><kbd>--debug</kbd></dt>
+<dd><p>Verbosity level; set to 1 or 2 for more debug output.</p>
+<p>Default: 0</p>
+</dd>
+<dt><kbd>--overwrite</kbd></dt>
+<dd><p>Default: False</p>
+</dd>
+<dt><kbd>--dont-run-new-simu</kbd></dt>
+<dd><p>by default, if some trees are already there but others are missing, we try to rerun the missing ones; if this is set we instead ignore any missing ones and just merge any that are there</p>
+<p>Default: False</p>
+</dd>
+<dt><kbd>--test</kbd></dt>
+<dd><p>sets some default parameter values that run quickly and successfully, i.e. useful for quick tests</p>
+<p>Default: False</p>
+</dd>
+<dt><kbd>--make-plots</kbd></dt>
+<dd><p>Default: False</p>
+</dd>
+<dt><kbd>--n-to-plot</kbd></dt>
+<dd><p>number of tree slice plots to make</p>
+<p>Default: 10</p>
+</dd>
+</dl>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  <!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="notebooks/bdms_inhomogeneous.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Inhomogeneous processes</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="api.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Modules</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Named Arguments</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments">Named Arguments</a></li>
+</ul>
+
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Erick Matsen
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2022, Erick Matsen.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

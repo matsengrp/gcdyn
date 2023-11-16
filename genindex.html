@@ -18,12 +18,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
 
   
-  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -34,13 +34,11 @@
     <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6" />
+  <script src="_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=365ca57ee442770a23c6"></script>
 
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/clipboard.min.js"></script>
@@ -59,6 +57,15 @@
   
   
   <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -119,13 +126,14 @@
   
   
   
+  
     
     
       
     
     
-    <img src="_static/logo.png" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="_static/logo.png" class="logo__image only-light" alt="gcdyn  documentation - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="gcdyn  documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -141,14 +149,68 @@
 <li class="toctree-l1"><a class="reference internal" href="notebooks/bdms_replay.html">Germinal center replay modeling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/bdms_inhomogeneous.html">Inhomogeneous processes</a></li>
 </ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Command line tools</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="argparse.html">Named Arguments</a></li>
+
+</ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="api.html">Modules</a><input checked class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.bdms.html">gcdyn.bdms</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.bdms.sample_trees.html">gcdyn.bdms.sample_trees</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.bdms.TreeNode.html">gcdyn.bdms.TreeNode</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.poisson.html">gcdyn.poisson</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.encode.html">gcdyn.encode</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.encode.encode_tree.html">gcdyn.encode.encode_tree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.encode.encode_trees.html">gcdyn.encode.encode_trees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.encode.pad_trees.html">gcdyn.encode.pad_trees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.encode.read_trees.html">gcdyn.encode.read_trees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.encode.scale_tree.html">gcdyn.encode.scale_tree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.encode.simfn.html">gcdyn.encode.simfn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.encode.trivialize_encodings.html">gcdyn.encode.trivialize_encodings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.encode.write_training_files.html">gcdyn.encode.write_training_files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.encode.write_trees.html">gcdyn.encode.write_trees</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.fitness.html">gcdyn.fitness</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.fitness.Fitness.html">gcdyn.fitness.Fitness</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.gpmap.html">gcdyn.gpmap</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.gpmap.AdditiveGPMap.html">gcdyn.gpmap.AdditiveGPMap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.gpmap.ConstantGPMap.html">gcdyn.gpmap.ConstantGPMap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.gpmap.GPMap.html">gcdyn.gpmap.GPMap</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.models.html">gcdyn.models</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.models.naive_log_likelihood.html">gcdyn.models.naive_log_likelihood</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.models.stadler_appx_log_likelihood.html">gcdyn.models.stadler_appx_log_likelihood</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.models.stadler_full_log_likelihood.html">gcdyn.models.stadler_full_log_likelihood</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.models.stadler_full_log_likelihood_scipy.html">gcdyn.models.stadler_full_log_likelihood_scipy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.models.BirthDeathModel.html">gcdyn.models.BirthDeathModel</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.mutators.html">gcdyn.mutators</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.AttrMutator.html">gcdyn.mutators.AttrMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.ContextMutator.html">gcdyn.mutators.ContextMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.DiscreteMutator.html">gcdyn.mutators.DiscreteMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.GaussianMutator.html">gcdyn.mutators.GaussianMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.KdeMutator.html">gcdyn.mutators.KdeMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.Mutator.html">gcdyn.mutators.Mutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.SequenceMutator.html">gcdyn.mutators.SequenceMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.SequencePhenotypeMutator.html">gcdyn.mutators.SequencePhenotypeMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.UniformMutator.html">gcdyn.mutators.UniformMutator</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.nn.html">gcdyn.nn</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.nn.BundleMeanLayer.html">gcdyn.nn.BundleMeanLayer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.nn.Callback.html">gcdyn.nn.Callback</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.nn.NeuralNetworkModel.html">gcdyn.nn.NeuralNetworkModel</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.poisson.html">gcdyn.poisson</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-9"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.set_backend.html">gcdyn.poisson.set_backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.ConstantResponse.html">gcdyn.poisson.ConstantResponse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.ExponentialResponse.html">gcdyn.poisson.ExponentialResponse</a></li>
@@ -163,30 +225,30 @@
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.poisson.SoftReluResponse.html">gcdyn.poisson.SoftReluResponse</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.mutators.html">gcdyn.mutators</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.AttrMutator.html">gcdyn.mutators.AttrMutator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.ContextMutator.html">gcdyn.mutators.ContextMutator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.DiscreteMutator.html">gcdyn.mutators.DiscreteMutator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.GaussianMutator.html">gcdyn.mutators.GaussianMutator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.KdeMutator.html">gcdyn.mutators.KdeMutator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.Mutator.html">gcdyn.mutators.Mutator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.SequenceMutator.html">gcdyn.mutators.SequenceMutator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.SequencePhenotypeMutator.html">gcdyn.mutators.SequencePhenotypeMutator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.mutators.UniformMutator.html">gcdyn.mutators.UniformMutator</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.gpmap.html">gcdyn.gpmap</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.gpmap.AdditiveGPMap.html">gcdyn.gpmap.AdditiveGPMap</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.gpmap.ConstantGPMap.html">gcdyn.gpmap.ConstantGPMap</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.gpmap.GPMap.html">gcdyn.gpmap.GPMap</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.utils.html">gcdyn.utils</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/gcdyn.utils.html">gcdyn.utils</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-10"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.addfn.html">gcdyn.utils.addfn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.arglist_imatches.html">gcdyn.utils.arglist_imatches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.arglist_index.html">gcdyn.utils.arglist_index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.color.html">gcdyn.utils.color</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.color_mutants.html">gcdyn.utils.color_mutants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.insert_in_arglist.html">gcdyn.utils.insert_in_arglist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.is_in_arglist.html">gcdyn.utils.is_in_arglist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.isclose.html">gcdyn.utils.isclose</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.ladderize_tree.html">gcdyn.utils.ladderize_tree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.limit_procs.html">gcdyn.utils.limit_procs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.make_dl_plots.html">gcdyn.utils.make_dl_plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.make_html.html">gcdyn.utils.make_html</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.memory_usage_fraction.html">gcdyn.utils.memory_usage_fraction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.mpl_init.html">gcdyn.utils.mpl_init</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.node_contexts.html">gcdyn.utils.node_contexts</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.padded_fivemer_contexts_of_paired_sequences.html">gcdyn.utils.padded_fivemer_contexts_of_paired_sequences</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.plot_chosen_params.html">gcdyn.utils.plot_chosen_params</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.plot_phenotype_response.html">gcdyn.utils.plot_phenotype_response</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.plot_responses.html">gcdyn.utils.plot_responses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.plot_tree_slices.html">gcdyn.utils.plot_tree_slices</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.random_transition_matrix.html">gcdyn.utils.random_transition_matrix</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.sample_trees.html">gcdyn.utils.sample_trees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.remove_from_arglist.html">gcdyn.utils.remove_from_arglist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.replace_in_arglist.html">gcdyn.utils.replace_in_arglist</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.simple_fivemer_contexts.html">gcdyn.utils.simple_fivemer_contexts</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gcdyn.utils.write_leaf_sequences_to_fasta.html">gcdyn.utils.write_leaf_sequences_to_fasta</a></li>
 </ul>
@@ -196,13 +258,12 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Experiments subpackage</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="experiments.html">Modules</a><input checked class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/experiments.replay.html">experiments.replay</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="experiments.html">Modules</a><input checked class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-11"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/experiments.replay.html">experiments.replay</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-12"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/experiments.replay.NAIVE_SEQUENCE.html">experiments.replay.NAIVE_SEQUENCE</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/experiments.replay.CHAIN_2_START_IDX.html">experiments.replay.CHAIN_2_START_IDX</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/experiments.replay.dms.html">experiments.replay.dms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/experiments.replay.mutability.html">experiments.replay.mutability</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/experiments.replay.seq_to_contexts.html">experiments.replay.seq_to_contexts</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/experiments.replay.substitution.html">experiments.replay.substitution</a></li>
 </ul>
 </li>
@@ -288,10 +349,10 @@
 
 <script>
 document.write(`
-  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
-    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
-    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
   </button>
 `);
 </script>
@@ -299,7 +360,7 @@ document.write(`
 <script>
 document.write(`
   <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
   </button>
 `);
 </script>
@@ -334,6 +395,7 @@ document.write(`
 <div class="genindex-jumpbox">
  <a href="#_"><strong>_</strong></a>
  | <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
@@ -345,11 +407,13 @@ document.write(`
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
+ | <a href="#V"><strong>V</strong></a>
  | <a href="#W"><strong>W</strong></a>
  | <a href="#Λ"><strong>Λ</strong></a>
  
@@ -365,6 +429,8 @@ document.write(`
         <li><a href="_autosummary/gcdyn.gpmap.ConstantGPMap.html#gcdyn.gpmap.ConstantGPMap.__call__">(gcdyn.gpmap.ConstantGPMap method)</a>
 </li>
         <li><a href="_autosummary/gcdyn.gpmap.GPMap.html#gcdyn.gpmap.GPMap.__call__">(gcdyn.gpmap.GPMap method)</a>
+</li>
+        <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.__call__">(gcdyn.nn.BundleMeanLayer method)</a>
 </li>
         <li><a href="_autosummary/gcdyn.poisson.ConstantResponse.html#gcdyn.poisson.ConstantResponse.__call__">(gcdyn.poisson.ConstantResponse method)</a>
 </li>
@@ -395,21 +461,55 @@ document.write(`
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.activity_regularizer">activity_regularizer (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.add_child">add_child() (gcdyn.bdms.TreeNode method)</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.add_face">add_face() (gcdyn.bdms.TreeNode method)</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.add_feature">add_feature() (gcdyn.bdms.TreeNode method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.add_features">add_features() (gcdyn.bdms.TreeNode method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.add_loss">add_loss() (gcdyn.nn.BundleMeanLayer method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.add_metric">add_metric() (gcdyn.nn.BundleMeanLayer method)</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.add_sister">add_sister() (gcdyn.bdms.TreeNode method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.add_update">add_update() (gcdyn.nn.BundleMeanLayer method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.add_variable">add_variable() (gcdyn.nn.BundleMeanLayer method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.add_weight">add_weight() (gcdyn.nn.BundleMeanLayer method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.utils.addfn.html#gcdyn.utils.addfn">addfn() (in module gcdyn.utils)</a>
+</li>
       <li><a href="_autosummary/gcdyn.gpmap.AdditiveGPMap.html#gcdyn.gpmap.AdditiveGPMap">AdditiveGPMap (class in gcdyn.gpmap)</a>, <a href="_autosummary/gcdyn.gpmap.html#gcdyn.gpmap.AdditiveGPMap">[1]</a>
 </li>
+      <li><a href="_autosummary/gcdyn.utils.arglist_imatches.html#gcdyn.utils.arglist_imatches">arglist_imatches() (in module gcdyn.utils)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.utils.arglist_index.html#gcdyn.utils.arglist_index">arglist_index() (in module gcdyn.utils)</a>
+</li>
       <li><a href="_autosummary/gcdyn.mutators.AttrMutator.html#gcdyn.mutators.AttrMutator">AttrMutator (class in gcdyn.mutators)</a>, <a href="_autosummary/gcdyn.mutators.html#gcdyn.mutators.AttrMutator">[1]</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.models.BirthDeathModel.html#gcdyn.models.BirthDeathModel">BirthDeathModel (class in gcdyn.models)</a>, <a href="_autosummary/gcdyn.models.html#gcdyn.models.BirthDeathModel">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.build">build() (gcdyn.nn.BundleMeanLayer method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.build_from_config">build_from_config() (gcdyn.nn.BundleMeanLayer method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer">BundleMeanLayer (class in gcdyn.nn)</a>, <a href="_autosummary/gcdyn.nn.html#gcdyn.nn.BundleMeanLayer">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -417,18 +517,78 @@ document.write(`
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.call">call() (gcdyn.nn.BundleMeanLayer method)</a>, <a href="_autosummary/gcdyn.nn.html#gcdyn.nn.BundleMeanLayer.call">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback">Callback (class in gcdyn.nn)</a>, <a href="_autosummary/gcdyn.nn.html#gcdyn.nn.Callback">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.fitness.Fitness.html#gcdyn.fitness.Fitness.cell_divisions_from_tfh_linear">cell_divisions_from_tfh_linear() (gcdyn.fitness.Fitness method)</a>, <a href="_autosummary/gcdyn.fitness.html#gcdyn.fitness.Fitness.cell_divisions_from_tfh_linear">[1]</a>
+</li>
       <li><a href="_autosummary/experiments.replay.CHAIN_2_START_IDX.html#experiments.replay.CHAIN_2_START_IDX">CHAIN_2_START_IDX (in module experiments.replay)</a>, <a href="_autosummary/experiments.replay.html#experiments.replay.CHAIN_2_START_IDX">[1]</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.check_monophyly">check_monophyly() (gcdyn.bdms.TreeNode method)</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.children">children (gcdyn.bdms.TreeNode property)</a>
 </li>
+      <li><a href="_autosummary/gcdyn.mutators.AttrMutator.html#gcdyn.mutators.AttrMutator.cleanup">cleanup() (gcdyn.mutators.AttrMutator method)</a>
+
+      <ul>
+        <li><a href="_autosummary/gcdyn.mutators.ContextMutator.html#gcdyn.mutators.ContextMutator.cleanup">(gcdyn.mutators.ContextMutator method)</a>, <a href="_autosummary/gcdyn.mutators.html#gcdyn.mutators.ContextMutator.cleanup">[1]</a>
+</li>
+        <li><a href="_autosummary/gcdyn.mutators.DiscreteMutator.html#gcdyn.mutators.DiscreteMutator.cleanup">(gcdyn.mutators.DiscreteMutator method)</a>
+</li>
+        <li><a href="_autosummary/gcdyn.mutators.GaussianMutator.html#gcdyn.mutators.GaussianMutator.cleanup">(gcdyn.mutators.GaussianMutator method)</a>
+</li>
+        <li><a href="_autosummary/gcdyn.mutators.KdeMutator.html#gcdyn.mutators.KdeMutator.cleanup">(gcdyn.mutators.KdeMutator method)</a>
+</li>
+        <li><a href="_autosummary/gcdyn.mutators.Mutator.html#gcdyn.mutators.Mutator.cleanup">(gcdyn.mutators.Mutator method)</a>, <a href="_autosummary/gcdyn.mutators.html#gcdyn.mutators.Mutator.cleanup">[1]</a>
+</li>
+        <li><a href="_autosummary/gcdyn.mutators.SequenceMutator.html#gcdyn.mutators.SequenceMutator.cleanup">(gcdyn.mutators.SequenceMutator method)</a>
+</li>
+        <li><a href="_autosummary/gcdyn.mutators.SequencePhenotypeMutator.html#gcdyn.mutators.SequencePhenotypeMutator.cleanup">(gcdyn.mutators.SequencePhenotypeMutator method)</a>, <a href="_autosummary/gcdyn.mutators.html#gcdyn.mutators.SequencePhenotypeMutator.cleanup">[1]</a>
+</li>
+        <li><a href="_autosummary/gcdyn.mutators.UniformMutator.html#gcdyn.mutators.UniformMutator.cleanup">(gcdyn.mutators.UniformMutator method)</a>
+</li>
+        <li><a href="_autosummary/gcdyn.poisson.ConstantResponse.html#gcdyn.poisson.ConstantResponse.cleanup">(gcdyn.poisson.ConstantResponse method)</a>
+</li>
+        <li><a href="_autosummary/gcdyn.poisson.ExponentialResponse.html#gcdyn.poisson.ExponentialResponse.cleanup">(gcdyn.poisson.ExponentialResponse method)</a>
+</li>
+        <li><a href="_autosummary/gcdyn.poisson.HomogeneousResponse.html#gcdyn.poisson.HomogeneousResponse.cleanup">(gcdyn.poisson.HomogeneousResponse method)</a>
+</li>
+        <li><a href="_autosummary/gcdyn.poisson.ModulatedPhenotypeResponse.html#gcdyn.poisson.ModulatedPhenotypeResponse.cleanup">(gcdyn.poisson.ModulatedPhenotypeResponse method)</a>
+</li>
+        <li><a href="_autosummary/gcdyn.poisson.ModulatedRateResponse.html#gcdyn.poisson.ModulatedRateResponse.cleanup">(gcdyn.poisson.ModulatedRateResponse method)</a>
+</li>
+        <li><a href="_autosummary/gcdyn.poisson.PhenotypeResponse.html#gcdyn.poisson.PhenotypeResponse.cleanup">(gcdyn.poisson.PhenotypeResponse method)</a>
+</li>
+        <li><a href="_autosummary/gcdyn.poisson.PhenotypeTimeResponse.html#gcdyn.poisson.PhenotypeTimeResponse.cleanup">(gcdyn.poisson.PhenotypeTimeResponse method)</a>
+</li>
+        <li><a href="_autosummary/gcdyn.poisson.Response.html#gcdyn.poisson.Response.cleanup">(gcdyn.poisson.Response method)</a>, <a href="_autosummary/gcdyn.poisson.html#gcdyn.poisson.Response.cleanup">[1]</a>
+</li>
+        <li><a href="_autosummary/gcdyn.poisson.SequenceContextMutationResponse.html#gcdyn.poisson.SequenceContextMutationResponse.cleanup">(gcdyn.poisson.SequenceContextMutationResponse method)</a>, <a href="_autosummary/gcdyn.poisson.html#gcdyn.poisson.SequenceContextMutationResponse.cleanup">[1]</a>
+</li>
+        <li><a href="_autosummary/gcdyn.poisson.SigmoidResponse.html#gcdyn.poisson.SigmoidResponse.cleanup">(gcdyn.poisson.SigmoidResponse method)</a>
+</li>
+        <li><a href="_autosummary/gcdyn.poisson.SoftReluResponse.html#gcdyn.poisson.SoftReluResponse.cleanup">(gcdyn.poisson.SoftReluResponse method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.utils.color.html#gcdyn.utils.color">color() (in module gcdyn.utils)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.utils.color_mutants.html#gcdyn.utils.color_mutants">color_mutants() (in module gcdyn.utils)</a>
+</li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.compare">compare() (gcdyn.bdms.TreeNode method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.compute_dtype">compute_dtype (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.compute_mask">compute_mask() (gcdyn.nn.BundleMeanLayer method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.compute_output_shape">compute_output_shape() (gcdyn.nn.BundleMeanLayer method)</a>, <a href="_autosummary/gcdyn.nn.html#gcdyn.nn.BundleMeanLayer.compute_output_shape">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.compute_output_signature">compute_output_signature() (gcdyn.nn.BundleMeanLayer method)</a>
 </li>
       <li><a href="_autosummary/gcdyn.gpmap.ConstantGPMap.html#gcdyn.gpmap.ConstantGPMap">ConstantGPMap (class in gcdyn.gpmap)</a>, <a href="_autosummary/gcdyn.gpmap.html#gcdyn.gpmap.ConstantGPMap">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/gcdyn.poisson.ConstantResponse.html#gcdyn.poisson.ConstantResponse">ConstantResponse (class in gcdyn.poisson)</a>, <a href="_autosummary/gcdyn.poisson.html#gcdyn.poisson.ConstantResponse">[1]</a>
 </li>
       <li><a href="_autosummary/gcdyn.mutators.ContextMutator.html#gcdyn.mutators.ContextMutator">ContextMutator (class in gcdyn.mutators)</a>, <a href="_autosummary/gcdyn.mutators.html#gcdyn.mutators.ContextMutator">[1]</a>
@@ -438,6 +598,8 @@ document.write(`
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.cophenetic_matrix">cophenetic_matrix() (gcdyn.bdms.TreeNode method)</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.copy">copy() (gcdyn.bdms.TreeNode method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.count_params">count_params() (gcdyn.nn.BundleMeanLayer method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -451,15 +613,21 @@ document.write(`
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.describe">describe() (gcdyn.bdms.TreeNode method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.detach">detach() (gcdyn.bdms.TreeNode method)</a>
 </li>
       <li><a href="_autosummary/gcdyn.mutators.DiscreteMutator.html#gcdyn.mutators.DiscreteMutator">DiscreteMutator (class in gcdyn.mutators)</a>, <a href="_autosummary/gcdyn.mutators.html#gcdyn.mutators.DiscreteMutator">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.dist">dist (gcdyn.bdms.TreeNode property)</a>
 </li>
       <li><a href="_autosummary/experiments.replay.dms.html#experiments.replay.dms">dms() (in module experiments.replay)</a>, <a href="_autosummary/experiments.replay.html#experiments.replay.dms">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.dtype">dtype (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.dtype_policy">dtype_policy (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.dynamic">dynamic (gcdyn.nn.BundleMeanLayer property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -467,14 +635,18 @@ document.write(`
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.encode.encode_tree.html#gcdyn.encode.encode_tree">encode_tree() (in module gcdyn.encode)</a>, <a href="_autosummary/gcdyn.encode.html#gcdyn.encode.encode_tree">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.encode.encode_trees.html#gcdyn.encode.encode_trees">encode_trees() (in module gcdyn.encode)</a>, <a href="_autosummary/gcdyn.encode.html#gcdyn.encode.encode_trees">[1]</a>
+</li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.event">event (gcdyn.bdms.TreeNode attribute)</a>, <a href="_autosummary/gcdyn.bdms.html#gcdyn.bdms.TreeNode.event">[1]</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.evolve">evolve() (gcdyn.bdms.TreeNode method)</a>, <a href="_autosummary/gcdyn.bdms.html#gcdyn.bdms.TreeNode.evolve">[1]</a>
 </li>
-      <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.expand_polytomies">expand_polytomies() (gcdyn.bdms.TreeNode method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.expand_polytomies">expand_polytomies() (gcdyn.bdms.TreeNode method)</a>
+</li>
       <li>
     experiments.replay
 
@@ -490,10 +662,22 @@ document.write(`
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.from_parent_child_table">from_parent_child_table() (gcdyn.bdms.TreeNode static method)</a>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.finalize_state">finalize_state() (gcdyn.nn.BundleMeanLayer method)</a>
 </li>
+      <li><a href="_autosummary/gcdyn.models.BirthDeathModel.html#gcdyn.models.BirthDeathModel.fit">fit() (gcdyn.models.BirthDeathModel method)</a>, <a href="_autosummary/gcdyn.models.html#gcdyn.models.BirthDeathModel.fit">[1]</a>
+
+      <ul>
+        <li><a href="_autosummary/gcdyn.nn.NeuralNetworkModel.html#gcdyn.nn.NeuralNetworkModel.fit">(gcdyn.nn.NeuralNetworkModel method)</a>, <a href="_autosummary/gcdyn.nn.html#gcdyn.nn.NeuralNetworkModel.fit">[1]</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.fitness.Fitness.html#gcdyn.fitness.Fitness">Fitness (class in gcdyn.fitness)</a>, <a href="_autosummary/gcdyn.fitness.html#gcdyn.fitness.Fitness">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.from_config">from_config() (gcdyn.nn.BundleMeanLayer class method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.from_parent_child_table">from_parent_child_table() (gcdyn.bdms.TreeNode static method)</a>
+</li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.from_skbio">from_skbio() (gcdyn.bdms.TreeNode static method)</a>
 </li>
   </ul></td>
@@ -512,6 +696,20 @@ document.write(`
 </li>
       </ul></li>
       <li>
+    gcdyn.encode
+
+      <ul>
+        <li><a href="_autosummary/gcdyn.encode.html#module-gcdyn.encode">module</a>
+</li>
+      </ul></li>
+      <li>
+    gcdyn.fitness
+
+      <ul>
+        <li><a href="_autosummary/gcdyn.fitness.html#module-gcdyn.fitness">module</a>
+</li>
+      </ul></li>
+      <li>
     gcdyn.gpmap
 
       <ul>
@@ -519,10 +717,24 @@ document.write(`
 </li>
       </ul></li>
       <li>
+    gcdyn.models
+
+      <ul>
+        <li><a href="_autosummary/gcdyn.models.html#module-gcdyn.models">module</a>
+</li>
+      </ul></li>
+      <li>
     gcdyn.mutators
 
       <ul>
         <li><a href="_autosummary/gcdyn.mutators.html#module-gcdyn.mutators">module</a>
+</li>
+      </ul></li>
+      <li>
+    gcdyn.nn
+
+      <ul>
+        <li><a href="_autosummary/gcdyn.nn.html#module-gcdyn.nn">module</a>
 </li>
       </ul></li>
       <li>
@@ -543,6 +755,8 @@ document.write(`
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_ascii">get_ascii() (gcdyn.bdms.TreeNode method)</a>
 </li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.get_build_config">get_build_config() (gcdyn.nn.BundleMeanLayer method)</a>
+</li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_cached_content">get_cached_content() (gcdyn.bdms.TreeNode method)</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_children">get_children() (gcdyn.bdms.TreeNode method)</a>
@@ -552,6 +766,8 @@ document.write(`
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_closest_leaf">get_closest_leaf() (gcdyn.bdms.TreeNode method)</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_common_ancestor">get_common_ancestor() (gcdyn.bdms.TreeNode method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.get_config">get_config() (gcdyn.nn.BundleMeanLayer method)</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_descendants">get_descendants() (gcdyn.bdms.TreeNode method)</a>
 </li>
@@ -563,6 +779,12 @@ document.write(`
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_farthest_node">get_farthest_node() (gcdyn.bdms.TreeNode method)</a>
 </li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.get_input_at">get_input_at() (gcdyn.nn.BundleMeanLayer method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.get_input_mask_at">get_input_mask_at() (gcdyn.nn.BundleMeanLayer method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.get_input_shape_at">get_input_shape_at() (gcdyn.nn.BundleMeanLayer method)</a>
+</li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_leaf_names">get_leaf_names() (gcdyn.bdms.TreeNode method)</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_leaves">get_leaves() (gcdyn.bdms.TreeNode method)</a>
@@ -573,11 +795,19 @@ document.write(`
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_monophyletic">get_monophyletic() (gcdyn.bdms.TreeNode method)</a>
 </li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.get_output_at">get_output_at() (gcdyn.nn.BundleMeanLayer method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.get_output_mask_at">get_output_mask_at() (gcdyn.nn.BundleMeanLayer method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.get_output_shape_at">get_output_shape_at() (gcdyn.nn.BundleMeanLayer method)</a>
+</li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_sisters">get_sisters() (gcdyn.bdms.TreeNode method)</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_topology_id">get_topology_id() (gcdyn.bdms.TreeNode method)</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.get_tree_root">get_tree_root() (gcdyn.bdms.TreeNode method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.get_weights">get_weights() (gcdyn.nn.BundleMeanLayer method)</a>
 </li>
       <li><a href="_autosummary/gcdyn.gpmap.GPMap.html#gcdyn.gpmap.GPMap">GPMap (class in gcdyn.gpmap)</a>, <a href="_autosummary/gcdyn.gpmap.html#gcdyn.gpmap.GPMap">[1]</a>
 </li>
@@ -597,16 +827,32 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.img_style">img_style (gcdyn.bdms.TreeNode property)</a>
 </li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.inbound_nodes">inbound_nodes (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.input">input (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.input_mask">input_mask (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.input_shape">input_shape (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.input_spec">input_spec (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.utils.insert_in_arglist.html#gcdyn.utils.insert_in_arglist">insert_in_arglist() (in module gcdyn.utils)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.utils.is_in_arglist.html#gcdyn.utils.is_in_arglist">is_in_arglist() (in module gcdyn.utils)</a>
+</li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.is_leaf">is_leaf() (gcdyn.bdms.TreeNode method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.is_root">is_root() (gcdyn.bdms.TreeNode method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.utils.html#gcdyn.utils.isclose">isclose() (in module gcdyn.utils)</a>, <a href="_autosummary/gcdyn.utils.isclose.html#gcdyn.utils.isclose">[1]</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.iter_ancestors">iter_ancestors() (gcdyn.bdms.TreeNode method)</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.iter_descendants">iter_descendants() (gcdyn.bdms.TreeNode method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.iter_edges">iter_edges() (gcdyn.bdms.TreeNode method)</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.iter_leaf_names">iter_leaf_names() (gcdyn.bdms.TreeNode method)</a>
@@ -635,6 +881,14 @@ document.write(`
 </li>
       <li><a href="_autosummary/gcdyn.utils.html#gcdyn.utils.ladderize_tree">ladderize_tree() (in module gcdyn.utils)</a>, <a href="_autosummary/gcdyn.utils.ladderize_tree.html#gcdyn.utils.ladderize_tree">[1]</a>
 </li>
+      <li><a href="_autosummary/gcdyn.utils.html#gcdyn.utils.limit_procs">limit_procs() (in module gcdyn.utils)</a>, <a href="_autosummary/gcdyn.utils.limit_procs.html#gcdyn.utils.limit_procs">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.fitness.Fitness.html#gcdyn.fitness.Fitness.linear_fitness">linear_fitness() (gcdyn.fitness.Fitness method)</a>, <a href="_autosummary/gcdyn.fitness.html#gcdyn.fitness.Fitness.linear_fitness">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.load_own_variables">load_own_variables() (gcdyn.nn.BundleMeanLayer method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.models.BirthDeathModel.html#gcdyn.models.BirthDeathModel.log_likelihood">log_likelihood() (gcdyn.models.BirthDeathModel method)</a>, <a href="_autosummary/gcdyn.models.html#gcdyn.models.BirthDeathModel.log_likelihood">[1]</a>
+</li>
       <li><a href="_autosummary/gcdyn.mutators.AttrMutator.html#gcdyn.mutators.AttrMutator.logprob">logprob() (gcdyn.mutators.AttrMutator method)</a>, <a href="_autosummary/gcdyn.mutators.html#gcdyn.mutators.AttrMutator.logprob">[1]</a>
 
       <ul>
@@ -656,11 +910,23 @@ document.write(`
 </li>
       </ul></li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.losses">losses (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.utils.make_dl_plots.html#gcdyn.utils.make_dl_plots">make_dl_plots() (in module gcdyn.utils)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.utils.html#gcdyn.utils.make_html">make_html() (in module gcdyn.utils)</a>, <a href="_autosummary/gcdyn.utils.make_html.html#gcdyn.utils.make_html">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.utils.memory_usage_fraction.html#gcdyn.utils.memory_usage_fraction">memory_usage_fraction() (in module gcdyn.utils)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.metrics">metrics (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
       <li><a href="_autosummary/gcdyn.poisson.ModulatedPhenotypeResponse.html#gcdyn.poisson.ModulatedPhenotypeResponse">ModulatedPhenotypeResponse (class in gcdyn.poisson)</a>, <a href="_autosummary/gcdyn.poisson.html#gcdyn.poisson.ModulatedPhenotypeResponse">[1]</a>
 </li>
       <li><a href="_autosummary/gcdyn.poisson.ModulatedRateResponse.html#gcdyn.poisson.ModulatedRateResponse">ModulatedRateResponse (class in gcdyn.poisson)</a>, <a href="_autosummary/gcdyn.poisson.html#gcdyn.poisson.ModulatedRateResponse">[1]</a>
@@ -673,15 +939,27 @@ document.write(`
 </li>
         <li><a href="_autosummary/gcdyn.bdms.html#module-gcdyn.bdms">gcdyn.bdms</a>
 </li>
+        <li><a href="_autosummary/gcdyn.encode.html#module-gcdyn.encode">gcdyn.encode</a>
+</li>
+        <li><a href="_autosummary/gcdyn.fitness.html#module-gcdyn.fitness">gcdyn.fitness</a>
+</li>
         <li><a href="_autosummary/gcdyn.gpmap.html#module-gcdyn.gpmap">gcdyn.gpmap</a>
 </li>
+        <li><a href="_autosummary/gcdyn.models.html#module-gcdyn.models">gcdyn.models</a>
+</li>
         <li><a href="_autosummary/gcdyn.mutators.html#module-gcdyn.mutators">gcdyn.mutators</a>
+</li>
+        <li><a href="_autosummary/gcdyn.nn.html#module-gcdyn.nn">gcdyn.nn</a>
 </li>
         <li><a href="_autosummary/gcdyn.poisson.html#module-gcdyn.poisson">gcdyn.poisson</a>
 </li>
         <li><a href="_autosummary/gcdyn.utils.html#module-gcdyn.utils">gcdyn.utils</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.utils.mpl_init.html#gcdyn.utils.mpl_init">mpl_init() (in module gcdyn.utils)</a>
+</li>
       <li><a href="_autosummary/experiments.replay.html#experiments.replay.mutability">mutability() (in module experiments.replay)</a>, <a href="_autosummary/experiments.replay.mutability.html#experiments.replay.mutability">[1]</a>
 </li>
       <li><a href="_autosummary/gcdyn.mutators.AttrMutator.html#gcdyn.mutators.AttrMutator.mutate">mutate() (gcdyn.mutators.AttrMutator method)</a>
@@ -704,28 +982,6 @@ document.write(`
         <li><a href="_autosummary/gcdyn.mutators.UniformMutator.html#gcdyn.mutators.UniformMutator.mutate">(gcdyn.mutators.UniformMutator method)</a>, <a href="_autosummary/gcdyn.mutators.html#gcdyn.mutators.UniformMutator.mutate">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/gcdyn.mutators.AttrMutator.html#gcdyn.mutators.AttrMutator.mutated_attrs">mutated_attrs (gcdyn.mutators.AttrMutator property)</a>, <a href="_autosummary/gcdyn.mutators.html#gcdyn.mutators.AttrMutator.mutated_attrs">[1]</a>
-
-      <ul>
-        <li><a href="_autosummary/gcdyn.mutators.ContextMutator.html#gcdyn.mutators.ContextMutator.mutated_attrs">(gcdyn.mutators.ContextMutator property)</a>, <a href="_autosummary/gcdyn.mutators.html#gcdyn.mutators.ContextMutator.mutated_attrs">[1]</a>
-</li>
-        <li><a href="_autosummary/gcdyn.mutators.DiscreteMutator.html#gcdyn.mutators.DiscreteMutator.mutated_attrs">(gcdyn.mutators.DiscreteMutator property)</a>
-</li>
-        <li><a href="_autosummary/gcdyn.mutators.GaussianMutator.html#gcdyn.mutators.GaussianMutator.mutated_attrs">(gcdyn.mutators.GaussianMutator property)</a>
-</li>
-        <li><a href="_autosummary/gcdyn.mutators.KdeMutator.html#gcdyn.mutators.KdeMutator.mutated_attrs">(gcdyn.mutators.KdeMutator property)</a>
-</li>
-        <li><a href="_autosummary/gcdyn.mutators.Mutator.html#gcdyn.mutators.Mutator.mutated_attrs">(gcdyn.mutators.Mutator property)</a>, <a href="_autosummary/gcdyn.mutators.html#gcdyn.mutators.Mutator.mutated_attrs">[1]</a>
-</li>
-        <li><a href="_autosummary/gcdyn.mutators.SequenceMutator.html#gcdyn.mutators.SequenceMutator.mutated_attrs">(gcdyn.mutators.SequenceMutator property)</a>
-</li>
-        <li><a href="_autosummary/gcdyn.mutators.SequencePhenotypeMutator.html#gcdyn.mutators.SequencePhenotypeMutator.mutated_attrs">(gcdyn.mutators.SequencePhenotypeMutator property)</a>, <a href="_autosummary/gcdyn.mutators.html#gcdyn.mutators.SequencePhenotypeMutator.mutated_attrs">[1]</a>
-</li>
-        <li><a href="_autosummary/gcdyn.mutators.UniformMutator.html#gcdyn.mutators.UniformMutator.mutated_attrs">(gcdyn.mutators.UniformMutator property)</a>
-</li>
-      </ul></li>
       <li><a href="_autosummary/gcdyn.mutators.Mutator.html#gcdyn.mutators.Mutator">Mutator (class in gcdyn.mutators)</a>, <a href="_autosummary/gcdyn.mutators.html#gcdyn.mutators.Mutator">[1]</a>
 </li>
   </ul></td>
@@ -736,9 +992,93 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.n_mutations">n_mutations (gcdyn.bdms.TreeNode attribute)</a>, <a href="_autosummary/gcdyn.bdms.html#gcdyn.bdms.TreeNode.n_mutations">[1]</a>
 </li>
+      <li><a href="_autosummary/gcdyn.models.html#gcdyn.models.naive_log_likelihood">naive_log_likelihood() (in module gcdyn.models)</a>, <a href="_autosummary/gcdyn.models.naive_log_likelihood.html#gcdyn.models.naive_log_likelihood">[1]</a>
+</li>
+      <li><a href="_autosummary/experiments.replay.NAIVE_SEQUENCE.html#experiments.replay.NAIVE_SEQUENCE">NAIVE_SEQUENCE (in module experiments.replay)</a>, <a href="_autosummary/experiments.replay.html#experiments.replay.NAIVE_SEQUENCE">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.name">name (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.name_scope">name_scope (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.NeuralNetworkModel.html#gcdyn.nn.NeuralNetworkModel">NeuralNetworkModel (class in gcdyn.nn)</a>, <a href="_autosummary/gcdyn.nn.html#gcdyn.nn.NeuralNetworkModel">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.mutators.AttrMutator.html#gcdyn.mutators.AttrMutator.node_attrs">node_attrs (gcdyn.mutators.AttrMutator property)</a>, <a href="_autosummary/gcdyn.mutators.html#gcdyn.mutators.AttrMutator.node_attrs">[1]</a>
+
+      <ul>
+        <li><a href="_autosummary/gcdyn.mutators.ContextMutator.html#gcdyn.mutators.ContextMutator.node_attrs">(gcdyn.mutators.ContextMutator property)</a>, <a href="_autosummary/gcdyn.mutators.html#gcdyn.mutators.ContextMutator.node_attrs">[1]</a>
+</li>
+        <li><a href="_autosummary/gcdyn.mutators.DiscreteMutator.html#gcdyn.mutators.DiscreteMutator.node_attrs">(gcdyn.mutators.DiscreteMutator property)</a>
+</li>
+        <li><a href="_autosummary/gcdyn.mutators.GaussianMutator.html#gcdyn.mutators.GaussianMutator.node_attrs">(gcdyn.mutators.GaussianMutator property)</a>
+</li>
+        <li><a href="_autosummary/gcdyn.mutators.KdeMutator.html#gcdyn.mutators.KdeMutator.node_attrs">(gcdyn.mutators.KdeMutator property)</a>
+</li>
+        <li><a href="_autosummary/gcdyn.mutators.Mutator.html#gcdyn.mutators.Mutator.node_attrs">(gcdyn.mutators.Mutator property)</a>, <a href="_autosummary/gcdyn.mutators.html#gcdyn.mutators.Mutator.node_attrs">[1]</a>
+</li>
+        <li><a href="_autosummary/gcdyn.mutators.SequenceMutator.html#gcdyn.mutators.SequenceMutator.node_attrs">(gcdyn.mutators.SequenceMutator property)</a>
+</li>
+        <li><a href="_autosummary/gcdyn.mutators.SequencePhenotypeMutator.html#gcdyn.mutators.SequencePhenotypeMutator.node_attrs">(gcdyn.mutators.SequencePhenotypeMutator property)</a>, <a href="_autosummary/gcdyn.mutators.html#gcdyn.mutators.SequencePhenotypeMutator.node_attrs">[1]</a>
+</li>
+        <li><a href="_autosummary/gcdyn.mutators.UniformMutator.html#gcdyn.mutators.UniformMutator.node_attrs">(gcdyn.mutators.UniformMutator property)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/experiments.replay.NAIVE_SEQUENCE.html#experiments.replay.NAIVE_SEQUENCE">NAIVE_SEQUENCE (in module experiments.replay)</a>, <a href="_autosummary/experiments.replay.html#experiments.replay.NAIVE_SEQUENCE">[1]</a>
+      <li><a href="_autosummary/gcdyn.utils.node_contexts.html#gcdyn.utils.node_contexts">node_contexts() (in module gcdyn.utils)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.non_trainable_variables">non_trainable_variables (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.non_trainable_weights">non_trainable_weights (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.fitness.Fitness.html#gcdyn.fitness.Fitness.normalized_fitness_df">normalized_fitness_df() (gcdyn.fitness.Fitness method)</a>, <a href="_autosummary/gcdyn.fitness.html#gcdyn.fitness.Fitness.normalized_fitness_df">[1]</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_batch_begin">on_batch_begin() (gcdyn.nn.Callback method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_batch_end">on_batch_end() (gcdyn.nn.Callback method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_epoch_begin">on_epoch_begin() (gcdyn.nn.Callback method)</a>, <a href="_autosummary/gcdyn.nn.html#gcdyn.nn.Callback.on_epoch_begin">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_epoch_end">on_epoch_end() (gcdyn.nn.Callback method)</a>, <a href="_autosummary/gcdyn.nn.html#gcdyn.nn.Callback.on_epoch_end">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_predict_batch_begin">on_predict_batch_begin() (gcdyn.nn.Callback method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_predict_batch_end">on_predict_batch_end() (gcdyn.nn.Callback method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_predict_begin">on_predict_begin() (gcdyn.nn.Callback method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_predict_end">on_predict_end() (gcdyn.nn.Callback method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_test_batch_begin">on_test_batch_begin() (gcdyn.nn.Callback method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_test_batch_end">on_test_batch_end() (gcdyn.nn.Callback method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_test_begin">on_test_begin() (gcdyn.nn.Callback method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_test_end">on_test_end() (gcdyn.nn.Callback method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_train_batch_begin">on_train_batch_begin() (gcdyn.nn.Callback method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_train_batch_end">on_train_batch_end() (gcdyn.nn.Callback method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_train_begin">on_train_begin() (gcdyn.nn.Callback method)</a>, <a href="_autosummary/gcdyn.nn.html#gcdyn.nn.Callback.on_train_begin">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_train_end">on_train_end() (gcdyn.nn.Callback method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.outbound_nodes">outbound_nodes (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.output">output (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.output_mask">output_mask (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.output_shape">output_shape (gcdyn.nn.BundleMeanLayer property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -746,15 +1086,27 @@ document.write(`
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.encode.html#gcdyn.encode.pad_trees">pad_trees() (in module gcdyn.encode)</a>, <a href="_autosummary/gcdyn.encode.pad_trees.html#gcdyn.encode.pad_trees">[1]</a>
+</li>
       <li><a href="_autosummary/gcdyn.utils.html#gcdyn.utils.padded_fivemer_contexts_of_paired_sequences">padded_fivemer_contexts_of_paired_sequences() (in module gcdyn.utils)</a>, <a href="_autosummary/gcdyn.utils.padded_fivemer_contexts_of_paired_sequences.html#gcdyn.utils.padded_fivemer_contexts_of_paired_sequences">[1]</a>
 </li>
       <li><a href="_autosummary/gcdyn.poisson.PhenotypeResponse.html#gcdyn.poisson.PhenotypeResponse">PhenotypeResponse (class in gcdyn.poisson)</a>, <a href="_autosummary/gcdyn.poisson.html#gcdyn.poisson.PhenotypeResponse">[1]</a>
 </li>
       <li><a href="_autosummary/gcdyn.poisson.PhenotypeTimeResponse.html#gcdyn.poisson.PhenotypeTimeResponse">PhenotypeTimeResponse (class in gcdyn.poisson)</a>, <a href="_autosummary/gcdyn.poisson.html#gcdyn.poisson.PhenotypeTimeResponse">[1]</a>
 </li>
+      <li><a href="_autosummary/gcdyn.utils.plot_chosen_params.html#gcdyn.utils.plot_chosen_params">plot_chosen_params() (in module gcdyn.utils)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.utils.plot_phenotype_response.html#gcdyn.utils.plot_phenotype_response">plot_phenotype_response() (in module gcdyn.utils)</a>
+</li>
       <li><a href="_autosummary/gcdyn.utils.plot_responses.html#gcdyn.utils.plot_responses">plot_responses() (in module gcdyn.utils)</a>
 </li>
+      <li><a href="_autosummary/gcdyn.utils.plot_tree_slices.html#gcdyn.utils.plot_tree_slices">plot_tree_slices() (in module gcdyn.utils)</a>
+</li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.populate">populate() (gcdyn.bdms.TreeNode method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.nn.NeuralNetworkModel.html#gcdyn.nn.NeuralNetworkModel.predict">predict() (gcdyn.nn.NeuralNetworkModel method)</a>, <a href="_autosummary/gcdyn.nn.html#gcdyn.nn.NeuralNetworkModel.predict">[1]</a>
 </li>
       <li><a href="_autosummary/gcdyn.mutators.AttrMutator.html#gcdyn.mutators.AttrMutator.prob">prob() (gcdyn.mutators.AttrMutator method)</a>, <a href="_autosummary/gcdyn.mutators.html#gcdyn.mutators.AttrMutator.prob">[1]</a>
 
@@ -774,8 +1126,6 @@ document.write(`
         <li><a href="_autosummary/gcdyn.mutators.UniformMutator.html#gcdyn.mutators.UniformMutator.prob">(gcdyn.mutators.UniformMutator method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.prune">prune() (gcdyn.bdms.TreeNode method)</a>, <a href="_autosummary/gcdyn.bdms.html#gcdyn.bdms.TreeNode.prune">[1]</a>
 </li>
   </ul></td>
@@ -786,15 +1136,21 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/gcdyn.utils.random_transition_matrix.html#gcdyn.utils.random_transition_matrix">random_transition_matrix() (in module gcdyn.utils)</a>
 </li>
+      <li><a href="_autosummary/gcdyn.encode.read_trees.html#gcdyn.encode.read_trees">read_trees() (in module gcdyn.encode)</a>
+</li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.remove_child">remove_child() (gcdyn.bdms.TreeNode method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.utils.remove_from_arglist.html#gcdyn.utils.remove_from_arglist">remove_from_arglist() (in module gcdyn.utils)</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.remove_mutation_events">remove_mutation_events() (gcdyn.bdms.TreeNode method)</a>, <a href="_autosummary/gcdyn.bdms.html#gcdyn.bdms.TreeNode.remove_mutation_events">[1]</a>
 </li>
-      <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.remove_sister">remove_sister() (gcdyn.bdms.TreeNode method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.remove_sister">remove_sister() (gcdyn.bdms.TreeNode method)</a>
+</li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.render">render() (gcdyn.bdms.TreeNode method)</a>, <a href="_autosummary/gcdyn.bdms.html#gcdyn.bdms.TreeNode.render">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.utils.replace_in_arglist.html#gcdyn.utils.replace_in_arglist">replace_in_arglist() (in module gcdyn.utils)</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.resolve_polytomy">resolve_polytomy() (gcdyn.bdms.TreeNode method)</a>
 </li>
@@ -810,11 +1166,13 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.sample_survivors">sample_survivors() (gcdyn.bdms.TreeNode method)</a>, <a href="_autosummary/gcdyn.bdms.html#gcdyn.bdms.TreeNode.sample_survivors">[1]</a>
 </li>
-      <li><a href="_autosummary/gcdyn.utils.html#gcdyn.utils.sample_trees">sample_trees() (in module gcdyn.utils)</a>, <a href="_autosummary/gcdyn.utils.sample_trees.html#gcdyn.utils.sample_trees">[1]</a>
+      <li><a href="_autosummary/gcdyn.bdms.html#gcdyn.bdms.sample_trees">sample_trees() (in module gcdyn.bdms)</a>, <a href="_autosummary/gcdyn.bdms.sample_trees.html#gcdyn.bdms.sample_trees">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.save_own_variables">save_own_variables() (gcdyn.nn.BundleMeanLayer method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.encode.html#gcdyn.encode.scale_tree">scale_tree() (in module gcdyn.encode)</a>, <a href="_autosummary/gcdyn.encode.scale_tree.html#gcdyn.encode.scale_tree">[1]</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.search_nodes">search_nodes() (gcdyn.bdms.TreeNode method)</a>
-</li>
-      <li><a href="_autosummary/experiments.replay.html#experiments.replay.seq_to_contexts">seq_to_contexts() (in module experiments.replay)</a>, <a href="_autosummary/experiments.replay.seq_to_contexts.html#experiments.replay.seq_to_contexts">[1]</a>
 </li>
       <li><a href="_autosummary/gcdyn.poisson.SequenceContextMutationResponse.html#gcdyn.poisson.SequenceContextMutationResponse">SequenceContextMutationResponse (class in gcdyn.poisson)</a>, <a href="_autosummary/gcdyn.poisson.html#gcdyn.poisson.SequenceContextMutationResponse">[1]</a>
 </li>
@@ -828,11 +1186,17 @@ document.write(`
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.set_style">set_style() (gcdyn.bdms.TreeNode method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.set_weights">set_weights() (gcdyn.nn.BundleMeanLayer method)</a>
+</li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.show">show() (gcdyn.bdms.TreeNode method)</a>
 </li>
+      <li><a href="_autosummary/gcdyn.fitness.Fitness.html#gcdyn.fitness.Fitness.sigmoidal_fitness">sigmoidal_fitness() (gcdyn.fitness.Fitness method)</a>, <a href="_autosummary/gcdyn.fitness.html#gcdyn.fitness.Fitness.sigmoidal_fitness">[1]</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/gcdyn.poisson.SigmoidResponse.html#gcdyn.poisson.SigmoidResponse">SigmoidResponse (class in gcdyn.poisson)</a>, <a href="_autosummary/gcdyn.poisson.html#gcdyn.poisson.SigmoidResponse">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.encode.html#gcdyn.encode.simfn">simfn() (in module gcdyn.encode)</a>, <a href="_autosummary/gcdyn.encode.simfn.html#gcdyn.encode.simfn">[1]</a>
 </li>
       <li><a href="_autosummary/gcdyn.utils.html#gcdyn.utils.simple_fivemer_contexts">simple_fivemer_contexts() (in module gcdyn.utils)</a>, <a href="_autosummary/gcdyn.utils.simple_fivemer_contexts.html#gcdyn.utils.simple_fivemer_contexts">[1]</a>
 </li>
@@ -842,11 +1206,21 @@ document.write(`
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.sort_descendants">sort_descendants() (gcdyn.bdms.TreeNode method)</a>
 </li>
+      <li><a href="_autosummary/gcdyn.models.html#gcdyn.models.stadler_appx_log_likelihood">stadler_appx_log_likelihood() (in module gcdyn.models)</a>, <a href="_autosummary/gcdyn.models.stadler_appx_log_likelihood.html#gcdyn.models.stadler_appx_log_likelihood">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.models.html#gcdyn.models.stadler_full_log_likelihood">stadler_full_log_likelihood() (in module gcdyn.models)</a>, <a href="_autosummary/gcdyn.models.stadler_full_log_likelihood.html#gcdyn.models.stadler_full_log_likelihood">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.models.html#gcdyn.models.stadler_full_log_likelihood_scipy">stadler_full_log_likelihood_scipy() (in module gcdyn.models)</a>, <a href="_autosummary/gcdyn.models.stadler_full_log_likelihood_scipy.html#gcdyn.models.stadler_full_log_likelihood_scipy">[1]</a>
+</li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.standardize">standardize() (gcdyn.bdms.TreeNode method)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.submodules">submodules (gcdyn.nn.BundleMeanLayer property)</a>
 </li>
       <li><a href="_autosummary/experiments.replay.html#experiments.replay.substitution">substitution() (in module experiments.replay)</a>, <a href="_autosummary/experiments.replay.substitution.html#experiments.replay.substitution">[1]</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.support">support (gcdyn.bdms.TreeNode property)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.supports_masking">supports_masking (gcdyn.nn.BundleMeanLayer property)</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.swap_children">swap_children() (gcdyn.bdms.TreeNode method)</a>
 </li>
@@ -858,11 +1232,17 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.t">t (gcdyn.bdms.TreeNode attribute)</a>, <a href="_autosummary/gcdyn.bdms.html#gcdyn.bdms.TreeNode.t">[1]</a>
 </li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.trainable_variables">trainable_variables (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.trainable_weights">trainable_weights (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.traverse">traverse() (gcdyn.bdms.TreeNode method)</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode">TreeNode (class in gcdyn.bdms)</a>, <a href="_autosummary/gcdyn.bdms.html#gcdyn.bdms.TreeNode">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.encode.html#gcdyn.encode.trivialize_encodings">trivialize_encodings() (in module gcdyn.encode)</a>, <a href="_autosummary/gcdyn.encode.trivialize_encodings.html#gcdyn.encode.trivialize_encodings">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -870,6 +1250,8 @@ document.write(`
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.fitness.Fitness.html#gcdyn.fitness.Fitness.uniform_fitness">uniform_fitness() (gcdyn.fitness.Fitness method)</a>, <a href="_autosummary/gcdyn.fitness.html#gcdyn.fitness.Fitness.uniform_fitness">[1]</a>
+</li>
       <li><a href="_autosummary/gcdyn.mutators.UniformMutator.html#gcdyn.mutators.UniformMutator">UniformMutator (class in gcdyn.mutators)</a>, <a href="_autosummary/gcdyn.mutators.html#gcdyn.mutators.UniformMutator">[1]</a>
 </li>
   </ul></td>
@@ -877,6 +1259,18 @@ document.write(`
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.unroot">unroot() (gcdyn.bdms.TreeNode method)</a>
 </li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.up">up (gcdyn.bdms.TreeNode property)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="V">V</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.variable_dtype">variable_dtype (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.variables">variables (gcdyn.nn.BundleMeanLayer property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -934,9 +1328,17 @@ document.write(`
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.weights">weights (gcdyn.nn.BundleMeanLayer property)</a>
+</li>
+      <li><a href="_autosummary/gcdyn.nn.BundleMeanLayer.html#gcdyn.nn.BundleMeanLayer.with_name_scope">with_name_scope() (gcdyn.nn.BundleMeanLayer class method)</a>
+</li>
       <li><a href="_autosummary/gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode.write">write() (gcdyn.bdms.TreeNode method)</a>
 </li>
       <li><a href="_autosummary/gcdyn.utils.html#gcdyn.utils.write_leaf_sequences_to_fasta">write_leaf_sequences_to_fasta() (in module gcdyn.utils)</a>, <a href="_autosummary/gcdyn.utils.write_leaf_sequences_to_fasta.html#gcdyn.utils.write_leaf_sequences_to_fasta">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.encode.html#gcdyn.encode.write_training_files">write_training_files() (in module gcdyn.encode)</a>, <a href="_autosummary/gcdyn.encode.write_training_files.html#gcdyn.encode.write_training_files">[1]</a>
+</li>
+      <li><a href="_autosummary/gcdyn.encode.write_trees.html#gcdyn.encode.write_trees">write_trees() (in module gcdyn.encode)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1060,16 +1462,12 @@ document.write(`
 
               
               
-                <footer class="bd-footer-article">
-                  
-<div class="footer-article-items footer-article__inner">
-  
-    <div class="footer-article-item"><!-- Previous / next buttons -->
+              
+              
+                <footer class="prev-next-footer">
+                  <!-- Previous / next buttons -->
 <div class="prev-next-area">
-</div></div>
-  
 </div>
-
                 </footer>
               
             </div>
@@ -1118,8 +1516,8 @@ By Erick Matsen
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6"></script>
 
   <footer class="bd-footer">
   </footer>

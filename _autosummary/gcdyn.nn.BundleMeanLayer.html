@@ -1,0 +1,2028 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>gcdyn.nn.BundleMeanLayer &#8212; gcdyn  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6" />
+  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=365ca57ee442770a23c6"></script>
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_autosummary/gcdyn.nn.BundleMeanLayer';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="gcdyn.nn.Callback" href="gcdyn.nn.Callback.html" />
+    <link rel="prev" title="gcdyn.nn" href="gcdyn.nn.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt="gcdyn  documentation - Home"/>
+    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="gcdyn  documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cite.html">Citing <code class="docutils literal notranslate"><span class="pre">gcdyn</span></code></a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/bdms_replay.html">Germinal center replay modeling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/bdms_inhomogeneous.html">Inhomogeneous processes</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Command line tools</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../argparse.html">Named Arguments</a></li>
+
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../api.html">Modules</a><input checked class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="gcdyn.bdms.html">gcdyn.bdms</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.sample_trees.html">gcdyn.bdms.sample_trees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.bdms.TreeNode.html">gcdyn.bdms.TreeNode</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="gcdyn.encode.html">gcdyn.encode</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.encode.encode_tree.html">gcdyn.encode.encode_tree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.encode.encode_trees.html">gcdyn.encode.encode_trees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.encode.pad_trees.html">gcdyn.encode.pad_trees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.encode.read_trees.html">gcdyn.encode.read_trees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.encode.scale_tree.html">gcdyn.encode.scale_tree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.encode.simfn.html">gcdyn.encode.simfn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.encode.trivialize_encodings.html">gcdyn.encode.trivialize_encodings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.encode.write_training_files.html">gcdyn.encode.write_training_files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.encode.write_trees.html">gcdyn.encode.write_trees</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="gcdyn.fitness.html">gcdyn.fitness</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.fitness.Fitness.html">gcdyn.fitness.Fitness</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="gcdyn.gpmap.html">gcdyn.gpmap</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.AdditiveGPMap.html">gcdyn.gpmap.AdditiveGPMap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.ConstantGPMap.html">gcdyn.gpmap.ConstantGPMap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.gpmap.GPMap.html">gcdyn.gpmap.GPMap</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="gcdyn.models.html">gcdyn.models</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.models.naive_log_likelihood.html">gcdyn.models.naive_log_likelihood</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.models.stadler_appx_log_likelihood.html">gcdyn.models.stadler_appx_log_likelihood</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.models.stadler_full_log_likelihood.html">gcdyn.models.stadler_full_log_likelihood</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.models.stadler_full_log_likelihood_scipy.html">gcdyn.models.stadler_full_log_likelihood_scipy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.models.BirthDeathModel.html">gcdyn.models.BirthDeathModel</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="gcdyn.mutators.html">gcdyn.mutators</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.AttrMutator.html">gcdyn.mutators.AttrMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.ContextMutator.html">gcdyn.mutators.ContextMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.DiscreteMutator.html">gcdyn.mutators.DiscreteMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.GaussianMutator.html">gcdyn.mutators.GaussianMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.KdeMutator.html">gcdyn.mutators.KdeMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.Mutator.html">gcdyn.mutators.Mutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.SequenceMutator.html">gcdyn.mutators.SequenceMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.SequencePhenotypeMutator.html">gcdyn.mutators.SequencePhenotypeMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.mutators.UniformMutator.html">gcdyn.mutators.UniformMutator</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="gcdyn.nn.html">gcdyn.nn</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">gcdyn.nn.BundleMeanLayer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.nn.Callback.html">gcdyn.nn.Callback</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.nn.NeuralNetworkModel.html">gcdyn.nn.NeuralNetworkModel</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="gcdyn.poisson.html">gcdyn.poisson</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-9"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.poisson.set_backend.html">gcdyn.poisson.set_backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.poisson.ConstantResponse.html">gcdyn.poisson.ConstantResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.poisson.ExponentialResponse.html">gcdyn.poisson.ExponentialResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.poisson.HomogeneousResponse.html">gcdyn.poisson.HomogeneousResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.poisson.ModulatedPhenotypeResponse.html">gcdyn.poisson.ModulatedPhenotypeResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.poisson.ModulatedRateResponse.html">gcdyn.poisson.ModulatedRateResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.poisson.PhenotypeResponse.html">gcdyn.poisson.PhenotypeResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.poisson.PhenotypeTimeResponse.html">gcdyn.poisson.PhenotypeTimeResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.poisson.Response.html">gcdyn.poisson.Response</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.poisson.SequenceContextMutationResponse.html">gcdyn.poisson.SequenceContextMutationResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.poisson.SigmoidResponse.html">gcdyn.poisson.SigmoidResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.poisson.SoftReluResponse.html">gcdyn.poisson.SoftReluResponse</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="gcdyn.utils.html">gcdyn.utils</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-10"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.addfn.html">gcdyn.utils.addfn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.arglist_imatches.html">gcdyn.utils.arglist_imatches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.arglist_index.html">gcdyn.utils.arglist_index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.color.html">gcdyn.utils.color</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.color_mutants.html">gcdyn.utils.color_mutants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.insert_in_arglist.html">gcdyn.utils.insert_in_arglist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.is_in_arglist.html">gcdyn.utils.is_in_arglist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.isclose.html">gcdyn.utils.isclose</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.ladderize_tree.html">gcdyn.utils.ladderize_tree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.limit_procs.html">gcdyn.utils.limit_procs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.make_dl_plots.html">gcdyn.utils.make_dl_plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.make_html.html">gcdyn.utils.make_html</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.memory_usage_fraction.html">gcdyn.utils.memory_usage_fraction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.mpl_init.html">gcdyn.utils.mpl_init</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.node_contexts.html">gcdyn.utils.node_contexts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.padded_fivemer_contexts_of_paired_sequences.html">gcdyn.utils.padded_fivemer_contexts_of_paired_sequences</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.plot_chosen_params.html">gcdyn.utils.plot_chosen_params</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.plot_phenotype_response.html">gcdyn.utils.plot_phenotype_response</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.plot_responses.html">gcdyn.utils.plot_responses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.plot_tree_slices.html">gcdyn.utils.plot_tree_slices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.random_transition_matrix.html">gcdyn.utils.random_transition_matrix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.remove_from_arglist.html">gcdyn.utils.remove_from_arglist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.replace_in_arglist.html">gcdyn.utils.replace_in_arglist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.simple_fivemer_contexts.html">gcdyn.utils.simple_fivemer_contexts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gcdyn.utils.write_leaf_sequences_to_fasta.html">gcdyn.utils.write_leaf_sequences_to_fasta</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Experiments subpackage</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../experiments.html">Modules</a><input checked class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-11"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="experiments.replay.html">experiments.replay</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-12"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="experiments.replay.NAIVE_SEQUENCE.html">experiments.replay.NAIVE_SEQUENCE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="experiments.replay.CHAIN_2_START_IDX.html">experiments.replay.CHAIN_2_START_IDX</a></li>
+<li class="toctree-l3"><a class="reference internal" href="experiments.replay.dms.html">experiments.replay.dms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="experiments.replay.mutability.html">experiments.replay.mutability</a></li>
+<li class="toctree-l3"><a class="reference internal" href="experiments.replay.substitution.html">experiments.replay.substitution</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../todo.html">To-do list</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/matsengrp/gcdyn" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/_autosummary/gcdyn.nn.BundleMeanLayer.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>gcdyn.nn.BundleMeanLayer</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer</span></code></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.call"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.call()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.compute_output_shape"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.compute_output_shape()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.__call__"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.__call__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.activity_regularizer"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.activity_regularizer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.add_loss"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.add_loss()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.add_metric"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.add_metric()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.add_update"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.add_update()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.add_variable"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.add_variable()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.add_weight"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.add_weight()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.build"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.build()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.build_from_config"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.build_from_config()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.compute_dtype"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.compute_dtype</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.compute_mask"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.compute_mask()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.compute_output_signature"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.compute_output_signature()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.count_params"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.count_params()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.dtype"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.dtype</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.dtype_policy"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.dtype_policy</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.dynamic"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.dynamic</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.finalize_state"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.finalize_state()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.from_config"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.from_config()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.get_build_config"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.get_build_config()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.get_config"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.get_config()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.get_input_at"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.get_input_at()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.get_input_mask_at"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.get_input_mask_at()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.get_input_shape_at"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.get_input_shape_at()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.get_output_at"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.get_output_at()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.get_output_mask_at"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.get_output_mask_at()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.get_output_shape_at"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.get_output_shape_at()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.get_weights"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.get_weights()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.inbound_nodes"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.inbound_nodes</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.input"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.input</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.input_mask"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.input_mask</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.input_shape"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.input_shape</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.input_spec"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.input_spec</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.load_own_variables"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.load_own_variables()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.losses"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.losses</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.metrics"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.metrics</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.name"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.name</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.name_scope"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.name_scope</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.non_trainable_variables"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.non_trainable_variables</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.non_trainable_weights"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.non_trainable_weights</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.outbound_nodes"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.outbound_nodes</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.output"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.output</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.output_mask"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.output_mask</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.output_shape"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.output_shape</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.save_own_variables"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.save_own_variables()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.set_weights"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.set_weights()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.submodules"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.submodules</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.supports_masking"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.supports_masking</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.trainable_variables"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.trainable_variables</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.trainable_weights"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.trainable_weights</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.variable_dtype"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.variable_dtype</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.variables"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.variables</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.weights"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.weights</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.with_name_scope"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.with_name_scope()</span></code></a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="gcdyn-nn-bundlemeanlayer">
+<h1>gcdyn.nn.BundleMeanLayer<a class="headerlink" href="#gcdyn-nn-bundlemeanlayer" title="Permalink to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.nn.</span></span><span class="sig-name descname"><span class="pre">BundleMeanLayer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/nn.html#BundleMeanLayer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Layer</span></code></p>
+<p>Assume that the input is of shape (number_of_bundles, bundle_size, feature_dim).</p>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.add_loss" title="gcdyn.nn.BundleMeanLayer.add_loss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_loss</span></code></a></p></td>
+<td><p>Add loss tensor(s), potentially dependent on layer inputs.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.add_metric" title="gcdyn.nn.BundleMeanLayer.add_metric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_metric</span></code></a></p></td>
+<td><p>Adds metric tensor to the layer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.add_update" title="gcdyn.nn.BundleMeanLayer.add_update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_update</span></code></a></p></td>
+<td><p>Add update op(s), potentially dependent on layer inputs.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.add_variable" title="gcdyn.nn.BundleMeanLayer.add_variable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_variable</span></code></a></p></td>
+<td><p>Deprecated, do NOT use! Alias for <cite>add_weight</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.add_weight" title="gcdyn.nn.BundleMeanLayer.add_weight"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_weight</span></code></a></p></td>
+<td><p>Adds a new variable to the layer.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.build" title="gcdyn.nn.BundleMeanLayer.build"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build</span></code></a></p></td>
+<td><p>Creates the variables of the layer (for subclass implementers).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.build_from_config" title="gcdyn.nn.BundleMeanLayer.build_from_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_from_config</span></code></a></p></td>
+<td><p>Builds the layer's states with the supplied config dict.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.call" title="gcdyn.nn.BundleMeanLayer.call"><code class="xref py py-obj docutils literal notranslate"><span class="pre">call</span></code></a></p></td>
+<td><p>This is where the layer's logic lives.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.compute_mask" title="gcdyn.nn.BundleMeanLayer.compute_mask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_mask</span></code></a></p></td>
+<td><p>Computes an output mask tensor.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.compute_output_shape" title="gcdyn.nn.BundleMeanLayer.compute_output_shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_output_shape</span></code></a></p></td>
+<td><p>Computes the output shape of the layer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.compute_output_signature" title="gcdyn.nn.BundleMeanLayer.compute_output_signature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_output_signature</span></code></a></p></td>
+<td><p>Compute the output tensor signature of the layer based on the inputs.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.count_params" title="gcdyn.nn.BundleMeanLayer.count_params"><code class="xref py py-obj docutils literal notranslate"><span class="pre">count_params</span></code></a></p></td>
+<td><p>Count the total number of scalars composing the weights.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.finalize_state" title="gcdyn.nn.BundleMeanLayer.finalize_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">finalize_state</span></code></a></p></td>
+<td><p>Finalizes the layers state after updating layer weights.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.from_config" title="gcdyn.nn.BundleMeanLayer.from_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_config</span></code></a></p></td>
+<td><p>Creates a layer from its config.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.get_build_config" title="gcdyn.nn.BundleMeanLayer.get_build_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_build_config</span></code></a></p></td>
+<td><p>Returns a dictionary with the layer's input shape.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.get_config" title="gcdyn.nn.BundleMeanLayer.get_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_config</span></code></a></p></td>
+<td><p>Returns the config of the layer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.get_input_at" title="gcdyn.nn.BundleMeanLayer.get_input_at"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_input_at</span></code></a></p></td>
+<td><p>Retrieves the input tensor(s) of a layer at a given node.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.get_input_mask_at" title="gcdyn.nn.BundleMeanLayer.get_input_mask_at"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_input_mask_at</span></code></a></p></td>
+<td><p>Retrieves the input mask tensor(s) of a layer at a given node.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.get_input_shape_at" title="gcdyn.nn.BundleMeanLayer.get_input_shape_at"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_input_shape_at</span></code></a></p></td>
+<td><p>Retrieves the input shape(s) of a layer at a given node.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.get_output_at" title="gcdyn.nn.BundleMeanLayer.get_output_at"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_output_at</span></code></a></p></td>
+<td><p>Retrieves the output tensor(s) of a layer at a given node.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.get_output_mask_at" title="gcdyn.nn.BundleMeanLayer.get_output_mask_at"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_output_mask_at</span></code></a></p></td>
+<td><p>Retrieves the output mask tensor(s) of a layer at a given node.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.get_output_shape_at" title="gcdyn.nn.BundleMeanLayer.get_output_shape_at"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_output_shape_at</span></code></a></p></td>
+<td><p>Retrieves the output shape(s) of a layer at a given node.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.get_weights" title="gcdyn.nn.BundleMeanLayer.get_weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_weights</span></code></a></p></td>
+<td><p>Returns the current weights of the layer, as NumPy arrays.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.load_own_variables" title="gcdyn.nn.BundleMeanLayer.load_own_variables"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_own_variables</span></code></a></p></td>
+<td><p>Loads the state of the layer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.save_own_variables" title="gcdyn.nn.BundleMeanLayer.save_own_variables"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_own_variables</span></code></a></p></td>
+<td><p>Saves the state of the layer.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.set_weights" title="gcdyn.nn.BundleMeanLayer.set_weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_weights</span></code></a></p></td>
+<td><p>Sets the weights of the layer, from NumPy arrays.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.with_name_scope" title="gcdyn.nn.BundleMeanLayer.with_name_scope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_name_scope</span></code></a></p></td>
+<td><p>Decorator to automatically enter the module name scope.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.activity_regularizer" title="gcdyn.nn.BundleMeanLayer.activity_regularizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">activity_regularizer</span></code></a></p></td>
+<td><p>Optional regularizer function for the output of this layer.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.compute_dtype" title="gcdyn.nn.BundleMeanLayer.compute_dtype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_dtype</span></code></a></p></td>
+<td><p>The dtype of the layer's computations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.dtype" title="gcdyn.nn.BundleMeanLayer.dtype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dtype</span></code></a></p></td>
+<td><p>The dtype of the layer weights.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.dtype_policy" title="gcdyn.nn.BundleMeanLayer.dtype_policy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dtype_policy</span></code></a></p></td>
+<td><p>The dtype policy associated with this layer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.dynamic" title="gcdyn.nn.BundleMeanLayer.dynamic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dynamic</span></code></a></p></td>
+<td><p>Whether the layer is dynamic (eager-only); set in the constructor.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.inbound_nodes" title="gcdyn.nn.BundleMeanLayer.inbound_nodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inbound_nodes</span></code></a></p></td>
+<td><p>Return Functional API nodes upstream of this layer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.input" title="gcdyn.nn.BundleMeanLayer.input"><code class="xref py py-obj docutils literal notranslate"><span class="pre">input</span></code></a></p></td>
+<td><p>Retrieves the input tensor(s) of a layer.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.input_mask" title="gcdyn.nn.BundleMeanLayer.input_mask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_mask</span></code></a></p></td>
+<td><p>Retrieves the input mask tensor(s) of a layer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.input_shape" title="gcdyn.nn.BundleMeanLayer.input_shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_shape</span></code></a></p></td>
+<td><p>Retrieves the input shape(s) of a layer.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.input_spec" title="gcdyn.nn.BundleMeanLayer.input_spec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_spec</span></code></a></p></td>
+<td><p><cite>InputSpec</cite> instance(s) describing the input format for this layer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.losses" title="gcdyn.nn.BundleMeanLayer.losses"><code class="xref py py-obj docutils literal notranslate"><span class="pre">losses</span></code></a></p></td>
+<td><p>List of losses added using the <cite>add_loss()</cite> API.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.metrics" title="gcdyn.nn.BundleMeanLayer.metrics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">metrics</span></code></a></p></td>
+<td><p>List of metrics attached to the layer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.name" title="gcdyn.nn.BundleMeanLayer.name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></a></p></td>
+<td><p>Name of the layer (string), set in the constructor.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.name_scope" title="gcdyn.nn.BundleMeanLayer.name_scope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">name_scope</span></code></a></p></td>
+<td><p>Returns a <cite>tf.name_scope</cite> instance for this class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.non_trainable_variables" title="gcdyn.nn.BundleMeanLayer.non_trainable_variables"><code class="xref py py-obj docutils literal notranslate"><span class="pre">non_trainable_variables</span></code></a></p></td>
+<td><p>Sequence of non-trainable variables owned by this module and its submodules.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.non_trainable_weights" title="gcdyn.nn.BundleMeanLayer.non_trainable_weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">non_trainable_weights</span></code></a></p></td>
+<td><p>List of all non-trainable weights tracked by this layer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.outbound_nodes" title="gcdyn.nn.BundleMeanLayer.outbound_nodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">outbound_nodes</span></code></a></p></td>
+<td><p>Return Functional API nodes downstream of this layer.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.output" title="gcdyn.nn.BundleMeanLayer.output"><code class="xref py py-obj docutils literal notranslate"><span class="pre">output</span></code></a></p></td>
+<td><p>Retrieves the output tensor(s) of a layer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.output_mask" title="gcdyn.nn.BundleMeanLayer.output_mask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">output_mask</span></code></a></p></td>
+<td><p>Retrieves the output mask tensor(s) of a layer.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.output_shape" title="gcdyn.nn.BundleMeanLayer.output_shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">output_shape</span></code></a></p></td>
+<td><p>Retrieves the output shape(s) of a layer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">stateful</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.submodules" title="gcdyn.nn.BundleMeanLayer.submodules"><code class="xref py py-obj docutils literal notranslate"><span class="pre">submodules</span></code></a></p></td>
+<td><p>Sequence of all sub-modules.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.supports_masking" title="gcdyn.nn.BundleMeanLayer.supports_masking"><code class="xref py py-obj docutils literal notranslate"><span class="pre">supports_masking</span></code></a></p></td>
+<td><p>Whether this layer supports computing a mask using <cite>compute_mask</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">trainable</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.trainable_variables" title="gcdyn.nn.BundleMeanLayer.trainable_variables"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trainable_variables</span></code></a></p></td>
+<td><p>Sequence of trainable variables owned by this module and its submodules.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.trainable_weights" title="gcdyn.nn.BundleMeanLayer.trainable_weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trainable_weights</span></code></a></p></td>
+<td><p>List of all trainable weights tracked by this layer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">updates</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.variable_dtype" title="gcdyn.nn.BundleMeanLayer.variable_dtype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">variable_dtype</span></code></a></p></td>
+<td><p>Alias of <cite>Layer.dtype</cite>, the dtype of the weights.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.variables" title="gcdyn.nn.BundleMeanLayer.variables"><code class="xref py py-obj docutils literal notranslate"><span class="pre">variables</span></code></a></p></td>
+<td><p>Returns the list of all layer variables/weights.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gcdyn.nn.BundleMeanLayer.weights" title="gcdyn.nn.BundleMeanLayer.weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">weights</span></code></a></p></td>
+<td><p>Returns the list of all layer variables/weights.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.call">
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/nn.html#BundleMeanLayer.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.call" title="Permalink to this definition">#</a></dt>
+<dd><p>This is where the layer’s logic lives.</p>
+<p>The <cite>call()</cite> method may not create state (except in its first
+invocation, wrapping the creation of variables or other resources in
+<cite>tf.init_scope()</cite>).  It is recommended to create state, including
+<cite>tf.Variable</cite> instances and nested <cite>Layer</cite> instances,</p>
+<blockquote>
+<div><p>in <cite>__init__()</cite>, or in the <cite>build()</cite> method that is</p>
+</div></blockquote>
+<p>called automatically before <cite>call()</cite> executes for the first time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputs</strong> – <p>Input tensor, or dict/list/tuple of input tensors.
+The first positional <cite>inputs</cite> argument is subject to special rules:
+- <cite>inputs</cite> must be explicitly passed. A layer cannot have zero</p>
+<blockquote>
+<div><p>arguments, and <cite>inputs</cite> cannot be provided via the default value
+of a keyword argument.</p>
+</div></blockquote>
+<ul>
+<li><p>NumPy array or Python scalar values in <cite>inputs</cite> get cast as
+tensors.</p></li>
+<li><p>Keras mask metadata is only collected from <cite>inputs</cite>.</p></li>
+<li><p>Layers are built (<cite>build(input_shape)</cite> method)
+using shape info from <cite>inputs</cite> only.</p></li>
+<li><p><cite>input_spec</cite> compatibility is only checked against <cite>inputs</cite>.</p></li>
+<li><p>Mixed precision input casting is only applied to <cite>inputs</cite>.
+If a layer has tensor arguments in <cite>*args</cite> or <cite>**kwargs</cite>, their
+casting behavior in mixed precision should be handled manually.</p></li>
+<li><p>The SavedModel input specification is generated using <cite>inputs</cite>
+only.</p></li>
+<li><p>Integration with various ecosystem packages like TFMOT, TFLite,
+TF.js, etc is only supported for <cite>inputs</cite> and not for tensors in
+positional and keyword arguments.</p></li>
+</ul>
+</p></li>
+<li><p><strong>*args</strong> – Additional positional arguments. May contain tensors, although
+this is not recommended, for the reasons above.</p></li>
+<li><p><strong>**kwargs</strong> – <p>Additional keyword arguments. May contain tensors, although
+this is not recommended, for the reasons above.
+The following optional keyword arguments are reserved:
+- <cite>training</cite>: Boolean scalar tensor of Python boolean indicating</p>
+<blockquote>
+<div><p>whether the <cite>call</cite> is meant for training or inference.</p>
+</div></blockquote>
+<ul>
+<li><p><cite>mask</cite>: Boolean input mask. If the layer’s <cite>call()</cite> method takes a
+<cite>mask</cite> argument, its default value will be set to the mask
+generated for <cite>inputs</cite> by the previous layer (if <cite>input</cite> did come
+from a layer that generated a corresponding mask, i.e. if it came
+from a Keras layer with masking support).</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tensor or list/tuple of tensors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.compute_output_shape">
+<span class="sig-name descname"><span class="pre">compute_output_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/nn.html#BundleMeanLayer.compute_output_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.compute_output_shape" title="Permalink to this definition">#</a></dt>
+<dd><p>Computes the output shape of the layer.</p>
+<p>This method will cause the layer’s state to be built, if that has not
+happened before. This requires that the layer will later be used with
+inputs that match the input shape provided here.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_shape</strong> – Shape tuple (tuple of integers) or <cite>tf.TensorShape</cite>,
+or structure of shape tuples / <cite>tf.TensorShape</cite> instances
+(one per output tensor of the layer).
+Shape tuples can include None for free dimensions,
+instead of an integer.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <cite>tf.TensorShape</cite> instance
+or structure of <cite>tf.TensorShape</cite> instances.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.__call__" title="Permalink to this definition">#</a></dt>
+<dd><p>Wraps <cite>call</cite>, applying pre- and post-processing steps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Positional arguments to be passed to <cite>self.call</cite>.</p></li>
+<li><p><strong>**kwargs</strong> – Keyword arguments to be passed to <cite>self.call</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output tensor(s).</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul>
+<li><p>The following optional keyword arguments are reserved for specific
+uses:
+* <cite>training</cite>: Boolean scalar tensor of Python boolean indicating</p>
+<blockquote>
+<div><p>whether the <cite>call</cite> is meant for training or inference.</p>
+</div></blockquote>
+<ul class="simple">
+<li><p><cite>mask</cite>: Boolean input mask.</p></li>
+</ul>
+</li>
+<li><p>If the layer’s <cite>call</cite> method takes a <cite>mask</cite> argument (as some Keras
+layers do), its default value will be set to the mask generated
+for <cite>inputs</cite> by the previous layer (if <cite>input</cite> did come from
+a layer that generated a corresponding mask, i.e. if it came from
+a Keras layer with masking support.</p></li>
+<li><p>If the layer is not built, the method will call <cite>build</cite>.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – if the layer’s <cite>call</cite> method returns None (an invalid
+    value).</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.12)"><strong>RuntimeError</strong></a> – if <cite>super().__init__()</cite> was not called in the
+    constructor.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.activity_regularizer">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">activity_regularizer</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.activity_regularizer" title="Permalink to this definition">#</a></dt>
+<dd><p>Optional regularizer function for the output of this layer.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.add_loss">
+<span class="sig-name descname"><span class="pre">add_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">losses</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.add_loss" title="Permalink to this definition">#</a></dt>
+<dd><p>Add loss tensor(s), potentially dependent on layer inputs.</p>
+<p>Some losses (for instance, activity regularization losses) may be
+dependent on the inputs passed when calling a layer. Hence, when reusing
+the same layer on different inputs <cite>a</cite> and <cite>b</cite>, some entries in
+<cite>layer.losses</cite> may be dependent on <cite>a</cite> and some on <cite>b</cite>. This method
+automatically keeps track of dependencies.</p>
+<p>This method can be used inside a subclassed layer or model’s <cite>call</cite>
+function, in which case <cite>losses</cite> should be a Tensor or list of Tensors.</p>
+<p>Example:</p>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>python
+class MyLayer(tf.keras.layers.Layer):</p>
+<blockquote>
+<div><dl class="simple">
+<dt>def call(self, inputs):</dt><dd><p>self.add_loss(tf.abs(tf.reduce_mean(inputs)))
+return inputs</p>
+</dd>
+</dl>
+</div></blockquote>
+<p><a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
+<p>The same code works in distributed training: the input to <cite>add_loss()</cite>
+is treated like a regularization loss and averaged across replicas
+by the training loop (both built-in <cite>Model.fit()</cite> and compliant custom
+training loops).</p>
+<p>The <cite>add_loss</cite> method can also be called directly on a Functional Model
+during construction. In this case, any loss Tensors passed to this Model
+must be symbolic and be able to be traced back to the model’s <cite>Input`s.
+These losses become part of the model’s topology and are tracked in
+`get_config</cite>.</p>
+<p>Example:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`python</span>
+<span class="pre">inputs</span> <span class="pre">=</span> <span class="pre">tf.keras.Input(shape=(10,))</span>
+<span class="pre">x</span> <span class="pre">=</span> <span class="pre">tf.keras.layers.Dense(10)(inputs)</span>
+<span class="pre">outputs</span> <span class="pre">=</span> <span class="pre">tf.keras.layers.Dense(1)(x)</span>
+<span class="pre">model</span> <span class="pre">=</span> <span class="pre">tf.keras.Model(inputs,</span> <span class="pre">outputs)</span>
+<span class="pre">#</span> <span class="pre">Activity</span> <span class="pre">regularization.</span>
+<span class="pre">model.add_loss(tf.abs(tf.reduce_mean(x)))</span>
+<span class="pre">`</span></code></p>
+<p>If this is not the case for your loss (if, for example, your loss
+references a <cite>Variable</cite> of one of the model’s layers), you can wrap your
+loss in a zero-argument lambda. These losses are not tracked as part of
+the model’s topology since they can’t be serialized.</p>
+<p>Example:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`python</span>
+<span class="pre">inputs</span> <span class="pre">=</span> <span class="pre">tf.keras.Input(shape=(10,))</span>
+<span class="pre">d</span> <span class="pre">=</span> <span class="pre">tf.keras.layers.Dense(10)</span>
+<span class="pre">x</span> <span class="pre">=</span> <span class="pre">d(inputs)</span>
+<span class="pre">outputs</span> <span class="pre">=</span> <span class="pre">tf.keras.layers.Dense(1)(x)</span>
+<span class="pre">model</span> <span class="pre">=</span> <span class="pre">tf.keras.Model(inputs,</span> <span class="pre">outputs)</span>
+<span class="pre">#</span> <span class="pre">Weight</span> <span class="pre">regularization.</span>
+<span class="pre">model.add_loss(lambda:</span> <span class="pre">tf.reduce_mean(d.kernel))</span>
+<span class="pre">`</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>losses</strong> – Loss tensor, or list/tuple of tensors. Rather than tensors,
+losses may also be zero-argument callables which create a loss
+tensor.</p></li>
+<li><p><strong>**kwargs</strong> – Used for backwards compatibility only.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.add_metric">
+<span class="sig-name descname"><span class="pre">add_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.add_metric" title="Permalink to this definition">#</a></dt>
+<dd><p>Adds metric tensor to the layer.</p>
+<p>This method can be used inside the <cite>call()</cite> method of a subclassed layer
+or model.</p>
+<p><a href="#id9"><span class="problematic" id="id10">``</span></a><a href="#id11"><span class="problematic" id="id12">`</span></a>python
+class MyMetricLayer(tf.keras.layers.Layer):</p>
+<blockquote>
+<div><dl class="simple">
+<dt>def __init__(self):</dt><dd><p>super(MyMetricLayer, self).__init__(name=’my_metric_layer’)
+self.mean = tf.keras.metrics.Mean(name=’metric_1’)</p>
+</dd>
+<dt>def call(self, inputs):</dt><dd><p>self.add_metric(self.mean(inputs))
+self.add_metric(tf.reduce_sum(inputs), name=’metric_2’)
+return inputs</p>
+</dd>
+</dl>
+</div></blockquote>
+<p><a href="#id13"><span class="problematic" id="id14">``</span></a><a href="#id15"><span class="problematic" id="id16">`</span></a></p>
+<p>This method can also be called directly on a Functional Model during
+construction. In this case, any tensor passed to this Model must
+be symbolic and be able to be traced back to the model’s <cite>Input`s. These
+metrics become part of the model’s topology and are tracked when you
+save the model via `save()</cite>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">`python</span>
+<span class="pre">inputs</span> <span class="pre">=</span> <span class="pre">tf.keras.Input(shape=(10,))</span>
+<span class="pre">x</span> <span class="pre">=</span> <span class="pre">tf.keras.layers.Dense(10)(inputs)</span>
+<span class="pre">outputs</span> <span class="pre">=</span> <span class="pre">tf.keras.layers.Dense(1)(x)</span>
+<span class="pre">model</span> <span class="pre">=</span> <span class="pre">tf.keras.Model(inputs,</span> <span class="pre">outputs)</span>
+<span class="pre">model.add_metric(math_ops.reduce_sum(x),</span> <span class="pre">name='metric_1')</span>
+<span class="pre">`</span></code></p>
+<p>Note: Calling <cite>add_metric()</cite> with the result of a metric object on a
+Functional Model, as shown in the example below, is not supported. This
+is because we cannot trace the metric result tensor back to the model’s
+inputs.</p>
+<p><code class="docutils literal notranslate"><span class="pre">`python</span>
+<span class="pre">inputs</span> <span class="pre">=</span> <span class="pre">tf.keras.Input(shape=(10,))</span>
+<span class="pre">x</span> <span class="pre">=</span> <span class="pre">tf.keras.layers.Dense(10)(inputs)</span>
+<span class="pre">outputs</span> <span class="pre">=</span> <span class="pre">tf.keras.layers.Dense(1)(x)</span>
+<span class="pre">model</span> <span class="pre">=</span> <span class="pre">tf.keras.Model(inputs,</span> <span class="pre">outputs)</span>
+<span class="pre">model.add_metric(tf.keras.metrics.Mean()(x),</span> <span class="pre">name='metric_1')</span>
+<span class="pre">`</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> – Metric tensor.</p></li>
+<li><p><strong>name</strong> – String metric name.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments for backward compatibility.
+Accepted values:
+<cite>aggregation</cite> - When the <cite>value</cite> tensor provided is not the result
+of calling a <cite>keras.Metric</cite> instance, it will be aggregated by
+default using a <cite>keras.Metric.Mean</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.add_update">
+<span class="sig-name descname"><span class="pre">add_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">updates</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.add_update" title="Permalink to this definition">#</a></dt>
+<dd><p>Add update op(s), potentially dependent on layer inputs.</p>
+<p>Weight updates (for instance, the updates of the moving mean and
+variance in a BatchNormalization layer) may be dependent on the inputs
+passed when calling a layer. Hence, when reusing the same layer on
+different inputs <cite>a</cite> and <cite>b</cite>, some entries in <cite>layer.updates</cite> may be
+dependent on <cite>a</cite> and some on <cite>b</cite>. This method automatically keeps track
+of dependencies.</p>
+<p>This call is ignored when eager execution is enabled (in that case,
+variable updates are run on the fly and thus do not need to be tracked
+for later execution).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>updates</strong> – Update op, or list/tuple of update ops, or zero-arg callable
+that returns an update op. A zero-arg callable should be passed in
+order to disable running the updates by setting <cite>trainable=False</cite>
+on this Layer, when executing in Eager mode.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.add_variable">
+<span class="sig-name descname"><span class="pre">add_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.add_variable" title="Permalink to this definition">#</a></dt>
+<dd><p>Deprecated, do NOT use! Alias for <cite>add_weight</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.add_weight">
+<span class="sig-name descname"><span class="pre">add_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regularizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_resource</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synchronization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">VariableSynchronization.AUTO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">VariableAggregationV2.NONE</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.add_weight" title="Permalink to this definition">#</a></dt>
+<dd><p>Adds a new variable to the layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – Variable name.</p></li>
+<li><p><strong>shape</strong> – Variable shape. Defaults to scalar if unspecified.</p></li>
+<li><p><strong>dtype</strong> – The type of the variable. Defaults to <cite>self.dtype</cite>.</p></li>
+<li><p><strong>initializer</strong> – Initializer instance (callable).</p></li>
+<li><p><strong>regularizer</strong> – Regularizer instance (callable).</p></li>
+<li><p><strong>trainable</strong> – Boolean, whether the variable should be part of the layer’s
+“trainable_variables” (e.g. variables, biases)
+or “non_trainable_variables” (e.g. BatchNorm mean and variance).
+Note that <cite>trainable</cite> cannot be <cite>True</cite> if <cite>synchronization</cite>
+is set to <cite>ON_READ</cite>.</p></li>
+<li><p><strong>constraint</strong> – Constraint instance (callable).</p></li>
+<li><p><strong>use_resource</strong> – <p>Whether to use a <cite>ResourceVariable</cite> or not.
+See [this guide](
+<a class="reference external" href="https://www.tensorflow.org/guide/migrate/tf1_vs_tf2#resourcevariables_instead_of_referencevariables">https://www.tensorflow.org/guide/migrate/tf1_vs_tf2#resourcevariables_instead_of_referencevariables</a>)</p>
+<blockquote>
+<div><p>for more information.</p>
+</div></blockquote>
+</p></li>
+<li><p><strong>synchronization</strong> – Indicates when a distributed a variable will be
+aggregated. Accepted values are constants defined in the class
+<cite>tf.VariableSynchronization</cite>. By default the synchronization is set
+to <cite>AUTO</cite> and the current <cite>DistributionStrategy</cite> chooses when to
+synchronize. If <cite>synchronization</cite> is set to <cite>ON_READ</cite>, <cite>trainable</cite>
+must not be set to <cite>True</cite>.</p></li>
+<li><p><strong>aggregation</strong> – Indicates how a distributed variable will be aggregated.
+Accepted values are constants defined in the class
+<cite>tf.VariableAggregation</cite>.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments. Accepted values are <cite>getter</cite>,
+<cite>collections</cite>, <cite>experimental_autocast</cite> and <cite>caching_device</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The variable created.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – When giving unsupported dtype and no initializer or when
+    trainable has been set to True with synchronization set as
+    <cite>ON_READ</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.build">
+<span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_shape</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.build" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates the variables of the layer (for subclass implementers).</p>
+<p>This is a method that implementers of subclasses of <cite>Layer</cite> or <cite>Model</cite>
+can override if they need a state-creation step in-between
+layer instantiation and layer call. It is invoked automatically before
+the first execution of <cite>call()</cite>.</p>
+<p>This is typically used to create the weights of <cite>Layer</cite> subclasses
+(at the discretion of the subclass implementer).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_shape</strong> – Instance of <cite>TensorShape</cite>, or list of instances of
+<cite>TensorShape</cite> if the layer expects a list of inputs
+(one instance per input).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.build_from_config">
+<span class="sig-name descname"><span class="pre">build_from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.build_from_config" title="Permalink to this definition">#</a></dt>
+<dd><p>Builds the layer’s states with the supplied config dict.</p>
+<p>By default, this method calls the <cite>build(config[“input_shape”])</cite> method,
+which creates weights based on the layer’s input shape in the supplied
+config. If your config contains other information needed to load the
+layer’s state, you should override this method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> – Dict containing the input shape associated with this layer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.compute_dtype">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_dtype</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.compute_dtype" title="Permalink to this definition">#</a></dt>
+<dd><p>The dtype of the layer’s computations.</p>
+<p>This is equivalent to <cite>Layer.dtype_policy.compute_dtype</cite>. Unless
+mixed precision is used, this is the same as <cite>Layer.dtype</cite>, the dtype of
+the weights.</p>
+<p>Layers automatically cast their inputs to the compute dtype, which
+causes computations and the output to be in the compute dtype as well.
+This is done by the base Layer class in <cite>Layer.__call__</cite>, so you do not
+have to insert these casts if implementing your own layer.</p>
+<p>Layers often perform certain internal computations in higher precision
+when <cite>compute_dtype</cite> is float16 or bfloat16 for numeric stability. The
+output will still typically be float16 or bfloat16 in such cases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The layer’s compute dtype.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.compute_mask">
+<span class="sig-name descname"><span class="pre">compute_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.compute_mask" title="Permalink to this definition">#</a></dt>
+<dd><p>Computes an output mask tensor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputs</strong> – Tensor or list of tensors.</p></li>
+<li><p><strong>mask</strong> – Tensor or list of tensors.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>None or a tensor (or list of tensors,</dt><dd><p>one per output tensor of the layer).</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.compute_output_signature">
+<span class="sig-name descname"><span class="pre">compute_output_signature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_signature</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.compute_output_signature" title="Permalink to this definition">#</a></dt>
+<dd><p>Compute the output tensor signature of the layer based on the inputs.</p>
+<p>Unlike a TensorShape object, a TensorSpec object contains both shape
+and dtype information for a tensor. This method allows layers to provide
+output dtype information if it is different from the input dtype.
+For any layer that doesn’t implement this function,
+the framework will fall back to use <cite>compute_output_shape</cite>, and will
+assume that the output dtype matches the input dtype.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_signature</strong> – Single TensorSpec or nested structure of TensorSpec
+objects, describing a candidate input for the layer.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Single TensorSpec or nested structure of TensorSpec objects,</dt><dd><p>describing how the layer would transform the provided input.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.12)"><strong>TypeError</strong></a> – If input_signature contains a non-TensorSpec object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.count_params">
+<span class="sig-name descname"><span class="pre">count_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.count_params" title="Permalink to this definition">#</a></dt>
+<dd><p>Count the total number of scalars composing the weights.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An integer count.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – if the layer isn’t yet built
+    (in which case its weights aren’t yet defined).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.dtype">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dtype</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.dtype" title="Permalink to this definition">#</a></dt>
+<dd><p>The dtype of the layer weights.</p>
+<p>This is equivalent to <cite>Layer.dtype_policy.variable_dtype</cite>. Unless
+mixed precision is used, this is the same as <cite>Layer.compute_dtype</cite>, the
+dtype of the layer’s computations.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.dtype_policy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dtype_policy</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.dtype_policy" title="Permalink to this definition">#</a></dt>
+<dd><p>The dtype policy associated with this layer.</p>
+<p>This is an instance of a <cite>tf.keras.mixed_precision.Policy</cite>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.dynamic">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dynamic</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.dynamic" title="Permalink to this definition">#</a></dt>
+<dd><p>Whether the layer is dynamic (eager-only); set in the constructor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.finalize_state">
+<span class="sig-name descname"><span class="pre">finalize_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.finalize_state" title="Permalink to this definition">#</a></dt>
+<dd><p>Finalizes the layers state after updating layer weights.</p>
+<p>This function can be subclassed in a layer and will be called after
+updating a layer weights. It can be overridden to finalize any
+additional layer state after a weight update.</p>
+<p>This function will be called after weights of a layer have been restored
+from a loaded model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.from_config">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.from_config" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a layer from its config.</p>
+<p>This method is the reverse of <cite>get_config</cite>,
+capable of instantiating the same layer from the config
+dictionary. It does not handle layer connectivity
+(handled by Network), nor weights (handled by <cite>set_weights</cite>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> – A Python dictionary, typically the
+output of get_config.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A layer instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.get_build_config">
+<span class="sig-name descname"><span class="pre">get_build_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_build_config" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns a dictionary with the layer’s input shape.</p>
+<p>This method returns a config dict that can be used by
+<cite>build_from_config(config)</cite> to create all states (e.g. Variables and
+Lookup tables) needed by the layer.</p>
+<p>By default, the config only contains the input shape that the layer
+was built with. If you’re writing a custom layer that creates state in
+an unusual way, you should override this method to make sure this state
+is already created when Keras attempts to load its value upon model
+loading.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dict containing the input shape associated with the layer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.get_config">
+<span class="sig-name descname"><span class="pre">get_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_config" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the config of the layer.</p>
+<p>A layer config is a Python dictionary (serializable)
+containing the configuration of a layer.
+The same layer can be reinstantiated later
+(without its trained weights) from this configuration.</p>
+<p>The config of a layer does not include connectivity
+information, nor the layer class name. These are handled
+by <cite>Network</cite> (one layer of abstraction above).</p>
+<p>Note that <cite>get_config()</cite> does not guarantee to return a fresh copy of
+dict every time it is called. The callers should make a copy of the
+returned dict if they want to modify it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Python dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.get_input_at">
+<span class="sig-name descname"><span class="pre">get_input_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_input_at" title="Permalink to this definition">#</a></dt>
+<dd><p>Retrieves the input tensor(s) of a layer at a given node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node_index</strong> – Integer, index of the node
+from which to retrieve the attribute.
+E.g. <cite>node_index=0</cite> will correspond to the
+first input node of the layer.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tensor (or list of tensors if the layer has multiple inputs).</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.12)"><strong>RuntimeError</strong></a> – If called in Eager mode.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.get_input_mask_at">
+<span class="sig-name descname"><span class="pre">get_input_mask_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_input_mask_at" title="Permalink to this definition">#</a></dt>
+<dd><p>Retrieves the input mask tensor(s) of a layer at a given node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node_index</strong> – Integer, index of the node
+from which to retrieve the attribute.
+E.g. <cite>node_index=0</cite> will correspond to the
+first time the layer was called.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A mask tensor
+(or list of tensors if the layer has multiple inputs).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.get_input_shape_at">
+<span class="sig-name descname"><span class="pre">get_input_shape_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_input_shape_at" title="Permalink to this definition">#</a></dt>
+<dd><p>Retrieves the input shape(s) of a layer at a given node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node_index</strong> – Integer, index of the node
+from which to retrieve the attribute.
+E.g. <cite>node_index=0</cite> will correspond to the
+first time the layer was called.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A shape tuple
+(or list of shape tuples if the layer has multiple inputs).</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.12)"><strong>RuntimeError</strong></a> – If called in Eager mode.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.get_output_at">
+<span class="sig-name descname"><span class="pre">get_output_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_output_at" title="Permalink to this definition">#</a></dt>
+<dd><p>Retrieves the output tensor(s) of a layer at a given node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node_index</strong> – Integer, index of the node
+from which to retrieve the attribute.
+E.g. <cite>node_index=0</cite> will correspond to the
+first output node of the layer.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tensor (or list of tensors if the layer has multiple outputs).</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.12)"><strong>RuntimeError</strong></a> – If called in Eager mode.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.get_output_mask_at">
+<span class="sig-name descname"><span class="pre">get_output_mask_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_output_mask_at" title="Permalink to this definition">#</a></dt>
+<dd><p>Retrieves the output mask tensor(s) of a layer at a given node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node_index</strong> – Integer, index of the node
+from which to retrieve the attribute.
+E.g. <cite>node_index=0</cite> will correspond to the
+first time the layer was called.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A mask tensor
+(or list of tensors if the layer has multiple outputs).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.get_output_shape_at">
+<span class="sig-name descname"><span class="pre">get_output_shape_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_output_shape_at" title="Permalink to this definition">#</a></dt>
+<dd><p>Retrieves the output shape(s) of a layer at a given node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node_index</strong> – Integer, index of the node
+from which to retrieve the attribute.
+E.g. <cite>node_index=0</cite> will correspond to the
+first time the layer was called.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A shape tuple
+(or list of shape tuples if the layer has multiple outputs).</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.12)"><strong>RuntimeError</strong></a> – If called in Eager mode.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.get_weights">
+<span class="sig-name descname"><span class="pre">get_weights</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_weights" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the current weights of the layer, as NumPy arrays.</p>
+<p>The weights of a layer represent the state of the layer. This function
+returns both trainable and non-trainable weight values associated with
+this layer as a list of NumPy arrays, which can in turn be used to load
+state into similarly parameterized layers.</p>
+<p>For example, a <cite>Dense</cite> layer returns a list of two values: the kernel
+matrix and the bias vector. These can be used to set the weights of
+another <cite>Dense</cite> layer:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">layer_a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span>
+<span class="gp">... </span>  <span class="n">kernel_initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant_initializer</span><span class="p">(</span><span class="mf">1.</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a_out</span> <span class="o">=</span> <span class="n">layer_a</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">]]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">layer_a</span><span class="o">.</span><span class="n">get_weights</span><span class="p">()</span>
+<span class="go">[array([[1.],</span>
+<span class="go">       [1.],</span>
+<span class="go">       [1.]], dtype=float32), array([0.], dtype=float32)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">layer_b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span>
+<span class="gp">... </span>  <span class="n">kernel_initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant_initializer</span><span class="p">(</span><span class="mf">2.</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b_out</span> <span class="o">=</span> <span class="n">layer_b</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">([[</span><span class="mf">10.</span><span class="p">,</span> <span class="mf">20.</span><span class="p">,</span> <span class="mf">30.</span><span class="p">]]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">layer_b</span><span class="o">.</span><span class="n">get_weights</span><span class="p">()</span>
+<span class="go">[array([[2.],</span>
+<span class="go">       [2.],</span>
+<span class="go">       [2.]], dtype=float32), array([0.], dtype=float32)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">layer_b</span><span class="o">.</span><span class="n">set_weights</span><span class="p">(</span><span class="n">layer_a</span><span class="o">.</span><span class="n">get_weights</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">layer_b</span><span class="o">.</span><span class="n">get_weights</span><span class="p">()</span>
+<span class="go">[array([[1.],</span>
+<span class="go">       [1.],</span>
+<span class="go">       [1.]], dtype=float32), array([0.], dtype=float32)]</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Weights values as a list of NumPy arrays.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.inbound_nodes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">inbound_nodes</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.inbound_nodes" title="Permalink to this definition">#</a></dt>
+<dd><p>Return Functional API nodes upstream of this layer.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.input">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.input" title="Permalink to this definition">#</a></dt>
+<dd><p>Retrieves the input tensor(s) of a layer.</p>
+<p>Only applicable if the layer has exactly one input,
+i.e. if it is connected to one incoming layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Input tensor or list of input tensors.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.12)"><strong>RuntimeError</strong></a> – If called in Eager mode.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AttributeError" title="(in Python v3.12)"><strong>AttributeError</strong></a> – If no inbound nodes are found.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.input_mask">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_mask</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.input_mask" title="Permalink to this definition">#</a></dt>
+<dd><p>Retrieves the input mask tensor(s) of a layer.</p>
+<p>Only applicable if the layer has exactly one inbound node,
+i.e. if it is connected to one incoming layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Input mask tensor (potentially None) or list of input
+mask tensors.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AttributeError" title="(in Python v3.12)"><strong>AttributeError</strong></a> – if the layer is connected to</p></li>
+<li><p><strong>more than one incoming layers.</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.input_shape">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_shape</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.input_shape" title="Permalink to this definition">#</a></dt>
+<dd><p>Retrieves the input shape(s) of a layer.</p>
+<p>Only applicable if the layer has exactly one input,
+i.e. if it is connected to one incoming layer, or if all inputs
+have the same shape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Input shape, as an integer shape tuple
+(or list of shape tuples, one tuple per input tensor).</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AttributeError" title="(in Python v3.12)"><strong>AttributeError</strong></a> – if the layer has no defined input_shape.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.12)"><strong>RuntimeError</strong></a> – if called in Eager mode.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.input_spec">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_spec</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.input_spec" title="Permalink to this definition">#</a></dt>
+<dd><p><cite>InputSpec</cite> instance(s) describing the input format for this layer.</p>
+<p>When you create a layer subclass, you can set <cite>self.input_spec</cite> to
+enable the layer to run input compatibility checks when it is called.
+Consider a <cite>Conv2D</cite> layer: it can only be called on a single input
+tensor of rank 4. As such, you can set, in <cite>__init__()</cite>:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`python</span>
+<span class="pre">self.input_spec</span> <span class="pre">=</span> <span class="pre">tf.keras.layers.InputSpec(ndim=4)</span>
+<span class="pre">`</span></code></p>
+<p>Now, if you try to call the layer on an input that isn’t rank 4
+(for instance, an input of shape <cite>(2,)</cite>, it will raise a
+nicely-formatted error:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">ValueError:</span> <span class="pre">Input</span> <span class="pre">0</span> <span class="pre">of</span> <span class="pre">layer</span> <span class="pre">conv2d</span> <span class="pre">is</span> <span class="pre">incompatible</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">layer:</span>
+<span class="pre">expected</span> <span class="pre">ndim=4,</span> <span class="pre">found</span> <span class="pre">ndim=1.</span> <span class="pre">Full</span> <span class="pre">shape</span> <span class="pre">received:</span> <span class="pre">[2]</span>
+<span class="pre">`</span></code></p>
+<p>Input checks that can be specified via <cite>input_spec</cite> include:
+- Structure (e.g. a single input, a list of 2 inputs, etc)
+- Shape
+- Rank (ndim)
+- Dtype</p>
+<p>For more information, see <cite>tf.keras.layers.InputSpec</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <cite>tf.keras.layers.InputSpec</cite> instance, or nested structure thereof.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.load_own_variables">
+<span class="sig-name descname"><span class="pre">load_own_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.load_own_variables" title="Permalink to this definition">#</a></dt>
+<dd><p>Loads the state of the layer.</p>
+<p>You can override this method to take full control of how the state of
+the layer is loaded upon calling <cite>keras.models.load_model()</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>store</strong> – Dict from which the state of the model will be loaded.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.losses">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">losses</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.losses" title="Permalink to this definition">#</a></dt>
+<dd><p>List of losses added using the <cite>add_loss()</cite> API.</p>
+<p>Variable regularization tensors are created when this property is
+accessed, so it is eager safe: accessing <cite>losses</cite> under a
+<cite>tf.GradientTape</cite> will propagate gradients back to the corresponding
+variables.</p>
+<p>Examples:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">MyLayer</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Layer</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="bp">self</span><span class="o">.</span><span class="n">add_loss</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">inputs</span><span class="p">)))</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">inputs</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">l</span> <span class="o">=</span> <span class="n">MyLayer</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">l</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">l</span><span class="o">.</span><span class="n">losses</span>
+<span class="go">[1.0]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">10</span><span class="p">)(</span><span class="n">inputs</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Activity regularization.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">losses</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">add_loss</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">losses</span><span class="p">)</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">kernel_initializer</span><span class="o">=</span><span class="s1">&#39;ones&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">d</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Weight regularization.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">add_loss</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">kernel</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">losses</span>
+<span class="go">[&lt;tf.Tensor: shape=(), dtype=float32, numpy=1.0&gt;]</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of tensors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.metrics">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">metrics</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.metrics" title="Permalink to this definition">#</a></dt>
+<dd><p>List of metrics attached to the layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of <cite>Metric</cite> objects.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.name" title="Permalink to this definition">#</a></dt>
+<dd><p>Name of the layer (string), set in the constructor.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.name_scope">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name_scope</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.name_scope" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns a <cite>tf.name_scope</cite> instance for this class.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.non_trainable_variables">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">non_trainable_variables</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.non_trainable_variables" title="Permalink to this definition">#</a></dt>
+<dd><p>Sequence of non-trainable variables owned by this module and its submodules.</p>
+<p>Note: this method uses reflection to find variables on the current instance
+and submodules. For performance reasons you may wish to cache the result
+of calling this method if you don’t expect the return value to change.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A sequence of variables for the current module (sorted by attribute
+name) followed by variables from all submodules recursively (breadth
+first).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.non_trainable_weights">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">non_trainable_weights</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.non_trainable_weights" title="Permalink to this definition">#</a></dt>
+<dd><p>List of all non-trainable weights tracked by this layer.</p>
+<p>Non-trainable weights are <em>not</em> updated during training. They are
+expected to be updated manually in <cite>call()</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of non-trainable variables.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.outbound_nodes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">outbound_nodes</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.outbound_nodes" title="Permalink to this definition">#</a></dt>
+<dd><p>Return Functional API nodes downstream of this layer.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.output">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">output</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.output" title="Permalink to this definition">#</a></dt>
+<dd><p>Retrieves the output tensor(s) of a layer.</p>
+<p>Only applicable if the layer has exactly one output,
+i.e. if it is connected to one incoming layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Output tensor or list of output tensors.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AttributeError" title="(in Python v3.12)"><strong>AttributeError</strong></a> – if the layer is connected to more than one incoming
+    layers.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.12)"><strong>RuntimeError</strong></a> – if called in Eager mode.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.output_mask">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">output_mask</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.output_mask" title="Permalink to this definition">#</a></dt>
+<dd><p>Retrieves the output mask tensor(s) of a layer.</p>
+<p>Only applicable if the layer has exactly one inbound node,
+i.e. if it is connected to one incoming layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Output mask tensor (potentially None) or list of output
+mask tensors.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AttributeError" title="(in Python v3.12)"><strong>AttributeError</strong></a> – if the layer is connected to</p></li>
+<li><p><strong>more than one incoming layers.</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.output_shape">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">output_shape</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.output_shape" title="Permalink to this definition">#</a></dt>
+<dd><p>Retrieves the output shape(s) of a layer.</p>
+<p>Only applicable if the layer has one output,
+or if all outputs have the same shape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Output shape, as an integer shape tuple
+(or list of shape tuples, one tuple per output tensor).</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AttributeError" title="(in Python v3.12)"><strong>AttributeError</strong></a> – if the layer has no defined output shape.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.12)"><strong>RuntimeError</strong></a> – if called in Eager mode.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.save_own_variables">
+<span class="sig-name descname"><span class="pre">save_own_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.save_own_variables" title="Permalink to this definition">#</a></dt>
+<dd><p>Saves the state of the layer.</p>
+<p>You can override this method to take full control of how the state of
+the layer is saved upon calling <cite>model.save()</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>store</strong> – Dict where the state of the model will be saved.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.set_weights">
+<span class="sig-name descname"><span class="pre">set_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weights</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.set_weights" title="Permalink to this definition">#</a></dt>
+<dd><p>Sets the weights of the layer, from NumPy arrays.</p>
+<p>The weights of a layer represent the state of the layer. This function
+sets the weight values from numpy arrays. The weight values should be
+passed in the order they are created by the layer. Note that the layer’s
+weights must be instantiated before calling this function, by calling
+the layer.</p>
+<p>For example, a <cite>Dense</cite> layer returns a list of two values: the kernel
+matrix and the bias vector. These can be used to set the weights of
+another <cite>Dense</cite> layer:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">layer_a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span>
+<span class="gp">... </span>  <span class="n">kernel_initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant_initializer</span><span class="p">(</span><span class="mf">1.</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a_out</span> <span class="o">=</span> <span class="n">layer_a</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">]]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">layer_a</span><span class="o">.</span><span class="n">get_weights</span><span class="p">()</span>
+<span class="go">[array([[1.],</span>
+<span class="go">       [1.],</span>
+<span class="go">       [1.]], dtype=float32), array([0.], dtype=float32)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">layer_b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span>
+<span class="gp">... </span>  <span class="n">kernel_initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant_initializer</span><span class="p">(</span><span class="mf">2.</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b_out</span> <span class="o">=</span> <span class="n">layer_b</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">([[</span><span class="mf">10.</span><span class="p">,</span> <span class="mf">20.</span><span class="p">,</span> <span class="mf">30.</span><span class="p">]]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">layer_b</span><span class="o">.</span><span class="n">get_weights</span><span class="p">()</span>
+<span class="go">[array([[2.],</span>
+<span class="go">       [2.],</span>
+<span class="go">       [2.]], dtype=float32), array([0.], dtype=float32)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">layer_b</span><span class="o">.</span><span class="n">set_weights</span><span class="p">(</span><span class="n">layer_a</span><span class="o">.</span><span class="n">get_weights</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">layer_b</span><span class="o">.</span><span class="n">get_weights</span><span class="p">()</span>
+<span class="go">[array([[1.],</span>
+<span class="go">       [1.],</span>
+<span class="go">       [1.]], dtype=float32), array([0.], dtype=float32)]</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>weights</strong> – a list of NumPy arrays. The number
+of arrays and their shape must match
+number of the dimensions of the weights
+of the layer (i.e. it should match the
+output of <cite>get_weights</cite>).</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – If the provided weights list does not match the
+    layer’s specifications.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.submodules">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">submodules</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.submodules" title="Permalink to this definition">#</a></dt>
+<dd><p>Sequence of all sub-modules.</p>
+<p>Submodules are modules which are properties of this module, or found as
+properties of modules which are properties of this module (and so on).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Module</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Module</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Module</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="n">b</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="n">c</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">submodules</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">submodules</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="n">c</span><span class="p">]</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">submodules</span><span class="p">)</span> <span class="o">==</span> <span class="p">[]</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A sequence of all submodules.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.supports_masking">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">supports_masking</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.supports_masking" title="Permalink to this definition">#</a></dt>
+<dd><p>Whether this layer supports computing a mask using <cite>compute_mask</cite>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.trainable_variables">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trainable_variables</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.trainable_variables" title="Permalink to this definition">#</a></dt>
+<dd><p>Sequence of trainable variables owned by this module and its submodules.</p>
+<p>Note: this method uses reflection to find variables on the current instance
+and submodules. For performance reasons you may wish to cache the result
+of calling this method if you don’t expect the return value to change.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A sequence of variables for the current module (sorted by attribute
+name) followed by variables from all submodules recursively (breadth
+first).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.trainable_weights">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trainable_weights</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.trainable_weights" title="Permalink to this definition">#</a></dt>
+<dd><p>List of all trainable weights tracked by this layer.</p>
+<p>Trainable weights are updated via gradient descent during training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of trainable variables.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.variable_dtype">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">variable_dtype</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.variable_dtype" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias of <cite>Layer.dtype</cite>, the dtype of the weights.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.variables">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">variables</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.variables" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the list of all layer variables/weights.</p>
+<p>Alias of <cite>self.weights</cite>.</p>
+<p>Note: This will not track the weights of nested <cite>tf.Modules</cite> that are
+not themselves Keras layers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of variables.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.weights">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weights</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.weights" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the list of all layer variables/weights.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of variables.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.with_name_scope">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_name_scope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.with_name_scope" title="Permalink to this definition">#</a></dt>
+<dd><p>Decorator to automatically enter the module name scope.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">MyModule</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="nd">@tf</span><span class="o">.</span><span class="n">Module</span><span class="o">.</span><span class="n">with_name_scope</span>
+<span class="gp">... </span>  <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">):</span>
+<span class="gp">... </span>      <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">3</span><span class="p">]))</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Using the above module would produce <a href="#id17"><span class="problematic" id="id18">`</span></a>tf.Variable`s and <a href="#id19"><span class="problematic" id="id20">`</span></a>tf.Tensor`s whose
+names included the module name:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mod</span> <span class="o">=</span> <span class="n">MyModule</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mod</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
+<span class="go">&lt;tf.Tensor: shape=(1, 3), dtype=float32, numpy=..., dtype=float32)&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mod</span><span class="o">.</span><span class="n">w</span>
+<span class="go">&lt;tf.Variable &#39;my_module/Variable:0&#39; shape=(2, 3) dtype=float32,</span>
+<span class="go">numpy=..., dtype=float32)&gt;</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>method</strong> – The method to wrap.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The original method wrapped such that it enters the module’s name scope.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  <!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="gcdyn.nn.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">gcdyn.nn</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="gcdyn.nn.Callback.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">gcdyn.nn.Callback</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer</span></code></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.call"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.call()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.compute_output_shape"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.compute_output_shape()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.__call__"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.__call__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.activity_regularizer"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.activity_regularizer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.add_loss"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.add_loss()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.add_metric"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.add_metric()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.add_update"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.add_update()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.add_variable"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.add_variable()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.add_weight"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.add_weight()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.build"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.build()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.build_from_config"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.build_from_config()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.compute_dtype"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.compute_dtype</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.compute_mask"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.compute_mask()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.compute_output_signature"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.compute_output_signature()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.count_params"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.count_params()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.dtype"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.dtype</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.dtype_policy"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.dtype_policy</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.dynamic"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.dynamic</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.finalize_state"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.finalize_state()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.from_config"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.from_config()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.get_build_config"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.get_build_config()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.get_config"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.get_config()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.get_input_at"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.get_input_at()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.get_input_mask_at"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.get_input_mask_at()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.get_input_shape_at"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.get_input_shape_at()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.get_output_at"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.get_output_at()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.get_output_mask_at"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.get_output_mask_at()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.get_output_shape_at"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.get_output_shape_at()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.get_weights"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.get_weights()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.inbound_nodes"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.inbound_nodes</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.input"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.input</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.input_mask"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.input_mask</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.input_shape"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.input_shape</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.input_spec"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.input_spec</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.load_own_variables"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.load_own_variables()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.losses"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.losses</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.metrics"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.metrics</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.name"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.name</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.name_scope"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.name_scope</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.non_trainable_variables"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.non_trainable_variables</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.non_trainable_weights"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.non_trainable_weights</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.outbound_nodes"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.outbound_nodes</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.output"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.output</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.output_mask"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.output_mask</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.output_shape"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.output_shape</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.save_own_variables"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.save_own_variables()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.set_weights"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.set_weights()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.submodules"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.submodules</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.supports_masking"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.supports_masking</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.trainable_variables"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.trainable_variables</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.trainable_weights"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.trainable_weights</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.variable_dtype"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.variable_dtype</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.variables"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.variables</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.weights"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.weights</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcdyn.nn.BundleMeanLayer.with_name_scope"><code class="docutils literal notranslate"><span class="pre">BundleMeanLayer.with_name_scope()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Erick Matsen
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2022, Erick Matsen.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

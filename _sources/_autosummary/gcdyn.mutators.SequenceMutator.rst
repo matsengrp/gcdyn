@@ -16,6 +16,8 @@ gcdyn.mutators.SequenceMutator
    .. autosummary::
       :nosignatures:
    
+      ~SequenceMutator.check_node
+      ~SequenceMutator.cleanup
       ~SequenceMutator.logprob
       ~SequenceMutator.mutate
       ~SequenceMutator.prob
@@ -28,6 +30,6 @@ gcdyn.mutators.SequenceMutator
 
    .. autosummary::
    
-      ~SequenceMutator.mutated_attrs
+      ~SequenceMutator.node_attrs
    
    

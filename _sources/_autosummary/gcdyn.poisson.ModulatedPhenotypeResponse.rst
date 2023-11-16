@@ -16,6 +16,7 @@ gcdyn.poisson.ModulatedPhenotypeResponse
    .. autosummary::
       :nosignatures:
    
+      ~ModulatedPhenotypeResponse.cleanup
       ~ModulatedPhenotypeResponse.waiting_time_logsf
       ~ModulatedPhenotypeResponse.waiting_time_rv
       ~ModulatedPhenotypeResponse.Λ

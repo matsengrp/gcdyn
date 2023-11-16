@@ -16,6 +16,7 @@ gcdyn.poisson.SoftReluResponse
    .. autosummary::
       :nosignatures:
    
+      ~SoftReluResponse.cleanup
       ~SoftReluResponse.waiting_time_logsf
       ~SoftReluResponse.waiting_time_rv
       ~SoftReluResponse.Λ

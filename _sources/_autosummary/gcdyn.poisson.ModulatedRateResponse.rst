@@ -16,6 +16,7 @@ gcdyn.poisson.ModulatedRateResponse
    .. autosummary::
       :nosignatures:
    
+      ~ModulatedRateResponse.cleanup
       ~ModulatedRateResponse.waiting_time_logsf
       ~ModulatedRateResponse.waiting_time_rv
       ~ModulatedRateResponse.Λ

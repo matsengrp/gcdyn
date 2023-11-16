@@ -16,6 +16,7 @@ gcdyn.mutators.KdeMutator
    .. autosummary::
       :nosignatures:
    
+      ~KdeMutator.cleanup
       ~KdeMutator.logprob
       ~KdeMutator.mutate
       ~KdeMutator.prob
@@ -28,6 +29,6 @@ gcdyn.mutators.KdeMutator
 
    .. autosummary::
    
-      ~KdeMutator.mutated_attrs
+      ~KdeMutator.node_attrs
    
    

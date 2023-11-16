@@ -16,6 +16,7 @@ gcdyn.mutators.SequencePhenotypeMutator
    .. autosummary::
       :nosignatures:
    
+      ~SequencePhenotypeMutator.cleanup
       ~SequencePhenotypeMutator.logprob
       ~SequencePhenotypeMutator.mutate
       ~SequencePhenotypeMutator.prob
@@ -28,6 +29,6 @@ gcdyn.mutators.SequencePhenotypeMutator
 
    .. autosummary::
    
-      ~SequencePhenotypeMutator.mutated_attrs
+      ~SequencePhenotypeMutator.node_attrs
    
    
