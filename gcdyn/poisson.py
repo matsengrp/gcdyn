@@ -13,11 +13,11 @@ from collections.abc import Callable
 from abc import ABC, abstractmethod
 from jax.tree_util import register_pytree_node
 from scipy.integrate import quad
-
 import numpy as np
 from numpy import random
 import scipy.special as sp
 
+import gcdyn.utils
 
 # imports that are only used for type hints
 if TYPE_CHECKING:
@@ -74,6 +74,14 @@ class Response(ABC):
         """
         return self.λ(node, 0.0)
 
+    def __eq__(self, other):
+        """Define equality of two Response objects by comparing their parameter
+        dictionaries."""
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+
+        return self._param_dict == other._param_dict
+
     @abstractmethod
     def λ(self, node: bdms.TreeNode, Δt: float) -> float:
         r"""Evaluate the Poisson intensity :math:`\lambda(t+\Delta t)` for a
@@ -113,6 +121,10 @@ class Response(ABC):
             node: The node whose state is accessed to evaluate the response function.
             τ: Poisson intensity measure of a time interval.
         """
+
+    def cleanup(self):
+        """Perform any cleanup required when finishing the simulation of each tree."""
+        pass
 
     def waiting_time_rv(
         self,
@@ -419,8 +431,6 @@ class SequenceContextMutationResponse(HomogeneousResponse):
 
     The mutability needs to be in units of mutations per unit time.
 
-    A ``sequence_context`` node feature is created when nodes are first operated on.
-
     Args:
         mutability: a mapping from local context to mutation rate (mutations per site per unit time)
         mutation_intensity: a scaling factor for the mutability
@@ -432,6 +442,11 @@ class SequenceContextMutationResponse(HomogeneousResponse):
         mutation_intensity: float = 1.0,
     ):
         self.mutability = (mutation_intensity * mutability).to_dict()
+        self.cached_contexts = {}
+
+    def cleanup(self):
+        """Clear cached contexts"""
+        self.cached_contexts.clear()
 
     @property
     def _param_dict(self) -> dict:
@@ -442,7 +457,11 @@ class SequenceContextMutationResponse(HomogeneousResponse):
         self.mutation_intensity = d["mutation_intensity"]
 
     def λ_homogeneous(self, node: bdms.TreeNode) -> float:
-        return sum(self.mutability[context] for context in node.sequence_context)
+        if node.sequence not in self.cached_contexts:
+            self.cached_contexts[node.sequence] = sum(
+                self.mutability[context] for context in gcdyn.utils.node_contexts(node)
+            )
+        return self.cached_contexts[node.sequence]
 
 
 class PhenotypeTimeResponse(Response):

@@ -1,12 +1,9 @@
 r"""BDMS inference."""
 
-from functools import reduce
-
 import ete3
 import jax.numpy as jnp
 import numpy as onp
 import scipy
-import tensorflow as tf
 from diffrax import ODETerm, PIDController, Tsit5, diffeqsolve
 from jax import lax
 
@@ -14,11 +11,7 @@ from jax import lax
 from jax.typing import ArrayLike
 from jaxopt import ScipyBoundedMinimize
 
-from gcdyn import bdms, mutators, poisson, utils
-
-# Pylance can't recognize tf submodules imported the normal way
-keras = tf.keras
-layers = keras.layers
+from gcdyn import mutators, poisson
 
 poisson.set_backend(use_jax=True)
 
@@ -28,221 +21,6 @@ def _select_where(source, selector):
     `selector` with exactly one `True` value."""
 
     return lax.select(selector, source, jnp.zeros_like(source)).sum()
-
-
-class NeuralNetworkModel:
-    """
-    Adapts Voznica et. al (2022) for trees with a state attribute.
-
-    Voznica, J., A. Zhukova, V. Boskova, E. Saulnier, F. Lemoine, M. Moslonka-Lefebvre, and O. Gascuel. “Deep Learning from Phylogenies to Uncover the Epidemiological Dynamics of Outbreaks.” Nature Communications 13, no. 1 (July 6, 2022): 3896. https://doi.org/10.1038/s41467-022-31511-0.
-    """
-
-    def __init__(
-        self,
-        trees: list[ete3.TreeNode],
-        responses: list[list[poisson.Response]],
-        network_layers: list[callable] = None,
-        max_leaf_count: int = 200,
-        ladderize_trees: bool = True,
-    ):
-        """
-        trees: list of `bdms.TreeNode`s
-        responses: 2D sequence, with first dimension corresponding to trees
-                   and second dimension to the Response objects to predict
-                   (Responses that aren't being estimated need not be provided)
-        network_layers: layers for the neural network; "None" will give the default network.
-                        Input shape should be (4, `max_leaf_count`), corresponding to the output of
-                        :py:meth:`encode_tree`. Output should be a vector with length equal to the
-                        number of scalars that parameterize all py:class:`poisson.Response` objects
-                        in a row of the `responses` argument.
-        max_leaf_count: the maximum leaf count across trees
-        ladderize_trees: if trees are already ladderized, set this to `False` to save computing time
-        """
-        num_parameters = sum(len(response._param_dict) for response in responses[0])
-
-        if network_layers is None:
-            print("    using default network layers")
-            network_layers = (
-                # Rotate matrix from (4, max_leaf_count) to (max_leaf_count, 4)
-                lambda x: tf.transpose(x, (0, 2, 1)),
-                layers.Conv1D(filters=50, kernel_size=3, activation="elu"),
-                layers.Conv1D(filters=50, kernel_size=10, activation="elu"),
-                layers.MaxPooling1D(pool_size=10, strides=10),
-                layers.Conv1D(filters=80, kernel_size=10, activation="elu"),
-                layers.GlobalAveragePooling1D(),
-                layers.Dense(64, activation="elu"),
-                layers.Dense(32, activation="elu"),
-                layers.Dense(16, activation="elu"),
-                layers.Dense(8, activation="elu"),
-                layers.Dense(num_parameters, activation="elu"),
-            )
-        elif network_layers == "small":
-            print("    using small network layers")
-            network_layers = (
-                # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
-                lambda x: tf.transpose(x, (0, 2, 1)),
-                layers.Conv1D(filters=25, kernel_size=3, activation="elu"),
-                layers.Conv1D(filters=25, kernel_size=8, activation="elu"),
-                layers.MaxPooling1D(pool_size=10, strides=10),
-                layers.Conv1D(filters=40, kernel_size=8, activation="elu"),
-                layers.GlobalAveragePooling1D(),
-                layers.Dense(32, activation="elu"),
-                layers.Dense(16, activation="elu"),
-                layers.Dense(8, activation="elu"),
-                layers.Dense(num_parameters, activation="elu"),
-            )
-        elif network_layers == "tiny":
-            print("    using tiny network layers")
-            network_layers = (
-                # Rotate matrix from (4, leaf_count) to (leaf_count, 4)
-                lambda x: tf.transpose(x, (0, 2, 1)),
-                layers.Conv1D(filters=25, kernel_size=3, activation="elu"),
-                layers.MaxPooling1D(pool_size=10, strides=10),
-                layers.Conv1D(filters=40, kernel_size=8, activation="elu"),
-                layers.GlobalAveragePooling1D(),
-                layers.Dense(16, activation="elu"),
-                layers.Dense(8, activation="elu"),
-                layers.Dense(num_parameters, activation="elu"),
-            )
-        else:
-            raise Exception(
-                "unhandled network layer specification '%s'" % network_layers
-            )
-
-        inputs = keras.Input(shape=(4, max_leaf_count))
-        outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
-        self.network = keras.Model(inputs=inputs, outputs=outputs)
-        self.network.summary(print_fn=lambda x: print("      %s" % x))
-
-        # Note: the original deep learning model rescales trees, but we don't here
-        # because we should always have the same root to tip height.
-        self.max_leaf_count = max_leaf_count
-
-        if ladderize_trees:
-            for tree in trees:
-                utils.ladderize_tree(tree)
-
-        self.trees = trees
-        self.encoded_trees = onp.stack(
-            [self.encode_tree(tree, self.max_leaf_count) for tree in trees]
-        )
-        self.responses = responses
-
-    @classmethod
-    def encode_tree(
-        cls, tree: bdms.TreeNode, max_leaf_count: int
-    ) -> onp.ndarray[float]:
-        """
-        Returns the "Compact Bijective Ladderized Vector" form of the given
-        ladderized tree.
-
-        The CBLV has been adapted to include the `x` attribute of every node.
-        Thus, in reference to figure 2a (v) in Voznica et. al (2022), two additional
-        rows have been appended: a third row of `x` for the nodes in row 1, and a
-        fourth row of `x` for the nodes in row 2.
-        """
-
-        # See the pytest for this method in `tests/test_deep_learning.py`
-
-        def traverse_inorder(tree):
-            num_children = len(tree.children)
-            assert tree.up is None or num_children in {
-                0,
-                2,
-            }, "Only full binary trees are supported."
-
-            for child in tree.children[: num_children // 2]:
-                yield from traverse_inorder(child)
-
-            yield tree
-
-            for child in tree.children[num_children // 2 :]:
-                yield from traverse_inorder(child)
-
-        assert len(tree.get_leaves()) <= max_leaf_count
-        matrix = onp.zeros((4, max_leaf_count))
-
-        leaf_index = 0
-        ancestor_index = 0
-        previous_ancestor = tree  # the root
-
-        for node in traverse_inorder(tree):
-            if node.is_leaf():
-                matrix[0, leaf_index] = node.t - previous_ancestor.t
-                matrix[2, leaf_index] = node.x
-                leaf_index += 1
-            else:
-                matrix[1, ancestor_index] = node.t
-                matrix[3, ancestor_index] = node.x
-                ancestor_index += 1
-                previous_ancestor = node
-
-        return matrix
-
-    @classmethod
-    def _encode_responses(
-        cls, responses: list[list[poisson.Response]]
-    ) -> onp.ndarray[float]:
-        return onp.array(
-            [
-                onp.hstack([response._flatten()[2] for response in row])
-                for row in responses
-            ]
-        )
-
-    @classmethod
-    def _decode_responses(
-        cls,
-        response_parameters: list[list[float]],
-        example_responses: list[poisson.Response],
-    ) -> list[list[poisson.Response]]:
-        result = []
-
-        for row in response_parameters:
-            responses = []
-            i = 0
-
-            response_structure = [response._flatten() for response in example_responses]
-
-            for (
-                response_cls,
-                param_names,
-                example_param_values,
-            ) in response_structure:
-                param_values = row[i : i + len(example_param_values)]
-                responses.append(response_cls._from_flat(param_names, param_values))
-                i += len(example_param_values)
-
-            result.append(responses)
-
-        return result
-
-    def fit(self, epochs: int = 30):
-        """Trains neural network on given trees and response parameters."""
-
-        response_parameters = self._encode_responses(self.responses)
-
-        self.network.compile(loss="mean_squared_error")
-        self.network.fit(self.encoded_trees, response_parameters, epochs=epochs)
-
-    def predict(
-        self, trees: list[bdms.TreeNode], ladderize_trees: bool = True
-    ) -> list[list[poisson.Response]]:
-        """Returns the Response objects predicted for each tree."""
-
-        if ladderize_trees:
-            for tree in trees:
-                utils.ladderize_tree(tree)
-
-        encoded_trees = onp.stack(
-            [self.encode_tree(tree, self.max_leaf_count) for tree in trees]
-        )
-
-        response_parameters = self.network(encoded_trees)
-
-        return self._decode_responses(
-            response_parameters, example_responses=self.responses[0]
-        )
 
 
 class BirthDeathModel:
@@ -661,7 +439,7 @@ def stadler_full_log_likelihood_scipy(
             raise RuntimeError("tree must be sampled")
 
     # This likelihood requires a discrete type space to be specified
-    assert type(mutator) == mutators.DiscreteMutator
+    assert isinstance(mutator, mutators.DiscreteMutator)
     type_space = onp.array(list(mutator.state_space.keys()))
     assert onp.all(onp.diagonal(mutator.transition_matrix) == 0)
     mutation_probs = mutator.transition_matrix

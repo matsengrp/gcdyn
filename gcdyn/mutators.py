@@ -14,7 +14,9 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm, gaussian_kde
 import ete3
+
 from gcdyn.gpmap import GPMap
+from gcdyn import utils
 
 # NOTE: sphinx is currently unable to present this in condensed form when the sphinx_autodoc_typehints extension is enabled
 from numpy.typing import ArrayLike
@@ -55,12 +57,15 @@ class Mutator(ABC):
 
     @property
     @abstractmethod
-    def mutated_attrs(self) -> Tuple[str]:
-        """Tuple of node attribute names that may be mutated by this
-        mutator."""
+    def node_attrs(self) -> Tuple[str]:
+        """Tuple of node attribute names that need to be propagated to child nodes."""
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({', '.join(f'{key}={value}' for key, value in vars(self).items() if not key.startswith('_'))})"
+
+    def cleanup(self):
+        """Perform any cleanup required when finishing the simulation of each tree."""
+        pass
 
 
 class AttrMutator(Mutator):
@@ -75,7 +80,7 @@ class AttrMutator(Mutator):
         self.attr = attr
 
     @property
-    def mutated_attrs(self) -> Tuple[str]:
+    def node_attrs(self) -> Tuple[str]:
         return (self.attr,)
 
     def logprob(self, node: ete3.TreeNode) -> float:
@@ -230,6 +235,11 @@ class SequenceMutator(AttrMutator):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(attr="sequence")
 
+    def check_node(self, node: ete3.TreeNode):
+        for tattr in self.node_attrs:
+            if not hasattr(node, tattr):
+                raise Exception("required attributed '%s' not found on node" % tattr)
+
     def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
         raise NotImplementedError
 
@@ -248,6 +258,7 @@ class UniformMutator(SequenceMutator):
         node: ete3.TreeNode,
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
+        self.check_node(node)
         alphabet = "ACGT"
         rng = np.random.default_rng(seed)
         sequence = list(node.sequence)
@@ -257,9 +268,8 @@ class UniformMutator(SequenceMutator):
 
 
 class ContextMutator(SequenceMutator):
-    """Class for hotspot-aware mutation model using mutability substitution
-    probabilities expressed in terms of context. Nodes must have a
-    ``sequence_context`` attribute.
+    """Class to mutate a node's sequence using a hotspot-aware mutation model with mutability substitution
+    probabilities expressed in terms of context.
 
     Args:
         mutability: Mutability values for each local nucleotide context.
@@ -274,6 +284,11 @@ class ContextMutator(SequenceMutator):
         super().__init__()
         self.mutability = mutability.to_dict()
         self.substitution = substitution.fillna(0.0).T.to_dict()
+        self.cached_ctx_muts = {}
+
+    def cleanup(self):
+        """Clear cached context mutabilities"""
+        self.cached_ctx_muts.clear()
 
     def mutate(
         self,
@@ -288,39 +303,30 @@ class ContextMutator(SequenceMutator):
             node: node with sequence, consisting of characters ``ACGT``
             seed: See :py:class:`Mutator`.
         """
+        self.check_node(node)
         rng = np.random.default_rng(seed)
-        mutabilities = np.asarray(
-            [self.mutability[context] for context in node.sequence_context]
-        )
+        seq_contexts = utils.node_contexts(node)
+        if node.sequence not in self.cached_ctx_muts:
+            self.cached_ctx_muts[node.sequence] = np.asarray(
+                [self.mutability[context] for context in seq_contexts]
+            )
+        mutabilities = self.cached_ctx_muts[node.sequence]
         i = rng.choice(len(mutabilities), p=mutabilities / mutabilities.sum())
-        context = node.sequence_context[i]
+        context = seq_contexts[i]
         sub_nt = rng.choice(
             list(self.substitution[context].keys()),
             p=list(self.substitution[context].values()),
         )
         node.sequence = node.sequence[:i] + sub_nt + node.sequence[(i + 1) :]
-        # update the modified sequence contexts (assumes they have fixed size)
-        context_size = len(node.sequence_context[i])
-        for pos in range(0, context_size):
-            i_offset = i - context_size // 2 + pos
-            if (
-                0 <= i_offset <= len(node.sequence) - 1
-                and node.sequence_context[i_offset][context_size - pos - 1] != "N"
-            ):
-                node.sequence_context[i_offset] = (
-                    node.sequence_context[i_offset][: (context_size - pos - 1)]
-                    + sub_nt
-                    + node.sequence_context[i_offset][(context_size - pos) :]
-                )
 
     @property
-    def mutated_attrs(self) -> Tuple[str]:
-        return super().mutated_attrs + ("sequence_context",)
+    def node_attrs(self) -> Tuple[str]:
+        return super().node_attrs + ("chain_2_start_idx",)
 
 
 class SequencePhenotypeMutator(AttrMutator):
-    r"""Mutations on a DNA sequence that get translated into a functional
-    phenotype.
+    r"""Class to mutate a node's sequence, and then translate that sequence
+    modification into a modification of the node's phenotype (attribute).
 
     Args:
         sequence_mutator: A SequenceMutator object.
@@ -338,6 +344,10 @@ class SequencePhenotypeMutator(AttrMutator):
         self.sequence_mutator = sequence_mutator
         self.gp_map = gp_map
         super().__init__(attr=attr)
+
+    def cleanup(self):
+        """Clear cached context mutabilities in sequence_mutator"""
+        self.sequence_mutator.cleanup()
 
     def mutate(
         self,
@@ -362,5 +372,5 @@ class SequencePhenotypeMutator(AttrMutator):
         )
 
     @property
-    def mutated_attrs(self) -> Tuple[str]:
-        return (self.attr,) + self.sequence_mutator.mutated_attrs
+    def node_attrs(self) -> Tuple[str]:
+        return (self.attr,) + self.sequence_mutator.node_attrs

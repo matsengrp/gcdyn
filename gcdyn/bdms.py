@@ -28,13 +28,15 @@ with these notable differences:
 from __future__ import annotations
 import ete3
 from ete3.coretype.tree import TreeError
-from gcdyn import mutators, poisson
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from typing import Any, Optional, Union, Literal, Iterator
 import itertools
 import copy
+from collections import defaultdict
+
+from gcdyn import mutators, poisson, utils
 
 
 class TreeNode(ete3.Tree):
@@ -110,7 +112,7 @@ class TreeNode(ete3.Tree):
                 dist=0,
                 name=next(self._name_generator),
             )
-            for attr in mutator.mutated_attrs:
+            for attr in mutator.node_attrs:
                 setattr(child, attr, copy.copy(getattr(self, attr)))
             if birth_mutations:
                 child.event = self._MUTATION_EVENT
@@ -120,7 +122,7 @@ class TreeNode(ete3.Tree):
                     dist=0,
                     name=next(self._name_generator),
                 )
-                for attr in mutator.mutated_attrs:
+                for attr in mutator.node_attrs:
                     setattr(grandchild, attr, copy.copy(getattr(child, attr)))
                 child.add_child(grandchild)
                 yield grandchild
@@ -147,7 +149,7 @@ class TreeNode(ete3.Tree):
             dist=0,
             name=next(self._name_generator),
         )
-        for attr in mutator.mutated_attrs:
+        for attr in mutator.node_attrs:
             setattr(child, attr, copy.copy(getattr(self, attr)))
         self.add_child(child)
         yield child
@@ -203,7 +205,7 @@ class TreeNode(ete3.Tree):
             )
         if init_population > capacity:
             raise ValueError(f"{init_population=} must be less than {capacity=}")
-        for attr in mutator.mutated_attrs:
+        for attr in mutator.node_attrs:
             if not hasattr(self, attr):
                 raise ValueError(
                     f"node {self.name} does not have attribute {attr} specified in mutator"
@@ -240,7 +242,7 @@ class TreeNode(ete3.Tree):
                 dist=0,
                 name=next(self._name_generator),
             )
-            for attr in mutator.mutated_attrs:
+            for attr in mutator.node_attrs:
                 setattr(start_node, attr, copy.copy(getattr(self, attr)))
             self.add_child(start_node)
             active_nodes[start_node.name] = start_node
@@ -293,11 +295,17 @@ class TreeNode(ete3.Tree):
             )
             Δt = min(waiting_time, end_time - current_time)
             current_time += Δt
-            assert current_time <= end_time
+            if (
+                current_time > end_time + 1e-8
+            ):  # 1e-8 is arbitrary, to account for floating point error
+                raise Exception(
+                    "current time %f exceeded end time %f by more than %e"
+                    % (current_time, end_time, 1e-8)
+                )
             for node in active_nodes.values():
                 node.dist += Δt
                 node.t = current_time
-                assert np.isclose(node.dist, node.t - node.up.t)
+                utils.isclose(node.dist, node.t - node.up.t, warn=True)
             if current_time < end_time:
                 event_node = active_nodes[event_node_name]
                 event_node.event = event
@@ -324,7 +332,7 @@ class TreeNode(ete3.Tree):
                 for node in active_nodes.values():
                     node.event = self._SURVIVAL_EVENT
                     n_active_nodes -= 1
-                    assert node.t == end_time
+                    utils.isclose(node.t, end_time, warn=True)
                 assert n_active_nodes == 0
                 active_nodes.clear()
         if verbose:
@@ -335,6 +343,8 @@ class TreeNode(ete3.Tree):
             raise TreeError(
                 f"number of survivors {n_survivors} is less than {min_survivors=}"
             )
+        mutation_response.cleanup()
+        mutator.cleanup()
 
     def _aborted_evolve_cleanup(self) -> None:
         """Remove any children added to the root node during an aborted
@@ -532,3 +542,58 @@ class TreeNode(ete3.Tree):
             plt.savefig(cbar_file)
 
         return super().render(*args, **kwargs)
+
+
+def sample_trees(
+    n,
+    init_x=0,
+    seed=None,
+    print_info=True,
+    extant_sampling_probability=1,
+    extinct_sampling_probability=1,
+    **evolve_kwargs,
+):
+    r"""Returns a sequence of n simulated trees.
+
+    Args:
+        n: Number of trees to evolve.
+        init_x: Phenotype of the root node of each tree.
+        seed: A seed to initialize the random number generation.
+              If ``None``, then fresh, unpredictable entropy will be pulled from the OS.
+              If an ``int``, then it will be used to derive the initial state.
+              If a :py:class:`numpy.random.Generator`, then it will be used directly.
+        print_info: Whether to print a summary statistic of the tree sizes.
+        extant_sampling_probability: To be passed to :py:meth:`TreeNode.sample_survivors` as argument `p`.
+        kwargs: Keyword arguments passed to :py:meth:`TreeNode.evolve`.
+    """
+
+    rng = np.random.default_rng(seed)
+
+    trees = []
+    encountered_errors = defaultdict(int)
+
+    while len(trees) != n:
+        try:
+            tree = TreeNode()
+            tree.x = init_x
+            tree.evolve(seed=rng, **evolve_kwargs)
+            tree.sample_survivors(p=extant_sampling_probability, seed=rng)
+            trees.append(tree)
+        except TreeError as err:  # not enough survivors
+            encountered_errors[str(err)] += 1
+            continue
+
+    if print_info:
+        if encountered_errors:
+            for error, count in encountered_errors.items():
+                print("Notice: obtained error", error, count, "times.")
+
+        print(
+            "Success: average of",
+            sum(len(list(tree.traverse())) for tree in trees) / len(trees),
+            "nodes per tree, over",
+            len(trees),
+            "trees.",
+        )
+
+    return tuple(trees)

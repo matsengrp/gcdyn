@@ -4,9 +4,9 @@ Various things relevant for the GC replay experiment.
 import os
 import sys
 import pandas as pd
-from typing import List, Dict
+from typing import Dict
 
-from gcdyn import utils
+from gcdyn import utils  # noqa: F401 NOTE this import is used to get gcdyn_data_dir
 
 NAIVE_SEQUENCE = "GAGGTGCAGCTTCAGGAGTCAGGACCTAGCCTCGTGAAACCTTCTCAGACTCTGTCCCTCACCTGTTCTGTCACTGGCGACTCCATCACCAGTGGTTACTGGAACTGGATCCGGAAATTCCCAGGGAATAAACTTGAGTACATGGGGTACATAAGCTACAGTGGTAGCACTTACTACAATCCATCTCTCAAAAGTCGAATCTCCATCACTCGAGACACATCCAAGAACCAGTACTACCTGCAGTTGAATTCTGTGACTACTGAGGACACAGCCACATATTACTGTGCAAGGGACTTCGATGTCTGGGGCGCAGGGACCACGGTCACCGTCTCCTCAGACATTGTGATGACTCAGTCTCAAAAATTCATGTCCACATCAGTAGGAGACAGGGTCAGCGTCACCTGCAAGGCCAGTCAGAATGTGGGTACTAATGTAGCCTGGTATCAACAGAAACCAGGGCAATCTCCTAAAGCACTGATTTACTCGGCATCCTACAGGTACAGTGGAGTCCCTGATCGCTTCACAGGCAGTGGATCTGGGACAGATTTCACTCTCACCATCAGCAATGTGCAGTCTGAAGACTTGGCAGAGTATTTCTGTCAGCAATATAACAGCTATCCTCTCACGTTCGGCTCGGGGACTAAGCTAGAAATAAAA"
 """The naive sequence used in the GC replay experiment."""
@@ -14,50 +14,55 @@ NAIVE_SEQUENCE = "GAGGTGCAGCTTCAGGAGTCAGGACCTAGCCTCGTGAAACCTTCTCAGACTCTGTCCCTCAC
 CHAIN_2_START_IDX = 336
 """The index of the first nucleotide of the light chain in the naive sequence."""
 
-gcdyn_data_dir = os.path.join(os.path.dirname(sys.modules["gcdyn"].__file__), "data")
+gcdyn_data_dir = os.path.join(
+    os.path.dirname(sys.modules["gcdyn"].__file__), "data"
+)  # NOTE uses utils import
 
 
-def mutability(file: str = "MK_RS5NF_mutability.csv") -> pd.Series:
+def mutability(fname: str = "MK_RS5NF_mutability.csv") -> pd.Series:
     """The mutability of each position in the naive sequence.
 
     Args:
-        file: The file to read the mutability from.
+        fname: The file to read the mutability from.
     """
-    return pd.read_csv(os.path.join(gcdyn_data_dir, file), index_col=0).squeeze(
+    return pd.read_csv(os.path.join(gcdyn_data_dir, fname), index_col=0).squeeze(
         "columns"
     )
 
 
-def substitution(file: str = "MK_RS5NF_substitution.csv") -> pd.DataFrame:
+def substitution(fname: str = "MK_RS5NF_substitution.csv") -> pd.DataFrame:
     """The substitution matrix for the naive sequence.
 
     Args:
-        file: The file to read the substitution matrix from.
+        fname: The file to read the substitution matrix from.
     """
-    return pd.read_csv(os.path.join(gcdyn_data_dir, file), index_col=0)
-
-
-def seq_to_contexts(seq) -> List[str]:
-    """Convert a replay BCR sequence to a list of 5-mer contexts.
-
-    Args:
-        seq: The sequence to convert.
-    """
-    return utils.padded_fivemer_contexts_of_paired_sequences(seq, CHAIN_2_START_IDX)
+    return pd.read_csv(os.path.join(gcdyn_data_dir, fname), index_col=0)
 
 
 def dms(
-    file: str = "https://media.githubusercontent.com/media/jbloomlab/Ab-CGGnaive_DMS/main/results/final_variant_scores/final_variant_scores.csv",
+    fname: str = "https://media.githubusercontent.com/media/jbloomlab/Ab-CGGnaive_DMS/main/results/final_variant_scores/final_variant_scores.csv",
+    cache_fname: str = os.path.dirname(os.path.realpath(__file__))
+    + "/final_variant_scores.csv",
+    debug: bool = False,
 ) -> Dict[str, pd.DataFrame]:
     """The DMS data for the GC replay experiment.
 
     Args:
-        file: The file to read the DMS data from.
+        fname: The file to read the DMS data from.
+        cache_fname: local path to which to copy file from <fname>. If present, we use this.
 
     Returns:
         A dictionary with the DMS data for each of the three phenotypes.
     """
-    dms_df = pd.read_csv(file, index_col="mutation")
+    if os.path.exists(cache_fname):
+        if debug:
+            print("  using existing dms cache file %s" % cache_fname)
+        fname = cache_fname
+    dms_df = pd.read_csv(fname, index_col="mutation")
+    if not os.path.exists(cache_fname):
+        if debug:
+            print("  caching dms info to %s" % cache_fname)
+        dms_df.to_csv(cache_fname, sep=",")
     # remove linker sites
     dms_df = dms_df[dms_df.chain != "link"]
 

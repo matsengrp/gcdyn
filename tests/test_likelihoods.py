@@ -229,7 +229,7 @@ class TestLikelihoods(unittest.TestCase):
     def test_full_tree(self):
         """A fully grown tree."""
 
-        trees = utils.sample_trees(n=1, t=2, init_x=1, **self.parameter_dict, seed=10)
+        trees = bdms.sample_trees(n=1, t=2, init_x=1, **self.parameter_dict, seed=10)
 
         self.compare_models(trees[0])
 

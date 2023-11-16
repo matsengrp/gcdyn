@@ -22,6 +22,12 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires="==3.9.*",
+    entry_points={
+        'console_scripts': [
+            'gcd-dl-infer = scripts.dl_infer:main',
+            'gcd-simulate = scripts.multi_simulation:main',
+        ],
+    },
     install_requires=[
         "ete3",
         "matplotlib",
@@ -32,6 +38,9 @@ setup(
         "biopython",
         "diffrax",
         "tensorflow",
+        "scikit-learn",
+        "colored-traceback",
+        "sphinx-argparse",
     ],
     extras_require={
         "PyQt5": [

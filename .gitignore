@@ -168,3 +168,5 @@ _ignore
 *.svg
 
 .DS_Store
+/experiments/final_variant_scores.csv
+/prof.out
