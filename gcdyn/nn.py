@@ -153,8 +153,8 @@ class NeuralNetworkModel:
             layers.TimeDistributed(
                 layers.Conv1D(filters=40, kernel_size=4, activation=actfn)
             ),
-            layers.TimeDistributed(layers.GlobalAveragePooling1D()),
-            BundleMeanLayer(),
+            layers.TimeDistributed(layers.GlobalAveragePooling1D()),  # one number for each filter from the previous layer
+            BundleMeanLayer(),  # combine predictions from all trees in bundle
         ]
         dense_unit_list = [48, 32, 16, 8]
         for idense, n_units in enumerate(dense_unit_list):

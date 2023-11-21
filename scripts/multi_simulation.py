@@ -267,10 +267,13 @@ def choose_params(args, pcounts):
         params[pname] = choose_val(args, pname, extra_bounds=extra_bounds)
         add_pval(pcounts, pname, params[pname])
     print(
-        "    chose new parameter values: %s"
-        % "  ".join(
+        "    chose new parameter values%s: %s"
+        % (
+            '' if args.simu_bundle_size is None else ' (for next bundle of size %d)' % args.simu_bundle_size,
+            "  ".join(
             "%s %s" % (p, ("%d" if p == "time_to_sampling" else "%.2f") % v)
             for p, v in sorted(params.items())
+        )
         )
     )
     return params
@@ -443,7 +446,7 @@ def get_parser():
     )
     parser.add_argument(
         "--n-max-tries",
-        default=10,
+        default=100,
         type=int,
         help="Number of times to retry simulation if it fails due to reaching either the min or max number of leaves.",
     )
@@ -464,7 +467,7 @@ def get_parser():
         "--simu-bundle-size",
         default=1,
         type=int,
-        help="By default, we choose a new set of parameters for each tree. If this arg is set, once we've chosen a set of parameter values, we simulate this many trees with those values.",
+        help="By default, we choose a new set of parameters for each tree. If this arg is set, once we've chosen a set of parameter values, we instead simulate this many trees with those same values before choosing another set.",
     )
     parser.add_argument("--min-survivors", default=100, type=int)
     parser.add_argument("--carry-cap", default=300, type=int)
@@ -553,6 +556,11 @@ def get_parser():
         help="If set (and --n-sub-procs is set), only run this many sub procs at a time (e.g. to conserve memory).",
     )
     parser.add_argument(
+        "--dry-run",
+        action='store_true',
+        help="If --n-sub-procs is set, don\'t actually run the subprocess, instead just print the commands that would be run",
+    )
+    parser.add_argument(
         "--itrial-start",
         type=int,
         default=0,
@@ -626,17 +634,17 @@ def run_sub_procs(args):
     ):  # make sure that all chunks of trees with same parameters are of same length, i.e. that last chunk isn't smaller (especially important if this is a subproc whose output will be smashed together with others)
         if n_per_proc % args.simu_bundle_size != 0:
             raise Exception(
-                "--n-trees-per-param-set %d has to evenly divide N trees per proc %d ( = --n-trials / --n-sub-procs = %d / %d), but got remainder %d"
+                "N trees per proc %d ( = --n-trials / --n-sub-procs = %d / %d) has to be evenly divisible by --simu-bundle-size %d, but got remainder %d"
                 % (
-                    args.simu_bundle_size,
                     n_per_proc,
                     args.n_trials,
                     args.n_sub_procs,
+                    args.simu_bundle_size,
                     n_per_proc % args.simu_bundle_size,
                 )
             )
         print(
-            "      bundling %d trees per set of parameter values (%d bundles per sub proc)"
+            "      making bundles of %d trees with same parameters (%d bundles per sub proc)"
             % (args.simu_bundle_size, n_per_proc / args.simu_bundle_size)
         )
     for iproc in range(args.n_sub_procs):
@@ -669,6 +677,8 @@ def run_sub_procs(args):
         cmd_str = " ".join(clist)
         print("      %s %s" % (utils.color("red", "run"), cmd_str))
         sys.stdout.flush()
+        if args.dry_run:
+            continue
         logfname = "%s/simu.log" % subdir
         if os.path.exists(logfname):
             subprocess.check_call(
@@ -681,6 +691,9 @@ def run_sub_procs(args):
         procs.append(subprocess.Popen(cmd_str, env=os.environ, shell=True))
         if args.n_max_procs is not None:
             utils.limit_procs(procs, args.n_max_procs)
+    if args.dry_run:
+        print('  --dry-run: exiting')
+        return
     while procs.count(None) != len(procs):  # we set each proc to None when it finishes
         for iproc in range(len(procs)):
             if procs[iproc] is None:  # already finished
@@ -698,7 +711,8 @@ def run_sub_procs(args):
         sys.stdout.flush()
         time.sleep(0.01 / max(1, len(procs)))
     print("    writing merged files to %s" % args.outdir)
-    print("        N files   time (s)  memory %   ftype")
+    print("        N files  N trees  time (s)  memory %   ftype")
+    missing_trees = None
     for ftype in encode.final_ofn_strs:
         ofn = outfn(args, ftype, None)
         fnames = [
@@ -706,6 +720,7 @@ def run_sub_procs(args):
             for i in range(args.n_sub_procs)
         ]
         start = time.time()
+        n_total_trees = ''
         if ftype in ["seqs", "trees", "leaf-meta", "summary-stats"]:
             if ftype in ["leaf-meta", "summary-stats"]:
                 cmds = [
@@ -716,7 +731,12 @@ def run_sub_procs(args):
                 cmds = ["cat %s >%s" % (" ".join(fnames), ofn)]
             for cmd in cmds:
                 subprocess.check_call(cmd, shell=True)
+            if ftype == 'trees':
+                n_total_trees = int(subprocess.check_output('wc -l %s | cut -d\' \' -f1' % ofn, shell=True))
         elif ftype in ["encoded-trees"]:
+            elists = [encode.read_trees(fn) for fn in fnames]
+            n_total_trees = sum(len(l) for l in elists)
+            missing_trees = [n_per_proc - len(l) for l in elists]
             all_etrees = [e for fn in fnames for e in encode.read_trees(fn)]
             encode.write_trees(ofn, all_etrees)
         elif ftype in ["responses"]:
@@ -724,19 +744,23 @@ def run_sub_procs(args):
             for fn in fnames:
                 with open(fn, "rb") as rfile:
                     all_responses += pickle.load(rfile)
+            n_total_trees = len(all_responses)
             with open(ofn, "wb") as rfile:
                 dill.dump(all_responses, rfile)
         else:
             raise Exception("unexpected file type %s" % ftype)
         print(
-            "         %3d      %5.2f   %7.2f      %s"
+            "         %3d %9s    %5.2f   %7.2f      %s"
             % (
                 len(fnames),
+                str(n_total_trees),
                 time.time() - start,
                 100 * utils.memory_usage_fraction(),
                 ftype,
             )
         )
+    if any(m > 0 for m in missing_trees):
+        print('    %s missing %d total trees over %d procs: %s' % (utils.color('yellow', 'warning'), sum(missing_trees), args.n_sub_procs, ' '.join(utils.color('red' if m>0 else None, str(m)) for m in missing_trees)))
     if args.make_plots:
         print("  note: can't make plots in main process when --n-sub-procs is set")
 
@@ -780,6 +804,7 @@ def main():
         set_test_args(args)
     if args.n_sub_procs is not None:
         run_sub_procs(args)
+        print("    total simulation time: %.1f sec" % (time.time() - start))
         sys.exit(0)
 
     assert args.death_value >= 0
