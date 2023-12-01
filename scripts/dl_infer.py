@@ -277,44 +277,23 @@ def get_parser():
     parser = argparse.ArgumentParser(
         formatter_class=MultiplyInheritedFormatter, description=helpstr
     )
-    parser.add_argument(
-        "--indir",
-        required=True,
-        help="input directory with gcdyn simulation output (uses encoded trees .npy, summary stats .csv, and response .pkl files)",
-    )
+    # fmt: off
+    parser.add_argument( "--indir", required=True, help="input directory with gcdyn simulation output (uses encoded trees .npy, summary stats .csv, and response .pkl files)", )
     parser.add_argument("--outdir", required=True, help="output directory")
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--bundle-size", type=int, default=50)
     parser.add_argument("--dropout-rate", type=float, default=0)
     parser.add_argument("--learning-rate", type=float, default=0.001)
     parser.add_argument("--ema-momentum", type=float, default=0.99)
-    parser.add_argument(
-        "--train-frac",
-        type=float,
-        default=0.8,
-        help="train on this fraction of the trees",
-    )
-    parser.add_argument(
-        "--validation-split",
-        type=float,
-        default=0.1,
-        help="fraction of training sample to tell keras to hold out for validation during training",
-    )
-    parser.add_argument(
-        "--params-to-predict",
-        default=["xscale", "xshift"],
-        nargs="+",
-        choices=["xscale", "xshift", "yscale"] + [k for k in sum_stat_scaled],
-    )
-    parser.add_argument(
-        "--test",
-        action="store_true",
-        help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly",
-    )
+    parser.add_argument( "--train-frac", type=float, default=0.8, help="train on this fraction of the trees")
+    parser.add_argument( "--validation-split", type=float, default=0.1, help="fraction of training sample to tell keras to hold out for validation during training")
+    parser.add_argument( "--params-to-predict", default=["xscale", "xshift"], nargs="+", choices=["xscale", "xshift", "yscale"] + [k for k in sum_stat_scaled])
+    parser.add_argument( "--test", action="store_true", help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly")
     parser.add_argument("--random-seed", default=0, type=int, help="random seed")
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--use-trivial-encoding", action="store_true")
     parser.add_argument("--dont-scale-params", action="store_true")
+    # fmt: on
     return parser
 
 

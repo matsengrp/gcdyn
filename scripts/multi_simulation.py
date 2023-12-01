@@ -35,27 +35,11 @@ def print_final_response_vals(tree, birth_resp, death_resp, final_time):
         xvals += txv
         bvals += tbv
         dvals += tdv
-        print(
-            "      %3d   %4d     %5.2f %5.2f  %5.2f %5.2f   %6.3f %6.3f"
-            % (
-                tval,
-                len(txv),
-                min(txv),
-                max(txv),
-                min(tbv),
-                max(tbv),
-                min(tdv),
-                max(tdv),
-            )
-        )
-    print("             mean      min       max")
-    print(
-        "       x   %6.2f    %6.2f    %6.2f" % (np.mean(xvals), min(xvals), max(xvals))
-    )
-    print(
-        "     birth %6.2f    %6.2f    %6.2f" % (np.mean(bvals), min(bvals), max(bvals))
-    )
-    print("     death %7.3f   %7.3f   %7.3f" % (np.mean(dvals), min(dvals), max(dvals)))
+        print("      %3d   %4d     %5.2f %5.2f  %5.2f %5.2f   %6.3f %6.3f" % (tval, len(txv), min(txv), max(txv), min(tbv), max(tbv), min(tdv), max(tdv)))  # fmt: skip
+    print("             mean      min       max")  # fmt: skip
+    print("       x   %6.2f    %6.2f    %6.2f" % (np.mean(xvals), min(xvals), max(xvals)))  # fmt: skip
+    print("     birth %6.2f    %6.2f    %6.2f" % (np.mean(bvals), min(bvals), max(bvals)))  # fmt: skip
+    print("     death %7.3f   %7.3f   %7.3f" % (np.mean(dvals), min(dvals), max(dvals)))  # fmt: skip
 
 
 # ----------------------------------------------------------------------------------------
@@ -421,6 +405,7 @@ def check_memory(itrial, max_frac=0.03):
 
 
 def get_parser():
+    # fmt: off
     helpstr = """
     Simulate B cell trees in germinal centers using the birth-death-mutation model.
     Example usage that samples parameter values from within ranges:
@@ -429,165 +414,44 @@ def get_parser():
         gcd-simulate --debug 1 --outdir <outdir> --carry-cap 150 --time-to-sampling-values 10 --n-trials 100 --n-sub-procs 10
 
     """
-
-    class MultiplyInheritedFormatter(
-        argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter
-    ):
+    class MultiplyInheritedFormatter(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
         pass
-
-    parser = argparse.ArgumentParser(
-        formatter_class=MultiplyInheritedFormatter, description=helpstr
-    )
-    parser.add_argument(
-        "--n-seqs", default=70, type=int, help="Number of sequences to observe"
-    )
-    parser.add_argument(
-        "--n-trials", default=51, type=int, help="Number of trials/GCs to simulate"
-    )
-    parser.add_argument(
-        "--n-max-tries",
-        default=100,
-        type=int,
-        help="Number of times to retry simulation if it fails due to reaching either the min or max number of leaves.",
-    )
-    parser.add_argument(
-        "--time-to-sampling-values",
-        default=[20],
-        nargs="+",
-        type=int,
-        help="List of values from which to choose for time to sampling.",
-    )
-    parser.add_argument(
-        "--time-to-sampling-range",
-        nargs="+",
-        type=int,
-        help="Pair of values (min/max) between which to choose at uniform random the time to sampling for each tree. Overrides --time-to-sampling-values.",
-    )
-    parser.add_argument(
-        "--simu-bundle-size",
-        default=1,
-        type=int,
-        help="By default, we choose a new set of parameters for each tree. If this arg is set, once we've chosen a set of parameter values, we instead simulate this many trees with those same values before choosing another set.",
-    )
+    parser = argparse.ArgumentParser(formatter_class=MultiplyInheritedFormatter, description=helpstr)
+    parser.add_argument("--n-seqs", default=70, type=int, help="Number of sequences to observe")
+    parser.add_argument("--n-trials", default=51, type=int, help="Number of trials/GCs to simulate")
+    parser.add_argument("--n-max-tries", default=100, type=int, help="Number of times to retry simulation if it fails due to reaching either the min or max number of leaves.")
+    parser.add_argument("--time-to-sampling-values", default=[20], nargs="+", type=int, help="List of values from which to choose for time to sampling.")
+    parser.add_argument("--time-to-sampling-range", nargs="+", type=int, help="Pair of values (min/max) between which to choose at uniform random the time to sampling for each tree. Overrides --time-to-sampling-values.")
+    parser.add_argument("--simu-bundle-size", default=1, type=int, help="By default, we choose a new set of parameters for each tree. If this arg is set, once we've chosen a set of parameter values, we instead simulate this many trees with those same values before choosing another set.")
     parser.add_argument("--min-survivors", default=100, type=int)
     parser.add_argument("--carry-cap", default=300, type=int)
-    parser.add_argument(
-        "--capacity-method",
-        default="birth",
-        choices=["birth", "death", "hard", None],
-        help="see bdms.evolve() docs. Note that 'death' often involves a ton of churn, which makes for very slow simulations.",
-    )
+    parser.add_argument("--capacity-method", default="birth", choices=["birth", "death", "hard", None], help="see bdms.evolve() docs. Note that 'death' often involves a ton of churn, which makes for very slow simulations.")
     parser.add_argument("--seed", default=0, type=int, help="random seed")
     parser.add_argument("--outdir", default=os.getcwd())
-    parser.add_argument(
-        "--birth-response",
-        default="sigmoid",
-        choices=["constant", "soft-relu", "sigmoid"],
-        help="birth rate response function",
-    )
+    parser.add_argument("--birth-response", default="sigmoid", choices=["constant", "soft-relu", "sigmoid"], help="birth rate response function")
     # parser.add_argument('--birth-value', default=0.5, type=float, help='value (parameter) for constant birth response')
-    parser.add_argument(
-        "--death-value",
-        default=0.1,
-        type=float,
-        help="value (parameter) for constant death response",
-    )
-    parser.add_argument(
-        "--xscale-values",
-        default=[2],
-        nargs="+",
-        type=float,
-        help="list of birth response xscale parameter values from which to choose",
-    )
-    parser.add_argument(
-        "--xshift-values",
-        default=[-2.5],
-        nargs="+",
-        type=float,
-        help="list of birth response xshift parameter values from which to choose",
-    )
-    parser.add_argument(
-        "--yscale-values",
-        default=[1],
-        nargs="+",
-        type=float,
-        help="list of birth response yscale parameter values from which to choose",
-    )
-    parser.add_argument(
-        "--xscale-range",
-        nargs="+",
-        type=float,
-        help="Pair of values (min/max) between which to choose at uniform random the birth response xscale parameter for each tree. Overrides --xscale-values. Suggest 0.5 5",
-    )
-    parser.add_argument(
-        "--xshift-range",
-        nargs="+",
-        type=float,
-        help="Pair of values (min/max) between which to choose at uniform random the birth response xshift parameter for each tree. Overrides --xshift-values. Suggest -0.5 3",
-    )
-    parser.add_argument(
-        "--yscale-range",
-        nargs="+",
-        type=float,
-        help="Pair of values (min/max) between which to choose at uniform random the birth response yscale parameter for each tree. Overrides --yscale-values. Suggest 1 50",
-    )
-    parser.add_argument(
-        "--initial-birth-rate-range",
-        default=[2, 10],
-        nargs="+",
-        type=float,
-        help="Pair of values (min/max) for initial/default/average growth rate (i.e. when affinity/x=0). Used to set --yscale.",
-    )
-    parser.add_argument(
-        "--yshift",
-        default=0,
-        type=float,
-        help="atm this shouldn't (need to, at least) be changed",
-    )
+    parser.add_argument("--death-value", default=0.1, type=float, help="value (parameter) for constant death response")
+    parser.add_argument("--xscale-values", default=[2], nargs="+", type=float, help="list of birth response xscale parameter values from which to choose")
+    parser.add_argument("--xshift-values", default=[-2.5], nargs="+", type=float, help="list of birth response xshift parameter values from which to choose")
+    parser.add_argument("--yscale-values", default=[1], nargs="+", type=float, help="list of birth response yscale parameter values from which to choose")
+    parser.add_argument("--xscale-range", nargs="+", type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response xscale parameter for each tree. Overrides --xscale-values. Suggest 0.5 5")
+    parser.add_argument("--xshift-range", nargs="+", type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response xshift parameter for each tree. Overrides --xshift-values. Suggest -0.5 3")
+    parser.add_argument("--yscale-range", nargs="+", type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response yscale parameter for each tree. Overrides --yscale-values. Suggest 1 50")
+    parser.add_argument("--initial-birth-rate-range", default=[2, 10], nargs="+", type=float, help="Pair of values (min/max) for initial/default/average growth rate (i.e. when affinity/x=0). Used to set --yscale.")
+    parser.add_argument("--yshift", default=0, type=float, help="atm this shouldn't (need to, at least) be changed")
     parser.add_argument("--mutability-multiplier", default=0.68, type=float)
-    parser.add_argument(
-        "--n-sub-procs",
-        type=int,
-        help="If set, the --n-trials are split among this many sub processes (which are recursively run with this script). Note that in terms of random seeds, results will not be identical with/without --n-sub-procs set (since there's no way to synchronize seeds partway through))",
-    )
-    parser.add_argument(
-        "--n-max-procs",
-        type=int,
-        help="If set (and --n-sub-procs is set), only run this many sub procs at a time (e.g. to conserve memory).",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action='store_true',
-        help="If --n-sub-procs is set, don\'t actually run the subprocess, instead just print the commands that would be run",
-    )
-    parser.add_argument(
-        "--itrial-start",
-        type=int,
-        default=0,
-        help="if running sub procs (--n-sub-procs) set this so each sub proc's trial index starts at the proper value",
-    )
-    parser.add_argument(
-        "--debug",
-        type=int,
-        default=0,
-        help="Verbosity level; set to 1 or 2 for more debug output.",
-    )
+    parser.add_argument("--n-sub-procs", type=int, help="If set, the --n-trials are split among this many sub processes (which are recursively run with this script). Note that in terms of random seeds, results will not be identical with/without --n-sub-procs set (since there's no way to synchronize seeds partway through))")
+    parser.add_argument("--n-max-procs", type=int, help="If set (and --n-sub-procs is set), only run this many sub procs at a time (e.g. to conserve memory).")
+    parser.add_argument("--dry-run", action='store_true', help="If --n-sub-procs is set, don\'t actually run the subprocess, instead just print the commands that would be run")
+    parser.add_argument("--itrial-start", type=int, default=0, help="if running sub procs (--n-sub-procs) set this so each sub proc's trial index starts at the proper value")
+    parser.add_argument("--debug", type=int, default=0, help="Verbosity level; set to 1 or 2 for more debug output.")
     parser.add_argument("--overwrite", action="store_true")
-    parser.add_argument(
-        "--dont-run-new-simu",
-        action="store_true",
-        help="by default, if some trees are already there but others are missing, we try to rerun the missing ones; if this is set we instead ignore any missing ones and just merge any that are there",
-    )
-    parser.add_argument(
-        "--test",
-        action="store_true",
-        help="sets some default parameter values that run quickly and successfully, i.e. useful for quick tests",
-    )
+    parser.add_argument("--dont-run-new-simu", action="store_true", help="by default, if some trees are already there but others are missing, we try to rerun the missing ones; if this is set we instead ignore any missing ones and just merge any that are there")
+    parser.add_argument("--test", action="store_true", help="sets some default parameter values that run quickly and successfully, i.e. useful for quick tests")
     parser.add_argument("--make-plots", action="store_true", help="")
-    parser.add_argument(
-        "--n-to-plot", type=int, default=10, help="number of tree slice plots to make"
-    )
+    parser.add_argument("--n-to-plot", type=int, default=10, help="number of tree slice plots to make")
     return parser
+    # fmt: on
 
 
 # ----------------------------------------------------------------------------------------
@@ -644,7 +508,7 @@ def run_sub_procs(args):
                 )
             )
         print(
-            "      making bundles of %d trees with same parameters (%d bundles per sub proc)"
+            "      making bundles of %d trees for each set of parameter values (%d bundles per sub proc)"
             % (args.simu_bundle_size, n_per_proc / args.simu_bundle_size)
         )
     for iproc in range(args.n_sub_procs):
