@@ -111,9 +111,9 @@ def generate_sequences_and_tree(
         )
         return None, None
 
-    fn = None
+    plt_fn = None
     if args.make_plots:
-        fn = utils.plot_tree_slices(
+        plt_fn = utils.plot_tree_slices(
             args.outdir + "/plots/tree-slices", tree, sample_time, itrial
         )
 
@@ -134,7 +134,7 @@ def generate_sequences_and_tree(
 
     set_mut_stats(tree)
 
-    return fn, tree
+    return plt_fn, tree
 
 
 # ----------------------------------------------------------------------------------------
@@ -182,7 +182,7 @@ def choose_val(args, pname, extra_bounds=None):
             # use the more restrictive (larger lo, smaller hi) values
             minv = max(minv, extra_bounds[0])
             maxv = min(maxv, extra_bounds[1])
-        print("    choosing %s within [%.2f, %.2f]" % (pname, minv, maxv))
+        print("        choosing %s within [%.2f, %.2f]" % (pname, minv, maxv))
         if pname == "time_to_sampling":
             return np.random.choice(
                 range(minv, maxv + 1)
@@ -207,7 +207,7 @@ def get_xshift_bounds(
     hi = (
         math.log(ysc_hi / br_lo - 1.0) / xscale if ysc_hi / br_lo > 1 else +float("inf")
     )
-    print("        additional xshift bounds from sigmoid/xscale: %.2f  %.2f" % (lo, hi))
+    print("          additional xshift bounds from sigmoid/xscale: %.2f  %.2f" % (lo, hi))
     return (lo, hi)
 
 
@@ -483,34 +483,17 @@ def set_test_args(args):
 
 # ----------------------------------------------------------------------------------------
 def run_sub_procs(args):
+    # fmt: off
     procs = []
     if args.n_trials % args.n_sub_procs != 0:
-        raise Exception(
-            "--n-trials %d has to be divisible by --n-sub-procs %d, but got remainder %d (otherwise it's too easy to run into issues with bundling)"
-            % (args.n_trials, args.n_sub_procs, args.n_trials % args.n_sub_procs)
-        )
+        raise Exception("--n-trials %d has to be divisible by --n-sub-procs %d, but got remainder %d (otherwise it's too easy to run into issues with bundling)" % (args.n_trials, args.n_sub_procs, args.n_trials % args.n_sub_procs))
     n_per_proc = int(args.n_trials / float(args.n_sub_procs))
-    print(
-        "    starting %d procs with %d events per proc" % (args.n_sub_procs, n_per_proc)
-    )
-    if (
-        args.simu_bundle_size != 1
-    ):  # make sure that all chunks of trees with same parameters are of same length, i.e. that last chunk isn't smaller (especially important if this is a subproc whose output will be smashed together with others)
+    print("    starting %d procs with %d events per proc" % (args.n_sub_procs, n_per_proc))
+    if args.simu_bundle_size != 1:  # make sure that all chunks of trees with same parameters are of same length, i.e. that last chunk isn't smaller (especially important if this is a subproc whose output will be smashed together with others)
         if n_per_proc % args.simu_bundle_size != 0:
-            raise Exception(
-                "N trees per proc %d ( = --n-trials / --n-sub-procs = %d / %d) has to be evenly divisible by --simu-bundle-size %d, but got remainder %d"
-                % (
-                    n_per_proc,
-                    args.n_trials,
-                    args.n_sub_procs,
-                    args.simu_bundle_size,
-                    n_per_proc % args.simu_bundle_size,
-                )
-            )
-        print(
-            "      making bundles of %d trees for each set of parameter values (%d bundles per sub proc)"
-            % (args.simu_bundle_size, n_per_proc / args.simu_bundle_size)
-        )
+            raise Exception("N trees per proc %d ( = --n-trials / --n-sub-procs = %d / %d) has to be evenly divisible by --simu-bundle-size %d, but got remainder %d" % (n_per_proc, args.n_trials, args.n_sub_procs, args.simu_bundle_size, n_per_proc % args.simu_bundle_size))
+        print("      making bundles of %d trees for each set of parameter values (%d bundles per sub proc)" % (args.simu_bundle_size, n_per_proc / args.simu_bundle_size))
+    # fmt: on
     for iproc in range(args.n_sub_procs):
         clist = ["python"] + copy.deepcopy(sys.argv)
         subdir = "%s/iproc-%d" % (args.outdir, iproc)
@@ -631,6 +614,7 @@ def run_sub_procs(args):
 
 # ----------------------------------------------------------------------------------------
 def main():
+    # fmt: off
     git_dir = os.path.dirname(os.path.realpath(__file__)).replace("/scripts", "/.git")
     print(
         "    gcdyn commit: %s"
@@ -640,16 +624,13 @@ def main():
     )
     parser = get_parser()
     args = parser.parse_args()
-    args.use_generated_parameter_bounds = (
-        args.birth_response == "sigmoid"
-        and None not in [args.yscale_range, args.initial_birth_rate_range]
-    )
+    if args.simu_bundle_size != 1 and args.n_trials % args.simu_bundle_size != 0:
+        raise Exception("--n-trials %d not evenly divisible by --simu-bundle-size %d" % (args.n_trials, args.simu_bundle_size))
+    args.use_generated_parameter_bounds = args.birth_response == "sigmoid" and None not in [args.yscale_range, args.initial_birth_rate_range]
     if args.use_generated_parameter_bounds:
         print("    using additional generated parameter bounds")
     else:
-        print(
-            "  note: not using additional generated parameter bounds since at least one of --yscale-range, --initial-birth-rate-range was unset (this may result in lots of failed simulation runs if the initial birth rate is either too small or too large)"
-        )
+        print("  note: not using additional generated parameter bounds since at least one of --yscale-range, --initial-birth-rate-range was unset (this may result in lots of failed simulation runs if the initial birth rate is either too small or too large)")
     # handle args that can have either a list of a few values, or choose from a uniform interval specified with two (min, max) values
     for pname in ["xscale", "xshift", "yscale", "time_to_sampling"]:
         rangevals = getattr(args, pname + "_range")
@@ -700,24 +681,23 @@ def main():
     all_seqs, all_trees = [], []
     n_missing = 0
     rng = np.random.default_rng(seed=args.seed)
-    params, n_times_used, pcounts = (
-        None,
-        0,
-        {},
-    )  # parameter values, and number of trees that we've simulated with these parameter values
+    params, n_times_used, pcounts = None, 0, {}  # parameter values, and number of trees that we've simulated with these parameter values
     all_fns = [[]]  # just for plotting
     for itrial in range(args.itrial_start, args.n_trials):
+        print(utils.color("blue", "trial %d:" % itrial), end=" ")
         check_memory(itrial)
         ofn = outfn(args, None, itrial)
+        if params is None or n_times_used == args.simu_bundle_size:  # first time through loop or start of a new bundle
+            params = choose_params(args, pcounts)  # NOTE make *sure* you always get to this point in the loop (i.e. don't put any continue statements above it)
+            n_times_used = 0
+        n_times_used += 1
         if os.path.exists(ofn) and not args.overwrite:
             print("    output %s already exists, skipping" % ofn)
             pfo = read_dill_file(ofn)
             if args.make_plots:
-                print(
-                    "    note: can't make tree slice plots when reading pickle files (i.e. you need to rm/overwrite to actually rerun the simulation), since we write pruned trees"
-                )
+                print("    note: can't make tree slice plots when reading pickle files (i.e. you need to rm/overwrite to actually rerun the simulation), since we write pruned trees")
             if pfo is None:  # file is screwed up and we want to rerun
-                print("    rerunning")
+                print("    rerunning since pickle file read failed")
             else:
                 add_seqs(all_seqs, itrial, pfo["tree"])
                 add_tree(all_trees, itrial, pfo)
@@ -726,17 +706,8 @@ def main():
             n_missing += 1
             continue
         sys.stdout.flush()
-        if (
-            params is None or n_times_used == args.simu_bundle_size
-        ):  # first time through loop or start of a new bundle
-            params = choose_params(args, pcounts)
-            n_times_used = 0
-        n_times_used += 1
-        birth_resp, death_resp = get_responses(
-            args, params["xscale"], params["xshift"], params["yscale"], pcounts
-        )
-        print(utils.color("blue", "trial %d:" % itrial), end=" ")
-        fn, tree = generate_sequences_and_tree(
+        birth_resp, death_resp = get_responses(args, params["xscale"], params["xshift"], params["yscale"], pcounts)
+        plt_fn, tree = generate_sequences_and_tree(
             args,
             params["time_to_sampling"],
             birth_resp,
@@ -750,7 +721,7 @@ def main():
         if tree is None:
             n_missing += 1
             continue
-        utils.addfn(all_fns, fn)
+        utils.addfn(all_fns, plt_fn)
 
         with open(ofn, "wb") as fp:
             dill.dump(
@@ -820,3 +791,4 @@ def main():
         )
 
     print("    total simulation time: %.1f sec" % (time.time() - start))
+    # fmt: on

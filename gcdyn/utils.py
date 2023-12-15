@@ -16,6 +16,7 @@ import glob
 import time
 import pandas as pd
 import warnings
+import sys
 
 
 def simple_fivemer_contexts(sequence: str):
@@ -328,6 +329,14 @@ def make_dl_plots(
     label_fsize=15,
 ):
     def single_plot(param, smpl):
+        # ----------------------------------------------------------------------------------------
+        def add_mae_text(smp_name, tdf):
+            mae = np.mean([
+                abs(pval - tval)
+                for tval, pval in zip(tdf['%s-truth'%param], tdf['%s-predicted'%param])
+            ])
+            plt.text(0.05, 0.75 if smp_name=='valid' else 0.85, '%s mae: %.4f'%(smp_name, mae), transform=ax.transAxes)
+        # ----------------------------------------------------------------------------------------
         plt.clf()
         df = prdfs[smpl]
         xkey, ykey = ["%s-%s" % (param, vtype) for vtype in ["truth", "predicted"]]
@@ -368,8 +377,10 @@ def make_dl_plots(
                 plt_df = df[: len(df) - int(validation_split * len(df))]
                 vld_df = df[len(df) - int(validation_split * len(df)) :]
                 ax = sns.scatterplot(vld_df, x=xkey, y=ykey, alpha=0.6, color="red")
+                add_mae_text('valid', vld_df)
             ax = sns.scatterplot(plt_df, x=xkey, y=ykey, alpha=0.6)
-            xvals = df[xkey]
+            add_mae_text(smpl, plt_df)
+            xvals = df[xkey]  # use df I think to (in principle) pick up all x values
             plt.plot(
                 [0.95 * min(xvals), 1.05 * max(xvals)],
                 [0.95 * min(xvals), 1.05 * max(xvals)],

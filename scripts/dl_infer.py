@@ -12,6 +12,7 @@ import pandas as pd
 import random
 import csv
 import copy
+import collections
 
 from gcdyn import utils, encode
 
@@ -175,6 +176,36 @@ def write_traintest_samples(args, smpldict):
 
 # ----------------------------------------------------------------------------------------
 def train_and_test(args, start_time):
+    # fmt: off
+    # ----------------------------------------------------------------------------------------
+    def check_bundles(samples, debug=False):
+        rnames = ['birth', 'death']
+        ibund, broken_bundles = -1, []
+        bundle_rates, tree_indices = {n : [] for n in rnames}, []
+        for iresp, (br, dr) in enumerate(zip(samples["birth-responses"], samples["death-responses"])):
+            if iresp % args.bundle_size == 0:
+                for rn in rnames:
+                    if len(bundle_rates[rn]) > 1:
+                        broken_bundles.append(ibund)
+                        print('    %s bundle with index %d (tree indices %d to %d) has multiple %s rates:\n      %s' % (utils.color("yellow", "warning"), ibund, min(tree_indices), max(tree_indices), rn, '\n      '.join(str(r) for r in bundle_rates[rn])))
+                        # print(' '.join(str(i) for i in tree_indices))  # maybe want to print all broken tree indices for deletion by hand
+                bundle_rates['birth'], bundle_rates['death'] = [br], [dr]
+                tree_indices = []
+                ibund += 1
+                if debug:
+                    print('  bundle %d (size %d)' % (ibund, args.bundle_size))
+            tree_indices.append(iresp)
+            if debug:
+                print('      %7d  %s  %s' % (iresp, br, dr))
+            for this_rate, rn in zip([br, dr], rnames):
+                if this_rate != bundle_rates[rn][0]:
+                    if br not in bundle_rates[rn]:
+                        bundle_rates[rn].append(br)
+                    if debug:
+                        print('        %s birth rate not equal to last one' % (utils.color("yellow", "warning")))
+        if len(broken_bundles) > 0:
+            raise Exception('%d broken bundles, see above' % len(broken_bundles))
+    # ----------------------------------------------------------------------------------------
     from gcdyn.nn import NeuralNetworkModel
     from gcdyn.poisson import ConstantResponse
 
@@ -192,14 +223,9 @@ def train_and_test(args, start_time):
         reader = csv.DictReader(sfile)
         for line in reader:
             samples["sstats"].append(line)
-    print(
-        "    read %d trees from %s (%d responses from %s)"
-        % (len(samples["trees"]), tfn, len(pklfo), rfn)
-    )
-    print(
-        "      first response pair:\n        birth: %s\n        death: %s"
-        % (samples["birth-responses"][0], samples["death-responses"][0])
-    )
+    print("    read %d trees from %s (%d responses from %s)" % (len(samples["trees"]), tfn, len(pklfo), rfn))
+    print("      first response pair:\n        birth: %s\n        death: %s" % (samples["birth-responses"][0], samples["death-responses"][0]))
+    check_bundles(samples)
 
     # separate train/test samples
     idxs = get_traintest_indices(args, samples)
@@ -208,10 +234,7 @@ def train_and_test(args, start_time):
         smpldict[smpl] = {
             key: [val[i] for i in idxs[smpl]] for key, val in samples.items()
         }
-    print(
-        "      N trees: %s"
-        % "   ".join("%s %d" % (s, len(smpldict[s]["trees"])) for s in smplist)
-    )
+    print("      N trees: %s" % "   ".join("%s %d" % (s, len(smpldict[s]["trees"])) for s in smplist))
 
     write_traintest_samples(args, smpldict)
 
@@ -241,6 +264,7 @@ def train_and_test(args, start_time):
         dropout_rate=args.dropout_rate,
         learning_rate=args.learning_rate,
         ema_momentum=args.ema_momentum,
+        prebundle_layer_cfg=args.prebundle_layer_cfg,
     )
     model.fit(epochs=args.epochs, validation_split=args.validation_split)
 
@@ -259,6 +283,7 @@ def train_and_test(args, start_time):
     )
 
     print("    total dl inference time: %.1f sec" % (time.time() - start_time))
+    # fmt: on
 
 
 # ----------------------------------------------------------------------------------------
@@ -285,10 +310,11 @@ def get_parser():
     parser.add_argument("--dropout-rate", type=float, default=0)
     parser.add_argument("--learning-rate", type=float, default=0.001)
     parser.add_argument("--ema-momentum", type=float, default=0.99)
-    parser.add_argument( "--train-frac", type=float, default=0.8, help="train on this fraction of the trees")
-    parser.add_argument( "--validation-split", type=float, default=0.1, help="fraction of training sample to tell keras to hold out for validation during training")
-    parser.add_argument( "--params-to-predict", default=["xscale", "xshift"], nargs="+", choices=["xscale", "xshift", "yscale"] + [k for k in sum_stat_scaled])
-    parser.add_argument( "--test", action="store_true", help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly")
+    parser.add_argument("--prebundle-layer-cfg", default='default') #, choices=['default', 'small', 'big', 'huge'])
+    parser.add_argument("--train-frac", type=float, default=0.8, help="train on this fraction of the trees")
+    parser.add_argument("--validation-split", type=float, default=0.1, help="fraction of training sample to tell keras to hold out for validation during training")
+    parser.add_argument("--params-to-predict", default=["xscale", "xshift"], nargs="+", choices=["xscale", "xshift", "yscale"] + [k for k in sum_stat_scaled])
+    parser.add_argument("--test", action="store_true", help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly")
     parser.add_argument("--random-seed", default=0, type=int, help="random seed")
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--use-trivial-encoding", action="store_true")

@@ -90,6 +90,8 @@ class NeuralNetworkModel:
         dropout_rate: float = 0.2,
         learning_rate: float = 0.01,
         ema_momentum: float = 0.99,
+        prebundle_layer_cfg: str = 'default',
+        actfn: str = "elu",
     ):
         """
         encoded_trees: list of encoded trees
@@ -113,10 +115,36 @@ class NeuralNetworkModel:
         self.max_leaf_count = max_leaf_count
         self.training_trees = encoded_trees
         self.responses = responses
+        self.actfn = actfn
+        # fmt: off
+        # various config options for the layers before the bundle mean layer
+        self.pre_bundle_layers = {
+            'small' : [
+                layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
+                layers.GlobalAveragePooling1D(),  # one number for each filter from the previous layer
+            ],
+            'default' : [
+                layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
+                layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
+                layers.MaxPooling1D(pool_size=2, strides=2),  # Downsampling by a factor of 2
+                layers.Conv1D(filters=40, kernel_size=4, activation=actfn),
+                layers.GlobalAveragePooling1D(),  # one number for each filter from the previous layer
+            ],
+            'big' : [
+                layers.Conv1D(filters=50, kernel_size=4, activation=actfn),
+                layers.Conv1D(filters=50, kernel_size=4, activation=actfn),
+                layers.Conv1D(filters=50, kernel_size=4, activation=actfn),
+                layers.MaxPooling1D(pool_size=2, strides=2),  # Downsampling by a factor of 2
+                layers.Conv1D(filters=60, kernel_size=4, activation=actfn),
+                layers.Conv1D(filters=60, kernel_size=4, activation=actfn),
+                layers.GlobalAveragePooling1D(),  # one number for each filter from the previous layer
+            ],
+        }
+        # fmt: on
 
-        self.build_model(dropout_rate, learning_rate, ema_momentum)
+        self.build_model(dropout_rate, learning_rate, ema_momentum, prebundle_layer_cfg=prebundle_layer_cfg)
 
-    def build_model(self, dropout_rate, learning_rate, ema_momentum, actfn="elu"):
+    def build_model(self, dropout_rate, learning_rate, ema_momentum, prebundle_layer_cfg='default'):
         # The TimeDistributed layer wrapper allows us to apply the inner layer (e.g., Conv1D) to each "time step"
         # of the input tensor independently. In our specific context, our data is structured in the format of:
         # (number_of_examples, bundle_size, feature_dim, max_leaf_count). We're essentially treating the
@@ -139,29 +167,15 @@ class NeuralNetworkModel:
             len(response._param_dict) for response in self.responses[0]
         )
 
-        network_layers = [  # if you want to add alternate model layer architectures, do it with subclassing
-            layers.Lambda(lambda x: tf.transpose(x, (0, 1, 3, 2))),
-            layers.TimeDistributed(
-                layers.Conv1D(filters=25, kernel_size=4, activation=actfn)
-            ),
-            layers.TimeDistributed(
-                layers.Conv1D(filters=25, kernel_size=4, activation=actfn)
-            ),
-            layers.TimeDistributed(
-                layers.MaxPooling1D(pool_size=2, strides=2)
-            ),  # Downsampling by a factor of 2
-            layers.TimeDistributed(
-                layers.Conv1D(filters=40, kernel_size=4, activation=actfn)
-            ),
-            layers.TimeDistributed(layers.GlobalAveragePooling1D()),  # one number for each filter from the previous layer
-            BundleMeanLayer(),  # combine predictions from all trees in bundle
-        ]
+        # fmt: off
+        network_layers = [layers.Lambda(lambda x: tf.transpose(x, (0, 1, 3, 2)))]
+        for tlr in self.pre_bundle_layers[prebundle_layer_cfg]:
+            network_layers.append(layers.TimeDistributed(tlr))
+        network_layers.append(BundleMeanLayer())  # combine predictions from all trees in bundle
         dense_unit_list = [48, 32, 16, 8]
         for idense, n_units in enumerate(dense_unit_list):
-            network_layers.append(layers.Dense(n_units, activation=actfn))
-            if (
-                dropout_rate != 0 and idense < len(dense_unit_list) - 1
-            ):  # add a dropout layer after each one except the last
+            network_layers.append(layers.Dense(n_units, activation=self.actfn))
+            if dropout_rate != 0 and idense < len(dense_unit_list) - 1:  # add a dropout layer after each one except the last
                 network_layers.append(layers.Dropout(dropout_rate))
         network_layers.append(layers.Dense(num_parameters))
 
@@ -173,6 +187,7 @@ class NeuralNetworkModel:
             learning_rate=learning_rate, use_ema=True, ema_momentum=ema_momentum
         )
         self.network.compile(loss="mean_squared_error", optimizer=optimizer)
+        # fmt: on
 
     @classmethod
     def _encode_responses(
