@@ -84,9 +84,18 @@ class NeuralNetworkModel:
 
     def __init__(
         self,
-        encoded_trees: list[onp.ndarray],
-        responses: list[list[poisson.Response]],
         bundle_size: int = 50,
+    ):
+        """
+        bundle_size: number of trees to bundle together. The per-bundle mean of predictions is applied to the
+                     convolutional output and then passed to the dense layers.
+        """
+        self.bundle_size = bundle_size
+
+    def build_model(
+        self,
+        training_trees: list[onp.ndarray],
+        responses: list[list[poisson.Response]],
         dropout_rate: float = 0.2,
         learning_rate: float = 0.01,
         ema_momentum: float = 0.99,
@@ -94,16 +103,21 @@ class NeuralNetworkModel:
         actfn: str = "elu",
     ):
         """
-        encoded_trees: list of encoded trees
+        training_trees: list of encoded trees
         responses: list of response objects for each tree, i.e. list of lists of responses, with
-                   first dimension the same length as encoded_trees, and second dimension with length the
+                   first dimension the same length as training_trees, and second dimension with length the
                    number of parameters to predict for each tree. Each response (atm) should just be a constant response
                    with one parameter. (Responses that aren't being estimated need not be provided)
-        bundle_size: number of trees to bundle together. The per-bundle mean of predictions is applied to the
-                     convolutional output and then passed to the dense layers.
         """
+        # fmt: off
+        # The TimeDistributed layer wrapper allows us to apply the inner layer (e.g., Conv1D) to each "time step"
+        # of the input tensor independently. In our specific context, our data is structured in the format of:
+        # (number_of_examples, bundle_size, feature_dim, max_leaf_count). We're essentially treating the
+        # 'bundle_size' dimension as if it were the "time" or "sequence length" dimension. This means that
+        # for every example, the inner layer is applied to each item within a bundle independently.
+
         leaf_counts = set(
-            [len(t[0]) for t in encoded_trees]
+            [len(t[0]) for t in training_trees]
         )  # length of first row in encoded tree
         if len(leaf_counts) != 1:
             raise Exception(
@@ -111,12 +125,16 @@ class NeuralNetworkModel:
                 % " ".join(str(c) for c in leaf_counts)
             )
         max_leaf_count = list(leaf_counts)[0]
-        self.bundle_size = bundle_size
         self.max_leaf_count = max_leaf_count
-        self.training_trees = encoded_trees
+        self.training_trees = training_trees
         self.responses = responses
         self.actfn = actfn
-        # fmt: off
+        print("    building model with bundle size %d (%d training trees in %d bundles): dropout %.2f   learn rate %.4f   momentum %.4f" % (self.bundle_size, len(self.training_trees), len(self.training_trees) / self.bundle_size, dropout_rate, learning_rate, ema_momentum))
+        num_parameters = sum(
+            len(response._param_dict) for response in self.responses[0]
+
+        )
+
         # various config options for the layers before the bundle mean layer
         self.pre_bundle_layers = {
             'small' : [
@@ -140,34 +158,7 @@ class NeuralNetworkModel:
                 layers.GlobalAveragePooling1D(),  # one number for each filter from the previous layer
             ],
         }
-        # fmt: on
 
-        self.build_model(dropout_rate, learning_rate, ema_momentum, prebundle_layer_cfg=prebundle_layer_cfg)
-
-    def build_model(self, dropout_rate, learning_rate, ema_momentum, prebundle_layer_cfg='default'):
-        # The TimeDistributed layer wrapper allows us to apply the inner layer (e.g., Conv1D) to each "time step"
-        # of the input tensor independently. In our specific context, our data is structured in the format of:
-        # (number_of_examples, bundle_size, feature_dim, max_leaf_count). We're essentially treating the
-        # 'bundle_size' dimension as if it were the "time" or "sequence length" dimension. This means that
-        # for every example, the inner layer is applied to each item within a bundle independently.
-
-        print(
-            "    building model with bundle size %d (%d training trees in %d bundles): dropout %.2f   learn rate %.4f   momentum %.4f"
-            % (
-                self.bundle_size,
-                len(self.training_trees),
-                len(self.training_trees) / self.bundle_size,
-                dropout_rate,
-                learning_rate,
-                ema_momentum,
-            )
-        )
-
-        num_parameters = sum(
-            len(response._param_dict) for response in self.responses[0]
-        )
-
-        # fmt: off
         network_layers = [layers.Lambda(lambda x: tf.transpose(x, (0, 1, 3, 2)))]
         for tlr in self.pre_bundle_layers[prebundle_layer_cfg]:
             network_layers.append(layers.TimeDistributed(tlr))
@@ -310,3 +301,8 @@ class NeuralNetworkModel:
         return self._decode_responses(
             predicted_responses, example_responses=self.responses[0]
         )
+
+    def load(self, fname):
+        with keras.utils.custom_object_scope({'BundleMeanLayer': BundleMeanLayer}):
+            self.network = keras.models.load_model(fname)
+

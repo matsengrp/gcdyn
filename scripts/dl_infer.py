@@ -15,6 +15,8 @@ import copy
 import collections
 
 from gcdyn import utils, encode
+from gcdyn.nn import NeuralNetworkModel
+from gcdyn.poisson import ConstantResponse
 
 # ----------------------------------------------------------------------------------------
 sum_stat_scaled = {
@@ -29,66 +31,38 @@ def csvfn(args, smpl):
 
 
 # ----------------------------------------------------------------------------------------
-def scale_vals(args, smpl, pvals, scaler=None, inverse=False, debug=True):
-    """Scale pvals for a single sample to mean 0 and variance 1. To reverse a scaling, pass in the original scaler and set inverse=True"""
-
+# fmt: off
+def scale_vals(args, in_pvals, scaler=None, inverse=False, smpl='', debug=True):
+    """Scale in_pvals for a single sample to mean 0 and variance 1. To reverse a scaling, pass in the original scaler and set inverse=True"""
     # ----------------------------------------------------------------------------------------
     def print_debug(pvals_before, pvals_scaled):
-        def get_lists(
-            pvs,
-        ):  # picks values from rows/columns to get a list of values for each parameter
+        def get_lists(pvs,):  # picks values from rows/columns to get a list of values for each parameter
             return [[plist[ivar] for plist in pvs]]
-
-        def fnstr(
-            pvs, fn
-        ):  # apply fn to each list from get_lists(), returns resulting combined str
+        def fnstr(pvs, fn):  # apply fn to each list from get_lists(), returns resulting combined str
             return " ".join("%7.2f" % fn(vl) for vl in get_lists(pvs))
-
         for ivar, vname in enumerate(args.params_to_predict):
             for dstr, pvs in zip(("before", "after"), (pvals_before, pvals_scaled)):
                 bstr = "   " if dstr != "before" else "      %10s %7s" % (vname, smpl)
-                print(
-                    "%s %s%s %s%s"
-                    % (
-                        bstr,
-                        fnstr(pvs, np.mean),
-                        fnstr(pvs, np.var),
-                        fnstr(pvs, min),
-                        fnstr(pvs, max),
-                    ),
-                    end="" if dstr == "before" else "\n",
-                )
-
+                print("%s %s%s %s%s" % (bstr, fnstr(pvs, np.mean), fnstr(pvs, np.var), fnstr(pvs, min), fnstr(pvs, max), ), end="" if dstr == "before" else "\n")
     # ----------------------------------------------------------------------------------------
-    if debug and smpl == smplist[0]:
-        print(
-            "    %sscaling %d variables: %s"
-            % (
-                "reverse " if inverse else "",
-                len(args.params_to_predict),
-                args.params_to_predict,
-            )
-        )
-        print(
-            "                                  before                             after"
-        )
-        print(
-            "                           mean   var     min   max         mean   var     min   max"
-        )
+    if debug:  # and smpl == smplist[0]:
+        print("    %sscaling %d variables: %s" % ("reverse " if inverse else "", len(args.params_to_predict), args.params_to_predict,))
+        print("                                  before                             after")
+        print("                           mean   var     min   max         mean   var     min   max")
     if scaler is None:
-        scaler = preprocessing.StandardScaler().fit(pvals)
-        # scaler = preprocessing.MinMaxScaler(feature_range=(0, 10)).fit(pvals)
+        scaler = preprocessing.StandardScaler().fit(in_pvals)
+        # scaler = preprocessing.MinMaxScaler(feature_range=(0, 10)).fit(in_pvals)
     if args.dont_scale_params:
-        return copy.copy(pvals), scaler
-    pscaled = scaler.inverse_transform(pvals) if inverse else scaler.transform(pvals)
+        return copy.copy(in_pvals), scaler
+    sc_pvals = scaler.inverse_transform(in_pvals) if inverse else scaler.transform(in_pvals)
     if debug:
-        print_debug(pvals, pscaled)
-    return pscaled, scaler
+        print_debug(in_pvals, sc_pvals)
+    return sc_pvals, scaler
 
 
 # ----------------------------------------------------------------------------------------
 def get_prediction(args, smpl, model, smpldict, scaler):
-    pred_resps = model.predict(smpldict[smpl]["trees"])
+    pred_resps = model.predict(smpldict[smpl]["trees"])  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
     true_resps, true_sstats = [
         smpldict[smpl][tk] for tk in ["birth-responses", "sstats"]
     ]
@@ -107,7 +81,7 @@ def get_prediction(args, smpl, model, smpldict, scaler):
         ]  # mean of each summary stat over trees in each bundle ('tree' is an index, so take min/index of first one)
     assert len(pred_resps) == len(true_resps)
     pvals = [[float(resp.value) for resp in plist] for plist in pred_resps]
-    pscaled, _ = scale_vals(args, smpl, pvals, scaler=scaler, inverse=True)
+    pscaled, _ = scale_vals(args, pvals, smpl=smpl, scaler=scaler, inverse=True)
     dfdata = {
         "%s-%s" % (param, ptype): []
         for param in args.params_to_predict
@@ -115,7 +89,7 @@ def get_prediction(args, smpl, model, smpldict, scaler):
     }
     for tr_resp, prlist, sum_stats in zip(true_resps, pscaled, true_sstats):
         for ip, param in enumerate(args.params_to_predict):
-            dfdata["%s-truth" % param].append(get_param(param, tr_resp, sum_stats))
+            dfdata["%s-truth" % param].append(get_pval(param, tr_resp, sum_stats))
             dfdata["%s-predicted" % param].append(prlist[ip])
     df = pd.DataFrame(dfdata)
     df.to_csv(csvfn(args, smpl))
@@ -148,13 +122,24 @@ def get_traintest_indices(args, samples):
 
 
 # ----------------------------------------------------------------------------------------
-def get_param(pname, bresp, sts):
+def get_pval(pname, bresp, sts):  # get parameter value from response fcn
     if pname == "total_branch_length":
         return float(sts["total_branch_length"])
     elif hasattr(bresp, pname):
         return getattr(bresp, pname)
     else:
         assert False
+
+
+# ----------------------------------------------------------------------------------------
+def get_pvlists(args, samples):  # rearrange + convert response fcn lists to lists of parameter values
+    pvals = [
+        [get_pval(pname, bresp, sts) for pname in args.params_to_predict]
+        for bresp, sts in zip(
+            samples["birth-responses"], samples["sstats"]
+        )
+    ]
+    return pvals
 
 
 # ----------------------------------------------------------------------------------------
@@ -175,8 +160,7 @@ def write_traintest_samples(args, smpldict):
 
 
 # ----------------------------------------------------------------------------------------
-def train_and_test(args, start_time):
-    # fmt: off
+def read_tree_files(args):
     # ----------------------------------------------------------------------------------------
     def check_bundles(samples, debug=False):
         rnames = ['birth', 'death']
@@ -206,9 +190,6 @@ def train_and_test(args, start_time):
         if len(broken_bundles) > 0:
             raise Exception('%d broken bundles, see above' % len(broken_bundles))
     # ----------------------------------------------------------------------------------------
-    from gcdyn.nn import NeuralNetworkModel
-    from gcdyn.poisson import ConstantResponse
-
     # read from various input files
     rfn, tfn, sfn = [
         "%s/%s" % (args.indir, s)
@@ -226,6 +207,12 @@ def train_and_test(args, start_time):
     print("    read %d trees from %s (%d responses from %s)" % (len(samples["trees"]), tfn, len(pklfo), rfn))
     print("      first response pair:\n        birth: %s\n        death: %s" % (samples["birth-responses"][0], samples["death-responses"][0]))
     check_bundles(samples)
+    return samples
+
+
+# ----------------------------------------------------------------------------------------
+def train_and_test(args, start_time):
+    samples = read_tree_files(args)
 
     # separate train/test samples
     idxs = get_traintest_indices(args, samples)
@@ -241,32 +228,24 @@ def train_and_test(args, start_time):
     # handle various scaling/re-encoding stuff
     pscaled, scalers = {}, {}  # scaled parameters and scalers
     for smpl in smplist:
-        pvals = [
-            [get_param(pname, bresp, sts) for pname in args.params_to_predict]
-            for bresp, sts in zip(
-                smpldict[smpl]["birth-responses"], smpldict[smpl]["sstats"]
-            )
-        ]
-        pscaled[smpl], scalers[smpl] = scale_vals(args, smpl, pvals)
-    if (
-        args.use_trivial_encoding
-    ):  # silly encodings for testing that essentially train on the output values
+        pvals = get_pvlists(args, smpldict[smpl])
+        pscaled[smpl], scalers[smpl] = scale_vals(args, pvals, smpl=smpl)
+    if args.use_trivial_encoding:  # silly encodings for testing that essentially train on the output values
         for smpl in smplist:
-            encode.trivialize_encodings(
-                smpldict[smpl]["trees"], pscaled[smpl], noise=True
-            )  # , n_debug=3)
+            encode.trivialize_encodings(smpldict[smpl]["trees"], pscaled[smpl], noise=True)  # , n_debug=3)
 
     # train
-    model = NeuralNetworkModel(
+    model = NeuralNetworkModel(bundle_size=args.bundle_size)
+    model.build_model(
         smpldict["train"]["trees"],
         [[ConstantResponse(v) for v in vlist] for vlist in pscaled["train"]],
-        bundle_size=args.bundle_size,
         dropout_rate=args.dropout_rate,
         learning_rate=args.learning_rate,
         ema_momentum=args.ema_momentum,
         prebundle_layer_cfg=args.prebundle_layer_cfg,
     )
     model.fit(epochs=args.epochs, validation_split=args.validation_split)
+    model.network.save('%s/model.h5' % (args.outdir))
 
     # evaluate/predict
     if not os.path.exists(args.outdir):
@@ -283,7 +262,15 @@ def train_and_test(args, start_time):
     )
 
     print("    total dl inference time: %.1f sec" % (time.time() - start_time))
-    # fmt: on
+
+
+# ----------------------------------------------------------------------------------------
+def infer(args, start_time):
+    samples = read_tree_files(args)
+    pvals = get_pvlists(args, samples)
+    pscaled, scalers = scale_vals(args, pvals)
+    model = NeuralNetworkModel(bundle_size=args.bundle_size)
+    model.load('%s/model.h5' % (args.outdir))
 
 
 # ----------------------------------------------------------------------------------------
@@ -291,7 +278,8 @@ def get_parser():
     helpstr = """
     Infer affinity response function on gcdyn simulation using deep learning neural networks.
     Example usage:
-        gcd-dl-infer --indir <input dir> --outdir <output dir> --params-to-predict xscale xshift yscale
+        gcd-dl train --indir <input dir> --outdir <output dir> --params-to-predict xscale xshift yscale
+        gcd-dl infer --indir <input dir> --outdir <output dir> --params-to-predict xscale xshift yscale
     """
 
     class MultiplyInheritedFormatter(
@@ -302,8 +290,8 @@ def get_parser():
     parser = argparse.ArgumentParser(
         formatter_class=MultiplyInheritedFormatter, description=helpstr
     )
-    # fmt: off
-    parser.add_argument( "--indir", required=True, help="input directory with gcdyn simulation output (uses encoded trees .npy, summary stats .csv, and response .pkl files)", )
+    parser.add_argument("action", choices=['train', 'infer'])
+    parser.add_argument("--indir", required=True, help="input directory with gcdyn simulation output (uses encoded trees .npy, summary stats .csv, and response .pkl files)", )
     parser.add_argument("--outdir", required=True, help="output directory")
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--bundle-size", type=int, default=50)
@@ -319,7 +307,6 @@ def get_parser():
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--use-trivial-encoding", action="store_true")
     parser.add_argument("--dont-scale-params", action="store_true")
-    # fmt: on
     return parser
 
 
@@ -337,13 +324,14 @@ def main():
 
     tf.keras.utils.set_random_seed(args.random_seed)
 
-    # ----------------------------------------------------------------------------------------
-    if os.path.exists(csvfn(args, "test")) and not args.overwrite:
-        print(
-            "    csv files already exist, so just replotting (override with --overwrite): %s"
-            % csvfn(args, "test")
-        )
-        read_plot_csv(args)
-        sys.exit(0)
-
-    train_and_test(args, start_time)
+    if args.action == 'train':
+        if os.path.exists(csvfn(args, "test")) and not args.overwrite:
+            print("    csv files already exist, so just replotting (override with --overwrite): %s" % csvfn(args, "test"))
+            read_plot_csv(args)
+            sys.exit(0)
+        train_and_test(args, start_time)
+    elif args.action == 'infer':
+        infer(args, start_time)
+    else:
+        assert False
+# fmt: on
