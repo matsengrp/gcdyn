@@ -61,10 +61,10 @@ def scale_vals(args, in_pvals, scaler=None, inverse=False, smpl='', debug=True):
 
 
 # ----------------------------------------------------------------------------------------
-def get_prediction(args, smpl, model, smpldict, scaler):
-    pred_resps = model.predict(smpldict[smpl]["trees"])  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
+def get_prediction(args, model, spld, scaler, smpl=None):
+    pred_resps = model.predict(spld["trees"])  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
     true_resps, true_sstats = [
-        smpldict[smpl][tk] for tk in ["birth-responses", "sstats"]
+        spld[tk] for tk in ["birth-responses", "sstats"]
     ]
     if args.bundle_size > 1:
         true_resps = [
@@ -235,10 +235,11 @@ def train_and_test(args, start_time):
             encode.trivialize_encodings(smpldict[smpl]["trees"], pscaled[smpl], noise=True)  # , n_debug=3)
 
     # train
-    model = NeuralNetworkModel(bundle_size=args.bundle_size)
+    responses = [[ConstantResponse(v) for v in vlist] for vlist in pscaled["train"]]
+    model = NeuralNetworkModel(responses[0], bundle_size=args.bundle_size)
     model.build_model(
         smpldict["train"]["trees"],
-        [[ConstantResponse(v) for v in vlist] for vlist in pscaled["train"]],
+        responses,
         dropout_rate=args.dropout_rate,
         learning_rate=args.learning_rate,
         ema_momentum=args.ema_momentum,
@@ -253,7 +254,7 @@ def train_and_test(args, start_time):
     print("  writing train/test results to %s" % args.outdir)
     prdfs = {}
     for smpl in ["train", "test"]:
-        prdfs[smpl] = get_prediction(args, smpl, model, smpldict, scalers["train"])
+        prdfs[smpl] = get_prediction(args, model, smpldict[smpl], scalers["train"], smpl=smpl)
     utils.make_dl_plots(
         prdfs,
         args.params_to_predict,
@@ -268,18 +269,33 @@ def train_and_test(args, start_time):
 def infer(args, start_time):
     samples = read_tree_files(args)
     pvals = get_pvlists(args, samples)
-    pscaled, scalers = scale_vals(args, pvals)
-    model = NeuralNetworkModel(bundle_size=args.bundle_size)
-    model.load('%s/model.h5' % (args.outdir))
+    pscaled, scaler = scale_vals(args, pvals)
+    example_response_list = [ConstantResponse(v) for v in pscaled[0]]
+    model = NeuralNetworkModel(example_response_list, bundle_size=args.bundle_size)
+    model.load(args.model_file)
 
+    if not os.path.exists(args.outdir):
+        os.makedirs(args.outdir)
+    print("  writing inference results to %s" % args.outdir)
+    prdf = get_prediction(args, model, samples, scaler)
+    utils.make_dl_plots(
+        {'infer' : prdf},
+        args.params_to_predict,
+        args.outdir + "/plots",
+        validation_split=0,
+    )
+
+    print("    total dl inference time: %.1f sec" % (time.time() - start_time))
 
 # ----------------------------------------------------------------------------------------
 def get_parser():
     helpstr = """
     Infer affinity response function on gcdyn simulation using deep learning neural networks.
+    Two actions: <train> trains and tests a new dl model on the sample in the input dir, whereas
+    <infer> infers parameters with an existing dl model.
     Example usage:
-        gcd-dl train --indir <input dir> --outdir <output dir> --params-to-predict xscale xshift yscale
-        gcd-dl infer --indir <input dir> --outdir <output dir> --params-to-predict xscale xshift yscale
+        gcd-dl train --indir <input dir> --outdir <output dir>
+        gcd-dl infer --indir <input dir> --outdir <output dir> --model-file <model file>
     """
 
     class MultiplyInheritedFormatter(
@@ -291,7 +307,8 @@ def get_parser():
         formatter_class=MultiplyInheritedFormatter, description=helpstr
     )
     parser.add_argument("action", choices=['train', 'infer'])
-    parser.add_argument("--indir", required=True, help="input directory with gcdyn simulation output (uses encoded trees .npy, summary stats .csv, and response .pkl files)", )
+    parser.add_argument("--indir", required=True, help="training input directory with gcdyn simulation output (uses encoded trees .npy, summary stats .csv, and response .pkl files)", )
+    parser.add_argument("--model-file", help="file with saved deep learning model for inference")
     parser.add_argument("--outdir", required=True, help="output directory")
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--bundle-size", type=int, default=50)
@@ -301,7 +318,7 @@ def get_parser():
     parser.add_argument("--prebundle-layer-cfg", default='default') #, choices=['default', 'small', 'big', 'huge'])
     parser.add_argument("--train-frac", type=float, default=0.8, help="train on this fraction of the trees")
     parser.add_argument("--validation-split", type=float, default=0.1, help="fraction of training sample to tell keras to hold out for validation during training")
-    parser.add_argument("--params-to-predict", default=["xscale", "xshift"], nargs="+", choices=["xscale", "xshift", "yscale"] + [k for k in sum_stat_scaled])
+    parser.add_argument("--params-to-predict", default=["xscale", "xshift", "yscale"], nargs="+", choices=["xscale", "xshift", "yscale"] + [k for k in sum_stat_scaled])
     parser.add_argument("--test", action="store_true", help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly")
     parser.add_argument("--random-seed", default=0, type=int, help="random seed")
     parser.add_argument("--overwrite", action="store_true")

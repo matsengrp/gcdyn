@@ -84,12 +84,19 @@ class NeuralNetworkModel:
 
     def __init__(
         self,
+        example_response_list: list[poisson.Response],
         bundle_size: int = 50,
     ):
         """
+        example_response_list: list of response objects for a single tree (used to work out the number of
+                     parameters and how to encode/decode)
         bundle_size: number of trees to bundle together. The per-bundle mean of predictions is applied to the
                      convolutional output and then passed to the dense layers.
         """
+        self.example_response_list = example_response_list
+        self.num_parameters = sum(
+            len(rsp._param_dict) for rsp in self.example_response_list
+        )
         self.bundle_size = bundle_size
 
     def build_model(
@@ -130,10 +137,6 @@ class NeuralNetworkModel:
         self.responses = responses
         self.actfn = actfn
         print("    building model with bundle size %d (%d training trees in %d bundles): dropout %.2f   learn rate %.4f   momentum %.4f" % (self.bundle_size, len(self.training_trees), len(self.training_trees) / self.bundle_size, dropout_rate, learning_rate, ema_momentum))
-        num_parameters = sum(
-            len(response._param_dict) for response in self.responses[0]
-
-        )
 
         # various config options for the layers before the bundle mean layer
         self.pre_bundle_layers = {
@@ -168,7 +171,7 @@ class NeuralNetworkModel:
             network_layers.append(layers.Dense(n_units, activation=self.actfn))
             if dropout_rate != 0 and idense < len(dense_unit_list) - 1:  # add a dropout layer after each one except the last
                 network_layers.append(layers.Dropout(dropout_rate))
-        network_layers.append(layers.Dense(num_parameters))
+        network_layers.append(layers.Dense(self.num_parameters))
 
         inputs = keras.Input(shape=(self.bundle_size, 4, self.max_leaf_count))
         outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
@@ -197,7 +200,7 @@ class NeuralNetworkModel:
     def _decode_responses(
         cls,
         response_parameters: list[list[float]],
-        example_responses: list[poisson.Response],
+        example_response_list: list[poisson.Response],
     ) -> list[list[poisson.Response]]:
         result = []
 
@@ -205,7 +208,7 @@ class NeuralNetworkModel:
             responses = []
             i = 0
 
-            response_structure = [response._flatten() for response in example_responses]
+            response_structure = [response._flatten() for response in example_response_list]
 
             for (
                 response_cls,
@@ -298,9 +301,7 @@ class NeuralNetworkModel:
             self._prepare_trees_for_network_input(encoded_trees)
         )
 
-        return self._decode_responses(
-            predicted_responses, example_responses=self.responses[0]
-        )
+        return self._decode_responses(predicted_responses, example_response_list=self.example_response_list)
 
     def load(self, fname):
         with keras.utils.custom_object_scope({'BundleMeanLayer': BundleMeanLayer}):
