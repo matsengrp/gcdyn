@@ -92,6 +92,7 @@ def get_prediction(args, model, spld, scaler, smpl=None):
             dfdata["%s-truth" % param].append(get_pval(param, tr_resp, sum_stats))
             dfdata["%s-predicted" % param].append(prlist[ip])
     df = pd.DataFrame(dfdata)
+    print("  writing %s results to %s" % (smpl, args.outdir))
     df.to_csv(csvfn(args, smpl))
     return df
 
@@ -251,7 +252,6 @@ def train_and_test(args, start_time):
     # evaluate/predict
     if not os.path.exists(args.outdir):
         os.makedirs(args.outdir)
-    print("  writing train/test results to %s" % args.outdir)
     prdfs = {}
     for smpl in ["train", "test"]:
         prdfs[smpl] = get_prediction(args, model, smpldict[smpl], scalers["train"], smpl=smpl)
@@ -276,8 +276,7 @@ def infer(args, start_time):
 
     if not os.path.exists(args.outdir):
         os.makedirs(args.outdir)
-    print("  writing inference results to %s" % args.outdir)
-    prdf = get_prediction(args, model, samples, scaler)
+    prdf = get_prediction(args, model, samples, scaler, smpl='infer')
     utils.make_dl_plots(
         {'infer' : prdf},
         args.params_to_predict,
