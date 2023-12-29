@@ -1,7 +1,7 @@
 .. argparse::
    :filename: ../scripts/dl_infer.py
    :func: get_parser
-   :prog: gcd-dl-infer
+   :prog: gcd-dl
 
 .. argparse::
    :filename: ../scripts/multi_simulation.py
