@@ -61,41 +61,53 @@ def scale_vals(args, in_pvals, scaler=None, inverse=False, smpl='', debug=True):
 
 
 # ----------------------------------------------------------------------------------------
-def get_prediction(args, model, spld, scaler, smpl=None):
-    pred_resps = model.predict(spld["trees"])  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
-    true_resps, true_sstats = [
-        spld[tk] for tk in ["birth-responses", "sstats"]
+def collapse_bundles(args, resps, sstats):
+    resps = [
+        NeuralNetworkModel._collapse_identical_list(resps[i : i + args.bundle_size])
+        for i in range(0, len(resps), args.bundle_size)
     ]
-    if args.bundle_size > 1:
-        true_resps = [
-            true_resps[i] for i in range(0, len(true_resps), args.bundle_size)
-        ]
-        true_sstats = [
-            {
-                k: (min if k == "tree" else np.mean)(
-                    [float(true_sstats[i + j][k]) for j in range(args.bundle_size)]
-                )
-                for k in true_sstats[i]
-            }
-            for i in range(0, len(true_sstats), args.bundle_size)
-        ]  # mean of each summary stat over trees in each bundle ('tree' is an index, so take min/index of first one)
-    assert len(pred_resps) == len(true_resps)
+    sstats = [
+        {
+            tkey: (min if tkey == "tree" else np.mean)(
+                [float(sstats[i + j][tkey]) for j in range(args.bundle_size)]
+            )
+            for tkey in sstats[i]
+        }
+        for i in range(0, len(sstats), args.bundle_size)
+    ]  # mean of each summary stat over trees in each bundle ('tree' key is an index, so take min/index of first one)
+    return resps, sstats
+
+# ----------------------------------------------------------------------------------------
+def write_prediction(args, pred_resps, true_resps=None, true_sstats=None, scaler=None, smpl=None):
     pvals = [[float(resp.value) for resp in plist] for plist in pred_resps]
-    pscaled, _ = scale_vals(args, pvals, smpl=smpl, scaler=scaler, inverse=True)
-    dfdata = {
+    punscaled, _ = scale_vals(args, pvals, smpl=smpl, scaler=scaler, inverse=True)
+    dfdata = {  # make empty df
         "%s-%s" % (param, ptype): []
         for param in args.params_to_predict
-        for ptype in ["truth", "predicted"]
+        for ptype in (["predicted"] if true_resps is None else ["truth", "predicted"])
     }
-    for tr_resp, prlist, sum_stats in zip(true_resps, pscaled, true_sstats):
+    assert true_resps is None or len(punscaled) == len(true_resps)
+    for itr, prlist in enumerate(punscaled):
         for ip, param in enumerate(args.params_to_predict):
-            dfdata["%s-truth" % param].append(get_pval(param, tr_resp, sum_stats))
             dfdata["%s-predicted" % param].append(prlist[ip])
+            if true_resps is not None:
+                dfdata["%s-truth" % param].append(get_pval(param, true_resps[itr], true_sstats[itr]))
     df = pd.DataFrame(dfdata)
     print("  writing %s results to %s" % (smpl, args.outdir))
     df.to_csv(csvfn(args, smpl))
     return df
 
+# ----------------------------------------------------------------------------------------
+def get_prediction(args, model, spld, scaler, smpl=None):
+    pred_resps = model.predict(spld["trees"])  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
+    true_resps, true_sstats = None, None
+    if args.is_simu:
+        true_resps, true_sstats = [spld[tk] for tk in ["birth-responses", "sstats"]]
+        if args.bundle_size > 1:
+            true_resps, true_sstats = collapse_bundles(args, true_resps, true_sstats)
+        assert len(pred_resps) == len(true_resps)
+    df = write_prediction(args, pred_resps, true_resps=true_resps, true_sstats=true_sstats, smpl=smpl, scaler=scaler)
+    return df
 
 # ----------------------------------------------------------------------------------------
 def read_plot_csv(args):
@@ -319,6 +331,7 @@ def get_parser():
     parser.add_argument("--validation-split", type=float, default=0.1, help="fraction of training sample to tell keras to hold out for validation during training")
     parser.add_argument("--params-to-predict", default=["xscale", "xshift", "yscale"], nargs="+", choices=["xscale", "xshift", "yscale"] + [k for k in sum_stat_scaled])
     parser.add_argument("--test", action="store_true", help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly")
+    parser.add_argument("--is-simu", action="store_true", help="set to this if running on simulation")
     parser.add_argument("--random-seed", default=0, type=int, help="random seed")
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--use-trivial-encoding", action="store_true")

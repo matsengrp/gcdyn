@@ -304,6 +304,7 @@ class NeuralNetworkModel:
         return self._decode_responses(predicted_responses, example_response_list=self.example_response_list)
 
     def load(self, fname):
+        print('    reading model file from %s' % fname)
         with keras.utils.custom_object_scope({'BundleMeanLayer': BundleMeanLayer}):
             self.network = keras.models.load_model(fname)
 
