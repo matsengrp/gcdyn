@@ -344,6 +344,8 @@ def main():
     parser = get_parser()
     start_time = time.time()
     args = parser.parse_args()
+    if args.action == 'infer' and args.model_file is None:
+        raise Exception('must specify --model-file for \'infer\' action')
     if args.test:
         args.epochs = 10
 

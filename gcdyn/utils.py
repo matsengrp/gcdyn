@@ -317,17 +317,11 @@ def mpl_init(fsize=20, label_fsize=15):
 
 
 # ----------------------------------------------------------------------------------------
+# fmt: off
 # plot scatter + box/whisker plot comparing true and predicted values for deep learning inference
 # NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
-def make_dl_plots(
-    prdfs,
-    params_to_predict,
-    outdir,
-    validation_split=0,
-    xtra_txt=None,
-    fsize=20,
-    label_fsize=15,
-):
+def make_dl_plots(prdfs, params_to_predict, outdir, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15):
+    # ----------------------------------------------------------------------------------------
     def single_plot(param, smpl):
         # ----------------------------------------------------------------------------------------
         def add_mae_text(smp_name, tdf):
@@ -340,37 +334,14 @@ def make_dl_plots(
         plt.clf()
         df = prdfs[smpl]
         xkey, ykey = ["%s-%s" % (param, vtype) for vtype in ["truth", "predicted"]]
-        if (
-            len(set(df["%s-truth" % param])) < 10
-        ):  # if simulation has discrete parameter values
+        if len(set(df["%s-truth" % param])) < 10:  # if simulation has discrete parameter values
             if validation_split > 0:
                 raise Exception("validation split not implemented here")
-            ax = sns.boxplot(
-                df,
-                x=xkey,
-                y=ykey,
-                boxprops={"facecolor": "None"},
-                order=sorted(set(df[xkey])),
-            )
+            ax = sns.boxplot(df, x=xkey, y=ykey, boxprops={"facecolor": "None"}, order=sorted(set(df[xkey])))
             if len(df) < 500:
-                ax = sns.swarmplot(
-                    df,
-                    x=xkey,
-                    y=ykey,
-                    size=4,
-                    alpha=0.6,
-                    order=sorted(set(df[xkey])),
-                )
-            # ax.set(title=smpl)
+                ax = sns.swarmplot(df, x=xkey, y=ykey, size=4, alpha=0.6, order=sorted(set(df[xkey])))  # ax.set(title=smpl)
             for xv, xvl in zip(ax.get_xticks(), ax.get_xticklabels()):
-                plt.plot(
-                    [xv - 0.5, xv + 0.5],
-                    [float(xvl._text), float(xvl._text)],
-                    color="darkred",
-                    linestyle="--",
-                    linewidth=3,
-                    alpha=0.7,
-                )
+                plt.plot([xv - 0.5, xv + 0.5], [float(xvl._text), float(xvl._text)], color="darkred", linestyle="--", linewidth=3, alpha=0.7)
         else:
             plt_df = df
             if smpl == "train" and validation_split != 0:
@@ -381,26 +352,18 @@ def make_dl_plots(
             ax = sns.scatterplot(plt_df, x=xkey, y=ykey, alpha=0.6)
             add_mae_text(smpl, plt_df)
             xvals = df[xkey]  # use df I think to (in principle) pick up all x values
-            plt.plot(
-                [0.95 * min(xvals), 1.05 * max(xvals)],
-                [0.95 * min(xvals), 1.05 * max(xvals)],
-                color="darkgreen",
-                linestyle="--",
-                linewidth=3,
-                alpha=0.7,
-            )
+            plt.plot([0.95 * min(xvals), 1.05 * max(xvals)], [0.95 * min(xvals), 1.05 * max(xvals)], color="darkgreen", linestyle="--", linewidth=3, alpha=0.7)
         plt.xlabel("true value")
         plt.ylabel("predicted value")
         titlestr = "%s %s" % (param, smpl)
         if xtra_txt is not None:
             titlestr += xtra_txt
-        plt.title(
-            titlestr, fontweight="bold", fontsize=20
-        )  # if len(title) < 25 else 15)
+        plt.title(titlestr, fontweight="bold", fontsize=20)  # if len(title) < 25 else 15)
         fn = "%s/%s-%s-hist.svg" % (outdir, param, smpl)
         plt.savefig(fn)
         return fn
 
+    # ----------------------------------------------------------------------------------------
     mpl_init()
     if not os.path.exists(outdir):
         os.makedirs(outdir)
@@ -411,6 +374,7 @@ def make_dl_plots(
             fn = single_plot(param, smpl)
             fnames[-1].append(fn)
     make_html(outdir, fnames=fnames)
+# fmt: on
 
 
 # ----------------------------------------------------------------------------------------

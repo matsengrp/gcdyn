@@ -11,7 +11,7 @@ from gcdyn import poisson
 poisson.set_backend(use_jax=True)
 
 # Pylance can't recognize tf submodules imported the normal way
-keras = tf.keras
+keras = tf.keras  # these imports are really slow
 layers = keras.layers
 
 
