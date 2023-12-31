@@ -297,11 +297,12 @@ def get_responses(args, xscale, xshift, yscale, pcounts):
         "      initial birth rate %.2f (range %s)"
         % (bresp.λ_phenotype(0), args.initial_birth_rate_range)
     )
-    if args.use_generated_parameter_bounds:
-        assert (
-            bresp.λ_phenotype(0) > args.initial_birth_rate_range[0] - 1e-8
-            and bresp.λ_phenotype(0) < args.initial_birth_rate_range[1] + 1e-8
-        )
+    if bresp.λ_phenotype(0) < args.initial_birth_rate_range[0] - 1e-8 or bresp.λ_phenotype(0) > args.initial_birth_rate_range[1] + 1e-8:
+        wstr = 'initial birth response outside specified range: %.3f not in [%.3f, %.3f]' % (bresp.λ_phenotype(0), args.initial_birth_rate_range[0], args.initial_birth_rate_range[1])
+        if args.use_generated_parameter_bounds:
+            raise Exception(wstr)
+        else:
+            print('  %s %s' % (utils.color('yellow', 'warning'), wstr))
     print_resp(bresp, dresp)
     add_pval(pcounts, "initial_birth_rate", bresp.λ_phenotype(0))
 
@@ -433,7 +434,7 @@ def get_parser():
     parser.add_argument("--death-value", default=0.1, type=float, help="value (parameter) for constant death response")
     parser.add_argument("--xscale-values", default=[2], nargs="+", type=float, help="list of birth response xscale parameter values from which to choose")
     parser.add_argument("--xshift-values", default=[-2.5], nargs="+", type=float, help="list of birth response xshift parameter values from which to choose")
-    parser.add_argument("--yscale-values", default=[1], nargs="+", type=float, help="list of birth response yscale parameter values from which to choose")
+    parser.add_argument("--yscale-values", default=[10], nargs="+", type=float, help="list of birth response yscale parameter values from which to choose")
     parser.add_argument("--xscale-range", nargs="+", type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response xscale parameter for each tree. Overrides --xscale-values. Suggest 0.5 5")
     parser.add_argument("--xshift-range", nargs="+", type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response xshift parameter for each tree. Overrides --xshift-values. Suggest -0.5 3")
     parser.add_argument("--yscale-range", nargs="+", type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response yscale parameter for each tree. Overrides --yscale-values. Suggest 1 50")

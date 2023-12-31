@@ -259,7 +259,7 @@ def train_and_test(args, start_time):
         prebundle_layer_cfg=args.prebundle_layer_cfg,
     )
     model.fit(epochs=args.epochs, validation_split=args.validation_split)
-    model.network.save('%s/model.h5' % (args.outdir))
+    model.network.save('%s/model.keras' % (args.outdir))
 
     # evaluate/predict
     if not os.path.exists(args.outdir):
