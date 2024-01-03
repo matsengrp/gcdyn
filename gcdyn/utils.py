@@ -472,14 +472,16 @@ def addfn(fnames, fn, n_columns=4):
 
 
 # ----------------------------------------------------------------------------------------
-def plot_chosen_params(plotdir, param_counters, pbounds, fnames=None):
+def plot_chosen_params(plotdir, param_counters, pbounds, n_bins=15, fnames=None):
     # ----------------------------------------------------------------------------------------
     def plot_param(pname):
         plt.clf()
         fig, ax = plt.subplots()
         sns.histplot(
             {pname: param_counters[pname]},
-            bins=15,
+            bins=n_bins,
+            # color='orange',
+            edgecolor='darkred' if len(param_counters[pname]) < 5 else None,
             # binwidth=(xmax - xmin) / n_bins,
         )
         plt.legend(
@@ -487,7 +489,6 @@ def plot_chosen_params(plotdir, param_counters, pbounds, fnames=None):
         )  # remove legend since we only have one hist atm
         ax.set(xlabel=pname)
         if pname in pbounds and pbounds[pname] is not None:
-            print("  %s   %s" % (pname, pbounds[pname]))
             for pbd in pbounds[pname]:
                 ax.plot(
                     [pbd, pbd],
@@ -525,7 +526,7 @@ def plot_phenotype_response(
     xmin=-5,
     xmax=5,
     nsteps=40,
-    n_to_plot=30,
+    n_to_plot=20,
     bundle_size=1,
     fnames=None,
 ):

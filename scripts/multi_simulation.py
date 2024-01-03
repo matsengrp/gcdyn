@@ -234,7 +234,7 @@ def add_pval(pcounts, pname, pval):
 # ----------------------------------------------------------------------------------------
 def choose_params(args, pcounts):
     params = {}
-    for pname in [
+    for pname in [  # NOTE compare to loop at end of run_sub_procs()
         "xscale",
         "xshift",
         "yscale",
@@ -478,6 +478,23 @@ def set_test_args(args):
 
 
 # ----------------------------------------------------------------------------------------
+def finish_param_choice(args, pcounts, all_trees=None, all_fns=None):
+    if all_fns is None:
+        all_fns = [[]]
+    if args.birth_response == "sigmoid":  # could plot other ones, but I think I need to modify some things, and I don't need it atm
+        if args.make_plots and all_trees is not None:
+            utils.plot_phenotype_response(args.outdir + "/plots/responses", all_trees, bundle_size=args.simu_bundle_size, fnames=all_fns)
+    # make summary param plots even if --make-plots isn't set (just cause atm i don't want to add another arg to make some-but-not-all plots)
+    utils.plot_chosen_params(args.outdir + "/plots/params", pcounts, {p: getattr(args, p.replace("-", "_") + "_range") for p in pcounts}, fnames=all_fns)
+    utils.make_html(args.outdir + "/plots", fnames=all_fns)
+
+    print("    sampled parameter values:               min      max")
+    for pname, pvals in sorted(pcounts.items()):
+        print("                      %27s  %7.2f  %7.2f" % (pname, min(pvals), max(pvals)))
+
+
+
+# ----------------------------------------------------------------------------------------
 def run_sub_procs(args):
     # fmt: off
     procs = []
@@ -605,7 +622,16 @@ def run_sub_procs(args):
     if any(m > 0 for m in missing_trees):
         print('    %s missing %d total trees over %d procs: %s' % (utils.color('yellow', 'warning'), sum(missing_trees), args.n_sub_procs, ' '.join(utils.color('red' if m>0 else None, str(m)) for m in missing_trees)))
     if args.make_plots:
-        print("  note: can't make plots in main process when --n-sub-procs is set")
+        print("  note: can't make per-tree plots in main process when --n-sub-procs is set")
+        with open(outfn(args, 'responses', None), "rb") as rfile:
+            pklfos = pickle.load(rfile)
+        pcounts = {}
+        for pkfo in pklfos:
+            for pname, pval in pkfo['birth']._param_dict.items():  # NOTE compare to loop in choose_params()
+                if pname == 'yshift':  # not varying this atm (and maybe not ever)
+                    continue
+                add_pval(pcounts, pname, pval)
+        finish_param_choice(args, pcounts)
 
 
 # ----------------------------------------------------------------------------------------
@@ -737,46 +763,15 @@ def main():
         )
 
     if args.dont_run_new_simu:
-        print(
-            "    --dont-run-new-simu: missing %d trees, but ignoring and just merging the ones we have"
-            % n_missing
-        )
+        print("    --dont-run-new-simu: missing %d trees, but ignoring and just merging the ones we have" % n_missing)
     if n_missing > 0:
-        print(
-            "    %s missing %d / %d trees (it's generally expected that some will fail, so this is probably ok if it's not too many)"
-            % (utils.color("yellow", "warning"), n_missing, args.n_trials)
-        )
+        print("    %s missing %d / %d trees (it's generally expected that some will fail, so this is probably ok if it's not too many)" % (utils.color("yellow", "warning"), n_missing, args.n_trials))
     if len(all_trees) == 0:
-        print(
-            "  %s no resulting trees, exiting without writing or plotting anything"
-            % utils.color("yellow", "warning")
-        )
+        print("  %s no resulting trees, exiting without writing or plotting anything" % utils.color("yellow", "warning"))
         sys.exit(0)
 
     write_final_outputs(args, all_seqs, all_trees)
 
-    if (
-        args.make_plots and args.birth_response == "sigmoid"
-    ):  # could plot other ones, but I think I need to modify some things, and I don't need it atm
-        utils.plot_phenotype_response(
-            args.outdir + "/plots/responses",
-            all_trees,
-            bundle_size=args.simu_bundle_size,
-            fnames=all_fns,
-        )
-        utils.plot_chosen_params(
-            args.outdir + "/plots/params",
-            pcounts,
-            {p: getattr(args, p.replace("-", "_") + "_range") for p in pcounts},
-            fnames=all_fns,
-        )
-        utils.make_html(args.outdir + "/plots", fnames=all_fns)
-
-    print("    sampled parameter values:               min      max")
-    for pname, pvals in sorted(pcounts.items()):
-        print(
-            "                      %17s  %7.2f  %7.2f" % (pname, min(pvals), max(pvals))
-        )
-
+    finish_param_choice(args, pcounts, all_trees=all_trees)
     print("    total simulation time: %.1f sec" % (time.time() - start))
     # fmt: on
