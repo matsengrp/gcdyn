@@ -46,6 +46,7 @@ def print_final_response_vals(tree, birth_resp, death_resp, final_time):
 def generate_sequences_and_tree(
     args,
     sample_time,
+    carry_cap,
     birth_resp,
     death_resp,
     mutation_resp,
@@ -70,13 +71,13 @@ def generate_sequences_and_tree(
                 mutator=mutator,
                 min_survivors=args.min_survivors,
                 birth_mutations=False,
-                capacity=args.carry_cap,
+                capacity=carry_cap,
                 capacity_method=args.capacity_method,
                 seed=seed,
                 verbose=args.debug > 1,
             )
             print(
-                "    try %d succeeded, tip count %d  (%.1fs)"
+                "    try %d succeeded, tip count %d  (time: %.1fs)"
                 % (iter + 1, len(tree), time.time() - tree_start)
             )
             if args.debug:
@@ -174,6 +175,7 @@ def print_resp(bresp, dresp):
 
 
 # ----------------------------------------------------------------------------------------
+# fmt: off
 def choose_val(args, pname, extra_bounds=None):
     minmax, vals = [getattr(args, pname + "_" + str) for str in ["range", "values"]]
     if minmax is not None:  # range with two values for continuous
@@ -183,10 +185,8 @@ def choose_val(args, pname, extra_bounds=None):
             minv = max(minv, extra_bounds[0])
             maxv = min(maxv, extra_bounds[1])
         print("        choosing %s within [%.2f, %.2f]" % (pname, minv, maxv))
-        if pname == "time_to_sampling":
-            return np.random.choice(
-                range(minv, maxv + 1)
-            )  # integers (note that this is inclusive)
+        if pname in ["time_to_sampling", 'carry-cap']:
+            return np.random.choice(range(minv, maxv + 1))  # integers (note that this is inclusive)
         else:
             return np.random.uniform(minv, maxv)  # floats
     else:  # discrete values
@@ -239,28 +239,22 @@ def choose_params(args, pcounts):
         "xshift",
         "yscale",
         "time_to_sampling",
+        "carry_cap",
     ]:  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
         extra_bounds = None
         if args.use_generated_parameter_bounds:
             if pname == "xshift":
                 extra_bounds = get_xshift_bounds(args, params["xscale"])
             if pname == "yscale":
-                extra_bounds = get_yscale_bounds(
-                    args, params["xscale"], params["xshift"]
-                )
+                extra_bounds = get_yscale_bounds(args, params["xscale"], params["xshift"])
         params[pname] = choose_val(args, pname, extra_bounds=extra_bounds)
+        if pname == 'carry_cap' and any(params[pname] < p for p in [args.min_survivors, args.n_seqs]):
+            print('  %s chose carry cap (%d) smaller than either --min-survivors %d or --n-seqs %d, so you\'ll probably either get a lot of failures or fail sampling seqs' % (utils.color('yellow', 'warning'), params[pname], args.min_survivors, args.n_seqs))
         add_pval(pcounts, pname, params[pname])
-    print(
-        "    chose new parameter values%s: %s"
-        % (
-            '' if args.simu_bundle_size is None else ' (for next bundle of size %d)' % args.simu_bundle_size,
-            "  ".join(
-            "%s %s" % (p, ("%d" if p == "time_to_sampling" else "%.2f") % v)
-            for p, v in sorted(params.items())
-        )
-        )
-    )
+    pvstrs = ["%s %s" % (p, ("%d" if p in ["time_to_sampling", "carry_cap"] else "%.2f") % v) for p, v in sorted(params.items())]
+    print("    chose new parameter values%s: %s" % ('' if args.simu_bundle_size == 1 else ' (for next bundle of size %d)' % args.simu_bundle_size, "  ".join(pvstrs)))
     return params
+# fmt: on
 
 
 # ----------------------------------------------------------------------------------------
@@ -410,9 +404,9 @@ def get_parser():
     helpstr = """
     Simulate B cell trees in germinal centers using the birth-death-mutation model.
     Example usage that samples parameter values from within ranges:
-        gcd-simulate --debug 1 --outdir <outdir> --xscale-range 0.5 5 --xshift-range -0.5 3 --yscale-range 1 50 --initial-birth-rate-range 2 10 --carry-cap 150 --time-to-sampling-values 10 --n-trials 1
+        gcd-simulate --debug 1 --outdir <outdir> --xscale-range 0.5 5 --xshift-range -0.5 3 --yscale-range 1 50 --initial-birth-rate-range 2 10 --carry-cap-values 150 --time-to-sampling-values 10 --n-trials 1
     Example usage with multiple subprocesses:
-        gcd-simulate --debug 1 --outdir <outdir> --carry-cap 150 --time-to-sampling-values 10 --n-trials 100 --n-sub-procs 10
+        gcd-simulate --debug 1 --outdir <outdir> --carry-cap-values 150 --time-to-sampling-values 10 --n-trials 100 --n-sub-procs 10
 
     """
     class MultiplyInheritedFormatter(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
@@ -425,7 +419,8 @@ def get_parser():
     parser.add_argument("--time-to-sampling-range", nargs="+", type=int, help="Pair of values (min/max) between which to choose at uniform random the time to sampling for each tree. Overrides --time-to-sampling-values.")
     parser.add_argument("--simu-bundle-size", default=1, type=int, help="By default, we choose a new set of parameters for each tree. If this arg is set, once we've chosen a set of parameter values, we instead simulate this many trees with those same values before choosing another set.")
     parser.add_argument("--min-survivors", default=100, type=int)
-    parser.add_argument("--carry-cap", default=300, type=int)
+    parser.add_argument("--carry-cap-values", default=[300], nargs='+', type=int)
+    parser.add_argument("--carry-cap-range", nargs='+', type=int)
     parser.add_argument("--capacity-method", default="birth", choices=["birth", "death", "hard", None], help="see bdms.evolve() docs. Note that 'death' often involves a ton of churn, which makes for very slow simulations.")
     parser.add_argument("--seed", default=0, type=int, help="random seed")
     parser.add_argument("--outdir", default=os.getcwd())
@@ -457,12 +452,12 @@ def get_parser():
 
 # ----------------------------------------------------------------------------------------
 def set_test_args(args):
-    if "--carry-cap" not in sys.argv:
-        args.carry_cap = 100
+    if "--carry-cap-values" not in sys.argv:
+        args.carry_cap_values = [100]
     if "--n-trials" not in sys.argv:
         args.n_trials = 1
-    if "--time-to-sampling" not in sys.argv:
-        args.time_to_sampling = {"vals": 10}
+    if "--time-to-sampling-values" not in sys.argv:
+        args.time_to_sampling_values = [10]
     if "--min-survivors" not in sys.argv:
         args.min_survivors = 10
     if "--n-seqs" not in sys.argv:
@@ -470,11 +465,11 @@ def set_test_args(args):
     if "--n-max-tries" not in sys.argv:
         args.n_max_tries = 5
     print(
-        "  --test: --carry-cap %d --n-trials %d  --time-to-sampling %s  --min-survivors %d  --n-seqs %d  --n-max-tries %d"
+        "  --test: --n-trials %d --carry-cap-values %s  --time-to-sampling %s  --min-survivors %d  --n-seqs %d  --n-max-tries %d"
         % (
-            args.carry_cap,
             args.n_trials,
-            args.time_to_sampling,
+            args.carry_cap_values,
+            args.time_to_sampling_values,
             args.min_survivors,
             args.n_seqs,
             args.n_max_tries,
@@ -617,12 +612,7 @@ def run_sub_procs(args):
 def main():
     # fmt: off
     git_dir = os.path.dirname(os.path.realpath(__file__)).replace("/scripts", "/.git")
-    print(
-        "    gcdyn commit: %s"
-        % subprocess.check_output(
-            ["git", "--git-dir", git_dir, "rev-parse", "HEAD"]
-        ).strip()
-    )
+    print("    gcdyn commit: %s" % subprocess.check_output(["git", "--git-dir", git_dir, "rev-parse", "HEAD"]).strip())
     parser = get_parser()
     args = parser.parse_args()
     if args.simu_bundle_size != 1 and args.n_trials % args.simu_bundle_size != 0:
@@ -633,14 +623,10 @@ def main():
     else:
         print("  note: not using additional generated parameter bounds since at least one of --yscale-range, --initial-birth-rate-range was unset (this may result in lots of failed simulation runs if the initial birth rate is either too small or too large)")
     # handle args that can have either a list of a few values, or choose from a uniform interval specified with two (min, max) values
-    for pname in ["xscale", "xshift", "yscale", "time_to_sampling"]:
+    for pname in ["xscale", "xshift", "yscale", "time_to_sampling", "carry_cap"]:
         rangevals = getattr(args, pname + "_range")
-        if (
-            rangevals is not None and len(rangevals) != 2
-        ):  # range with two values for continuous
-            raise Exception(
-                "range must consist of two values but got %d" % len(rangevals)
-            )
+        if rangevals is not None and len(rangevals) != 2:  # range with two values for continuous
+            raise Exception("range must consist of two values but got %d" % len(rangevals))
     random.seed(args.seed)
     np.random.seed(args.seed)
     np.seterr(divide="ignore")
@@ -711,6 +697,7 @@ def main():
         plt_fn, tree = generate_sequences_and_tree(
             args,
             params["time_to_sampling"],
+            params["carry_cap"],
             birth_resp,
             death_resp,
             mutation_resp,

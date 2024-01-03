@@ -369,7 +369,7 @@ def make_dl_plots(prdfs, params_to_predict, outdir, validation_split=0, xtra_txt
         plt.clf()
         all_df = prdfs[smpl]
         xkey, ykey = ["%s-%s" % (param, vtype) for vtype in ["truth", "predicted"]]
-        discrete = len(set(all_df["%s-truth" % param])) < 100  # if simulation has discrete parameter values
+        discrete = len(set(all_df["%s-truth" % param])) < 15  # if simulation has discrete parameter values
         if discrete and ptype == 'scatter' and len(all_df) > 500:  # too busy, don't bother making them
             return None
         plt_df = all_df.copy()
