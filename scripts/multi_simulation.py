@@ -306,7 +306,7 @@ def get_responses(args, xscale, xshift, yscale, pcounts):
 
 
 # ----------------------------------------------------------------------------------------
-def write_final_outputs(args, all_seqs, all_trees):
+def write_final_outputs(args, all_seqs, all_trees, params):
     print("  writing final outputs to %s" % args.outdir)
 
     with open(outfn(args, "seqs", None), "w") as asfile:
@@ -330,6 +330,7 @@ def write_final_outputs(args, all_seqs, all_trees):
                     }
                 )
 
+    # write summary stats
     scale_vals, encoded_trees = encode.encode_trees([pfo["tree"] for pfo in all_trees])
     sstats = []
     for itr, (sval, pfo) in enumerate(zip(scale_vals, all_trees)):
@@ -340,6 +341,9 @@ def write_final_outputs(args, all_seqs, all_trees):
                 "total_branch_length": sum(
                     n.dist for n in pfo["tree"].iter_descendants()
                 ),
+                "carry_cap": params["carry_cap"],
+                "time_to_sampling": params["time_to_sampling"],
+                # NOTE if you add something here, also add it to encode.sstat_fieldnames
             }
         )
     responses = [
@@ -631,6 +635,12 @@ def run_sub_procs(args):
                 if pname == 'yshift':  # not varying this atm (and maybe not ever)
                     continue
                 add_pval(pcounts, pname, pval)
+            add_pval(pcounts, "initial_birth_rate", pkfo['birth'].λ_phenotype(0))
+        with open(outfn(args, 'summary-stats', None)) as cfile:
+            reader = csv.DictReader(cfile)
+            for line in reader:
+                for pname in ['carry_cap', 'time_to_sampling']:
+                    add_pval(pcounts, pname, float(line[pname]))
         finish_param_choice(args, pcounts)
 
 
@@ -770,7 +780,7 @@ def main():
         print("  %s no resulting trees, exiting without writing or plotting anything" % utils.color("yellow", "warning"))
         sys.exit(0)
 
-    write_final_outputs(args, all_seqs, all_trees)
+    write_final_outputs(args, all_seqs, all_trees, params)
 
     finish_param_choice(args, pcounts, all_trees=all_trees)
     print("    total simulation time: %.1f sec" % (time.time() - start))

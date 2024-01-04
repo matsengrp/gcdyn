@@ -7,6 +7,7 @@ import os
 from gcdyn.bdms import TreeNode
 from gcdyn import utils
 
+sstat_fieldnames = ["tree", "mean_branch_length", "total_branch_length", "carry_cap", "time_to_sampling"]
 
 def encode_tree(
     intree: TreeNode,
@@ -249,10 +250,9 @@ def write_training_files(outdir, encoded_trees, responses, sstats, dbgstr=""):
         os.makedirs(outdir)
     write_trees(simfn(outdir, "encoded-trees", None), encoded_trees)
     with open(simfn(outdir, "summary-stats", None), "w") as jfile:
-        fieldnames = ["tree", "mean_branch_length", "total_branch_length"]
-        writer = csv.DictWriter(jfile, fieldnames)
+        writer = csv.DictWriter(jfile, sstat_fieldnames)
         writer.writeheader()
         for sline in sstats:
-            writer.writerow({k: v for k, v in sline.items() if k in fieldnames})
+            writer.writerow({k: v for k, v in sline.items() if k in sstat_fieldnames})
     with open(simfn(outdir, "responses", None), "wb") as pfile:
         dill.dump(responses, pfile)
