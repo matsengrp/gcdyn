@@ -330,8 +330,10 @@ def write_final_outputs(args, all_seqs, all_trees, params):
                     }
                 )
 
-    # write summary stats
+    # encode trees
     scale_vals, encoded_trees = encode.encode_trees([pfo["tree"] for pfo in all_trees])
+
+    # write summary stats
     sstats = []
     for itr, (sval, pfo) in enumerate(zip(scale_vals, all_trees)):
         sstats.append(
