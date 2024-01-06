@@ -56,7 +56,7 @@ def generate_sequences_and_tree(
     seed=0,
 ):
     err_strs, success = {}, False
-    for iter in range(args.n_max_tries):
+    for itry in range(args.n_max_tries):
         try:
             tree_start = time.time()
             tree = bdms.TreeNode()
@@ -77,8 +77,8 @@ def generate_sequences_and_tree(
                 verbose=args.debug > 1,
             )
             print(
-                "    try %d succeeded, tip count %d  (time: %.1fs)"
-                % (iter + 1, len(tree), time.time() - tree_start)
+                "    finished tree with %d tips at time %.1f%s (%.1f sec)"
+                % (len(tree), np.mean([l.t for l in tree.iter_leaves()]), '' if itry==0 else '  try %d' % (itry + 1),  time.time() - tree_start)
             )
             if args.debug:
                 print_final_response_vals(tree, birth_resp, death_resp, sample_time)
@@ -176,7 +176,7 @@ def print_resp(bresp, dresp):
 
 # ----------------------------------------------------------------------------------------
 # fmt: off
-def choose_val(args, pname, extra_bounds=None):
+def choose_val(args, pname, extra_bounds=None, dbgstrs=None):
     minmax, vals = [getattr(args, pname + "_" + str) for str in ["range", "values"]]
     if minmax is not None:  # range with two values for continuous
         minv, maxv = minmax
@@ -184,7 +184,7 @@ def choose_val(args, pname, extra_bounds=None):
             # use the more restrictive (larger lo, smaller hi) values
             minv = max(minv, extra_bounds[0])
             maxv = min(maxv, extra_bounds[1])
-        print("        choosing %s within [%.2f, %.2f]" % (pname, minv, maxv))
+        print("        choosing %s within [%.2f, %.2f]%s" % (pname, minv, maxv, '' if (dbgstrs is None or len(dbgstrs)==0) else ' (%s)'%', '.join(dbgstrs)))
         if pname in ["time_to_sampling", 'carry-cap']:
             return np.random.choice(range(minv, maxv + 1))  # integers (note that this is inclusive)
         else:
@@ -194,10 +194,7 @@ def choose_val(args, pname, extra_bounds=None):
 
 
 # ----------------------------------------------------------------------------------------
-def get_xshift_bounds(
-    args,
-    xscale,
-):  # see algebra here https://photos.app.goo.gl/i8jM5Aa8QXvbDD267
+def get_xshift_bounds(args, xscale, dbgstrs):  # see algebra here https://photos.app.goo.gl/i8jM5Aa8QXvbDD267
     assert args.birth_response == "sigmoid"
     ysc_lo, ysc_hi = args.yscale_range
     br_lo, br_hi = args.initial_birth_rate_range
@@ -207,20 +204,17 @@ def get_xshift_bounds(
     hi = (
         math.log(ysc_hi / br_lo - 1.0) / xscale if ysc_hi / br_lo > 1 else +float("inf")
     )
-    print("          additional xshift bounds from sigmoid/xscale: %.2f  %.2f" % (lo, hi))
+    dbgstrs.append("additional xshift bounds from sigmoid/xscale: %.2f  %.2f" % (lo, hi))
     return (lo, hi)
 
 
 # ----------------------------------------------------------------------------------------
-def get_yscale_bounds(args, xscale, xshift):  # similar to previous fcn
+def get_yscale_bounds(args, xscale, xshift, dbgstrs):  # similar to previous fcn
     assert args.birth_response == "sigmoid"
     br_lo, br_hi = args.initial_birth_rate_range
     lo = br_lo * (1 + math.exp(xscale * xshift))
     hi = br_hi * (1 + math.exp(xscale * xshift))
-    print(
-        "        additional yscale bounds from sigmoid/xscale/xshift: %.2f  %.2f"
-        % (lo, hi)
-    )
+    dbgstrs.append("additional yscale bounds from sigmoid/xscale/xshift: %.2f  %.2f" % (lo, hi))
     return (lo, hi)
 
 
@@ -241,13 +235,13 @@ def choose_params(args, pcounts):
         "time_to_sampling",
         "carry_cap",
     ]:  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
-        extra_bounds = None
+        extra_bounds, dbgstrs = None, []
         if args.use_generated_parameter_bounds:
             if pname == "xshift":
-                extra_bounds = get_xshift_bounds(args, params["xscale"])
+                extra_bounds = get_xshift_bounds(args, params["xscale"], dbgstrs)
             if pname == "yscale":
-                extra_bounds = get_yscale_bounds(args, params["xscale"], params["xshift"])
-        params[pname] = choose_val(args, pname, extra_bounds=extra_bounds)
+                extra_bounds = get_yscale_bounds(args, params["xscale"], params["xshift"], dbgstrs)
+        params[pname] = choose_val(args, pname, extra_bounds=extra_bounds, dbgstrs=dbgstrs)
         if pname == 'carry_cap' and any(params[pname] < p for p in [args.min_survivors, args.n_seqs]):
             print('  %s chose carry cap (%d) smaller than either --min-survivors %d or --n-seqs %d, so you\'ll probably either get a lot of failures or fail sampling seqs' % (utils.color('yellow', 'warning'), params[pname], args.min_survivors, args.n_seqs))
         add_pval(pcounts, pname, params[pname])
@@ -306,7 +300,7 @@ def get_responses(args, xscale, xshift, yscale, pcounts):
 
 
 # ----------------------------------------------------------------------------------------
-def write_final_outputs(args, all_seqs, all_trees, params):
+def write_final_outputs(args, all_seqs, all_trees, param_list):
     print("  writing final outputs to %s" % args.outdir)
 
     with open(outfn(args, "seqs", None), "w") as asfile:
@@ -334,8 +328,9 @@ def write_final_outputs(args, all_seqs, all_trees, params):
     scale_vals, encoded_trees = encode.encode_trees([pfo["tree"] for pfo in all_trees])
 
     # write summary stats
+    assert len(param_list) == len(all_trees)
     sstats = []
-    for itr, (sval, pfo) in enumerate(zip(scale_vals, all_trees)):
+    for itr, (sval, pfo, params) in enumerate(zip(scale_vals, all_trees, param_list)):
         sstats.append(
             {
                 "tree": itr + args.itrial_start,
@@ -627,23 +622,26 @@ def run_sub_procs(args):
         )
     if any(m > 0 for m in missing_trees):
         print('    %s missing %d total trees over %d procs: %s' % (utils.color('yellow', 'warning'), sum(missing_trees), args.n_sub_procs, ' '.join(utils.color('red' if m>0 else None, str(m)) for m in missing_trees)))
+
     if args.make_plots:
         print("  note: can't make per-tree plots in main process when --n-sub-procs is set")
-        with open(outfn(args, 'responses', None), "rb") as rfile:
-            pklfos = pickle.load(rfile)
-        pcounts = {}
-        for pkfo in pklfos:
-            for pname, pval in pkfo['birth']._param_dict.items():  # NOTE compare to loop in choose_params()
-                if pname == 'yshift':  # not varying this atm (and maybe not ever)
-                    continue
-                add_pval(pcounts, pname, pval)
-            add_pval(pcounts, "initial_birth_rate", pkfo['birth'].λ_phenotype(0))
-        with open(outfn(args, 'summary-stats', None)) as cfile:
-            reader = csv.DictReader(cfile)
-            for line in reader:
-                for pname in ['carry_cap', 'time_to_sampling']:
-                    add_pval(pcounts, pname, float(line[pname]))
-        finish_param_choice(args, pcounts)
+
+    # read merged files so we can make parameter count plots
+    with open(outfn(args, 'responses', None), "rb") as rfile:
+        pklfos = pickle.load(rfile)
+    pcounts = {}
+    for pkfo in pklfos:
+        for pname, pval in pkfo['birth']._param_dict.items():  # NOTE compare to loop in choose_params()
+            if pname == 'yshift':  # not varying this atm (and maybe not ever)
+                continue
+            add_pval(pcounts, pname, pval)
+        add_pval(pcounts, "initial_birth_rate", pkfo['birth'].λ_phenotype(0))
+    with open(outfn(args, 'summary-stats', None)) as cfile:
+        reader = csv.DictReader(cfile)
+        for line in reader:
+            for pname in [p for p in ['carry_cap', 'time_to_sampling'] if p in line]:  # old files don't have these
+                add_pval(pcounts, pname, float(line[pname]))
+    finish_param_choice(args, pcounts)
 
 
 # ----------------------------------------------------------------------------------------
@@ -706,7 +704,7 @@ def main():
     all_seqs, all_trees = [], []
     n_missing = 0
     rng = np.random.default_rng(seed=args.seed)
-    params, n_times_used, pcounts = None, 0, {}  # parameter values, and number of trees that we've simulated with these parameter values
+    params, n_times_used, pcounts, plist = None, 0, {}, []  # parameter values, and number of trees that we've simulated with these parameter values (pcounts keeps track of counts of each parameter (for summary printing/plots) whereas plist keeps all parameter values so we can write summary stats at the end)
     all_fns = [[]]  # just for plotting
     for itrial in range(args.itrial_start, args.n_trials):
         print(utils.color("blue", "trial %d:" % itrial), end=" ")
@@ -747,6 +745,7 @@ def main():
         if tree is None:
             n_missing += 1
             continue
+        plist.append(params)
         utils.addfn(all_fns, plt_fn)
 
         with open(ofn, "wb") as fp:
@@ -782,7 +781,7 @@ def main():
         print("  %s no resulting trees, exiting without writing or plotting anything" % utils.color("yellow", "warning"))
         sys.exit(0)
 
-    write_final_outputs(args, all_seqs, all_trees, params)
+    write_final_outputs(args, all_seqs, all_trees, plist)
 
     finish_param_choice(args, pcounts, all_trees=all_trees)
     print("    total simulation time: %.1f sec" % (time.time() - start))
