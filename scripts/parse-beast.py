@@ -89,14 +89,15 @@ def read_gct_kd():
 
 # ----------------------------------------------------------------------------------------
 def get_mut_info():
-    dms_df = pd.read_csv('projects/gcdyn/experiments/final_variant_scores.csv', index_col="mutation", dtype=dict(position_IMGT=pd.Int16Dtype())) #"https://media.githubusercontent.com/media/jbloomlab/Ab-CGGnaive_DMS/main/results/final_variant_scores/final_variant_scores.csv"
+    print('    reading variant scores from %s' % args.variant_score_fname)
+    dms_df = pd.read_csv(args.variant_score_fname, index_col="mutation", dtype=dict(position_IMGT=pd.Int16Dtype())) #"https://media.githubusercontent.com/media/jbloomlab/Ab-CGGnaive_DMS/main/results/final_variant_scores/final_variant_scores.csv"
     dms_df = dms_df[dms_df.chain != "link"]  # remove linker sites
     dms_df["WT"] = dms_df.wildtype == dms_df.mutant  # add indicator for wildtype data
     assert dms_df.position_IMGT.max() < 1000
     dms_df["site"] = [f"{chain}-{str(pos).zfill(3)}" for chain, pos in zip(dms_df.chain, dms_df.position_IMGT)]
 
-    # read position info
-    pos_df = pd.read_csv('projects/gcdyn/experiments/CGGnaive_sites.csv', dtype=dict(site=pd.Int16Dtype()), index_col="site_scFv")  # "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv"
+    print('    reading cgg naive position info from %s' % args.cgg_naive_sites_fname)
+    pos_df = pd.read_csv(args.cgg_naive_sites_fname, dtype=dict(site=pd.Int16Dtype()), index_col="site_scFv")  # "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv"
     naive_seqs = {c : "".join(pos_df.query("chain == '%s'"%c.upper()).amino_acid) for c in 'hl'}
     naive_seqs['l'] = naive_seqs['l'][:-1]  # trim the last character, for some reason
     pos_maps = {c : pos_df.loc[pos_df.chain == c.upper(), "site"].reset_index(drop=True) for c in 'hl'}
@@ -104,23 +105,39 @@ def get_mut_info():
     return dms_df, naive_seqs, pos_maps
 
 # ----------------------------------------------------------------------------------------
-resdir = '/fh/fast/matsen_e/shared/replay-related/jareds-replay-fork/gcreplay/nextflow/results'
-beastdir = '%s/2023-05-18-beast/beast/btt-PR-1-1-1-LB-20-GC' % resdir
+example_results_dir = '/fh/fast/matsen_e/shared/replay-related/jareds-replay-fork/gcreplay/nextflow/results'
+example_beastdir = '%s/2023-05-18-beast/beast/btt-PR-1-1-1-LB-20-GC' % example_results_dir
 parser = argparse.ArgumentParser()
-parser.add_argument("xml_fname", default='%s/beastgen.xml'%beastdir)
-parser.add_argument("trees_fname", default='%s/beastannotated-PR-1-1-1-LB-20-GC_with_time.history.trees'%beastdir)
-parser.add_argument("outdir")
+parser.add_argument("--xml-fname", help='beast xml file')
+parser.add_argument("--trees-fname", help='beast .history.trees file')
+parser.add_argument("--outdir", required=True)
 parser.add_argument("--max-leaf-count", type=int, default=100)
 parser.add_argument("--igk-idx", type=int, default=336, help='zero-based index of first igk position in smooshed-together igh+igk sequence')
 parser.add_argument("--debug", action='store_true')
 parser.add_argument("--check-gct-kd", action='store_true')
-parser.add_argument("--gct-kd-fname", default='%s/latest/merged-results/observed-seqs.csv'%resdir)
+parser.add_argument("--gct-kd-fname", default='%s/latest/merged-results/observed-seqs.csv'%example_results_dir, help='old additive kd numbers from a gctree run')
+parser.add_argument("--test", action='store_true', help='if set, run on example beast files (see other args)')
+parser.add_argument("--variant-score-fname", default='projects/gcdyn/experiments/final_variant_scores.csv')
+parser.add_argument("--cgg-naive-sites-fname", default='projects/gcdyn/experiments/CGGnaive_sites.csv')
 args = parser.parse_args()
+
+if args.test:
+    print('  --test: running with results from example dir %s' % example_results_dir)
+    args.xml_fname = '%s/beastgen.xml' % example_beastdir
+    args.trees_fname = '%s/beastannotated-PR-1-1-1-LB-20-GC_with_time.history.trees' % example_beastdir
+    print('    --xml-fname: %s' % args.xml_fname)
+    print('    --trees-fname: %s' % args.trees_fname)
+else:
+    if args.xml_fname is None or args.trees_fname is None:
+        raise Exception('both --xml-fname and --trees-fname must be set unless running with --test')
 
 if not os.path.exists(args.outdir):
     os.makedirs(args.outdir)
 
+dms_df, naive_seqs, pos_maps = get_mut_info()
+
 single_treefname = '%s/single-tree.history.trees' % args.outdir
+print('  writing first tree from beast history file to new file %s' % single_treefname)
 subprocess.check_call('grep -v \'^tree STATE_[1-9][^ ]\' %s >%s' % (args.trees_fname, single_treefname), shell=True)
 
 print('  loading trees from %s' % single_treefname)
@@ -131,8 +148,6 @@ sys.stdout.flush()
 
 if args.check_gct_kd:
     gct_kd_vals = read_gct_kd()
-
-dms_df, naive_seqs, pos_maps = get_mut_info()
 
 if args.debug:
     print('                               N muts')
