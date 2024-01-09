@@ -78,9 +78,7 @@ def collapse_bundles(args, resps, sstats):
     return resps, sstats
 
 # ----------------------------------------------------------------------------------------
-def write_prediction(args, pred_resps, true_resps=None, true_sstats=None, scaler=None, smpl=None):
-    pvals = [[float(resp.value) for resp in plist] for plist in pred_resps]
-    punscaled, _ = scale_vals(args, pvals, smpl=smpl, scaler=scaler, inverse=True)
+def write_prediction(args, punscaled, true_resps=None, true_sstats=None, smpl=None):
     dfdata = {  # make empty df
         "%s-%s" % (param, ptype): []
         for param in args.params_to_predict
@@ -100,13 +98,15 @@ def write_prediction(args, pred_resps, true_resps=None, true_sstats=None, scaler
 # ----------------------------------------------------------------------------------------
 def get_prediction(args, model, spld, scaler, smpl=None):
     pred_resps = model.predict(spld["trees"])  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
+    pvals = [[float(resp.value) for resp in plist] for plist in pred_resps]
+    punscaled, _ = scale_vals(args, pvals, smpl=smpl, scaler=scaler, inverse=True)
     true_resps, true_sstats = None, None
     if args.is_simu:
         true_resps, true_sstats = [spld[tk] for tk in ["birth-responses", "sstats"]]
         if args.bundle_size > 1:
             true_resps, true_sstats = collapse_bundles(args, true_resps, true_sstats)
         assert len(pred_resps) == len(true_resps)
-    df = write_prediction(args, pred_resps, true_resps=true_resps, true_sstats=true_sstats, smpl=smpl, scaler=scaler)
+    df = write_prediction(args, punscaled, true_resps=true_resps, true_sstats=true_sstats, smpl=smpl)
     return df
 
 # ----------------------------------------------------------------------------------------
@@ -204,22 +204,28 @@ def read_tree_files(args):
             raise Exception('%d broken bundles, see above' % len(broken_bundles))
     # ----------------------------------------------------------------------------------------
     # read from various input files
+    samples = {}
     rfn, tfn, sfn = [
         "%s/%s" % (args.indir, s)
         for s in ["responses.pkl", "encoded-trees.npy", "summary-stats.csv"]
     ]
-    with open(rfn, "rb") as rfile:
-        pklfo = pickle.load(rfile)
-    samples = {k + "-responses": [tfo[k] for tfo in pklfo] for k in ["birth", "death"]}
+    rstr = ''
+    if args.is_simu:
+        with open(rfn, "rb") as rfile:
+            pklfo = pickle.load(rfile)
+        rstr = ' (%d responses from %s)' % (len(pklfo), rfn)
+        for tk in ["birth", "death"]:
+            samples[tk + "-responses"] = [tfo[tk] for tfo in pklfo]
     samples["trees"] = encode.read_trees(tfn)
     samples["sstats"] = []
     with open(sfn) as sfile:
         reader = csv.DictReader(sfile)
         for line in reader:
             samples["sstats"].append(line)
-    print("    read %d trees from %s (%d responses from %s)" % (len(samples["trees"]), tfn, len(pklfo), rfn))
-    print("      first response pair:\n        birth: %s\n        death: %s" % (samples["birth-responses"][0], samples["death-responses"][0]))
-    check_bundles(samples)
+    print("    read %d trees from %s%s" % (len(samples["trees"]), tfn, rstr))
+    if args.is_simu:
+        print("      first response pair:\n        birth: %s\n        death: %s" % (samples["birth-responses"][0], samples["death-responses"][0]))
+        check_bundles(samples)
     return samples
 
 
@@ -280,9 +286,9 @@ def train_and_test(args, start_time):
 # ----------------------------------------------------------------------------------------
 def infer(args, start_time):
     samples = read_tree_files(args)
-    pvals = get_pvlists(args, samples)
+    pvals = get_pvlists(args, samples)  # only really need the pvals to get the scaler (and maybe we should anyway be using the scaler from the training sample?)
     pscaled, scaler = scale_vals(args, pvals)
-    example_response_list = [ConstantResponse(v) for v in pscaled[0]]
+    example_response_list = [ConstantResponse(v) for v in pscaled[0]]  # well, we used pscaled for the example response, but this is a really hacky way of telling the neural network how many parameters to expect
     model = NeuralNetworkModel(example_response_list, bundle_size=args.bundle_size)
     model.load(args.model_file)
 

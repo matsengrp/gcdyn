@@ -94,8 +94,8 @@ def encode_tree(
 def scale_tree(
     intree: TreeNode,
 ) -> (float, TreeNode):
-    """Scale intree to average branch length 1, i.e. divide all branches by the average branch length.
-    Returns initial average branch length brlen and scaled tree outtree."""
+    """Scale intree to average leaf depth (i.e. time) of 1, i.e. divide all leaf depths by the average depth.
+    Returns initial average branch depth brlen and scaled tree outtree."""
     mean_brlen = np.mean([lf.t for lf in intree.iter_leaves()])
     outtree = copy.copy(intree)
     for node in outtree.iter_descendants():
