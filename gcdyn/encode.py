@@ -248,3 +248,15 @@ def write_leaf_meta(ofn, lmetafos):
         writer.writeheader()
         for lmfo in lmetafos:
             writer.writerow(lmfo)
+
+# ----------------------------------------------------------------------------------------
+def write_training_files(outdir, encoded_trees, responses, sstats, dbgstr=""):
+    """Write encoded tree .npy, response fcn .pkl, and summary stat .csv files for training/testing on simulation."""
+    if dbgstr != "":
+        print("      writing %s files to %s" % (dbgstr, outdir))
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+    write_trees(output_fn(outdir, "encoded-trees", None), encoded_trees)
+    with open(output_fn(outdir, "responses", None), "wb") as pfile:
+        dill.dump(responses, pfile)
+    write_sstats(output_fn(outdir, "summary-stats", None), sstats)

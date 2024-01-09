@@ -345,12 +345,7 @@ def write_final_outputs(args, all_seqs, all_trees, param_list):
         {k: p["%s-response" % k] for k in ["birth", "death"]} for p in all_trees
     ]
 
-    if not os.path.exists(args.outdir):
-        os.makedirs(args.outdir)
-    encode.write_trees(outfn(args, "encoded-trees", None), encoded_trees)
-    with open(outfn(args, "responses", None), "wb") as pfile:
-        dill.dump(responses, pfile)
-    encode.write_sstats(outfn(args, "summary-stats", None), sstats)
+    encode.write_training_files(args.outdir, encoded_trees, responses, sstats)
 
 # ----------------------------------------------------------------------------------------
 def add_seqs(all_seqs, itrial, tree):

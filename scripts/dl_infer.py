@@ -348,6 +348,8 @@ def main():
         raise Exception('must specify --model-file for \'infer\' action')
     if args.test:
         args.epochs = 10
+    if args.action == 'train' and not args.is_simu:
+        raise Exception('need to set --is-simu when training')
 
     random.seed(args.random_seed)
     np.random.seed(args.random_seed)
