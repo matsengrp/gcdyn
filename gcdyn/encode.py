@@ -7,8 +7,6 @@ import os
 from gcdyn.bdms import TreeNode
 from gcdyn import utils
 
-sstat_fieldnames = ["tree", "mean_branch_length", "total_branch_length", "carry_cap", "time_to_sampling"]
-
 def encode_tree(
     intree: TreeNode,
     max_leaf_count: int = None,
@@ -211,18 +209,12 @@ def write_trees(
 def read_trees(filename: str):
     return np.load(filename)
 
+# ----------------------------------------------------------------------------------------
+final_ofn_strs = ["seqs", "trees", "leaf-meta", "encoded-trees", "responses", "summary-stats"]
+sstat_fieldnames = ["tree", "mean_branch_length", "total_branch_length", "carry_cap", "time_to_sampling"]
 
-final_ofn_strs = [
-    "seqs",
-    "trees",
-    "leaf-meta",
-    "encoded-trees",
-    "responses",
-    "summary-stats",
-]
-
-
-def simfn(odir, ftype, itrial):
+# ----------------------------------------------------------------------------------------
+def output_fn(odir, ftype, itrial):
     """Return file name for simulation files of various types."""
     assert ftype in final_ofn_strs + [None]
     if itrial is None:
@@ -241,18 +233,18 @@ def simfn(odir, ftype, itrial):
         sfx = "pkl"
     return f"{odir}/{ftype}.{sfx}"
 
-
-def write_training_files(outdir, encoded_trees, responses, sstats, dbgstr=""):
-    """Write encoded tree .npy, response fcn .pkl, and summary stat .csv files."""
-    if dbgstr != "":
-        print("      writing %s files to %s" % (dbgstr, outdir))
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
-    write_trees(simfn(outdir, "encoded-trees", None), encoded_trees)
-    with open(simfn(outdir, "summary-stats", None), "w") as jfile:
-        writer = csv.DictWriter(jfile, sstat_fieldnames)
+# ----------------------------------------------------------------------------------------
+def write_sstats(ofn, sstats):
+    with open(ofn, "w") as sfile:
+        writer = csv.DictWriter(sfile, sstat_fieldnames)
         writer.writeheader()
         for sline in sstats:
             writer.writerow({k: v for k, v in sline.items() if k in sstat_fieldnames})
-    with open(simfn(outdir, "responses", None), "wb") as pfile:
-        dill.dump(responses, pfile)
+
+# ----------------------------------------------------------------------------------------
+def write_leaf_meta(ofn, lmetafos):
+    with open(ofn, "w") as mfile:
+        writer = csv.DictWriter(mfile, ["name", "affinity", "n_muts"])
+        writer.writeheader()
+        for lmfo in lmetafos:
+            writer.writerow(lmfo)

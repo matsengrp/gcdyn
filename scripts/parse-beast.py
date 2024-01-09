@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# fmt: off
 import numpy as np
 import argparse
 import os
@@ -19,7 +20,7 @@ from gcdyn import bdms, utils, encode
 from historydag import beast_loader
 
 # ----------------------------------------------------------------------------------------
-def get_additive_kd(nuc_seq, name='', debug=False):
+def get_affinity(nuc_seq, name='', debug=False):
     # ----------------------------------------------------------------------------------------
     def get_mutations(naive_aa, aa, pos_map, chain_annotation):
         assert len(naive_aa) == len(aa)
@@ -37,7 +38,7 @@ def get_additive_kd(nuc_seq, name='', debug=False):
                'l' : ltranslate(nuc_seq[336:])}
     muts = {c : get_mutations(naive_seqs[c], aa_seqs[c], pos_maps[c], "(%s)"%c.upper()) for c in 'hl'}
     has_stops = [any("*" in x for x in muts[c]) for c in 'hl']
-    if any(has_stops):
+    if any(has_stops):  # should really be "affinity" or "delta bind" rather than kd_val
         kd_val = np.nan
         kdstr = utils.color('red', ' stop')
     else:
@@ -50,19 +51,20 @@ def get_additive_kd(nuc_seq, name='', debug=False):
             gctstr = utils.color('blue', '-', width=5) if gctval is None else '%5.2f'%gctval
             print('    %s %s' % (gctstr, 'ok' if abs(kd_val-gctval) / gctval < 0.001 else utils.color('red', 'nope')), end='')
         print()
-    return kd_val
+    return kd_val, len(muts['h'] + muts['l'])
 
 # ----------------------------------------------------------------------------------------
 def get_etree(dtree, debug=False):
-    etree, enodes = None, {}
+    etree, enodes, lmetafos = None, {}, []
     for node in dtree.preorder_node_iter():
         nlab = node.taxon.label
         assert nlab not in enodes
-        enodes[nlab] = bdms.TreeNode(t=node.distance_from_root(), dist=0, name=nlab)  # note that the dtree distances are times, so all leaves are the same distance to root
+        enodes[nlab] = bdms.TreeNode(t=node.distance_from_root(), dist=node.edge.length, name=nlab)  # note that the dtree distances are times, so all leaves are the same distance to root (this sets root node distance to None)
         if node is dtree.seed_node:
             assert etree is None
             etree = enodes[nlab]
-        enodes[nlab].x = get_additive_kd(node.nuc_seq, name=nlab, debug=args.debug)
+        enodes[nlab].x, n_muts = get_affinity(node.nuc_seq, name=nlab, debug=args.debug)
+        lmetafos.append({'name' : nlab, 'affinity' : enodes[nlab].x, 'n_muts' : n_muts})
 
     for node in dtree.preorder_node_iter():
         for cnode in node.child_node_iter():
@@ -74,7 +76,7 @@ def get_etree(dtree, debug=False):
         print(dtree.as_ascii_plot(width=150, plot_metric='depth', show_internal_node_labels=True))
         print('ete3')
         print(etree.get_ascii(show_internal=True))
-    return etree
+    return etree, lmetafos
 
 # ----------------------------------------------------------------------------------------
 def read_gct_kd():
@@ -107,7 +109,17 @@ def get_mut_info():
 # ----------------------------------------------------------------------------------------
 example_results_dir = '/fh/fast/matsen_e/shared/replay-related/jareds-replay-fork/gcreplay/nextflow/results'
 example_beastdir = '%s/2023-05-18-beast/beast/btt-PR-1-1-1-LB-20-GC' % example_results_dir
-parser = argparse.ArgumentParser()
+helpstr = """
+Read Beast results from xml and history.trees files, add phenotype (affinity/kd) info from additive DMS-based
+affinity model, then write sequences to fasta, tree to newick, and affinity to yaml.
+Example usage:
+    parse-beast.py --test --outdir <outdir>
+    parse-beast.py --outdir <outdir> --xml-fname <beastdir>/beastgen.xml --trees-fname <beastdir>/*.history.trees --debug --check
+"""
+class MultiplyInheritedFormatter(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+    pass
+formatter_class = MultiplyInheritedFormatter
+parser = argparse.ArgumentParser(formatter_class=MultiplyInheritedFormatter, description=helpstr)
 parser.add_argument("--xml-fname", help='beast xml file')
 parser.add_argument("--trees-fname", help='beast .history.trees file')
 parser.add_argument("--outdir", required=True)
@@ -149,10 +161,11 @@ sys.stdout.flush()
 if args.check_gct_kd:
     gct_kd_vals = read_gct_kd()
 
+sstats, encoded_trees, lmetafos = [], [], []
 if args.debug:
     print('                               N muts')
     print('              name    kd     h  l   h+l')
-for dtree in res_gen:
+for itr, dtree in enumerate(res_gen):
     with open('%s/seqs.fa' % args.outdir, 'w') as sfile:
         inodelabel = 0
         for node in dtree.preorder_node_iter():
@@ -165,7 +178,15 @@ for dtree in res_gen:
     with open('%s/tree.nwk' % args.outdir, 'w') as tfile:
         tfile.write('%s\n' % dtree.as_string(schema='newick').strip())
 
-    etree = get_etree(dtree, debug=args.debug)
+    etree, tr_lmfos = get_etree(dtree, debug=args.debug)
     brlen, sctree = encode.scale_tree(etree)
     enc_tree = encode.encode_tree(etree, max_leaf_count=args.max_leaf_count, dont_scale=True)
 
+    sstats.append({'tree' : itr, 'mean_branch_length' : brlen, 'total_branch_length' : sum(n.dist for n in etree.iter_descendants())})
+    encoded_trees.append(enc_tree)
+    lmetafos += tr_lmfos
+
+print('  writing %d trees to %s' % (len(encoded_trees), args.outdir))
+encode.write_trees(encode.output_fn(args.outdir, 'encoded-trees', None), encoded_trees)
+encode.write_sstats(encode.output_fn(args.outdir, 'summary-stats', None), sstats)
+encode.write_leaf_meta(encode.output_fn(args.outdir, 'leaf-meta', None), lmetafos)

@@ -21,7 +21,7 @@ from experiments import replay
 def outfn(args, ftype, itrial, odir=None):
     if odir is None:
         odir = args.outdir
-    return encode.simfn(odir, ftype, itrial)
+    return encode.output_fn(odir, ftype, itrial)
 
 
 # ----------------------------------------------------------------------------------------
@@ -248,7 +248,6 @@ def choose_params(args, pcounts):
     pvstrs = ["%s %s" % (p, ("%d" if p in ["time_to_sampling", "carry_cap"] else "%.2f") % v) for p, v in sorted(params.items())]
     print("    chose new parameter values%s: %s" % ('' if args.simu_bundle_size == 1 else ' (for next bundle of size %d)' % args.simu_bundle_size, "  ".join(pvstrs)))
     return params
-# fmt: on
 
 
 # ----------------------------------------------------------------------------------------
@@ -311,18 +310,17 @@ def write_final_outputs(args, all_seqs, all_trees, param_list):
         for pfo in all_trees:
             tfile.write("%s\n" % pfo["tree"].write(format=1))
 
-    with open(outfn(args, "leaf-meta", None), "w") as jfile:
-        writer = csv.DictWriter(jfile, ["name", "affinity", "n_muts"])
-        writer.writeheader()
-        for pfo in all_trees:
-            for node in pfo["tree"].iter_descendants():
-                writer.writerow(
-                    {
-                        "name": node.name,
-                        "affinity": node.x,
-                        "n_muts": node.total_mutations,
-                    }
-                )
+    lmetafos = []
+    for pfo in all_trees:
+        for node in pfo["tree"].iter_descendants():
+            lmetafos.append(
+                {
+                    "name": node.name,
+                    "affinity": node.x,
+                    "n_muts": node.total_mutations,
+                }
+            )
+    encode.write_leaf_meta(outfn(args, "leaf-meta", None), lmetafos)
 
     # encode trees
     scale_vals, encoded_trees = encode.encode_trees([pfo["tree"] for pfo in all_trees])
@@ -346,8 +344,13 @@ def write_final_outputs(args, all_seqs, all_trees, param_list):
     responses = [
         {k: p["%s-response" % k] for k in ["birth", "death"]} for p in all_trees
     ]
-    encode.write_training_files(args.outdir, encoded_trees, responses, sstats)
 
+    if not os.path.exists(args.outdir):
+        os.makedirs(args.outdir)
+    encode.write_trees(outfn(args, "encoded-trees", None), encoded_trees)
+    with open(outfn(args, "responses", None), "wb") as pfile:
+        dill.dump(responses, pfile)
+    encode.write_sstats(outfn(args, "summary-stats", None), sstats)
 
 # ----------------------------------------------------------------------------------------
 def add_seqs(all_seqs, itrial, tree):
@@ -401,7 +404,6 @@ def check_memory(itrial, max_frac=0.03):
 
 
 def get_parser():
-    # fmt: off
     helpstr = """
     Simulate B cell trees in germinal centers using the birth-death-mutation model.
     Example usage that samples parameter values from within ranges:
