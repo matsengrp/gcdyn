@@ -45,17 +45,16 @@ def scale_vals(args, in_pvals, scaler=None, inverse=False, smpl='', debug=True):
                 bstr = "   " if dstr != "before" else "      %10s %7s" % (vname, smpl)
                 print("%s %s%s %s%s" % (bstr, fnstr(pvs, np.mean), fnstr(pvs, np.var), fnstr(pvs, min), fnstr(pvs, max), ), end="" if dstr == "before" else "\n")
     # ----------------------------------------------------------------------------------------
-    if debug:  # and smpl == smplist[0]:
-        print("    %sscaling %d variables: %s" % ("reverse " if inverse else "", len(args.params_to_predict), args.params_to_predict,))
-        print("                                  before                             after")
-        print("                           mean   var     min   max         mean   var     min   max")
-    if scaler is None:
-        scaler = preprocessing.StandardScaler().fit(in_pvals)
-        # scaler = preprocessing.MinMaxScaler(feature_range=(0, 10)).fit(in_pvals)
     if args.dont_scale_params:
         return copy.copy(in_pvals), scaler
+    if scaler is None:
+        scaler = preprocessing.StandardScaler().fit(in_pvals)  # scaler = preprocessing.MinMaxScaler(feature_range=(0, 10)).fit(in_pvals)
     sc_pvals = scaler.inverse_transform(in_pvals) if inverse else scaler.transform(in_pvals)
     if debug:
+        if debug:  # and smpl == smplist[0]:
+            print("    %sscaling %d variables: %s" % ("reverse " if inverse else "", len(args.params_to_predict), args.params_to_predict,))
+            print("                                  before                             after")
+            print("                           mean   var     min   max         mean   var     min   max")
         print_debug(in_pvals, sc_pvals)
     return sc_pvals, scaler
 
