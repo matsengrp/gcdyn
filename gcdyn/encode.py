@@ -211,20 +211,26 @@ def read_trees(filename: str):
 
 # ----------------------------------------------------------------------------------------
 final_ofn_strs = ["seqs", "trees", "leaf-meta", "encoded-trees", "responses", "summary-stats"]
+model_state_ofn_strs = ["model", "train-scaler", "example-responses"]
 sstat_fieldnames = ["tree", "mean_branch_length", "total_branch_length", "carry_cap", "time_to_sampling"]
 
 # ----------------------------------------------------------------------------------------
 def output_fn(odir, ftype, itrial):
     """Return file name for simulation files of various types."""
-    assert ftype in final_ofn_strs + [None]
+    assert ftype in final_ofn_strs + model_state_ofn_strs + [None]
     if itrial is None:
         suffixes = {
+            # final ofn:
             "seqs": "fasta",
             "trees": "nwk",
             "encoded-trees": "npy",
             "responses": "pkl",
             "leaf-meta": "csv",
             "summary-stats": "csv",
+            # model state:
+            "model": "keras",
+            "train-scaler": "pkl",
+            "example-responses": "pkl",
         }
         sfx = suffixes.get(ftype, "simu")
     else:

@@ -4,7 +4,8 @@ import argparse
 import os
 import sys
 from sklearn import preprocessing
-
+import joblib
+import dill
 import colored_traceback.always  # noqa: F401
 import time
 import pickle
@@ -264,7 +265,10 @@ def train_and_test(args, start_time):
         prebundle_layer_cfg=args.prebundle_layer_cfg,
     )
     model.fit(epochs=args.epochs, validation_split=args.validation_split)
-    model.network.save('%s/model.keras' % (args.outdir))
+    model.network.save(encode.output_fn(args.outdir, 'model', None))
+    joblib.dump(scalers['train'], encode.output_fn(args.outdir, 'train-scaler', None))
+    with open(encode.output_fn(args.outdir, 'example-responses', None), 'wb') as dfile:
+        dill.dump(responses[0], dfile)  # dump list of response fcns for one tree (so that when reading the model to infer, we can tell the neural network the structure of the responses)
 
     # evaluate/predict
     if not os.path.exists(args.outdir):
@@ -283,13 +287,34 @@ def train_and_test(args, start_time):
 
 
 # ----------------------------------------------------------------------------------------
+def read_model_files(args, samples):
+    erfn = encode.output_fn(args.model_dir, 'example-responses', None)
+    if os.path.exists(erfn):
+        print('    reading example responses from %s' % erfn)
+        with open(erfn, "rb") as rfile:
+            example_response_list = pickle.load(rfile)
+    else:
+        print('  %s example responses file %s doesn\'t exist, so trying to get from input info (probably ok on simulation)' % (utils.color('yellow', 'warning'), erfn))
+        pvals = get_pvlists(args, samples)  # only really need the pvals to get the scaler (and maybe we should anyway be using the scaler from the training sample?)
+        pscaled, inf_scaler = scale_vals(args, pvals)
+        example_response_list = [ConstantResponse(v) for v in pscaled[0]]  # well, we used pscaled for the example response, but this is a really hacky way of telling the neural network how many parameters to expect
+    scfn = encode.output_fn(args.model_dir, 'train-scaler', None)
+    if os.path.exists(scfn):
+        print('    reading training scaler from %s' % scfn)
+        use_scaler = joblib.load(scfn)
+    else:
+        print('  %s training scaler file %s doesn\'t exist, so fitting new scaler on inference sample (which isn\'t correct, but may be ok)' % (utils.color('yellow', 'warning'), scfn))
+        use_scaler = inf_scaler
+
+    model = NeuralNetworkModel(example_response_list, bundle_size=args.bundle_size)
+    model.load(encode.output_fn(args.model_dir, 'model', None))
+
+    return use_scaler, model
+
+# ----------------------------------------------------------------------------------------
 def infer(args, start_time):
     samples = read_tree_files(args)
-    pvals = get_pvlists(args, samples)  # only really need the pvals to get the scaler (and maybe we should anyway be using the scaler from the training sample?)
-    pscaled, scaler = scale_vals(args, pvals)
-    example_response_list = [ConstantResponse(v) for v in pscaled[0]]  # well, we used pscaled for the example response, but this is a really hacky way of telling the neural network how many parameters to expect
-    model = NeuralNetworkModel(example_response_list, bundle_size=args.bundle_size)
-    model.load(args.model_file)
+    scaler, model = read_model_files(args, samples)
 
     if not os.path.exists(args.outdir):
         os.makedirs(args.outdir)
@@ -311,7 +336,7 @@ def get_parser():
     <infer> infers parameters with an existing dl model.
     Example usage:
         gcd-dl train --indir <input dir> --outdir <output dir>
-        gcd-dl infer --indir <input dir> --outdir <output dir> --model-file <model file>
+        gcd-dl infer --indir <input dir> --outdir <output dir> --model-dir <model dir>
     """
 
     class MultiplyInheritedFormatter(
@@ -324,7 +349,7 @@ def get_parser():
     )
     parser.add_argument("action", choices=['train', 'infer'])
     parser.add_argument("--indir", required=True, help="training input directory with gcdyn simulation output (uses encoded trees .npy, summary stats .csv, and response .pkl files)", )
-    parser.add_argument("--model-file", help="file with saved deep learning model for inference")
+    parser.add_argument("--model-dir", help="file with saved deep learning model for inference")
     parser.add_argument("--outdir", required=True, help="output directory")
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--bundle-size", type=int, default=50)
@@ -349,8 +374,8 @@ def main():
     parser = get_parser()
     start_time = time.time()
     args = parser.parse_args()
-    if args.action == 'infer' and args.model_file is None:
-        raise Exception('must specify --model-file for \'infer\' action')
+    if args.action == 'infer' and args.model_dir is None:
+        raise Exception('must specify --model-dir for \'infer\' action')
     if args.test:
         args.epochs = 10
     if args.action == 'train' and not args.is_simu:

@@ -88,8 +88,8 @@ class NeuralNetworkModel:
         bundle_size: int = 50,
     ):
         """
-        example_response_list: list of response objects for a single tree (used to work out the number of
-                     parameters and how to encode/decode)
+        example_response_list: list of response objects for a single tree (used for two things: to work out the number of
+                     parameters, and how to encode/decode by calling its _flatten() fcn)
         bundle_size: number of trees to bundle together. The per-bundle mean of predictions is applied to the
                      convolutional output and then passed to the dense layers.
         """
