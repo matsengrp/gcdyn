@@ -63,17 +63,17 @@ def scale_vals(args, in_pvals, scaler=None, inverse=False, smpl='', debug=True):
 # ----------------------------------------------------------------------------------------
 def collapse_bundles(args, resps, sstats):
     resps = [
-        NeuralNetworkModel._collapse_identical_list(resps[i : i + args.bundle_size])
-        for i in range(0, len(resps), args.bundle_size)
+        NeuralNetworkModel._collapse_identical_list(resps[i : i + args.dl_bundle_size])
+        for i in range(0, len(resps), args.dl_bundle_size)
     ]
     sstats = [
         {
             tkey: (min if tkey == "tree" else np.mean)(
-                [float(sstats[i + j][tkey]) for j in range(args.bundle_size)]
+                [float(sstats[i + j][tkey]) for j in range(args.dl_bundle_size)]
             )
             for tkey in sstats[i]
         }
-        for i in range(0, len(sstats), args.bundle_size)
+        for i in range(0, len(sstats), args.dl_bundle_size)
     ]  # mean of each summary stat over trees in each bundle ('tree' key is an index, so take min/index of first one)
     return resps, sstats
 
@@ -103,7 +103,7 @@ def get_prediction(args, model, spld, scaler, smpl=None):
     true_resps, true_sstats = None, None
     if args.is_simu:
         true_resps, true_sstats = [spld[tk] for tk in ["birth-responses", "sstats"]]
-        if args.bundle_size > 1:
+        if args.dl_bundle_size > 1:
             true_resps, true_sstats = collapse_bundles(args, true_resps, true_sstats)
         assert len(pred_resps) == len(true_resps)
     df = write_prediction(args, punscaled, true_resps=true_resps, true_sstats=true_sstats, smpl=smpl)
@@ -180,7 +180,7 @@ def read_tree_files(args):
         ibund, broken_bundles = -1, []
         bundle_rates, tree_indices = {n : [] for n in rnames}, []
         for iresp, (br, dr) in enumerate(zip(samples["birth-responses"], samples["death-responses"])):
-            if iresp % args.bundle_size == 0:
+            if iresp % args.dl_bundle_size == 0:
                 for rn in rnames:
                     if len(bundle_rates[rn]) > 1:
                         broken_bundles.append(ibund)
@@ -190,7 +190,7 @@ def read_tree_files(args):
                 tree_indices = []
                 ibund += 1
                 if debug:
-                    print('  bundle %d (size %d)' % (ibund, args.bundle_size))
+                    print('  bundle %d (size %d)' % (ibund, args.dl_bundle_size))
             tree_indices.append(iresp)
             if debug:
                 print('      %7d  %s  %s' % (iresp, br, dr))
@@ -255,7 +255,7 @@ def train_and_test(args, start_time):
 
     # train
     responses = [[ConstantResponse(v) for v in vlist] for vlist in pscaled["train"]]
-    model = NeuralNetworkModel(responses[0], bundle_size=args.bundle_size)
+    model = NeuralNetworkModel(responses[0], bundle_size=args.dl_bundle_size)
     model.build_model(
         smpldict["train"]["trees"],
         responses,
@@ -306,7 +306,7 @@ def read_model_files(args, samples):
         print('  %s training scaler file %s doesn\'t exist, so fitting new scaler on inference sample (which isn\'t correct, but may be ok)' % (utils.color('yellow', 'warning'), scfn))
         use_scaler = inf_scaler
 
-    model = NeuralNetworkModel(example_response_list, bundle_size=args.bundle_size)
+    model = NeuralNetworkModel(example_response_list, bundle_size=args.dl_bundle_size)
     model.load(encode.output_fn(args.model_dir, 'model', None))
 
     return use_scaler, model
@@ -352,7 +352,7 @@ def get_parser():
     parser.add_argument("--model-dir", help="file with saved deep learning model for inference")
     parser.add_argument("--outdir", required=True, help="output directory")
     parser.add_argument("--epochs", type=int, default=30)
-    parser.add_argument("--bundle-size", type=int, default=50)
+    parser.add_argument("--dl-bundle-size", type=int, default=50, help='\'dl-\' is to differentiate from \'simu-\' bundle size when calling this from cf-gcdyn.py')
     parser.add_argument("--dropout-rate", type=float, default=0)
     parser.add_argument("--learning-rate", type=float, default=0.001)
     parser.add_argument("--ema-momentum", type=float, default=0.99)
