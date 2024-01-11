@@ -39,7 +39,7 @@ def get_affinity(nuc_seq, name='', debug=False):
     muts = {c : get_mutations(naive_seqs[c], aa_seqs[c], pos_maps[c], "(%s)"%c.upper()) for c in 'hl'}
     has_stops = [any("*" in x for x in muts[c]) for c in 'hl']
     if any(has_stops):  # should really be "affinity" or "delta bind" rather than kd_val
-        kd_val = np.nan
+        kd_val = dms_df.delta_bind_CGG.min()
         kdstr = utils.color('red', ' stop')
     else:
         kd_val = dms_df.delta_bind_CGG[muts['h'] + muts['l']].sum()
