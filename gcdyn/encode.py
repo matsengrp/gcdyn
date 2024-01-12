@@ -213,6 +213,7 @@ def read_trees(filename: str):
 final_ofn_strs = ["seqs", "trees", "leaf-meta", "encoded-trees", "responses", "summary-stats"]
 model_state_ofn_strs = ["model", "train-scaler", "example-responses"]
 sstat_fieldnames = ["tree", "mean_branch_length", "total_branch_length", "carry_cap", "time_to_sampling"]
+leaf_meta_fields = ["tree-index", "name", "affinity", "n_muts"]
 
 # ----------------------------------------------------------------------------------------
 def output_fn(odir, ftype, itrial):
@@ -250,7 +251,7 @@ def write_sstats(ofn, sstats):
 # ----------------------------------------------------------------------------------------
 def write_leaf_meta(ofn, lmetafos):
     with open(ofn, "w") as mfile:
-        writer = csv.DictWriter(mfile, ["name", "affinity", "n_muts"])
+        writer = csv.DictWriter(mfile, leaf_meta_fields)
         writer.writeheader()
         for lmfo in lmetafos:
             writer.writerow(lmfo)
