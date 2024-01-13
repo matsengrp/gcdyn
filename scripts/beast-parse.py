@@ -21,7 +21,7 @@ from gcdyn import bdms, utils, encode
 from historydag import beast_loader
 
 # ----------------------------------------------------------------------------------------
-def get_affinity(nuc_seq, name, debug=False):
+def get_affinity(nuc_seq, name, kd_checks, debug=False):
     # ----------------------------------------------------------------------------------------
     def get_mutations(naive_aa, aa, pos_map, chain_annotation):
         assert len(naive_aa) == len(aa)
@@ -51,12 +51,14 @@ def get_affinity(nuc_seq, name, debug=False):
             gctval = gct_kd_vals[name]
             gctstr = utils.color('blue', '-', width=5) if gctval is None else '%5.2f'%gctval
             fdiff = 0 if gctval==0 and kd_val==0 else abs((kd_val-gctval)) / max(abs(gctval), abs(kd_val))
-            print('    %s %s' % (gctstr, 'ok' if fdiff < 0.001 else utils.color('red', 'nope')), end='')
+            chkstr = 'ok' if fdiff < 0.001 else 'bad'
+            kd_checks[chkstr] += 1
+            print('    %s %s' % (gctstr, utils.color('red' if chkstr=='bad' else None, chkstr)), end='')
         print()
     return kd_val, len(muts['h'] + muts['l'])
 
 # ----------------------------------------------------------------------------------------
-def get_etree(dtree, idir, itr, debug=False):
+def get_etree(dtree, idir, itr, kd_checks, debug=False):
     etree, enodes, lmetafos = None, {}, []
     for node in dtree.preorder_node_iter():
         nlab = node.taxon.label
@@ -65,7 +67,7 @@ def get_etree(dtree, idir, itr, debug=False):
         if node is dtree.seed_node:
             assert etree is None
             etree = enodes[nlab]
-        enodes[nlab].x, n_muts = get_affinity(node.nuc_seq, nlab, debug=args.debug)
+        enodes[nlab].x, n_muts = get_affinity(node.nuc_seq, nlab, kd_checks, debug=args.debug)
         lmetafos.append({'tree-index' : idir + itr, 'name' : nlab, 'affinity' : enodes[nlab].x, 'n_muts' : n_muts})
 
     for node in dtree.preorder_node_iter():
@@ -135,6 +137,7 @@ def read_single_dir(bstdir, idir):
     if args.debug:
         print('                               N muts')
         print('              name    kd     h  l   h+l')
+    kd_checks = {'ok' : 0, 'bad' : 0}
     for itr, dtree in enumerate(res_gen):
         with open('%s/seqs.fa' % gcodir, 'w') as sfile:
             inodelabel = 0
@@ -149,13 +152,16 @@ def read_single_dir(bstdir, idir):
         with open('%s/tree.nwk' % gcodir, 'w') as tfile:
             tfile.write('%s\n' % dtree.as_string(schema='newick').strip())
 
-        etree, tr_lmfos = get_etree(dtree, idir, itr, debug=args.debug)
+        etree, tr_lmfos = get_etree(dtree, idir, itr, kd_checks, debug=args.debug)
         brlen, sctree = encode.scale_tree(etree)
         enc_tree = encode.encode_tree(etree, max_leaf_count=args.max_leaf_count, dont_scale=True)
 
         sstats.append({'tree' : idir + itr, 'mean_branch_length' : brlen, 'total_branch_length' : sum(n.dist for n in etree.iter_descendants())})
         encoded_trees.append(enc_tree)
         lmetafos += tr_lmfos
+
+    if kd_checks['bad'] > 0:
+        print('  %s %d / %d affinities don\'t match old values from gctree results' % (utils.color('yellow', 'warning'), kd_checks['bad'], sum(kd_checks.values())))
 
     if args.debug:
         print('      writing %d trees to %s' % (len(encoded_trees), gcodir))
@@ -172,7 +178,7 @@ helpstr = """
 Read Beast results from xml and history.trees files, add phenotype (affinity/kd) info from additive DMS-based
 affinity model, then write sequences to fasta, tree to newick, and affinity to yaml.
 Example usage:
-    beast-parse.py --input-dir <input-dir> --beast-version <vsn> --outdir <outdir> --debug 1 --check
+    beast-parse.py --input-dir <input-dir> --beast-version <bvsn> --output-version <ovsn> --debug 1 --check
 """
 class MultiplyInheritedFormatter(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
     pass
