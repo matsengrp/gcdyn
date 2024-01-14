@@ -45,8 +45,7 @@ def print_final_response_vals(tree, birth_resp, death_resp, final_time):
 # ----------------------------------------------------------------------------------------
 def generate_sequences_and_tree(
     args,
-    sample_time,
-    carry_cap,
+    params,
     birth_resp,
     death_resp,
     mutation_resp,
@@ -64,14 +63,14 @@ def generate_sequences_and_tree(
             tree.sequence = replay.NAIVE_SEQUENCE
             tree.chain_2_start_idx = replay.CHAIN_2_START_IDX
             tree.evolve(
-                sample_time,
+                params['time_to_sampling'],
                 birth_response=birth_resp,
                 death_response=death_resp,
                 mutation_response=mutation_resp,
                 mutator=mutator,
                 min_survivors=args.min_survivors,
                 birth_mutations=False,
-                capacity=carry_cap,
+                capacity=params["carry_cap"],
                 capacity_method=args.capacity_method,
                 seed=seed,
                 verbose=args.debug > 1,
@@ -81,7 +80,7 @@ def generate_sequences_and_tree(
                 % (len(tree), np.mean([l.t for l in tree.iter_leaves()]), '' if itry==0 else '  try %d' % (itry + 1),  time.time() - tree_start)
             )
             if args.debug:
-                print_final_response_vals(tree, birth_resp, death_resp, sample_time)
+                print_final_response_vals(tree, birth_resp, death_resp, params['time_to_sampling'])
             success = True
             break
         except bdms.TreeError as terr:
@@ -115,10 +114,10 @@ def generate_sequences_and_tree(
     plt_fn = None
     if args.make_plots:
         plt_fn = utils.plot_tree_slices(
-            args.outdir + "/plots/tree-slices", tree, sample_time, itrial
+            args.outdir + "/plots/tree-slices", tree, params['time_to_sampling'], itrial
         )
 
-    n_to_sample = args.n_seqs
+    n_to_sample = params["n_seqs"]
     if len(tree) < n_to_sample:
         print(
             "  %s --n-seqs set to %d but tree has only %d tips, so just sampling all of them"
@@ -234,6 +233,7 @@ def choose_params(args, pcounts):
         "yscale",
         "time_to_sampling",
         "carry_cap",
+        "n_seqs",
     ]:  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
         extra_bounds, dbgstrs = None, []
         if args.use_generated_parameter_bounds:
@@ -242,10 +242,16 @@ def choose_params(args, pcounts):
             if pname == "yscale":
                 extra_bounds = get_yscale_bounds(args, params["xscale"], params["xshift"], dbgstrs)
         params[pname] = choose_val(args, pname, extra_bounds=extra_bounds, dbgstrs=dbgstrs)
-        if pname == 'carry_cap' and any(params[pname] < p for p in [args.min_survivors, args.n_seqs]):
-            print('  %s chose carry cap (%d) smaller than either --min-survivors %d or --n-seqs %d, so you\'ll probably either get a lot of failures or fail sampling seqs' % (utils.color('yellow', 'warning'), params[pname], args.min_survivors, args.n_seqs))
+        if pname in ["time_to_sampling", "carry_cap", "n_seqs"]:
+            params[pname] = int(params[pname])
         add_pval(pcounts, pname, params[pname])
-    pvstrs = ["%s %s" % (p, ("%d" if p in ["time_to_sampling", "carry_cap"] else "%.2f") % v) for p, v in sorted(params.items())]
+    if args.min_survivors is None:
+        tfrac = 0.2
+        args.min_survivors = tfrac * params["carry_cap"]
+        print('    setting --min-survivors to %.2f * carry cap = %d' % (tfrac, args.min_survivors))
+    if any(params["carry_cap"] < p for p in [args.min_survivors, params["n_seqs"]]):
+        print('  %s chose carry cap (%d) smaller than either min survivors %d or N seqs %d, so you\'ll probably either get a lot of failed tree runs, or fail sampling seqs' % (utils.color('yellow', 'warning'), params["carry_cap"], args.min_survivors, params["n_seqs"]))
+    pvstrs = ["%s %s" % (p, ("%d" if p in ["time_to_sampling", "carry_cap", "n_seqs"] else "%.2f") % v) for p, v in sorted(params.items())]
     print("    chose new parameter values%s: %s" % ('' if args.simu_bundle_size == 1 else ' (for next bundle of size %d)' % args.simu_bundle_size, "  ".join(pvstrs)))
     return params
 
@@ -410,13 +416,14 @@ def get_parser():
     class MultiplyInheritedFormatter(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
         pass
     parser = argparse.ArgumentParser(formatter_class=MultiplyInheritedFormatter, description=helpstr)
-    parser.add_argument("--n-seqs", default=70, type=int, help="Number of sequences to observe")
+    parser.add_argument("--n-seqs-values", default=[70], nargs="+", type=int, help="Number of sequences to observe (list of values)")
+    parser.add_argument("--n-seqs-range", nargs="+", type=int)
     parser.add_argument("--n-trials", default=51, type=int, help="Number of trials/GCs to simulate")
     parser.add_argument("--n-max-tries", default=100, type=int, help="Number of times to retry simulation if it fails due to reaching either the min or max number of leaves.")
     parser.add_argument("--time-to-sampling-values", default=[20], nargs="+", type=int, help="List of values from which to choose for time to sampling.")
     parser.add_argument("--time-to-sampling-range", nargs="+", type=int, help="Pair of values (min/max) between which to choose at uniform random the time to sampling for each tree. Overrides --time-to-sampling-values.")
     parser.add_argument("--simu-bundle-size", default=1, type=int, help="By default, we choose a new set of parameters for each tree. If this arg is set, once we've chosen a set of parameter values, we instead simulate this many trees with those same values before choosing another set.")
-    parser.add_argument("--min-survivors", default=100, type=int)
+    parser.add_argument("--min-survivors", type=int, help="The simulation is terminated if the number of leaves falls below this. If not set, it\'s set automatically based on carry capacity.")
     parser.add_argument("--carry-cap-values", default=[300], nargs='+', type=int)
     parser.add_argument("--carry-cap-range", nargs='+', type=int)
     parser.add_argument("--capacity-method", default="birth", choices=["birth", "death", "hard", None], help="see bdms.evolve() docs. Note that 'death' often involves a ton of churn, which makes for very slow simulations.")
@@ -459,7 +466,7 @@ def set_test_args(args):
     if "--min-survivors" not in sys.argv:
         args.min_survivors = 10
     if "--n-seqs" not in sys.argv:
-        args.n_seqs = 5
+        args.n_seqs_values = [5]
     if "--n-max-tries" not in sys.argv:
         args.n_max_tries = 5
     print(
@@ -469,7 +476,7 @@ def set_test_args(args):
             args.carry_cap_values,
             args.time_to_sampling_values,
             args.min_survivors,
-            args.n_seqs,
+            args.n_seqs_values,
             args.n_max_tries,
         )
     )
@@ -636,7 +643,7 @@ def run_sub_procs(args):
     with open(outfn(args, 'summary-stats', None)) as cfile:
         reader = csv.DictReader(cfile)
         for line in reader:
-            for pname in [p for p in ['carry_cap', 'time_to_sampling'] if p in line]:  # old files don't have these
+            for pname in [p for p in ['carry_cap', 'time_to_sampling', 'n_seqs'] if p in line]:  # old files don't have these
                 add_pval(pcounts, pname, float(line[pname]))
     finish_param_choice(args, pcounts)
 
@@ -656,7 +663,7 @@ def main():
     else:
         print("  note: not using additional generated parameter bounds since at least one of --yscale-range, --initial-birth-rate-range was unset (this may result in lots of failed simulation runs if the initial birth rate is either too small or too large)")
     # handle args that can have either a list of a few values, or choose from a uniform interval specified with two (min, max) values
-    for pname in ["xscale", "xshift", "yscale", "time_to_sampling", "carry_cap"]:
+    for pname in ["xscale", "xshift", "yscale", "time_to_sampling", "carry_cap", "n_seqs"]:
         rangevals = getattr(args, pname + "_range")
         if rangevals is not None and len(rangevals) != 2:  # range with two values for continuous
             raise Exception("range must consist of two values but got %d" % len(rangevals))
@@ -729,8 +736,7 @@ def main():
         birth_resp, death_resp = get_responses(args, params["xscale"], params["xshift"], params["yscale"], pcounts)
         plt_fn, tree = generate_sequences_and_tree(
             args,
-            params["time_to_sampling"],
-            params["carry_cap"],
+            params,
             birth_resp,
             death_resp,
             mutation_resp,
