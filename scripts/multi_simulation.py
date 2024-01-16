@@ -75,9 +75,10 @@ def generate_sequences_and_tree(
                 seed=seed,
                 verbose=args.debug > 1,
             )
+            live_leaves = [l for l in tree if l.event == tree._SURVIVAL_EVENT]
             print(
-                "    finished tree with %d tips at time %.1f%s (%.1f sec)"
-                % (len(tree), np.mean([l.t for l in tree.iter_leaves()]), '' if itry==0 else '  try %d' % (itry + 1),  time.time() - tree_start)
+                "    finished tree with %d live tips (%d total tips) at time %.1f%s (%.1f sec)"
+                % (len(live_leaves), len(tree), np.mean([l.t for l in tree.iter_leaves()]), '' if itry==0 else '  try %d' % (itry + 1),  time.time() - tree_start)
             )
             if args.debug:
                 print_final_response_vals(tree, birth_resp, death_resp, params['time_to_sampling'])
@@ -118,12 +119,9 @@ def generate_sequences_and_tree(
         )
 
     n_to_sample = params["n_seqs"]
-    if len(tree) < n_to_sample:
-        print(
-            "  %s --n-seqs set to %d but tree has only %d tips, so just sampling all of them"
-            % (utils.color("yellow", "warning"), n_to_sample, len(tree))
-        )
-        n_to_sample = len(tree)
+    if len(live_leaves) < n_to_sample:
+        print("  %s --n-seqs set to %d but tree only has %d live tips, so just sampling all of them" % (utils.color("yellow", "warning"), n_to_sample, len(live_leaves)))
+        n_to_sample = len(live_leaves)
     tree.sample_survivors(n=n_to_sample, seed=seed)
     tree.prune()
     tree.remove_mutation_events()
@@ -332,7 +330,8 @@ def write_final_outputs(args, all_seqs, all_trees, param_list):
     scale_vals, encoded_trees = encode.encode_trees([pfo["tree"] for pfo in all_trees])
 
     # write summary stats
-    assert len(param_list) == len(all_trees)
+    if len(param_list) != len(all_trees):
+        raise Exception('parameter list %d not same length as trees %d' % (len(param_list), len(all_trees)))
     sstats = []
     for itr, (sval, pfo, params) in enumerate(zip(scale_vals, all_trees, param_list)):
         sstats.append(
@@ -728,6 +727,7 @@ def main():
             else:
                 add_seqs(all_seqs, itrial, pfo["tree"])
                 add_tree(all_trees, itrial, pfo)
+                plist.append(params)
                 continue
         if args.dont_run_new_simu:
             n_missing += 1
@@ -748,33 +748,12 @@ def main():
         if tree is None:
             n_missing += 1
             continue
-        plist.append(params)
         utils.addfn(all_fns, plt_fn)
-
         with open(ofn, "wb") as fp:
-            dill.dump(
-                {
-                    "tree": tree,
-                    "birth-response": birth_resp,
-                    "death-response": death_resp,
-                },
-                fp,
-            )
-
-        add_seqs(
-            all_seqs,
-            itrial,
-            tree,
-        )
-        add_tree(
-            all_trees,
-            itrial,
-            {
-                "tree": tree,
-                "birth-response": birth_resp,
-                "death-response": death_resp,
-            },
-        )
+            dill.dump({"tree": tree, "birth-response": birth_resp, "death-response": death_resp}, fp)
+        add_seqs(all_seqs, itrial, tree)
+        add_tree(all_trees, itrial, {"tree": tree, "birth-response": birth_resp, "death-response": death_resp})
+        plist.append(params)
 
     if args.dont_run_new_simu:
         print("    --dont-run-new-simu: missing %d trees, but ignoring and just merging the ones we have" % n_missing)
