@@ -320,14 +320,14 @@ def mpl_init(fsize=20, label_fsize=15):
 # fmt: off
 # plot scatter + box/whisker plot comparing true and predicted values for deep learning inference
 # NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
-def make_dl_plots(prdfs, params_to_predict, outdir, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15):
+def make_dl_plots(prdfs, params_to_predict, outdir, is_simu=False, data_val=0, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15):
     # ----------------------------------------------------------------------------------------
     def single_plot(ptype, param, smpl):
         # ----------------------------------------------------------------------------------------
         def add_mae_text(ax, smp_name, tdf):
             mae = np.mean([
                 abs(pval - tval)
-                for tval, pval in zip(tdf['%s-truth'%param], tdf['%s-predicted'%param])
+                for tval, pval in zip(tdf["%s-%s"%(param, xkstr)], tdf['%s-predicted'%param])
             ])
             plt.text(0.05, 0.75 if smp_name=='valid' else 0.85, '%s mae: %.4f'%(smp_name, mae), transform=ax.transAxes, color='red' if smp_name=='valid' else None)
         # ----------------------------------------------------------------------------------------
@@ -364,12 +364,16 @@ def make_dl_plots(prdfs, params_to_predict, outdir, validation_split=0, xtra_txt
                     ax.set_xticklabels(xtls, rotation=90, ha='right')
             else:
                 assert False
-            add_mae_text(ax, smpl, tdf)
+            if is_simu:
+                add_mae_text(ax, smpl, tdf)
         # ----------------------------------------------------------------------------------------
         plt.clf()
         all_df = prdfs[smpl]
-        xkey, ykey = ["%s-%s" % (param, vtype) for vtype in ["truth", "predicted"]]
-        discrete = len(set(all_df["%s-truth" % param])) < 15  # if simulation has discrete parameter values
+        xkstr = "truth" if is_simu else "data"
+        xkey, ykey = ["%s-%s" % (param, vtype) for vtype in [xkstr, "predicted"]]
+        if not is_simu:
+            all_df["%s-%s"%(param, xkstr)] = [data_val for _ in all_df["%s-predicted"%param]]
+        discrete = len(set(all_df["%s-%s"%(param, xkstr)])) < 15  # if simulation has discrete parameter values
         if discrete and ptype == 'scatter' and len(all_df) > 500:  # too busy, don't bother making them
             return None
         plt_df = all_df.copy()
@@ -378,7 +382,7 @@ def make_dl_plots(prdfs, params_to_predict, outdir, validation_split=0, xtra_txt
             vld_df = all_df.copy()[len(all_df) - int(validation_split * len(all_df)) :]
             snsplot('valid', vld_df, discrete=discrete)
         snsplot(smpl, plt_df, discrete=discrete)
-        plt.xlabel("true value")
+        plt.xlabel("%s value" % xkstr.replace("truth", "true"))
         plt.ylabel("predicted value")
         titlestr = "%s %s" % (param, smpl)
         if xtra_txt is not None:

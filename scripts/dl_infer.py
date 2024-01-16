@@ -118,6 +118,7 @@ def read_plot_csv(args):
         prdfs,
         args.params_to_predict,
         args.outdir + "/plots",
+        is_simu=args.is_simu,
         validation_split=args.validation_split,
     )
 
@@ -226,6 +227,14 @@ def read_tree_files(args):
     if args.is_simu:
         print("      first response pair:\n        birth: %s\n        death: %s" % (samples["birth-responses"][0], samples["death-responses"][0]))
         check_bundles(samples)
+    if len(samples["trees"]) % args.dl_bundle_size != 0:
+        if args.discard_extra_trees:
+            n_remain = len(samples["trees"]) % args.dl_bundle_size
+            print('  --discard-extra-trees: discarding %d trees from end of input since total N trees %d isn\'t evenly divisible by bundle size %d' % (n_remain, len(samples['trees']), args.dl_bundle_size))
+            for tk in samples:
+                samples[tk] = samples[tk][: len(samples[tk]) - n_remain]
+        else:
+            raise Exception('N trees %d not divisible by bundle size %d' % (len(samples["trees"]), args.dl_bundle_size))
     return samples
 
 
@@ -280,6 +289,7 @@ def train_and_test(args, start_time):
         prdfs,
         args.params_to_predict,
         args.outdir + "/plots",
+        is_simu=args.is_simu,
         validation_split=args.validation_split,
     )
 
@@ -323,6 +333,7 @@ def infer(args, start_time):
         {'infer' : prdf},
         args.params_to_predict,
         args.outdir + "/plots",
+        is_simu=args.is_simu,
         validation_split=0,
     )
 
@@ -353,6 +364,7 @@ def get_parser():
     parser.add_argument("--outdir", required=True, help="output directory")
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--dl-bundle-size", type=int, default=50, help='\'dl-\' is to differentiate from \'simu-\' bundle size when calling this from cf-gcdyn.py')
+    parser.add_argument("--discard-extra-trees", action="store_true", help='By default, the number of trees during inference must be evenly divisible by --dl-bundle-size. If this is set, however, any extras are discarded to allow inference.')
     parser.add_argument("--dropout-rate", type=float, default=0)
     parser.add_argument("--learning-rate", type=float, default=0.001)
     parser.add_argument("--ema-momentum", type=float, default=0.99)
