@@ -1,13 +1,12 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>gcdyn.nn.BundleMeanLayer &#8212; gcdyn  documentation</title>
   
@@ -19,32 +18,32 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=365ca57ee442770a23c6"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/clipboard.min.js"></script>
-    <script src="../_static/copybutton.js"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_autosummary/gcdyn.nn.BundleMeanLayer';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -59,10 +58,9 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>
@@ -103,11 +101,14 @@
 </form></div>
   </div>
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
-    </nav>
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
+      
+      
       
       <div class="bd-sidebar-primary bd-sidebar">
         
@@ -122,6 +123,7 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item">
+
   
 
 <a class="navbar-brand logo" href="../index.html">
@@ -140,7 +142,18 @@
   
   
 </a></div>
-        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul class="nav bd-sidenav">
@@ -398,6 +411,7 @@
 </button>
 
 
+
 <script>
 document.write(`
   <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
@@ -407,6 +421,7 @@ document.write(`
   </button>
 `);
 </script>
+
 
 <script>
 document.write(`
@@ -505,13 +520,13 @@ document.write(`
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="gcdyn-nn-bundlemeanlayer">
-<h1>gcdyn.nn.BundleMeanLayer<a class="headerlink" href="#gcdyn-nn-bundlemeanlayer" title="Permalink to this heading">#</a></h1>
+<h1>gcdyn.nn.BundleMeanLayer<a class="headerlink" href="#gcdyn-nn-bundlemeanlayer" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.nn.</span></span><span class="sig-name descname"><span class="pre">BundleMeanLayer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/nn.html#BundleMeanLayer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.nn.</span></span><span class="sig-name descname"><span class="pre">BundleMeanLayer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/nn.html#BundleMeanLayer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Layer</span></code></p>
 <p>Assume that the input is of shape (number_of_bundles, bundle_size, feature_dim).</p>
 <p class="rubric">Methods</p>
@@ -697,7 +712,7 @@ document.write(`
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.call">
-<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/nn.html#BundleMeanLayer.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.call" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/nn.html#BundleMeanLayer.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.call" title="Link to this definition">#</a></dt>
 <dd><p>This is where the layer’s logic lives.</p>
 <p>The <cite>call()</cite> method may not create state (except in its first
 invocation, wrapping the creation of variables or other resources in
@@ -761,7 +776,7 @@ from a Keras layer with masking support).</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.compute_output_shape">
-<span class="sig-name descname"><span class="pre">compute_output_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/nn.html#BundleMeanLayer.compute_output_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.compute_output_shape" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">compute_output_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/nn.html#BundleMeanLayer.compute_output_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.compute_output_shape" title="Link to this definition">#</a></dt>
 <dd><p>Computes the output shape of the layer.</p>
 <p>This method will cause the layer’s state to be built, if that has not
 happened before. This requires that the layer will later be used with
@@ -783,7 +798,7 @@ or structure of <cite>tf.TensorShape</cite> instances.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.__call__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.__call__" title="Link to this definition">#</a></dt>
 <dd><p>Wraps <cite>call</cite>, applying pre- and post-processing steps.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -831,13 +846,13 @@ a Keras layer with masking support.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.activity_regularizer">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">activity_regularizer</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.activity_regularizer" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">activity_regularizer</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.activity_regularizer" title="Link to this definition">#</a></dt>
 <dd><p>Optional regularizer function for the output of this layer.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.add_loss">
-<span class="sig-name descname"><span class="pre">add_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">losses</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.add_loss" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">add_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">losses</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.add_loss" title="Link to this definition">#</a></dt>
 <dd><p>Add loss tensor(s), potentially dependent on layer inputs.</p>
 <p>Some losses (for instance, activity regularization losses) may be
 dependent on the inputs passed when calling a layer. Hence, when reusing
@@ -903,7 +918,7 @@ tensor.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.add_metric">
-<span class="sig-name descname"><span class="pre">add_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.add_metric" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">add_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.add_metric" title="Link to this definition">#</a></dt>
 <dd><p>Adds metric tensor to the layer.</p>
 <p>This method can be used inside the <cite>call()</cite> method of a subclassed layer
 or model.</p>
@@ -961,7 +976,7 @@ default using a <cite>keras.Metric.Mean</cite>.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.add_update">
-<span class="sig-name descname"><span class="pre">add_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">updates</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.add_update" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">add_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">updates</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.add_update" title="Link to this definition">#</a></dt>
 <dd><p>Add update op(s), potentially dependent on layer inputs.</p>
 <p>Weight updates (for instance, the updates of the moving mean and
 variance in a BatchNormalization layer) may be dependent on the inputs
@@ -984,13 +999,13 @@ on this Layer, when executing in Eager mode.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.add_variable">
-<span class="sig-name descname"><span class="pre">add_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.add_variable" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">add_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.add_variable" title="Link to this definition">#</a></dt>
 <dd><p>Deprecated, do NOT use! Alias for <cite>add_weight</cite>.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.add_weight">
-<span class="sig-name descname"><span class="pre">add_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regularizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_resource</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synchronization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">VariableSynchronization.AUTO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">VariableAggregationV2.NONE</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.add_weight" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">add_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regularizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_resource</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synchronization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">VariableSynchronization.AUTO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">VariableAggregationV2.NONE</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.add_weight" title="Link to this definition">#</a></dt>
 <dd><p>Adds a new variable to the layer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1039,7 +1054,7 @@ Accepted values are constants defined in the class
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.build">
-<span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_shape</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.build" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_shape</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.build" title="Link to this definition">#</a></dt>
 <dd><p>Creates the variables of the layer (for subclass implementers).</p>
 <p>This is a method that implementers of subclasses of <cite>Layer</cite> or <cite>Model</cite>
 can override if they need a state-creation step in-between
@@ -1058,7 +1073,7 @@ the first execution of <cite>call()</cite>.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.build_from_config">
-<span class="sig-name descname"><span class="pre">build_from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.build_from_config" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">build_from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.build_from_config" title="Link to this definition">#</a></dt>
 <dd><p>Builds the layer’s states with the supplied config dict.</p>
 <p>By default, this method calls the <cite>build(config[“input_shape”])</cite> method,
 which creates weights based on the layer’s input shape in the supplied
@@ -1073,7 +1088,7 @@ layer’s state, you should override this method.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.compute_dtype">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_dtype</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.compute_dtype" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_dtype</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.compute_dtype" title="Link to this definition">#</a></dt>
 <dd><p>The dtype of the layer’s computations.</p>
 <p>This is equivalent to <cite>Layer.dtype_policy.compute_dtype</cite>. Unless
 mixed precision is used, this is the same as <cite>Layer.dtype</cite>, the dtype of
@@ -1094,7 +1109,7 @@ output will still typically be float16 or bfloat16 in such cases.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.compute_mask">
-<span class="sig-name descname"><span class="pre">compute_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.compute_mask" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">compute_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.compute_mask" title="Link to this definition">#</a></dt>
 <dd><p>Computes an output mask tensor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1115,7 +1130,7 @@ output will still typically be float16 or bfloat16 in such cases.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.compute_output_signature">
-<span class="sig-name descname"><span class="pre">compute_output_signature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_signature</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.compute_output_signature" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">compute_output_signature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_signature</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.compute_output_signature" title="Link to this definition">#</a></dt>
 <dd><p>Compute the output tensor signature of the layer based on the inputs.</p>
 <p>Unlike a TensorShape object, a TensorSpec object contains both shape
 and dtype information for a tensor. This method allows layers to provide
@@ -1143,7 +1158,7 @@ objects, describing a candidate input for the layer.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.count_params">
-<span class="sig-name descname"><span class="pre">count_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.count_params" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">count_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.count_params" title="Link to this definition">#</a></dt>
 <dd><p>Count the total number of scalars composing the weights.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -1158,7 +1173,7 @@ objects, describing a candidate input for the layer.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.dtype">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dtype</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.dtype" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dtype</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.dtype" title="Link to this definition">#</a></dt>
 <dd><p>The dtype of the layer weights.</p>
 <p>This is equivalent to <cite>Layer.dtype_policy.variable_dtype</cite>. Unless
 mixed precision is used, this is the same as <cite>Layer.compute_dtype</cite>, the
@@ -1167,20 +1182,20 @@ dtype of the layer’s computations.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.dtype_policy">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dtype_policy</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.dtype_policy" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dtype_policy</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.dtype_policy" title="Link to this definition">#</a></dt>
 <dd><p>The dtype policy associated with this layer.</p>
 <p>This is an instance of a <cite>tf.keras.mixed_precision.Policy</cite>.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.dynamic">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dynamic</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.dynamic" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dynamic</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.dynamic" title="Link to this definition">#</a></dt>
 <dd><p>Whether the layer is dynamic (eager-only); set in the constructor.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.finalize_state">
-<span class="sig-name descname"><span class="pre">finalize_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.finalize_state" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">finalize_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.finalize_state" title="Link to this definition">#</a></dt>
 <dd><p>Finalizes the layers state after updating layer weights.</p>
 <p>This function can be subclassed in a layer and will be called after
 updating a layer weights. It can be overridden to finalize any
@@ -1191,7 +1206,7 @@ from a loaded model.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.from_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.from_config" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.from_config" title="Link to this definition">#</a></dt>
 <dd><p>Creates a layer from its config.</p>
 <p>This method is the reverse of <cite>get_config</cite>,
 capable of instantiating the same layer from the config
@@ -1210,7 +1225,7 @@ output of get_config.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.get_build_config">
-<span class="sig-name descname"><span class="pre">get_build_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_build_config" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_build_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_build_config" title="Link to this definition">#</a></dt>
 <dd><p>Returns a dictionary with the layer’s input shape.</p>
 <p>This method returns a config dict that can be used by
 <cite>build_from_config(config)</cite> to create all states (e.g. Variables and
@@ -1229,7 +1244,7 @@ loading.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.get_config">
-<span class="sig-name descname"><span class="pre">get_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_config" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_config" title="Link to this definition">#</a></dt>
 <dd><p>Returns the config of the layer.</p>
 <p>A layer config is a Python dictionary (serializable)
 containing the configuration of a layer.
@@ -1250,7 +1265,7 @@ returned dict if they want to modify it.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.get_input_at">
-<span class="sig-name descname"><span class="pre">get_input_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_input_at" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_input_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_input_at" title="Link to this definition">#</a></dt>
 <dd><p>Retrieves the input tensor(s) of a layer at a given node.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1270,7 +1285,7 @@ first input node of the layer.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.get_input_mask_at">
-<span class="sig-name descname"><span class="pre">get_input_mask_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_input_mask_at" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_input_mask_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_input_mask_at" title="Link to this definition">#</a></dt>
 <dd><p>Retrieves the input mask tensor(s) of a layer at a given node.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1288,7 +1303,7 @@ first time the layer was called.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.get_input_shape_at">
-<span class="sig-name descname"><span class="pre">get_input_shape_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_input_shape_at" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_input_shape_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_input_shape_at" title="Link to this definition">#</a></dt>
 <dd><p>Retrieves the input shape(s) of a layer at a given node.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1309,7 +1324,7 @@ first time the layer was called.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.get_output_at">
-<span class="sig-name descname"><span class="pre">get_output_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_output_at" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_output_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_output_at" title="Link to this definition">#</a></dt>
 <dd><p>Retrieves the output tensor(s) of a layer at a given node.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1329,7 +1344,7 @@ first output node of the layer.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.get_output_mask_at">
-<span class="sig-name descname"><span class="pre">get_output_mask_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_output_mask_at" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_output_mask_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_output_mask_at" title="Link to this definition">#</a></dt>
 <dd><p>Retrieves the output mask tensor(s) of a layer at a given node.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1347,7 +1362,7 @@ first time the layer was called.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.get_output_shape_at">
-<span class="sig-name descname"><span class="pre">get_output_shape_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_output_shape_at" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_output_shape_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_output_shape_at" title="Link to this definition">#</a></dt>
 <dd><p>Retrieves the output shape(s) of a layer at a given node.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1368,7 +1383,7 @@ first time the layer was called.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.get_weights">
-<span class="sig-name descname"><span class="pre">get_weights</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_weights" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_weights</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.get_weights" title="Link to this definition">#</a></dt>
 <dd><p>Returns the current weights of the layer, as NumPy arrays.</p>
 <p>The weights of a layer represent the state of the layer. This function
 returns both trainable and non-trainable weight values associated with
@@ -1407,13 +1422,13 @@ another <cite>Dense</cite> layer:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.inbound_nodes">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">inbound_nodes</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.inbound_nodes" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">inbound_nodes</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.inbound_nodes" title="Link to this definition">#</a></dt>
 <dd><p>Return Functional API nodes upstream of this layer.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.input">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.input" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.input" title="Link to this definition">#</a></dt>
 <dd><p>Retrieves the input tensor(s) of a layer.</p>
 <p>Only applicable if the layer has exactly one input,
 i.e. if it is connected to one incoming layer.</p>
@@ -1432,7 +1447,7 @@ i.e. if it is connected to one incoming layer.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.input_mask">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_mask</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.input_mask" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_mask</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.input_mask" title="Link to this definition">#</a></dt>
 <dd><p>Retrieves the input mask tensor(s) of a layer.</p>
 <p>Only applicable if the layer has exactly one inbound node,
 i.e. if it is connected to one incoming layer.</p>
@@ -1452,7 +1467,7 @@ mask tensors.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.input_shape">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_shape</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.input_shape" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_shape</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.input_shape" title="Link to this definition">#</a></dt>
 <dd><p>Retrieves the input shape(s) of a layer.</p>
 <p>Only applicable if the layer has exactly one input,
 i.e. if it is connected to one incoming layer, or if all inputs
@@ -1473,7 +1488,7 @@ have the same shape.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.input_spec">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_spec</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.input_spec" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_spec</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.input_spec" title="Link to this definition">#</a></dt>
 <dd><p><cite>InputSpec</cite> instance(s) describing the input format for this layer.</p>
 <p>When you create a layer subclass, you can set <cite>self.input_spec</cite> to
 enable the layer to run input compatibility checks when it is called.
@@ -1504,7 +1519,7 @@ nicely-formatted error:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.load_own_variables">
-<span class="sig-name descname"><span class="pre">load_own_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.load_own_variables" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">load_own_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.load_own_variables" title="Link to this definition">#</a></dt>
 <dd><p>Loads the state of the layer.</p>
 <p>You can override this method to take full control of how the state of
 the layer is loaded upon calling <cite>keras.models.load_model()</cite>.</p>
@@ -1517,7 +1532,7 @@ the layer is loaded upon calling <cite>keras.models.load_model()</cite>.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.losses">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">losses</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.losses" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">losses</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.losses" title="Link to this definition">#</a></dt>
 <dd><p>List of losses added using the <cite>add_loss()</cite> API.</p>
 <p>Variable regularization tensors are created when this property is
 accessed, so it is eager safe: accessing <cite>losses</cite> under a
@@ -1566,7 +1581,7 @@ variables.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.metrics">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">metrics</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.metrics" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">metrics</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.metrics" title="Link to this definition">#</a></dt>
 <dd><p>List of metrics attached to the layer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -1577,19 +1592,19 @@ variables.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.name" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.name" title="Link to this definition">#</a></dt>
 <dd><p>Name of the layer (string), set in the constructor.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.name_scope">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name_scope</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.name_scope" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name_scope</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.name_scope" title="Link to this definition">#</a></dt>
 <dd><p>Returns a <cite>tf.name_scope</cite> instance for this class.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.non_trainable_variables">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">non_trainable_variables</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.non_trainable_variables" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">non_trainable_variables</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.non_trainable_variables" title="Link to this definition">#</a></dt>
 <dd><p>Sequence of non-trainable variables owned by this module and its submodules.</p>
 <p>Note: this method uses reflection to find variables on the current instance
 and submodules. For performance reasons you may wish to cache the result
@@ -1605,7 +1620,7 @@ first).</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.non_trainable_weights">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">non_trainable_weights</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.non_trainable_weights" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">non_trainable_weights</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.non_trainable_weights" title="Link to this definition">#</a></dt>
 <dd><p>List of all non-trainable weights tracked by this layer.</p>
 <p>Non-trainable weights are <em>not</em> updated during training. They are
 expected to be updated manually in <cite>call()</cite>.</p>
@@ -1618,13 +1633,13 @@ expected to be updated manually in <cite>call()</cite>.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.outbound_nodes">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">outbound_nodes</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.outbound_nodes" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">outbound_nodes</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.outbound_nodes" title="Link to this definition">#</a></dt>
 <dd><p>Return Functional API nodes downstream of this layer.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.output">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">output</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.output" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">output</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.output" title="Link to this definition">#</a></dt>
 <dd><p>Retrieves the output tensor(s) of a layer.</p>
 <p>Only applicable if the layer has exactly one output,
 i.e. if it is connected to one incoming layer.</p>
@@ -1644,7 +1659,7 @@ i.e. if it is connected to one incoming layer.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.output_mask">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">output_mask</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.output_mask" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">output_mask</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.output_mask" title="Link to this definition">#</a></dt>
 <dd><p>Retrieves the output mask tensor(s) of a layer.</p>
 <p>Only applicable if the layer has exactly one inbound node,
 i.e. if it is connected to one incoming layer.</p>
@@ -1664,7 +1679,7 @@ mask tensors.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.output_shape">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">output_shape</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.output_shape" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">output_shape</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.output_shape" title="Link to this definition">#</a></dt>
 <dd><p>Retrieves the output shape(s) of a layer.</p>
 <p>Only applicable if the layer has one output,
 or if all outputs have the same shape.</p>
@@ -1684,7 +1699,7 @@ or if all outputs have the same shape.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.save_own_variables">
-<span class="sig-name descname"><span class="pre">save_own_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.save_own_variables" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">save_own_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.save_own_variables" title="Link to this definition">#</a></dt>
 <dd><p>Saves the state of the layer.</p>
 <p>You can override this method to take full control of how the state of
 the layer is saved upon calling <cite>model.save()</cite>.</p>
@@ -1697,7 +1712,7 @@ the layer is saved upon calling <cite>model.save()</cite>.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.set_weights">
-<span class="sig-name descname"><span class="pre">set_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weights</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.set_weights" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">set_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weights</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.set_weights" title="Link to this definition">#</a></dt>
 <dd><p>Sets the weights of the layer, from NumPy arrays.</p>
 <p>The weights of a layer represent the state of the layer. This function
 sets the weight values from numpy arrays. The weight values should be
@@ -1745,7 +1760,7 @@ output of <cite>get_weights</cite>).</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.submodules">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">submodules</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.submodules" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">submodules</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.submodules" title="Link to this definition">#</a></dt>
 <dd><p>Sequence of all sub-modules.</p>
 <p>Submodules are modules which are properties of this module, or found as
 properties of modules which are properties of this module (and so on).</p>
@@ -1771,13 +1786,13 @@ properties of modules which are properties of this module (and so on).</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.supports_masking">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">supports_masking</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.supports_masking" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">supports_masking</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.supports_masking" title="Link to this definition">#</a></dt>
 <dd><p>Whether this layer supports computing a mask using <cite>compute_mask</cite>.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.trainable_variables">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trainable_variables</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.trainable_variables" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trainable_variables</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.trainable_variables" title="Link to this definition">#</a></dt>
 <dd><p>Sequence of trainable variables owned by this module and its submodules.</p>
 <p>Note: this method uses reflection to find variables on the current instance
 and submodules. For performance reasons you may wish to cache the result
@@ -1793,7 +1808,7 @@ first).</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.trainable_weights">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trainable_weights</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.trainable_weights" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trainable_weights</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.trainable_weights" title="Link to this definition">#</a></dt>
 <dd><p>List of all trainable weights tracked by this layer.</p>
 <p>Trainable weights are updated via gradient descent during training.</p>
 <dl class="field-list simple">
@@ -1805,13 +1820,13 @@ first).</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.variable_dtype">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">variable_dtype</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.variable_dtype" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">variable_dtype</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.variable_dtype" title="Link to this definition">#</a></dt>
 <dd><p>Alias of <cite>Layer.dtype</cite>, the dtype of the weights.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.variables">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">variables</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.variables" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">variables</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.variables" title="Link to this definition">#</a></dt>
 <dd><p>Returns the list of all layer variables/weights.</p>
 <p>Alias of <cite>self.weights</cite>.</p>
 <p>Note: This will not track the weights of nested <cite>tf.Modules</cite> that are
@@ -1825,7 +1840,7 @@ not themselves Keras layers.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.weights">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weights</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.weights" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weights</span></span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.weights" title="Link to this definition">#</a></dt>
 <dd><p>Returns the list of all layer variables/weights.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -1836,7 +1851,7 @@ not themselves Keras layers.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.BundleMeanLayer.with_name_scope">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_name_scope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.with_name_scope" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_name_scope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.nn.BundleMeanLayer.with_name_scope" title="Link to this definition">#</a></dt>
 <dd><p>Decorator to automatically enter the module name scope.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">MyModule</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="gp">... </span>  <span class="nd">@tf</span><span class="o">.</span><span class="n">Module</span><span class="o">.</span><span class="n">with_name_scope</span>
@@ -1879,7 +1894,7 @@ names included the module name:</p>
               
               
                 <footer class="prev-next-footer">
-                  <!-- Previous / next buttons -->
+                  
 <div class="prev-next-area">
     <a class="left-prev"
        href="gcdyn.nn.html"
@@ -1907,6 +1922,7 @@ names included the module name:</p>
             
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
 
   <div class="sidebar-secondary-item">
   <div class="page-toc tocsection onthispage">
@@ -1993,6 +2009,7 @@ By Erick Matsen
   
   <div class="footer-item">
     
+
   <p class="copyright">
     
       © Copyright 2022, Erick Matsen.
@@ -2019,8 +2036,8 @@ By Erick Matsen
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
 
   <footer class="bd-footer">
   </footer>

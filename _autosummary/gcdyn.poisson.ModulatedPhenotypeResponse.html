@@ -1,13 +1,12 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>gcdyn.poisson.ModulatedPhenotypeResponse &#8212; gcdyn  documentation</title>
   
@@ -19,32 +18,32 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=365ca57ee442770a23c6"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/clipboard.min.js"></script>
-    <script src="../_static/copybutton.js"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_autosummary/gcdyn.poisson.ModulatedPhenotypeResponse';</script>
@@ -61,10 +60,9 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>
@@ -105,11 +103,14 @@
 </form></div>
   </div>
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
-    </nav>
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
+      
+      
       
       <div class="bd-sidebar-primary bd-sidebar">
         
@@ -124,6 +125,7 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item">
+
   
 
 <a class="navbar-brand logo" href="../index.html">
@@ -142,7 +144,18 @@
   
   
 </a></div>
-        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul class="nav bd-sidenav">
@@ -400,6 +413,7 @@
 </button>
 
 
+
 <script>
 document.write(`
   <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
@@ -409,6 +423,7 @@ document.write(`
   </button>
 `);
 </script>
+
 
 <script>
 document.write(`
@@ -460,13 +475,13 @@ document.write(`
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="gcdyn-poisson-modulatedphenotyperesponse">
-<h1>gcdyn.poisson.ModulatedPhenotypeResponse<a class="headerlink" href="#gcdyn-poisson-modulatedphenotyperesponse" title="Permalink to this heading">#</a></h1>
+<h1>gcdyn.poisson.ModulatedPhenotypeResponse<a class="headerlink" href="#gcdyn-poisson-modulatedphenotyperesponse" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="gcdyn.poisson.ModulatedPhenotypeResponse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.poisson.</span></span><span class="sig-name descname"><span class="pre">ModulatedPhenotypeResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phenotype_response</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">external_field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interaction=&lt;function</span> <span class="pre">ModulatedPhenotypeResponse.&lt;lambda&gt;&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol=1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter=100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/poisson.html#ModulatedPhenotypeResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.poisson.ModulatedPhenotypeResponse" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcdyn.poisson.</span></span><span class="sig-name descname"><span class="pre">ModulatedPhenotypeResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phenotype_response</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">external_field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interaction=&lt;function</span> <span class="pre">ModulatedPhenotypeResponse.&lt;lambda&gt;&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol=1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter=100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/poisson.html#ModulatedPhenotypeResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.poisson.ModulatedPhenotypeResponse" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="gcdyn.poisson.PhenotypeTimeResponse.html#gcdyn.poisson.PhenotypeTimeResponse" title="gcdyn.poisson.PhenotypeTimeResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhenotypeTimeResponse</span></code></a></p>
 <p>An inhomogeneous phenotype response that combines a homogeneous
 phenotype response with a time-dependent external field <span class="math notranslate nohighlight">\(f(t)\)</span> that
@@ -478,11 +493,11 @@ The homogeneous phenotype response is evaluated at the effective phenotype.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>phenotype_response</strong> (<a class="reference internal" href="gcdyn.poisson.PhenotypeResponse.html#gcdyn.poisson.PhenotypeResponse" title="gcdyn.poisson.PhenotypeResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhenotypeResponse</span></code></a>) – a homogeneous phenotype response for the effective phenotype <span class="math notranslate nohighlight">\(x - f(t)\)</span>.</p></li>
-<li><p><strong>external_field</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]) – external field <span class="math notranslate nohighlight">\(f(t)\)</span>, a function that maps time to the external field.</p></li>
-<li><p><strong>interaction</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]) – a function <span class="math notranslate nohighlight">\(\phi(x, f(t))\)</span> that maps the phenotype and external field to the effective phenotype.</p></li>
-<li><p><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – See <a class="reference internal" href="gcdyn.poisson.PhenotypeTimeResponse.html#gcdyn.poisson.PhenotypeTimeResponse" title="gcdyn.poisson.PhenotypeTimeResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhenotypeTimeResponse</span></code></a>.</p></li>
-<li><p><strong>maxiter</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – See <a class="reference internal" href="gcdyn.poisson.PhenotypeTimeResponse.html#gcdyn.poisson.PhenotypeTimeResponse" title="gcdyn.poisson.PhenotypeTimeResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhenotypeTimeResponse</span></code></a>.</p></li>
+<li><p><strong>phenotype_response</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="gcdyn.poisson.PhenotypeResponse.html#gcdyn.poisson.PhenotypeResponse" title="gcdyn.poisson.PhenotypeResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhenotypeResponse</span></code></a></span>) – a homogeneous phenotype response for the effective phenotype <span class="math notranslate nohighlight">\(x - f(t)\)</span>.</p></li>
+<li><p><strong>external_field</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]</span>) – external field <span class="math notranslate nohighlight">\(f(t)\)</span>, a function that maps time to the external field.</p></li>
+<li><p><strong>interaction</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]</span>) – a function <span class="math notranslate nohighlight">\(\phi(x, f(t))\)</span> that maps the phenotype and external field to the effective phenotype.</p></li>
+<li><p><strong>tol</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – See <a class="reference internal" href="gcdyn.poisson.PhenotypeTimeResponse.html#gcdyn.poisson.PhenotypeTimeResponse" title="gcdyn.poisson.PhenotypeTimeResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhenotypeTimeResponse</span></code></a>.</p></li>
+<li><p><strong>maxiter</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – See <a class="reference internal" href="gcdyn.poisson.PhenotypeTimeResponse.html#gcdyn.poisson.PhenotypeTimeResponse" title="gcdyn.poisson.PhenotypeTimeResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhenotypeTimeResponse</span></code></a>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -514,87 +529,87 @@ The homogeneous phenotype response is evaluated at the effective phenotype.</p>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.poisson.ModulatedPhenotypeResponse._phenotype_time">
-<span class="sig-name descname"><span class="pre">λ_phenotype_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/poisson.html#ModulatedPhenotypeResponse.λ_phenotype_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.poisson.ModulatedPhenotypeResponse._phenotype_time" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">λ_phenotype_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gcdyn/poisson.html#ModulatedPhenotypeResponse.λ_phenotype_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.poisson.ModulatedPhenotypeResponse._phenotype_time" title="Link to this definition">#</a></dt>
 <dd><p>Evaluate the Poisson intensity <span class="math notranslate nohighlight">\(\lambda_x(t)\)</span> for phenotype
 <span class="math notranslate nohighlight">\(x\)</span> at time <span class="math notranslate nohighlight">\(t\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Phenotype.</p></li>
-<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Time.</p></li>
+<li><p><strong>x</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Phenotype.</p></li>
+<li><p><strong>t</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Time.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.poisson.ModulatedPhenotypeResponse.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.poisson.ModulatedPhenotypeResponse.__call__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.poisson.ModulatedPhenotypeResponse.__call__" title="Link to this definition">#</a></dt>
 <dd><p>Call <code class="docutils literal notranslate"><span class="pre">self</span></code> to evaluate the Poisson intensity at a tree node.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>node</strong> (<a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a>) – The node whose state is accessed to evaluate the response function.</p>
+<dd class="field-odd"><p><strong>node</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a></span>) – The node whose state is accessed to evaluate the response function.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.poisson.ModulatedPhenotypeResponse.cleanup">
-<span class="sig-name descname"><span class="pre">cleanup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.poisson.ModulatedPhenotypeResponse.cleanup" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">cleanup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.poisson.ModulatedPhenotypeResponse.cleanup" title="Link to this definition">#</a></dt>
 <dd><p>Perform any cleanup required when finishing the simulation of each tree.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.poisson.ModulatedPhenotypeResponse.waiting_time_logsf">
-<span class="sig-name descname"><span class="pre">waiting_time_logsf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Δt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.poisson.ModulatedPhenotypeResponse.waiting_time_logsf" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">waiting_time_logsf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Δt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.poisson.ModulatedPhenotypeResponse.waiting_time_logsf" title="Link to this definition">#</a></dt>
 <dd><p>Evaluate the logarithm of the survival function of the waiting time
 <span class="math notranslate nohighlight">\(\Delta t\)</span> given the rate process starting at the provided node.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>node</strong> (<a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a>) – The node at which the rate process starts.</p></li>
-<li><p><strong>Δt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – The waiting time.</p></li>
+<li><p><strong>node</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a></span>) – The node at which the rate process starts.</p></li>
+<li><p><strong>Δt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – The waiting time.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.poisson.ModulatedPhenotypeResponse.waiting_time_rv">
-<span class="sig-name descname"><span class="pre">waiting_time_rv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rate_multiplier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.poisson.ModulatedPhenotypeResponse.waiting_time_rv" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">waiting_time_rv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rate_multiplier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.poisson.ModulatedPhenotypeResponse.waiting_time_rv" title="Link to this definition">#</a></dt>
 <dd><p>Sample the waiting time <span class="math notranslate nohighlight">\(\Delta t\)</span> until the first event,
 given the rate process starting at the provided node.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>node</strong> (<a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a>) – The node at which the rate process starts.</p></li>
-<li><p><strong>rate_multiplier</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – A multiplicative factor to apply to the rate process when
+<li><p><strong>node</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a></span>) – The node at which the rate process starts.</p></li>
+<li><p><strong>rate_multiplier</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – A multiplicative factor to apply to the rate process when
 sampling the waiting time. This can be used to impose a
 population-size constraint in simulations.</p></li>
-<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.26)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – A seed to initialize the random number generation.
+<li><p><strong>seed</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.26)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – A seed to initialize the random number generation.
 If <code class="docutils literal notranslate"><span class="pre">None</span></code>, then fresh, unpredictable entropy will be pulled from the OS.
 If an <code class="docutils literal notranslate"><span class="pre">int</span></code>, then it will be used to derive the initial state.
 If a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.26)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a>, then it will be used directly.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.poisson.ModulatedPhenotypeResponse.">
-<span class="sig-name descname"><span class="pre">Λ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Δt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.poisson.ModulatedPhenotypeResponse." title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">Λ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Δt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.poisson.ModulatedPhenotypeResponse." title="Link to this definition">#</a></dt>
 <dd><p>Evaluate the Poisson intensity measure of the time interval
 <span class="math notranslate nohighlight">\([t, t+\Delta t)\)</span>, defined as.</p>
 <div class="math notranslate nohighlight">
@@ -604,19 +619,19 @@ log probability density function of waiting times.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>node</strong> (<a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a>) – The node whose state is accessed to evaluate the response function.</p></li>
-<li><p><strong>Δt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Time interval duration (Lebesgue measure).</p></li>
+<li><p><strong>node</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a></span>) – The node whose state is accessed to evaluate the response function.</p></li>
+<li><p><strong>Δt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Time interval duration (Lebesgue measure).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.poisson.ModulatedPhenotypeResponse._inv">
-<span class="sig-name descname"><span class="pre">Λ_inv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">τ</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.poisson.ModulatedPhenotypeResponse._inv" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">Λ_inv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">τ</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcdyn.poisson.ModulatedPhenotypeResponse._inv" title="Link to this definition">#</a></dt>
 <dd><p>Evaluate the inverse function wrt <span class="math notranslate nohighlight">\(\Delta t\)</span> of <a class="reference internal" href="gcdyn.poisson.Response.html#id0" title="gcdyn.poisson.Response.Λ"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Response.Λ()</span></code></a>,
 <span class="math notranslate nohighlight">\(\Lambda_t^{-1}(\tau)\)</span>, such that <span class="math notranslate nohighlight">\(\Lambda_t^{-1}(\Lambda(t, t+\Delta t)) = \Delta t\)</span>.
 This is needed for sampling waiting times.
@@ -624,32 +639,32 @@ Note that <span class="math notranslate nohighlight">\(\Lambda_t^{-1}\)</span> i
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>node</strong> (<a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a>) – The node whose state is accessed to evaluate the response function.</p></li>
-<li><p><strong>τ</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Poisson intensity measure of a time interval.</p></li>
+<li><p><strong>node</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a></span>) – The node whose state is accessed to evaluate the response function.</p></li>
+<li><p><strong>τ</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Poisson intensity measure of a time interval.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">λ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Δt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">λ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Δt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Link to this definition">#</a></dt>
 <dd><p>Evaluate the Poisson intensity <span class="math notranslate nohighlight">\(\lambda(t+\Delta t)\)</span> for a
 tree node at time <span class="math notranslate nohighlight">\(t\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>node</strong> (<a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a>) – The node whose state is accessed to evaluate the response function.</p></li>
-<li><p><strong>Δt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Time shift from <code class="docutils literal notranslate"><span class="pre">node</span></code> at which to evaluate Poisson intensity
+<li><p><strong>node</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="gcdyn.bdms.TreeNode.html#gcdyn.bdms.TreeNode" title="gcdyn.bdms.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a></span>) – The node whose state is accessed to evaluate the response function.</p></li>
+<li><p><strong>Δt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Time shift from <code class="docutils literal notranslate"><span class="pre">node</span></code> at which to evaluate Poisson intensity
 (<code class="docutils literal notranslate"><span class="pre">0.0</span></code> corresponds to the node’s time). This only has an effect if the
 response function is time-inhomogeneous.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -667,7 +682,7 @@ response function is time-inhomogeneous.</p></li>
               
               
                 <footer class="prev-next-footer">
-                  <!-- Previous / next buttons -->
+                  
 <div class="prev-next-area">
     <a class="left-prev"
        href="gcdyn.poisson.HomogeneousResponse.html"
@@ -695,6 +710,7 @@ response function is time-inhomogeneous.</p></li>
             
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
 
   <div class="sidebar-secondary-item">
   <div class="page-toc tocsection onthispage">
@@ -734,6 +750,7 @@ By Erick Matsen
   
   <div class="footer-item">
     
+
   <p class="copyright">
     
       © Copyright 2022, Erick Matsen.
@@ -760,8 +777,8 @@ By Erick Matsen
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
 
   <footer class="bd-footer">
   </footer>
