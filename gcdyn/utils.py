@@ -331,7 +331,7 @@ def make_dl_plots(prdfs, params_to_predict, outdir, is_simu=False, data_val=0, v
             ])
             plt.text(0.05, 0.75 if smp_name=='valid' else 0.85, '%s mae: %.4f'%(smp_name, mae), transform=ax.transAxes, color='red' if smp_name=='valid' else None)
         # ----------------------------------------------------------------------------------------
-        def snsplot(smpl, tdf, discrete=False, n_bins=8):
+        def snsplot(smpl, tdf, discrete=False, n_bins=8, leave_ticks=False):
             def tcolor(def_val): return 'red' if smpl=='valid' else def_val
             xvals = all_df[xkey]  # use df I think to (in principle) pick up all x values
             if ptype == 'scatter':
@@ -351,17 +351,19 @@ def make_dl_plots(prdfs, params_to_predict, outdir, is_simu=False, data_val=0, v
                     bkey, order = 'x_bins', None
                 boxprops = {"facecolor": "None", 'edgecolor': tcolor('black'), 'linewidth' : 5 if smpl=='valid' else 2}
                 ax = sns.boxplot(x=bkey, y=ykey, data=tdf, order=order, boxprops=boxprops, whiskerprops={'color' : tcolor('black')})
-                xtls = []
-                for xv, xvl in zip(ax.get_xticks(), ax.get_xticklabels()):  # plot a horizontal dashed line at y=x (i.e. correct) for each bin and get labels
-                    if discrete:
-                        tyv = float(xvl._text)
-                    else:
-                        lo, hi = [float(s.lstrip('(').rstrip(']')) for s in xvl._text.split(', ')]
-                        tyv = np.mean([lo, hi])  # true/y val
-                        xtls.append('%.1f-%.1f'%(lo, hi))
-                    plt.plot([xv - 0.5, xv + 0.5], [tyv, tyv], color="darkgreen", linestyle="--", linewidth=3, alpha=0.7)
-                if not discrete:
-                    ax.set_xticklabels(xtls, rotation=90, ha='right')
+                if not leave_ticks:  # if we're calling this fcn twice (i.e. plotting validation set), this tick/true line stuff is already there (and will crash if called twice)
+                    xtls = []
+                    for xv, xvl in zip(ax.get_xticks(), ax.get_xticklabels()):  # plot a horizontal dashed line at y=x (i.e. correct) for each bin and get labels
+                        if discrete:
+                            tyv = float(xvl._text)
+                        else:
+                            lo, hi = [float(s.lstrip('(').rstrip(']')) for s in xvl._text.split(', ')]
+                            tyv = np.mean([lo, hi])  # true/y val
+                            xtls.append('%.1f-%.1f'%(lo, hi))
+                        plt.plot([xv - 0.5, xv + 0.5], [tyv, tyv], color="darkgreen", linestyle="--", linewidth=3, alpha=0.7)
+                    if not discrete:
+                        ax.set_xticks(ax.get_xticks())
+                        ax.set_xticklabels(xtls, rotation=90, ha='right')
             else:
                 assert False
             if is_simu:
@@ -380,7 +382,7 @@ def make_dl_plots(prdfs, params_to_predict, outdir, is_simu=False, data_val=0, v
         if smpl == "train" and validation_split != 0:
             plt_df = all_df.copy()[: len(all_df) - int(validation_split * len(all_df))]
             vld_df = all_df.copy()[len(all_df) - int(validation_split * len(all_df)) :]
-            snsplot('valid', vld_df, discrete=discrete)
+            snsplot('valid', vld_df, discrete=discrete, leave_ticks=True)  # well, leave ticks *and* don't plot true dashed line
         snsplot(smpl, plt_df, discrete=discrete)
         plt.xlabel("%s value" % xkstr.replace("truth", "true"))
         plt.ylabel("predicted value")

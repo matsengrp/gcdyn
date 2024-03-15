@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 # TODO: use ArrayLike in various phenotype/time response methods (current float types) once it is available in a stable release
 # from numpy.typing import ArrayLike
 
-from jax.config import config
+from jax import config
 
 config.update("jax_enable_x64", True)
 

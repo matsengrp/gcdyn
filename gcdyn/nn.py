@@ -176,7 +176,8 @@ class NeuralNetworkModel:
         inputs = keras.Input(shape=(self.bundle_size, 4, self.max_leaf_count))
         outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
         self.network = keras.Model(inputs=inputs, outputs=outputs)
-        self.network.summary(print_fn=lambda x: print("      %s" % x))
+        # def pfn(x, line_break=False): print("      %s" % x)
+        self.network.summary() #print_fn=pfn)
         optimizer = keras.optimizers.Adam(
             learning_rate=learning_rate, use_ema=True, ema_momentum=ema_momentum
         )
