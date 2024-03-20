@@ -315,10 +315,11 @@ def write_final_outputs(args, all_seqs, all_trees, param_list):
             tfile.write("%s\n" % pfo["tree"].write(format=1))
 
     lmetafos = []
-    for pfo in all_trees:
+    for itr, pfo in enumerate(all_trees):
         for node in pfo["tree"].iter_descendants():
             lmetafos.append(
                 {
+                    "tree-index": itr,
                     "name": node.name,
                     "affinity": node.x,
                     "n_muts": node.total_mutations,
@@ -758,7 +759,7 @@ def main():
     if args.dont_run_new_simu:
         print("    --dont-run-new-simu: missing %d trees, but ignoring and just merging the ones we have" % n_missing)
     if n_missing > 0:
-        print("    %s missing %d / %d trees (it's generally expected that some will fail, so this is probably ok if it's not too many)" % (utils.color("yellow", "warning"), n_missing, args.n_trials))
+        print("    %s missing %d / %d trees (it's generally expected that some will fail, so this is probably ok if it's not too many)" % (utils.color("yellow", "warning"), n_missing, args.n_trials - args.itrial_start))
     if len(all_trees) == 0:
         print("  %s no resulting trees, exiting without writing or plotting anything" % utils.color("yellow", "warning"))
         sys.exit(0)
