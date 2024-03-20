@@ -7,6 +7,8 @@ import os
 from gcdyn.bdms import TreeNode
 from gcdyn import utils
 
+# fmt: off
+
 def encode_tree(
     intree: TreeNode,
     max_leaf_count: int = None,
@@ -30,40 +32,22 @@ def encode_tree(
     into the model (using encode.pad_trees()) than to try to guess a max_leaf_count
     when initially encoding them.
     """
-
     # See the pytest for this method in `tests/test_deep_learning.py`
-
+    # ----------------------------------------------------------------------------------------
     def traverse_inorder(tmptr):
         num_children = len(tmptr.children)
-        assert tmptr.up is None or num_children in {
-            0,
-            2,
-        }, (
-            "Only full binary trees are supported, but found node with %d children"
-            % num_children
-        )
-
-        for child in tmptr.children[
-            : num_children // 2
-        ]:  # trivial loop over single lefthand subtree/node
+        assert tmptr.up is None or num_children in {0, 2, }, ("Only full binary trees are supported, but found node with %d children" % num_children)
+        for child in tmptr.children[:num_children // 2]:  # trivial loop over single lefthand subtree/node
             yield from traverse_inorder(child)
-
         yield tmptr
-
-        for child in tmptr.children[
-            num_children // 2 :
-        ]:  # trivial loop over single rightand subtree/node
+        for child in tmptr.children[num_children // 2:]:  # trivial loop over single rightand subtree/node
             yield from traverse_inorder(child)
-
+    # ----------------------------------------------------------------------------------------
     if not dont_scale:
         _, intree = scale_tree(intree)
-
     # assert utils.isclose(np.mean([lf.t for lf in intree.iter_leaves()]), 1), "trees must be scaled to 1 before encoding"
-
     if ladderize:
-        worktree = (
-            intree.copy()
-        )  # make a copy so the ladderization doesn't modify the input tree
+        worktree = intree.copy()  # make a copy so the ladderization doesn't modify the input tree
         utils.ladderize_tree(worktree)
     else:
         worktree = intree
@@ -73,10 +57,8 @@ def encode_tree(
     assert len(worktree.get_leaves()) <= max_leaf_count
     matrix = np.zeros((4, max_leaf_count))
 
-    leaf_index = 0
-    ancestor_index = 0
+    leaf_index, ancestor_index = 0, 0
     previous_ancestor = worktree  # the root
-
     for node in traverse_inorder(worktree):
         if node.is_leaf():
             matrix[0, leaf_index] = node.t - previous_ancestor.t
@@ -267,3 +249,5 @@ def write_training_files(outdir, encoded_trees, responses, sstats, dbgstr=""):
     with open(output_fn(outdir, "responses", None), "wb") as pfile:
         dill.dump(responses, pfile)
     write_sstats(output_fn(outdir, "summary-stats", None), sstats)
+
+# fmt: on
