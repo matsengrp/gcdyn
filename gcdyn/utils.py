@@ -1,5 +1,7 @@
 r"""Utility functions ^^^^^^^^^^^^^^^^^"""
 
+# fmt: off
+
 from collections import defaultdict, OrderedDict
 
 import ete3
@@ -17,6 +19,7 @@ import time
 import pandas as pd
 import warnings
 import sys
+import itertools
 
 
 def simple_fivemer_contexts(sequence: str):
@@ -73,7 +76,7 @@ def write_leaf_sequences_to_fasta(
     return sequence_dict
 
 
-def ladderize_tree(tree, attr="x"):
+def ladderize_tree(tree, attr="x", check_for_ties=False, debug=False):
     """
     Ladderizes the given tree.
     Adapts the procedure described in Voznica et. al (2022) for trees whose leaves
@@ -93,24 +96,53 @@ def ladderize_tree(tree, attr="x"):
 
     Voznica, J., A. Zhukova, V. Boskova, E. Saulnier, F. Lemoine, M. Moslonka-Lefebvre, and O. Gascuel. “Deep Learning from Phylogenies to Uncover the Epidemiological Dynamics of Outbreaks.” Nature Communications 13, no. 1 (July 6, 2022): 3896. https://doi.org/10.1038/s41467-022-31511-0.
     """
+    # ----------------------------------------------------------------------------------------
+    def check_ties(nodelist, sub_root):  # note that ties are only a problem if the occur on *non*-identical subtrees
+        def kfn(n): return sort_criteria[n.name]
+        svgroups = [(vls, list(gp)) for vls, gp in itertools.groupby(sorted(nodelist, key=kfn, reverse=True), key=kfn)]  # group together nodes with the same sort criteria
+        len_sortd_groups = sorted(svgroups, key=lambda gp: len(gp[1]), reverse=True)  # sort by the lengths of these groups
+        if len(len_sortd_groups[0][1]) > 1:  # if largest (first) group is longer than 1 (has a tie)
+            print('    %s multiple nodes with same sort criteria%s:' % (color('yellow', 'warning'), ' below node %s'%sub_root.name))
+            print('            ' + '\n            '.join(sub_root.get_ascii().split('\n'))) #attributes=['t']))
+            for svals, sgroup in len_sortd_groups:
+                svstr = ' '.join(('%6.3f'%v) for v in svals)
+                if len(sgroup) > 1:
+                    print('      %s    %s' % (svstr, ' '.join(str(n.name) for n in sgroup)))
+    # ----------------------------------------------------------------------------------------
+    def get_criteria(node):
+        return [node.t, node.up.t, getattr(node, attr)]
+    # ----------------------------------------------------------------------------------------
+    if debug:
+        # import dendropy ete doesn't seem to be able to print trees in a way that shows branch lengths, so it can be nice to use dendropy as well
+        # dtree = dendropy.Tree.get_from_string(tree.write(format=1), "newick", suppress_internal_node_taxa=False, preserve_underscores=True, rooting='force-rooted')
+        # print(dtree.as_ascii_plot(width=400, plot_metric='length', show_internal_node_labels=True)) #, node_label_compose_fn=compose_fcn)
+        print('  before:')
+        print(tree.get_ascii()) #attributes=['t']))
 
+    # calculate sorting criteria values
     sort_criteria = defaultdict(list)
-
     for node in tree.traverse("postorder"):
         if node.is_leaf():
-            sort_criteria[node.name] = [node.t, node.up.t, getattr(node, attr)]
+            sort_criteria[node.name] = get_criteria(node)
         else:
-            sort_criteria[node.name] = sorted(
+            sort_criteria[node.name] = sorted(  # sort criteria for internal nodes is the criteria of their first (by sort criteria) child
                 (sort_criteria[child.name] for child in node.children), reverse=True
-            )[0]
+            )[0]  # ties here won't change anything right *here*, but changing the sort criteria (by adding more values) would change this
 
+    # sort by those criteria
     for node in tree.traverse("postorder"):
         if len(node.children) > 1:
+            if check_for_ties:
+                check_ties(node.children, sub_root=node)
             node.children = sorted(
                 node.children,
                 key=lambda node: sort_criteria[node.name],
                 reverse=True,
             )
+
+    if debug:
+        print('  after:')
+        print(tree.get_ascii()) #attributes=['t']))
 
 
 def random_transition_matrix(length, seed=None):
@@ -317,7 +349,6 @@ def mpl_init(fsize=20, label_fsize=15):
 
 
 # ----------------------------------------------------------------------------------------
-# fmt: off
 # plot scatter + box/whisker plot comparing true and predicted values for deep learning inference
 # NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
 def make_dl_plots(prdfs, params_to_predict, outdir, is_simu=False, data_val=0, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15):
