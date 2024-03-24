@@ -43,6 +43,11 @@ def print_final_response_vals(tree, birth_resp, death_resp, final_time):
 
 
 # ----------------------------------------------------------------------------------------
+def relabel_nodes(tree):
+    for node in tree.iter_descendants():
+        node.name = '%s-%s' % ('leaf' if node.is_leaf() else 'mrca', node.name)
+
+# ----------------------------------------------------------------------------------------
 def generate_sequences_and_tree(
     args,
     params,
@@ -125,6 +130,8 @@ def generate_sequences_and_tree(
     tree.sample_survivors(n=n_to_sample, seed=seed)
     tree.prune()
     tree.remove_mutation_events()
+    if args.label_leaf_internal_nodes:
+        relabel_nodes(tree)
 
     # check that node times and branch lengths are consistent
     for node in tree.iter_descendants():
@@ -452,6 +459,7 @@ def get_parser():
     parser.add_argument("--dont-run-new-simu", action="store_true", help="by default, if some trees are already there but others are missing, we try to rerun the missing ones; if this is set we instead ignore any missing ones and just merge any that are there")
     parser.add_argument("--test", action="store_true", help="sets some default parameter values that run quickly and successfully, i.e. useful for quick tests")
     parser.add_argument("--make-plots", action="store_true", help="")
+    parser.add_argument("--label-leaf-internal-nodes", action="store_true", help="Instead of the default node naming scheme of pure integers, add a prefix to the integer indicating if it\'s a leaf (\'leaf-\') or internal (\'mrca-\') node.")
     parser.add_argument("--n-to-plot", type=int, default=10, help="number of tree slice plots to make")
     return parser
     # fmt: on
