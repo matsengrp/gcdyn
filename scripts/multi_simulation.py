@@ -304,7 +304,7 @@ def get_responses(args, xscale, xshift, yscale, pcounts):
 
 # ----------------------------------------------------------------------------------------
 def write_final_outputs(args, all_seqs, all_trees, param_list):
-    print("  writing final outputs to %s" % args.outdir)
+    print("  writing final outputs%s to %s" % (' (including internal nodes)' if args.sample_internal_nodes else '', args.outdir))
 
     with open(outfn(args, "seqs", None), "w") as asfile:
         for sfo in all_seqs:
@@ -316,7 +316,7 @@ def write_final_outputs(args, all_seqs, all_trees, param_list):
 
     lmetafos = []
     for itr, pfo in enumerate(all_trees):
-        for node in pfo["tree"].iter_descendants():
+        for node in pfo["tree"].iter_descendants():  # both internal and leaf nodes always get written to this file
             lmetafos.append(
                 {
                     "tree-index": itr,
@@ -325,7 +325,7 @@ def write_final_outputs(args, all_seqs, all_trees, param_list):
                     "n_muts": node.total_mutations,
                 }
             )
-    encode.write_leaf_meta(outfn(args, "leaf-meta", None), lmetafos)
+    encode.write_leaf_meta(outfn(args, "meta", None), lmetafos)
 
     # encode trees
     scale_vals, encoded_trees = encode.encode_trees([pfo["tree"] for pfo in all_trees])
@@ -354,7 +354,7 @@ def write_final_outputs(args, all_seqs, all_trees, param_list):
     encode.write_training_files(args.outdir, encoded_trees, responses, sstats)
 
 # ----------------------------------------------------------------------------------------
-def add_seqs(all_seqs, itrial, tree):
+def add_seqs(args, all_seqs, itrial, tree):
     def getname(nstr):
         return nstr if itrial is None else "%d-%s" % (itrial, nstr)
 
@@ -364,11 +364,12 @@ def add_seqs(all_seqs, itrial, tree):
             "seq": replay.NAIVE_SEQUENCE,
         }
     )
-    for leaf in tree.iter_leaves():
+    sample_nodes = tree.iter_descendants() if args.sample_internal_nodes else tree.iter_leaves()
+    for node in sample_nodes:
         all_seqs.append(
             {
-                "name": getname(leaf.name),
-                "seq": leaf.sequence,
+                "name": getname(node.name),
+                "seq": node.sequence,
             }
         )
 
@@ -441,6 +442,7 @@ def get_parser():
     parser.add_argument("--initial-birth-rate-range", default=[2, 10], nargs="+", type=float, help="Pair of values (min/max) for initial/default/average growth rate (i.e. when affinity/x=0). Used to set --yscale.")
     parser.add_argument("--yshift", default=0, type=float, help="atm this shouldn't (need to, at least) be changed")
     parser.add_argument("--mutability-multiplier", default=0.68, type=float)
+    parser.add_argument("--sample-internal-nodes", action='store_true', help="By default, only sequences for leaf nodes are written to output (although affinities are written for both leaf and internal nodes). If this arg is set, we write seqs also for internal nodes.")
     parser.add_argument("--n-sub-procs", type=int, help="If set, the --n-trials are split among this many sub processes (which are recursively run with this script). Note that in terms of random seeds, results will not be identical with/without --n-sub-procs set (since there's no way to synchronize seeds partway through))")
     parser.add_argument("--n-max-procs", type=int, help="If set (and --n-sub-procs is set), only run this many sub procs at a time (e.g. to conserve memory).")
     parser.add_argument("--dry-run", action='store_true', help="If --n-sub-procs is set, don\'t actually run the subprocess, instead just print the commands that would be run")
@@ -586,8 +588,8 @@ def run_sub_procs(args):
         ]
         start = time.time()
         n_total_trees = ''
-        if ftype in ["seqs", "trees", "leaf-meta", "summary-stats"]:
-            if ftype in ["leaf-meta", "summary-stats"]:
+        if ftype in ["seqs", "trees", "meta", "summary-stats"]:
+            if ftype in ["meta", "summary-stats"]:
                 cmds = [
                     "head -n1 %s >%s" % (fnames[0], ofn),
                     "tail --quiet -n+2 %s >>%s" % (" ".join(fnames), ofn),
@@ -726,7 +728,7 @@ def main():
             if pfo is None:  # file is screwed up and we want to rerun
                 print("    rerunning since pickle file read failed")
             else:
-                add_seqs(all_seqs, itrial, pfo["tree"])
+                add_seqs(args, all_seqs, itrial, pfo["tree"])
                 add_tree(all_trees, itrial, pfo)
                 plist.append(params)
                 continue
@@ -752,7 +754,7 @@ def main():
         utils.addfn(all_fns, plt_fn)
         with open(ofn, "wb") as fp:
             dill.dump({"tree": tree, "birth-response": birth_resp, "death-response": death_resp}, fp)
-        add_seqs(all_seqs, itrial, tree)
+        add_seqs(args, all_seqs, itrial, tree)
         add_tree(all_trees, itrial, {"tree": tree, "birth-response": birth_resp, "death-response": death_resp})
         plist.append(params)
 
