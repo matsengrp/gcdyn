@@ -11,7 +11,7 @@ from gcdyn import poisson
 poisson.set_backend(use_jax=True)
 
 # Pylance can't recognize tf submodules imported the normal way
-keras = tf.keras  # these imports are really slow
+import keras  # these imports are really slow
 layers = keras.layers
 
 
@@ -59,6 +59,7 @@ class Callback(tf.keras.callbacks.Callback):
         self.last_time = time.time()
 
 
+@keras.saving.register_keras_serializable()
 class BundleMeanLayer(layers.Layer):
     """Assume that the input is of shape (number_of_bundles, bundle_size, feature_dim)."""
 
@@ -74,6 +75,15 @@ class BundleMeanLayer(layers.Layer):
             input_shape[2],
         )  # output shape is (number_of_bundles, feature_dim)
 
+@keras.saving.register_keras_serializable()
+class TransposeLayer(layers.Layer):
+    """Transpose inputs (used to be Lambda layer, but they're not really serializable."""
+
+    def __init__(self, **kwargs):
+        super(TransposeLayer, self).__init__(**kwargs)
+
+    def call(self, inputs):
+        return tf.transpose(inputs, (0, 1, 3, 2))
 
 class NeuralNetworkModel:
     """
@@ -162,7 +172,7 @@ class NeuralNetworkModel:
             ],
         }
 
-        network_layers = [layers.Lambda(lambda x: tf.transpose(x, (0, 1, 3, 2)))]
+        network_layers = [TransposeLayer()]
         for tlr in self.pre_bundle_layers[prebundle_layer_cfg]:
             network_layers.append(layers.TimeDistributed(tlr))
         network_layers.append(BundleMeanLayer())  # combine predictions from all trees in bundle
@@ -176,7 +186,7 @@ class NeuralNetworkModel:
         inputs = keras.Input(shape=(self.bundle_size, 4, self.max_leaf_count))
         outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
         self.network = keras.Model(inputs=inputs, outputs=outputs)
-        # def pfn(x, line_break=False): print("      %s" % x)
+        # def pfn(x, line_break=False): print("      %s" % x)  # this doesn't seem to work with keras 3
         self.network.summary() #print_fn=pfn)
         optimizer = keras.optimizers.Adam(
             learning_rate=learning_rate, use_ema=True, ema_momentum=ema_momentum
