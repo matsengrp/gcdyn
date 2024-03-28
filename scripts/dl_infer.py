@@ -239,6 +239,21 @@ def read_tree_files(args):
 
 
 # ----------------------------------------------------------------------------------------
+def predict_and_plot(args, model, smpldict, scaler, smpls):
+    if not os.path.exists(args.outdir):
+        os.makedirs(args.outdir)
+    prdfs = {}
+    for smpl in smpls:
+        prdfs[smpl] = get_prediction(args, model, smpldict[smpl], scaler, smpl=smpl)
+    utils.make_dl_plots(
+        prdfs,
+        args.params_to_predict,
+        args.outdir + "/plots",
+        is_simu=args.is_simu,
+        validation_split=0 if smpl=='infer' else args.validation_split,
+    )
+
+# ----------------------------------------------------------------------------------------
 def train_and_test(args, start_time):
     samples = read_tree_files(args)
 
@@ -279,22 +294,8 @@ def train_and_test(args, start_time):
     with open(encode.output_fn(args.outdir, 'example-responses', None), 'wb') as dfile:
         dill.dump(responses[0], dfile)  # dump list of response fcns for one tree (so that when reading the model to infer, we can tell the neural network the structure of the responses)
 
-    # evaluate/predict
-    if not os.path.exists(args.outdir):
-        os.makedirs(args.outdir)
-    prdfs = {}
-    for smpl in ["train", "test"]:
-        prdfs[smpl] = get_prediction(args, model, smpldict[smpl], scalers["train"], smpl=smpl)
-    utils.make_dl_plots(
-        prdfs,
-        args.params_to_predict,
-        args.outdir + "/plots",
-        is_simu=args.is_simu,
-        validation_split=args.validation_split,
-    )
-
+    predict_and_plot(args, model, smpldict, scalers["train"], ['train', 'test'])
     print("    total dl inference time: %.1f sec" % (time.time() - start_time))
-
 
 # ----------------------------------------------------------------------------------------
 def read_model_files(args, samples):
@@ -323,20 +324,9 @@ def read_model_files(args, samples):
 
 # ----------------------------------------------------------------------------------------
 def infer(args, start_time):
-    samples = read_tree_files(args)
-    scaler, model = read_model_files(args, samples)
-
-    if not os.path.exists(args.outdir):
-        os.makedirs(args.outdir)
-    prdf = get_prediction(args, model, samples, scaler, smpl='infer')
-    utils.make_dl_plots(
-        {'infer' : prdf},
-        args.params_to_predict,
-        args.outdir + "/plots",
-        is_simu=args.is_simu,
-        validation_split=0,
-    )
-
+    smpldict = {'infer' : read_tree_files(args)}
+    scaler, model = read_model_files(args, smpldict['infer'])
+    predict_and_plot(args, model, smpldict, scaler, ['infer'])
     print("    total dl inference time: %.1f sec" % (time.time() - start_time))
 
 # ----------------------------------------------------------------------------------------
