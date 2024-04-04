@@ -23,7 +23,6 @@ def outfn(args, ftype, itrial, odir=None):
         odir = args.outdir
     return encode.output_fn(odir, ftype, itrial)
 
-
 # ----------------------------------------------------------------------------------------
 def print_final_response_vals(tree, birth_resp, death_resp, final_time):
     print("                           x         birth           death")
@@ -43,9 +42,13 @@ def print_final_response_vals(tree, birth_resp, death_resp, final_time):
 
 
 # ----------------------------------------------------------------------------------------
-def relabel_nodes(tree):
-    for node in tree.iter_descendants():
-        node.name = '%s-%s' % ('leaf' if node.is_leaf() else 'mrca', node.name)
+def relabel_nodes(args, tree, itrial):
+    for node in [tree] + list(tree.iter_descendants()):
+        if node is tree:
+            node.name = "naive"
+        elif args.label_leaf_internal_nodes:  # don't want naive node to also have 'mrca'
+            node.name = '%s-%s' % ('leaf' if node.is_leaf() else 'mrca', node.name)
+        node.name = "%d-%s" % (itrial, node.name)
 
 # ----------------------------------------------------------------------------------------
 def generate_sequences_and_tree(
@@ -130,8 +133,7 @@ def generate_sequences_and_tree(
     tree.sample_survivors(n=n_to_sample, seed=seed)
     tree.prune()
     tree.remove_mutation_events()
-    if args.label_leaf_internal_nodes:
-        relabel_nodes(tree)
+    relabel_nodes(args, tree, itrial)
 
     # check that node times and branch lengths are consistent
     for node in tree.iter_descendants():
@@ -323,7 +325,7 @@ def write_final_outputs(args, all_seqs, all_trees, param_list):
 
     lmetafos = []
     for itr, pfo in enumerate(all_trees):
-        for node in pfo["tree"].iter_descendants():  # both internal and leaf nodes always get written to this file
+        for node in [pfo["tree"]] + list(pfo["tree"].iter_descendants()):  # both internal and leaf nodes always get written to this file
             lmetafos.append(
                 {
                     "tree-index": itr,
@@ -362,20 +364,11 @@ def write_final_outputs(args, all_seqs, all_trees, param_list):
 
 # ----------------------------------------------------------------------------------------
 def add_seqs(args, all_seqs, itrial, tree):
-    def getname(nstr):
-        return nstr if itrial is None else "%d-%s" % (itrial, nstr)
-
-    all_seqs.append(
-        {
-            "name": getname("naive"),
-            "seq": replay.NAIVE_SEQUENCE,
-        }
-    )
-    sample_nodes = tree.iter_descendants() if args.sample_internal_nodes else tree.iter_leaves()
+    sample_nodes = [tree] + list(tree.iter_descendants()) if args.sample_internal_nodes else list(tree.iter_leaves())
     for node in sample_nodes:
         all_seqs.append(
             {
-                "name": getname(node.name),
+                "name": node.name,
                 "seq": node.sequence,
             }
         )
@@ -383,8 +376,6 @@ def add_seqs(args, all_seqs, itrial, tree):
 
 # ----------------------------------------------------------------------------------------
 def add_tree(all_trees, itrial, pfo):
-    for node in pfo["tree"].iter_descendants():
-        node.name = "%d-%s" % (itrial, node.name)
     all_trees.append(pfo)
 
 
