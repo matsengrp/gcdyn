@@ -555,24 +555,30 @@ def plot_chosen_params(plotdir, param_counters, pbounds, n_bins=15, fnames=None)
 
 
 # ----------------------------------------------------------------------------------------
-def plot_phenotype_response(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_plot=20, bundle_size=1, fnames=None):
+def plot_phenotype_response(plotdir, pfo_list, xbounds=[-5, 5], nsteps=40, n_to_plot=20, bundle_size=1, fnames=None):
     # ----------------------------------------------------------------------------------------
-    def plt_single_tree(itree, pfo, xmin, xmax, n_bins=30):
-        plt.clf()
-        fig, ax = plt.subplots()
-        ax2 = ax.twinx()
+    def affy_plot(pfo, ax, ax2=None, n_bins=30):
         leaves = list(pfo["tree"].iter_leaves())
         leaf_vals = [n.x for n in leaves]
         int_vals = [n.x for n in pfo["tree"].iter_descendants() if n not in leaves]
         all_vals = leaf_vals + int_vals
-        xmin, xmax = min([xmin] + all_vals), max([xmax] + all_vals)
+        xmin, xmax = min(xbounds + all_vals), max(xbounds + all_vals)
         sns.histplot({"internal": int_vals, "leaves": leaf_vals}, ax=ax2, multiple="stack", binwidth=(xmax - xmin) / n_bins)
-        dx = (xmax - xmin) / nsteps
-        xvals = list(np.arange(xmin, 0, dx)) + list(np.arange(0, xmax + dx, dx))
+        ax.set(title="itree %d (%d nodes)"%(itree, len(all_vals)))
+    # ----------------------------------------------------------------------------------------
+    def resp_plot(pfo, ax):
+        dx = (xbounds[1] - xbounds[0]) / nsteps
+        xvals = list(np.arange(xbounds[0], 0, dx)) + list(np.arange(0, xbounds[1] + dx, dx))
         rvals = [pfo["birth-response"].λ_phenotype(x) for x in xvals]
         data = {"affinity": xvals, "lambda": rvals}
         sns.lineplot(data, x="affinity", y="lambda", ax=ax, linewidth=3, color="#990012")
-        ax.set(title="itree %d (%d nodes)"%(itree, len(all_vals)))
+    # ----------------------------------------------------------------------------------------
+    def plt_single_tree(itree, pfo):
+        plt.clf()
+        fig, ax = plt.subplots()
+        ax2 = ax.twinx()
+        affy_plot(pfo, ax, ax2=ax2)
+        resp_plot(pfo, ax)
         param_text = "xscale %.1f\nxshift %.1f\nyscale %.1f" % (pfo["birth-response"].xscale, pfo["birth-response"].xshift, pfo["birth-response"].yscale)
         fig.text(0.6, 0.25, param_text, fontsize=17)
         fn = "%s/trees-%d.svg" % (plotdir, itree)
@@ -595,7 +601,7 @@ def plot_phenotype_response(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_
     if len(fnames[-1]) > 0:  # add an empty row if there's already file names there
         fnames.append([])
     for itree in plt_indices:
-        fn = plt_single_tree(itree, pfo_list[itree], xmin, xmax)
+        fn = plt_single_tree(itree, pfo_list[itree])
         addfn(fnames, fn)
 
 # ----------------------------------------------------------------------------------------
