@@ -355,13 +355,15 @@ def mpl_init(fsize=20, label_fsize=15):
 # NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
 def make_dl_plots(prdfs, params_to_predict, outdir, is_simu=False, data_val=0, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15):
     # ----------------------------------------------------------------------------------------
-    def plot_responses(smpl):
+    def plot_responses(smpl, n_max_plots=100):
         from gcdyn.poisson import SigmoidResponse
         pfo_list = []
-        for irow in range(len(prdfs[smpl].index)):
+        n_preds = len(prdfs[smpl].index)
+        n_plots = min(n_max_plots, n_preds)
+        for irow in range(n_plots):
             pdict = {p : prdfs[smpl]['%s-predicted'%p][irow] for p in sigmoid_params}
             pfo_list.append({'birth-response' : SigmoidResponse(**pdict)})
-        fn = plot_many_curves(outdir, pfo_list, titlestr=smpl)
+        fn = plot_many_curves(outdir, '%sall-response'%smpl, pfo_list, titlestr='%s: %d / %d responses' % (smpl, n_plots, n_preds))
         return fn
     # ----------------------------------------------------------------------------------------
     def single_plot(ptype, param, smpl):
@@ -577,13 +579,13 @@ def resp_plot(pfo, ax, xbounds=[-5, 5], nsteps=40, alpha=0.8):
     sns.lineplot(data, x="affinity", y="lambda", ax=ax, linewidth=3, color="#990012", alpha=alpha)
 
 # ----------------------------------------------------------------------------------------
-def plot_many_curves(plotdir, pfo_list, titlestr=None):
+def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None):
     mpl_init()
     fig, ax = plt.subplots()
     for pfo in pfo_list:
         resp_plot(pfo, ax, alpha=0.15)
-    ax.set(title='%s%d responses' % ('' if titlestr is None else titlestr+': ', len(pfo_list)))
-    fn = "%s/all-responses.svg" % plotdir
+    ax.set(title='%d responses' % len(pfo_list) if titlestr is None else titlestr)
+    fn = "%s/%s.svg" % (plotdir, plotname)
     plt.savefig(fn)
     return fn
 
@@ -627,7 +629,7 @@ def plot_phenotype_response(plotdir, pfo_list, xbounds=[-5, 5], n_to_plot=20, bu
     else:
         plt_indices = range(0, min(n_to_plot * bundle_size, len(pfo_list)), bundle_size)
 
-    fn = plot_many_curves(plotdir, [pfo_list[i] for i in plt_indices])
+    fn = plot_many_curves(plotdir, 'all-responses', [pfo_list[i] for i in plt_indices])
     addfn(fnames, fn)
     for itree in plt_indices:
         fn = plt_single_tree(itree, pfo_list[itree])
