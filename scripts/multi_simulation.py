@@ -16,6 +16,7 @@ import glob
 from gcdyn import bdms, gpmap, mutators, poisson, utils, encode
 from experiments import replay
 
+sigmoid_params = ['xscale', 'xshift', 'yscale']  # ick
 
 # ----------------------------------------------------------------------------------------
 def outfn(args, ftype, itrial, odir=None):
@@ -232,23 +233,22 @@ def add_pval(pcounts, pname, pval):
 
 
 # ----------------------------------------------------------------------------------------
-def choose_params(args, pcounts):
+def choose_params(args, pcounts, itrial):
     params = {}
-    for pname in [  # NOTE compare to loop at end of run_sub_procs()
-        "xscale",
-        "xshift",
-        "yscale",
-        "time_to_sampling",
-        "carry_cap",
-        "n_seqs",
-    ]:  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
+    plist = ["xscale", "xshift", "yscale", "time_to_sampling", "carry_cap", "n_seqs"]  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
+    for pname in plist:  # NOTE compare to loop at end of run_sub_procs()
         extra_bounds, dbgstrs = None, []
         if args.use_generated_parameter_bounds:
             if pname == "xshift":
                 extra_bounds = get_xshift_bounds(args, params["xscale"], dbgstrs)
             if pname == "yscale":
                 extra_bounds = get_yscale_bounds(args, params["xscale"], params["xshift"], dbgstrs)
-        params[pname] = choose_val(args, pname, extra_bounds=extra_bounds, dbgstrs=dbgstrs)
+        if args.dl_prediction_dir is not None and pname in sigmoid_params:
+            if pname == plist[0]:
+                print('        choosing dl prediction at index %d (of %d) for: %s' % (itrial % len(args.dl_pvals), len(args.dl_pvals), ' '.join(sigmoid_params)))
+            params[pname] = args.dl_pvals[itrial % len(args.dl_pvals)][pname]
+        else:
+            params[pname] = choose_val(args, pname, extra_bounds=extra_bounds, dbgstrs=dbgstrs)
         if pname in ["time_to_sampling", "carry_cap", "n_seqs"]:
             params[pname] = int(params[pname])
         add_pval(pcounts, pname, params[pname])
@@ -440,6 +440,7 @@ def get_parser():
     parser.add_argument("--initial-birth-rate-range", default=[2, 10], nargs="+", type=float, help="Pair of values (min/max) for initial/default/average growth rate (i.e. when affinity/x=0). Used to set --yscale.")
     parser.add_argument("--yshift", default=0, type=float, help="atm this shouldn't (need to, at least) be changed")
     parser.add_argument("--mutability-multiplier", default=0.68, type=float)
+    parser.add_argument('--dl-prediction-dir', help='If set, look for deep learning (dl) predictions in this dir, and simulate using the predicted parameter values therein')
     parser.add_argument("--sample-internal-nodes", action='store_true', help="By default, only sequences for leaf nodes are written to output (although affinities are written for both leaf and internal nodes). If this arg is set, we write seqs also for internal nodes.")
     parser.add_argument("--n-sub-procs", type=int, help="If set, the --n-trials are split among this many sub processes (which are recursively run with this script). Note that in terms of random seeds, results will not be identical with/without --n-sub-procs set (since there's no way to synchronize seeds partway through))")
     parser.add_argument("--n-max-procs", type=int, help="If set (and --n-sub-procs is set), only run this many sub procs at a time (e.g. to conserve memory).")
@@ -668,6 +669,15 @@ def main():
         rangevals = getattr(args, pname + "_range")
         if rangevals is not None and len(rangevals) != 2:  # range with two values for continuous
             raise Exception("range must consist of two values but got %d" % len(rangevals))
+    if args.dl_prediction_dir is not None:
+        prfn = '%s/test.csv' % args.dl_prediction_dir
+        print('  reading dl prediction from %s' % prfn)
+        args.dl_pvals = []
+        with open(prfn) as cfile:
+            reader = csv.DictReader(cfile)
+            for line in reader:
+                args.dl_pvals.append({p : float(line['%s-predicted'%p]) for p in sigmoid_params})
+
     random.seed(args.seed)
     np.random.seed(args.seed)
     np.seterr(divide="ignore")
@@ -716,7 +726,7 @@ def main():
         check_memory(itrial)
         ofn = outfn(args, None, itrial)
         if params is None or n_times_used == args.simu_bundle_size:  # first time through loop or start of a new bundle
-            params = choose_params(args, pcounts)  # NOTE make *sure* you always get to this point in the loop (i.e. don't put any continue statements above it)
+            params = choose_params(args, pcounts, itrial)  # NOTE make *sure* you always get to this point in the loop (i.e. don't put any continue statements above it)
             n_times_used = 0
         n_times_used += 1
         if os.path.exists(ofn) and not args.overwrite:
