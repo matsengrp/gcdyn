@@ -438,8 +438,6 @@ def make_dl_plots(prdfs, params_to_predict, outdir, is_simu=False, data_val=0, v
                 if fn is not None:
                     fnames[-1].append(fn)
     make_html(outdir, fnames=fnames)
-# fmt: on
-
 
 # ----------------------------------------------------------------------------------------
 def plot_tree_slices(plotdir, tree, max_time, itrial):
@@ -557,16 +555,7 @@ def plot_chosen_params(plotdir, param_counters, pbounds, n_bins=15, fnames=None)
 
 
 # ----------------------------------------------------------------------------------------
-def plot_phenotype_response(
-    plotdir,
-    pfo_list,
-    xmin=-5,
-    xmax=5,
-    nsteps=40,
-    n_to_plot=20,
-    bundle_size=1,
-    fnames=None,
-):
+def plot_phenotype_response(plotdir, pfo_list, xmin=-5, xmax=5, nsteps=40, n_to_plot=20, bundle_size=1, fnames=None):
     # ----------------------------------------------------------------------------------------
     def plt_single_tree(itree, pfo, xmin, xmax, n_bins=30):
         plt.clf()
@@ -577,37 +566,18 @@ def plot_phenotype_response(
         int_vals = [n.x for n in pfo["tree"].iter_descendants() if n not in leaves]
         all_vals = leaf_vals + int_vals
         xmin, xmax = min([xmin] + all_vals), max([xmax] + all_vals)
-        sns.histplot(
-            {"internal": int_vals, "leaves": leaf_vals},
-            ax=ax2,
-            multiple="stack",
-            binwidth=(xmax - xmin) / n_bins,
-        )
-
+        sns.histplot({"internal": int_vals, "leaves": leaf_vals}, ax=ax2, multiple="stack", binwidth=(xmax - xmin) / n_bins)
         dx = (xmax - xmin) / nsteps
         xvals = list(np.arange(xmin, 0, dx)) + list(np.arange(0, xmax + dx, dx))
         rvals = [pfo["birth-response"].λ_phenotype(x) for x in xvals]
         data = {"affinity": xvals, "lambda": rvals}
-        sns.lineplot(
-            data, x="affinity", y="lambda", ax=ax, linewidth=3, color="#990012"
-        )
-        ax.set(
-            title="itree %d (%d nodes)"
-            % (
-                itree,
-                len(all_vals),
-            )
-        )
-        param_text = "xscale %.1f\nxshift %.1f\nyscale %.1f" % (
-            pfo["birth-response"].xscale,
-            pfo["birth-response"].xshift,
-            pfo["birth-response"].yscale,
-        )
+        sns.lineplot(data, x="affinity", y="lambda", ax=ax, linewidth=3, color="#990012")
+        ax.set(title="itree %d (%d nodes)"%(itree, len(all_vals)))
+        param_text = "xscale %.1f\nxshift %.1f\nyscale %.1f" % (pfo["birth-response"].xscale, pfo["birth-response"].xshift, pfo["birth-response"].yscale)
         fig.text(0.6, 0.25, param_text, fontsize=17)
         fn = "%s/trees-%d.svg" % (plotdir, itree)
         plt.savefig(fn)
         return fn
-
     # ----------------------------------------------------------------------------------------
     print("    plotting trees to %s" % plotdir)
     mpl_init()
@@ -627,7 +597,6 @@ def plot_phenotype_response(
     for itree in plt_indices:
         fn = plt_single_tree(itree, pfo_list[itree], xmin, xmax)
         addfn(fnames, fn)
-
 
 # ----------------------------------------------------------------------------------------
 def memory_usage_fraction(
@@ -782,3 +751,5 @@ def make_html(
     with open(htmlfname, "w") as htmlfile:
         htmlfile.write("\n".join(lines))
     # subprocess.check_call(['chmod', '664', htmlfname])
+
+# fmt: on
