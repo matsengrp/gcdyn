@@ -22,6 +22,8 @@ import sys
 import itertools
 
 
+sigmoid_params = ['xscale', 'xshift', 'yscale']  # ick
+
 def simple_fivemer_contexts(sequence: str):
     r"""Decompose a sequence into a list of its 5mer contexts.
 
@@ -353,6 +355,15 @@ def mpl_init(fsize=20, label_fsize=15):
 # NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
 def make_dl_plots(prdfs, params_to_predict, outdir, is_simu=False, data_val=0, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15):
     # ----------------------------------------------------------------------------------------
+    def plot_responses(smpl):
+        from gcdyn.poisson import SigmoidResponse
+        pfo_list = []
+        for irow in range(len(prdfs[smpl].index)):
+            pdict = {p : prdfs[smpl]['%s-predicted'%p][irow] for p in sigmoid_params}
+            pfo_list.append({'birth-response' : SigmoidResponse(**pdict)})
+        fn = plot_many_curves(outdir, pfo_list, titlestr=smpl)
+        return fn
+    # ----------------------------------------------------------------------------------------
     def single_plot(ptype, param, smpl):
         # ----------------------------------------------------------------------------------------
         def add_mae_text(ax, smp_name, tdf):
@@ -429,7 +440,10 @@ def make_dl_plots(prdfs, params_to_predict, outdir, is_simu=False, data_val=0, v
     mpl_init()
     if not os.path.exists(outdir):
         os.makedirs(outdir)
-    fnames = []
+    fnames = [[]]
+    for smpl in sorted(prdfs, reverse=True):
+        fn = plot_responses(smpl)
+        fnames[-1].append(fn)
     for ptype in ['scatter', 'box']:
         for smpl in sorted(prdfs, reverse=True):
             fnames.append([])
@@ -555,7 +569,26 @@ def plot_chosen_params(plotdir, param_counters, pbounds, n_bins=15, fnames=None)
 
 
 # ----------------------------------------------------------------------------------------
-def plot_phenotype_response(plotdir, pfo_list, xbounds=[-5, 5], nsteps=40, n_to_plot=20, bundle_size=1, fnames=None):
+def resp_plot(pfo, ax, xbounds=[-5, 5], nsteps=40, alpha=0.8):
+    dx = (xbounds[1] - xbounds[0]) / nsteps
+    xvals = list(np.arange(xbounds[0], 0, dx)) + list(np.arange(0, xbounds[1] + dx, dx))
+    rvals = [float(pfo["birth-response"].λ_phenotype(x)) for x in xvals]
+    data = {"affinity": xvals, "lambda": rvals}
+    sns.lineplot(data, x="affinity", y="lambda", ax=ax, linewidth=3, color="#990012", alpha=alpha)
+
+# ----------------------------------------------------------------------------------------
+def plot_many_curves(plotdir, pfo_list, titlestr=None):
+    mpl_init()
+    fig, ax = plt.subplots()
+    for pfo in pfo_list:
+        resp_plot(pfo, ax, alpha=0.15)
+    ax.set(title='%s%d responses' % ('' if titlestr is None else titlestr+': ', len(pfo_list)))
+    fn = "%s/all-responses.svg" % plotdir
+    plt.savefig(fn)
+    return fn
+
+# ----------------------------------------------------------------------------------------
+def plot_phenotype_response(plotdir, pfo_list, xbounds=[-5, 5], n_to_plot=20, bundle_size=1, fnames=None):
     # ----------------------------------------------------------------------------------------
     def affy_plot(pfo, ax, ax2=None, n_bins=30):
         leaves = list(pfo["tree"].iter_leaves())
@@ -565,13 +598,6 @@ def plot_phenotype_response(plotdir, pfo_list, xbounds=[-5, 5], nsteps=40, n_to_
         xmin, xmax = min(xbounds + all_vals), max(xbounds + all_vals)
         sns.histplot({"internal": int_vals, "leaves": leaf_vals}, ax=ax2, multiple="stack", binwidth=(xmax - xmin) / n_bins)
         ax.set(title="itree %d (%d nodes)"%(itree, len(all_vals)))
-    # ----------------------------------------------------------------------------------------
-    def resp_plot(pfo, ax):
-        dx = (xbounds[1] - xbounds[0]) / nsteps
-        xvals = list(np.arange(xbounds[0], 0, dx)) + list(np.arange(0, xbounds[1] + dx, dx))
-        rvals = [pfo["birth-response"].λ_phenotype(x) for x in xvals]
-        data = {"affinity": xvals, "lambda": rvals}
-        sns.lineplot(data, x="affinity", y="lambda", ax=ax, linewidth=3, color="#990012")
     # ----------------------------------------------------------------------------------------
     def plt_single_tree(itree, pfo):
         plt.clf()
@@ -586,20 +612,23 @@ def plot_phenotype_response(plotdir, pfo_list, xbounds=[-5, 5], nsteps=40, n_to_
         return fn
     # ----------------------------------------------------------------------------------------
     print("    plotting trees to %s" % plotdir)
-    mpl_init()
     for sfn in glob.glob("%s/*.svg" % plotdir):
         os.remove(sfn)
     if not os.path.exists(plotdir):
         os.makedirs(plotdir)
+    if fnames is None:
+        fnames = [[]]
+    if len(fnames[-1]) > 0:  # add an empty row if there's already file names there
+        fnames.append([])
+
     n_to_plot = min(len(pfo_list), n_to_plot)
     if bundle_size == 1:
         plt_indices = range(n_to_plot)
     else:
         plt_indices = range(0, min(n_to_plot * bundle_size, len(pfo_list)), bundle_size)
-    if fnames is None:
-        fnames = [[]]
-    if len(fnames[-1]) > 0:  # add an empty row if there's already file names there
-        fnames.append([])
+
+    fn = plot_many_curves(plotdir, [pfo_list[i] for i in plt_indices])
+    addfn(fnames, fn)
     for itree in plt_indices:
         fn = plt_single_tree(itree, pfo_list[itree])
         addfn(fnames, fn)

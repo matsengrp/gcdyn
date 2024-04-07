@@ -16,8 +16,6 @@ import glob
 from gcdyn import bdms, gpmap, mutators, poisson, utils, encode
 from experiments import replay
 
-sigmoid_params = ['xscale', 'xshift', 'yscale']  # ick
-
 # ----------------------------------------------------------------------------------------
 def outfn(args, ftype, itrial, odir=None):
     if odir is None:
@@ -243,9 +241,9 @@ def choose_params(args, pcounts, itrial):
                 extra_bounds = get_xshift_bounds(args, params["xscale"], dbgstrs)
             if pname == "yscale":
                 extra_bounds = get_yscale_bounds(args, params["xscale"], params["xshift"], dbgstrs)
-        if args.dl_prediction_dir is not None and pname in sigmoid_params:
+        if args.dl_prediction_dir is not None and pname in utils.sigmoid_params:
             if pname == plist[0]:
-                print('        choosing dl prediction at index %d (of %d) for: %s' % (itrial % len(args.dl_pvals), len(args.dl_pvals), ' '.join(sigmoid_params)))
+                print('        choosing dl prediction at index %d (of %d) for: %s' % (itrial % len(args.dl_pvals), len(args.dl_pvals), ' '.join(utils.sigmoid_params)))
             params[pname] = args.dl_pvals[itrial % len(args.dl_pvals)][pname]
         else:
             params[pname] = choose_val(args, pname, extra_bounds=extra_bounds, dbgstrs=dbgstrs)
@@ -676,7 +674,7 @@ def main():
         with open(prfn) as cfile:
             reader = csv.DictReader(cfile)
             for line in reader:
-                args.dl_pvals.append({p : float(line['%s-predicted'%p]) for p in sigmoid_params})
+                args.dl_pvals.append({p : float(line['%s-predicted'%p]) for p in utils.sigmoid_params})
 
     random.seed(args.seed)
     np.random.seed(args.seed)
