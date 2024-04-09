@@ -1,5 +1,6 @@
 r"""Uses PyTorch for Deep Mutational Scanning (``torchdms``) model to predict
 affinity of Ig heavy and light chain DNA sequences to presented antigen."""
+
 from __future__ import annotations
 import pandas as pd
 import torch
