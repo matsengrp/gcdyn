@@ -1,5 +1,6 @@
 r"""Uses phenotype to determine fitness of B cells in the germinal center light
 zone."""
+
 from __future__ import annotations
 from typing import Callable
 from math import exp
