@@ -10,6 +10,5 @@ sphinx-copybutton
 myst-nb
 pandoc
 jupyterlab
-seaborn
 biopython
 dill

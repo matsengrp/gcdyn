@@ -41,10 +41,8 @@ setup(
         "scikit-learn",
         "colored-traceback",
         "sphinx-argparse",
+        "seaborn",
+        "psutil",
+        "pyqt5"
     ],
-    extras_require={
-        "PyQt5": [
-            "PyQt5",
-        ],
-    },
 )
