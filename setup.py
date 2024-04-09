@@ -21,7 +21,7 @@ setup(
         "License :: OSI Approved :: GNU General Public License (GPL)",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.9, <3.11",
+    python_requires=">=3.9, <3.13",
     entry_points={
         'console_scripts': [
             'gcd-dl-infer = scripts.dl_infer:main',
