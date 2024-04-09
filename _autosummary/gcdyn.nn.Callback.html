@@ -558,7 +558,10 @@ document.write(`
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">last_time</span></code></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_time</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">model</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_time</span></code></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -615,23 +618,23 @@ the <cite>Model</cite>’s metrics are returned. Example:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.Callback.on_batch_begin">
-<span class="sig-name descname"><span class="pre">on_batch_begin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks.html#Callback.on_batch_begin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_batch_begin" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">on_batch_begin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks/callback.html#Callback.on_batch_begin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_batch_begin" title="Link to this definition">#</a></dt>
 <dd><p>A backwards compatibility alias for <cite>on_train_batch_begin</cite>.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.Callback.on_batch_end">
-<span class="sig-name descname"><span class="pre">on_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks.html#Callback.on_batch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_batch_end" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">on_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks/callback.html#Callback.on_batch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_batch_end" title="Link to this definition">#</a></dt>
 <dd><p>A backwards compatibility alias for <cite>on_train_batch_end</cite>.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.Callback.on_predict_batch_begin">
-<span class="sig-name descname"><span class="pre">on_predict_batch_begin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks.html#Callback.on_predict_batch_begin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_predict_batch_begin" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">on_predict_batch_begin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks/callback.html#Callback.on_predict_batch_begin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_predict_batch_begin" title="Link to this definition">#</a></dt>
 <dd><p>Called at the beginning of a batch in <cite>predict</cite> methods.</p>
 <p>Subclasses should override for any actions to run.</p>
 <p>Note that if the <cite>steps_per_execution</cite> argument to <cite>compile</cite> in
-<cite>tf.keras.Model</cite> is set to <cite>N</cite>, this method will only be called every
+<cite>Model</cite> is set to <cite>N</cite>, this method will only be called every
 <cite>N</cite> batches.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -646,11 +649,11 @@ method but that may change in the future.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.Callback.on_predict_batch_end">
-<span class="sig-name descname"><span class="pre">on_predict_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks.html#Callback.on_predict_batch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_predict_batch_end" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">on_predict_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks/callback.html#Callback.on_predict_batch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_predict_batch_end" title="Link to this definition">#</a></dt>
 <dd><p>Called at the end of a batch in <cite>predict</cite> methods.</p>
 <p>Subclasses should override for any actions to run.</p>
 <p>Note that if the <cite>steps_per_execution</cite> argument to <cite>compile</cite> in
-<cite>tf.keras.Model</cite> is set to <cite>N</cite>, this method will only be called every
+<cite>Model</cite> is set to <cite>N</cite>, this method will only be called every
 <cite>N</cite> batches.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -664,7 +667,7 @@ method but that may change in the future.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.Callback.on_predict_begin">
-<span class="sig-name descname"><span class="pre">on_predict_begin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks.html#Callback.on_predict_begin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_predict_begin" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">on_predict_begin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks/callback.html#Callback.on_predict_begin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_predict_begin" title="Link to this definition">#</a></dt>
 <dd><p>Called at the beginning of prediction.</p>
 <p>Subclasses should override for any actions to run.</p>
 <dl class="field-list simple">
@@ -677,7 +680,7 @@ method but that may change in the future.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.Callback.on_predict_end">
-<span class="sig-name descname"><span class="pre">on_predict_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks.html#Callback.on_predict_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_predict_end" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">on_predict_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks/callback.html#Callback.on_predict_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_predict_end" title="Link to this definition">#</a></dt>
 <dd><p>Called at the end of prediction.</p>
 <p>Subclasses should override for any actions to run.</p>
 <dl class="field-list simple">
@@ -690,13 +693,13 @@ method but that may change in the future.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.Callback.on_test_batch_begin">
-<span class="sig-name descname"><span class="pre">on_test_batch_begin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks.html#Callback.on_test_batch_begin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_test_batch_begin" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">on_test_batch_begin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks/callback.html#Callback.on_test_batch_begin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_test_batch_begin" title="Link to this definition">#</a></dt>
 <dd><p>Called at the beginning of a batch in <cite>evaluate</cite> methods.</p>
 <p>Also called at the beginning of a validation batch in the <cite>fit</cite>
 methods, if validation data is provided.</p>
 <p>Subclasses should override for any actions to run.</p>
 <p>Note that if the <cite>steps_per_execution</cite> argument to <cite>compile</cite> in
-<cite>tf.keras.Model</cite> is set to <cite>N</cite>, this method will only be called every
+<cite>Model</cite> is set to <cite>N</cite>, this method will only be called every
 <cite>N</cite> batches.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -711,13 +714,13 @@ method but that may change in the future.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.Callback.on_test_batch_end">
-<span class="sig-name descname"><span class="pre">on_test_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks.html#Callback.on_test_batch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_test_batch_end" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">on_test_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks/callback.html#Callback.on_test_batch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_test_batch_end" title="Link to this definition">#</a></dt>
 <dd><p>Called at the end of a batch in <cite>evaluate</cite> methods.</p>
 <p>Also called at the end of a validation batch in the <cite>fit</cite>
 methods, if validation data is provided.</p>
 <p>Subclasses should override for any actions to run.</p>
 <p>Note that if the <cite>steps_per_execution</cite> argument to <cite>compile</cite> in
-<cite>tf.keras.Model</cite> is set to <cite>N</cite>, this method will only be called every
+<cite>Model</cite> is set to <cite>N</cite>, this method will only be called every
 <cite>N</cite> batches.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -731,7 +734,7 @@ methods, if validation data is provided.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.Callback.on_test_begin">
-<span class="sig-name descname"><span class="pre">on_test_begin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks.html#Callback.on_test_begin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_test_begin" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">on_test_begin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks/callback.html#Callback.on_test_begin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_test_begin" title="Link to this definition">#</a></dt>
 <dd><p>Called at the beginning of evaluation or validation.</p>
 <p>Subclasses should override for any actions to run.</p>
 <dl class="field-list simple">
@@ -744,7 +747,7 @@ method but that may change in the future.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.Callback.on_test_end">
-<span class="sig-name descname"><span class="pre">on_test_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks.html#Callback.on_test_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_test_end" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">on_test_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks/callback.html#Callback.on_test_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_test_end" title="Link to this definition">#</a></dt>
 <dd><p>Called at the end of evaluation or validation.</p>
 <p>Subclasses should override for any actions to run.</p>
 <dl class="field-list simple">
@@ -758,11 +761,11 @@ but that may change in the future.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.Callback.on_train_batch_begin">
-<span class="sig-name descname"><span class="pre">on_train_batch_begin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks.html#Callback.on_train_batch_begin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_train_batch_begin" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">on_train_batch_begin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks/callback.html#Callback.on_train_batch_begin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_train_batch_begin" title="Link to this definition">#</a></dt>
 <dd><p>Called at the beginning of a training batch in <cite>fit</cite> methods.</p>
 <p>Subclasses should override for any actions to run.</p>
 <p>Note that if the <cite>steps_per_execution</cite> argument to <cite>compile</cite> in
-<cite>tf.keras.Model</cite> is set to <cite>N</cite>, this method will only be called every
+<cite>Model</cite> is set to <cite>N</cite>, this method will only be called every
 <cite>N</cite> batches.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -777,11 +780,11 @@ method but that may change in the future.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.Callback.on_train_batch_end">
-<span class="sig-name descname"><span class="pre">on_train_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks.html#Callback.on_train_batch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_train_batch_end" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">on_train_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks/callback.html#Callback.on_train_batch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_train_batch_end" title="Link to this definition">#</a></dt>
 <dd><p>Called at the end of a training batch in <cite>fit</cite> methods.</p>
 <p>Subclasses should override for any actions to run.</p>
 <p>Note that if the <cite>steps_per_execution</cite> argument to <cite>compile</cite> in
-<cite>tf.keras.Model</cite> is set to <cite>N</cite>, this method will only be called every
+<cite>Model</cite> is set to <cite>N</cite>, this method will only be called every
 <cite>N</cite> batches.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -795,7 +798,7 @@ method but that may change in the future.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gcdyn.nn.Callback.on_train_end">
-<span class="sig-name descname"><span class="pre">on_train_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks.html#Callback.on_train_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_train_end" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">on_train_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/keras/src/callbacks/callback.html#Callback.on_train_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gcdyn.nn.Callback.on_train_end" title="Link to this definition">#</a></dt>
 <dd><p>Called at the end of training.</p>
 <p>Subclasses should override for any actions to run.</p>
 <dl class="field-list simple">

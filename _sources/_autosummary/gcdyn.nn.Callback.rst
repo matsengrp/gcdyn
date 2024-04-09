@@ -45,6 +45,7 @@ gcdyn.nn.Callback
    
       ~Callback.epoch
       ~Callback.last_time
+      ~Callback.model
       ~Callback.start_time
    
    

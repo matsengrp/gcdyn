@@ -1,0 +1,798 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>keras.src.callbacks.callback &#8212; gcdyn  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../../../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../../../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/keras/src/callbacks/callback';</script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../../_static/logo.png" class="logo__image only-light" alt="gcdyn  documentation - Home"/>
+    <script>document.write(`<img src="../../../../_static/logo.png" class="logo__image only-dark" alt="gcdyn  documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cite.html">Citing <code class="docutils literal notranslate"><span class="pre">gcdyn</span></code></a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../../notebooks/bdms_replay.html">Germinal center replay modeling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../notebooks/bdms_inhomogeneous.html">Inhomogeneous processes</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Command line tools</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../../argparse.html">Named Arguments</a></li>
+
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api.html">Modules</a><input checked class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../_autosummary/gcdyn.bdms.html">gcdyn.bdms</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.bdms.sample_trees.html">gcdyn.bdms.sample_trees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.bdms.TreeNode.html">gcdyn.bdms.TreeNode</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../_autosummary/gcdyn.encode.html">gcdyn.encode</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.encode.encode_tree.html">gcdyn.encode.encode_tree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.encode.encode_trees.html">gcdyn.encode.encode_trees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.encode.pad_trees.html">gcdyn.encode.pad_trees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.encode.read_trees.html">gcdyn.encode.read_trees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.encode.scale_tree.html">gcdyn.encode.scale_tree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.encode.simfn.html">gcdyn.encode.simfn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.encode.trivialize_encodings.html">gcdyn.encode.trivialize_encodings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.encode.write_training_files.html">gcdyn.encode.write_training_files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.encode.write_trees.html">gcdyn.encode.write_trees</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../_autosummary/gcdyn.fitness.html">gcdyn.fitness</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.fitness.Fitness.html">gcdyn.fitness.Fitness</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../_autosummary/gcdyn.gpmap.html">gcdyn.gpmap</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.gpmap.AdditiveGPMap.html">gcdyn.gpmap.AdditiveGPMap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.gpmap.ConstantGPMap.html">gcdyn.gpmap.ConstantGPMap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.gpmap.GPMap.html">gcdyn.gpmap.GPMap</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../_autosummary/gcdyn.models.html">gcdyn.models</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.models.naive_log_likelihood.html">gcdyn.models.naive_log_likelihood</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.models.stadler_appx_log_likelihood.html">gcdyn.models.stadler_appx_log_likelihood</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.models.stadler_full_log_likelihood.html">gcdyn.models.stadler_full_log_likelihood</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.models.stadler_full_log_likelihood_scipy.html">gcdyn.models.stadler_full_log_likelihood_scipy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.models.BirthDeathModel.html">gcdyn.models.BirthDeathModel</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../_autosummary/gcdyn.mutators.html">gcdyn.mutators</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.mutators.AttrMutator.html">gcdyn.mutators.AttrMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.mutators.ContextMutator.html">gcdyn.mutators.ContextMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.mutators.DiscreteMutator.html">gcdyn.mutators.DiscreteMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.mutators.GaussianMutator.html">gcdyn.mutators.GaussianMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.mutators.KdeMutator.html">gcdyn.mutators.KdeMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.mutators.Mutator.html">gcdyn.mutators.Mutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.mutators.SequenceMutator.html">gcdyn.mutators.SequenceMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.mutators.SequencePhenotypeMutator.html">gcdyn.mutators.SequencePhenotypeMutator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.mutators.UniformMutator.html">gcdyn.mutators.UniformMutator</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../_autosummary/gcdyn.nn.html">gcdyn.nn</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.nn.BundleMeanLayer.html">gcdyn.nn.BundleMeanLayer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.nn.Callback.html">gcdyn.nn.Callback</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.nn.NeuralNetworkModel.html">gcdyn.nn.NeuralNetworkModel</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../_autosummary/gcdyn.poisson.html">gcdyn.poisson</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-9"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.poisson.set_backend.html">gcdyn.poisson.set_backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.poisson.ConstantResponse.html">gcdyn.poisson.ConstantResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.poisson.ExponentialResponse.html">gcdyn.poisson.ExponentialResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.poisson.HomogeneousResponse.html">gcdyn.poisson.HomogeneousResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.poisson.ModulatedPhenotypeResponse.html">gcdyn.poisson.ModulatedPhenotypeResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.poisson.ModulatedRateResponse.html">gcdyn.poisson.ModulatedRateResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.poisson.PhenotypeResponse.html">gcdyn.poisson.PhenotypeResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.poisson.PhenotypeTimeResponse.html">gcdyn.poisson.PhenotypeTimeResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.poisson.Response.html">gcdyn.poisson.Response</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.poisson.SequenceContextMutationResponse.html">gcdyn.poisson.SequenceContextMutationResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.poisson.SigmoidResponse.html">gcdyn.poisson.SigmoidResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.poisson.SoftReluResponse.html">gcdyn.poisson.SoftReluResponse</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.html">gcdyn.utils</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-10"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.addfn.html">gcdyn.utils.addfn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.arglist_imatches.html">gcdyn.utils.arglist_imatches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.arglist_index.html">gcdyn.utils.arglist_index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.color.html">gcdyn.utils.color</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.color_mutants.html">gcdyn.utils.color_mutants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.insert_in_arglist.html">gcdyn.utils.insert_in_arglist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.is_in_arglist.html">gcdyn.utils.is_in_arglist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.isclose.html">gcdyn.utils.isclose</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.ladderize_tree.html">gcdyn.utils.ladderize_tree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.limit_procs.html">gcdyn.utils.limit_procs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.make_dl_plots.html">gcdyn.utils.make_dl_plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.make_html.html">gcdyn.utils.make_html</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.memory_usage_fraction.html">gcdyn.utils.memory_usage_fraction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.mpl_init.html">gcdyn.utils.mpl_init</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.node_contexts.html">gcdyn.utils.node_contexts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.padded_fivemer_contexts_of_paired_sequences.html">gcdyn.utils.padded_fivemer_contexts_of_paired_sequences</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.plot_chosen_params.html">gcdyn.utils.plot_chosen_params</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.plot_phenotype_response.html">gcdyn.utils.plot_phenotype_response</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.plot_responses.html">gcdyn.utils.plot_responses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.plot_tree_slices.html">gcdyn.utils.plot_tree_slices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.random_transition_matrix.html">gcdyn.utils.random_transition_matrix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.remove_from_arglist.html">gcdyn.utils.remove_from_arglist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.replace_in_arglist.html">gcdyn.utils.replace_in_arglist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.simple_fivemer_contexts.html">gcdyn.utils.simple_fivemer_contexts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/gcdyn.utils.write_leaf_sequences_to_fasta.html">gcdyn.utils.write_leaf_sequences_to_fasta</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Experiments subpackage</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../experiments.html">Modules</a><input checked class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-11"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../_autosummary/experiments.replay.html">experiments.replay</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-12"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/experiments.replay.NAIVE_SEQUENCE.html">experiments.replay.NAIVE_SEQUENCE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/experiments.replay.CHAIN_2_START_IDX.html">experiments.replay.CHAIN_2_START_IDX</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/experiments.replay.dms.html">experiments.replay.dms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/experiments.replay.mutability.html">experiments.replay.mutability</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/experiments.replay.substitution.html">experiments.replay.substitution</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../../developer.html">Developer tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../todo.html">To-do list</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/matsengrp/gcdyn" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for keras.src.callbacks.callback</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">keras.src</span> <span class="kn">import</span> <span class="n">backend</span>
+<span class="kn">from</span> <span class="nn">keras.src.api_export</span> <span class="kn">import</span> <span class="n">keras_export</span>
+
+
+<span class="nd">@keras_export</span><span class="p">(</span><span class="s2">&quot;keras.callbacks.Callback&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Callback</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class used to build new callbacks.</span>
+
+<span class="sd">    Callbacks can be passed to keras methods such as `fit()`, `evaluate()`, and</span>
+<span class="sd">    `predict()` in order to hook into the various stages of the model training,</span>
+<span class="sd">    evaluation, and inference lifecycle.</span>
+
+<span class="sd">    To create a custom callback, subclass `keras.callbacks.Callback` and</span>
+<span class="sd">    override the method associated with the stage of interest.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    &gt;&gt;&gt; training_finished = False</span>
+<span class="sd">    &gt;&gt;&gt; class MyCallback(Callback):</span>
+<span class="sd">    ...   def on_train_end(self, logs=None):</span>
+<span class="sd">    ...     global training_finished</span>
+<span class="sd">    ...     training_finished = True</span>
+<span class="sd">    &gt;&gt;&gt; model = Sequential([</span>
+<span class="sd">    ...     layers.Dense(1, input_shape=(1,))])</span>
+<span class="sd">    &gt;&gt;&gt; model.compile(loss=&#39;mean_squared_error&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; model.fit(np.array([[1.0]]), np.array([[1.0]]),</span>
+<span class="sd">    ...           callbacks=[MyCallback()])</span>
+<span class="sd">    &gt;&gt;&gt; assert training_finished == True</span>
+
+<span class="sd">    If you want to use `Callback` objects in a custom training loop:</span>
+
+<span class="sd">    1. You should pack all your callbacks into a single `callbacks.CallbackList`</span>
+<span class="sd">       so they can all be called together.</span>
+<span class="sd">    2. You will need to manually call all the `on_*` methods at the appropriate</span>
+<span class="sd">       locations in your loop. Like this:</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    callbacks =  keras.callbacks.CallbackList([...])</span>
+<span class="sd">    callbacks.append(...)</span>
+<span class="sd">    callbacks.on_train_begin(...)</span>
+<span class="sd">    for epoch in range(EPOCHS):</span>
+<span class="sd">        callbacks.on_epoch_begin(epoch)</span>
+<span class="sd">        for i, data in dataset.enumerate():</span>
+<span class="sd">        callbacks.on_train_batch_begin(i)</span>
+<span class="sd">        batch_logs = model.train_step(data)</span>
+<span class="sd">        callbacks.on_train_batch_end(i, batch_logs)</span>
+<span class="sd">        epoch_logs = ...</span>
+<span class="sd">        callbacks.on_epoch_end(epoch, epoch_logs)</span>
+<span class="sd">    final_logs=...</span>
+<span class="sd">    callbacks.on_train_end(final_logs)</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        params: Dict. Training parameters</span>
+<span class="sd">            (eg. verbosity, batch size, number of epochs...).</span>
+<span class="sd">        model: Instance of `Model`.</span>
+<span class="sd">            Reference of the model being trained.</span>
+
+<span class="sd">    The `logs` dictionary that callback methods</span>
+<span class="sd">    take as argument will contain keys for quantities relevant to</span>
+<span class="sd">    the current batch or epoch (see method-specific docstrings).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validation_data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
+
+    <span class="k">def</span> <span class="nf">set_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">model</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">backend</span><span class="o">.</span><span class="n">backend</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;jax&quot;</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">,</span> <span class="s2">&quot;jax_state_sync&quot;</span>
+        <span class="p">):</span>
+            <span class="c1"># With JAX, by default the model state is not</span>
+            <span class="c1"># attached to the model in the middle of an</span>
+            <span class="c1"># epoch. We have to force a sync before</span>
+            <span class="c1"># accessing model state for e.g. checkpointing.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">jax_state_sync</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span>
+
+<div class="viewcode-block" id="Callback.on_batch_begin">
+<a class="viewcode-back" href="../../../../_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_batch_begin">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_batch_begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A backwards compatibility alias for `on_train_batch_begin`.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="Callback.on_batch_end">
+<a class="viewcode-back" href="../../../../_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_batch_end">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_batch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A backwards compatibility alias for `on_train_batch_end`.&quot;&quot;&quot;</span></div>
+
+
+    <span class="k">def</span> <span class="nf">on_epoch_begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called at the start of an epoch.</span>
+
+<span class="sd">        Subclasses should override for any actions to run. This function should</span>
+<span class="sd">        only be called during TRAIN mode.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            epoch: Integer, index of epoch.</span>
+<span class="sd">            logs: Dict. Currently no data is passed to this argument for this</span>
+<span class="sd">              method but that may change in the future.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">on_epoch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called at the end of an epoch.</span>
+
+<span class="sd">        Subclasses should override for any actions to run. This function should</span>
+<span class="sd">        only be called during TRAIN mode.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            epoch: Integer, index of epoch.</span>
+<span class="sd">            logs: Dict, metric results for this training epoch, and for the</span>
+<span class="sd">              validation epoch if validation is performed. Validation result</span>
+<span class="sd">              keys are prefixed with `val_`. For training epoch, the values of</span>
+<span class="sd">              the `Model`&#39;s metrics are returned. Example:</span>
+<span class="sd">              `{&#39;loss&#39;: 0.2, &#39;accuracy&#39;: 0.7}`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Callback.on_train_batch_begin">
+<a class="viewcode-back" href="../../../../_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_train_batch_begin">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_train_batch_begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called at the beginning of a training batch in `fit` methods.</span>
+
+<span class="sd">        Subclasses should override for any actions to run.</span>
+
+<span class="sd">        Note that if the `steps_per_execution` argument to `compile` in</span>
+<span class="sd">        `Model` is set to `N`, this method will only be called every</span>
+<span class="sd">        `N` batches.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            batch: Integer, index of batch within the current epoch.</span>
+<span class="sd">            logs: Dict. Currently no data is passed to this argument for this</span>
+<span class="sd">              method but that may change in the future.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># For backwards compatibility.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">on_batch_begin</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="n">logs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Callback.on_train_batch_end">
+<a class="viewcode-back" href="../../../../_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_train_batch_end">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_train_batch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called at the end of a training batch in `fit` methods.</span>
+
+<span class="sd">        Subclasses should override for any actions to run.</span>
+
+<span class="sd">        Note that if the `steps_per_execution` argument to `compile` in</span>
+<span class="sd">        `Model` is set to `N`, this method will only be called every</span>
+<span class="sd">        `N` batches.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            batch: Integer, index of batch within the current epoch.</span>
+<span class="sd">            logs: Dict. Aggregated metric results up until this batch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># For backwards compatibility.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">on_batch_end</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="n">logs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Callback.on_test_batch_begin">
+<a class="viewcode-back" href="../../../../_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_test_batch_begin">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_test_batch_begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called at the beginning of a batch in `evaluate` methods.</span>
+
+<span class="sd">        Also called at the beginning of a validation batch in the `fit`</span>
+<span class="sd">        methods, if validation data is provided.</span>
+
+<span class="sd">        Subclasses should override for any actions to run.</span>
+
+<span class="sd">        Note that if the `steps_per_execution` argument to `compile` in</span>
+<span class="sd">        `Model` is set to `N`, this method will only be called every</span>
+<span class="sd">        `N` batches.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            batch: Integer, index of batch within the current epoch.</span>
+<span class="sd">            logs: Dict. Currently no data is passed to this argument for this</span>
+<span class="sd">              method but that may change in the future.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="Callback.on_test_batch_end">
+<a class="viewcode-back" href="../../../../_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_test_batch_end">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_test_batch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called at the end of a batch in `evaluate` methods.</span>
+
+<span class="sd">        Also called at the end of a validation batch in the `fit`</span>
+<span class="sd">        methods, if validation data is provided.</span>
+
+<span class="sd">        Subclasses should override for any actions to run.</span>
+
+<span class="sd">        Note that if the `steps_per_execution` argument to `compile` in</span>
+<span class="sd">        `Model` is set to `N`, this method will only be called every</span>
+<span class="sd">        `N` batches.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            batch: Integer, index of batch within the current epoch.</span>
+<span class="sd">            logs: Dict. Aggregated metric results up until this batch.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="Callback.on_predict_batch_begin">
+<a class="viewcode-back" href="../../../../_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_predict_batch_begin">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_predict_batch_begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called at the beginning of a batch in `predict` methods.</span>
+
+<span class="sd">        Subclasses should override for any actions to run.</span>
+
+<span class="sd">        Note that if the `steps_per_execution` argument to `compile` in</span>
+<span class="sd">        `Model` is set to `N`, this method will only be called every</span>
+<span class="sd">        `N` batches.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            batch: Integer, index of batch within the current epoch.</span>
+<span class="sd">            logs: Dict. Currently no data is passed to this argument for this</span>
+<span class="sd">              method but that may change in the future.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="Callback.on_predict_batch_end">
+<a class="viewcode-back" href="../../../../_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_predict_batch_end">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_predict_batch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called at the end of a batch in `predict` methods.</span>
+
+<span class="sd">        Subclasses should override for any actions to run.</span>
+
+<span class="sd">        Note that if the `steps_per_execution` argument to `compile` in</span>
+<span class="sd">        `Model` is set to `N`, this method will only be called every</span>
+<span class="sd">        `N` batches.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            batch: Integer, index of batch within the current epoch.</span>
+<span class="sd">            logs: Dict. Aggregated metric results up until this batch.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+    <span class="k">def</span> <span class="nf">on_train_begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called at the beginning of training.</span>
+
+<span class="sd">        Subclasses should override for any actions to run.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            logs: Dict. Currently no data is passed to this argument for this</span>
+<span class="sd">              method but that may change in the future.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Callback.on_train_end">
+<a class="viewcode-back" href="../../../../_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_train_end">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_train_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called at the end of training.</span>
+
+<span class="sd">        Subclasses should override for any actions to run.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            logs: Dict. Currently the output of the last call to</span>
+<span class="sd">              `on_epoch_end()` is passed to this argument for this method but</span>
+<span class="sd">              that may change in the future.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="Callback.on_test_begin">
+<a class="viewcode-back" href="../../../../_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_test_begin">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_test_begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called at the beginning of evaluation or validation.</span>
+
+<span class="sd">        Subclasses should override for any actions to run.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            logs: Dict. Currently no data is passed to this argument for this</span>
+<span class="sd">              method but that may change in the future.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="Callback.on_test_end">
+<a class="viewcode-back" href="../../../../_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_test_end">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_test_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called at the end of evaluation or validation.</span>
+
+<span class="sd">        Subclasses should override for any actions to run.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            logs: Dict. Currently the output of the last call to</span>
+<span class="sd">              `on_test_batch_end()` is passed to this argument for this method</span>
+<span class="sd">              but that may change in the future.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="Callback.on_predict_begin">
+<a class="viewcode-back" href="../../../../_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_predict_begin">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_predict_begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called at the beginning of prediction.</span>
+
+<span class="sd">        Subclasses should override for any actions to run.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            logs: Dict. Currently no data is passed to this argument for this</span>
+<span class="sd">              method but that may change in the future.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="Callback.on_predict_end">
+<a class="viewcode-back" href="../../../../_autosummary/gcdyn.nn.Callback.html#gcdyn.nn.Callback.on_predict_end">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_predict_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called at the end of prediction.</span>
+
+<span class="sd">        Subclasses should override for any actions to run.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            logs: Dict. Currently no data is passed to this argument for this</span>
+<span class="sd">              method but that may change in the future.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Erick Matsen
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2022, Erick Matsen.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
