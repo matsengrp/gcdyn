@@ -386,7 +386,7 @@ def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itri
         assert args.tree_inference_method == 'iqtree'
         cmd = '%s/iqtree -asr -s %s -pre %s/%s >%s/log' % (os.path.dirname(os.path.realpath(__file__)), ifn, wkdir, outfix, wkdir)
         print('    %s %s' % (utils.color('red', 'run'), cmd))
-        subprocess.check_call(cmd.split())
+        subprocess.check_call(cmd, shell=True)
     # ----------------------------------------------------------------------------------------
     def read_inferred_seqs():
         assert args.tree_inference_method == 'iqtree'
@@ -575,6 +575,63 @@ def finish_param_choice(args, pcounts, all_trees=None, all_fns=None):
 
 # ----------------------------------------------------------------------------------------
 def run_sub_procs(args):
+    # ----------------------------------------------------------------------------------------
+    def merge_subproc_outputs(subd=None):
+        odr = os.path.dirname(outfn(args, "seqs", subd=subd))
+        print("    writing merged %sfiles to %s" % ('' if subd is None else args.tree_inference_method+' ', odr))
+        print("        N files  N trees  time (s)  memory %   ftype")
+        if not os.path.exists(odr):
+            os.makedirs(odr)
+        missing_trees = None
+        for ftype in encode.final_ofn_strs:
+            ofn = outfn(args, ftype, subd=subd)
+            fnames = [
+                outfn(args, ftype, subd="iproc-%d%s"%(i, '' if subd is None else '/'+subd))
+                for i in range(args.n_sub_procs)
+            ]
+            start = time.time()
+            n_total_trees = ''
+            if ftype in ["seqs", "trees", "meta", "summary-stats"]:
+                if ftype in ["meta", "summary-stats"]:
+                    cmds = [
+                        "head -n1 %s >%s" % (fnames[0], ofn),
+                        "tail --quiet -n+2 %s >>%s" % (" ".join(fnames), ofn),
+                    ]
+                else:
+                    cmds = ["cat %s >%s" % (" ".join(fnames), ofn)]
+                for cmd in cmds:
+                    subprocess.check_call(cmd, shell=True)
+                if ftype == 'trees':
+                    n_total_trees = int(subprocess.check_output('wc -l %s | cut -d\' \' -f1' % ofn, shell=True))
+            elif ftype in ["encoded-trees"]:
+                elists = [encode.read_trees(fn) for fn in fnames]
+                n_total_trees = sum(len(l) for l in elists)
+                missing_trees = [n_per_proc - len(l) for l in elists]
+                all_etrees = [e for fn in fnames for e in encode.read_trees(fn)]
+                encode.write_trees(ofn, all_etrees)
+            elif ftype in ["responses"]:
+                all_responses = []
+                for fn in fnames:
+                    with open(fn, "rb") as rfile:
+                        all_responses += pickle.load(rfile)
+                n_total_trees = len(all_responses)
+                with open(ofn, "wb") as rfile:
+                    dill.dump(all_responses, rfile)
+            else:
+                raise Exception("unexpected file type %s" % ftype)
+            print(
+                "         %3d %9s    %5.2f   %7.2f      %s"
+                % (
+                    len(fnames),
+                    str(n_total_trees),
+                    time.time() - start,
+                    100 * utils.memory_usage_fraction(),
+                    ftype,
+                )
+            )
+        if any(m > 0 for m in missing_trees):
+            print('    %s missing %d total trees over %d procs: %s' % (utils.color('yellow', 'warning'), sum(missing_trees), args.n_sub_procs, ' '.join(utils.color('red' if m>0 else None, str(m)) for m in missing_trees)))
+    # ----------------------------------------------------------------------------------------
     procs = []
     if args.n_trials % args.n_sub_procs != 0:
         raise Exception("--n-trials %d has to be divisible by --n-sub-procs %d, but got remainder %d (otherwise it's too easy to run into issues with bundling)" % (args.n_trials, args.n_sub_procs, args.n_trials % args.n_sub_procs))
@@ -647,57 +704,9 @@ def run_sub_procs(args):
                     )
         sys.stdout.flush()
         time.sleep(0.01 / max(1, len(procs)))
-    print("    writing merged files to %s" % args.outdir)
-    print("        N files  N trees  time (s)  memory %   ftype")
-    missing_trees = None
-    for ftype in encode.final_ofn_strs:
-        ofn = outfn(args, ftype)
-        fnames = [
-            outfn(args, ftype, subd="iproc-%d"%i)
-            for i in range(args.n_sub_procs)
-        ]
-        start = time.time()
-        n_total_trees = ''
-        if ftype in ["seqs", "trees", "meta", "summary-stats"]:
-            if ftype in ["meta", "summary-stats"]:
-                cmds = [
-                    "head -n1 %s >%s" % (fnames[0], ofn),
-                    "tail --quiet -n+2 %s >>%s" % (" ".join(fnames), ofn),
-                ]
-            else:
-                cmds = ["cat %s >%s" % (" ".join(fnames), ofn)]
-            for cmd in cmds:
-                subprocess.check_call(cmd, shell=True)
-            if ftype == 'trees':
-                n_total_trees = int(subprocess.check_output('wc -l %s | cut -d\' \' -f1' % ofn, shell=True))
-        elif ftype in ["encoded-trees"]:
-            elists = [encode.read_trees(fn) for fn in fnames]
-            n_total_trees = sum(len(l) for l in elists)
-            missing_trees = [n_per_proc - len(l) for l in elists]
-            all_etrees = [e for fn in fnames for e in encode.read_trees(fn)]
-            encode.write_trees(ofn, all_etrees)
-        elif ftype in ["responses"]:
-            all_responses = []
-            for fn in fnames:
-                with open(fn, "rb") as rfile:
-                    all_responses += pickle.load(rfile)
-            n_total_trees = len(all_responses)
-            with open(ofn, "wb") as rfile:
-                dill.dump(all_responses, rfile)
-        else:
-            raise Exception("unexpected file type %s" % ftype)
-        print(
-            "         %3d %9s    %5.2f   %7.2f      %s"
-            % (
-                len(fnames),
-                str(n_total_trees),
-                time.time() - start,
-                100 * utils.memory_usage_fraction(),
-                ftype,
-            )
-        )
-    if any(m > 0 for m in missing_trees):
-        print('    %s missing %d total trees over %d procs: %s' % (utils.color('yellow', 'warning'), sum(missing_trees), args.n_sub_procs, ' '.join(utils.color('red' if m>0 else None, str(m)) for m in missing_trees)))
+    merge_subproc_outputs()
+    if args.tree_inference_method is not None:
+        merge_subproc_outputs(subd=args.tree_inference_method)
 
     if args.make_plots:
         print("  note: can't make per-tree plots in main process when --n-sub-procs is set")
