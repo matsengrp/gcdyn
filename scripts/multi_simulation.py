@@ -365,7 +365,7 @@ def add_seqs(args, all_seqs, itrial, tree):
     sample_nodes = [tree] + list(tree.iter_descendants()) if args.sample_internal_nodes else list(tree.iter_leaves())
     lseqs = []
     for node in sample_nodes:
-        sfo = {"name": node.name, "seq": node.sequence}
+        sfo = {"name": str(node.name), "seq": node.sequence}  # when read from pickle, the node names sometimes end up as integers
         all_seqs.append(sfo)
         if node.is_leaf():
             lseqs.append(sfo)
