@@ -75,14 +75,16 @@ def encode_tree(
 
 def scale_tree(
     intree: TreeNode,
+    new_mean_depth: float = 1
 ) -> (float, TreeNode):
-    """Scale intree to average leaf depth (i.e. time) of 1, i.e. divide all leaf depths by the average depth.
-    Returns initial average branch depth brlen and scaled tree outtree."""
+    """Return new tree scaled to average leaf depth <new_mean_depth>.
+    Also returns original average branch depth <brlen>"""
     mean_brlen = np.mean([lf.t for lf in intree.iter_leaves()])
     outtree = copy.copy(intree)
-    for node in outtree.iter_descendants():
-        node.t /= mean_brlen
-    assert utils.isclose(np.mean([lf.t for lf in outtree.iter_leaves()]), 1)
+    for node in intree.iter_descendants(strategy="preorder"):  # preorder so we don't need a separate loop for .dist
+        node.t *= new_mean_depth / mean_brlen
+        node.dist = node.t - node.up.t
+    assert utils.isclose(np.mean([lf.t for lf in outtree.iter_leaves()]), new_mean_depth)
     return mean_brlen, outtree
 
 

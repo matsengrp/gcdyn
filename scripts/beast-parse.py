@@ -179,6 +179,7 @@ Read Beast results from xml and history.trees files, add phenotype (affinity/kd)
 affinity model, then write sequences to fasta, tree to newick, and affinity to yaml.
 Example usage:
     beast-parse.py --input-dir <input-dir> --beast-version <bvsn> --output-version <ovsn> --debug 1 --check
+(see also datascripts/meta/taraki-gctree-2021-10/run.sh)
 """
 class MultiplyInheritedFormatter(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
     pass

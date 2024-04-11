@@ -16,10 +16,12 @@ import glob
 from gcdyn import bdms, gpmap, mutators, poisson, utils, encode
 from experiments import replay
 
+# fmt: off
 # ----------------------------------------------------------------------------------------
-def outfn(args, ftype, itrial, odir=None):
-    if odir is None:
-        odir = args.outdir
+def outfn(args, ftype, itrial=None, subd=None):
+    odir = args.outdir
+    if subd is not None:
+        odir += '/%s' % subd
     return encode.output_fn(odir, ftype, itrial)
 
 # ----------------------------------------------------------------------------------------
@@ -180,7 +182,6 @@ def print_resp(bresp, dresp):
 
 
 # ----------------------------------------------------------------------------------------
-# fmt: off
 def choose_val(args, pname, extra_bounds=None, dbgstrs=None):
     minmax, vals = [getattr(args, pname + "_" + str) for str in ["range", "values"]]
     if minmax is not None:  # range with two values for continuous
@@ -310,14 +311,13 @@ def get_responses(args, xscale, xshift, yscale, pcounts):
 
 
 # ----------------------------------------------------------------------------------------
-def write_final_outputs(args, all_seqs, all_trees, param_list):
-    print("  writing final outputs%s to %s" % (' (including internal nodes)' if args.sample_internal_nodes else '', args.outdir))
+def write_final_outputs(args, all_seqs, all_trees, param_list, inferred=False):
+    subd = args.tree_inference_method if inferred else ''
+    print("  writing %sfinal outputs%s to %s" % ('inferred ' if inferred else '', ' (including internal nodes)' if args.sample_internal_nodes else '', os.path.dirname(outfn(args, "seqs", subd=subd))))
 
-    with open(outfn(args, "seqs", None), "w") as asfile:
-        for sfo in all_seqs:
-            asfile.write(">%s\n%s\n" % (sfo["name"], sfo["seq"]))
+    utils.write_fasta(outfn(args, "seqs", subd=subd), all_seqs)
 
-    with open(outfn(args, "trees", None), "w") as tfile:
+    with open(outfn(args, "trees", subd=subd), "w") as tfile:
         for pfo in all_trees:
             tfile.write("%s\n" % pfo["tree"].write(format=1))
 
@@ -332,7 +332,7 @@ def write_final_outputs(args, all_seqs, all_trees, param_list):
                     "n_muts": node.total_mutations,
                 }
             )
-    encode.write_leaf_meta(outfn(args, "meta", None), lmetafos)
+    encode.write_leaf_meta(outfn(args, "meta", subd=subd), lmetafos)
 
     # encode trees
     scale_vals, encoded_trees = encode.encode_trees([pfo["tree"] for pfo in all_trees])
@@ -358,24 +358,98 @@ def write_final_outputs(args, all_seqs, all_trees, param_list):
         {k: p["%s-response" % k] for k in ["birth", "death"]} for p in all_trees
     ]
 
-    encode.write_training_files(args.outdir, encoded_trees, responses, sstats)
+    encode.write_training_files(os.path.dirname(outfn(args, "seqs", subd=subd)), encoded_trees, responses, sstats)
 
 # ----------------------------------------------------------------------------------------
 def add_seqs(args, all_seqs, itrial, tree):
     sample_nodes = [tree] + list(tree.iter_descendants()) if args.sample_internal_nodes else list(tree.iter_leaves())
+    lseqs = []
     for node in sample_nodes:
-        all_seqs.append(
-            {
-                "name": node.name,
-                "seq": node.sequence,
-            }
-        )
-
+        sfo = {"name": node.name, "seq": node.sequence}
+        all_seqs.append(sfo)
+        if node.is_leaf():
+            lseqs.append(sfo)
+    return lseqs
 
 # ----------------------------------------------------------------------------------------
 def add_tree(all_trees, itrial, pfo):
     all_trees.append(pfo)
 
+# ----------------------------------------------------------------------------------------
+def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itrial, outfix='out', debug=False):
+    # ----------------------------------------------------------------------------------------
+    def run_method():
+        ifn = '%s/input-seqs.fa' % wkdir
+        with open(ifn, 'w') as sfile:
+            for sfo in true_leaf_seqs:
+                sfile.write('>%s\n%s\n' % (sfo['name'], sfo['seq']))
+        assert args.tree_inference_method == 'iqtree'
+        cmd = '%s/iqtree -asr -s %s -pre %s/%s >%s/log' % (os.path.dirname(os.path.realpath(__file__)), ifn, wkdir, outfix, wkdir)
+        print('    %s %s' % (utils.color('red', 'run'), cmd))
+        subprocess.check_call(cmd.split())
+    # ----------------------------------------------------------------------------------------
+    def read_inferred_seqs():
+        assert args.tree_inference_method == 'iqtree'
+        inf_infos = {}
+        with open('%s/%s.state'%(wkdir, outfix)) as afile:
+            reader = csv.DictReader(filter(lambda row: row[0]!='#', afile), delimiter=str('\t'))
+            for line in reader:
+                node = line['Node']
+                if node not in inf_infos:
+                    inf_infos[node] = {}
+                inf_infos[node][int(line['Site'])] = line['State'].replace('-', 'N')  # NOTE this has uncertainty info as well, which atm i'm ignoring
+        seq_len = len(true_leaf_seqs[0]['seq'])
+        inf_seqfos = []
+        for node, nfo in inf_infos.items():
+            inf_seqfos.append({'name' : node, 'seq' : ''.join(nfo[i] for i in range(1, seq_len+1))})
+        if debug:
+            print('      read %d %s inferred ancestral seqs' % (len(inf_seqfos), args.tree_inference_method))
+        return inf_seqfos
+    # ----------------------------------------------------------------------------------------
+    assert not args.sample_internal_nodes  # would need to think about whether I want to 1) pass inferred seqs to iqtree and/or 2) read iqtree inferred internal nodes
+    wkdir = '%s/%s/itree-%d' % (args.outdir, args.tree_inference_method, itrial)
+    if not os.path.exists(wkdir):
+        os.makedirs(wkdir)
+    ofn = '%s/%s.treefile' % (wkdir, outfix)
+    if os.path.exists(ofn):
+        print('    %s output file exists, not rerunning: %s' % (args.tree_inference_method, ofn))
+    else:
+        run_method()
+    tree = bdms.TreeNode(newick=ofn, format=1)
+
+    inf_seqfos = read_inferred_seqs()
+    utils.write_fasta('%s/inf-anc-seqs.fa'%wkdir, inf_seqfos)
+
+    if debug:
+        print('  before scaling:')
+        print(utils.pad_lines(tree.get_ascii(show_internal=True)))
+        utils.print_dtree(tree)
+
+    # set .x, .t, and .total_mutations
+    all_seqs = {s['name'] : s['seq'] for s in true_leaf_seqs + inf_seqfos}
+    hdcache = {}
+    for tnode in [tree] + list(tree.iter_descendants(strategy='preorder')):
+        nseq = all_seqs[tnode.name]
+        tnode.x = gp_map(nseq)
+        tnode.t = tnode.dist + (0 if tnode is tree else tnode.up.t)
+        if nseq not in hdcache:
+            hdcache[nseq] = utils.hamming_distance(all_seqs[tree.name], nseq)
+        tnode.total_mutations = hdcache[nseq]
+    encode.scale_tree(tree, new_mean_depth=params['time_to_sampling'])
+
+    if debug:
+        print('  after scaling:')
+        def dstr(d): return utils.color('blue', '0', width=9) if float(d)==0 else '%9.6f'%d
+        naive_hdist = utils.hamming_distance(replay.NAIVE_SEQUENCE, all_seqs[tree.name])
+        if naive_hdist != 0:
+            print('    %s inferred root not equal to replay naive seq (%d bases differ)' % (utils.color('yellow', 'note'), naive_hdist))
+        print('                dist        t          x')
+        for tnode in [tree] + list(tree.iter_descendants(strategy='preorder')):
+            print('  %10s  %s  %s   %s' % (tnode.name, dstr(tnode.dist), dstr(tnode.t), dstr(tnode.x)))
+
+    inf_pfo = {'%s-response'%r : pfo['%s-response'%r] for r in ['birth', 'death']}
+    inf_pfo['tree'] = tree
+    inf_trees.append(inf_pfo)
 
 # ----------------------------------------------------------------------------------------
 def read_dill_file(fname):
@@ -451,8 +525,8 @@ def get_parser():
     parser.add_argument("--make-plots", action="store_true", help="")
     parser.add_argument("--label-leaf-internal-nodes", action="store_true", help="Instead of the default node naming scheme of pure integers, add a prefix to the integer indicating if it\'s a leaf (\'leaf-\') or internal (\'mrca-\') node.")
     parser.add_argument("--n-to-plot", type=int, default=10, help="number of tree slice plots to make")
+    parser.add_argument("--tree-inference-method")
     return parser
-    # fmt: on
 
 
 # ----------------------------------------------------------------------------------------
@@ -501,7 +575,6 @@ def finish_param_choice(args, pcounts, all_trees=None, all_fns=None):
 
 # ----------------------------------------------------------------------------------------
 def run_sub_procs(args):
-    # fmt: off
     procs = []
     if args.n_trials % args.n_sub_procs != 0:
         raise Exception("--n-trials %d has to be divisible by --n-sub-procs %d, but got remainder %d (otherwise it's too easy to run into issues with bundling)" % (args.n_trials, args.n_sub_procs, args.n_trials % args.n_sub_procs))
@@ -511,14 +584,13 @@ def run_sub_procs(args):
         if n_per_proc % args.simu_bundle_size != 0:
             raise Exception("N trees per proc %d ( = --n-trials / --n-sub-procs = %d / %d) has to be evenly divisible by --simu-bundle-size %d, but got remainder %d" % (n_per_proc, args.n_trials, args.n_sub_procs, args.simu_bundle_size, n_per_proc % args.simu_bundle_size))
         print("      making bundles of %d trees for each set of parameter values (%d bundles per sub proc)" % (args.simu_bundle_size, n_per_proc / args.simu_bundle_size))
-    # fmt: on
     for iproc in range(args.n_sub_procs):
         clist = ["python"] + copy.deepcopy(sys.argv)
         subdir = "%s/iproc-%d" % (args.outdir, iproc)
         istart = iproc * n_per_proc
         if (
             all(
-                os.path.exists(outfn(args, ft, None, odir=subdir))
+                os.path.exists(outfn(args, ft, subd='iproc-%d'%iproc))
                 for ft in encode.final_ofn_strs
             )
             and not args.overwrite
@@ -579,9 +651,9 @@ def run_sub_procs(args):
     print("        N files  N trees  time (s)  memory %   ftype")
     missing_trees = None
     for ftype in encode.final_ofn_strs:
-        ofn = outfn(args, ftype, None)
+        ofn = outfn(args, ftype)
         fnames = [
-            outfn(args, ftype, None, odir="%s/iproc-%d" % (args.outdir, i))
+            outfn(args, ftype, subd="iproc-%d"%i)
             for i in range(args.n_sub_procs)
         ]
         start = time.time()
@@ -631,7 +703,7 @@ def run_sub_procs(args):
         print("  note: can't make per-tree plots in main process when --n-sub-procs is set")
 
     # read merged files so we can make parameter count plots
-    with open(outfn(args, 'responses', None), "rb") as rfile:
+    with open(outfn(args, 'responses'), "rb") as rfile:
         pklfos = pickle.load(rfile)
     pcounts = {}
     for pkfo in pklfos:
@@ -640,7 +712,7 @@ def run_sub_procs(args):
                 continue
             add_pval(pcounts, pname, pval)
         add_pval(pcounts, "initial_birth_rate", pkfo['birth'].λ_phenotype(0))
-    with open(outfn(args, 'summary-stats', None)) as cfile:
+    with open(outfn(args, 'summary-stats')) as cfile:
         reader = csv.DictReader(cfile)
         for line in reader:
             for pname in [p for p in ['carry_cap', 'time_to_sampling', 'n_seqs'] if p in line]:  # old files don't have these
@@ -650,7 +722,6 @@ def run_sub_procs(args):
 
 # ----------------------------------------------------------------------------------------
 def main():
-    # fmt: off
     git_dir = os.path.dirname(os.path.realpath(__file__)).replace("/scripts", "/.git")
     print("    gcdyn commit: %s" % subprocess.check_output(["git", "--git-dir", git_dir, "rev-parse", "HEAD"]).strip())
     parser = get_parser()
@@ -675,6 +746,8 @@ def main():
             reader = csv.DictReader(cfile)
             for line in reader:
                 args.dl_pvals.append({p : float(line['%s-predicted'%p]) for p in utils.sigmoid_params})
+    if args.tree_inference_method is not None and args.sample_internal_nodes:
+        raise Exception('need to implement this')
 
     random.seed(args.seed)
     np.random.seed(args.seed)
@@ -714,7 +787,7 @@ def main():
         args.mutability_multiplier * replay.mutability(),
     )
 
-    all_seqs, all_trees = [], []
+    all_seqs, all_trees, inf_trees = [], [], []
     n_missing = 0
     rng = np.random.default_rng(seed=args.seed)
     params, n_times_used, pcounts, plist = None, 0, {}, []  # parameter values, and number of trees that we've simulated with these parameter values (pcounts keeps track of counts of each parameter (for summary printing/plots) whereas plist keeps all parameter values so we can write summary stats at the end)
@@ -722,7 +795,7 @@ def main():
     for itrial in range(args.itrial_start, args.n_trials):
         print(utils.color("blue", "trial %d:" % itrial), end=" ")
         check_memory(itrial)
-        ofn = outfn(args, None, itrial)
+        ofn = outfn(args, None, itrial=itrial)
         if params is None or n_times_used == args.simu_bundle_size:  # first time through loop or start of a new bundle
             params = choose_params(args, pcounts, itrial)  # NOTE make *sure* you always get to this point in the loop (i.e. don't put any continue statements above it)
             n_times_used = 0
@@ -735,9 +808,11 @@ def main():
             if pfo is None:  # file is screwed up and we want to rerun
                 print("    rerunning since pickle file read failed")
             else:
-                add_seqs(args, all_seqs, itrial, pfo["tree"])
+                tree_leaf_seqs = add_seqs(args, all_seqs, itrial, pfo["tree"])
                 add_tree(all_trees, itrial, pfo)
                 plist.append(params)
+                if args.tree_inference_method is not None:
+                    get_inferred_tree(args, params, pfo, gp_map, inf_trees, tree_leaf_seqs, itrial, debug=args.debug)
                 continue
         if args.dont_run_new_simu:
             n_missing += 1
@@ -761,9 +836,12 @@ def main():
         utils.addfn(all_fns, plt_fn)
         with open(ofn, "wb") as fp:
             dill.dump({"tree": tree, "birth-response": birth_resp, "death-response": death_resp}, fp)
-        add_seqs(args, all_seqs, itrial, tree)
-        add_tree(all_trees, itrial, {"tree": tree, "birth-response": birth_resp, "death-response": death_resp})
+        tree_leaf_seqs = add_seqs(args, all_seqs, itrial, tree)
+        pfo = {"tree": tree, "birth-response": birth_resp, "death-response": death_resp}
+        add_tree(all_trees, itrial, pfo)
         plist.append(params)
+        if args.tree_inference_method is not None:
+            get_inferred_tree(args, params, pfo, gp_map, inf_trees, tree_leaf_seqs, itrial, debug=args.debug)
 
     if args.dont_run_new_simu:
         print("    --dont-run-new-simu: missing %d trees, but ignoring and just merging the ones we have" % n_missing)
@@ -774,7 +852,9 @@ def main():
         sys.exit(0)
 
     write_final_outputs(args, all_seqs, all_trees, plist)
+    if args.tree_inference_method is not None:
+        write_final_outputs(args, all_seqs, inf_trees, plist, inferred=True)
 
     finish_param_choice(args, pcounts, all_trees=all_trees)
     print("    total simulation time: %.1f sec" % (time.time() - start))
-    # fmt: on
+# fmt: on

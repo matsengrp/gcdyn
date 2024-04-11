@@ -789,4 +789,29 @@ def make_html(
         htmlfile.write("\n".join(lines))
     # subprocess.check_call(['chmod', '664', htmlfname])
 
+# ----------------------------------------------------------------------------------------
+def pad_lines(lstr, extra_str='            '):
+    return '\n'.join(extra_str+l for l in lstr.split('\n'))
+
+# ----------------------------------------------------------------------------------------
+def print_dtree(etree):
+    # # ete tree version (better than __str__()), although it still can't show distance:
+    # print(pad_lines(tree.get_ascii(show_internal=True)))
+    import dendropy
+    dtree = dendropy.Tree.get_from_string(etree.write(format=1), 'newick', suppress_internal_node_taxa=False, preserve_underscores=True)
+    # print(utils.pad_lines(get_ascii_tree(dendro_tree=dtree)))
+    tlines = dtree.as_ascii_plot(width=250, plot_metric='length', show_internal_node_labels=True) #, node_label_compose_fn=compose_fcn)
+    print(pad_lines(tlines))
+
+# ----------------------------------------------------------------------------------------
+def hamming_distance(seq1, seq2):
+    assert len(seq1) == len(seq2)
+    return sum(x != y for x, y in zip(seq1.upper(), seq2.upper()) if x not in 'N-' and y not in 'N-')
+
+# ----------------------------------------------------------------------------------------
+def write_fasta(ofn, seqfos):
+    with open(ofn, "w") as asfile:
+        for sfo in seqfos:
+            asfile.write(">%s\n%s\n" % (sfo["name"], sfo["seq"]))
+
 # fmt: on
