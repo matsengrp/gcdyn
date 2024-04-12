@@ -32,6 +32,9 @@ xscales=0.1:1:5:10; xshifts=-5:-2:-1:0:1:2:5
 pranges="--xscale-range-list 0.01,2 --xshift-range-list=-0.5,3 --yscale-range-list 1,50 --initial-birth-rate-range-list 4,10 --time-to-sampling-range-list 10,30 --carry-cap-range-list 100,300 --n-seqs-range-list 40,90"
 ppl="--params-to-predict-list xscale:xshift:yscale:xscale,xshift:xscale,yscale:xshift,yscale:xscale,xshift,yscale"
 echo $bin $common --label vary-all --version v1 $pranges --n-replicates 1 --n-trials-list 5000:50000:500000:670000 --simu-bundle-size-list 1:50:67 --dl-bundle-size-list 1:50:67 --zip-vars simu-bundle-size:dl-bundle-size --epochs-list 250 --simu-extra-args=\"--n-max-procs 20\" $ppl
+# echo $bin $common --label const-resp --version test-v0 --n-replicates 1 --birth-response-list constant --n-trials-list 5000:50000 --simu-bundle-size-list 1 --dl-bundle-size-list 1 --epochs-list 250 --simu-extra-args=\"--n-max-procs 20\"
+
+# maybe this is right (but can't read it now)? dld=/fh/fast/matsen_e/dralph/partis/gcdyn/vary-all/v1/n-trials-500000/simu-bundle-size-1/dl-bundle-size-1/params-to-predict-xscale:xshift:yscale/dl-infer
 # echo ./projects/cf-gcdyn.py --actions data --n-max-procs 5 --n-sub-procs 100 --base-outdir /fh/fast/matsen_e/dralph/partis/gcdyn --label test-data --version v0 --dry --dl-model-dir $dld --dl-bundle-size-list 1
 
 

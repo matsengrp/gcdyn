@@ -43,13 +43,20 @@ def print_final_response_vals(tree, birth_resp, death_resp, final_time):
 
 
 # ----------------------------------------------------------------------------------------
-def relabel_nodes(args, tree, itrial):
+def relabel_nodes(args, tree, itrial, only_internal=False, seqfos=None):
+    if seqfos is not None:
+        seqdict = {s['name'] : s for s in seqfos}
     for node in [tree] + list(tree.iter_descendants()):
+        if only_internal and node.is_leaf():
+            continue
+        old_name = node.name
         if node is tree:
             node.name = "naive"
         elif args.label_leaf_internal_nodes:  # don't want naive node to also have 'mrca'
             node.name = '%s-%s' % ('leaf' if node.is_leaf() else 'mrca', node.name)
         node.name = "%d-%s" % (itrial, node.name)
+        if seqfos is not None and old_name in seqdict:
+            seqdict[old_name]['name'] = node.name
 
 # ----------------------------------------------------------------------------------------
 def generate_sequences_and_tree(
@@ -110,23 +117,18 @@ def generate_sequences_and_tree(
             continue
     print()
     for estr in sorted([k for k, v in err_strs.items() if v > 0]):
-        print(
-            "      %s %d failures with message '%s'"
-            % (utils.color("yellow", "warning"), err_strs[estr], estr)
-        )
+        print("      %s %d failures with message '%s'" % (utils.color("yellow", "warning"), err_strs[estr], estr))
     if not success:
-        print(
-            "    %s exceeded maximum number of tries %d so giving up"
-            % (utils.color("yellow", "warning"), args.n_max_tries)
-        )
+        print("    %s exceeded maximum number of tries %d so giving up" % (utils.color("yellow", "warning"), args.n_max_tries))
         return None, None
 
     plt_fn = None
     if args.make_plots:
-        plt_fn = utils.plot_tree_slices(
-            args.outdir + "/plots/tree-slices", tree, params['time_to_sampling'], itrial
-        )
+        plt_fn = utils.plot_tree_slices(args.outdir + "/plots/tree-slices", tree, params['time_to_sampling'], itrial)
 
+    if args.debug > 1:
+        print('    tree before sampling:')
+        utils.print_dtree(tree)
     n_to_sample = params["n_seqs"]
     if len(live_leaves) < n_to_sample:
         print("  %s --n-seqs set to %d but tree only has %d live tips, so just sampling all of them" % (utils.color("yellow", "warning"), n_to_sample, len(live_leaves)))
@@ -135,31 +137,34 @@ def generate_sequences_and_tree(
     tree.prune()
     tree.remove_mutation_events()
     relabel_nodes(args, tree, itrial)
+    if args.debug > 1:
+        print('    tree after sampling, pruning, relabeling, etc:')
+        utils.print_dtree(tree)
 
     # check that node times and branch lengths are consistent
     for node in tree.iter_descendants():
         assert np.isclose(node.t - node.up.t, node.dist)
 
-    set_mut_stats(tree)
+    set_mut_stats(tree, debug=args.debug)
 
     return plt_fn, tree
 
 
 # ----------------------------------------------------------------------------------------
-def set_mut_stats(tree):
+def set_mut_stats(tree, debug=False):
     tree.total_mutations = 0
-
     for node in tree.iter_descendants(strategy="preorder"):
         node.total_mutations = node.n_mutations + node.up.total_mutations
 
-    tmut_tots = [leaf.total_mutations for leaf in tree.iter_leaves()]
-
-    tmean, tmin, tmax = np.mean(tmut_tots), min(tmut_tots), max(tmut_tots)
-    print(
-        "   mutations per sequence:  mean %.1f   min %.1f  max %.1f"
-        % (tmean, tmin, tmax)
-    )
-
+    if debug:
+        leaf_muts = sorted([l.total_mutations for l in tree.iter_leaves()])
+        int_muts = sorted([n.total_mutations for n in [tree] + list(tree.iter_descendants()) if not n.is_leaf()])
+        print('      internal muts (mean %.1f): %s' % (np.mean(int_muts), ' '.join(str(n) for n in int_muts)))
+        print('          leaf muts (mean %.1f): %s' % (np.mean(leaf_muts), ' '.join(str(n) for n in leaf_muts)))
+        leaf_times = sorted([l.t for l in tree.iter_leaves()])
+        int_times = sorted([n.t for n in [tree] + list(tree.iter_descendants()) if not n.is_leaf()])
+        print('      internal times (mean %.1f): %s' % (np.mean(int_times), ' '.join('%.1f'%n for n in int_times)))
+        print('          leaf times (mean %.1f): %s' % (np.mean(leaf_times), ' '.join('%.1f'%n for n in leaf_times)))
 
 # ----------------------------------------------------------------------------------------
 def scan_response(
@@ -378,13 +383,15 @@ def add_tree(all_trees, itrial, pfo):
 # ----------------------------------------------------------------------------------------
 def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itrial, outfix='out', debug=False):
     # ----------------------------------------------------------------------------------------
-    def run_method():
+    def run_method(ofn):
         ifn = '%s/input-seqs.fa' % wkdir
         with open(ifn, 'w') as sfile:
             for sfo in true_leaf_seqs:
                 sfile.write('>%s\n%s\n' % (sfo['name'], sfo['seq']))
         assert args.tree_inference_method == 'iqtree'
         cmd = '%s/iqtree -asr -s %s -pre %s/%s >%s/log' % (os.path.dirname(os.path.realpath(__file__)), ifn, wkdir, outfix, wkdir)
+        if os.path.exists(ofn) and args.overwrite:
+            cmd += ' -redo'
         print('    %s %s' % (utils.color('red', 'run'), cmd))
         subprocess.check_call(cmd, shell=True)
     # ----------------------------------------------------------------------------------------
@@ -403,32 +410,35 @@ def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itri
         for node, nfo in inf_infos.items():
             inf_seqfos.append({'name' : node, 'seq' : ''.join(nfo[i] for i in range(1, seq_len+1))})
         if debug:
-            print('      read %d %s inferred ancestral seqs' % (len(inf_seqfos), args.tree_inference_method))
+            print('          read %d %s inferred ancestral seqs' % (len(inf_seqfos), args.tree_inference_method))
         return inf_seqfos
     # ----------------------------------------------------------------------------------------
     assert not args.sample_internal_nodes  # would need to think about whether I want to 1) pass inferred seqs to iqtree and/or 2) read iqtree inferred internal nodes
+    if debug:
+        print('   %s: getting inferred tree' % (utils.color('blue', args.tree_inference_method)))
     wkdir = '%s/%s/itree-%d' % (args.outdir, args.tree_inference_method, itrial)
     if not os.path.exists(wkdir):
         os.makedirs(wkdir)
     ofn = '%s/%s.treefile' % (wkdir, outfix)
-    if os.path.exists(ofn):
-        print('    %s output file exists, not rerunning: %s' % (args.tree_inference_method, ofn))
+    if os.path.exists(ofn) and not args.overwrite:
+        print('        %s output file exists, not rerunning: %s' % (args.tree_inference_method, ofn))
     else:
-        run_method()
-    tree = bdms.TreeNode(newick=ofn, format=1)
-
+        run_method(ofn)
     inf_seqfos = read_inferred_seqs()
+    tree = bdms.TreeNode(newick=ofn, format=1)
+    relabel_nodes(args, tree, itrial, only_internal=True, seqfos=inf_seqfos)
     utils.write_fasta('%s/inf-anc-seqs.fa'%wkdir, inf_seqfos)
 
-    if debug:
-        print('  before scaling:')
-        print(utils.pad_lines(tree.get_ascii(show_internal=True)))
-        utils.print_dtree(tree)
+    if debug > 1:
+        print('            %s tree before scaling:' % args.tree_inference_method)
+        utils.print_dtree(tree, extra_str='                ')
 
     # set .x, .t, and .total_mutations
     all_seqs = {s['name'] : s['seq'] for s in true_leaf_seqs + inf_seqfos}
     hdcache = {}
     for tnode in [tree] + list(tree.iter_descendants(strategy='preorder')):
+        if tnode.name not in all_seqs:
+            print('%s not in all_seqs: %s' % (tnode.name, all_seqs.keys()))
         nseq = all_seqs[tnode.name]
         tnode.x = gp_map(nseq)
         tnode.t = tnode.dist + (0 if tnode is tree else tnode.up.t)
@@ -437,15 +447,16 @@ def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itri
         tnode.total_mutations = hdcache[nseq]
     encode.scale_tree(tree, new_mean_depth=params['time_to_sampling'])
 
+    naive_hdist = utils.hamming_distance(replay.NAIVE_SEQUENCE, all_seqs[tree.name])
+    if naive_hdist != 0:
+        print('              %s inferred root not equal to replay naive seq (%d bases differ)' % (utils.color('yellow', 'note'), naive_hdist))
+
     if debug:
-        print('  after scaling:')
+        print('            after scaling:')
         def dstr(d): return utils.color('blue', '0', width=9) if float(d)==0 else '%9.6f'%d
-        naive_hdist = utils.hamming_distance(replay.NAIVE_SEQUENCE, all_seqs[tree.name])
-        if naive_hdist != 0:
-            print('    %s inferred root not equal to replay naive seq (%d bases differ)' % (utils.color('yellow', 'note'), naive_hdist))
-        print('                dist        t          x')
+        print('                          dist        t          x')
         for tnode in [tree] + list(tree.iter_descendants(strategy='preorder')):
-            print('  %10s  %s  %s   %s' % (tnode.name, dstr(tnode.dist), dstr(tnode.t), dstr(tnode.x)))
+            print('            %10s  %s  %s   %s' % (tnode.name, dstr(tnode.dist), dstr(tnode.t), dstr(tnode.x)))
 
     inf_pfo = {'%s-response'%r : pfo['%s-response'%r] for r in ['birth', 'death']}
     inf_pfo['tree'] = tree
