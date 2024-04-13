@@ -157,14 +157,12 @@ def set_mut_stats(tree, debug=False):
         node.total_mutations = node.n_mutations + node.up.total_mutations
 
     if debug:
-        leaf_muts = sorted([l.total_mutations for l in tree.iter_leaves()])
-        int_muts = sorted([n.total_mutations for n in [tree] + list(tree.iter_descendants()) if not n.is_leaf()])
-        print('      internal muts (mean %.1f): %s' % (np.mean(int_muts), ' '.join(str(n) for n in int_muts)))
-        print('          leaf muts (mean %.1f): %s' % (np.mean(leaf_muts), ' '.join(str(n) for n in leaf_muts)))
-        leaf_times = sorted([l.t for l in tree.iter_leaves()])
-        int_times = sorted([n.t for n in [tree] + list(tree.iter_descendants()) if not n.is_leaf()])
-        print('      internal times (mean %.1f): %s' % (np.mean(int_times), ' '.join('%.1f'%n for n in int_times)))
-        print('          leaf times (mean %.1f): %s' % (np.mean(leaf_times), ' '.join('%.1f'%n for n in leaf_times)))
+        for tattr, tname in [('total_mutations', 'muts'), ('t', 'times')]:
+            int_vals = sorted([getattr(n, tattr) for n in [tree] + list(tree.iter_descendants()) if not n.is_leaf()])
+            leaf_vals = sorted([getattr(l, tattr) for l in tree.iter_leaves()])
+            def tfn(v): return ('%.1f' if tattr=='t' else '%d') % v
+            print('      internal %s (mean %.1f): %s' % (tname, np.mean(int_vals), ' '.join(tfn(n) for n in int_vals)))
+            print('          leaf %s (mean %.1f): %s' % (tname, np.mean(leaf_vals), ' '.join(tfn(n) for n in leaf_vals)))
 
 # ----------------------------------------------------------------------------------------
 def scan_response(
@@ -437,8 +435,6 @@ def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itri
     all_seqs = {s['name'] : s['seq'] for s in true_leaf_seqs + inf_seqfos}
     hdcache = {}
     for tnode in [tree] + list(tree.iter_descendants(strategy='preorder')):
-        if tnode.name not in all_seqs:
-            print('%s not in all_seqs: %s' % (tnode.name, all_seqs.keys()))
         nseq = all_seqs[tnode.name]
         tnode.x = gp_map(nseq)
         tnode.t = tnode.dist + (0 if tnode is tree else tnode.up.t)
@@ -454,9 +450,9 @@ def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itri
     if debug:
         print('            after scaling:')
         def dstr(d): return utils.color('blue', '0', width=9) if float(d)==0 else '%9.6f'%d
-        print('                          dist        t          x')
+        print('                               dist        t          x')
         for tnode in [tree] + list(tree.iter_descendants(strategy='preorder')):
-            print('            %10s  %s  %s   %s' % (tnode.name, dstr(tnode.dist), dstr(tnode.t), dstr(tnode.x)))
+            print('            %15s  %s  %s   %s' % (tnode.name, dstr(tnode.dist), dstr(tnode.t), dstr(tnode.x)))
 
     inf_pfo = {'%s-response'%r : pfo['%s-response'%r] for r in ['birth', 'death']}
     inf_pfo['tree'] = tree
@@ -767,7 +763,7 @@ def main():
             for line in reader:
                 args.dl_pvals.append({p : float(line['%s-predicted'%p]) for p in utils.sigmoid_params})
     if args.tree_inference_method is not None and args.sample_internal_nodes:
-        raise Exception('need to implement this')
+        raise Exception('this isn\'t implemented, and it\'s not really clear that it should be -- for instance, do the internal nodes get passed to tree inference, or do we just sample the inferred internal nodes?')
 
     random.seed(args.seed)
     np.random.seed(args.seed)
