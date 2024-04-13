@@ -99,27 +99,38 @@ def ladderize_tree(tree, attr="x", check_for_ties=False, debug=False):
     Voznica, J., A. Zhukova, V. Boskova, E. Saulnier, F. Lemoine, M. Moslonka-Lefebvre, and O. Gascuel. “Deep Learning from Phylogenies to Uncover the Epidemiological Dynamics of Outbreaks.” Nature Communications 13, no. 1 (July 6, 2022): 3896. https://doi.org/10.1038/s41467-022-31511-0.
     """
     # ----------------------------------------------------------------------------------------
+    def sortstr(tnd, vals=None):
+        return ' '.join(('%6.3f'%v) for v in (sort_criteria[tnd.name] if vals is None else vals))
+    # ----------------------------------------------------------------------------------------
     def check_ties(nodelist, sub_root):  # note that ties are only a problem if the occur on *non*-identical subtrees
         def kfn(n): return sort_criteria[n.name]
         svgroups = [(vls, list(gp)) for vls, gp in itertools.groupby(sorted(nodelist, key=kfn, reverse=True), key=kfn)]  # group together nodes with the same sort criteria
         len_sortd_groups = sorted(svgroups, key=lambda gp: len(gp[1]), reverse=True)  # sort by the lengths of these groups
         if len(len_sortd_groups[0][1]) > 1:  # if largest (first) group is longer than 1 (has a tie)
-            print('    %s multiple nodes with same sort criteria%s:' % (color('yellow', 'warning'), ' below node %s'%sub_root.name))
-            print('            ' + '\n            '.join(sub_root.get_ascii().split('\n'))) #attributes=['t']))
+            print('        %s multiple nodes with same sort criteria%s:' % (color('yellow', 'warning'), ' below node %s'%sub_root.name))
             for svals, sgroup in len_sortd_groups:
-                svstr = ' '.join(('%6.3f'%v) for v in svals)
                 if len(sgroup) > 1:
-                    print('      %s    %s' % (svstr, ' '.join(str(n.name) for n in sgroup)))
+                    print('          %s    %s' % (sortstr(None, vals=svals), ' '.join(str(n.name) for n in sgroup)))
+            print(pad_lines(sub_root.get_ascii(), extra_str='              '))
     # ----------------------------------------------------------------------------------------
-    def get_criteria(node):
-        return [node.t, node.up.t, getattr(node, attr)]
+    def age_sum(node, tdbg=False):  # sum of ages from node to root
+        if tdbg:
+            print('  age sum for %s' % node.name)
+        total, parent = 0, node
+        while not parent.is_root():
+            total += parent.t
+            if tdbg:
+                print('        %15s  %5.2f  %5.2f' % (parent.name, parent.t, total))
+            parent = parent.up
+        return total
+    # ----------------------------------------------------------------------------------------
+    def get_criteria(node):  # note that node.up.t would always be the same (the parent of the two nodes we're sorting), except the sort values of each internal node are the sort values of its first child (so, eventually, always a leaf)
+        return [node.t, node.up.t, age_sum(node), getattr(node, attr)]
     # ----------------------------------------------------------------------------------------
     if debug:
-        # import dendropy ete doesn't seem to be able to print trees in a way that shows branch lengths, so it can be nice to use dendropy as well
-        # dtree = dendropy.Tree.get_from_string(tree.write(format=1), "newick", suppress_internal_node_taxa=False, preserve_underscores=True, rooting='force-rooted')
-        # print(dtree.as_ascii_plot(width=400, plot_metric='length', show_internal_node_labels=True)) #, node_label_compose_fn=compose_fcn)
-        print('  before:')
-        print(tree.get_ascii()) #attributes=['t']))
+        print('      before ladderization:')
+        # print(pad_lines(tree.get_ascii(show_internal=True)))
+        print_dtree(tree)
 
     # calculate sorting criteria values
     sort_criteria = defaultdict(list)
@@ -138,13 +149,18 @@ def ladderize_tree(tree, attr="x", check_for_ties=False, debug=False):
                 check_ties(node.children, sub_root=node)
             node.children = sorted(
                 node.children,
-                key=lambda node: sort_criteria[node.name],
+                key=lambda n: sort_criteria[n.name],
                 reverse=True,
             )
+            if debug:
+                print('  %-8s %d children' % (node.name+':', len(node.children)))
+                for chd in node.children:
+                    print('     %-8s %s' % (chd.name+':', sortstr(chd)))
 
     if debug:
-        print('  after:')
-        print(tree.get_ascii()) #attributes=['t']))
+        print('      after ladderization:')
+        # print(pad_lines(tree.get_ascii(show_internal=True)))
+        print_dtree(tree)
 
 
 def random_transition_matrix(length, seed=None):
@@ -794,12 +810,12 @@ def pad_lines(lstr, extra_str='            '):
     return '\n'.join(extra_str+l for l in lstr.split('\n'))
 
 # ----------------------------------------------------------------------------------------
-def print_dtree(etree, extra_str='            '):
+def print_dtree(etree, width=250, extra_str='            '):
     # # ete tree version (better than __str__()), although it still can't show distance:
     # print(pad_lines(tree.get_ascii(show_internal=True), extra_str=extra_str))
     import dendropy
     dtree = dendropy.Tree.get_from_string(etree.write(format=1), 'newick', suppress_internal_node_taxa=False, preserve_underscores=True)
-    tlines = dtree.as_ascii_plot(width=250, plot_metric='length', show_internal_node_labels=True) #, node_label_compose_fn=compose_fcn)
+    tlines = dtree.as_ascii_plot(width=width, plot_metric='length', show_internal_node_labels=True) #, node_label_compose_fn=compose_fcn)
     print(pad_lines(tlines, extra_str=extra_str))
 
 # ----------------------------------------------------------------------------------------

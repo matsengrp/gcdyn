@@ -50,7 +50,7 @@ def relabel_nodes(args, tree, itrial, only_internal=False, seqfos=None):
         if only_internal and node.is_leaf():
             continue
         old_name = node.name
-        if node is tree:
+        if node.is_root():
             node.name = "naive"
         elif args.label_leaf_internal_nodes:  # don't want naive node to also have 'mrca'
             node.name = '%s-%s' % ('leaf' if node.is_leaf() else 'mrca', node.name)
@@ -437,7 +437,7 @@ def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itri
     for tnode in [tree] + list(tree.iter_descendants(strategy='preorder')):
         nseq = all_seqs[tnode.name]
         tnode.x = gp_map(nseq)
-        tnode.t = tnode.dist + (0 if tnode is tree else tnode.up.t)
+        tnode.t = tnode.dist + (0 if tnode.is_root() else tnode.up.t)
         if nseq not in hdcache:
             hdcache[nseq] = utils.hamming_distance(all_seqs[tree.name], nseq)
         tnode.total_mutations = hdcache[nseq]
