@@ -295,10 +295,7 @@ def get_responses(args, xscale, xshift, yscale, pcounts):
     # ----------------------------------------------------------------------------------------
     dresp = poisson.ConstantResponse(args.death_value)
     bresp = get_birth()
-    print(
-        "      initial birth rate %.2f (range %s)"
-        % (bresp.λ_phenotype(0), args.initial_birth_rate_range)
-    )
+    print("      initial birth rate %.2f (range %s)" % (bresp.λ_phenotype(0), args.initial_birth_rate_range))
     if bresp.λ_phenotype(0) < args.initial_birth_rate_range[0] - 1e-8 or bresp.λ_phenotype(0) > args.initial_birth_rate_range[1] + 1e-8:
         wstr = 'initial birth response outside specified range: %.3f not in [%.3f, %.3f]' % (bresp.λ_phenotype(0), args.initial_birth_rate_range[0], args.initial_birth_rate_range[1])
         if args.use_generated_parameter_bounds:

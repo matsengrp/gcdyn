@@ -19,6 +19,10 @@ import glob
 
 from gcdyn import bdms, utils, encode
 from historydag import beast_loader
+partis_dir = os.path.dirname(os.path.realpath(__file__)).replace('/projects/gcdyn/scripts', '')
+sys.path.insert(1, partis_dir) # + '/python')
+import python.treeutils as treeutils
+import python.utils as utils
 
 # ----------------------------------------------------------------------------------------
 def get_affinity(nuc_seq, name, kd_checks, debug=False):
@@ -46,7 +50,7 @@ def get_affinity(nuc_seq, name, kd_checks, debug=False):
         kd_val = dms_df.delta_bind_CGG[muts['h'] + muts['l']].sum()
         kdstr = '%5.2f' % kd_val
     if debug:
-        print('    %15s %s  %3d%3d  %3d' % (name, kdstr, len(muts['h']), len(muts['l']), len(muts['h']+muts['l'])), end='')
+        print('    %18s %s  %3d%3d  %3d' % (name, kdstr, len(muts['h']), len(muts['l']), len(muts['h']+muts['l'])), end='')
         if args.check_gct_kd and name in gct_kd_vals:
             gctval = gct_kd_vals[name]
             gctstr = utils.color('blue', '-', width=5) if gctval is None else '%5.2f'%gctval
@@ -68,7 +72,8 @@ def get_etree(dtree, idir, itr, kd_checks, debug=False):
             assert etree is None
             etree = enodes[nlab]
         enodes[nlab].x, n_muts = get_affinity(node.nuc_seq, nlab, kd_checks, debug=args.debug)
-        lmetafos.append({'tree-index' : idir + itr, 'name' : nlab, 'affinity' : enodes[nlab].x, 'n_muts' : n_muts})
+        assert itr == 0  # would want to update tree-index
+        lmetafos.append({'tree-index' : idir, 'name' : nlab, 'affinity' : enodes[nlab].x, 'n_muts' : n_muts})
 
     for node in dtree.preorder_node_iter():
         for cnode in node.child_node_iter():
@@ -133,10 +138,10 @@ def read_single_dir(bstdir, idir):
         print('          loading trees from %s' % single_treefname)
     res_gen, rmd_sites = beast_loader.load_beast_trees('%s/beastgen.xml'%bstdir, single_treefname)
 
-    sstats, encoded_trees, lmetafos = [], [], []
+    sstats, encoded_trees, lmetafos, dendro_trees = [], [], [], []
     if args.debug:
         print('                               N muts')
-        print('              name    kd     h  l   h+l')
+        print('              name       kd     h  l   h+l')
     kd_checks = {'ok' : 0, 'bad' : 0}
     for itr, dtree in enumerate(res_gen):
         with open('%s/seqs.fa' % gcodir, 'w') as sfile:
@@ -144,21 +149,25 @@ def read_single_dir(bstdir, idir):
             for node in dtree.preorder_node_iter():
                 if node.taxon is None:
                     assert itr == 0  # if you start reading more than one tree, you [probably] need to change the node names so they tell you which tree they're from
-                    node.taxon = dendropy.Taxon('node-%d' % inodelabel)
+                    node.taxon = dendropy.Taxon('%d-node-%d' % (idir, inodelabel))
                     inodelabel += 1
-                node.taxon.label = node.taxon.label.replace('@20', '')  # not sure what this is for
+                else:
+                    node.taxon.label = '%d-%s' % (idir, node.taxon.label)
+                node.taxon.label = node.taxon.label.replace('@20', '').replace('@0', '')  # not sure what this is for
                 node.nuc_seq = node.observed_cg.to_sequence() if node.is_leaf() else node.cg.to_sequence()
                 sfile.write('>%s\n%s\n' % (node.taxon.label, node.nuc_seq))
-        with open('%s/tree.nwk' % gcodir, 'w') as tfile:
+        with open('%s/trees.nwk' % gcodir, 'w') as tfile:
             tfile.write('%s\n' % dtree.as_string(schema='newick').strip())
 
         etree, tr_lmfos = get_etree(dtree, idir, itr, kd_checks, debug=args.debug)
         brlen, sctree = encode.scale_tree(etree)
         enc_tree = encode.encode_tree(etree, max_leaf_count=args.max_leaf_count, dont_scale=True)
 
-        sstats.append({'tree' : idir + itr, 'mean_branch_length' : brlen, 'total_branch_length' : sum(n.dist for n in etree.iter_descendants())})
+        assert itr == 0  # would want to change tree index ('tree' key) below
+        sstats.append({'tree' : idir, 'mean_branch_length' : brlen, 'total_branch_length' : sum(n.dist for n in etree.iter_descendants())})
         encoded_trees.append(enc_tree)
         lmetafos += tr_lmfos
+        dendro_trees.append(dtree)
 
     if kd_checks['bad'] > 0:
         print('  %s %d / %d affinities don\'t match old values from gctree results' % (utils.color('yellow', 'warning'), kd_checks['bad'], sum(kd_checks.values())))
@@ -167,11 +176,12 @@ def read_single_dir(bstdir, idir):
         print('      writing %d trees to %s' % (len(encoded_trees), gcodir))
     encode.write_trees(encode.output_fn(gcodir, 'encoded-trees', None), encoded_trees)
     encode.write_sstats(encode.output_fn(gcodir, 'summary-stats', None), sstats)
-    encode.write_leaf_meta(encode.output_fn(gcodir, 'leaf-meta', None), lmetafos)
+    encode.write_leaf_meta(encode.output_fn(gcodir, 'meta', None), lmetafos)
 
     all_info['encoded_trees'] += encoded_trees
     all_info['sstats'] += sstats
     all_info['lmetafos'] += lmetafos
+    all_info['dtrees'] += dendro_trees
 
 # ----------------------------------------------------------------------------------------
 helpstr = """
@@ -203,7 +213,7 @@ dms_df, naive_seqs, pos_maps = get_mut_info()
 if args.check_gct_kd:
     gct_kd_vals = read_gct_kd()
 
-all_info = {'encoded_trees' : [], 'sstats' : [], 'lmetafos' : []}
+all_info = {'encoded_trees' : [], 'sstats' : [], 'lmetafos' : [], 'dtrees' : []}
 for idir, bstdir in enumerate(glob.glob('%s/%s/beast/*-GC' % (args.input_dir, args.beast_version))):
     # if 'btt-PR-1-3-2-LA-39-GC' not in bstdir:
     #     continue
@@ -218,4 +228,7 @@ if not os.path.exists(all_outdir):
 print('  writing %d trees to %s' % (len(all_info['encoded_trees']), all_outdir))
 encode.write_trees(encode.output_fn(all_outdir, 'encoded-trees', None), all_info['encoded_trees'])
 encode.write_sstats(encode.output_fn(all_outdir, 'summary-stats', None), all_info['sstats'])
-encode.write_leaf_meta(encode.output_fn(all_outdir, 'leaf-meta', None), all_info['lmetafos'])
+encode.write_leaf_meta(encode.output_fn(all_outdir, 'meta', None), all_info['lmetafos'])
+with open('%s/trees.nwk' % all_outdir, 'w') as tfile:
+    for dtree in all_info['dtrees']:
+        tfile.write('%s\n' % dtree.as_string(schema='newick').strip())
