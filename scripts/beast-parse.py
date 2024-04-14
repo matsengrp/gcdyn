@@ -138,7 +138,7 @@ def read_single_dir(bstdir, idir):
         print('          loading trees from %s' % single_treefname)
     res_gen, rmd_sites = beast_loader.load_beast_trees('%s/beastgen.xml'%bstdir, single_treefname)
 
-    sstats, encoded_trees, lmetafos, dendro_trees = [], [], [], []
+    sstats, encoded_trees, lmetafos, trsfos, dendro_trees = [], [], [], [], []
     if args.debug:
         print('                               N muts')
         print('              name       kd     h  l   h+l')
@@ -156,6 +156,7 @@ def read_single_dir(bstdir, idir):
                 node.taxon.label = node.taxon.label.replace('@20', '').replace('@0', '')  # not sure what this is for
                 node.nuc_seq = node.observed_cg.to_sequence() if node.is_leaf() else node.cg.to_sequence()
                 sfile.write('>%s\n%s\n' % (node.taxon.label, node.nuc_seq))
+                trsfos.append({'name' : node.taxon.label, 'seq' : node.nuc_seq})
         with open('%s/trees.nwk' % gcodir, 'w') as tfile:
             tfile.write('%s\n' % dtree.as_string(schema='newick').strip())
 
@@ -181,6 +182,7 @@ def read_single_dir(bstdir, idir):
     all_info['encoded_trees'] += encoded_trees
     all_info['sstats'] += sstats
     all_info['lmetafos'] += lmetafos
+    all_info['seqfos'] += trsfos
     all_info['dtrees'] += dendro_trees
 
 # ----------------------------------------------------------------------------------------
@@ -213,7 +215,7 @@ dms_df, naive_seqs, pos_maps = get_mut_info()
 if args.check_gct_kd:
     gct_kd_vals = read_gct_kd()
 
-all_info = {'encoded_trees' : [], 'sstats' : [], 'lmetafos' : [], 'dtrees' : []}
+all_info = {'encoded_trees' : [], 'sstats' : [], 'lmetafos' : [], 'seqfos' : [], 'dtrees' : []}
 for idir, bstdir in enumerate(glob.glob('%s/%s/beast/*-GC' % (args.input_dir, args.beast_version))):
     # if 'btt-PR-1-3-2-LA-39-GC' not in bstdir:
     #     continue
@@ -229,6 +231,7 @@ print('  writing %d trees to %s' % (len(all_info['encoded_trees']), all_outdir))
 encode.write_trees(encode.output_fn(all_outdir, 'encoded-trees', None), all_info['encoded_trees'])
 encode.write_sstats(encode.output_fn(all_outdir, 'summary-stats', None), all_info['sstats'])
 encode.write_leaf_meta(encode.output_fn(all_outdir, 'meta', None), all_info['lmetafos'])
+utils.write_fasta(encode.output_fn(all_outdir, 'seqs', None),  all_info['seqfos'])
 with open('%s/trees.nwk' % all_outdir, 'w') as tfile:
     for dtree in all_info['dtrees']:
         tfile.write('%s\n' % dtree.as_string(schema='newick').strip())
