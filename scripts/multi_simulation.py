@@ -122,9 +122,9 @@ def generate_sequences_and_tree(
         print("    %s exceeded maximum number of tries %d so giving up" % (utils.color("yellow", "warning"), args.n_max_tries))
         return None, None
 
-    plt_fn = None
+    fnlist = None
     if args.make_plots:
-        plt_fn = utils.plot_tree_slices(args.outdir + "/plots/tree-slices", tree, params['time_to_sampling'], itrial)
+        fnlist = utils.plot_tree_slices(args.outdir + "/plots/tree-slices", tree, params['time_to_sampling'], itrial)
 
     if args.debug > 1:
         print('    tree before sampling:')
@@ -147,7 +147,7 @@ def generate_sequences_and_tree(
 
     set_mut_stats(tree, debug=args.debug)
 
-    return plt_fn, tree
+    return fnlist, tree
 
 
 # ----------------------------------------------------------------------------------------
@@ -741,7 +741,7 @@ def main():
     args = parser.parse_args()
     if args.simu_bundle_size != 1 and args.n_trials % args.simu_bundle_size != 0:
         raise Exception("--n-trials %d not evenly divisible by --simu-bundle-size %d" % (args.n_trials, args.simu_bundle_size))
-    args.use_generated_parameter_bounds = args.birth_response == "sigmoid" and None not in [args.yscale_range, args.initial_birth_rate_range]
+    args.use_generated_parameter_bounds = args.birth_response == "sigmoid" and None not in [args.yscale_range, args.initial_birth_rate_range]  # if either yscale or initial birth rate have no specified range, we can't calculate xshift and yscale ranges (well maybe could do one, but generally if you want ranges, specify them)
     if args.use_generated_parameter_bounds:
         print("    using additional generated parameter bounds")
     else:
@@ -832,7 +832,7 @@ def main():
             continue
         sys.stdout.flush()
         birth_resp, death_resp = get_responses(args, params["xscale"], params["xshift"], params["yscale"], pcounts)
-        plt_fn, tree = generate_sequences_and_tree(
+        fnlist, tree = generate_sequences_and_tree(
             args,
             params,
             birth_resp,
@@ -846,7 +846,8 @@ def main():
         if tree is None:
             n_missing += 1
             continue
-        utils.addfn(all_fns, plt_fn)
+        for fn in fnlist:
+            utils.addfn(all_fns, fn)
         with open(ofn, "wb") as fp:
             dill.dump({"tree": tree, "birth-response": birth_resp, "death-response": death_resp}, fp)
         tree_leaf_seqs = add_seqs(args, all_seqs, itrial, tree)
@@ -868,6 +869,6 @@ def main():
     if args.tree_inference_method is not None:
         write_final_outputs(args, all_seqs, inf_trees, plist, inferred=True)
 
-    finish_param_choice(args, pcounts, all_trees=all_trees)
+    finish_param_choice(args, pcounts, all_trees=all_trees, all_fns=all_fns)
     print("    total simulation time: %.1f sec" % (time.time() - start))
 # fmt: on

@@ -473,70 +473,70 @@ def make_dl_plots(prdfs, params_to_predict, outdir, is_simu=False, data_val=0, v
 
 # ----------------------------------------------------------------------------------------
 def plot_tree_slices(plotdir, tree, max_time, itrial):
-    n_plots = 5
-    dt = round(max_time / float(n_plots))
-    tdata = {"time": [], "affinity": []}
-    for stime in list(range(dt, max_time, dt)) + [max_time]:
-        for aval in tree.slice(stime):
-            tdata["time"].append(stime)
-            tdata["affinity"].append(aval)
-
-    mpl_init()
-    with warnings.catch_warnings():
-        warnings.simplefilter(
-            "ignore"
-        )  # i don't know why it has to warn me that it's clearing the fig/ax I'm passing in, and I don't know how else to stop it
-        sns.set_theme(
-            style="white", rc={"axes.facecolor": (0, 0, 0, 0), "axes.linewidth": 2}
-        )
-        palette = None  # sns.color_palette("Set2", 12)
-        g = sns.FacetGrid(
-            pd.DataFrame(tdata),
-            palette=palette,
-            row="time",
-            hue="time",
-            aspect=9,
-            height=1.2,
-        )  # create a grid with a row for each 'time'
-        g.map_dataframe(sns.kdeplot, x="affinity", fill=True, alpha=0.6)
-        g.map_dataframe(sns.kdeplot, x="affinity", color="black")
-
+    # ----------------------------------------------------------------------------------------
+    def make_n_vs_time_plot(ndata):
+        fig, ax = plt.subplots()
+        sns.lineplot(x=ndata['time'], y=ndata['n-nodes'], linewidth=5, alpha=0.5)
+        ax.set(xlabel='time', ylabel='N nodes')
+        fn = "%s/n-vs-time-tree-%d.svg" % (plotdir, itrial)
+        plt.savefig(fn)
+        fnlist.append(fn)
+    # ----------------------------------------------------------------------------------------
+    def make_affy_slice_plot(tdata):
+        # ----------------------------------------------------------------------------------------
         def label_fn(x, color, label):
             ax = plt.gca()  # get current axis
-            ax.text(
-                0,
-                0.2,
-                label,
-                color="black",
-                fontsize=13,
-                ha="left",
-                va="center",
-                transform=ax.transAxes,
-            )
-
-        g.map(label_fn, "time")  # iterate grid to plot labels
-
-        g.fig.subplots_adjust(hspace=-0.7)  # adjust subplots to create overlap
-        g.set_titles("")  # remove subplot titles
-        g.set(
-            yticks=[], xlabel="affinity", ylabel="time"
-        )  # remove yticks and set xlabel
-        g.despine(left=True)
+            ax.text(0, 0.2, label, color="black", fontsize=13, ha="left", va="center", transform=ax.transAxes)
+        # ----------------------------------------------------------------------------------------
+        warnings.simplefilter("ignore")  # i don't know why it has to warn me that it's clearing the fig/ax I'm passing in, and I don't know how else to stop it
+        sns.set_theme(style="white", rc={"axes.facecolor": (0, 0, 0, 0), "axes.linewidth": 2})
+        palette = None  # sns.color_palette("Set2", 12)
+        fgrid = sns.FacetGrid(pd.DataFrame(tdata), palette=palette, row="time", hue="time", aspect=8, height=1.2)  # create a grid with a row for each 'time'
+        fgrid.map_dataframe(sns.kdeplot, x="affinity", fill=True, alpha=0.6)  # filled, smoothed hists
+        fgrid.map_dataframe(sns.kdeplot, x="affinity", color="black")  # black outlines
+        fgrid.map(label_fn, "time")  # iterate grid to plot labels
+        # fgrid.fig.subplots_adjust(hspace=-0.7)  # adjust subplots to create overlap
+        fgrid.set_titles("")  # remove subplot titles
+        fgrid.set(yticks=[], xlabel="affinity", ylabel="time")  # remove yticks and set xlabel
+        fgrid.despine(left=True)
         plt.suptitle("affinity vs time (tree %d)" % itrial, y=0.98)
-
+        fn = "%s/phenotype-slices-tree-%d.svg" % (plotdir, itrial)
+        plt.savefig(fn)
+        fnlist.append(fn)
+    # ----------------------------------------------------------------------------------------
+    def get_data(dtype, n_slices):
+        dt = round(max_time / float(n_slices))
+        assert dtype in ['n-nodes', 'affinity']
+        tdata = {'time': [], dtype: []}
+        for stime in list(range(dt, max_time, dt)) + [max_time]:
+            tslice = tree.slice(stime)
+            if dtype == 'n-nodes':
+                tdata['time'].append(stime)
+                tdata['n-nodes'].append(len(tslice))
+            elif dtype == 'affinity':
+                for aval in tslice:
+                    tdata["time"].append(stime)
+                    tdata["affinity"].append(aval)
+            else:
+                assert False
+        return tdata
+    # ----------------------------------------------------------------------------------------
+    mpl_init()
     if not os.path.exists(plotdir):
         os.makedirs(plotdir)
-    fn = "%s/phenotype-slices-tree-%d.svg" % (plotdir, itrial)
-    plt.savefig(fn)
-    return fn
+    fnlist = []
+    make_n_vs_time_plot(get_data('n-nodes', max_time))
+    # ugh i give up, this plot is ugly and not that useful
+    # with warnings.catch_warnings():
+    #     make_affy_slice_plot(get_data('affinity', '5'))
 
+    return fnlist
 
 # ----------------------------------------------------------------------------------------
 def addfn(fnames, fn, n_columns=4):
     if len(fnames[-1]) >= n_columns:
         fnames.append([])
     fnames[-1].append(fn)
-
 
 # ----------------------------------------------------------------------------------------
 def plot_chosen_params(plotdir, param_counters, pbounds, n_bins=15, fnames=None):
@@ -636,8 +636,8 @@ def plot_phenotype_response(plotdir, pfo_list, xbounds=[-5, 5], n_to_plot=20, bu
         os.makedirs(plotdir)
     if fnames is None:
         fnames = [[]]
-    if len(fnames[-1]) > 0:  # add an empty row if there's already file names there
-        fnames.append([])
+    # if len(fnames[-1]) > n_columns:  # add an empty row if there's already file names there
+    #     fnames.append([])
 
     n_to_plot = min(len(pfo_list), n_to_plot)
     if bundle_size == 1:
