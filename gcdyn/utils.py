@@ -614,6 +614,9 @@ def plot_phenotype_response(plotdir, pfo_list, xbounds=[-5, 5], n_to_plot=20, bu
         int_vals = [n.x for n in pfo["tree"].iter_descendants() if n not in leaves]
         all_vals = leaf_vals + int_vals
         xmin, xmax = min(xbounds + all_vals), max(xbounds + all_vals)
+        if len(set(int_vals + leaf_vals)) == 1:
+            print('    %s all affinity values the same, can\'t plot (for some reason numpy histogram barfs)' % color('yellow', 'warning'))
+            return
         sns.histplot({"internal": int_vals, "leaves": leaf_vals}, ax=ax2, multiple="stack", binwidth=(xmax - xmin) / n_bins)
         ax.set(title="itree %d (%d nodes)"%(itree, len(all_vals)))
     # ----------------------------------------------------------------------------------------
