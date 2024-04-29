@@ -478,6 +478,7 @@ def plot_tree_slices(plotdir, tree, max_time, itrial):
         fig, ax = plt.subplots()
         sns.lineplot(x=ndata['time'], y=ndata['n-nodes'], linewidth=5, alpha=0.5)
         ax.set(xlabel='time', ylabel='N nodes')
+        plt.ylim(0, ax.get_ylim()[1])
         fn = "%s/n-vs-time-tree-%d.svg" % (plotdir, itrial)
         plt.savefig(fn)
         fnlist.append(fn)
@@ -544,17 +545,7 @@ def plot_chosen_params(plotdir, param_counters, pbounds, n_bins=15, fnames=None)
     def plot_param(pname):
         plt.clf()
         fig, ax = plt.subplots()
-        sns.histplot(
-            {pname: param_counters[pname]},
-            bins=n_bins,
-            # color='orange',
-            edgecolor='darkred' if len(param_counters[pname]) < 5 else None,
-            # binwidth=(xmax - xmin) / n_bins,
-        )
-        plt.legend(
-            [], [], frameon=False
-        )  # remove legend since we only have one hist atm
-        ax.set(xlabel=pname)
+        xmin, xmax = [mfn(param_counters[pname]) for mfn in [min, max]]
         if pname in pbounds and pbounds[pname] is not None:
             for pbd in pbounds[pname]:
                 ax.plot(
@@ -564,6 +555,19 @@ def plot_chosen_params(plotdir, param_counters, pbounds, n_bins=15, fnames=None)
                     linestyle="--",
                     linewidth=3,
                 )
+            xmin, xmax = [mfn(v, b) for mfn, v, b in zip([min, max], [xmin, xmax], pbounds[pname])]
+        sns.histplot(
+            {pname: param_counters[pname], 'bounds' : pbounds[pname]},  # UGH add a fake histogram for the bounds, which sucks and means i have to kill the border for both of them, but otherwise it fucks up the bin widths
+            bins=n_bins,
+            edgecolor='darkred' if len(param_counters[pname]) < 5 else None,
+            # binwidth=(xmax - xmin) / n_bins,  # this crashes sometimes in numpy, seems to be a bug
+            palette={pname : '#78c2f1', 'bounds' : '#ffffff'},
+        )
+        plt.setp(ax.patches, linewidth=0)
+        # for ptch in ax.patches:  # can set individual bin styles this way, but it seems harder to figure out which are the fake ones for the bounds
+        #     print(ptch, ptch.get_x(), pbounds[pname])
+        plt.legend([], [], frameon=False)  # remove legend since we only have one hist atm
+        ax.set(xlabel=pname)
         # param_text = 'xscale %.1f\nxshift %.1f\nyscale %.1f' % (pfo["birth-response"].xscale, pfo["birth-response"].xshift, pfo["birth-response"].yscale)
         # fig.text(0.6, 0.25, param_text, fontsize=17)
         fn = "%s/chosen-%s-values.svg" % (plotdir, pname)
