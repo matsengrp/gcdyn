@@ -23,6 +23,7 @@ partis_dir = os.path.dirname(os.path.realpath(__file__)).replace('/projects/gcdy
 sys.path.insert(1, partis_dir) # + '/python')
 import python.treeutils as treeutils
 import python.utils as utils
+import python.datautils as datautils
 
 # ----------------------------------------------------------------------------------------
 def get_affinity(nuc_seq, name, kd_checks, debug=False):
@@ -71,7 +72,7 @@ def get_etree(dtree, idir, itr, kd_checks, debug=False):
         if node is dtree.seed_node:
             assert etree is None
             etree = enodes[nlab]
-        enodes[nlab].x, n_muts = get_affinity(node.nuc_seq, nlab, kd_checks, debug=args.debug)
+        enodes[nlab].x, n_muts = get_affinity(node.nuc_seq, nlab, kd_checks, debug=debug)
         assert itr == 0  # would want to update tree-index
         lmetafos.append({'tree-index' : idir, 'name' : nlab, 'affinity' : enodes[nlab].x, 'n_muts' : n_muts})
 
@@ -138,13 +139,16 @@ def read_single_dir(bstdir, idir):
         print('          loading trees from %s' % single_treefname)
     res_gen, rmd_sites = beast_loader.load_beast_trees('%s/beastgen.xml'%bstdir, single_treefname)
 
-    sstats, encoded_trees, lmetafos, trsfos, dendro_trees = [], [], [], [], []
     if args.debug:
         print('                               N muts')
         print('              name       kd     h  l   h+l')
     kd_checks = {'ok' : 0, 'bad' : 0}
     for itr, dtree in enumerate(res_gen):
-        with open('%s/seqs.fa' % gcodir, 'w') as sfile:
+        sofn = encode.output_fn(gcodir, 'seqs', None)
+        if not os.path.exists(sofn):  # UGH (used to use the wrong file name)
+            sofn = sofn.replace('fasta', 'fa')
+        trsfos = []
+        with open(sofn, 'w') as sfile:
             inodelabel = 0
             for node in dtree.preorder_node_iter():
                 if node.taxon is None:
@@ -165,25 +169,58 @@ def read_single_dir(bstdir, idir):
         enc_tree = encode.encode_tree(etree, max_leaf_count=args.max_leaf_count, dont_scale=True)
 
         assert itr == 0  # would want to change tree index ('tree' key) below
-        sstats.append({'tree' : idir, 'mean_branch_length' : brlen, 'total_branch_length' : sum(n.dist for n in etree.iter_descendants())})
-        encoded_trees.append(enc_tree)
-        lmetafos += tr_lmfos
-        dendro_trees.append(dtree)
+        sstats = {'tree' : idir, 'mean_branch_length' : brlen, 'total_branch_length' : sum(n.dist for n in etree.iter_descendants())}
+        break  # seems to only ever be one tree in res_gen atm anyway
+
+    print('    tree with %d leaf nodes' % len(list(dtree.leaf_node_iter())))
 
     if kd_checks['bad'] > 0:
         print('  %s %d / %d affinities don\'t match old values from gctree results' % (utils.color('yellow', 'warning'), kd_checks['bad'], sum(kd_checks.values())))
 
     if args.debug:
-        print('      writing %d trees to %s' % (len(encoded_trees), gcodir))
-    encode.write_trees(encode.output_fn(gcodir, 'encoded-trees', None), encoded_trees)
-    encode.write_sstats(encode.output_fn(gcodir, 'summary-stats', None), sstats)
-    encode.write_leaf_meta(encode.output_fn(gcodir, 'meta', None), lmetafos)
+        print('      writing tree to %s' % gcodir)
+    encode.write_trees(encode.output_fn(gcodir, 'encoded-trees', None), [enc_tree])
+    encode.write_sstats(encode.output_fn(gcodir, 'summary-stats', None), [sstats])
+    encode.write_leaf_meta(encode.output_fn(gcodir, 'meta', None), tr_lmfos)
 
-    all_info['encoded_trees'] += encoded_trees
-    all_info['sstats'] += sstats
-    all_info['lmetafos'] += lmetafos
-    all_info['seqfos'] += trsfos
-    all_info['dtrees'] += dendro_trees
+    all_info['encoded_trees'].append(enc_tree)
+    all_info['sstats'].append(sstats)
+    all_info['lmetafos'].append(tr_lmfos)
+    all_info['seqfos'].append(trsfos)
+    all_info['dtrees'].append(dtree)
+    all_info['metafos'].append(rpmeta[datautils.fix_btt_id(gclabel)])
+
+# ----------------------------------------------------------------------------------------
+def subset_info(timepoint):
+    n_kept, n_tot = 0, 0
+    returnfo = {k : [] for k in infokeys}
+    if len(set(len(vlist) for vlist in all_info.values())) > 1:
+        raise Exception('different length vlists: %s' % set(len(vlist) for vlist in all_info.values()))
+    for itree in range(len(all_info['encoded_trees'])):
+        n_tot += 1
+        mfo = all_info['metafos'][itree]
+        tps = mfo['time']
+        if tps != timepoint:
+            continue
+        n_kept += 1
+        for tk in infokeys:
+            returnfo[tk].append(all_info[tk][itree])
+    print('  %s: kept %d / %d trees' % (timepoint, n_kept, n_tot))
+    return returnfo
+
+# ----------------------------------------------------------------------------------------
+def write_output(outdir, infolists):
+    # concatenate all the trees read from each dir NOTE this only really makes sense if you only read *one* from each dir (each dir corresponds to one gc, but has lots of sampled beast trees for that gc)
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+    print('  writing %d trees to %s' % (len(infolists['encoded_trees']), outdir))
+    encode.write_trees(encode.output_fn(outdir, 'encoded-trees', None), infolists['encoded_trees'])
+    encode.write_sstats(encode.output_fn(outdir, 'summary-stats', None), infolists['sstats'])
+    encode.write_leaf_meta(encode.output_fn(outdir, 'meta', None), [lfo for lflist in infolists['lmetafos'] for lfo in lflist])
+    utils.write_fasta(encode.output_fn(outdir, 'seqs', None), [s for slist in infolists['seqfos'] for s in slist])
+    with open('%s/trees.nwk' % outdir, 'w') as tfile:
+        for dtree in infolists['dtrees']:
+            tfile.write('%s\n' % dtree.as_string(schema='newick').strip())
 
 # ----------------------------------------------------------------------------------------
 helpstr = """
@@ -198,11 +235,12 @@ class MultiplyInheritedFormatter(argparse.RawTextHelpFormatter, argparse.Argumen
 formatter_class = MultiplyInheritedFormatter
 parser = argparse.ArgumentParser(formatter_class=MultiplyInheritedFormatter, description=helpstr)
 parser.add_argument("--input-dir", default='/fh/fast/matsen_e/shared/replay-related/jareds-replay-fork/gcreplay/nextflow/results', help='base input dir with beast results and dms affinity info')
+parser.add_argument('--gcreplay-dir', default='/fh/fast/matsen_e/data/taraki-gctree-2021-10/gcreplay', help='dir with gctree results on gcreplay data from which we read seqs, affinity, mutation info, and trees)')
 parser.add_argument("--beast-version", default='2023-05-18-beast', help='subdir of --input-dir with beast results')
 parser.add_argument("--output-version", default='test')
 parser.add_argument("--max-leaf-count", type=int, default=100)
 parser.add_argument("--igk-idx", type=int, default=336, help='zero-based index of first igk position in smooshed-together igh+igk sequence')
-parser.add_argument("--debug", type=int)
+parser.add_argument("--debug", type=int, default=0)
 parser.add_argument("--check-gct-kd", action='store_true')
 parser.add_argument("--variant-score-fname", default='projects/gcdyn/experiments/final_variant_scores.csv')
 parser.add_argument("--cgg-naive-sites-fname", default='projects/gcdyn/experiments/CGGnaive_sites.csv')
@@ -211,27 +249,22 @@ args = parser.parse_args()
 
 baseoutdir = '/fh/fast/matsen_e/data/taraki-gctree-2021-10/beast-processed-data/%s' % args.output_version
 
+rpmeta = datautils.read_gcreplay_metadata(args.gcreplay_dir)
+
 dms_df, naive_seqs, pos_maps = get_mut_info()
 if args.check_gct_kd:
     gct_kd_vals = read_gct_kd()
 
-all_info = {'encoded_trees' : [], 'sstats' : [], 'lmetafos' : [], 'seqfos' : [], 'dtrees' : []}
+infokeys = ['encoded_trees', 'sstats', 'lmetafos', 'seqfos', 'dtrees', 'metafos']
+all_info = {k : [] for k in infokeys}
 for idir, bstdir in enumerate(glob.glob('%s/%s/beast/*-GC' % (args.input_dir, args.beast_version))):
-    # if 'btt-PR-1-3-2-LA-39-GC' not in bstdir:
-    #     continue
     read_single_dir(bstdir, idir)
     if args.test and idir > 3:
         break
 
-# concatenate all the trees read from each dir NOTE this only really makes sense if you only read *one* from each dir (each dir corresponds to one gc, but has lots of samples beast trees for that gc)
-all_outdir = '%s/all-trees' % baseoutdir
-if not os.path.exists(all_outdir):
-    os.makedirs(all_outdir)
-print('  writing %d trees to %s' % (len(all_info['encoded_trees']), all_outdir))
-encode.write_trees(encode.output_fn(all_outdir, 'encoded-trees', None), all_info['encoded_trees'])
-encode.write_sstats(encode.output_fn(all_outdir, 'summary-stats', None), all_info['sstats'])
-encode.write_leaf_meta(encode.output_fn(all_outdir, 'meta', None), all_info['lmetafos'])
-utils.write_fasta(encode.output_fn(all_outdir, 'seqs', None),  all_info['seqfos'])
-with open('%s/trees.nwk' % all_outdir, 'w') as tfile:
-    for dtree in all_info['dtrees']:
-        tfile.write('%s\n' % dtree.as_string(schema='newick').strip())
+all_tps = sorted(set(m['time'] for m in rpmeta.values()))
+for tps in all_tps:
+    subfo = subset_info(tps)
+    if len(subfo['encoded_trees']) > 0:
+        write_output('%s/%s-trees' % (baseoutdir, tps), subfo)
+write_output('%s/all-trees' % baseoutdir, all_info)

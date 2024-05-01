@@ -166,7 +166,8 @@ def pad_trees(
         )
     padded_trees = []
     for itree, etree in enumerate(trees):
-        assert len(etree) == 4  # make sure there's 4 rows
+        if len(etree) != 4:  # make sure there's 4 rows
+            raise Exception('encoded tree has length %d (should be 4)' % len(etree))
         assert (
             len(set(len(r) for r in etree)) == 1
         )  # and that every row is the same length
