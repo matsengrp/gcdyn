@@ -25,6 +25,8 @@ import python.treeutils as treeutils
 import python.utils as utils
 import python.datautils as datautils
 
+from experiments import replay
+
 # ----------------------------------------------------------------------------------------
 def get_affinity(nuc_seq, name, kd_checks, debug=False):
     # ----------------------------------------------------------------------------------------
@@ -42,16 +44,18 @@ def get_affinity(nuc_seq, name, kd_checks, debug=False):
     # ----------------------------------------------------------------------------------------
     aa_seqs = {'h' : ltranslate(nuc_seq[:336]),
                'l' : ltranslate(nuc_seq[336:])}
-    muts = {c : get_mutations(naive_seqs[c], aa_seqs[c], pos_maps[c], "(%s)"%c.upper()) for c in 'hl'}
-    has_stops = [any("*" in x for x in muts[c]) for c in 'hl']
+    aa_muts = {c : get_mutations(naive_seqs_aa[c], aa_seqs[c], pos_maps[c], "(%s)"%c.upper()) for c in 'hl'}
+
+    has_stops = [any("*" in x for x in aa_muts[c]) for c in 'hl']
     if any(has_stops):  # should really be "affinity" or "delta bind" rather than kd_val
         kd_val = dms_df.delta_bind_CGG.min()
         kdstr = utils.color('red', ' stop')
     else:
-        kd_val = dms_df.delta_bind_CGG[muts['h'] + muts['l']].sum()
+        kd_val = dms_df.delta_bind_CGG[aa_muts['h'] + aa_muts['l']].sum()
         kdstr = '%5.2f' % kd_val
+    n_nuc_muts = utils.hamming_distance(replay.NAIVE_SEQUENCE, nuc_seq)
     if debug:
-        print('    %18s %s  %3d%3d  %3d' % (name, kdstr, len(muts['h']), len(muts['l']), len(muts['h']+muts['l'])), end='')
+        print('    %18s %s  %3d%3d  %3d    %3d' % (name, kdstr, len(aa_muts['h']), len(aa_muts['l']), len(aa_muts['h']+aa_muts['l']), n_nuc_muts), end='')
         if args.check_gct_kd and name in gct_kd_vals:
             gctval = gct_kd_vals[name]
             gctstr = utils.color('blue', '-', width=5) if gctval is None else '%5.2f'%gctval
@@ -60,7 +64,7 @@ def get_affinity(nuc_seq, name, kd_checks, debug=False):
             kd_checks[chkstr] += 1
             print('    %s %s' % (gctstr, utils.color('red' if chkstr=='bad' else None, chkstr)), end='')
         print()
-    return kd_val, len(muts['h'] + muts['l'])
+    return kd_val, n_nuc_muts
 
 # ----------------------------------------------------------------------------------------
 def get_etree(dtree, idir, itr, kd_checks, debug=False):
@@ -72,9 +76,9 @@ def get_etree(dtree, idir, itr, kd_checks, debug=False):
         if node is dtree.seed_node:
             assert etree is None
             etree = enodes[nlab]
-        enodes[nlab].x, n_muts = get_affinity(node.nuc_seq, nlab, kd_checks, debug=debug)
+        enodes[nlab].x, n_nuc_muts = get_affinity(node.nuc_seq, nlab, kd_checks, debug=debug)
         assert itr == 0  # would want to update tree-index
-        lmetafos.append({'tree-index' : idir, 'name' : nlab, 'affinity' : enodes[nlab].x, 'n_muts' : n_muts})
+        lmetafos.append({'tree-index' : idir, 'name' : nlab, 'affinity' : enodes[nlab].x, 'n_muts' : n_nuc_muts})
 
     for node in dtree.preorder_node_iter():
         for cnode in node.child_node_iter():
@@ -111,11 +115,14 @@ def get_mut_info():
 
     print('    reading cgg naive position info from %s' % args.cgg_naive_sites_fname)
     pos_df = pd.read_csv(args.cgg_naive_sites_fname, dtype=dict(site=pd.Int16Dtype()), index_col="site_scFv")  # "https://raw.githubusercontent.com/jbloomlab/Ab-CGGnaive_DMS/main/data/CGGnaive_sites.csv"
-    naive_seqs = {c : "".join(pos_df.query("chain == '%s'"%c.upper()).amino_acid) for c in 'hl'}
-    naive_seqs['l'] = naive_seqs['l'][:-1]  # trim the last character, for some reason
+    naive_seqs_aa = {c : "".join(pos_df.query("chain == '%s'"%c.upper()).amino_acid) for c in 'hl'}
+    naive_seqs_aa['l'] = naive_seqs_aa['l'][:-1]  # trim the last character, for some reason
+    naive_seqs_nuc = {c : "".join(pos_df.query("chain == '%s'"%c.upper()).KI_codon) for c in 'hl'}
+    assert replay.NAIVE_SEQUENCE == naive_seqs_nuc['h'] + naive_seqs_nuc['l'][:-3]  # i don't know why it doesn't have the last 3 bases, but whatever
+    # utils.color_mutants(replay.NAIVE_SEQUENCE, naive_seqs_nuc['h'] + naive_seqs_nuc['l'], align_if_necessary=True, print_result=True)
     pos_maps = {c : pos_df.loc[pos_df.chain == c.upper(), "site"].reset_index(drop=True) for c in 'hl'}
 
-    return dms_df, naive_seqs, pos_maps
+    return dms_df, naive_seqs_aa, pos_maps
 
 # ----------------------------------------------------------------------------------------
 def read_single_dir(bstdir, idir):
@@ -140,8 +147,8 @@ def read_single_dir(bstdir, idir):
     res_gen, rmd_sites = beast_loader.load_beast_trees('%s/beastgen.xml'%bstdir, single_treefname)
 
     if args.debug:
-        print('                               N muts')
-        print('              name       kd     h  l   h+l')
+        print('                                N AA muts   N nuc muts')
+        print('              name       kd     h  l   h+l    h+l')
     kd_checks = {'ok' : 0, 'bad' : 0}
     for itr, dtree in enumerate(res_gen):
         sofn = encode.output_fn(gcodir, 'seqs', None)
@@ -179,6 +186,8 @@ def read_single_dir(bstdir, idir):
 
     if args.debug:
         print('      writing tree to %s' % gcodir)
+    gcid = datautils.fix_btt_id(gclabel)
+    write_gcids(gcodir, [gcid])
     encode.write_trees(encode.output_fn(gcodir, 'encoded-trees', None), [enc_tree])
     encode.write_sstats(encode.output_fn(gcodir, 'summary-stats', None), [sstats])
     encode.write_leaf_meta(encode.output_fn(gcodir, 'meta', None), tr_lmfos)
@@ -188,7 +197,8 @@ def read_single_dir(bstdir, idir):
     all_info['lmetafos'].append(tr_lmfos)
     all_info['seqfos'].append(trsfos)
     all_info['dtrees'].append(dtree)
-    all_info['metafos'].append(rpmeta[datautils.fix_btt_id(gclabel)])
+    all_info['gcids'].append(gcid)
+    all_info['metafos'].append(rpmeta[gcid])
 
 # ----------------------------------------------------------------------------------------
 def subset_info(timepoint):
@@ -209,6 +219,14 @@ def subset_info(timepoint):
     return returnfo
 
 # ----------------------------------------------------------------------------------------
+def write_gcids(odir, gcids):
+    with open('%s/gcids.csv' % odir, 'w') as gfile:
+        writer = csv.DictWriter(gfile, ['gcid'])
+        writer.writeheader()
+        for gid in gcids:
+            writer.writerow({'gcid' : gid})
+
+# ----------------------------------------------------------------------------------------
 def write_output(outdir, infolists):
     # concatenate all the trees read from each dir NOTE this only really makes sense if you only read *one* from each dir (each dir corresponds to one gc, but has lots of sampled beast trees for that gc)
     if not os.path.exists(outdir):
@@ -221,6 +239,7 @@ def write_output(outdir, infolists):
     with open('%s/trees.nwk' % outdir, 'w') as tfile:
         for dtree in infolists['dtrees']:
             tfile.write('%s\n' % dtree.as_string(schema='newick').strip())
+    write_gcids(outdir, infolists['gcids'])
 
 # ----------------------------------------------------------------------------------------
 helpstr = """
@@ -251,11 +270,11 @@ baseoutdir = '/fh/fast/matsen_e/data/taraki-gctree-2021-10/beast-processed-data/
 
 rpmeta = datautils.read_gcreplay_metadata(args.gcreplay_dir)
 
-dms_df, naive_seqs, pos_maps = get_mut_info()
+dms_df, naive_seqs_aa, pos_maps = get_mut_info()
 if args.check_gct_kd:
     gct_kd_vals = read_gct_kd()
 
-infokeys = ['encoded_trees', 'sstats', 'lmetafos', 'seqfos', 'dtrees', 'metafos']
+infokeys = ['encoded_trees', 'sstats', 'lmetafos', 'seqfos', 'dtrees', 'gcids', 'metafos']
 all_info = {k : [] for k in infokeys}
 for idir, bstdir in enumerate(glob.glob('%s/%s/beast/*-GC' % (args.input_dir, args.beast_version))):
     read_single_dir(bstdir, idir)
