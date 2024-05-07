@@ -20,6 +20,7 @@ import pandas as pd
 import warnings
 import sys
 import itertools
+from Bio.Seq import Seq
 
 
 sigmoid_params = ['xscale', 'xshift', 'yscale']  # ick
@@ -54,6 +55,10 @@ def node_contexts(node: ete3.TreeNode):
         )
     else:
         return simple_fivemer_contexts(node.sequence)
+
+
+def ltranslate(nuc_seq):
+    return str(Seq(nuc_seq).translate())
 
 
 def write_leaf_sequences_to_fasta(
@@ -243,9 +248,17 @@ def color(col, seq, width=None, padside="left"):
 
 
 # ----------------------------------------------------------------------------------------
-def color_mutants(ref_seq, qseq):  # crappy version of fcn in partis utils
+def color_mutants(ref_seq, qseq, amino_acid=False):  # crappy version of fcn in partis utils
+    def getcol(r, q):
+        if q in ambig_bases or r in ambig_bases:
+            return 'blue'
+        elif q == r:
+            return None
+        else:
+            return "red"
     assert len(ref_seq) == len(qseq)
-    return "".join([color(None if q == r else "red", q) for r, q in zip(ref_seq, qseq)])
+    ambig_bases = 'X' if amino_acid else 'N-'
+    return "".join([color(getcol(r, q), q) for r, q in zip(ref_seq, qseq)])
 
 
 # ----------------------------------------------------------------------------------------
@@ -826,9 +839,10 @@ def print_dtree(etree, width=250, extra_str='            '):
     print(pad_lines(tlines, extra_str=extra_str))
 
 # ----------------------------------------------------------------------------------------
-def hamming_distance(seq1, seq2):
+def hamming_distance(seq1, seq2, amino_acid=False):
     assert len(seq1) == len(seq2)
-    return sum(x != y for x, y in zip(seq1.upper(), seq2.upper()) if x not in 'N-' and y not in 'N-')
+    ambig_bases = 'X' if amino_acid else 'N-'
+    return sum(x != y for x, y in zip(seq1.upper(), seq2.upper()) if x not in ambig_bases and y not in ambig_bases)
 
 # ----------------------------------------------------------------------------------------
 def write_fasta(ofn, seqfos):

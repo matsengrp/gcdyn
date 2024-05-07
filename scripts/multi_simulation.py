@@ -323,6 +323,7 @@ def write_final_outputs(args, all_seqs, all_trees, param_list, inferred=False):
             tfile.write("%s\n" % pfo["tree"].write(format=1))
 
     lmetafos = []
+    naive_seq_aa = utils.ltranslate(replay.NAIVE_SEQUENCE)
     for itr, pfo in enumerate(all_trees):
         for node in [pfo["tree"]] + list(pfo["tree"].iter_descendants()):  # both internal and leaf nodes always get written to this file
             lmetafos.append(
@@ -331,6 +332,7 @@ def write_final_outputs(args, all_seqs, all_trees, param_list, inferred=False):
                     "name": node.name,
                     "affinity": node.x,
                     "n_muts": node.total_mutations,
+                    "n_muts_aa": utils.hamming_distance(naive_seq_aa, utils.ltranslate(node.sequence), amino_acid=True),
                 }
             )
     encode.write_leaf_meta(outfn(args, "meta", subd=subd), lmetafos)
