@@ -153,9 +153,11 @@ def generate_sequences_and_tree(
 
 # ----------------------------------------------------------------------------------------
 def set_mut_stats(tree, debug=False):
-    tree.total_mutations = 0
+    tree.total_mutations, tree.total_aa_muts = 0, 0
+    naive_seq_aa = utils.ltranslate(replay.NAIVE_SEQUENCE)
     for node in tree.iter_descendants(strategy="preorder"):
         node.total_mutations = node.n_mutations + node.up.total_mutations
+        node.total_aa_muts = utils.hamming_distance(naive_seq_aa, utils.ltranslate(node.sequence), amino_acid=True)
 
     if debug:
         for tattr, tname in [('total_mutations', 'muts'), ('t', 'times')]:
@@ -323,7 +325,6 @@ def write_final_outputs(args, all_seqs, all_trees, param_list, inferred=False):
             tfile.write("%s\n" % pfo["tree"].write(format=1))
 
     lmetafos = []
-    naive_seq_aa = utils.ltranslate(replay.NAIVE_SEQUENCE)
     for itr, pfo in enumerate(all_trees):
         for node in [pfo["tree"]] + list(pfo["tree"].iter_descendants()):  # both internal and leaf nodes always get written to this file
             lmetafos.append(
@@ -332,7 +333,7 @@ def write_final_outputs(args, all_seqs, all_trees, param_list, inferred=False):
                     "name": node.name,
                     "affinity": node.x,
                     "n_muts": node.total_mutations,
-                    "n_muts_aa": utils.hamming_distance(naive_seq_aa, utils.ltranslate(node.sequence), amino_acid=True),
+                    "n_muts_aa": node.total_aa_muts,
                 }
             )
     encode.write_leaf_meta(outfn(args, "meta", subd=subd), lmetafos)
@@ -431,16 +432,20 @@ def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itri
         print('            %s tree before scaling:' % args.tree_inference_method)
         utils.print_dtree(tree, extra_str='                ')
 
-    # set .x, .t, and .total_mutations
+    # set .x, .t, .total_mutations, and .total_aa_muts
     all_seqs = {s['name'] : s['seq'] for s in true_leaf_seqs + inf_seqfos}
-    hdcache = {}
+    all_aa_seqs = {n : utils.ltranslate(s) for n, s in all_seqs.items()}
+    hdcache, hdc_aa = {}, {}
     for tnode in [tree] + list(tree.iter_descendants(strategy='preorder')):
-        nseq = all_seqs[tnode.name]
+        nseq, aa_seq = all_seqs[tnode.name], all_aa_seqs[tnode.name]
         tnode.x = gp_map(nseq)
         tnode.t = tnode.dist + (0 if tnode.is_root() else tnode.up.t)
         if nseq not in hdcache:
             hdcache[nseq] = utils.hamming_distance(all_seqs[tree.name], nseq)
+        if aa_seq not in hdc_aa:
+            hdc_aa[aa_seq] = utils.hamming_distance(all_aa_seqs[tree.name], aa_seq, amino_acid=True)
         tnode.total_mutations = hdcache[nseq]
+        tnode.total_aa_muts = hdc_aa[aa_seq]
     encode.scale_tree(tree, new_mean_depth=params['time_to_sampling'])
 
     naive_hdist = utils.hamming_distance(replay.NAIVE_SEQUENCE, all_seqs[tree.name])
@@ -505,7 +510,7 @@ def get_parser():
     parser.add_argument("--carry-cap-values", default=[300], nargs='+', type=int)
     parser.add_argument("--carry-cap-range", nargs='+', type=int)
     parser.add_argument("--capacity-method", default="birth", choices=["birth", "death", "hard", None], help="see bdms.evolve() docs. Note that 'death' often involves a ton of churn, which makes for very slow simulations.")
-    parser.add_argument("--init-population", type=int)
+    parser.add_argument("--init-population", type=int, default=100)
     parser.add_argument("--seed", default=0, type=int, help="random seed")
     parser.add_argument("--outdir", default=os.getcwd())
     parser.add_argument("--birth-response", default="sigmoid", choices=["constant", "soft-relu", "sigmoid"], help="birth rate response function")
@@ -850,8 +855,9 @@ def main():
         if tree is None:
             n_missing += 1
             continue
-        for fn in fnlist:
-            utils.addfn(all_fns, fn)
+        if fnlist is not None:
+            for fn in fnlist:
+                utils.addfn(all_fns, fn)
         with open(ofn, "wb") as fp:
             dill.dump({"tree": tree, "birth-response": birth_resp, "death-response": death_resp}, fp)
         tree_leaf_seqs = add_seqs(args, all_seqs, itrial, tree)
