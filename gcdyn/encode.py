@@ -88,6 +88,16 @@ def scale_tree(
     return mean_brlen, outtree
 
 
+def scale_trees(
+        intrees: list[TreeNode],
+) -> list[float]:
+    scale_vals = []
+    for intr in intrees:
+        brlen, sctree = scale_tree(intr)
+        scale_vals.append(brlen)
+    return scale_vals
+
+
 def encode_trees(
     intrees: list[TreeNode],
     max_leaf_count: int = None,
@@ -248,7 +258,8 @@ def write_training_files(outdir, encoded_trees, responses, sstats, dbgstr=""):
         print("      writing %s files to %s" % (dbgstr, outdir))
     if not os.path.exists(outdir):
         os.makedirs(outdir)
-    write_trees(output_fn(outdir, "encoded-trees", None), encoded_trees)
+    if encoded_trees is not None:
+        write_trees(output_fn(outdir, "encoded-trees", None), encoded_trees)
     with open(output_fn(outdir, "responses", None), "wb") as pfile:
         dill.dump(responses, pfile)
     write_sstats(output_fn(outdir, "summary-stats", None), sstats)

@@ -850,4 +850,157 @@ def write_fasta(ofn, seqfos):
         for sfo in seqfos:
             asfile.write(">%s\n%s\n" % (sfo["name"], sfo["seq"]))
 
+# ----------------------------------------------------------------------------------------
+def getsuffix(fname):  # suffix, including the dot
+    if len(os.path.splitext(fname)) != 2:
+        raise Exception('couldn\'t split %s into two pieces using dot' % fname)
+    return os.path.splitext(fname)[1]
+
+# ----------------------------------------------------------------------------------------
+# if <look_for_tuples> is set, look for uids that are actually string-converted python tuples, and add each entry in the tuple as a duplicate sequence. Can also pass in a list <tuple_info> if you need to do more with the info afterwards (this is to handle gctree writing fasta files with broken names; see usage also in datascripts/meta/taraki-XXX)
+def read_fastx(fname, name_key='name', seq_key='seq', add_info=True, dont_split_infostrs=False, sanitize_uids=False, sanitize_seqs=False, queries=None, n_max_queries=-1, istartstop=None, ftype=None, n_random_queries=None, look_for_tuples=False, tuple_info=None):
+    if ftype is None:
+        suffix = getsuffix(fname)
+        if suffix == '.fa' or suffix == '.fasta':
+            ftype = 'fa'
+        elif suffix == '.fq' or suffix == '.fastq':
+            ftype = 'fq'
+        else:
+            raise Exception('unhandled file type: %s' % suffix)
+
+    finfo = []
+    iline = -1  # index of the query/seq that we're currently reading in the fasta
+    n_fasta_queries = 0  # number of queries so far added to <finfo> (I guess I could just use len(finfo) at this point)
+    missing_queries = set(queries) if queries is not None else None
+    already_printed_forbidden_character_warning, already_printed_warn_char_warning = False, False
+    with open(fname) as fastafile:
+        startpos = None
+        while True:
+            if startpos is not None:  # rewind since the last time through we had to look to see when the next header line appeared
+                fastafile.seek(startpos)
+            headline = fastafile.readline()
+            if not headline:
+                break
+            if headline.strip() == '':  # skip a blank line
+                headline = fastafile.readline()
+
+            if ftype == 'fa':
+                if headline[0] != '>':
+                    raise Exception('invalid fasta header line in %s:\n    %s' % (fname, headline))
+                headline = headline.lstrip('>')
+
+                seqlines = []
+                nextline = fastafile.readline()
+                while True:
+                    if not nextline:
+                        break
+                    if nextline[0] == '>':
+                        break
+                    else:
+                        startpos = fastafile.tell()  # i.e. very line that doesn't begin with '>' increments <startpos>
+                    seqlines.append(nextline)
+                    nextline = fastafile.readline()
+                seqline = ''.join([l.strip() for l in seqlines]) if len(seqlines) > 0 else None
+            elif ftype == 'fq':
+                if headline[0] != '@':
+                    raise Exception('invalid fastq header line in %s:\n    %s' % (fname, headline))
+                headline = headline.lstrip('@')
+
+                seqline = fastafile.readline()  # NOTE .fq with multi-line entries isn't supported, since delimiter characters are allowed to occur within the quality string
+                plusline = fastafile.readline().strip()
+                if plusline[0] != '+':
+                    raise Exception('invalid fastq quality header in %s:\n    %s' % (fname, plusline))
+                qualityline = fastafile.readline()
+            else:
+                raise Exception('unhandled ftype %s' % ftype)
+
+            if not seqline:
+                break
+
+            iline += 1
+            if istartstop is not None:
+                if iline < istartstop[0]:
+                    continue
+                elif iline >= istartstop[1]:
+                    continue
+
+            if dont_split_infostrs:  # if this is set, we let the calling fcn handle all the infostr parsing (e.g. for imgt germline fasta files)
+                infostrs = headline
+                uid = infostrs
+            else:  # but by default, we split by everything that could be a separator, which isn't really ideal, but we're reading way too many different kinds of fasta files at this point to change the default
+                # NOTE commenting this since it fucking breaks on the imgt fastas, which use a different fucking format and i don't even remember whose stupid format this was for WTF PEOPLE
+                # if ';' in headline and '=' in headline:  # HOLY SHIT PEOPLE DON"T PUT YOUR META INFO IN YOUR FASTA FILES
+                #     infostrs = [s1.split('=') for s1 in headline.strip().split(';')]
+                #     uid = infostrs[0][0]
+                #     infostrs = dict(s for s in infostrs if len(s) == 2)
+                # else:
+                infostrs = [s3.strip() for s1 in headline.split(' ') for s2 in s1.split('\t') for s3 in s2.split('|')]  # NOTE the uid is left untranslated in here
+                uid = infostrs[0]
+            if sanitize_uids and any(fc in uid for fc in forbidden_characters):
+                if not already_printed_forbidden_character_warning:
+                    print('  %s: found a forbidden character (one of %s) in sequence id \'%s\'. This means we\'ll be replacing each of these forbidden characters with a single letter from their name (in this case %s). If this will cause problems you should replace the characters with something else beforehand.' % (color('yellow', 'warning'), ' '.join(["'" + fc + "'" for fc in forbidden_characters]), uid, uid.translate(forbidden_character_translations)))
+                    already_printed_forbidden_character_warning = True
+                uid = uid.translate(forbidden_character_translations)
+            if sanitize_uids and any(wc in uid for wc in warn_chars):
+                if not already_printed_warn_char_warning:
+                    print('  %s: found a character that may cause problems if doing phylogenetic inference (one of %s) in sequence id \'%s\' (only printing this warning on first occurence).' % (color('yellow', 'warning'), ' '.join(["'" + fc + "'" for fc in warn_chars]), uid))
+                    already_printed_warn_char_warning = True
+
+            if queries is not None:
+                if uid not in queries:
+                    continue
+                missing_queries.remove(uid)
+
+            seqfo = {name_key : uid, seq_key : seqline.strip().upper()}
+            if add_info:
+                seqfo['infostrs'] = infostrs
+            if sanitize_seqs:
+                seqfo[seq_key] = seqfo[seq_key].translate(ambig_translations).upper()
+                if any(c not in alphabet for c in seqfo[seq_key]):
+                    unexpected_chars = set([ch for ch in seqfo[seq_key] if ch not in alphabet])
+                    raise Exception('unexpected character%s %s (not among %s) in input sequence with id %s:\n  %s' % (plural(len(unexpected_chars)), ', '.join([('\'%s\'' % ch) for ch in unexpected_chars]), alphabet, seqfo[name_key], seqfo[seq_key]))
+            finfo.append(seqfo)
+
+            n_fasta_queries += 1
+            if n_max_queries > 0 and n_fasta_queries >= n_max_queries:
+                break
+            if queries is not None and len(missing_queries) == 0:
+                break
+    if n_max_queries > 0:
+        print('    stopped after reading %d sequences from %s' % (n_max_queries, fname))
+    if queries is not None:
+        print('    only looked for %d specified sequences in %s' % (len(queries), fname))
+
+    if n_random_queries is not None:
+        if n_random_queries > len(finfo):
+            print('  %s asked for n_random_queries %d from file with only %d entries, so just taking all of them (%s)' % (color('yellow', 'warning'), n_random_queries, len(finfo), fname))
+            n_random_queries = len(finfo)
+        finfo = numpy.random.choice(finfo, n_random_queries, replace=False)
+
+    if look_for_tuples:  # this is because gctree writes broken fasta files with multiple uids in a line
+        new_sfos, n_found = [], 0
+        for sfo in finfo:
+            headline = ' '.join(sfo['infostrs'])
+            if any(c not in headline for c in '()'):
+                new_sfos.append(sfo)
+                continue
+            istart, istop = [headline.find(c) for c in '()']
+            try:
+                nids = eval(headline[istart : istop + 1])
+                if tuple_info is not None:
+                    tuple_info.append(nids)
+                n_found += 1
+                print('         look_for_tuples: found %d uids in headline %s: %s' % (len(nids), headline, ' '.join(nids)))
+                for uid in nids:
+                    nsfo = copy.deepcopy(sfo)
+                    nsfo['name'] = uid
+                    new_sfos.append(nsfo)
+            except:
+                print('    %s failed parsing tuple from fasta line \'%s\' from %s' % (wrnstr(), headline, fname))
+                new_sfos.append(sfo)
+        if n_found > 0:
+            print('      found %d seqfos with tuple headers (added %d net total seqs) in %s' % (n_found, len(new_sfos) - len(finfo), fname))
+        finfo = new_sfos
+
+    return finfo
 # fmt: on

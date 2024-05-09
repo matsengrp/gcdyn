@@ -12,6 +12,7 @@ import subprocess
 import dill
 import math
 import glob
+import json
 
 from gcdyn import bdms, gpmap, mutators, poisson, utils, encode
 from experiments import replay
@@ -314,7 +315,7 @@ def get_responses(args, xscale, xshift, yscale, pcounts):
 
 
 # ----------------------------------------------------------------------------------------
-def write_final_outputs(args, all_seqs, all_trees, param_list, inferred=False):
+def write_final_outputs(args, all_seqs, all_trees, param_list, inferred=False, dont_encode=False):
     subd = args.tree_inference_method if inferred else ''
     print("  writing %sfinal outputs%s to %s" % ('inferred ' if inferred else '', ' (including internal nodes)' if args.sample_internal_nodes else '', os.path.dirname(outfn(args, "seqs", subd=subd))))
 
@@ -339,7 +340,11 @@ def write_final_outputs(args, all_seqs, all_trees, param_list, inferred=False):
     encode.write_leaf_meta(outfn(args, "meta", subd=subd), lmetafos)
 
     # encode trees
-    scale_vals, encoded_trees = encode.encode_trees([pfo["tree"] for pfo in all_trees])
+    if dont_encode:  # UGH
+        scale_vals = encode.scale_trees([pfo["tree"] for pfo in all_trees])
+        encoded_trees = None
+    else:
+        scale_vals, encoded_trees = encode.encode_trees([pfo["tree"] for pfo in all_trees])
 
     # write summary stats
     if len(param_list) != len(all_trees):
@@ -381,36 +386,59 @@ def add_tree(all_trees, itrial, pfo):
 
 # ----------------------------------------------------------------------------------------
 def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itrial, outfix='out', debug=False):
+    assert args.tree_inference_method in ['iqtree', 'gctree']
     # ----------------------------------------------------------------------------------------
     def run_method(ofn):
         ifn = '%s/input-seqs.fa' % wkdir
-        with open(ifn, 'w') as sfile:
-            for sfo in true_leaf_seqs:
-                sfile.write('>%s\n%s\n' % (sfo['name'], sfo['seq']))
-        assert args.tree_inference_method == 'iqtree'
-        cmd = '%s/iqtree -asr -s %s -pre %s/%s >%s/log' % (os.path.dirname(os.path.realpath(__file__)), ifn, wkdir, outfix, wkdir)
-        if os.path.exists(ofn) and args.overwrite:
-            cmd += ' -redo'
+        input_seqs = true_leaf_seqs
+        if args.tree_inference_method == 'gctree':
+            input_seqs.insert(0, {'name' : 'naive', 'seq' : replay.NAIVE_SEQUENCE})
+        utils.write_fasta(ifn, input_seqs)
+        if args.tree_inference_method == 'iqtree':
+            cmd = '%s/iqtree -asr -s %s -pre %s/%s >%s/log' % (os.path.dirname(os.path.realpath(__file__)), ifn, wkdir, outfix, wkdir)
+            if os.path.exists(ofn) and args.overwrite:
+                cmd += ' -redo'
+        elif args.tree_inference_method == 'gctree':
+            mfn = '%s/meta.yaml' % wkdir
+            with open(mfn, 'w') as mfile:
+                mfo = {'h_frame' : 1, 'h_offset' : 0, 'l_frame' : 1, 'l_offset' : replay.CHAIN_2_START_IDX}
+                json.dump(mfo, mfile)
+            cmd = '%s/bin/gctree-run.py --infname %s --outdir %s --metafname %s' % (args.partis_dir, ifn, wkdir, mfn)
+            #  --fix-multifurcations  turn this on if you want to be able to encode them (but then will need to also have it on for data trees)
+        else:
+            assert False
         print('    %s %s' % (utils.color('red', 'run'), cmd))
         subprocess.check_call(cmd, shell=True)
     # ----------------------------------------------------------------------------------------
     def read_inferred_seqs():
-        assert args.tree_inference_method == 'iqtree'
-        inf_infos = {}
-        with open('%s/%s.state'%(wkdir, outfix)) as afile:
-            reader = csv.DictReader(filter(lambda row: row[0]!='#', afile), delimiter=str('\t'))
-            for line in reader:
-                node = line['Node']
-                if node not in inf_infos:
-                    inf_infos[node] = {}
-                inf_infos[node][int(line['Site'])] = line['State'].replace('-', 'N')  # NOTE this has uncertainty info as well, which atm i'm ignoring
-        seq_len = len(true_leaf_seqs[0]['seq'])
-        inf_seqfos = []
-        for node, nfo in inf_infos.items():
-            inf_seqfos.append({'name' : node, 'seq' : ''.join(nfo[i] for i in range(1, seq_len+1))})
+        if args.tree_inference_method == 'iqtree':
+            inf_infos = {}
+            with open('%s/%s.state'%(wkdir, outfix)) as afile:
+                reader = csv.DictReader(filter(lambda row: row[0]!='#', afile), delimiter=str('\t'))
+                for line in reader:
+                    node = line['Node']
+                    if node not in inf_infos:
+                        inf_infos[node] = {}
+                    inf_infos[node][int(line['Site'])] = line['State'].replace('-', 'N')  # NOTE this has uncertainty info as well, which atm i'm ignoring
+            seq_len = len(true_leaf_seqs[0]['seq'])
+            inf_seqfos = []
+            for node, nfo in inf_infos.items():
+                inf_seqfos.append({'name' : node, 'seq' : ''.join(nfo[i] for i in range(1, seq_len+1))})
+        elif args.tree_inference_method == 'gctree':
+            inf_seqfos = utils.read_fastx(ofn(wkdir, seqs=True))
+        else:
+            assert False
         if debug:
             print('          read %d %s inferred ancestral seqs' % (len(inf_seqfos), args.tree_inference_method))
         return inf_seqfos
+    # ----------------------------------------------------------------------------------------
+    def ofn(wkdir, seqs=False):
+        if args.tree_inference_method == 'iqtree':
+            return '%s/%s.treefile' % (wkdir, outfix)
+        elif args.tree_inference_method == 'gctree':
+            return '%s/%s' % (wkdir, 'inferred-seqs.fa' if seqs else 'tree.nwk')
+        else:
+            assert False
     # ----------------------------------------------------------------------------------------
     assert not args.sample_internal_nodes  # would need to think about whether I want to 1) pass inferred seqs to iqtree and/or 2) read iqtree inferred internal nodes
     if debug:
@@ -418,14 +446,15 @@ def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itri
     wkdir = '%s/%s/itree-%d' % (args.outdir, args.tree_inference_method, itrial)
     if not os.path.exists(wkdir):
         os.makedirs(wkdir)
-    ofn = '%s/%s.treefile' % (wkdir, outfix)
-    if os.path.exists(ofn) and not args.overwrite:
-        print('        %s output file exists, not rerunning: %s' % (args.tree_inference_method, ofn))
+    if os.path.exists(ofn(wkdir)) and not args.overwrite:
+        print('        %s output file exists, not rerunning: %s' % (args.tree_inference_method, ofn(wkdir)))
     else:
-        run_method(ofn)
+        run_method(ofn(wkdir))
     inf_seqfos = read_inferred_seqs()
-    tree = bdms.TreeNode(newick=ofn, format=1)
-    relabel_nodes(args, tree, itrial, only_internal=True, seqfos=inf_seqfos)
+    with open(ofn(wkdir)) as ofile:
+        tstr = ofile.read().replace('[&R]', '').strip()
+    tree = bdms.TreeNode(newick=tstr, format=1, quoted_node_names=True)
+    relabel_nodes(args, tree, itrial, only_internal=True, seqfos=inf_seqfos + true_leaf_seqs)
     utils.write_fasta('%s/inf-anc-seqs.fa'%wkdir, inf_seqfos)
 
     if debug > 1:
@@ -539,6 +568,7 @@ def get_parser():
     parser.add_argument("--label-leaf-internal-nodes", action="store_true", help="Instead of the default node naming scheme of pure integers, add a prefix to the integer indicating if it\'s a leaf (\'leaf-\') or internal (\'mrca-\') node.")
     parser.add_argument("--n-to-plot", type=int, default=10, help="number of tree slice plots to make")
     parser.add_argument("--tree-inference-method")
+    parser.add_argument("--partis-dir", default='%s/work/partis'%os.getenv('HOME'))
     return parser
 
 
@@ -877,7 +907,7 @@ def main():
 
     write_final_outputs(args, all_seqs, all_trees, plist)
     if args.tree_inference_method is not None:
-        write_final_outputs(args, all_seqs, inf_trees, plist, inferred=True)
+        write_final_outputs(args, all_seqs, inf_trees, plist, inferred=True, dont_encode=args.tree_inference_method=='gctree')  # need to turn on --fix-multifurcations above if i want to encode gctrees
 
     finish_param_choice(args, pcounts, all_trees=all_trees, all_fns=all_fns)
     print("    total simulation time: %.1f sec" % (time.time() - start))
