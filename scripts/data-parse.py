@@ -293,11 +293,13 @@ def write_final_output(outdir, infolists):
 
 # ----------------------------------------------------------------------------------------
 helpstr = """
-Read Beast results from xml and history.trees files, add phenotype (affinity/kd) info from additive DMS-based
-affinity model, then write sequences to fasta, tree to newick, and affinity to yaml.
+Read Beast results from xml and history.trees files (or iqtree results), then add phenotype (affinity/kd) info from additive DMS-based
+affinity model, then write sequences to fasta, tree to newick, and affinity to yaml. The beast results are run by someone else's code,
+while the iqtree results are from datascripts/meta/taraki-gctree-2021-10/iqtree-run.py.
 Example usage:
-    beast-parse.py --input-dir <input-dir> --beast-version <bvsn> --output-version <ovsn> --debug 1 --check
-(see also datascripts/meta/taraki-gctree-2021-10/run.sh)
+    data-parse.py --method beast --output-version <ovsn> --debug 1 --check-gct-kd
+    data-parse.py --method iqtree --output-version <ovsn> --debug 1 --check-gct-kd
+(see commands in datascripts/meta/taraki-gctree-2021-10/run.sh)
 """
 class MultiplyInheritedFormatter(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
     pass
