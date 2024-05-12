@@ -32,8 +32,8 @@ xscales=0.1:1:5:10; xshifts=-5:-2:-1:0:1:2:5
 # pranges="--xscale-range-list 0.01,2 --xshift-range-list=-0.5,3 --yscale-range-list 1,50 --initial-birth-rate-range-list 4,10 --time-to-sampling-range-list 10,30 --carry-cap-range-list 100,300 --n-seqs-range-list 40,90"
 # ppl="--params-to-predict-list xscale:xshift:yscale:xscale,xshift:xscale,yscale:xshift,yscale:xscale,xshift,yscale"
 # echo $bin $common --label vary-all --version v1 $pranges --n-replicates 1 --n-trials-list 5000:50000:500000:670000 --simu-bundle-size-list 1:50:67 --dl-bundle-size-list 1:50:67 --zip-vars simu-bundle-size:dl-bundle-size --epochs-list 250 --simu-extra-args=\"--n-max-procs 20\" $ppl
-pranges="--xscale-range-list 0.01,2 --xshift-range-list=-0.5,3 --yscale-range-list 1,50 --time-to-sampling-range-list 10,30 --n-seqs-range-list 40,90"
-echo $bin $common --label tree-infer-effect --version v0 --initial-birth-rate-range-list 0.1,0.5:1,5 --carry-cap-range-list 100,101:500,501:1000,1001 $pranges --n-replicates 1 --n-trials-list 100 --simu-extra-args=\"--n-max-procs 20\"
+pranges="--xscale-range-list 0.01,2 --xshift-range-list=-0.5,3 --yscale-range-list 1,50 --time-to-sampling-range-list 15,25 --n-seqs-range-list 65,95"
+echo $bin $common --label tree-infer-effect --version v2 --initial-birth-rate-range-list 0.5,1:1,5 --carry-cap-range-list 1000,1001 --init-population-list 1:100 $pranges --n-replicates 1 --n-trials-list 75 --simu-extra-args=\"--n-max-procs 20\"
 # --initial-birth-rate-range 1 3
 
 # maybe this is right (but can't read it now)? dld=/fh/fast/matsen_e/dralph/partis/gcdyn/vary-all/v1/n-trials-500000/simu-bundle-size-1/dl-bundle-size-1/params-to-predict-xscale:xshift:yscale/dl-infer

@@ -839,6 +839,17 @@ def print_dtree(etree, width=250, extra_str='            '):
     print(pad_lines(tlines, extra_str=extra_str))
 
 # ----------------------------------------------------------------------------------------
+def get_etree(fname=None, treestr=None):  # specify either fname or treestr
+    if treestr is None:
+        assert fname is not None
+        with open(fname) as tfile:
+            treestr = tfile.read() #.replace('[&R]', '').strip()
+    if len(treestr.split()) == 2 and treestr.split()[0] in ['[&U]', '[&R]']:  # dumbest #$!#$#ing format in the goddamn world (ete barfs on other programs' rooting information)
+        treestr = treestr.split()[1]
+    return ete3.Tree(treestr, format=1, quoted_node_names=True)
+    # return bdms.TreeNode(newick=treestr, format=1, quoted_node_names=True)
+
+# ----------------------------------------------------------------------------------------
 def hamming_distance(seq1, seq2, amino_acid=False):
     assert len(seq1) == len(seq2)
     ambig_bases = 'X' if amino_acid else 'N-'

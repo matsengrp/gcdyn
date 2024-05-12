@@ -451,9 +451,7 @@ def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itri
     else:
         run_method(ofn(wkdir))
     inf_seqfos = read_inferred_seqs()
-    with open(ofn(wkdir)) as ofile:
-        tstr = ofile.read().replace('[&R]', '').strip()
-    tree = bdms.TreeNode(newick=tstr, format=1, quoted_node_names=True)
+    tree = utils.get_etree(fname=ofn(wkdir))
     relabel_nodes(args, tree, itrial, only_internal=True, seqfos=inf_seqfos + true_leaf_seqs)
     utils.write_fasta('%s/inf-anc-seqs.fa'%wkdir, inf_seqfos)
 
