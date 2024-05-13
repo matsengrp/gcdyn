@@ -208,7 +208,7 @@ def read_trees(filename: str):
 final_ofn_strs = ["seqs", "trees", "meta", "encoded-trees", "responses", "summary-stats"]
 model_state_ofn_strs = ["model", "train-scaler", "example-responses"]
 sstat_fieldnames = ["tree", "mean_branch_length", "total_branch_length", "carry_cap", "time_to_sampling"]
-leaf_meta_fields = ["tree-index", "name", "affinity", "n_muts", "n_muts_aa"]
+leaf_meta_fields = ["tree-index", "name", "affinity", "n_muts", "n_muts_aa", "gc"]
 
 # ----------------------------------------------------------------------------------------
 def output_fn(odir, ftype, itrial):
