@@ -68,7 +68,7 @@ def get_affinity(nuc_seq, name, kd_checks, debug=False):
 
 # ----------------------------------------------------------------------------------------
 # this converts dendropy tree  <dtree> (which is how we get the beast results from beast_loader) to the ete3 tree that we need for encoding
-def get_etree(dtree, idir, itr, kd_checks, gclabel=None, debug=False):
+def get_beast_etree(dtree, idir, itr, kd_checks, gcid=None, debug=False):
     etree, enodes, lmetafos = None, {}, []
     for node in dtree.preorder_node_iter():
         nlab = node.taxon.label
@@ -80,8 +80,8 @@ def get_etree(dtree, idir, itr, kd_checks, gclabel=None, debug=False):
         enodes[nlab].x, n_nuc_muts, n_aa_muts = get_affinity(node.nuc_seq, nlab, kd_checks, debug=debug)
         assert itr == 0  # would want to update tree-index
         lmetafos.append({'tree-index' : idir, 'name' : nlab, 'affinity' : enodes[nlab].x, 'n_muts' : n_nuc_muts, 'n_muts_aa' : n_aa_muts})
-        if gclabel is not None:
-            lmetafos[-1]['gc'] = gclabel
+        if gcid is not None:
+            lmetafos[-1]['gc'] = gcid
 
     for node in dtree.preorder_node_iter():
         for cnode in node.child_node_iter():
@@ -158,6 +158,8 @@ def write_tree(gcodir, dtree, trsfos, sstats, enc_tree, tr_lmfos):
 
 # ----------------------------------------------------------------------------------------
 def read_iqtree_dir(indir, idir, gclabel, gcodir):
+    gcid = gclabel
+
     kd_checks = {'ok' : 0, 'bad' : 0}
     in_fos = utils.read_fastx('%s/input-seqs.fa'%indir)
     inf_fos = utils.read_fastx('%s/inferred-seqs.fa'%indir)
@@ -193,7 +195,6 @@ def read_iqtree_dir(indir, idir, gclabel, gcodir):
     sstats = {'tree' : idir, 'mean_branch_length' : brlen, 'total_branch_length' : sum(n.dist for n in etree.iter_descendants())}
 
     write_tree(gcodir, dtree, all_seqfos, sstats, enc_tree, lmetafos)
-    gcid = gclabel #datautils.fix_btt_id(gclabel)
     write_gcids(gcodir, [gcid])
 
     all_info['encoded_trees'].append(enc_tree)
@@ -206,6 +207,8 @@ def read_iqtree_dir(indir, idir, gclabel, gcodir):
 
 # ----------------------------------------------------------------------------------------
 def read_beast_dir(bstdir, idir, gclabel, gcodir):
+    gcid = datautils.fix_btt_id(gclabel)
+
     single_treefname = '%s/single-tree.history.trees' % gcodir
     tfns = glob.glob('%s/beastannotated-*.history.trees' % bstdir)
     if len(tfns) != 1:
@@ -234,7 +237,7 @@ def read_beast_dir(bstdir, idir, gclabel, gcodir):
             node.nuc_seq = node.observed_cg.to_sequence() if node.is_leaf() else node.cg.to_sequence()
             trsfos.append({'name' : node.taxon.label, 'seq' : node.nuc_seq})
 
-        etree, tr_lmfos = get_etree(dtree, idir, itr, kd_checks, gclabel=gclabel, debug=args.debug)
+        etree, tr_lmfos = get_beast_etree(dtree, idir, itr, kd_checks, gcid=gcid, debug=args.debug)
         brlen, sctree = encode.scale_tree(etree)
         enc_tree = encode.encode_tree(etree, max_leaf_count=args.max_leaf_count, dont_scale=True)
 
@@ -247,7 +250,6 @@ def read_beast_dir(bstdir, idir, gclabel, gcodir):
         print('  %s %d / %d affinities don\'t match old values from gctree results' % (utils.color('yellow', 'warning'), kd_checks['bad'], sum(kd_checks.values())))
 
     write_tree(gcodir, dtree, trsfos, sstats, enc_tree, tr_lmfos)
-    gcid = datautils.fix_btt_id(gclabel)
     write_gcids(gcodir, [gcid])
 
     all_info['encoded_trees'].append(enc_tree)
