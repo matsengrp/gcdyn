@@ -485,7 +485,7 @@ def make_dl_plots(prdfs, params_to_predict, outdir, is_simu=False, data_val=0, v
     make_html(outdir, fnames=fnames)
 
 # ----------------------------------------------------------------------------------------
-def plot_tree_slices(plotdir, tree, max_time, itrial):
+def plot_n_vs_time(plotdir, tree, max_time, itrial):
     # ----------------------------------------------------------------------------------------
     def make_n_vs_time_plot(ndata):
         fig, ax = plt.subplots()
@@ -540,6 +540,7 @@ def plot_tree_slices(plotdir, tree, max_time, itrial):
         os.makedirs(plotdir)
     fnlist = []
     make_n_vs_time_plot(get_data('n-nodes', max_time))
+    # old slice plots:
     # ugh i give up, this plot is ugly and not that useful
     # with warnings.catch_warnings():
     #     make_affy_slice_plot(get_data('affinity', '5'))

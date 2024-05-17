@@ -126,7 +126,7 @@ def generate_sequences_and_tree(
 
     fnlist = None
     if args.make_plots:
-        fnlist = utils.plot_tree_slices(args.outdir + "/plots/tree-slices", tree, params['time_to_sampling'], itrial)
+        fnlist = utils.plot_n_vs_time(args.outdir + "/plots/tree-slices", tree, params['time_to_sampling'], itrial)
 
     if args.debug > 1:
         print('    tree before sampling:')
@@ -598,7 +598,7 @@ def set_test_args(args):
 
 
 # ----------------------------------------------------------------------------------------
-def finish_param_choice(args, pcounts, all_trees=None, all_fns=None):
+def plot_params_responses(args, pcounts, all_trees=None, all_fns=None):
     if all_fns is None:
         all_fns = [[]]
     if args.birth_response == "sigmoid":  # could plot other ones, but I think I need to modify some things, and I don't need it atm
@@ -611,7 +611,6 @@ def finish_param_choice(args, pcounts, all_trees=None, all_fns=None):
     print("    sampled parameter values:               min      max")
     for pname, pvals in sorted(pcounts.items()):
         print("                      %27s  %7.2f  %7.2f" % (pname, min(pvals), max(pvals)))
-
 
 
 # ----------------------------------------------------------------------------------------
@@ -767,7 +766,7 @@ def run_sub_procs(args):
         for line in reader:
             for pname in [p for p in ['carry_cap', 'time_to_sampling', 'n_seqs'] if p in line]:  # old files don't have these
                 add_pval(pcounts, pname, float(line[pname]))
-    finish_param_choice(args, pcounts)
+    plot_params_responses(args, pcounts)
 
 
 # ----------------------------------------------------------------------------------------
@@ -854,7 +853,7 @@ def main():
             print("    output %s already exists, skipping" % ofn)
             pfo = read_dill_file(ofn)
             if args.make_plots:
-                print("    note: can't make tree slice plots when reading pickle files (i.e. you need to rm/overwrite to actually rerun the simulation), since we write pruned trees")
+                print("    note: can't make N vs time plots when reading pickle files since we write pruned trees (i.e. you need to rm/overwrite to actually rerun the simulation)")
             if pfo is None:  # file is screwed up and we want to rerun
                 print("    rerunning since pickle file read failed")
             else:
@@ -907,6 +906,6 @@ def main():
     if args.tree_inference_method is not None:
         write_final_outputs(args, all_seqs, inf_trees, plist, inferred=True, dont_encode=args.tree_inference_method=='gctree')  # need to turn on --fix-multifurcations above if i want to encode gctrees
 
-    finish_param_choice(args, pcounts, all_trees=all_trees, all_fns=all_fns)
+    plot_params_responses(args, pcounts, all_trees=all_trees, all_fns=all_fns)
     print("    total simulation time: %.1f sec" % (time.time() - start))
 # fmt: on
