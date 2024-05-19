@@ -330,11 +330,12 @@ def write_final_outputs(args, all_seqs, all_trees, param_list, inferred=False, d
         for node in [pfo["tree"]] + list(pfo["tree"].iter_descendants()):  # both internal and leaf nodes always get written to this file
             lmetafos.append(
                 {
-                    "tree-index": itr,
+                    "tree-index": itr + args.itrial_start,
                     "name": node.name,
                     "affinity": node.x,
                     "n_muts": node.total_mutations,
                     "n_muts_aa": node.total_aa_muts,
+                    "is_leaf" : node.is_leaf(),
                 }
             )
     encode.write_leaf_meta(outfn(args, "meta", subd=subd), lmetafos)

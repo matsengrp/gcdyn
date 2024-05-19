@@ -84,8 +84,10 @@ def write_prediction(args, punscaled, true_resps=None, true_sstats=None, smpl=No
         for param in args.params_to_predict
         for ptype in (["predicted"] if true_resps is None else ["truth", "predicted"])
     }
+    dfdata['tree-index'] = []
     assert true_resps is None or len(punscaled) == len(true_resps)
     for itr, prlist in enumerate(punscaled):
+        dfdata['tree-index'].append(true_sstats[itr]['tree'])
         for ip, param in enumerate(args.params_to_predict):
             dfdata["%s-predicted" % param].append(prlist[ip])
             if true_resps is not None:
@@ -110,12 +112,14 @@ def get_prediction(args, model, spld, scaler, smpl=None):
     return df
 
 # ----------------------------------------------------------------------------------------
-def read_plot_csv(args):
-    prdfs = {}
+def plot_existing_results(args):
+    prdfs, smpldict = {}, {}
     for smpl in ["train", "test"]:
         prdfs[smpl] = pd.read_csv(csvfn(args, smpl))
+    seqmeta = read_meta_csv(args.indir)
     utils.make_dl_plots(
         prdfs,
+        seqmeta,
         args.params_to_predict,
         args.outdir + "/plots",
         is_simu=args.is_simu,
@@ -172,6 +176,15 @@ def write_traintest_samples(args, smpldict):
             dbgstr=smpl,
         )
 
+
+# ----------------------------------------------------------------------------------------
+def read_meta_csv(mdir):
+    metafos = []
+    with open('%s/meta.csv'%mdir) as lmfile:
+        reader = csv.DictReader(lmfile)
+        for line in reader:
+            metafos.append(line)
+    return metafos
 
 # ----------------------------------------------------------------------------------------
 def read_tree_files(args):
@@ -245,8 +258,10 @@ def predict_and_plot(args, model, smpldict, scaler, smpls):
     prdfs = {}
     for smpl in smpls:
         prdfs[smpl] = get_prediction(args, model, smpldict[smpl], scaler, smpl=smpl)
+    seqmeta = read_meta_csv(args.indir)
     utils.make_dl_plots(
         prdfs,
+        seqmeta,
         args.params_to_predict,
         args.outdir + "/plots",
         is_simu=args.is_simu,
@@ -392,7 +407,7 @@ def main():
     if args.action == 'train':
         if os.path.exists(csvfn(args, "test")) and not args.overwrite:
             print("    csv files already exist, so just replotting (override with --overwrite): %s" % csvfn(args, "test"))
-            read_plot_csv(args)
+            plot_existing_results(args)
             sys.exit(0)
         train_and_test(args, start_time)
     elif args.action == 'infer':

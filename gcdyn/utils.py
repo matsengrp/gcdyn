@@ -382,18 +382,32 @@ def mpl_init(fsize=20, label_fsize=15):
 # ----------------------------------------------------------------------------------------
 # plot scatter + box/whisker plot comparing true and predicted values for deep learning inference
 # NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
-def make_dl_plots(prdfs, params_to_predict, outdir, is_simu=False, data_val=0, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15):
+def make_dl_plots(prdfs, seqmeta, params_to_predict, outdir, is_simu=False, data_val=0, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15):
     # ----------------------------------------------------------------------------------------
-    def plot_responses(smpl, n_max_plots=100):
+    def add_fn(fn, n_per_row=4):
+        if len(fnames) == 0 or len(fnames[-1]) >= n_per_row:
+            fnames.append([])
+        fnames[-1].append(fn)
+    # ----------------------------------------------------------------------------------------
+    def plot_responses(smpl, n_max_plots=25):
         from gcdyn.poisson import SigmoidResponse
         pfo_list = []
         n_preds = len(prdfs[smpl].index)
         n_plots = min(n_max_plots, n_preds)
+        lmdict = defaultdict(list)  # map from tree index to list of seq meta for that tree
+        for mfo in seqmeta:
+            lmdict[int(mfo['tree-index'])].append(mfo)
         for irow in range(n_plots):
-            pdict = {p : prdfs[smpl]['%s-predicted'%p][irow] for p in sigmoid_params}
-            pfo_list.append({'birth-response' : SigmoidResponse(**pdict)})
+            itree = prdfs[smpl]['tree-index'][irow]
+            mfos = lmdict[itree]
+            pdicts = [{p : prdfs[smpl]['%s-%s'%(p, tp)][irow] for p in sigmoid_params} for tp in ['truth', 'predicted']]
+            true_resp, pred_resp = [SigmoidResponse(**pd) for pd in pdicts]
+            fn = plot_many_curves(outdir, '%strue-vs-inf-response-%d'%(smpl, irow), [{'birth-response' : r} for r in [true_resp, pred_resp]],
+                                  titlestr='%s: response index %d' % (smpl, irow), affy_vals=[float(m['affinity']) for m in mfos], colors=['#006600', '#990012'], add_true_pred_text=True)
+            add_fn(fn)
+            pfo_list.append({'birth-response' : pred_resp})
         fn = plot_many_curves(outdir, '%sall-response'%smpl, pfo_list, titlestr='%s: %d / %d responses' % (smpl, n_plots, n_preds))
-        return fn
+        add_fn(fn)
     # ----------------------------------------------------------------------------------------
     def single_plot(ptype, param, smpl):
         # ----------------------------------------------------------------------------------------
@@ -473,8 +487,7 @@ def make_dl_plots(prdfs, params_to_predict, outdir, is_simu=False, data_val=0, v
         os.makedirs(outdir)
     fnames = [[]]
     for smpl in sorted(prdfs, reverse=True):
-        fn = plot_responses(smpl)
-        fnames[-1].append(fn)
+        plot_responses(smpl)
     for ptype in ['scatter', 'box']:
         for smpl in sorted(prdfs, reverse=True):
             fnames.append([])
@@ -605,47 +618,62 @@ def plot_chosen_params(plotdir, param_counters, pbounds, n_bins=15, fnames=None)
 
 
 # ----------------------------------------------------------------------------------------
-def resp_plot(pfo, ax, xbounds=[-5, 5], nsteps=40, alpha=0.8):
+def resp_plot(pfo, ax, xbounds=[-5, 5], nsteps=40, alpha=0.8, color="#990012"):
     dx = (xbounds[1] - xbounds[0]) / nsteps
     xvals = list(np.arange(xbounds[0], 0, dx)) + list(np.arange(0, xbounds[1] + dx, dx))
     rvals = [float(pfo["birth-response"].λ_phenotype(x)) for x in xvals]
     data = {"affinity": xvals, "lambda": rvals}
-    sns.lineplot(data, x="affinity", y="lambda", ax=ax, linewidth=3, color="#990012", alpha=alpha)
+    sns.lineplot(data, x="affinity", y="lambda", ax=ax, linewidth=3, color=color, alpha=alpha)
 
 # ----------------------------------------------------------------------------------------
-def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None):
+def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None, colors=None, add_true_pred_text=False):
     mpl_init()
     fig, ax = plt.subplots()
-    for pfo in pfo_list:
-        resp_plot(pfo, ax, alpha=0.15)
+    for ipf, pfo in enumerate(pfo_list):
+        resp_plot(pfo, ax, alpha=0.15 if len(pfo_list)>5 else 0.5, color='#990012' if colors is None else colors[ipf])
+    if add_true_pred_text:
+        assert len(pfo_list) == 2
+        add_param_text(fig, pfo_list[0], inf_pfo=pfo_list[1])
+    if affy_vals is not None:
+        ax2 = ax.twinx()
+        affy_plot({'all' : affy_vals}, ax, ax2=ax2)
     ax.set(title='%d responses' % len(pfo_list) if titlestr is None else titlestr)
     fn = "%s/%s.svg" % (plotdir, plotname)
     plt.savefig(fn)
     return fn
 
 # ----------------------------------------------------------------------------------------
-def plot_phenotype_response(plotdir, pfo_list, xbounds=[-5, 5], n_to_plot=20, bundle_size=1, fnames=None):
+def affy_plot(affy_vals, ax, ax2=None, n_bins=30, xbounds=[-5, 5]):
+    all_vals = [v for vlist in affy_vals.values() for v in vlist]
+    xmin, xmax = min(xbounds + all_vals), max(xbounds + all_vals)
+    if len(set(all_vals)) == 1:
+        print('    %s all affinity values the same, can\'t plot (for some reason numpy histogram barfs)' % color('yellow', 'warning'))
+        return
+    sns.histplot(affy_vals if len(affy_vals)>1 else all_vals, ax=ax2, multiple="stack", binwidth=(xmax - xmin) / n_bins)
+
+# ----------------------------------------------------------------------------------------
+def add_param_text(fig, pfo, inf_pfo=None):
+    param_text = ['%s %.1f%s' % (p, getattr(pfo['birth-response'], p), '' if inf_pfo is None else ' (%.1f)'%getattr(inf_pfo['birth-response'], p)) for p in ['xscale', 'xshift', 'yscale']]
+    xv, yv = (0.6, 0.25) if inf_pfo is None else (0.17, 0.7)
+    fig.text(xv, yv, '\n'.join(param_text), fontsize=17)
+
+# ----------------------------------------------------------------------------------------
+def plot_phenotype_response(plotdir, pfo_list, n_to_plot=20, bundle_size=1, fnames=None):
     # ----------------------------------------------------------------------------------------
-    def affy_plot(pfo, ax, ax2=None, n_bins=30):
+    def get_afplot(pfo, ax, itree, ax2=None):
         leaves = list(pfo["tree"].iter_leaves())
         leaf_vals = [n.x for n in leaves]
         int_vals = [n.x for n in pfo["tree"].iter_descendants() if n not in leaves]
-        all_vals = leaf_vals + int_vals
-        xmin, xmax = min(xbounds + all_vals), max(xbounds + all_vals)
-        if len(set(int_vals + leaf_vals)) == 1:
-            print('    %s all affinity values the same, can\'t plot (for some reason numpy histogram barfs)' % color('yellow', 'warning'))
-            return
-        sns.histplot({"internal": int_vals, "leaves": leaf_vals}, ax=ax2, multiple="stack", binwidth=(xmax - xmin) / n_bins)
-        ax.set(title="itree %d (%d nodes)"%(itree, len(all_vals)))
+        affy_plot({'internal' : int_vals, 'leaf' : leaf_vals}, ax, ax2=ax2)
+        ax.set(title="itree %d (%d nodes)"%(itree, len(leaf_vals+int_vals)))
     # ----------------------------------------------------------------------------------------
     def plt_single_tree(itree, pfo):
         plt.clf()
         fig, ax = plt.subplots()
         ax2 = ax.twinx()
-        affy_plot(pfo, ax, ax2=ax2)
+        get_afplot(pfo, ax, itree, ax2=ax2)
         resp_plot(pfo, ax)
-        param_text = "xscale %.1f\nxshift %.1f\nyscale %.1f" % (pfo["birth-response"].xscale, pfo["birth-response"].xshift, pfo["birth-response"].yscale)
-        fig.text(0.6, 0.25, param_text, fontsize=17)
+        add_param_text(fig, pfo)
         fn = "%s/trees-%d.svg" % (plotdir, itree)
         plt.savefig(fn)
         return fn
