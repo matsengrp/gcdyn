@@ -634,21 +634,28 @@ def get_resp_vals(resp, xbounds, nsteps, normalize=False):
     return rvals
 
 # ----------------------------------------------------------------------------------------
-def resp_fcn_diff(resp1, resp2, xbounds, normalize=False, nsteps=40, debug=False):
+def resp_fcn_diff(resp1, resp2, xbounds, dont_normalize=False, nsteps=40, debug=False):
     # ----------------------------------------------------------------------------------------
     def prdbg():
-        def prvls(vlist, p=3):
-            print('  '.join(('%7.'+str(p)+'f')%v for v in vlist))
-        prvls(xvals, p=1)
+        def prvls(lbl, vlist, p=3):
+            print('    %5s'%lbl, '  '.join(('%7.'+str(p)+'f')%v for v in vlist))
+        print('   %d bins with xbounds %.3f to %.3f (width %.3f):' % (nsteps, xbounds[0], xbounds[1], dx))
+        prvls('x', xvals, p=1)
         diffs = [v1-v2 for v1, v2 in zip(vals1, vals2)]
-        for vl in [vals1, vals2, diffs, [abs(d)*dx for d in diffs]]:
-            prvls(vl)
+        for l, vl in [('v1', vals1), ('v2', vals2), ('diff', diffs), ('area', [abs(d)*dx for d in diffs])]:
+            prvls(l, vl)
+        if not dont_normalize:
+            print('   normd diff: %.3f / %.3f = %.3f' % (sumv, rect_area, sumv / rect_area))
     # ----------------------------------------------------------------------------------------
     xvals, dx = get_resp_xvals(xbounds, nsteps)
-    vals1, vals2 = [get_resp_vals(r, xbounds, nsteps, normalize=normalize) for r in [resp1, resp2]]
+    vals1, vals2 = [get_resp_vals(r, xbounds, nsteps) for r in [resp1, resp2]]  # , normalize=normalize
+    sumv = sum(abs(v1-v2) * dx for v1, v2 in zip(vals1, vals2))
+    if not dont_normalize:  # divide area between curves by area of rectangle defined by xbounds and min/max of either fcn
+        rect_area = abs(xbounds[1] - xbounds[0]) * abs(max(vals1+vals2) - min(vals1+vals2))
+        sumv /= rect_area
     if debug:
         prdbg()
-    return sum(abs(v1-v2) * dx for v1, v2 in zip(vals1, vals2))
+    return sumv
 
 # ----------------------------------------------------------------------------------------
 def resp_plot(bresp, ax, xbounds, alpha=0.8, color="#990012", nsteps=40):
