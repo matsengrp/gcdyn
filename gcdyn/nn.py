@@ -117,6 +117,7 @@ class NeuralNetworkModel:
         learning_rate: float = 0.01,
         ema_momentum: float = 0.99,
         prebundle_layer_cfg: str = 'default',
+        loss_fcn="mean_squared_error",
         actfn: str = "elu",
     ):
         """
@@ -191,7 +192,7 @@ class NeuralNetworkModel:
         optimizer = keras.optimizers.Adam(
             learning_rate=learning_rate, use_ema=True, ema_momentum=ema_momentum
         )
-        self.network.compile(loss="mean_squared_error", optimizer=optimizer)
+        self.network.compile(loss=loss_fcn, optimizer=optimizer)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
         # fmt: on
 
     @classmethod

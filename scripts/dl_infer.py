@@ -100,7 +100,7 @@ def write_prediction(args, punscaled, true_resps=None, true_sstats=None, smpl=No
 # ----------------------------------------------------------------------------------------
 def get_prediction(args, model, spld, scaler, smpl=None):
     pred_resps = model.predict(spld["trees"])  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
-    pvals = [[float(resp.value) for resp in plist] for plist in pred_resps]
+    pvals = [[float(resp.value) for resp in plist] for plist in pred_resps]  # order corresponds to args.params_to_predict
     punscaled, _ = scale_vals(args, pvals, smpl=smpl, scaler=scaler, inverse=True)  # *un* scale according to the training scaling (if scaler is not None, it should be the training scaler)
     true_resps, true_sstats = None, None
     if args.is_simu:
