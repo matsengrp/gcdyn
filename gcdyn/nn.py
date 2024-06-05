@@ -1,4 +1,5 @@
 r"""Neural network models for inference."""
+# fmt: off
 
 import numpy as onp
 import tensorflow as tf
@@ -85,18 +86,15 @@ class TransposeLayer(layers.Layer):
     def call(self, inputs):
         return tf.transpose(inputs, (0, 1, 3, 2))
 
-class NeuralNetworkModel:
+# ----------------------------------------------------------------------------------------
+class ParamNetworkModel:
     """
     Adapts Voznica et. al (2022) for trees with a state attribute.
-
     Voznica, J., A. Zhukova, V. Boskova, E. Saulnier, F. Lemoine, M. Moslonka-Lefebvre, and O. Gascuel. “Deep Learning from Phylogenies to Uncover the Epidemiological Dynamics of Outbreaks.” Nature Communications 13, no. 1 (July 6, 2022): 3896. https://doi.org/10.1038/s41467-022-31511-0.
+    Predicts the parameters of the response functions (atm, this means the three parameters of a sigmoid birth response, although minimal/no changes here would be required from some generalizations).
     """
 
-    def __init__(
-        self,
-        example_response_list: list[poisson.Response],
-        bundle_size: int = 50,
-    ):
+    def __init__(self, example_response_list, bundle_size=50):
         """
         example_response_list: list of response objects for a single tree (used for two things: to work out the number of
                      parameters, and how to encode/decode by calling its _flatten() fcn)
@@ -111,8 +109,7 @@ class NeuralNetworkModel:
 
     def build_model(
         self,
-        training_trees: list[onp.ndarray],
-        responses: list[list[poisson.Response]],
+        max_leaf_count: float,
         dropout_rate: float = 0.2,
         learning_rate: float = 0.01,
         ema_momentum: float = 0.99,
@@ -120,34 +117,15 @@ class NeuralNetworkModel:
         loss_fcn="mean_squared_error",
         actfn: str = "elu",
     ):
-        """
-        training_trees: list of encoded trees
-        responses: list of response objects for each tree, i.e. list of lists of responses, with
-                   first dimension the same length as training_trees, and second dimension with length the
-                   number of parameters to predict for each tree. Each response (atm) should just be a constant response
-                   with one parameter. (Responses that aren't being estimated need not be provided)
-        """
-        # fmt: off
         # The TimeDistributed layer wrapper allows us to apply the inner layer (e.g., Conv1D) to each "time step"
         # of the input tensor independently. In our specific context, our data is structured in the format of:
         # (number_of_examples, bundle_size, feature_dim, max_leaf_count). We're essentially treating the
         # 'bundle_size' dimension as if it were the "time" or "sequence length" dimension. This means that
         # for every example, the inner layer is applied to each item within a bundle independently.
 
-        leaf_counts = set(
-            [len(t[0]) for t in training_trees]
-        )  # length of first row in encoded tree
-        if len(leaf_counts) != 1:
-            raise Exception(
-                "encoded trees have different lengths: %s"
-                % " ".join(str(c) for c in leaf_counts)
-            )
-        max_leaf_count = list(leaf_counts)[0]
         self.max_leaf_count = max_leaf_count
-        self.training_trees = training_trees
-        self.responses = responses
         self.actfn = actfn
-        print("    building model with bundle size %d (%d training trees in %d bundles): dropout %.2f   learn rate %.4f   momentum %.4f" % (self.bundle_size, len(self.training_trees), len(self.training_trees) / self.bundle_size, dropout_rate, learning_rate, ema_momentum))
+        print("    building model with bundle size %d: dropout %.2f   learn rate %.4f   momentum %.4f" % (self.bundle_size, dropout_rate, learning_rate, ema_momentum))
 
         # various config options for the layers before the bundle mean layer
         self.pre_bundle_layers = {
@@ -193,7 +171,6 @@ class NeuralNetworkModel:
             learning_rate=learning_rate, use_ema=True, ema_momentum=ema_momentum
         )
         self.network.compile(loss=loss_fcn, optimizer=optimizer)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
-        # fmt: on
 
     @classmethod
     def _encode_responses(
@@ -289,13 +266,21 @@ class NeuralNetworkModel:
         """
         return self._reshape_data_wrt_bundle_size(onp.stack(trees))
 
-    def fit(self, epochs: int = 30, validation_split: float = 0):
-        """Trains neural network on given trees and response parameters."""
+    def fit(self, training_trees: list[onp.ndarray], responses: list[list[poisson.Response]], epochs: int = 30, validation_split: float = 0):
+        """
+        Trains neural network on given trees and responses.
+        training_trees: list of encoded trees
+        responses: list of response objects for each tree, i.e. list of lists of responses, with
+                   first dimension the same length as training_trees, and second dimension with length the
+                   number of parameters to predict for each tree. Each response (atm) should just be a constant response
+                   with one parameter. (Responses that aren't being estimated need not be provided)
+        """
+        print("    fitting model with bundle size %d (%d training trees in %d bundles)" % (self.bundle_size, len(training_trees), len(training_trees) / self.bundle_size))
         response_parameters = self._encode_responses(
-            self._take_one_identical_item_per_bundle(self.responses)
+            self._take_one_identical_item_per_bundle(responses)
         )
         self.network.fit(
-            self._prepare_trees_for_network_input(self.training_trees),
+            self._prepare_trees_for_network_input(training_trees),
             response_parameters,
             epochs=epochs,
             callbacks=[Callback(epochs, use_validation=validation_split > 0)],
@@ -319,3 +304,84 @@ class NeuralNetworkModel:
         print('    reading model file from %s' % fname)
         with keras.utils.custom_object_scope({'BundleMeanLayer': BundleMeanLayer}):
             self.network = keras.models.load_model(fname, safe_mode=False)
+
+# ----------------------------------------------------------------------------------------
+class PerCellNetworkModel:
+    """
+    Similar to ParamNetworkModel, except we directly predict the fitness of each cell (rather than the parameters of the fitenss response function).
+    """
+
+    def __init__(self):
+        pass
+
+    # ----------------------------------------------------------------------------------------
+    def build_model(
+        self,
+        max_leaf_count: float,
+        dropout_rate: float = 0.2,
+        learning_rate: float = 0.01,
+        ema_momentum: float = 0.99,
+        loss_fcn="mean_squared_error",
+        actfn: str = "elu",
+    ):
+        self.max_leaf_count = max_leaf_count
+        self.actfn = actfn
+        print("    building model with: dropout %.2f   learn rate %.4f   momentum %.4f" % (dropout_rate, learning_rate, ema_momentum))
+
+        tlayers = [
+            # layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
+            # layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
+            # layers.MaxPooling1D(pool_size=2, strides=2),  # Downsampling by a factor of 2
+            # layers.Conv1D(filters=40, kernel_size=4, activation=actfn),
+            # layers.GlobalAveragePooling1D(),  # one number for each filter from the previous layer
+            layers.Conv1D(filters=10, kernel_size=4, activation=actfn),
+            # layers.Conv1D(filters=10, kernel_size=4, activation=actfn),
+            # layers.MaxPooling1D(pool_size=2, strides=2),  # Downsampling by a factor of 2
+            # layers.Conv1D(filters=10, kernel_size=4, activation=actfn),
+            # layers.GlobalAveragePooling1D(),  # one number for each filter from the previous layer
+        ]
+
+        network_layers = [] #TransposeLayer()]
+        for tlr in tlayers:
+            network_layers.append(tlr)
+        # dense_unit_list = [48, 32, 16, 8]
+        # for idense, n_units in enumerate(dense_unit_list):
+        #     network_layers.append(layers.Dense(n_units, activation=self.actfn))
+        #     if dropout_rate != 0 and idense < len(dense_unit_list) - 1:  # add a dropout layer after each one except the last
+        #         network_layers.append(layers.Dropout(dropout_rate))
+        network_layers.append(layers.Flatten())
+        network_layers.append(layers.Dense(2 * self.max_leaf_count))
+        network_layers.append(layers.Reshape((2, self.max_leaf_count)))
+
+        inputs = keras.Input(shape=(4, self.max_leaf_count))
+        outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
+        self.network = keras.Model(inputs=inputs, outputs=outputs)
+        # def pfn(x, line_break=False): print("      %s" % x)  # this doesn't seem to work with keras 3
+        self.network.summary() #print_fn=pfn)
+        optimizer = keras.optimizers.Adam(
+            learning_rate=learning_rate, use_ema=True, ema_momentum=ema_momentum
+        )
+        self.network.compile(loss=loss_fcn, optimizer=optimizer)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
+
+    # ----------------------------------------------------------------------------------------
+    def fit(self, training_trees, training_fitnesses, epochs=30, validation_split=0):
+        self.network.fit(
+            onp.stack(training_trees),
+            onp.stack(training_fitnesses),
+            epochs=epochs,
+            callbacks=[Callback(epochs, use_validation=validation_split > 0)],
+            verbose=0,
+            validation_split=validation_split,
+        )
+
+    # ----------------------------------------------------------------------------------------
+    def predict(self, encoded_trees):
+        predicted_fitnesses = self.network(onp.stack(encoded_trees))
+        return predicted_fitnesses
+
+    # ----------------------------------------------------------------------------------------
+    def load(self, fname):
+        print('    reading model file from %s' % fname)
+        self.network = keras.models.load_model(fname, safe_mode=False)
+
+# fmt: on

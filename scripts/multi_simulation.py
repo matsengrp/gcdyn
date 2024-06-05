@@ -260,8 +260,8 @@ def choose_params(args, pcounts, itrial):
         add_pval(pcounts, pname, params[pname])
     if args.min_survivors is None:
         tfrac = 0.2
-        args.min_survivors = tfrac * params["carry_cap"]
-        print('    setting --min-survivors to %.2f * carry cap = %d' % (tfrac, args.min_survivors))
+        args.min_survivors = tfrac * params['n_seqs']
+        print('    setting --min-survivors to %.2f * N seqs = %d' % (tfrac, args.min_survivors))
     if any(params["carry_cap"] < p for p in [args.min_survivors, params["n_seqs"]]):
         print('  %s chose carry cap (%d) smaller than either min survivors %d or N seqs %d, so you\'ll probably either get a lot of failed tree runs, or fail sampling seqs' % (utils.color('yellow', 'warning'), params["carry_cap"], args.min_survivors, params["n_seqs"]))
     pvstrs = ["%s %s" % (p, ("%d" if p in ["time_to_sampling", "carry_cap", "n_seqs"] else "%.2f") % v) for p, v in sorted(params.items())]
@@ -343,9 +343,10 @@ def write_final_outputs(args, all_seqs, all_trees, param_list, inferred=False, d
     # encode trees
     if dont_encode:  # UGH
         scale_vals = encode.scale_trees([pfo["tree"] for pfo in all_trees])
-        encoded_trees = None
+        encoded_trees, encoded_fitnesses = None, None
     else:
         scale_vals, encoded_trees = encode.encode_trees([pfo["tree"] for pfo in all_trees])
+        _, encoded_fitnesses = encode.encode_trees([pfo["tree"] for pfo in all_trees], mtype='fitness', birth_responses=[pfo["birth-response"] for pfo in all_trees])  # this re-scales the tree, which i think is just a waste of time
 
     # write summary stats
     if len(param_list) != len(all_trees):
@@ -368,7 +369,7 @@ def write_final_outputs(args, all_seqs, all_trees, param_list, inferred=False, d
         {k: p["%s-response" % k] for k in ["birth", "death"]} for p in all_trees
     ]
 
-    encode.write_training_files(os.path.dirname(outfn(args, "seqs", subd=subd)), encoded_trees, responses, sstats)
+    encode.write_training_files(os.path.dirname(outfn(args, "seqs", subd=subd)), encoded_trees, responses, sstats, encoded_fitnesses=encoded_fitnesses)
 
 # ----------------------------------------------------------------------------------------
 def add_seqs(args, all_seqs, itrial, tree):
@@ -644,7 +645,7 @@ def run_sub_procs(args):
                     subprocess.check_call(cmd, shell=True)
                 if ftype == 'trees':
                     n_total_trees = int(subprocess.check_output('wc -l %s | cut -d\' \' -f1' % ofn, shell=True))
-            elif ftype in ["encoded-trees"]:
+            elif ftype in ["encoded-trees", "encoded-fitnesses"]:
                 elists = [encode.read_trees(fn) for fn in fnames]
                 n_total_trees = sum(len(l) for l in elists)
                 missing_trees = [n_per_proc - len(l) for l in elists]
@@ -905,7 +906,7 @@ def main():
 
     write_final_outputs(args, all_seqs, all_trees, plist)
     if args.tree_inference_method is not None:
-        write_final_outputs(args, all_seqs, inf_trees, plist, inferred=True, dont_encode=args.tree_inference_method=='gctree')  # need to turn on --fix-multifurcations above if i want to encode gctrees
+        write_final_outputs(args, all_seqs, inf_trees, plist, inferred=True, dont_encode=args.tree_inference_method=='gctree')  # need to turn on --fix-multifurcations above if i want to encode gctrees (atm just want to make replay comparison plots, whicih doesn't require encoding)
 
     plot_params_responses(args, pcounts, all_trees=all_trees, all_fns=all_fns)
     print("    total simulation time: %.1f sec" % (time.time() - start))

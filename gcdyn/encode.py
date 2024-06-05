@@ -9,12 +9,8 @@ from gcdyn import utils
 
 # fmt: off
 
-def encode_tree(
-    intree: TreeNode,
-    max_leaf_count: int = None,
-    ladderize: bool = True,
-    dont_scale: bool = False,
-) -> np.ndarray[float]:
+# ----------------------------------------------------------------------------------------
+def encode_tree(intree, max_leaf_count=None, ladderize=True, dont_scale=False, mtype='tree', bresp=None):
     """
     Returns the "Compact Bijective Ladderized Vector" form of the given
     tree. Does not modify input tree.
@@ -31,6 +27,9 @@ def encode_tree(
     It often makes more sense to pad encoded trees to the same size right before passing
     into the model (using encode.pad_trees()) than to try to guess a max_leaf_count
     when initially encoding them.
+
+    mtype: default 'tree' returns normal encoded tree. If set to 'fitness', returns two-row
+    matrix of fitness values.
     """
     # See the pytest for this method in `tests/test_deep_learning.py`
     # ----------------------------------------------------------------------------------------
@@ -43,6 +42,21 @@ def encode_tree(
         for child in tmptr.children[num_children // 2:]:  # trivial loop over single rightand subtree/node
             yield from traverse_inorder(child)
     # ----------------------------------------------------------------------------------------
+    def fill_leaf(node, leaf_index, previous_ancestor):
+        if mtype == 'tree':
+            matrix[0, leaf_index] = node.t - previous_ancestor.t
+            matrix[2, leaf_index] = node.x
+        elif mtype == 'fitness':
+            matrix[0, leaf_index] = bresp.λ_phenotype(node.x)
+    # ----------------------------------------------------------------------------------------
+    def fill_ancestor(node, ancestor_index):
+        if mtype == 'tree':
+            matrix[1, ancestor_index] = node.t
+            matrix[3, ancestor_index] = node.x
+        elif mtype == 'fitness':
+            matrix[1, ancestor_index] = bresp.λ_phenotype(node.x)
+    # ----------------------------------------------------------------------------------------
+    assert mtype in ['tree', 'fitness']
     if not dont_scale:
         _, intree = scale_tree(intree)
     # assert utils.isclose(np.mean([lf.t for lf in intree.iter_leaves()]), 1), "trees must be scaled to 1 before encoding"
@@ -55,28 +69,44 @@ def encode_tree(
     if max_leaf_count is None:
         max_leaf_count = len(worktree.get_leaves())
     assert len(worktree.get_leaves()) <= max_leaf_count
-    matrix = np.zeros((4, max_leaf_count))
+    matrix = np.zeros((4 if mtype=='tree' else 2, max_leaf_count))
 
     leaf_index, ancestor_index = 0, 0
     previous_ancestor = worktree  # the root
     for node in traverse_inorder(worktree):
         if node.is_leaf():
-            matrix[0, leaf_index] = node.t - previous_ancestor.t
-            matrix[2, leaf_index] = node.x
+            fill_leaf(node, leaf_index, previous_ancestor)
             leaf_index += 1
         else:
-            matrix[1, ancestor_index] = node.t
-            matrix[3, ancestor_index] = node.x
+            fill_ancestor(node, ancestor_index)
             ancestor_index += 1
             previous_ancestor = node
 
     return matrix
 
+# ----------------------------------------------------------------------------------------
+# NOTE could also make version of this that used original (unencoded) tree to attach nodes/names to each dict
+def decode_tree(enc_tree, enc_fit=None): #, max_leaf_count=None, ladderize=True):
+    """ Reverse the encoding of a tree, i.e. convert encoded tree <enc_tree> into list of dicts, where each dict has
+    info for one node. If <enc_fit> is set, this also includes fitness information. NOTE that this obviously
+    is entirely dependent on the hard coded rows in the encoding function. """
+    ndicts = []
+    assert len(enc_tree) == 4  # 4 rows in encoded tree (leaf dists, internal dists, leaf phenotypes, internal phenotypes)
+    assert len(set(len(r) for r in enc_tree)) == 1  # all rows the same length
+    if enc_fit is not None:
+        assert len(enc_fit) == 2  # 2 rows in encoded fitnesses (leaf fitnesses, internal fitnesses)
+        assert all(len(r)==len(enc_tree[0]) for r in enc_fit)  # all rows the same length as encoded tree rows
+    for icol in range(len(enc_tree[0])):
+        lfo = {'dist' : enc_tree[0][icol], 'fitness' : enc_tree[2][icol]}  # leaf node
+        nfo = {'dist' : enc_tree[1][icol], 'fitness' : enc_tree[1][icol]}  # internal node
+        if enc_fit is not None:
+            lfo['fitness'] = enc_fit[0][icol]
+            nfo['fitness'] = enc_fit[1][icol]
+        ndicts.extend([lfo, nfo])
+    return ndicts
 
-def scale_tree(
-    intree: TreeNode,
-    new_mean_depth: float = 1
-) -> (float, TreeNode):
+# ----------------------------------------------------------------------------------------
+def scale_tree(intree, new_mean_depth=1):
     """Return new tree scaled to average leaf depth <new_mean_depth>.
     Also returns original average branch depth <brlen>"""
     mean_brlen = np.mean([lf.t for lf in intree.iter_leaves()])
@@ -87,29 +117,21 @@ def scale_tree(
     assert utils.isclose(np.mean([lf.t for lf in outtree.iter_leaves()]), new_mean_depth)
     return mean_brlen, outtree
 
-
-def scale_trees(
-        intrees: list[TreeNode],
-) -> list[float]:
+# ----------------------------------------------------------------------------------------
+def scale_trees(intrees):
     scale_vals = []
     for intr in intrees:
         brlen, sctree = scale_tree(intr)
         scale_vals.append(brlen)
     return scale_vals
 
-
-def encode_trees(
-    intrees: list[TreeNode],
-    max_leaf_count: int = None,
-    ladderize: bool = True,
-) -> (list[float], list[np.ndarray[float]]):
+# ----------------------------------------------------------------------------------------
+def encode_trees(intrees, max_leaf_count=None, ladderize=True, mtype='tree', birth_responses=None):
     """Scale and then encode each tree in intrees, returning list of scale vals (average branch length
     for each tree) and list of scaled, encoded trees."""
     scale_vals, enc_trees = [], []
-    for intr in intrees:
-        brlen, sctree = scale_tree(
-            intr
-        )  # rescale separately so we can store the branch len
+    for itr, intree in enumerate(intrees):
+        brlen, sctree = scale_tree(intree)  # rescale separately so we can store the branch len
         scale_vals.append(brlen)
         enc_trees.append(
             encode_tree(
@@ -117,14 +139,14 @@ def encode_trees(
                 max_leaf_count=max_leaf_count,
                 ladderize=ladderize,
                 dont_scale=True,
+                mtype=mtype,
+                bresp=None if birth_responses is None else birth_responses[itr],
             )
         )
     return scale_vals, enc_trees
 
-
-def trivialize_encodings(
-    encoded_trees, param_vals, noise=False, max_print=10, n_debug=0, debug=False
-):
+# ----------------------------------------------------------------------------------------
+def trivialize_encodings(encoded_trees, param_vals, noise=False, max_print=10, n_debug=0, debug=False):
     """Convert encoded_trees to a "trivialized" encoding, i.e. one that replaces the actual tree
     information with the response parameter values that we're trying to predict."""
 
@@ -158,7 +180,7 @@ def trivialize_encodings(
         if debug or itree < n_debug:
             print(estr("after", entr))
 
-
+# ----------------------------------------------------------------------------------------
 def pad_trees(
     trees: list[np.ndarray], min_n_max_leaves: int = 100, debug: bool = False
 ):
@@ -166,21 +188,12 @@ def pad_trees(
     Returns a new array with the padded trees (does not modify input trees).
     """
     n_leaf_list = [len(t[0]) for t in trees]
-    max_leaf_count = max(
-        min_n_max_leaves, max(n_leaf_list)
-    )  # model complains if this is 70, i'm not sure why but whatever
+    max_leaf_count = max(min_n_max_leaves, max(n_leaf_list))  # model complains if this is 70, i'm not sure why but whatever
     if debug:
-        print(
-            "    padding encoded trees to max leaf count %d (all leaf counts: %s)"
-            % (max_leaf_count, " ".join(str(c) for c in set(n_leaf_list)))
-        )
+        print("    padding encoded trees to max leaf count %d (all leaf counts: %s)" % (max_leaf_count, " ".join(str(c) for c in set(n_leaf_list))))
     padded_trees = []
     for itree, etree in enumerate(trees):
-        if len(etree) != 4:  # make sure there's 4 rows
-            raise Exception('encoded tree has length %d (should be 4)' % len(etree))
-        assert (
-            len(set(len(r) for r in etree)) == 1
-        )  # and that every row is the same length
+        assert len(set(len(r) for r in etree)) == 1  # and that every row is the same length
         padded_trees.append(
             np.pad(etree, ((0, 0), (0, max_leaf_count - len(etree[0]))))
         )
@@ -191,21 +204,16 @@ def pad_trees(
             print(etree)
     return np.array(padded_trees)
 
+# ----------------------------------------------------------------------------------------
+def write_trees(filename, trees):
+    np.save(filename, pad_trees(trees))  # maybe should at some point use savez_compressed()? but size isn't an issue atm (have to pad here since np.save() requires arrays of same dimension
 
-def write_trees(
-    filename: str,
-    trees: list[np.ndarray],
-):
-    np.save(
-        filename, pad_trees(trees)
-    )  # maybe should at some point use savez_compressed()? but size isn't an issue atm (have to pad here since np.save() requires arrays of same dimension
-
-
+# ----------------------------------------------------------------------------------------
 def read_trees(filename: str):
     return np.load(filename)
 
 # ----------------------------------------------------------------------------------------
-final_ofn_strs = ["seqs", "trees", "meta", "encoded-trees", "responses", "summary-stats"]
+final_ofn_strs = ["seqs", "trees", "meta", "encoded-trees", "encoded-fitnesses", "responses", "summary-stats"]
 model_state_ofn_strs = ["model", "train-scaler", "example-responses"]
 sstat_fieldnames = ["tree", "mean_branch_length", "total_branch_length", "carry_cap", "time_to_sampling"]
 leaf_meta_fields = ["tree-index", "name", "affinity", "n_muts", "n_muts_aa", "gc", "is_leaf"]
@@ -220,6 +228,7 @@ def output_fn(odir, ftype, itrial):
             "seqs": "fasta",
             "trees": "nwk",
             "encoded-trees": "npy",
+            "encoded-fitnesses": "npy",
             "responses": "pkl",
             "meta": "csv",
             "summary-stats": "csv",
@@ -252,7 +261,7 @@ def write_leaf_meta(ofn, lmetafos):
             writer.writerow(lmfo)
 
 # ----------------------------------------------------------------------------------------
-def write_training_files(outdir, encoded_trees, responses, sstats, dbgstr=""):
+def write_training_files(outdir, encoded_trees, responses, sstats, encoded_fitnesses=None, dbgstr=""):
     """Write encoded tree .npy, response fcn .pkl, and summary stat .csv files for training/testing on simulation."""
     if dbgstr != "":
         print("      writing %s files to %s" % (dbgstr, outdir))
@@ -260,6 +269,8 @@ def write_training_files(outdir, encoded_trees, responses, sstats, dbgstr=""):
         os.makedirs(outdir)
     if encoded_trees is not None:
         write_trees(output_fn(outdir, "encoded-trees", None), encoded_trees)
+    if encoded_fitnesses is not None:
+        write_trees(output_fn(outdir, "encoded-fitnesses", None), encoded_fitnesses)
     with open(output_fn(outdir, "responses", None), "wb") as pfile:
         dill.dump(responses, pfile)
     write_sstats(output_fn(outdir, "summary-stats", None), sstats)

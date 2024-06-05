@@ -380,9 +380,48 @@ def mpl_init(fsize=20, label_fsize=15):
 
 
 # ----------------------------------------------------------------------------------------
+# plot the two column <xkey> and <ykey> in <tdf> vs each other (pass in xvals separately since we want to have the same range for all [train/test/validation] dfs)
+def sns_xy_plot(ptype, smpl, tdf, xkey, ykey, xvals, discrete=False, n_bins=8, leave_ticks=False, xtra_text=None):
+    def tcolor(def_val): return 'red' if smpl=='valid' else def_val
+    if ptype == 'scatter':
+        if discrete:
+            ax = sns.swarmplot(tdf, x=xkey, y=ykey, size=4, alpha=0.6, order=sorted(set(xvals)))  # ax.set(title=smpl)
+        else:
+            ax = sns.scatterplot(tdf, x=xkey, y=ykey, alpha=0.6, color=tcolor(None))
+        if smpl == 'train':  # 'train' and 'valid' go on the same plot, but we don't want to plot the dashed line twice
+            plt.plot([0.95 * min(xvals), 1.05 * max(xvals)], [0.95 * min(xvals), 1.05 * max(xvals)], color="darkgreen", linestyle="--", linewidth=3, alpha=0.7)
+    elif ptype == 'box':
+        if discrete:
+            bkey, order = xkey, sorted(set(xvals))
+        else:
+            dx = (max(xvals) - min(xvals)) / float(n_bins)
+            bin_edges = np.arange(min(xvals), max(xvals) + dx, dx)
+            tdf['x_bins'] = pd.cut(tdf[xkey], bins=bin_edges) #n_bins)
+            bkey, order = 'x_bins', None
+        boxprops = {"facecolor": "None", 'edgecolor': tcolor('black'), 'linewidth' : 5 if smpl=='valid' else 2}
+        ax = sns.boxplot(x=bkey, y=ykey, data=tdf, order=order, boxprops=boxprops, whiskerprops={'color' : tcolor('black')})
+        if not leave_ticks:  # if we're calling this fcn twice (i.e. plotting validation set), this tick/true line stuff is already there (and will crash if called twice)
+            xtls = []
+            for xv, xvl in zip(ax.get_xticks(), ax.get_xticklabels()):  # plot a horizontal dashed line at y=x (i.e. correct) for each bin and get labels
+                if discrete:
+                    tyv = float(xvl._text)
+                else:
+                    lo, hi = [float(s.lstrip('(').rstrip(']')) for s in xvl._text.split(', ')]
+                    tyv = np.mean([lo, hi])  # true/y val
+                    xtls.append('%.1f-%.1f'%(lo, hi))
+                plt.plot([xv - 0.5, xv + 0.5], [tyv, tyv], color="darkgreen", linestyle="--", linewidth=3, alpha=0.7)
+            if not discrete:
+                ax.set_xticks(ax.get_xticks())
+                ax.set_xticklabels(xtls, rotation=90, ha='right')
+    else:
+        assert False
+    if xtra_text is not None:
+        plt.text(0.05, 0.75 if smp_name=='valid' else 0.85, xtra_text, transform=ax.transAxes, color='red' if smp_name=='valid' else None)
+
+# ----------------------------------------------------------------------------------------
 # plot scatter + box/whisker plot comparing true and predicted values for deep learning inference
 # NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
-def make_dl_plots(prdfs, seqmeta, params_to_predict, outdir, is_simu=False, data_val=0, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15):
+def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu=False, data_val=0, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15):
     # ----------------------------------------------------------------------------------------
     def add_fn(fn, n_per_row=4):
         if len(fnames) == 0 or len(fnames[-1]) >= n_per_row:
@@ -411,68 +450,32 @@ def make_dl_plots(prdfs, seqmeta, params_to_predict, outdir, is_simu=False, data
         fn = plot_many_curves(outdir, '%sall-response'%smpl, pfo_list, titlestr='%s: %d / %d responses' % (smpl, n_plots, n_preds))
         add_fn(fn)
     # ----------------------------------------------------------------------------------------
-    def single_plot(ptype, param, smpl):
+    def plot_single_param(ptype, param, smpl):
         # ----------------------------------------------------------------------------------------
-        def add_mae_text(ax, smp_name, tdf):
+        def get_mae_text(smpl, tdf):
+            if not is_simu:
+                return None
             mae = np.mean([
                 abs(pval - tval)
                 for tval, pval in zip(tdf["%s-%s"%(param, xkstr)], tdf['%s-predicted'%param])
             ])
-            plt.text(0.05, 0.75 if smp_name=='valid' else 0.85, '%s mae: %.4f'%(smp_name, mae), transform=ax.transAxes, color='red' if smp_name=='valid' else None)
-        # ----------------------------------------------------------------------------------------
-        def snsplot(smpl, tdf, discrete=False, n_bins=8, leave_ticks=False):
-            def tcolor(def_val): return 'red' if smpl=='valid' else def_val
-            xvals = all_df[xkey]  # use df I think to (in principle) pick up all x values
-            if ptype == 'scatter':
-                if discrete:
-                    ax = sns.swarmplot(tdf, x=xkey, y=ykey, size=4, alpha=0.6, order=sorted(set(all_df[xkey])))  # ax.set(title=smpl)
-                else:
-                    ax = sns.scatterplot(tdf, x=xkey, y=ykey, alpha=0.6, color=tcolor(None))
-                if smpl == 'train':  # 'train' and 'valid' go on the same plot, but we don't want to plot the dashed line twice
-                    plt.plot([0.95 * min(xvals), 1.05 * max(xvals)], [0.95 * min(xvals), 1.05 * max(xvals)], color="darkgreen", linestyle="--", linewidth=3, alpha=0.7)
-            elif ptype == 'box':
-                if discrete:
-                    bkey, order = xkey, sorted(set(all_df[xkey]))
-                else:
-                    dx = (max(xvals) - min(xvals)) / float(n_bins)
-                    bin_edges = np.arange(min(xvals), max(xvals) + dx, dx)
-                    tdf['x_bins'] = pd.cut(tdf[xkey], bins=bin_edges) #n_bins)
-                    bkey, order = 'x_bins', None
-                boxprops = {"facecolor": "None", 'edgecolor': tcolor('black'), 'linewidth' : 5 if smpl=='valid' else 2}
-                ax = sns.boxplot(x=bkey, y=ykey, data=tdf, order=order, boxprops=boxprops, whiskerprops={'color' : tcolor('black')})
-                if not leave_ticks:  # if we're calling this fcn twice (i.e. plotting validation set), this tick/true line stuff is already there (and will crash if called twice)
-                    xtls = []
-                    for xv, xvl in zip(ax.get_xticks(), ax.get_xticklabels()):  # plot a horizontal dashed line at y=x (i.e. correct) for each bin and get labels
-                        if discrete:
-                            tyv = float(xvl._text)
-                        else:
-                            lo, hi = [float(s.lstrip('(').rstrip(']')) for s in xvl._text.split(', ')]
-                            tyv = np.mean([lo, hi])  # true/y val
-                            xtls.append('%.1f-%.1f'%(lo, hi))
-                        plt.plot([xv - 0.5, xv + 0.5], [tyv, tyv], color="darkgreen", linestyle="--", linewidth=3, alpha=0.7)
-                    if not discrete:
-                        ax.set_xticks(ax.get_xticks())
-                        ax.set_xticklabels(xtls, rotation=90, ha='right')
-            else:
-                assert False
-            if is_simu:
-                add_mae_text(ax, smpl, tdf)
+            xtra_text = '%s mae: %.4f'%(smpl, mae)
         # ----------------------------------------------------------------------------------------
         plt.clf()
         all_df = prdfs[smpl]
         xkstr = "truth" if is_simu else "data"
-        xkey, ykey = ["%s-%s" % (param, vtype) for vtype in [xkstr, "predicted"]]
-        if not is_simu:
+        if not is_simu:  # set x value for data (since there's no truth, we pick an arbitrary x value at which to display the points)
             all_df["%s-%s"%(param, xkstr)] = [data_val for _ in all_df["%s-predicted"%param]]
         discrete = len(set(all_df["%s-%s"%(param, xkstr)])) < 15  # if simulation has discrete parameter values
         if discrete and ptype == 'scatter' and len(all_df) > 500:  # too busy, don't bother making them
             return None
         plt_df = all_df.copy()
+        xkey, ykey = ["%s-%s" % (param, vtype) for vtype in [xkstr, "predicted"]]
         if smpl == "train" and validation_split != 0:
             plt_df = all_df.copy()[: len(all_df) - int(validation_split * len(all_df))]
             vld_df = all_df.copy()[len(all_df) - int(validation_split * len(all_df)) :]
-            snsplot('valid', vld_df, discrete=discrete, leave_ticks=True)  # well, leave ticks *and* don't plot true dashed line
-        snsplot(smpl, plt_df, discrete=discrete)
+            sns_xy_plot(ptype, 'valid', vld_df, xkey, ykey, all_df[xkey], discrete=discrete, leave_ticks=True, xtra_text=get_mae_text('valid', vld_df))  # well, leave ticks *and* don't plot true dashed line
+        sns_xy_plot(ptype, smpl, plt_df, xkey, ykey, all_df[xkey], discrete=discrete, xtra_text=get_mae_text(smpl, plt_df))
         plt.xlabel("%s value" % xkstr.replace("truth", "true"))
         plt.ylabel("predicted value")
         titlestr = "%s %s" % (param, smpl)
@@ -482,21 +485,29 @@ def make_dl_plots(prdfs, seqmeta, params_to_predict, outdir, is_simu=False, data
         fn = "%s/%s-%s-%s-hist.svg" % (outdir, param, smpl, ptype)
         plt.savefig(fn)
         return fn
-
     # ----------------------------------------------------------------------------------------
     mpl_init()
     if not os.path.exists(outdir):
         os.makedirs(outdir)
     fnames = [[]]
-    for smpl in sorted(prdfs, reverse=True):
-        plot_responses(smpl)
-    for ptype in ['scatter', 'box']:
+    if model_type == 'sigmoid':
         for smpl in sorted(prdfs, reverse=True):
-            fnames.append([])
-            for param in params_to_predict:
-                fn = single_plot(ptype, param, smpl)
+            plot_responses(smpl)
+        for ptype in ['scatter', 'box']:
+            for smpl in sorted(prdfs, reverse=True):
+                fnames.append([])
+                for param in params_to_predict:
+                    fn = plot_single_param(ptype, param, smpl)
+                    if fn is not None:
+                        fnames[-1].append(fn)
+    if model_type == 'per-cell':
+        for ptype in ['scatter', 'box']:
+            for smpl in sorted(prdfs, reverse=True):
+                fn = plot_single_param(ptype, 'fitness', smpl)
                 if fn is not None:
                     fnames[-1].append(fn)
+    else:
+        assert False
     make_html(outdir, fnames=fnames)
 
 # ----------------------------------------------------------------------------------------

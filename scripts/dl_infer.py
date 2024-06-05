@@ -16,7 +16,7 @@ import copy
 import collections
 
 from gcdyn import utils, encode
-from gcdyn.nn import NeuralNetworkModel
+from gcdyn.nn import ParamNetworkModel, PerCellNetworkModel
 from gcdyn.poisson import ConstantResponse
 
 # ----------------------------------------------------------------------------------------
@@ -63,7 +63,7 @@ def scale_vals(args, in_pvals, scaler=None, inverse=False, smpl='', debug=True):
 # ----------------------------------------------------------------------------------------
 def collapse_bundles(args, resps, sstats):
     resps = [
-        NeuralNetworkModel._collapse_identical_list(resps[i : i + args.dl_bundle_size])
+        ParamNetworkModel._collapse_identical_list(resps[i : i + args.dl_bundle_size])
         for i in range(0, len(resps), args.dl_bundle_size)
     ]
     sstats = [
@@ -78,7 +78,7 @@ def collapse_bundles(args, resps, sstats):
     return resps, sstats
 
 # ----------------------------------------------------------------------------------------
-def write_prediction(args, punscaled, true_resps=None, true_sstats=None, smpl=None):
+def write_sigmoid_prediction(args, punscaled, true_resps=None, true_sstats=None, smpl=None):
     dfdata = {  # make empty df
         "%s-%s" % (param, ptype): []
         for param in args.params_to_predict
@@ -98,17 +98,52 @@ def write_prediction(args, punscaled, true_resps=None, true_sstats=None, smpl=No
     return df
 
 # ----------------------------------------------------------------------------------------
+def write_per_cell_prediction(args, pred_fitnesses, enc_trees, true_fitnesses=None, true_sstats=None, smpl=None):
+    assert true_fitnesses is None or len(pred_fitnesses) == len(true_fitnesses)
+    dfdata = {  # make empty df
+        "fitness-%s"%ptype : []
+        for ptype in (["predicted"] if true_fitnesses is None else ["truth", "predicted"])
+    }
+    dfdata['tree-index'] = []
+    for itr, efit in enumerate(pred_fitnesses):
+        pred_ndicts = encode.decode_tree(enc_trees[itr], enc_fit=efit)
+        if true_fitnesses is not None:
+            true_ndicts = encode.decode_tree(enc_trees[itr], enc_fit=true_fitnesses[itr])
+            assert len(pred_ndicts) == len(true_ndicts)
+            for pdict, tdict in zip(pred_ndicts, true_ndicts):
+                pdict['fitness-predicted'] = pdict['fitness']
+                del pdict['fitness']
+                pdict['fitness-truth'] = tdict['fitness']
+        for ndict in pred_ndicts:
+            dfdata['tree-index'].append(true_sstats[itr]['tree'])  # NOTE tree-index isn't necessarily equal to <itr>
+            for tk in [k for k in ndict if k in dfdata]:
+                dfdata[tk].append(ndict[tk])
+    df = pd.DataFrame(dfdata)
+    print("  writing %s results to %s" % (smpl, args.outdir))
+    df.to_csv(csvfn(args, smpl))
+    return df
+
+# ----------------------------------------------------------------------------------------
 def get_prediction(args, model, spld, scaler, smpl=None):
-    pred_resps = model.predict(spld["trees"])  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
-    pvals = [[float(resp.value) for resp in plist] for plist in pred_resps]  # order corresponds to args.params_to_predict
-    punscaled, _ = scale_vals(args, pvals, smpl=smpl, scaler=scaler, inverse=True)  # *un* scale according to the training scaling (if scaler is not None, it should be the training scaler)
-    true_resps, true_sstats = None, None
-    if args.is_simu:
-        true_resps, true_sstats = [spld[tk] for tk in ["birth-responses", "sstats"]]
-        if args.dl_bundle_size > 1:
-            true_resps, true_sstats = collapse_bundles(args, true_resps, true_sstats)
-        assert len(pred_resps) == len(true_resps)
-    df = write_prediction(args, punscaled, true_resps=true_resps, true_sstats=true_sstats, smpl=smpl)
+    if args.model_type == 'sigmoid':
+        pred_resps = model.predict(spld["trees"])  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
+        pvals = [[float(resp.value) for resp in plist] for plist in pred_resps]  # order corresponds to args.params_to_predict
+        punscaled, _ = scale_vals(args, pvals, smpl=smpl, scaler=scaler, inverse=True)  # *un* scale according to the training scaling (if scaler is not None, it should be the training scaler)
+        true_resps, true_sstats = None, None
+        if args.is_simu:
+            true_resps, true_sstats = [spld[tk] for tk in ["birth-responses", "sstats"]]
+            if args.dl_bundle_size > 1:
+                true_resps, true_sstats = collapse_bundles(args, true_resps, true_sstats)
+            assert len(pred_resps) == len(true_resps)
+        df = write_sigmoid_prediction(args, punscaled, true_resps=true_resps, true_sstats=true_sstats, smpl=smpl)
+    elif args.model_type == 'per-cell':
+        pred_fitnesses = model.predict(spld["trees"]).numpy()
+        true_resps, true_sstats = None, None
+        if args.is_simu:
+            true_fitnesses, true_sstats = [spld[tk] for tk in ["fitnesses", "sstats"]]
+        df = write_per_cell_prediction(args, pred_fitnesses, spld["trees"], true_fitnesses=true_fitnesses, true_sstats=true_sstats, smpl=smpl)
+    else:
+        assert False
     return df
 
 # ----------------------------------------------------------------------------------------
@@ -118,6 +153,7 @@ def plot_existing_results(args):
         prdfs[smpl] = pd.read_csv(csvfn(args, smpl))
     seqmeta = read_meta_csv(args.indir)
     utils.make_dl_plots(
+        args.model_type,
         prdfs,
         seqmeta,
         args.params_to_predict,
@@ -219,9 +255,9 @@ def read_tree_files(args):
     # ----------------------------------------------------------------------------------------
     # read from various input files
     samples = {}
-    rfn, tfn, sfn = [
+    rfn, tfn, ffn, sfn = [
         "%s/%s" % (args.indir, s)
-        for s in ["responses.pkl", "encoded-trees.npy", "summary-stats.csv"]
+        for s in ["responses.pkl", "encoded-trees.npy", "encoded-fitnesses.npy", "summary-stats.csv"]
     ]
     rstr = ''
     if args.is_simu:
@@ -231,6 +267,7 @@ def read_tree_files(args):
         for tk in ["birth", "death"]:
             samples[tk + "-responses"] = [tfo[tk] for tfo in pklfo]
     samples["trees"] = encode.read_trees(tfn)
+    samples["fitnesses"] = encode.read_trees(ffn)
     samples["sstats"] = []
     with open(sfn) as sfile:
         reader = csv.DictReader(sfile)
@@ -250,9 +287,8 @@ def read_tree_files(args):
             raise Exception('N trees %d not divisible by bundle size %d' % (len(samples["trees"]), args.dl_bundle_size))
     return samples
 
-
 # ----------------------------------------------------------------------------------------
-def predict_and_plot(args, model, smpldict, scaler, smpls):
+def predict_and_plot(args, model, smpldict, smpls, scaler=None):
     if not os.path.exists(args.outdir):
         os.makedirs(args.outdir)
     prdfs = {}
@@ -260,6 +296,7 @@ def predict_and_plot(args, model, smpldict, scaler, smpls):
         prdfs[smpl] = get_prediction(args, model, smpldict[smpl], scaler, smpl=smpl)
     seqmeta = read_meta_csv(args.indir)
     utils.make_dl_plots(
+        args.model_type,
         prdfs,
         seqmeta,
         args.params_to_predict,
@@ -270,6 +307,36 @@ def predict_and_plot(args, model, smpldict, scaler, smpls):
 
 # ----------------------------------------------------------------------------------------
 def train_and_test(args, start_time):
+    # ----------------------------------------------------------------------------------------
+    def train_sigmoid(smpldict, max_leaf_count):
+        # handle various scaling/re-encoding stuff
+        pscaled, scalers = {}, {}  # scaled parameters and scalers
+        for smpl in smplist:
+            pvals = get_pvlists(args, smpldict[smpl])
+            pscaled[smpl], scalers[smpl] = scale_vals(args, pvals, smpl=smpl)
+        if args.use_trivial_encoding:  # silly encodings for testing that essentially train on the output values
+            for smpl in smplist:
+                encode.trivialize_encodings(smpldict[smpl]["trees"], pscaled[smpl], noise=True)  # , n_debug=3)
+
+        # train
+        responses = [[ConstantResponse(v) for v in vlist] for vlist in pscaled["train"]]  # order corresponds to args.params_to_predict (constant response is just a container for one value, and note we don't bother to set the name)
+        model = ParamNetworkModel(responses[0], bundle_size=args.dl_bundle_size)
+        assert args.params_to_predict == utils.sigmoid_params
+        model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, prebundle_layer_cfg=args.prebundle_layer_cfg)
+        model.fit(smpldict["train"]["trees"], responses, epochs=args.epochs, validation_split=args.validation_split)
+        joblib.dump(scalers['train'], encode.output_fn(args.outdir, 'train-scaler', None))
+        with open(encode.output_fn(args.outdir, 'example-responses', None), 'wb') as dfile:
+            dill.dump(responses[0], dfile)  # dump list of response fcns for one tree (so that when reading the model to infer, we can tell the neural network the structure of the responses)
+        return model, scalers
+    # ----------------------------------------------------------------------------------------
+    def train_per_cell(smpldict, max_leaf_count):
+        # seqmeta = read_meta_csv(args.indir)
+        # affy_vals = [float(m['affinity']) for m in seqmeta]
+        model = PerCellNetworkModel()
+        model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum)
+        model.fit(smpldict["train"]["trees"], smpldict['train']['fitnesses'], epochs=args.epochs, validation_split=args.validation_split)
+        return model
+    # ----------------------------------------------------------------------------------------
     samples = read_tree_files(args)
 
     # separate train/test samples
@@ -283,33 +350,20 @@ def train_and_test(args, start_time):
 
     write_traintest_samples(args, smpldict)
 
-    # handle various scaling/re-encoding stuff
-    pscaled, scalers = {}, {}  # scaled parameters and scalers
-    for smpl in smplist:
-        pvals = get_pvlists(args, smpldict[smpl])
-        pscaled[smpl], scalers[smpl] = scale_vals(args, pvals, smpl=smpl)
-    if args.use_trivial_encoding:  # silly encodings for testing that essentially train on the output values
-        for smpl in smplist:
-            encode.trivialize_encodings(smpldict[smpl]["trees"], pscaled[smpl], noise=True)  # , n_debug=3)
+    leaf_counts = set([len(t[0]) for t in smpldict["train"]["trees"]])  # length of first row in encoded tree (i guess really it'd be better to also include test trees in this, but in practice it probably doesn't matter)
+    if len(leaf_counts) != 1:
+        raise Exception("encoded trees have different lengths: %s" % " ".join(str(c) for c in leaf_counts))
+    max_leaf_count = list(leaf_counts)[0]
 
-    # train
-    responses = [[ConstantResponse(v) for v in vlist] for vlist in pscaled["train"]]
-    model = NeuralNetworkModel(responses[0], bundle_size=args.dl_bundle_size)
-    model.build_model(
-        smpldict["train"]["trees"],
-        responses,
-        dropout_rate=args.dropout_rate,
-        learning_rate=args.learning_rate,
-        ema_momentum=args.ema_momentum,
-        prebundle_layer_cfg=args.prebundle_layer_cfg,
-    )
-    model.fit(epochs=args.epochs, validation_split=args.validation_split)
+    if args.model_type == 'sigmoid':
+        model, scalers = train_sigmoid(smpldict, max_leaf_count)
+    elif args.model_type == 'per-cell':
+        model = train_per_cell(smpldict, max_leaf_count)
+    else:
+        assert False
     model.network.save(encode.output_fn(args.outdir, 'model', None))
-    joblib.dump(scalers['train'], encode.output_fn(args.outdir, 'train-scaler', None))
-    with open(encode.output_fn(args.outdir, 'example-responses', None), 'wb') as dfile:
-        dill.dump(responses[0], dfile)  # dump list of response fcns for one tree (so that when reading the model to infer, we can tell the neural network the structure of the responses)
 
-    predict_and_plot(args, model, smpldict, scalers["train"], ['train', 'test'])
+    predict_and_plot(args, model, smpldict, ['train', 'test'], scaler=scalers["train"] if args.model_type=='sigmoid' else None)
     print("    total dl inference time: %.1f sec" % (time.time() - start_time))
 
 # ----------------------------------------------------------------------------------------
@@ -332,7 +386,7 @@ def read_model_files(args, samples):
         print('  %s training scaler file %s doesn\'t exist, so fitting new scaler on inference sample (which isn\'t correct, but may be ok)' % (utils.color('yellow', 'warning'), scfn))
         use_scaler = inf_scaler
 
-    model = NeuralNetworkModel(example_response_list, bundle_size=args.dl_bundle_size)
+    model = ParamNetworkModel(example_response_list, bundle_size=args.dl_bundle_size)
     model.load(encode.output_fn(args.model_dir, 'model', None))
 
     return use_scaler, model
@@ -367,6 +421,7 @@ def get_parser():
     parser.add_argument("--indir", required=True, help="training input directory with gcdyn simulation output (uses encoded trees .npy, summary stats .csv, and response .pkl files)", )
     parser.add_argument("--model-dir", help="file with saved deep learning model for inference")
     parser.add_argument("--outdir", required=True, help="output directory")
+    parser.add_argument("--model-type", choices=['sigmoid', 'per-cell'], default='per-cell', help='type of neural network model, sigmoid: infer 3 params of sigmoid fcn, per-cell: infer fitness of each individual cell')
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--dl-bundle-size", type=int, default=50, help='\'dl-\' is to differentiate from \'simu-\' bundle size when calling this from cf-gcdyn.py')
     parser.add_argument("--discard-extra-trees", action="store_true", help='By default, the number of trees during inference must be evenly divisible by --dl-bundle-size. If this is set, however, any extras are discarded to allow inference.')
