@@ -500,7 +500,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                     fn = plot_single_param(ptype, param, smpl)
                     if fn is not None:
                         fnames[-1].append(fn)
-    if model_type == 'per-cell':
+    elif model_type == 'per-cell':
         for ptype in ['scatter', 'box']:
             for smpl in sorted(prdfs, reverse=True):
                 fn = plot_single_param(ptype, 'fitness', smpl)

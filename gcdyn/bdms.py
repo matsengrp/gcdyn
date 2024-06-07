@@ -205,6 +205,8 @@ class TreeNode(ete3.Tree):
             )
         if init_population > capacity:
             raise ValueError(f"{init_population=} must be less than {capacity=}")
+        if init_population < 2 or (init_population & (init_population-1) != 0):
+            raise Exception('init_population must be a positive power of 2, but got %d' % init_population)
         for attr in mutator.node_attrs:
             if not hasattr(self, attr):
                 raise ValueError(
@@ -236,19 +238,20 @@ class TreeNode(ete3.Tree):
         n_active_nodes = 0
         total_birth_rate = 0.0
         total_death_rate = 0.0
-        for _ in range(init_population):
-            start_node = TreeNode(
-                t=self.t,
-                dist=0,
-                name=next(self._name_generator),
-            )
-            for attr in mutator.node_attrs:
-                setattr(start_node, attr, copy.copy(getattr(self, attr)))
-            self.add_child(start_node)
-            active_nodes[start_node.name] = start_node
+        while len(self.get_leaves()) < init_population:
+            for pnode in self.get_leaves():
+                if not pnode.is_root():  # could probably also do it for root, but stuff below seems to assume root doesn't have an event
+                    pnode.event = self._BIRTH_EVENT
+                for _ in range(2):
+                    cnode = TreeNode(t=self.t, dist=0, name=next(self._name_generator))
+                    for attr in mutator.node_attrs:
+                        setattr(cnode, attr, copy.copy(getattr(self, attr)))
+                    pnode.add_child(cnode)
+        for tnode in self.iter_leaves():
+            active_nodes[tnode.name] = tnode
             n_active_nodes += 1
-            total_birth_rate += birth_response(start_node)
-            total_death_rate += death_response(start_node)
+            total_birth_rate += birth_response(tnode)
+            total_death_rate += death_response(tnode)
 
         # initialize rate multipliers, which are used to logistically modulate
         # rates in accordance with the carrying capacity
@@ -455,6 +458,13 @@ class TreeNode(ete3.Tree):
                 assert len(node.children) == 1
                 node.children[0].n_mutations += 1
                 node.delete(prevent_nondicotomic=False, preserve_branch_length=True)
+
+    def check_binarity(self) -> None:
+        bad_nodes = [(n.name, len(n.children)) for n in [self] + list(self.iter_descendants()) if len(n.children) not in [0, 2]]
+        if len(bad_nodes) == 0:
+            print('    tree is binary')
+        else:
+            print('    %s %d nodes have N children not in [0, 2]: %s' % (utils.color('yellow', 'warning'), len(bad_nodes), ', '.join('%s %d'%(s, n) for s, n in bad_nodes)))
 
     def render(
         self, color_by=None, *args: Any, cbar_file: Optional[str] = None, **kwargs: Any

@@ -35,7 +35,9 @@ def encode_tree(intree, max_leaf_count=None, ladderize=True, dont_scale=False, m
     # ----------------------------------------------------------------------------------------
     def traverse_inorder(tmptr):
         num_children = len(tmptr.children)
-        assert tmptr.up is None or num_children in {0, 2, }, ("Only full binary trees are supported, but found node with %d children" % num_children)
+        allowed_children = [1, 2] if tmptr.is_root() else [0, 2]  # root used to have 1 child, so may as well not crash if we get one of those old trees
+        if num_children not in allowed_children:
+            raise Exception("found %s node with %d children (must have %s)" % ('root' if tmptr.up is None else ('leaf' if tmptr.is_leaf() else 'internal'), num_children, allowed_children))
         for child in tmptr.children[:num_children // 2]:  # trivial loop over single lefthand subtree/node
             yield from traverse_inorder(child)
         yield tmptr

@@ -138,6 +138,7 @@ def generate_sequences_and_tree(
     tree.sample_survivors(n=n_to_sample, seed=seed)
     tree.prune()
     tree.remove_mutation_events()
+    tree.check_binarity()
     relabel_nodes(args, tree, itrial)
     if args.debug > 1:
         print('    tree after sampling, pruning, relabeling, etc:')
@@ -198,6 +199,8 @@ def choose_val(args, pname, extra_bounds=None, dbgstrs=None):
             minv = max(minv, extra_bounds[0])
             maxv = min(maxv, extra_bounds[1])
         print("        choosing %s within [%.2f, %.2f]%s" % (pname, minv, maxv, '' if (dbgstrs is None or len(dbgstrs)==0) else ' (%s)'%', '.join(dbgstrs)))
+        if minv > maxv:
+            raise Exception('arrived at nonsense range: [%.2f, %.2f]' % (minv, maxv))
         if pname in ["time_to_sampling", 'carry-cap']:
             return np.random.choice(range(minv, maxv + 1))  # integers (note that this is inclusive)
         else:
@@ -539,7 +542,7 @@ def get_parser():
     parser.add_argument("--carry-cap-values", default=[300], nargs='+', type=int)
     parser.add_argument("--carry-cap-range", nargs='+', type=int)
     parser.add_argument("--capacity-method", default="birth", choices=["birth", "death", "hard", None], help="see bdms.evolve() docs. Note that 'death' often involves a ton of churn, which makes for very slow simulations.")
-    parser.add_argument("--init-population", type=int, default=100)
+    parser.add_argument("--init-population", type=int, default=2)
     parser.add_argument("--seed", default=0, type=int, help="random seed")
     parser.add_argument("--outdir", default=os.getcwd())
     parser.add_argument("--birth-response", default="sigmoid", choices=["constant", "soft-relu", "sigmoid"], help="birth rate response function")
@@ -777,6 +780,8 @@ def main():
     print("    gcdyn commit: %s" % subprocess.check_output(["git", "--git-dir", git_dir, "rev-parse", "HEAD"]).strip())
     parser = get_parser()
     args = parser.parse_args()
+    if args.init_population < 2 or (args.init_population & (args.init_population-1) != 0):
+        raise Exception('--init-population must be a positive power of 2, but got %d' % args.init_population)
     if args.simu_bundle_size != 1 and args.n_trials % args.simu_bundle_size != 0:
         raise Exception("--n-trials %d not evenly divisible by --simu-bundle-size %d" % (args.n_trials, args.simu_bundle_size))
     args.use_generated_parameter_bounds = args.birth_response == "sigmoid" and None not in [args.yscale_range, args.initial_birth_rate_range]  # if either yscale or initial birth rate have no specified range, we can't calculate xshift and yscale ranges (well maybe could do one, but generally if you want ranges, specify them)
@@ -906,7 +911,7 @@ def main():
 
     write_final_outputs(args, all_seqs, all_trees, plist)
     if args.tree_inference_method is not None:
-        write_final_outputs(args, all_seqs, inf_trees, plist, inferred=True, dont_encode=args.tree_inference_method=='gctree')  # need to turn on --fix-multifurcations above if i want to encode gctrees (atm just want to make replay comparison plots, whicih doesn't require encoding)
+        write_final_outputs(args, all_seqs, inf_trees, plist, inferred=True, dont_encode=args.tree_inference_method=='gctree')  # need to turn on --fix-multifurcations above if i want to encode gctrees (atm just want to make replay comparison plots, which doesn't require encoding)
 
     plot_params_responses(args, pcounts, all_trees=all_trees, all_fns=all_fns)
     print("    total simulation time: %.1f sec" % (time.time() - start))
