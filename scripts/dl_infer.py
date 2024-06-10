@@ -98,22 +98,27 @@ def write_sigmoid_prediction(args, punscaled, true_resps=None, true_sstats=None,
     return df
 
 # ----------------------------------------------------------------------------------------
-def write_per_cell_prediction(args, pred_fitnesses, enc_trees, true_fitnesses=None, true_sstats=None, smpl=None):
+def write_per_cell_prediction(args, pred_fitnesses, enc_trees, true_fitnesses=None, true_resps=None, true_sstats=None, smpl=None):
     assert true_fitnesses is None or len(pred_fitnesses) == len(true_fitnesses)
     dfdata = {  # make empty df
         "fitness-%s"%ptype : []
         for ptype in (["predicted"] if true_fitnesses is None else ["truth", "predicted"])
     }
     dfdata['tree-index'] = []
+    dfdata['phenotype'] = []
+    for param in args.params_to_predict:
+        dfdata['%s-truth'%param] = []
     for itr, efit in enumerate(pred_fitnesses):
         pred_ndicts = encode.decode_tree(enc_trees[itr], enc_fit=efit)
         if true_fitnesses is not None:
             true_ndicts = encode.decode_tree(enc_trees[itr], enc_fit=true_fitnesses[itr])
             assert len(pred_ndicts) == len(true_ndicts)
-            for pdict, tdict in zip(pred_ndicts, true_ndicts):
+            for icell, (pdict, tdict) in enumerate(zip(pred_ndicts, true_ndicts)):
                 pdict['fitness-predicted'] = pdict['fitness']
                 del pdict['fitness']
                 pdict['fitness-truth'] = tdict['fitness']
+                for ip, param in enumerate(args.params_to_predict):  # writes true parameter values for each cell, which kind of sucks, but they're only nonzero for the first cell in each tree
+                    dfdata["%s-truth" % param].append(get_pval(param, true_resps[itr], true_sstats[itr]) if icell==0 else 0)
         for ndict in pred_ndicts:
             dfdata['tree-index'].append(true_sstats[itr]['tree'])  # NOTE tree-index isn't necessarily equal to <itr>
             for tk in [k for k in ndict if k in dfdata]:
@@ -125,11 +130,11 @@ def write_per_cell_prediction(args, pred_fitnesses, enc_trees, true_fitnesses=No
 
 # ----------------------------------------------------------------------------------------
 def get_prediction(args, model, spld, scaler, smpl=None):
+    true_fitnesses, true_resps, true_sstats = None, None, None
     if args.model_type == 'sigmoid':
         pred_resps = model.predict(spld["trees"])  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
         pvals = [[float(resp.value) for resp in plist] for plist in pred_resps]  # order corresponds to args.params_to_predict
         punscaled, _ = scale_vals(args, pvals, smpl=smpl, scaler=scaler, inverse=True)  # *un* scale according to the training scaling (if scaler is not None, it should be the training scaler)
-        true_resps, true_sstats = None, None
         if args.is_simu:
             true_resps, true_sstats = [spld[tk] for tk in ["birth-responses", "sstats"]]
             if args.dl_bundle_size > 1:
@@ -137,11 +142,11 @@ def get_prediction(args, model, spld, scaler, smpl=None):
             assert len(pred_resps) == len(true_resps)
         df = write_sigmoid_prediction(args, punscaled, true_resps=true_resps, true_sstats=true_sstats, smpl=smpl)
     elif args.model_type == 'per-cell':
+        assert args.dl_bundle_size == 1
         pred_fitnesses = model.predict(spld["trees"]).numpy()
-        true_resps, true_sstats = None, None
         if args.is_simu:
-            true_fitnesses, true_sstats = [spld[tk] for tk in ["fitnesses", "sstats"]]
-        df = write_per_cell_prediction(args, pred_fitnesses, spld["trees"], true_fitnesses=true_fitnesses, true_sstats=true_sstats, smpl=smpl)
+            true_fitnesses, true_resps, true_sstats = [spld[tk] for tk in ["fitnesses", "birth-responses", "sstats"]]
+        df = write_per_cell_prediction(args, pred_fitnesses, spld["trees"], true_fitnesses=true_fitnesses, true_resps=true_resps, true_sstats=true_sstats, smpl=smpl)
     else:
         assert False
     return df
