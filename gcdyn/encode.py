@@ -90,8 +90,8 @@ def encode_tree(intree, max_leaf_count=None, ladderize=True, dont_scale=False, m
 # NOTE could also make version of this that used original (unencoded) tree to attach nodes/names to each dict
 def decode_tree(enc_tree, enc_fit=None): #, max_leaf_count=None, ladderize=True):
     """ Reverse the encoding of a tree, i.e. convert encoded tree <enc_tree> into list of dicts, where each dict has
-    info for one node. If <enc_fit> is set, this also includes fitness information. NOTE that this obviously
-    is entirely dependent on the hard coded rows in the encoding function. """
+    info for one node. If an encoded fitness matrix <enc_fit> is set, this also includes fitness information. NOTE
+    that this obviously is entirely dependent on the hard coded rows in the encoding function. """
     ndicts = []
     assert len(enc_tree) == 4  # 4 rows in encoded tree (leaf dists, internal dists, leaf phenotypes, internal phenotypes)
     assert len(set(len(r) for r in enc_tree)) == 1  # all rows the same length
@@ -99,8 +99,8 @@ def decode_tree(enc_tree, enc_fit=None): #, max_leaf_count=None, ladderize=True)
         assert len(enc_fit) == 2  # 2 rows in encoded fitnesses (leaf fitnesses, internal fitnesses)
         assert all(len(r)==len(enc_tree[0]) for r in enc_fit)  # all rows the same length as encoded tree rows
     for icol in range(len(enc_tree[0])):
-        lfo = {'dist' : enc_tree[0][icol], 'fitness' : enc_tree[2][icol]}  # leaf node
-        nfo = {'dist' : enc_tree[1][icol], 'fitness' : enc_tree[1][icol]}  # internal node
+        lfo = {'dist' : enc_tree[0][icol], 'phenotype' : enc_tree[2][icol]}  # leaf node
+        nfo = {'dist' : enc_tree[1][icol], 'phenotype' : enc_tree[3][icol]}  # internal node
         if enc_fit is not None:
             lfo['fitness'] = enc_fit[0][icol]
             nfo['fitness'] = enc_fit[1][icol]
