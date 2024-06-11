@@ -21,6 +21,7 @@ import warnings
 import sys
 import itertools
 from Bio.Seq import Seq
+import math
 
 
 sigmoid_params = ['xscale', 'xshift', 'yscale']  # ick
@@ -730,7 +731,7 @@ def group_by_xvals(xvals, yvals, low_edges, skip_overflows=False):  # NOTE a lot
             continue
         xvals.append(np.mean([low_edges[ibin], low_edges[ibin+1]]))
         yvals.append(np.mean(bin_contents[ibin]))
-        yerrs.append(np.std(bin_contents[ibin], ddof=1) if ncont>1 else abs(bin_contents[ibin][0]))
+        yerrs.append(np.std(bin_contents[ibin], ddof=1) / math.sqrt(len(bin_contents[ibin])) if ncont>1 else abs(bin_contents[ibin][0]))
     return xvals, yvals, yerrs
 
 # ----------------------------------------------------------------------------------------
