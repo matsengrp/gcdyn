@@ -77,14 +77,26 @@ class BundleMeanLayer(layers.Layer):
         )  # output shape is (number_of_bundles, feature_dim)
 
 @keras.saving.register_keras_serializable()
-class TransposeLayer(layers.Layer):
+class SigmoidTransposeLayer(layers.Layer):
     """Transpose inputs (used to be Lambda layer, but they're not really serializable."""
 
     def __init__(self, **kwargs):
-        super(TransposeLayer, self).__init__(**kwargs)
+        super(SigmoidTransposeLayer, self).__init__(**kwargs)
 
     def call(self, inputs):
-        return tf.transpose(inputs, (0, 1, 3, 2))
+        # leave first (batch/sample) and second (bundle) dimensions the same, and swap third (dist/phenotyp) and fourth (leaf/internal node) dimensions
+        return tf.transpose(inputs, perm=(0, 1, 3, 2))
+
+@keras.saving.register_keras_serializable()
+class PerCellTransposeLayer(layers.Layer):
+    """Transpose inputs (used to be Lambda layer, but they're not really serializable."""
+
+    def __init__(self, **kwargs):
+        super(PerCellTransposeLayer, self).__init__(**kwargs)
+
+    def call(self, inputs):
+        # leave first (batch/sample) and second (bundle) dimensions the same, and swap third (dist/phenotyp) and fourth (leaf/internal node) dimensions
+        return tf.transpose(inputs, perm=(0, 2, 1))
 
 # ----------------------------------------------------------------------------------------
 class ParamNetworkModel:
@@ -151,7 +163,7 @@ class ParamNetworkModel:
             ],
         }
 
-        network_layers = [TransposeLayer()]
+        network_layers = [SigmoidTransposeLayer()]
         for tlr in self.pre_bundle_layers[prebundle_layer_cfg]:
             network_layers.append(layers.TimeDistributed(tlr))
         network_layers.append(BundleMeanLayer())  # combine predictions from all trees in bundle
@@ -329,26 +341,21 @@ class PerCellNetworkModel:
         print("    building model with: dropout %.2f   learn rate %.4f   momentum %.4f" % (dropout_rate, learning_rate, ema_momentum))
 
         tlayers = [
-            # layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
-            # layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
-            # layers.MaxPooling1D(pool_size=2, strides=2),  # Downsampling by a factor of 2
-            # layers.Conv1D(filters=40, kernel_size=4, activation=actfn),
-            # layers.GlobalAveragePooling1D(),  # one number for each filter from the previous layer
-            layers.Conv1D(filters=10, kernel_size=4, activation=actfn),
-            # layers.Conv1D(filters=10, kernel_size=4, activation=actfn),
-            # layers.MaxPooling1D(pool_size=2, strides=2),  # Downsampling by a factor of 2
-            # layers.Conv1D(filters=10, kernel_size=4, activation=actfn),
-            # layers.GlobalAveragePooling1D(),  # one number for each filter from the previous layer
+            layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
+            layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
+            layers.MaxPooling1D(pool_size=2, strides=2),  # Downsampling by a factor of 2
+            layers.Conv1D(filters=40, kernel_size=4, activation=actfn),
+            layers.GlobalAveragePooling1D(),  # one number for each filter from the previous layer
         ]
 
-        network_layers = [] #TransposeLayer()]
+        network_layers = [PerCellTransposeLayer()]
         for tlr in tlayers:
             network_layers.append(tlr)
-        # dense_unit_list = [48, 32, 16, 8]
-        # for idense, n_units in enumerate(dense_unit_list):
-        #     network_layers.append(layers.Dense(n_units, activation=self.actfn))
-        #     if dropout_rate != 0 and idense < len(dense_unit_list) - 1:  # add a dropout layer after each one except the last
-        #         network_layers.append(layers.Dropout(dropout_rate))
+        dense_unit_list = [48, 32, 16, 8]
+        for idense, n_units in enumerate(dense_unit_list):
+            network_layers.append(layers.Dense(n_units, activation=self.actfn))
+            if dropout_rate != 0 and idense < len(dense_unit_list) - 1:  # add a dropout layer after each one except the last
+                network_layers.append(layers.Dropout(dropout_rate))
         network_layers.append(layers.Flatten())
         network_layers.append(layers.Dense(2 * self.max_leaf_count))
         network_layers.append(layers.Reshape((2, self.max_leaf_count)))

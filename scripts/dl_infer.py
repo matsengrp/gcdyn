@@ -373,25 +373,31 @@ def train_and_test(args, start_time):
 
 # ----------------------------------------------------------------------------------------
 def read_model_files(args, samples):
-    erfn = encode.output_fn(args.model_dir, 'example-responses', None)
-    if os.path.exists(erfn):
-        print('    reading example responses from %s' % erfn)
-        with open(erfn, "rb") as rfile:
-            example_response_list = pickle.load(rfile)
+    use_scaler = None
+    if args.model_type == 'sigmoid':
+        erfn = encode.output_fn(args.model_dir, 'example-responses', None)
+        if os.path.exists(erfn):
+            print('    reading example responses from %s' % erfn)
+            with open(erfn, "rb") as rfile:
+                example_response_list = pickle.load(rfile)
+        else:
+            print('  %s example responses file %s doesn\'t exist, so trying to get from input info (probably ok on simulation)' % (utils.color('yellow', 'warning'), erfn))
+            pvals = get_pvlists(args, samples)  # only really need the pvals to get the scaler (and maybe we should anyway be using the scaler from the training sample?)
+            pscaled, inf_scaler = scale_vals(args, pvals)
+            example_response_list = [ConstantResponse(v) for v in pscaled[0]]  # well, we used pscaled for the example response, but this is a really hacky way of telling the neural network how many parameters to expect
+        scfn = encode.output_fn(args.model_dir, 'train-scaler', None)
+        if os.path.exists(scfn):
+            print('    reading training scaler from %s' % scfn)
+            use_scaler = joblib.load(scfn)
+        else:
+            print('  %s training scaler file %s doesn\'t exist, so fitting new scaler on inference sample (which isn\'t correct, but may be ok)' % (utils.color('yellow', 'warning'), scfn))
+            use_scaler = inf_scaler
+            model = ParamNetworkModel(example_response_list, bundle_size=args.dl_bundle_size)
+    elif args.model_type == 'per-cell':
+        model = PerCellNetworkModel()
     else:
-        print('  %s example responses file %s doesn\'t exist, so trying to get from input info (probably ok on simulation)' % (utils.color('yellow', 'warning'), erfn))
-        pvals = get_pvlists(args, samples)  # only really need the pvals to get the scaler (and maybe we should anyway be using the scaler from the training sample?)
-        pscaled, inf_scaler = scale_vals(args, pvals)
-        example_response_list = [ConstantResponse(v) for v in pscaled[0]]  # well, we used pscaled for the example response, but this is a really hacky way of telling the neural network how many parameters to expect
-    scfn = encode.output_fn(args.model_dir, 'train-scaler', None)
-    if os.path.exists(scfn):
-        print('    reading training scaler from %s' % scfn)
-        use_scaler = joblib.load(scfn)
-    else:
-        print('  %s training scaler file %s doesn\'t exist, so fitting new scaler on inference sample (which isn\'t correct, but may be ok)' % (utils.color('yellow', 'warning'), scfn))
-        use_scaler = inf_scaler
+        assert False
 
-    model = ParamNetworkModel(example_response_list, bundle_size=args.dl_bundle_size)
     model.load(encode.output_fn(args.model_dir, 'model', None))
 
     return use_scaler, model
@@ -400,7 +406,7 @@ def read_model_files(args, samples):
 def infer(args, start_time):
     smpldict = {'infer' : read_tree_files(args)}
     scaler, model = read_model_files(args, smpldict['infer'])
-    predict_and_plot(args, model, smpldict, scaler, ['infer'])
+    predict_and_plot(args, model, smpldict, ['infer'], scaler=scaler)
     print("    total dl inference time: %.1f sec" % (time.time() - start_time))
 
 # ----------------------------------------------------------------------------------------
@@ -428,7 +434,7 @@ def get_parser():
     parser.add_argument("--outdir", required=True, help="output directory")
     parser.add_argument("--model-type", choices=['sigmoid', 'per-cell'], default='per-cell', help='type of neural network model, sigmoid: infer 3 params of sigmoid fcn, per-cell: infer fitness of each individual cell')
     parser.add_argument("--epochs", type=int, default=30)
-    parser.add_argument("--dl-bundle-size", type=int, default=50, help='\'dl-\' is to differentiate from \'simu-\' bundle size when calling this from cf-gcdyn.py')
+    parser.add_argument("--dl-bundle-size", type=int, default=1, help='\'dl-\' is to differentiate from \'simu-\' bundle size when calling this from cf-gcdyn.py')
     parser.add_argument("--discard-extra-trees", action="store_true", help='By default, the number of trees during inference must be evenly divisible by --dl-bundle-size. If this is set, however, any extras are discarded to allow inference.')
     parser.add_argument("--dropout-rate", type=float, default=0)
     parser.add_argument("--learning-rate", type=float, default=0.001)

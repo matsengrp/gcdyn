@@ -200,7 +200,7 @@ def choose_val(args, pname, extra_bounds=None, dbgstrs=None):
             maxv = min(maxv, extra_bounds[1])
         print("        choosing %s within [%.2f, %.2f]%s" % (pname, minv, maxv, '' if (dbgstrs is None or len(dbgstrs)==0) else ' (%s)'%', '.join(dbgstrs)))
         if minv > maxv:
-            raise Exception('arrived at nonsense range: [%.2f, %.2f]' % (minv, maxv))
+            raise Exception('arrived at nonsense range for %s: [%.2f, %.2f]' % (pname, minv, maxv))
         if pname in ["time_to_sampling", 'carry-cap']:
             return np.random.choice(range(minv, maxv + 1))  # integers (note that this is inclusive)
         else:

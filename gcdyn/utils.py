@@ -25,6 +25,7 @@ from Bio.Seq import Seq
 
 sigmoid_params = ['xscale', 'xshift', 'yscale']  # ick
 affy_bins = [-15, -5, -3, -2, -1, -0.5, -0.25, 0.25, 0.5, 1, 1.5, 2, 2.5, 3, 5]  # first is underflow lo edge, last is overflow lo edge
+fitness_bins = [0, 0.25, 0.5, 0.75, 1, 2] #, 5, 15]
 
 def simple_fivemer_contexts(sequence: str):
     r"""Decompose a sequence into a list of its 5mer contexts.
@@ -403,7 +404,7 @@ def sns_xy_plot(ptype, smpl, tdf, xkey, ykey, xvals=None, true_x_eq_y=False, dis
             tdf['x_bins'] = pd.cut(tdf[xkey], bins=bin_edges) #n_bins)
             bkey, order = 'x_bins', None
         boxprops = {"facecolor": "None", 'edgecolor': tcolor('black'), 'linewidth' : 5 if smpl=='valid' else 2}
-        ax = sns.boxplot(x=bkey, y=ykey, data=tdf, order=order, boxprops=boxprops, whiskerprops={'color' : tcolor('black')}) #, ax=ax)
+        ax = sns.boxplot(x=bkey, y=ykey, data=tdf, order=order, boxprops=boxprops, whiskerprops={'color' : tcolor('black')}, showfliers=False) #, ax=ax)
         if not leave_ticks:  # if we're calling this fcn twice (i.e. plotting validation set), this tick/true line stuff is already there (and will crash if called twice)
             xtls = []
             for xv, xvl in zip(ax.get_xticks(), ax.get_xticklabels()):  # plot a horizontal dashed line at y=x (i.e. correct) for each bin and get labels
@@ -433,7 +434,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             fnames.append([])
         fnames[-1].append(fn)
     # ----------------------------------------------------------------------------------------
-    def plot_responses(smpl, n_max_plots=3):
+    def plot_responses(smpl, n_max_plots=25):
         # ----------------------------------------------------------------------------------------
         def plot_true_pred_pair(true_resp, pred_resp, affy_vals, plotname, titlestr=None):
             fn = plot_many_curves(outdir, plotname, [{'birth-response' : r} for r in [true_resp, pred_resp]], titlestr=titlestr,
@@ -456,6 +457,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 plot_true_pred_pair(true_resp, pred_resp, [float(m['affinity']) for m in lmdict[tree_index]], '%strue-vs-inf-response-%d'%(smpl, irow), titlestr='%s: response index %d / %d' % (smpl, irow, n_tree_preds))
                 # pfo_list.append({'birth-response' : pred_resp})
             # fn = plot_many_curves(outdir, '%sall-response'%smpl, pfo_list, titlestr='%s: %d / %d responses' % (smpl, n_plots, n_tree_preds))
+            # add_fn(fn)
         elif model_type == 'per-cell':
             irow = 0  # row in file (per-cell, unlike previous block)
             itree = 0  # itree is zero-based index/count of tree in this file, whereas tree_index is index in original simulation sequence (e.g. if this file starts from 10th tree, itree starts at 0 but tree_index starts at 9)
@@ -468,13 +470,13 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                     for tk in dfdata:
                         dfdata[tk].append(prdfs[smpl][tk][irow])
                     irow += 1
+                xbounds = [mfn([float(m['affinity']) for m in lmdict[tree_index]]) for mfn in [min, max]]
                 fn = plot_many_curves(outdir, '%strue-vs-inf-response-%d'%(smpl, itree), [{'birth-response' : true_resp}], titlestr='%s: response index %d / %d' % (smpl, itree, n_tree_preds),
-                                      affy_vals=[float(m['affinity']) for m in lmdict[tree_index]], colors=['#006600'], pred_xvals=dfdata['phenotype'], pred_yvals=dfdata['fitness-predicted'])
+                                      colors=['#006600'], pred_xvals=dfdata['phenotype'], pred_yvals=dfdata['fitness-predicted'], xbounds=xbounds)
                 add_fn(fn)
                 itree += 1
         else:
             assert False
-        add_fn(fn)
     # ----------------------------------------------------------------------------------------
     def plot_single_param(ptype, param, smpl, xkey=None, ykey=None):
         # ----------------------------------------------------------------------------------------
@@ -500,12 +502,13 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
         discrete = len(set(all_df[xkey])) < 15  # if simulation has discrete parameter values
         if ptype == 'scatter' and len(all_df) > 500:  # too busy, don't bother making them
             return None
+        bin_edges = fitness_bins if param=='fitness' else None
         plt_df = all_df.copy()
         if smpl == "train" and validation_split != 0:
             plt_df = all_df.copy()[: len(all_df) - int(validation_split * len(all_df))]
             vld_df = all_df.copy()[len(all_df) - int(validation_split * len(all_df)) :]
-            sns_xy_plot(ptype, 'valid', vld_df, xkey, ykey, xvals=all_df[xkey], discrete=discrete, leave_ticks=True, xtra_text=get_mae_text('valid', vld_df))  # well, leave ticks *and* don't plot true dashed line
-        sns_xy_plot(ptype, smpl, plt_df, xkey, ykey, xvals=all_df[xkey], true_x_eq_y=True, discrete=discrete, xtra_text=get_mae_text(smpl, plt_df))
+            sns_xy_plot(ptype, 'valid', vld_df, xkey, ykey, xvals=all_df[xkey], discrete=discrete, bin_edges=bin_edges, leave_ticks=True, xtra_text=get_mae_text('valid', vld_df))  # well, leave ticks *and* don't plot true dashed line
+        sns_xy_plot(ptype, smpl, plt_df, xkey, ykey, xvals=all_df[xkey], true_x_eq_y=True, discrete=discrete, bin_edges=bin_edges, xtra_text=get_mae_text(smpl, plt_df))
         plt.xlabel("%s value" % xlabel)
         plt.ylabel(ylabel)
         titlestr = "%s %s" % (param, smpl)
@@ -519,8 +522,9 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
     mpl_init()
     if not os.path.exists(outdir):
         os.makedirs(outdir)
-    fnames = [[]]
+    fnames = []
     for smpl in sorted(prdfs, reverse=True):
+        fnames.append([])
         plot_responses(smpl)
     for ptype in ['scatter', 'box']:
         for smpl in sorted(prdfs, reverse=True):
@@ -731,17 +735,18 @@ def group_by_xvals(xvals, yvals, low_edges, skip_overflows=False):  # NOTE a lot
 
 # ----------------------------------------------------------------------------------------
 def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None, colors=None, add_true_pred_text=False,
-                     pred_xvals=None, pred_yvals=None):
+                     pred_xvals=None, pred_yvals=None, xbounds=[-5, 5]):
     mpl_init()
     fig, ax = plt.subplots()
-    xbounds = [-5, 5]
     if affy_vals is not None:
         ax2 = ax.twinx()
         affy_plot({'all' : affy_vals}, ax, ax2=ax2)
         xbounds = [mfn(affy_vals) for mfn in [min, max]]
     if pred_xvals is not None and pred_yvals is not None:  # doesn't make sense to set only one
+        # # binned with mean/std err (this is ok, but it kind of sucks to have binning, and we don't need it for individual tree plots)
         xvals, yvals, yerrs = group_by_xvals(pred_xvals, pred_yvals, affy_bins, skip_overflows=True)
         ax.errorbar(xvals, yvals, yerr=yerrs, color='darkred', alpha=0.6, marker='.', markersize=13, linewidth=3)
+        ax.scatter(pred_xvals, pred_yvals, color='grey', alpha=0.45, marker='.')
     for ipf, pfo in enumerate(pfo_list):
         resp_plot(pfo['birth-response'], ax, alpha=0.15 if len(pfo_list)>5 else 0.5, color='#990012' if colors is None else colors[ipf], xbounds=xbounds)
     if add_true_pred_text:
@@ -752,6 +757,7 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
     ax.set(title='%d responses' % len(pfo_list) if titlestr is None else titlestr)
     fn = "%s/%s.svg" % (plotdir, plotname)
     plt.savefig(fn)
+    plt.close()
     return fn
 
 # ----------------------------------------------------------------------------------------
