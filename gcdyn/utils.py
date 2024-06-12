@@ -438,10 +438,12 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
     def plot_responses(smpl, n_max_plots=25):
         # ----------------------------------------------------------------------------------------
         def plot_true_pred_pair(true_resp, pred_resp, affy_vals, plotname, titlestr=None):
-            fn = plot_many_curves(outdir, plotname, [{'birth-response' : r} for r in [true_resp, pred_resp]], titlestr=titlestr,
+            fn = plot_many_curves(outdir+'/'+smpl, plotname, [{'birth-response' : r} for r in [true_resp, pred_resp]], titlestr=titlestr,
                                   affy_vals=affy_vals, colors=['#006600', '#990012'], add_true_pred_text=True)
             add_fn(fn)
         # ----------------------------------------------------------------------------------------
+        if not os.path.exists(outdir+'/'+smpl):
+            os.makedirs(outdir+'/'+smpl)
         from gcdyn.poisson import SigmoidResponse
         # pfo_list = []
         n_pred_rows = len(prdfs[smpl].index)  # N cells for per-cell, N trees for sigmoid
@@ -455,7 +457,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 tree_index = int(prdfs[smpl]['tree-index'][irow])
                 pdicts = [{p : prdfs[smpl]['%s-%s'%(p, tp)][irow] for p in sigmoid_params} for tp in ['truth', 'predicted']]
                 true_resp, pred_resp = [SigmoidResponse(**pd) for pd in pdicts]
-                plot_true_pred_pair(true_resp, pred_resp, [float(m['affinity']) for m in lmdict[tree_index]], '%strue-vs-inf-response-%d'%(smpl, irow), titlestr='%s: response index %d / %d' % (smpl, irow, n_tree_preds))
+                plot_true_pred_pair(true_resp, pred_resp, [float(m['affinity']) for m in lmdict[tree_index]], 'true-vs-inf-response-%d'%irow, titlestr='%s: response index %d / %d' % (smpl, irow, n_tree_preds))
                 # pfo_list.append({'birth-response' : pred_resp})
             # fn = plot_many_curves(outdir, '%sall-response'%smpl, pfo_list, titlestr='%s: %d / %d responses' % (smpl, n_plots, n_tree_preds))
             # add_fn(fn)
@@ -472,7 +474,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                         dfdata[tk].append(prdfs[smpl][tk][irow])
                     irow += 1
                 xbounds = [mfn([float(m['affinity']) for m in lmdict[tree_index]]) for mfn in [min, max]]
-                fn = plot_many_curves(outdir, '%strue-vs-inf-response-%d'%(smpl, itree), [{'birth-response' : true_resp}], titlestr='%s: response index %d / %d' % (smpl, itree, n_tree_preds),
+                fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-response-%d'%itree, [{'birth-response' : true_resp}], titlestr='%s: response index %d / %d' % (smpl, itree, n_tree_preds),
                                       colors=['#006600'], pred_xvals=dfdata['phenotype'], pred_yvals=dfdata['fitness-predicted'], xbounds=xbounds)
                 add_fn(fn)
                 itree += 1

@@ -30,6 +30,23 @@ smplist = ["train", "test"]
 def csvfn(args, smpl):
     return "%s/%s.csv" % (args.outdir, smpl)
 
+# ----------------------------------------------------------------------------------------
+def unroll_fitnesses(matrix_list):
+    return [[f] for farr in matrix_list for flist in farr for f in flist]
+
+# ----------------------------------------------------------------------------------------
+# "roll" up single list of values in <scale_vals> into the shape (list of matrices) specified by <template_matrices> (scaling has to happen on mple list of values, and outputs  <scale_vals>, then we have to put things back into matrices for the NN)
+def roll_fitnesses(scale_vals, template_matrices):
+    iglobal, new_fitnesses = 0, []
+    for farr in template_matrices:
+        new_array = []
+        for flist in farr:
+            new_array.append([])
+            for _ in flist:
+                new_array[-1].append(scale_vals[iglobal][0])
+                iglobal += 1
+        new_fitnesses.append(new_array)
+    return new_fitnesses
 
 # ----------------------------------------------------------------------------------------
 # fmt: off
@@ -41,19 +58,23 @@ def scale_vals(args, in_pvals, scaler=None, inverse=False, smpl='', debug=True):
             return [[plist[ivar] for plist in pvs]]
         def fnstr(pvs, fn):  # apply fn to each list from get_lists(), returns resulting combined str
             return " ".join("%7.2f" % fn(vl) for vl in get_lists(pvs))
-        for ivar, vname in enumerate(args.params_to_predict):
+        assert args.model_type in ['sigmoid', 'per-cell']
+        for ivar, vname in enumerate(svar_list):
             for dstr, pvs in zip(("before", "after"), (pvals_before, pvals_scaled)):
                 bstr = "   " if dstr != "before" else "      %10s %7s" % (vname, smpl)
                 print("%s %s%s %s%s" % (bstr, fnstr(pvs, np.mean), fnstr(pvs, np.var), fnstr(pvs, min), fnstr(pvs, max), ), end="" if dstr == "before" else "\n")
     # ----------------------------------------------------------------------------------------
+    svar_list = args.params_to_predict if args.model_type=='sigmoid' else ['fitness']
     if args.dont_scale_params:
         return copy.copy(in_pvals), scaler
+    if inverse:
+        assert scaler is not None
     if scaler is None:
         scaler = preprocessing.StandardScaler().fit(in_pvals)  # scaler = preprocessing.MinMaxScaler(feature_range=(0, 10)).fit(in_pvals)
     sc_pvals = scaler.inverse_transform(in_pvals) if inverse else scaler.transform(in_pvals)
     if debug:
         if debug:  # and smpl == smplist[0]:
-            print("    %sscaling %d variables: %s" % ("reverse " if inverse else "", len(args.params_to_predict), args.params_to_predict,))
+            print("    %sscaling %d variables: %s" % ("reverse " if inverse else "", len(svar_list), svar_list,))
             print("                                  before                             after")
             print("                           mean   var     min   max         mean   var     min   max")
         print_debug(in_pvals, sc_pvals)
@@ -144,9 +165,11 @@ def get_prediction(args, model, spld, scaler, smpl=None):
     elif args.model_type == 'per-cell':
         assert args.dl_bundle_size == 1
         pred_fitnesses = model.predict(spld["trees"]).numpy()
+        punscaled, _ = scale_vals(args, unroll_fitnesses(pred_fitnesses), smpl=smpl, scaler=scaler, inverse=True)  # *un* scale according to the training scaling (if scaler is not None, it should be the training scaler)
+        unscaled_fitnesses = roll_fitnesses(punscaled, pred_fitnesses)
         if args.is_simu:
             true_fitnesses, true_resps, true_sstats = [spld[tk] for tk in ["fitnesses", "birth-responses", "sstats"]]
-        df = write_per_cell_prediction(args, pred_fitnesses, spld["trees"], true_fitnesses=true_fitnesses, true_resps=true_resps, true_sstats=true_sstats, smpl=smpl)
+        df = write_per_cell_prediction(args, unscaled_fitnesses, spld["trees"], true_fitnesses=true_fitnesses, true_resps=true_resps, true_sstats=true_sstats, smpl=smpl)
     else:
         assert False
     return df
@@ -192,12 +215,17 @@ def get_pval(pname, bresp, sts):  # get parameter value from response fcn
 
 # ----------------------------------------------------------------------------------------
 def get_pvlists(args, samples):  # rearrange + convert response fcn lists to lists of parameter values
-    pvals = [
-        [get_pval(pname, bresp, sts) for pname in args.params_to_predict]
-        for bresp, sts in zip(
-            samples["birth-responses"], samples["sstats"]
-        )
-    ]
+    if args.model_type == 'sigmoid':
+        pvals = [
+            [get_pval(pname, bresp, sts) for pname in args.params_to_predict]
+            for bresp, sts in zip(
+                samples["birth-responses"], samples["sstats"]
+            )
+        ]
+    elif args.model_type == 'per-cell':
+        pvals = unroll_fitnesses(samples['fitnesses'])
+    else:
+        assert False
     return pvals
 
 
@@ -313,33 +341,24 @@ def predict_and_plot(args, model, smpldict, smpls, scaler=None):
 # ----------------------------------------------------------------------------------------
 def train_and_test(args, start_time):
     # ----------------------------------------------------------------------------------------
-    def train_sigmoid(smpldict, max_leaf_count):
-        # handle various scaling/re-encoding stuff
-        pscaled, scalers = {}, {}  # scaled parameters and scalers
-        for smpl in smplist:
-            pvals = get_pvlists(args, smpldict[smpl])
-            pscaled[smpl], scalers[smpl] = scale_vals(args, pvals, smpl=smpl)
-        if args.use_trivial_encoding:  # silly encodings for testing that essentially train on the output values
-            for smpl in smplist:
-                encode.trivialize_encodings(smpldict[smpl]["trees"], pscaled[smpl], noise=True)  # , n_debug=3)
-
-        # train
+    def train_sigmoid(smpldict, pscaled, max_leaf_count):
         responses = [[ConstantResponse(v) for v in vlist] for vlist in pscaled["train"]]  # order corresponds to args.params_to_predict (constant response is just a container for one value, and note we don't bother to set the name)
         model = ParamNetworkModel(responses[0], bundle_size=args.dl_bundle_size)
         assert args.params_to_predict == utils.sigmoid_params
         model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, prebundle_layer_cfg=args.prebundle_layer_cfg)
         model.fit(smpldict["train"]["trees"], responses, epochs=args.epochs, validation_split=args.validation_split)
-        joblib.dump(scalers['train'], encode.output_fn(args.outdir, 'train-scaler', None))
         with open(encode.output_fn(args.outdir, 'example-responses', None), 'wb') as dfile:
             dill.dump(responses[0], dfile)  # dump list of response fcns for one tree (so that when reading the model to infer, we can tell the neural network the structure of the responses)
-        return model, scalers
+        return model
     # ----------------------------------------------------------------------------------------
-    def train_per_cell(smpldict, max_leaf_count):
+    def train_per_cell(smpldict, pscaled, max_leaf_count):
         # seqmeta = read_meta_csv(args.indir)
         # affy_vals = [float(m['affinity']) for m in seqmeta]
         model = PerCellNetworkModel()
         model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum)
-        model.fit(smpldict["train"]["trees"], smpldict['train']['fitnesses'], epochs=args.epochs, validation_split=args.validation_split)
+        new_fitnesses = roll_fitnesses(pscaled['train'], smpldict['train']['fitnesses'])
+        assert len(smpldict['train']['fitnesses']) == len(new_fitnesses)
+        model.fit(smpldict["train"]["trees"], new_fitnesses, epochs=args.epochs, validation_split=args.validation_split)
         return model
     # ----------------------------------------------------------------------------------------
     samples = read_tree_files(args)
@@ -360,21 +379,31 @@ def train_and_test(args, start_time):
         raise Exception("encoded trees have different lengths: %s" % " ".join(str(c) for c in leaf_counts))
     max_leaf_count = list(leaf_counts)[0]
 
+    # handle various scaling/re-encoding stuff
+    pscaled, scalers = {}, {}  # scaled parameters and scalers
+    for smpl in smplist:
+        pvals = get_pvlists(args, smpldict[smpl])
+        pscaled[smpl], scalers[smpl] = scale_vals(args, pvals, smpl=smpl)
+    joblib.dump(scalers['train'], encode.output_fn(args.outdir, 'train-scaler', None))
+    if args.use_trivial_encoding:  # silly encodings for testing that essentially train on the output values
+        for smpl in smplist:
+            encode.trivialize_encodings(smpldict[smpl]["trees"], pscaled[smpl], noise=True)  # , n_debug=3)
+
     if args.model_type == 'sigmoid':
-        model, scalers = train_sigmoid(smpldict, max_leaf_count)
+        model = train_sigmoid(smpldict, pscaled, max_leaf_count)
     elif args.model_type == 'per-cell':
-        model = train_per_cell(smpldict, max_leaf_count)
+        model = train_per_cell(smpldict, pscaled, max_leaf_count)
     else:
         assert False
     model.network.save(encode.output_fn(args.outdir, 'model', None))
 
-    predict_and_plot(args, model, smpldict, ['train', 'test'], scaler=scalers["train"] if args.model_type=='sigmoid' else None)
+    predict_and_plot(args, model, smpldict, ['train', 'test'], scaler=scalers["train"])
     print("    total dl inference time: %.1f sec" % (time.time() - start_time))
 
 # ----------------------------------------------------------------------------------------
 def read_model_files(args, samples):
-    use_scaler = None
-    if args.model_type == 'sigmoid':
+    # ----------------------------------------------------------------------------------------
+    def read_example_response():
         erfn = encode.output_fn(args.model_dir, 'example-responses', None)
         if os.path.exists(erfn):
             print('    reading example responses from %s' % erfn)
@@ -382,17 +411,25 @@ def read_model_files(args, samples):
                 example_response_list = pickle.load(rfile)
         else:
             print('  %s example responses file %s doesn\'t exist, so trying to get from input info (probably ok on simulation)' % (utils.color('yellow', 'warning'), erfn))
-            pvals = get_pvlists(args, samples)  # only really need the pvals to get the scaler (and maybe we should anyway be using the scaler from the training sample?)
+            pvals = get_pvlists(args, samples)  # only need the pvals to get the scaler for example_response_list, which doesn't use the actual parameters values, so this is pretty silly (e.g. maybe I could just replace with example_response_list = [ConstantResponse(0) for _ in args.params_to_predict]?)
             pscaled, inf_scaler = scale_vals(args, pvals)
             example_response_list = [ConstantResponse(v) for v in pscaled[0]]  # well, we used pscaled for the example response, but this is a really hacky way of telling the neural network how many parameters to expect
+        return example_response_list
+    # ----------------------------------------------------------------------------------------
+    def read_scaler():
         scfn = encode.output_fn(args.model_dir, 'train-scaler', None)
         if os.path.exists(scfn):
             print('    reading training scaler from %s' % scfn)
             use_scaler = joblib.load(scfn)
         else:
+            assert False  # shouldn't need this any more (?) [would need to get inf_scaler from fcn above now that I've rearranged things]
             print('  %s training scaler file %s doesn\'t exist, so fitting new scaler on inference sample (which isn\'t correct, but may be ok)' % (utils.color('yellow', 'warning'), scfn))
             use_scaler = inf_scaler
-            model = ParamNetworkModel(example_response_list, bundle_size=args.dl_bundle_size)
+        return use_scaler
+    # ----------------------------------------------------------------------------------------
+    use_scaler = read_scaler()
+    if args.model_type == 'sigmoid':
+        model = ParamNetworkModel(read_example_response(), bundle_size=args.dl_bundle_size)
     elif args.model_type == 'per-cell':
         model = PerCellNetworkModel()
     else:

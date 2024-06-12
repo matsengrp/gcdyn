@@ -203,7 +203,7 @@ def pad_trees(
             before_len = len(etree[0])
             np.set_printoptions(precision=3, suppress=True, linewidth=99999)
             print("  padded length from %d to %d" % (before_len, len(etree[0])))
-            print(etree)
+            # print(etree)
     return np.array(padded_trees)
 
 # ----------------------------------------------------------------------------------------
