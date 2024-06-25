@@ -26,7 +26,7 @@ import math
 
 sigmoid_params = ['xscale', 'xshift', 'yscale']  # ick
 affy_bins = [-15, -5, -3, -2, -1, -0.5, -0.25, 0.25, 0.5, 1, 1.5, 2, 2.5, 3, 5]  # first is underflow lo edge, last is overflow lo edge
-fitness_bins = [0, 0.25, 0.5, 0.75, 1, 2] #, 5, 15]
+fitness_bins = [-1.5, -1, -0.75, -0.5, -0.2, 0, 0.1, 0.25, 0.4, 0.5, 0.75, 1, 1.5, 2] #, 5, 15]
 
 def simple_fivemer_contexts(sequence: str):
     r"""Decompose a sequence into a list of its 5mer contexts.
@@ -450,10 +450,14 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
         n_tree_preds = len(set(prdfs[smpl]['tree-index']))
         n_plots = min(n_max_plots, n_tree_preds)
         lmdict = defaultdict(list)  # map from tree index to list of seq meta for that tree
+        validation_indices = None
+        if smpl == "train" and validation_split != 0:  # NOTE this obviously depends on keras continuing to do validation splits this way
+            validation_indices = [i for i in range(n_tree_preds - int(validation_split * n_tree_preds), n_tree_preds)]
         for mfo in seqmeta:
             lmdict[int(mfo['tree-index'])].append(mfo)
         if model_type == 'sigmoid':
             for irow in range(n_plots):
+                assert validation_indices is None or irow not in validation_indices  # would just want to plot with a different color or label or something, but i don't feel like implementing atm
                 tree_index = int(prdfs[smpl]['tree-index'][irow])
                 pdicts = [{p : prdfs[smpl]['%s-%s'%(p, tp)][irow] for p in sigmoid_params} for tp in ['truth', 'predicted']]
                 true_resp, pred_resp = [SigmoidResponse(**pd) for pd in pdicts]
@@ -474,7 +478,8 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                         dfdata[tk].append(prdfs[smpl][tk][irow])
                     irow += 1
                 xbounds = [mfn([float(m['affinity']) for m in lmdict[tree_index]]) for mfn in [min, max]]
-                fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-response-%d'%itree, [{'birth-response' : true_resp}], titlestr='%s: response index %d / %d' % (smpl, itree, n_tree_preds),
+                smpstr = smpl if validation_indices is None or tree_index not in validation_indices else 'validation'
+                fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-response-%d'%itree, [{'birth-response' : true_resp}], titlestr='%s: response index %d / %d' % (smpstr, itree, n_tree_preds),
                                       colors=['#006600'], pred_xvals=dfdata['phenotype'], pred_yvals=dfdata['fitness-predicted'], xbounds=xbounds)
                 add_fn(fn)
                 itree += 1
@@ -508,7 +513,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
         bin_edges = fitness_bins if param=='fitness' else None
         plt_df = all_df.copy()
         if smpl == "train" and validation_split != 0:
-            plt_df = all_df.copy()[: len(all_df) - int(validation_split * len(all_df))]
+            plt_df = all_df.copy()[: len(all_df) - int(validation_split * len(all_df))]  # NOTE this obviously depends on keras continuing to do validation splits this way
             vld_df = all_df.copy()[len(all_df) - int(validation_split * len(all_df)) :]
             sns_xy_plot(ptype, 'valid', vld_df, xkey, ykey, xvals=all_df[xkey], discrete=discrete, bin_edges=bin_edges, leave_ticks=True, xtra_text=get_mae_text('valid', vld_df))  # well, leave ticks *and* don't plot true dashed line
         sns_xy_plot(ptype, smpl, plt_df, xkey, ykey, xvals=all_df[xkey], true_x_eq_y=True, discrete=discrete, bin_edges=bin_edges, xtra_text=get_mae_text(smpl, plt_df))
