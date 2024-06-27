@@ -279,6 +279,25 @@ class ConstantResponse(PhenotypeResponse):
         self.value = d["value"]
 
 
+class LinearResponse(PhenotypeResponse):
+    def __init__(self, slope: float = 1.0, intercept: float = 0):
+        super().__init__()
+        self.slope = slope
+        self.intercept = intercept
+
+    def λ_phenotype(self, x: float) -> float:
+        return self.slope * x + self.intercept
+
+    @property
+    def _param_dict(self) -> dict:
+        return dict(slope=self.slope, intercept=self.intercept)
+
+    @_param_dict.setter
+    def _param_dict(self, d):
+        self.slope = d["slope"]
+        self.intercept = d["intercept"]
+
+
 class ExponentialResponse(PhenotypeResponse):
     r"""Exponential response function on a :py:class:`bdms.TreeNode` object's
     phenotype attribute :math:`x`.

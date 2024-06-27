@@ -3,6 +3,7 @@ import copy
 import csv
 import dill
 import os
+import sys
 
 from gcdyn.bdms import TreeNode
 from gcdyn import utils
@@ -148,44 +149,50 @@ def encode_trees(intrees, max_leaf_count=None, ladderize=True, mtype='tree', bir
     return scale_vals, enc_trees
 
 # ----------------------------------------------------------------------------------------
-def trivialize_encodings(encoded_trees, param_vals, noise=False, max_print=10, n_debug=0, debug=False):
-    """Convert encoded_trees to a "trivialized" encoding, i.e. one that replaces the actual tree
-    information with the response parameter values that we're trying to predict."""
-
-    def getval(itree, icol):
-        rval = param_vals[itree][icol % len(param_vals[itree])]
+def trivialize_encodings(encoded_trees, model_type, predict_vals, noise=False, max_print=10, n_debug=0, debug=False):
+    """Convert encoded_trees (modify in place) to a "trivialized" encoding, i.e. one that replaces the tree
+    information with the response parameter values that we're trying to predict.
+    sigmoid: replace 4-row encoded tree matrix entries with repeating columns of sigmoid parameters
+      (first column is xscale, second is xshift, etc.)
+    per-cell: replace both the distance and affinity entry for each node with its fitness (i.e. first and third
+      [and second and fourth] rows are now equal)
+    """
+    # ----------------------------------------------------------------------------------------
+    def getval(itree, irow, icol):
+        if model_type == 'sigmoid':
+            param_vals = predict_vals  # each entry (itree) in predict_vals is a list of three values (xscale, xshift, yscale)
+            rval = param_vals[itree][icol % len(param_vals[itree])]
+        elif model_type == 'per-cell':
+            encoded_fitnesses = predict_vals  # each entry (itree) is a 2 x max_leaf_count matrix with the fitness for each node
+            rval = encoded_fitnesses[itree][irow % 2][icol]
+        else:
+            assert False
         if noise:
             rval += np.random.uniform(-0.1 * rval, 0.1 * rval)
         return rval
-
-    def estr(tstr, entr):
-        return "    %6s: %s" % (
-            tstr,
-            "\n            ".join(
-                " ".join("%5.2f" % v for v in list(le[:max_print])) + " ..."
-                for le in entr
-            ),
-        )
-
+    # ----------------------------------------------------------------------------------------
+    def estr(tstr, etree):
+        def vstrs(le): return ["%5.2f"%v for v in list(le[:max_print])]
+        return "    %6s: %s" % (tstr, "\n            ".join(" ".join(vstrs(le)) + " ..." for le in etree))
+    # ----------------------------------------------------------------------------------------
     if debug or n_debug > 0:
         print(" trivializing encodings")
-        np.set_printoptions(
-            edgeitems=30, linewidth=100000, formatter=dict(float=lambda x: "%.3g" % x)
-        )
-    for itree, entr in enumerate(encoded_trees):
+        np.set_printoptions(edgeitems=30, linewidth=100000, formatter=dict(float=lambda x: "%.3g" % x))
+    for itree, etree in enumerate(encoded_trees):
         if debug or itree < n_debug:
             print("  itree %d" % itree)
-            print(estr("before", entr))
-        for irow in range(len(entr)):
-            for icol in range(len(entr[irow])):
-                entr[irow][icol] = getval(itree, icol)
+            print(estr("before", etree))
+        for irow in range(len(etree)):
+            for icol in range(len(etree[irow])):
+                etree[irow][icol] = getval(itree, irow, icol)
         if debug or itree < n_debug:
-            print(estr("after", entr))
+            print(estr("after", etree))
 
 # ----------------------------------------------------------------------------------------
 def pad_trees(
-    trees: list[np.ndarray], min_n_max_leaves: int = 100, debug: bool = False
+    trees: list[np.ndarray], min_n_max_leaves: int = 50, debug: bool = False
 ):
+    debug = True
     """Pad a list of encoded trees with zeros so that they're all the same length.
     Returns a new array with the padded trees (does not modify input trees).
     """

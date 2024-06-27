@@ -188,6 +188,7 @@ def plot_existing_results(args):
         args.outdir + "/plots",
         is_simu=args.is_simu,
         validation_split=args.validation_split,
+        trivial_encoding=args.use_trivial_encoding,
     )
 
 
@@ -336,6 +337,7 @@ def predict_and_plot(args, model, smpldict, smpls, scaler=None):
         args.outdir + "/plots",
         is_simu=args.is_simu,
         validation_split=0 if smpl=='infer' else args.validation_split,
+        trivial_encoding=args.use_trivial_encoding,
     )
 
 # ----------------------------------------------------------------------------------------
@@ -385,9 +387,14 @@ def train_and_test(args, start_time):
         pvals = get_pvlists(args, smpldict[smpl])
         pscaled[smpl], scalers[smpl] = scale_vals(args, pvals, smpl=smpl)
     joblib.dump(scalers['train'], encode.output_fn(args.outdir, 'train-scaler', None))
-    if args.use_trivial_encoding:  # silly encodings for testing that essentially train on the output values
+
+    # silly encodings for testing that essentially train on the output values
+    if args.use_trivial_encoding:
         for smpl in smplist:
-            encode.trivialize_encodings(smpldict[smpl]["trees"], pscaled[smpl], noise=True)  # , n_debug=3)
+            predict_vals = pscaled[smpl]
+            if args.model_type == 'per-cell':
+                predict_vals = roll_fitnesses(predict_vals, smpldict[smpl]['fitnesses'])
+            encode.trivialize_encodings(smpldict[smpl]["trees"], args.model_type, predict_vals, noise=False, n_debug=3)
 
     if args.model_type == 'sigmoid':
         model = train_sigmoid(smpldict, pscaled, max_leaf_count)
