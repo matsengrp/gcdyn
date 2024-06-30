@@ -7,7 +7,7 @@ import time
 import sys
 from functools import reduce
 
-from gcdyn import poisson
+from gcdyn import poisson, encode
 
 poisson.set_backend(use_jax=True)
 
@@ -318,6 +318,18 @@ class ParamNetworkModel:
             self.network = keras.models.load_model(fname, safe_mode=False)
 
 # ----------------------------------------------------------------------------------------
+@tf.function
+# ignore nans (still gets nans in lass?): https://stackoverflow.com/questions/59831930/how-can-i-replace-nans-in-keras-tensor-with-different-value-i-have-a-tensorflow
+# ingore (with tf.gather()) parts of tensor:  https://stackoverflow.com/questions/53216564/how-to-ignore-part-of-input-and-output-in-keras
+# ah, just enforce that no input values have the empty fill value
+def better_loss(y_true, y_pred):
+    y_true, fill_true = tf.split(y_true, [2, 2], axis=1)
+    y_pred, fill_pred = tf.split(y_pred, [2, 2], axis=1)
+    loss = tf.square(y_true - y_pred)
+    loss = tf.where(tf.cast(fill_true, tf.bool), loss, tf.zeros_like(loss))  # if filled (fill_true == 1) use <loss>, otherwise set to zero (NOTE fill_pred is [probably?] useless)
+    return tf.reduce_sum(loss)  # tf.reduce_mean(loss)
+
+# ----------------------------------------------------------------------------------------
 class PerCellNetworkModel:
     """
     Similar to ParamNetworkModel, except we directly predict the fitness of each cell (rather than the parameters of the fitenss response function).
@@ -357,10 +369,10 @@ class PerCellNetworkModel:
             if dropout_rate != 0 and idense < len(dense_unit_list) - 1:  # add a dropout layer after each one except the last
                 network_layers.append(layers.Dropout(dropout_rate))
         network_layers.append(layers.Flatten())
-        network_layers.append(layers.Dense(2 * self.max_leaf_count))
-        network_layers.append(layers.Reshape((2, self.max_leaf_count)))
+        network_layers.append(layers.Dense(encode.mtx_lens['fitness'] * self.max_leaf_count))
+        network_layers.append(layers.Reshape((encode.mtx_lens['fitness'], self.max_leaf_count)))
 
-        inputs = keras.Input(shape=(4, self.max_leaf_count))
+        inputs = keras.Input(shape=(encode.mtx_lens['tree'], self.max_leaf_count))
         outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
         self.network = keras.Model(inputs=inputs, outputs=outputs)
         # def pfn(x, line_break=False): print("      %s" % x)  # this doesn't seem to work with keras 3
@@ -368,7 +380,7 @@ class PerCellNetworkModel:
         optimizer = keras.optimizers.Adam(
             learning_rate=learning_rate, use_ema=True, ema_momentum=ema_momentum
         )
-        self.network.compile(loss=loss_fcn, optimizer=optimizer)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
+        self.network.compile(loss=better_loss, optimizer=optimizer)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
 
     # ----------------------------------------------------------------------------------------
     def fit(self, training_trees, training_fitnesses, epochs=30, validation_split=0):

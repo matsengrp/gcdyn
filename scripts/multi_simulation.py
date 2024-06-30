@@ -653,7 +653,7 @@ def run_sub_procs(args):
                 n_total_trees = sum(len(l) for l in elists)
                 missing_trees = [n_per_proc - len(l) for l in elists]
                 all_etrees = [e for fn in fnames for e in encode.read_trees(fn)]
-                encode.write_trees(ofn, all_etrees)
+                encode.write_trees(ofn, all_etrees, 'tree' if 'tree' in ftype else 'fitness')
             elif ftype in ["responses"]:
                 all_responses = []
                 for fn in fnames:

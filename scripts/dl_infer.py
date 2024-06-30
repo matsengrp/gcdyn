@@ -31,24 +31,6 @@ def csvfn(args, smpl):
     return "%s/%s.csv" % (args.outdir, smpl)
 
 # ----------------------------------------------------------------------------------------
-def unroll_fitnesses(matrix_list):
-    return [[f] for farr in matrix_list for flist in farr for f in flist]
-
-# ----------------------------------------------------------------------------------------
-# "roll" up single list of values in <scale_vals> into the shape (list of matrices) specified by <template_matrices> (scaling has to happen on mple list of values, and outputs  <scale_vals>, then we have to put things back into matrices for the NN)
-def roll_fitnesses(scale_vals, template_matrices):
-    iglobal, new_fitnesses = 0, []
-    for farr in template_matrices:
-        new_array = []
-        for flist in farr:
-            new_array.append([])
-            for _ in flist:
-                new_array[-1].append(scale_vals[iglobal][0])
-                iglobal += 1
-        new_fitnesses.append(new_array)
-    return new_fitnesses
-
-# ----------------------------------------------------------------------------------------
 # fmt: off
 def scale_vals(args, in_pvals, scaler=None, inverse=False, smpl='', debug=True):
     """Scale in_pvals for a single sample to mean 0 and variance 1. To reverse a scaling, pass in the original scaler and set inverse=True"""
@@ -130,9 +112,9 @@ def write_per_cell_prediction(args, pred_fitnesses, enc_trees, true_fitnesses=No
     for param in args.params_to_predict:
         dfdata['%s-truth'%param] = []
     for itr, efit in enumerate(pred_fitnesses):
-        pred_ndicts = encode.decode_tree(enc_trees[itr], enc_fit=efit)
+        pred_ndicts = encode.decode_matrices(enc_trees[itr], efit)
         if true_fitnesses is not None:
-            true_ndicts = encode.decode_tree(enc_trees[itr], enc_fit=true_fitnesses[itr])
+            true_ndicts = encode.decode_matrices(enc_trees[itr], true_fitnesses[itr])
             assert len(pred_ndicts) == len(true_ndicts)
             for icell, (pdict, tdict) in enumerate(zip(pred_ndicts, true_ndicts)):
                 pdict['fitness-predicted'] = pdict['fitness']
@@ -165,10 +147,15 @@ def get_prediction(args, model, spld, scaler, smpl=None):
     elif args.model_type == 'per-cell':
         assert args.dl_bundle_size == 1
         pred_fitnesses = model.predict(spld["trees"]).numpy()
-        punscaled, _ = scale_vals(args, unroll_fitnesses(pred_fitnesses), smpl=smpl, scaler=scaler, inverse=True)  # *un* scale according to the training scaling (if scaler is not None, it should be the training scaler)
-        unscaled_fitnesses = roll_fitnesses(punscaled, pred_fitnesses)
+        # print(pred_fitnesses[0])
+        for pfit, etree in zip(pred_fitnesses, spld['trees']):
+            encode.reset_fill_entries(pfit, etree)
+        punscaled, _ = scale_vals(args, extract_fitnesses(pred_fitnesses), smpl=smpl, scaler=scaler, inverse=True)  # *un* scale according to the training scaling (if scaler is not None, it should be the training scaler)
+        unscaled_fitnesses = encode.matricize_fitnesses(punscaled, pred_fitnesses)
         if args.is_simu:
             true_fitnesses, true_resps, true_sstats = [spld[tk] for tk in ["fitnesses", "birth-responses", "sstats"]]
+            # print(true_fitnesses[0])
+            # assert False
         df = write_per_cell_prediction(args, unscaled_fitnesses, spld["trees"], true_fitnesses=true_fitnesses, true_resps=true_resps, true_sstats=true_sstats, smpl=smpl)
     else:
         assert False
@@ -224,11 +211,15 @@ def get_pvlists(args, samples):  # rearrange + convert response fcn lists to lis
             )
         ]
     elif args.model_type == 'per-cell':
-        pvals = unroll_fitnesses(samples['fitnesses'])
+        pvals = extract_fitnesses(samples['fitnesses'])
     else:
         assert False
     return pvals
 
+# ----------------------------------------------------------------------------------------
+def extract_fitnesses(matrix_list):
+    """Convert encoded fitness matrix into list of (length-1 lists) with fitness, for input to scale_vals"""
+    return [[nfo['fitness']] for fmtx in matrix_list for nfo in encode.decode_matrix('fitness', fmtx)]
 
 # ----------------------------------------------------------------------------------------
 def write_traintest_samples(args, smpldict):
@@ -358,7 +349,7 @@ def train_and_test(args, start_time):
         # affy_vals = [float(m['affinity']) for m in seqmeta]
         model = PerCellNetworkModel()
         model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum)
-        new_fitnesses = roll_fitnesses(pscaled['train'], smpldict['train']['fitnesses'])
+        new_fitnesses = encode.matricize_fitnesses(pscaled['train'], smpldict['train']['fitnesses'])
         assert len(smpldict['train']['fitnesses']) == len(new_fitnesses)
         model.fit(smpldict["train"]["trees"], new_fitnesses, epochs=args.epochs, validation_split=args.validation_split)
         return model
@@ -393,7 +384,7 @@ def train_and_test(args, start_time):
         for smpl in smplist:
             predict_vals = pscaled[smpl]
             if args.model_type == 'per-cell':
-                predict_vals = roll_fitnesses(predict_vals, smpldict[smpl]['fitnesses'])
+                predict_vals = encode.matricize_fitnesses(predict_vals, smpldict[smpl]['fitnesses'])
             encode.trivialize_encodings(smpldict[smpl]["trees"], args.model_type, predict_vals, noise=False, n_debug=3)
 
     if args.model_type == 'sigmoid':
@@ -507,6 +498,9 @@ def main():
         args.epochs = 10
     if args.action == 'train' and not args.is_simu:
         raise Exception('need to set --is-simu when training')
+    if args.use_trivial_encoding and not args.dont_scale_params:
+        print('  %s --use-trivial-encoding: turning on --dont-scale-params since parameter scaling needs fixing to work with trivial encoding' % utils.wrnstr())
+        args.dont_scale_params = True
 
     random.seed(args.random_seed)
     np.random.seed(args.random_seed)

@@ -24,7 +24,7 @@ from Bio.Seq import Seq
 import math
 
 sigmoid_params = ['xscale', 'xshift', 'yscale']  # ick
-affy_bins = [-15, -5, -3, -2, -1, -0.5, -0.25, 0.25, 0.5, 1, 1.5, 2, 2.5, 3.5, 4, 5, 7]
+affy_bins = [-15, -10, -7, -5, -3, -2, -1, -0.5, -0.25, 0.25, 0.5, 1, 1.5, 2, 2.5, 3.5, 4, 5, 7]
 fitness_bins = [-1.5, -1, -0.75, -0.5, -0.2, 0, 0.1, 0.25, 0.4, 0.5, 0.75, 1, 1.5, 2] #, 5, 15]
 
 def simple_fivemer_contexts(sequence: str):
@@ -264,6 +264,13 @@ def color_mutants(ref_seq, qseq, amino_acid=False):  # crappy version of fcn in 
 
 
 # ----------------------------------------------------------------------------------------
+def non_none(vlist):  # return the first non-None value in vlist (there are many, many places where i could go back and use this) [this avoids hard-to-read if/else statements that require writing the first val twice]
+    for val in vlist:
+        if val is not None:
+            return val
+    raise Exception('utils.non_none() called with all-None vlist: %s' % vlist)
+
+# ----------------------------------------------------------------------------------------
 def isclose(num1, num2, eps=1e-8, debug=False, fail=False, warn=False):
     """Return true if num1 and num2 are closer to each other than eps (numpy version is super slow."""
     if abs(num1 - num2) < eps:
@@ -470,7 +477,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             while itree < n_plots:
                 tree_index = int(prdfs[smpl]['tree-index'][irow])
                 if trivial_encoding:
-                    true_resp = LinearResponse() #SigmoidResponse(xscale=1, xshift=1, yscale=1.5)
+                    true_resp = LinearResponse()
                     xbounds = None
                 else:
                     pdict = {p : prdfs[smpl]['%s-truth'%p][irow] for p in sigmoid_params}
