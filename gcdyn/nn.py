@@ -380,7 +380,7 @@ class PerCellNetworkModel:
         optimizer = keras.optimizers.Adam(
             learning_rate=learning_rate, use_ema=True, ema_momentum=ema_momentum
         )
-        self.network.compile(loss=better_loss, optimizer=optimizer)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
+        self.network.compile(loss='mse', optimizer=optimizer)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
 
     # ----------------------------------------------------------------------------------------
     def fit(self, training_trees, training_fitnesses, epochs=30, validation_split=0):

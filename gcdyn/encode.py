@@ -1,5 +1,5 @@
 import numpy as np
-np.set_printoptions(edgeitems=30, linewidth=100000, formatter=dict(float=lambda x: "%.3g" % x))
+np.set_printoptions(edgeitems=30, linewidth=100000, formatter=dict(float=lambda x: "%5.2f" % x))  # np.set_printoptions(precision=3, suppress=True, linewidth=99999)
 import copy
 import csv
 import dill
@@ -12,22 +12,32 @@ from gcdyn import utils
 # fmt: off
 
 # ----------------------------------------------------------------------------------------
-mtx_lens = {'tree' : 6, 'fitness' : 4}  # expected number of rows in each matrix type
-  # 4 rows in encoded tree (leaf dists, internal dists, leaf phenotypes, internal phenotypes)  #, leaf is_filled, internal is_filled)
-  # 4 rows in encoded fitnesses (leaf fitnesses, internal fitnesses, leaf is_filled, internal is_filled)
+empty_val = -1e-8  # encoded tree entries with this value indicate that they weren't filled, i.e. don't correspond to a tree node
+eps = 1e-12
+def is_empty(val):
+    return abs(val - empty_val) < eps
+
+# ----------------------------------------------------------------------------------------
+def mprint(mtx):
+    for trow in mtx:
+        print(' '.join(utils.color('blue' if is_empty(v) else None, '%5.2f'%v) for v in trow))
+
+# expected number of rows in each matrix type
+mtx_lens = {
+    'tree' : 4,  # 4 rows in encoded tree (leaf dists, internal dists, leaf phenotypes, internal phenotypes)
+    'fitness' : 2  # 2 rows in encoded fitnesses (leaf fitnesses, internal fitnesses)
+}
+
 # indices of each row in encoded matrices
 imtxs = {
     'tree' : {
         'distance'  : {'leaf' : 0, 'internal' : 1},
         'phenotype' : {'leaf' : 2, 'internal' : 3},
-        'fill'      : {'leaf' : 4, 'internal' : 5},
     },
     'fitness' : {
         'fitness' : {'leaf' : 0, 'internal' : 1},
-        'fill'    : {'leaf' : 2, 'internal' : 3},
     }
 }
-mtx_fill_indices = {mtype : [i for i in imtxs[mtype].get('fill', {}).values()] for mtype in imtxs}  # indices of 'fill' rows for each mtype
 
 # ----------------------------------------------------------------------------------------
 def encode_tree(intree, max_leaf_count=None, ladderize=True, dont_scale=False, mtype='tree', bresp=None):
@@ -38,9 +48,7 @@ def encode_tree(intree, max_leaf_count=None, ladderize=True, dont_scale=False, m
     The CBLV has been adapted to include the `x` attribute of every node.
     Thus, in reference to figure 2a (v) in Voznica et. al (2022), two additional
     rows have been appended: a third row of `x` for the nodes in row 1, and a
-    fourth row of `x` for the nodes in row 2. We also add fifth and sixth rows that
-    determine whether the corresponding entries in the first through fourth rows are
-    filled, i.e. unfilled (padded) values correspond to 0s in the fifth and sixth rows.
+    fourth row of `x` for the nodes in row 2.
 
     Note that by default this ladderizes the tree first, so if you've already done
     this you should set ladderize to False.
@@ -66,32 +74,15 @@ def encode_tree(intree, max_leaf_count=None, ladderize=True, dont_scale=False, m
         for child in tmptr.children[num_children // 2:]:  # trivial loop over single rightand subtree/node
             yield from traverse_inorder(child)
     # ----------------------------------------------------------------------------------------
-    def fill_leaf(node, leaf_index, previous_ancestor):
+    def fill_node(ntype, node, index, dist):
+        imt = imtxs[mtype]
         if mtype == 'tree':
-            matrix[0, leaf_index] = node.t - previous_ancestor.t
-            matrix[2, leaf_index] = node.x
-            matrix[4, leaf_index] = 1  # it's kind of awkward to have 'fill' rows in 'tree' (as well as in fitness), but it makes decoding simpler, since then you don't need to also have a 'fitness' matrix at hand
+            matrix[imt['distance'][ntype], index] = dist
+            matrix[imt['phenotype'][ntype], index] = node.x
         elif mtype == 'fitness':
-            matrix[0, leaf_index] = bresp.λ_phenotype(node.x)
-            matrix[2, leaf_index] = 1
-    # ----------------------------------------------------------------------------------------
-    def fill_ancestor(node, ancestor_index):
-        if mtype == 'tree':
-            matrix[1, ancestor_index] = node.t
-            matrix[3, ancestor_index] = node.x
-            matrix[5, ancestor_index] = 1
-        elif mtype == 'fitness':
-            matrix[1, ancestor_index] = bresp.λ_phenotype(node.x)
-            matrix[3, ancestor_index] = 1
-    # ----------------------------------------------------------------------------------------
-    def set_unfilled_values(matrix):
-        for irow in range(len(matrix)):
-            for icol in range(len(matrix[irow])):
-                if np.isnan(matrix[irow][icol]):
-                    if irow in mtx_fill_indices[mtype]:  # is_filled rows need to be zero to signal that they weren't filled
-                        matrix[irow][icol] = 0
-                    else:
-                        matrix[irow][icol] = 0
+            matrix[imt['fitness'][ntype], index] = bresp.λ_phenotype(node.x)
+        if any(is_empty(matrix[imt[k][ntype], index]) for k in imt):
+            raise Exception('filled matrix with empty value')
     # ----------------------------------------------------------------------------------------
     assert mtype in ['tree', 'fitness']
     if not dont_scale:
@@ -106,29 +97,26 @@ def encode_tree(intree, max_leaf_count=None, ladderize=True, dont_scale=False, m
     if max_leaf_count is None:
         max_leaf_count = len(worktree.get_leaves())
     assert len(worktree.get_leaves()) <= max_leaf_count
-    # matrix = np.zeros((4 if mtype=='tree' else 2, max_leaf_count))
-    matrix = np.full((mtx_lens[mtype], max_leaf_count), float('nan'))  # don't use None, since then numpy makes it an 'object' array, and crashes when you read it (unless you set a pickle arg)
+    matrix = np.full((mtx_lens[mtype], max_leaf_count), empty_val)
 
     leaf_index, ancestor_index = 0, 0
     previous_ancestor = worktree  # the root
     for node in traverse_inorder(worktree):
         if node.is_leaf():
-            fill_leaf(node, leaf_index, previous_ancestor)
+            fill_node('leaf', node, leaf_index, node.t - previous_ancestor.t)
             leaf_index += 1
         else:
-            fill_ancestor(node, ancestor_index)
+            fill_node('internal', node, ancestor_index, node.t)
             ancestor_index += 1
             previous_ancestor = node
 
-    set_unfilled_values(matrix)
     return matrix
 
 # ----------------------------------------------------------------------------------------
 def decode_matrices(enc_tree, enc_fit):
-    for nt in ['leaf', 'internal']:  # both matrices must have the same entries filled (i.e. both 'fill' rows are identical)
-        assert all(enc_tree[imtxs['tree']['fill'][nt]] == enc_fit[imtxs['fitness']['fill'][nt]])
+    assert set(len(r) for r in enc_tree) == set(len(r) for r in enc_fit)  # all rows the same length
     tdicts, fdicts = decode_matrix('tree', enc_tree), decode_matrix('fitness', enc_fit)
-    assert len(tdicts) == len(fdicts)  # this doesn't really enforce that they two matrices are from the same tree, but it's still worth checking
+    assert len(tdicts) == len(fdicts)  # got the same number of info dicts from each matrix (this doesn't really enforce that they two matrices are from the same tree, but it's still worth checking)
     for td, fd in zip(tdicts, fdicts):
         td.update(fd)
     return tdicts
@@ -136,53 +124,54 @@ def decode_matrices(enc_tree, enc_fit):
 # ----------------------------------------------------------------------------------------
 # NOTE could also make version of this that used original (unencoded) tree to attach nodes/names to each dict
 def decode_matrix(mtype, matrix):
-    """ Reverse the encoding of a tree (or fitnesses), i.e. convert encoded tree <enc_tree> into list of dicts,
-    where each dict has info for one node. If an encoded fitness matrix <enc_fit> is set, this also includes
-    fitness information. Can set either enc_tree or enc_fit to None."""
+    """ Reverse the encoding of a tree (or fitnesses), i.e. convert encoded matrix into list of dicts,
+    where each dict has info for one node."""
+    # ----------------------------------------------------------------------------------------
+    def irow(tkey, ntype):
+        return imtxs[mtype][tkey][ntype]
+    # ----------------------------------------------------------------------------------------
     assert len(matrix) == mtx_lens[mtype]  # expected number of rows
     assert len(set(len(r) for r in matrix)) == 1  # all rows the same length
     ndicts = []
-    imt = imtxs[mtype]
-    for icol in range(len(matrix[0])):
-        for ntype in ['leaf', 'internal']:
-            if matrix[imt['fill'][ntype]][icol] not in [0, 1]:
-                raise Exception('unexpected fill value: %f' % matrix[imt['fill'][ntype]][icol])
-            if matrix[imt['fill'][ntype]][icol] == 0:  # if this entry wasn't filled (i.e. it doesn't correspond to a node)
+    imt = imtxs[mtype]  # shortand for last bit of index dict
+    for ntype in ['leaf', 'internal']:
+        for icol in range(len(matrix[0])):
+            if any(is_empty(matrix[irow(k, ntype)][icol]) for k in imt):  # if this entry wasn't filled (i.e. it doesn't correspond to a node)
+                assert all(is_empty(matrix[irow(k, ntype)][icol]) for k in imt)  # if any are key [distance/phenotype or fitness] is unfilled, they all should be
                 continue
-            nfo = {}
-            for tk in [k for k in imt if k!='fill']:
-                nfo[tk] = matrix[imt[tk][ntype]][icol]
+            nfo = {k : matrix[irow(k, ntype)][icol] for k in imt}
             ndicts.append(nfo)
     return ndicts
 
 # ----------------------------------------------------------------------------------------
-# the NN predicts not only the fitness rows (which we want) but also the fill rows, which kind of sucks I think
-# (but maybe isn't a big deal), so we have to go and fix the fill rows using the original encoded tree
+# The NN predicts values for unfilled entries in the fitness matrix, which we then have to reset to <empty_val> before using
 def reset_fill_entries(enc_fit, enc_tree):
-    """Reset [presumably incorrect] fill rows in <enc_fit> according to fill rows in <enc_tree>"""
     for ntype in ['leaf', 'internal']:
-        ifit, itree = [imtxs[m]['fill'][ntype] for m in ['fitness', 'tree']]
-        new_row = enc_tree[itree]
-        assert len(enc_fit[ifit]) == len(new_row)
-        for icol in range(len(enc_fit[ifit])):
-            enc_fit[ifit][icol] = new_row[icol]
+        irow_fit = imtxs['fitness']['fitness'][ntype]
+        irow_tree = imtxs['tree']['distance'][ntype]  # could also use 'phenotype'
+        fit_row, tree_row = enc_fit[irow_fit], enc_tree[irow_tree]
+        assert len(fit_row) == len(tree_row)
+        for icol in range(len(fit_row)):
+            if is_empty(tree_row[icol]):  # if the encoded tree has <empty_val> here, we need to set the corresponding value in <enc_fit> also to <empty_val>
+                fit_row[icol] = empty_val
 
 # ----------------------------------------------------------------------------------------
-# "roll" up single list of values in <scale_vals> into the shape (list of matrices) specified by <template_matrices> (scaling has to happen on simple list of values, and outputs  <scale_vals>, then we have to put things back into matrices for the NN)
+# convert the list of single lists of values in <scale_vals> into the shape (list of matrices) specified by <template_matrices> (scaling has to happen on simple list of values, and outputs <scale_vals>, then we have to put things back into matrices for the NN)
+# NOTE template matrix is used only for 1) shape or resulting matrix and 2) locations of unfilled entries, i.e. values of <empty_val>
 def matricize_fitnesses(scale_vals, template_matrices):
     iglobal, new_fitnesses = 0, []
+    tkey = 'fitness'
     # assert len(scale_vals) == 2 * len(template_matrices[0][0]) * len(template_matrices)  # total number of scaled values vs number or entries in fitness rows of matrices (not actually equal since unfilled values don't go in scale_vals)
-    for farr in template_matrices:
-        new_array = copy.deepcopy(farr)
+    for tmtx in template_matrices:
+        nmtx = copy.deepcopy(tmtx)
         for ntype in ['leaf', 'internal']:
-            irow = imtxs['fitness']['fitness'][ntype]
-            for icol in range(len(new_array[irow])):
-                assert new_array[imtxs['fitness']['fill'][ntype]][icol] in [0, 1]
-                if new_array[imtxs['fitness']['fill'][ntype]][icol] == 0:  # skip unfilled values
+            irow = imtxs['fitness'][tkey][ntype]
+            for icol in range(len(nmtx[irow])):
+                if is_empty(tmtx[irow][icol]):  # if this entry wasn't filled (i.e. it doesn't correspond to a node)
                     continue
-                new_array[irow][icol] = scale_vals[iglobal][0]  # [0] is because we only scale one parameter (fitness) for per-cell prediction (whereas for sigmoid we scaled the three sigmoid parameters)
+                nmtx[irow][icol] = scale_vals[iglobal][0]  # [0] is because we only scale one parameter (fitness) for per-cell prediction (whereas for sigmoid we scaled the three sigmoid parameters)
                 iglobal += 1
-        new_fitnesses.append(new_array)
+        new_fitnesses.append(nmtx)
     return new_fitnesses
 
 # ----------------------------------------------------------------------------------------
@@ -254,14 +243,11 @@ def trivialize_encodings(encoded_trees, model_type, predict_vals, noise=False, m
     # ----------------------------------------------------------------------------------------
     if debug or n_debug > 0:
         print(" trivializing encodings")
-        np.set_printoptions(edgeitems=30, linewidth=100000, formatter=dict(float=lambda x: "%.3g" % x))
     for itree, etree in enumerate(encoded_trees):
         if debug or itree < n_debug:
             print("  itree %d" % itree)
             print(estr("before", etree))
         for irow in range(len(etree)):
-            if irow in imtxs['tree']['fill'].values():
-                continue
             for icol in range(len(etree[irow])):
                 etree[irow][icol] = getval(itree, irow, icol)
         if debug or itree < n_debug:
@@ -289,7 +275,6 @@ def pad_trees(
         )
         if debug and itree == 0:
             before_len = len(etree[0])
-            np.set_printoptions(precision=3, suppress=True, linewidth=99999)
             print("  padded length from %d to %d" % (before_len, len(etree[0])))
             # print(etree)
     return np.array(padded_trees)

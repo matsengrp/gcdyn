@@ -147,15 +147,15 @@ def get_prediction(args, model, spld, scaler, smpl=None):
     elif args.model_type == 'per-cell':
         assert args.dl_bundle_size == 1
         pred_fitnesses = model.predict(spld["trees"]).numpy()
-        # print(pred_fitnesses[0])
         for pfit, etree in zip(pred_fitnesses, spld['trees']):
             encode.reset_fill_entries(pfit, etree)
+        # encode.mprint(pred_fitnesses[0])
         punscaled, _ = scale_vals(args, extract_fitnesses(pred_fitnesses), smpl=smpl, scaler=scaler, inverse=True)  # *un* scale according to the training scaling (if scaler is not None, it should be the training scaler)
         unscaled_fitnesses = encode.matricize_fitnesses(punscaled, pred_fitnesses)
         if args.is_simu:
             true_fitnesses, true_resps, true_sstats = [spld[tk] for tk in ["fitnesses", "birth-responses", "sstats"]]
-            # print(true_fitnesses[0])
-            # assert False
+            # encode.mprint(true_fitnesses[0])
+            # sys.exit()
         df = write_per_cell_prediction(args, unscaled_fitnesses, spld["trees"], true_fitnesses=true_fitnesses, true_resps=true_resps, true_sstats=true_sstats, smpl=smpl)
     else:
         assert False
@@ -202,8 +202,9 @@ def get_pval(pname, bresp, sts):  # get parameter value from response fcn
 
 
 # ----------------------------------------------------------------------------------------
-def get_pvlists(args, samples):  # rearrange + convert response fcn lists to lists of parameter values
-    if args.model_type == 'sigmoid':
+# convert list of output matrices (either sigmoid params or fitnesses) to a list of lists of values (for each parameter, smashing all matrices into one list)
+def get_pvlists(args, samples):
+    if args.model_type == 'sigmoid':  # rearrange + convert response fcn lists to lists of parameter values
         pvals = [
             [get_pval(pname, bresp, sts) for pname in args.params_to_predict]
             for bresp, sts in zip(
@@ -217,7 +218,7 @@ def get_pvlists(args, samples):  # rearrange + convert response fcn lists to lis
     return pvals
 
 # ----------------------------------------------------------------------------------------
-def extract_fitnesses(matrix_list):
+def extract_fitnesses(matrix_list):  # reverse of encode.matricize_fitnesses()
     """Convert encoded fitness matrix into list of (length-1 lists) with fitness, for input to scale_vals"""
     return [[nfo['fitness']] for fmtx in matrix_list for nfo in encode.decode_matrix('fitness', fmtx)]
 
