@@ -441,7 +441,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             fnames.append([])
         fnames[-1].append(fn)
     # ----------------------------------------------------------------------------------------
-    def plot_responses(smpl, n_max_plots=25):
+    def plot_responses(smpl, n_max_plots=10):
         # ----------------------------------------------------------------------------------------
         def plot_true_pred_pair(true_resp, pred_resp, affy_vals, plotname, titlestr=None):
             fn = plot_many_curves(outdir+'/'+smpl, plotname, [{'birth-response' : r} for r in [true_resp, pred_resp]], titlestr=titlestr,
@@ -463,11 +463,11 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             lmdict[int(mfo['tree-index'])].append(mfo)
         if model_type == 'sigmoid':
             for irow in range(n_plots):
-                assert validation_indices is None or irow not in validation_indices  # would just want to plot with a different color or label or something, but i don't feel like implementing atm
                 tree_index = int(prdfs[smpl]['tree-index'][irow])
                 pdicts = [{p : prdfs[smpl]['%s-%s'%(p, tp)][irow] for p in sigmoid_params} for tp in ['truth', 'predicted']]
                 true_resp, pred_resp = [SigmoidResponse(**pd) for pd in pdicts]
-                plot_true_pred_pair(true_resp, pred_resp, [float(m['affinity']) for m in lmdict[tree_index]], 'true-vs-inf-response-%d'%irow, titlestr='%s: response index %d / %d' % (smpl, irow, n_tree_preds))
+                smpstr = smpl if validation_indices is None or tree_index not in validation_indices else 'validation'
+                plot_true_pred_pair(true_resp, pred_resp, [float(m['affinity']) for m in lmdict[tree_index]], 'true-vs-inf-response-%d'%irow, titlestr='%s: response index %d / %d' % (smpstr, irow, n_tree_preds))
                 # pfo_list.append({'birth-response' : pred_resp})
             # fn = plot_many_curves(outdir, '%sall-response'%smpl, pfo_list, titlestr='%s: %d / %d responses' % (smpl, n_plots, n_tree_preds))
             # add_fn(fn)
@@ -691,7 +691,7 @@ def get_resp_vals(resp, xbounds, nsteps, normalize=False):
     return rvals
 
 # ----------------------------------------------------------------------------------------
-def resp_fcn_diff(resp1, resp2, xbounds, dont_normalize=False, nsteps=40, debug=False):
+def resp_fcn_diff(resp1, resp2, xbounds, dont_normalize=False, nsteps=40, debug=False):  # see also nn.curve_loss()
     # ----------------------------------------------------------------------------------------
     def prdbg():
         def prvls(lbl, vlist, p=3):
@@ -749,6 +749,13 @@ def group_by_xvals(xvals, yvals, xbins, skip_overflows=False, debug=False):  # N
 # ----------------------------------------------------------------------------------------
 def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None, colors=None, add_true_pred_text=False,
                      pred_xvals=None, pred_yvals=None, xbounds=None, xbins=affy_bins):
+    # ----------------------------------------------------------------------------------------
+    def add_curve_loss(resp_1, resp_2, diff_vals):
+        from gcdyn.nn import curve_loss
+        import tensorflow as tf
+        def split_resp(r): return [float(v) for v in [r.xscale, r.xshift, r.yscale]]
+        diff_vals.append(curve_loss(tf.constant([split_resp(resp_1)]), tf.constant([split_resp(resp_2)])))
+    # ----------------------------------------------------------------------------------------
     mpl_init()
     fig, ax = plt.subplots()
     if affy_vals is not None:
@@ -769,8 +776,10 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
     if add_true_pred_text:
         assert len(pfo_list) == 2
         assert affy_vals is not None
-        diff_val = resp_fcn_diff(pfo_list[0]['birth-response'], pfo_list[1]['birth-response'], [mfn(affy_vals) for mfn in [min, max]])
-        add_param_text(fig, pfo_list[0], inf_pfo=pfo_list[1], diff_val=diff_val)
+        resp_1, resp_2 = [pfo_list[i]['birth-response'] for i in [0, 1]]
+        diff_vals = [resp_fcn_diff(resp_1, resp_2, [mfn(affy_vals) for mfn in [min, max]])]
+        # add_curve_loss(resp_1, resp_2, diff_vals)  # uncomment to print also the diff from the curve loss fcn (it should be the same, modulo different xbounds and nsteps
+        add_param_text(fig, pfo_list[0], inf_pfo=pfo_list[1], diff_vals=diff_vals)
     ax.set(title='%d responses' % len(pfo_list) if titlestr is None else titlestr)
     fn = "%s/%s.svg" % (plotdir, plotname)
     plt.savefig(fn)
@@ -787,11 +796,12 @@ def affy_plot(affy_vals, ax, ax2=None, n_bins=30, xbounds=[-5, 5]):
     sns.histplot(affy_vals if len(affy_vals)>1 else all_vals, ax=ax2, multiple="stack", binwidth=(xmax - xmin) / n_bins)
 
 # ----------------------------------------------------------------------------------------
-def add_param_text(fig, pfo, inf_pfo=None, diff_val=None):
+def add_param_text(fig, pfo, inf_pfo=None, diff_vals=None):
     param_text = ['%s %.1f%s' % (p, getattr(pfo['birth-response'], p), '' if inf_pfo is None else ' (%.1f)'%getattr(inf_pfo['birth-response'], p)) for p in ['xscale', 'xshift', 'yscale']]
-    if diff_val is not None:
-        param_text.append('diff %.2f' % diff_val)
-    xv, yv = (0.6, 0.25) if inf_pfo is None else (0.19, 0.7 if diff_val is None else 0.65)
+    if diff_vals is not None:
+        for dv in diff_vals:
+            param_text.append('diff %.2f' % dv)
+    xv, yv = (0.6, 0.25) if inf_pfo is None else (0.19, 0.7 if diff_vals is None else 0.65)
     fig.text(xv, yv, '\n'.join(param_text), fontsize=17)
 
 # ----------------------------------------------------------------------------------------

@@ -39,7 +39,7 @@ def scale_vals(args, in_pvals, scaler=None, inverse=False, smpl='', debug=True):
         def get_lists(pvs,):  # picks values from rows/columns to get a list of values for each parameter
             return [[plist[ivar] for plist in pvs]]
         def fnstr(pvs, fn):  # apply fn to each list from get_lists(), returns resulting combined str
-            return " ".join("%7.2f" % fn(vl) for vl in get_lists(pvs))
+            return " ".join("%8.2f" % fn(vl) for vl in get_lists(pvs))
         assert args.model_type in ['sigmoid', 'per-cell']
         for ivar, vname in enumerate(svar_list):
             for dstr, pvs in zip(("before", "after"), (pvals_before, pvals_scaled)):
@@ -58,7 +58,7 @@ def scale_vals(args, in_pvals, scaler=None, inverse=False, smpl='', debug=True):
         if debug:  # and smpl == smplist[0]:
             print("    %sscaling %d variables: %s" % ("reverse " if inverse else "", len(svar_list), svar_list,))
             print("                                  before                             after")
-            print("                           mean   var     min   max         mean   var     min   max")
+            print("                           mean    var      min    max          mean    var      min    max")
         print_debug(in_pvals, sc_pvals)
     return sc_pvals, scaler
 
@@ -339,8 +339,8 @@ def train_and_test(args, start_time):
         responses = [[ConstantResponse(v) for v in vlist] for vlist in pscaled["train"]]  # order corresponds to args.params_to_predict (constant response is just a container for one value, and note we don't bother to set the name)
         model = ParamNetworkModel(responses[0], bundle_size=args.dl_bundle_size)
         assert args.params_to_predict == utils.sigmoid_params
-        model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, prebundle_layer_cfg=args.prebundle_layer_cfg)
-        model.fit(smpldict["train"]["trees"], responses, epochs=args.epochs, validation_split=args.validation_split)
+        model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, prebundle_layer_cfg=args.prebundle_layer_cfg, loss_fcn=args.loss_fcn)
+        model.fit(smpldict["train"]["trees"], responses, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
         with open(encode.output_fn(args.outdir, 'example-responses', None), 'wb') as dfile:
             dill.dump(responses[0], dfile)  # dump list of response fcns for one tree (so that when reading the model to infer, we can tell the neural network the structure of the responses)
         return model
@@ -349,10 +349,10 @@ def train_and_test(args, start_time):
         # seqmeta = read_meta_csv(args.indir)
         # affy_vals = [float(m['affinity']) for m in seqmeta]
         model = PerCellNetworkModel()
-        model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum)
+        model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, loss_fcn=args.loss_fcn)
         new_fitnesses = encode.matricize_fitnesses(pscaled['train'], smpldict['train']['fitnesses'])
         assert len(smpldict['train']['fitnesses']) == len(new_fitnesses)
-        model.fit(smpldict["train"]["trees"], new_fitnesses, epochs=args.epochs, validation_split=args.validation_split)
+        model.fit(smpldict["train"]["trees"], new_fitnesses, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
         return model
     # ----------------------------------------------------------------------------------------
     samples = read_tree_files(args)
@@ -469,7 +469,9 @@ def get_parser():
     parser.add_argument("--model-dir", help="file with saved deep learning model for inference")
     parser.add_argument("--outdir", required=True, help="output directory")
     parser.add_argument("--model-type", choices=['sigmoid', 'per-cell'], default='per-cell', help='type of neural network model, sigmoid: infer 3 params of sigmoid fcn, per-cell: infer fitness of each individual cell')
+    parser.add_argument("--loss-fcn", choices=['mse', 'curve'], default='mse')
     parser.add_argument("--epochs", type=int, default=30)
+    parser.add_argument("--batch-size", type=int)
     parser.add_argument("--dl-bundle-size", type=int, default=1, help='\'dl-\' is to differentiate from \'simu-\' bundle size when calling this from cf-gcdyn.py')
     parser.add_argument("--discard-extra-trees", action="store_true", help='By default, the number of trees during inference must be evenly divisible by --dl-bundle-size. If this is set, however, any extras are discarded to allow inference.')
     parser.add_argument("--dropout-rate", type=float, default=0)
@@ -502,6 +504,8 @@ def main():
     if args.use_trivial_encoding and not args.dont_scale_params:
         print('  %s --use-trivial-encoding: turning on --dont-scale-params since parameter scaling needs fixing to work with trivial encoding' % utils.wrnstr())
         args.dont_scale_params = True
+    if args.model_type == 'sigmoid' and args.loss_fcn == 'curve' and not args.dont_scale_params:
+        raise Exception('can\'t scale output parameter values for sigmoid curve loss')
 
     random.seed(args.random_seed)
     np.random.seed(args.random_seed)

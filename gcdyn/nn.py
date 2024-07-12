@@ -6,8 +6,9 @@ import tensorflow as tf
 import time
 import sys
 from functools import reduce
+import math
 
-from gcdyn import poisson, encode
+from gcdyn import poisson, encode, utils
 
 poisson.set_backend(use_jax=True)
 
@@ -99,6 +100,38 @@ class PerCellTransposeLayer(layers.Layer):
         return tf.transpose(inputs, perm=(0, 2, 1))
 
 # ----------------------------------------------------------------------------------------
+@tf.function  # NOTE need to comment this decorator in order for .numpy() to work (and add run_eagerly to .compile() call, but note that training is WAY the fuck slower if it's commented
+def curve_loss(y_true, y_pred):  # copied from/modeled after utils.resp_fcn_diff()
+    # ----------------------------------------------------------------------------------------
+    def params(yt):
+        assert utils.sigmoid_params == ['xscale', 'xshift', 'yscale']  # ick
+        pvlist = tf.split(yt, [1, 1, 1], axis=1)  # axis 0 is N samples
+        return {p : v for p, v in zip(utils.sigmoid_params, pvlist)}
+    # ----------------------------------------------------------------------------------------
+    def sigval(xv, pvals):
+        return pvals['yscale'] * tf.math.sigmoid(pvals['xscale'] * (xv - pvals['xshift']))
+    # ----------------------------------------------------------------------------------------
+    def print_debug():  # NOTE to run this, you probably need to comment @tf.function above, as well as add run_eagerly=True in .compile()
+        print('params:', y_true, y_pred)
+        print('     true    ', true_svals.numpy())
+        print('     pred    ', pred_svals.numpy())
+        print('     diff    ', (true_svals - pred_svals).numpy())
+        print('     abs diff', tf.math.abs(true_svals - pred_svals).numpy())
+        print('    sum %.3f   diff %.5f' % (tf.reduce_sum(tf.math.abs(true_svals - pred_svals) * tf.constant(dx)).numpy(), normed_area.numpy()))
+    # ----------------------------------------------------------------------------------------
+    xbounds = [-5, 5]  # once we're passing in input affinity values, we won't need this somewhat abritrary choice
+    nsteps = 20  # even with like 10k steps training doesn't get any slower, so could increase this a lot
+    dx = (xbounds[1] - xbounds[0]) / nsteps
+    xvals = tf.constant(list(onp.arange(xbounds[0], 0, dx)) + list(onp.arange(0, xbounds[1] + dx, dx)), dtype=tf.float32)
+    true_svals, pred_svals = [sigval(xvals, params(yv)) for yv in [y_true, y_pred]]
+    sumv = tf.reduce_sum(tf.math.abs(true_svals - pred_svals) * tf.constant(dx))
+    all_yvals = tf.concat([true_svals, pred_svals], 0)
+    rect_area = tf.math.abs(tf.constant(xbounds[1] - xbounds[0], dtype=tf.float32)) * tf.math.abs(tf.math.reduce_max(all_yvals) - tf.math.reduce_min(all_yvals))
+    normed_area = sumv / rect_area
+    # print_debug()
+    return normed_area
+
+# ----------------------------------------------------------------------------------------
 class ParamNetworkModel:
     """
     Adapts Voznica et. al (2022) for trees with a state attribute.
@@ -182,7 +215,7 @@ class ParamNetworkModel:
         optimizer = keras.optimizers.Adam(
             learning_rate=learning_rate, use_ema=True, ema_momentum=ema_momentum
         )
-        self.network.compile(loss=loss_fcn, optimizer=optimizer)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
+        self.network.compile(loss=curve_loss if loss_fcn=='curve' else loss_fcn, optimizer=optimizer)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
 
     @classmethod
     def _encode_responses(
@@ -278,7 +311,7 @@ class ParamNetworkModel:
         """
         return self._reshape_data_wrt_bundle_size(onp.stack(trees))
 
-    def fit(self, training_trees: list[onp.ndarray], responses: list[list[poisson.Response]], epochs: int = 30, validation_split: float = 0):
+    def fit(self, training_trees: list[onp.ndarray], responses: list[list[poisson.Response]], epochs: int = 30, batch_size: int = None, validation_split: float = 0):
         """
         Trains neural network on given trees and responses.
         training_trees: list of encoded trees
@@ -295,6 +328,7 @@ class ParamNetworkModel:
             self._prepare_trees_for_network_input(training_trees),
             response_parameters,
             epochs=epochs,
+            batch_size=batch_size,
             callbacks=[Callback(epochs, use_validation=validation_split > 0)],
             verbose=0,
             validation_split=validation_split,
@@ -319,14 +353,10 @@ class ParamNetworkModel:
 
 # ----------------------------------------------------------------------------------------
 @tf.function
-# ignore nans (still gets nans in lass?): https://stackoverflow.com/questions/59831930/how-can-i-replace-nans-in-keras-tensor-with-different-value-i-have-a-tensorflow
-# ingore (with tf.gather()) parts of tensor:  https://stackoverflow.com/questions/53216564/how-to-ignore-part-of-input-and-output-in-keras
-# ah, just enforce that no input values have the empty fill value
-def better_loss(y_true, y_pred):
-    y_true, fill_true = tf.split(y_true, [2, 2], axis=1)
-    y_pred, fill_pred = tf.split(y_pred, [2, 2], axis=1)
+# I think this works, but I haven't tested a ton since the per-cell prediction isn't really working well evefn with constant N leaves
+def per_cell_masked_loss(y_true, y_pred):
     loss = tf.square(y_true - y_pred)
-    loss = tf.where(tf.cast(fill_true, tf.bool), loss, tf.zeros_like(loss))  # if filled (fill_true == 1) use <loss>, otherwise set to zero (NOTE fill_pred is [probably?] useless)
+    loss = tf.where(tf.cast(encode.is_empty(y_true), tf.bool), tf.zeros_like(loss), loss)  # if filled (fill_true == 1) use <loss>, otherwise set to zero (NOTE fill_pred is [probably?] useless)
     return tf.reduce_sum(loss)  # tf.reduce_mean(loss)
 
 # ----------------------------------------------------------------------------------------
@@ -380,10 +410,10 @@ class PerCellNetworkModel:
         optimizer = keras.optimizers.Adam(
             learning_rate=learning_rate, use_ema=True, ema_momentum=ema_momentum
         )
-        self.network.compile(loss='mse', optimizer=optimizer)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
+        self.network.compile(loss=loss_fcn, optimizer=optimizer) #, run_eagerly=True)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
 
     # ----------------------------------------------------------------------------------------
-    def fit(self, training_trees, training_fitnesses, epochs=30, validation_split=0):
+    def fit(self, training_trees, training_fitnesses, epochs=30, batch_size=None, validation_split=0):
         self.network.fit(
             onp.stack(training_trees),
             onp.stack(training_fitnesses),
