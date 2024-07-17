@@ -35,38 +35,61 @@ def csvfn(args, smpl):
 # ----------------------------------------------------------------------------------------
 class LScaler(object):
     # ----------------------------------------------------------------------------------------
-    def __init__(self, args, var_list, smpldict=None, scaler=None, smpl=''):
+    def __init__(self, args, var_list, in_tensors, smpl=''):
         self.args = args
         self.var_list = var_list
-        self.scaler = scaler
-        if smpldict is not None:
-            self.in_pvals = self.get_pvlists(smpldict)
-            self.pscaled = self.scale(self.in_pvals, smpl=smpl)
+        self.scaler = None
+        self.in_tensors = in_tensors
+        self.in_vals = self.extract_tree_vals(self.in_tensors)  # in_vals and out_vals are formatted for scaling (list or rows, each row with an entry for each variable)
+        self.out_vals = self.scale(self.in_vals, smpl=smpl)
+        self.out_tensors = self.re_encode_tree_vals(self.out_vals, self.in_tensors)
 
     # ----------------------------------------------------------------------------------------
-    # convert list of output matrices (either sigmoid params or fitnesses) to a list of lists of values (smashing all matrices into one list for each parameter)
-    def get_pvlists(self, samples):
-        if self.args.model_type == 'sigmoid':  # rearrange + convert response fcn lists to lists of parameter values
-            pvals = [
-                [get_pval(pname, bresp, sts) for pname in self.args.params_to_predict]
-                for bresp, sts in zip(
-                    samples["birth-responses"], samples["sstats"]
-                )
-            ]
-        elif self.args.model_type == 'per-cell':
-            pvals = extract_fitnesses(samples['fitnesses'])
-        else:
-            assert False
-        return pvals
+    # convert encoded trees to one-variable-per-column format needed by scaler (reverse of re_encode_tree_vals())
+    def extract_tree_vals(self, matrix_list):
+        rvals = []
+        for etree in matrix_list:
+            ndicts = encode.decode_matrix('tree', etree)
+            rvals += [[n[k] for k in self.var_list] for n in ndicts]
+        return rvals
 
     # ----------------------------------------------------------------------------------------
-    def reverse_scaling(self, in_pvals, smpl=''):  # apply inverse of existing scaler to <in_pvals>
-        assert self.scaler is not None
-        return self.scale(in_pvals, inverse=True, smpl=smpl)
+    # convert values formatted for scaling <scale_vals> (each entry in first list is a list with an entry for each parameter value) back to the original list of matrices format specified by <template_matrices>
+    # NOTE template matrix is used for 1) shape or resulting matrix and 2) locations of unfilled entries, i.e. values of <empty_val>
+    def re_encode_tree_vals(self, scale_vals, template_matrices, mtype='tree'):
+        # ----------------------------------------------------------------------------------------
+        def set_entries(tkey, tmtx, nmtx):
+            for ntype in ['leaf', 'internal']:
+                irow = encode.imtxs[mtype][tkey][ntype]
+                for icol in range(len(nmtx[irow])):
+                    if encode.is_empty(tmtx[irow][icol]):  # if this entry wasn't filled (i.e. it doesn't correspond to a node)
+                        continue
+                    nmtx[irow][icol] = scale_vals[iglobals[tkey]][self.var_list.index(tkey)]  # [0] is because we only scale one parameter (fitness) for per-cell prediction (whereas for sigmoid we scaled the three sigmoid parameters)
+                    iglobals[tkey] += 1
+        # ----------------------------------------------------------------------------------------
+        assert self.var_list == ['distance', 'phenotype']  # would need to change things if not
+        iglobals = {k : 0 for k in self.var_list}  # index in 1-d list <scale_vals> (don't actually need two of them, they're the same, but this way it's easier to not increment twice)
+        new_trees = [copy.deepcopy(tmtx) for tmtx in template_matrices]
+        for tkey in self.var_list:
+            for tmtx, nmtx in zip(template_matrices, new_trees):
+                set_entries(tkey, tmtx, nmtx)
+        return new_trees
+
+    # ----------------------------------------------------------------------------------------
+    # apply existing scaling to new tensors <in_tensors>
+    def apply_scaling(self, in_tensors, smpl='', debug=True):
+        assert self.scaler is not None or self.args.dont_scale_params
+        in_vals = self.extract_tree_vals(in_tensors)
+        out_vals = self.scale(in_vals, smpl=smpl)
+        out_tensors = self.re_encode_tree_vals(out_vals, in_tensors)
+        return out_tensors
 
     # ----------------------------------------------------------------------------------------
     def scale(self, invals, inverse=False, smpl='', debug=True):
-        """Scale invals for a single sample to mean 0 and variance 1. To reverse a scaling, pass in the original scaler and set inverse=True"""
+        """Scale <invals> to mean 0 and variance 1.
+        To reverse a scaling, pass in the original scaler and set inverse=True.
+        <invals> should be a list of rows, where each row has an entry for each parameter value.
+        """
         # ----------------------------------------------------------------------------------------
         def print_debug(pvals_before, pvals_scaled):
             def get_lists(pvs,):  # picks values from rows/columns to get a list of values for each parameter
@@ -83,7 +106,7 @@ class LScaler(object):
             return copy.copy(invals)
         if inverse:
             assert self.scaler is not None
-        if self.scaler is None:
+        if self.scaler is None:  # note: fits each column separately (i.e. each row should contain one value for each parameter/variable)
             self.scaler = preprocessing.StandardScaler().fit(invals)
         sc_pvals = self.scaler.inverse_transform(invals) if inverse else self.scaler.transform(invals)
         if debug:
@@ -112,15 +135,15 @@ def collapse_bundles(args, resps, sstats):
     return resps, sstats
 
 # ----------------------------------------------------------------------------------------
-def write_sigmoid_prediction(args, punscaled, true_resps=None, true_sstats=None, smpl=None):
+def write_sigmoid_prediction(args, pred_vals, true_resps=None, true_sstats=None, smpl=None):
     dfdata = {  # make empty df
         "%s-%s" % (param, ptype): []
         for param in args.params_to_predict
         for ptype in (["predicted"] if true_resps is None else ["truth", "predicted"])
     }
     dfdata['tree-index'] = []
-    assert true_resps is None or len(punscaled) == len(true_resps)
-    for itr, prlist in enumerate(punscaled):
+    assert true_resps is None or len(pred_vals) == len(true_resps)
+    for itr, prlist in enumerate(pred_vals):
         dfdata['tree-index'].append(true_sstats[itr]['tree'])
         for ip, param in enumerate(args.params_to_predict):
             dfdata["%s-predicted" % param].append(prlist[ip])
@@ -140,7 +163,7 @@ def write_per_cell_prediction(args, pred_fitnesses, enc_trees, true_fitnesses=No
     }
     dfdata['tree-index'] = []
     dfdata['phenotype'] = []
-    for param in args.params_to_predict:
+    for param in utils.sigmoid_params:
         dfdata['%s-truth'%param] = []
     for itr, efit in enumerate(pred_fitnesses):
         pred_ndicts = encode.decode_matrices(enc_trees[itr], efit)
@@ -151,7 +174,7 @@ def write_per_cell_prediction(args, pred_fitnesses, enc_trees, true_fitnesses=No
                 pdict['fitness-predicted'] = pdict['fitness']
                 del pdict['fitness']
                 pdict['fitness-truth'] = tdict['fitness']
-                for ip, param in enumerate(args.params_to_predict):  # writes true parameter values for each cell, which kind of sucks, but they're only nonzero for the first cell in each tree
+                for ip, param in enumerate(utils.sigmoid_params):  # writes true parameter values for each cell, which kind of sucks, but they're only nonzero for the first cell in each tree
                     dfdata["%s-truth" % param].append(get_pval(param, true_resps[itr], true_sstats[itr]) if icell==0 else 0)
         for ndict in pred_ndicts:
             dfdata['tree-index'].append(true_sstats[itr]['tree'])  # NOTE tree-index isn't necessarily equal to <itr>
@@ -166,28 +189,25 @@ def write_per_cell_prediction(args, pred_fitnesses, enc_trees, true_fitnesses=No
 def get_prediction(args, model, spld, lscaler, smpl=None):
     true_fitnesses, true_resps, true_sstats = None, None, None
     if args.model_type == 'sigmoid':
-        pred_resps = model.predict(spld["trees"])  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
-        pvals = [[float(resp.value) for resp in plist] for plist in pred_resps]  # order corresponds to args.params_to_predict
-        punscaled = lscaler.reverse_scaling(pvals, smpl=smpl)  # *un* scale according to the training scaling (if scaler is not None, it should be the training scaler)
+        const_pred_resps = model.predict(lscaler.apply_scaling(spld['trees'], smpl=smpl))  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
+        pred_vals = [[float(rsp.value) for rsp in rlist] for rlist in const_pred_resps]
         if args.is_simu:
             true_resps, true_sstats = [spld[tk] for tk in ["birth-responses", "sstats"]]
             if args.dl_bundle_size > 1:
                 true_resps, true_sstats = collapse_bundles(args, true_resps, true_sstats)
-            assert len(pred_resps) == len(true_resps)
-        df = write_sigmoid_prediction(args, punscaled, true_resps=true_resps, true_sstats=true_sstats, smpl=smpl)
+            assert len(pred_vals) == len(true_resps)
+        df = write_sigmoid_prediction(args, pred_vals, true_resps=true_resps, true_sstats=true_sstats, smpl=smpl)
     elif args.model_type == 'per-cell':
         assert args.dl_bundle_size == 1
-        pred_fitnesses = model.predict(spld["trees"]).numpy()
+        pred_fitnesses = model.predict(lscaler.apply_scaling(spld['trees'], smpl=smpl)).numpy()
         for pfit, etree in zip(pred_fitnesses, spld['trees']):
             encode.reset_fill_entries(pfit, etree)
         # encode.mprint(pred_fitnesses[0])
-        punscaled = lscaler.reverse_scaling(extract_fitnesses(pred_fitnesses), smpl=smpl)  # *un* scale according to the training scaling (if scaler is not None, it should be the training scaler)
-        unscaled_fitnesses = encode.matricize_fitnesses(punscaled, pred_fitnesses)
         if args.is_simu:
             true_fitnesses, true_resps, true_sstats = [spld[tk] for tk in ["fitnesses", "birth-responses", "sstats"]]
             # encode.mprint(true_fitnesses[0])
             # sys.exit()
-        df = write_per_cell_prediction(args, unscaled_fitnesses, spld["trees"], true_fitnesses=true_fitnesses, true_resps=true_resps, true_sstats=true_sstats, smpl=smpl)
+        df = write_per_cell_prediction(args, pred_fitnesses, spld["trees"], true_fitnesses=true_fitnesses, true_resps=true_resps, true_sstats=true_sstats, smpl=smpl)
     else:
         assert False
     return df
@@ -230,11 +250,6 @@ def get_pval(pname, bresp, sts):  # get parameter value from response fcn
         return getattr(bresp, pname)
     else:
         assert False
-
-# ----------------------------------------------------------------------------------------
-def extract_fitnesses(matrix_list):  # reverse of encode.matricize_fitnesses()
-    """Convert encoded fitness matrix into list of (length-1 lists) with fitness, for input to scaling fcn"""
-    return [[nfo['fitness']] for fmtx in matrix_list for nfo in encode.decode_matrix('fitness', fmtx)]
 
 # ----------------------------------------------------------------------------------------
 def write_traintest_samples(args, smpldict):
@@ -350,11 +365,11 @@ def predict_and_plot(args, model, smpldict, smpls, lscaler=None):
 def train_and_test(args, start_time):
     # ----------------------------------------------------------------------------------------
     def train_sigmoid(smpldict, lscalers, max_leaf_count):
-        responses = [[ConstantResponse(v) for v in vlist] for vlist in lscalers["train"].pscaled]  # order corresponds to args.params_to_predict (constant response is just a container for one value, and note we don't bother to set the name)
+        responses = [[ConstantResponse(getattr(rsp, p)) for p in args.params_to_predict] for rsp in smpldict['train']['birth-responses']]  # order corresponds to args.params_to_predict (constant response is just a container for one value, and note we don't bother to set the name)
         model = ParamNetworkModel(responses[0], bundle_size=args.dl_bundle_size)
         assert args.params_to_predict == utils.sigmoid_params
         model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, prebundle_layer_cfg=args.prebundle_layer_cfg, loss_fcn=args.loss_fcn)
-        model.fit(smpldict["train"]["trees"], responses, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
+        model.fit(lscalers['train'].out_tensors, responses, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
         return model
     # ----------------------------------------------------------------------------------------
     def train_per_cell(smpldict, lscalers, max_leaf_count):
@@ -362,9 +377,7 @@ def train_and_test(args, start_time):
         # affy_vals = [float(m['affinity']) for m in seqmeta]
         model = PerCellNetworkModel()
         model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, loss_fcn=args.loss_fcn)
-        new_fitnesses = encode.matricize_fitnesses(lscalers['train'].pscaled, smpldict['train']['fitnesses'])
-        assert len(smpldict['train']['fitnesses']) == len(new_fitnesses)
-        model.fit(smpldict["train"]["trees"], new_fitnesses, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
+        model.fit(lscalers['train'].out_tensors, smpldict['train']['fitnesses'], epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
         return model
     # ----------------------------------------------------------------------------------------
     samples = read_tree_files(args)
@@ -388,15 +401,16 @@ def train_and_test(args, start_time):
     # handle various scaling/re-encoding stuff
     lscalers = {}
     for smpl in smplist:
-        lscalers[smpl] = LScaler(args, args.params_to_predict, smpldict[smpl], smpl=smpl)
+        lscalers[smpl] = LScaler(args, ['distance', 'phenotype'], smpldict[smpl]['trees'], smpl=smpl)
     joblib.dump(lscalers['train'].scaler, encode.output_fn(args.outdir, 'train-scaler', None))
 
     # silly encodings for testing that essentially train on the output values
     if args.use_trivial_encoding:
         for smpl in smplist:
-            predict_vals = lscalers[smpl].pscaled
             if args.model_type == 'per-cell':
-                predict_vals = encode.matricize_fitnesses(predict_vals, smpldict[smpl]['fitnesses'])
+                predict_vals = smpldict[smpl]['fitnesses']
+            else:
+                predict_vals = [[getattr(rsp, p) for p in args.params_to_predict] for rsp in smpldict['train']['birth-responses']]  # order corresponds to args.params_to_predict (constant response is just a container for one value, and note we don't bother to set the name)
             encode.trivialize_encodings(smpldict[smpl]["trees"], args.model_type, predict_vals, noise=False, n_debug=3)
 
     if args.model_type == 'sigmoid':
@@ -489,12 +503,8 @@ def main():
     if args.use_trivial_encoding and not args.dont_scale_params:
         print('  %s --use-trivial-encoding: turning on --dont-scale-params since parameter scaling needs fixing to work with trivial encoding' % utils.wrnstr())
         args.dont_scale_params = True
-    if args.model_type == 'sigmoid' and args.loss_fcn == 'curve' and not args.dont_scale_params:
-        raise Exception('can\'t scale output parameter values for sigmoid curve loss')
     if args.model_dir is not None and args.action == 'train':
         raise Exception('doesn\'t make sense to set --model-dir when training')
-    if args.model_type == 'per-cell':
-        args.params_to_predict = ['fitnesses']
 
     random.seed(args.random_seed)
     np.random.seed(args.random_seed)

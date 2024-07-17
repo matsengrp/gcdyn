@@ -156,25 +156,6 @@ def reset_fill_entries(enc_fit, enc_tree):
                 fit_row[icol] = empty_val
 
 # ----------------------------------------------------------------------------------------
-# convert the list of single lists of values in <scale_vals> into the shape (list of matrices) specified by <template_matrices> (scaling has to happen on simple list of values, and outputs <scale_vals>, then we have to put things back into matrices for the NN)
-# NOTE template matrix is used only for 1) shape or resulting matrix and 2) locations of unfilled entries, i.e. values of <empty_val>
-def matricize_fitnesses(scale_vals, template_matrices):
-    iglobal, new_fitnesses = 0, []
-    tkey = 'fitness'
-    # assert len(scale_vals) == 2 * len(template_matrices[0][0]) * len(template_matrices)  # total number of scaled values vs number or entries in fitness rows of matrices (not actually equal since unfilled values don't go in scale_vals)
-    for tmtx in template_matrices:
-        nmtx = copy.deepcopy(tmtx)
-        for ntype in ['leaf', 'internal']:
-            irow = imtxs['fitness'][tkey][ntype]
-            for icol in range(len(nmtx[irow])):
-                if is_empty(tmtx[irow][icol]):  # if this entry wasn't filled (i.e. it doesn't correspond to a node)
-                    continue
-                nmtx[irow][icol] = scale_vals[iglobal][0]  # [0] is because we only scale one parameter (fitness) for per-cell prediction (whereas for sigmoid we scaled the three sigmoid parameters)
-                iglobal += 1
-        new_fitnesses.append(nmtx)
-    return new_fitnesses
-
-# ----------------------------------------------------------------------------------------
 def scale_tree(intree, new_mean_depth=1):
     """Return new tree scaled to average leaf depth <new_mean_depth>.
     Also returns original average branch depth <brlen>"""
