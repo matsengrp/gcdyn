@@ -441,17 +441,24 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             fnames.append([])
         fnames[-1].append(fn)
     # ----------------------------------------------------------------------------------------
-    def plot_responses(smpl, n_max_plots=10):
+    def plot_responses(smpl, n_max_plots=20, n_max_diffs=1000):
         # ----------------------------------------------------------------------------------------
-        def plot_true_pred_pair(true_resp, pred_resp, affy_vals, plotname, titlestr=None):
+        def plot_true_pred_pair(true_resp, pred_resp, affy_vals, diff_vals, plotname, titlestr=None):
             fn = plot_many_curves(outdir+'/'+smpl, plotname, [{'birth-response' : r} for r in [true_resp, pred_resp]], titlestr=titlestr,
-                                  affy_vals=affy_vals, colors=['#006600', '#990012'], add_true_pred_text=True)
+                                  affy_vals=affy_vals, colors=['#006600', '#990012'], add_true_pred_text=True, diff_vals=diff_vals)
             add_fn(fn)
+        # ----------------------------------------------------------------------------------------
+        def get_curve_loss(resp_1, resp_2):
+            from gcdyn.nn import curve_loss
+            import tensorflow as tf
+            def split_resp(r): return [float(v) for v in [r.xscale, r.xshift, r.yscale]]
+            return curve_loss(tf.constant([split_resp(resp_1)]), tf.constant([split_resp(resp_2)]))
         # ----------------------------------------------------------------------------------------
         if not os.path.exists(outdir+'/'+smpl):
             os.makedirs(outdir+'/'+smpl)
         from gcdyn.poisson import SigmoidResponse, LinearResponse
         # pfo_list = []
+        curve_diffs = {smpl : [], 'validation' : []}
         n_pred_rows = len(prdfs[smpl].index)  # N cells for per-cell, N trees for sigmoid
         n_tree_preds = len(set(prdfs[smpl]['tree-index']))
         n_plots = min(n_max_plots, n_tree_preds)
@@ -462,15 +469,29 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
         for mfo in seqmeta:
             lmdict[int(mfo['tree-index'])].append(mfo)
         if model_type == 'sigmoid':
-            for irow in range(n_plots):
+            n_skipped_diffs = {s : 0 for s in curve_diffs}
+            for irow in range(n_tree_preds):
                 tree_index = int(prdfs[smpl]['tree-index'][irow])
+                is_valid = validation_indices is not None and tree_index in validation_indices
+                smplstr = 'validation' if is_valid else smpl
                 pdicts = [{p : prdfs[smpl]['%s-%s'%(p, tp)][irow] for p in sigmoid_params} for tp in ['truth', 'predicted']]
                 true_resp, pred_resp = [SigmoidResponse(**pd) for pd in pdicts]
-                smpstr = smpl if validation_indices is None or tree_index not in validation_indices else 'validation'
-                plot_true_pred_pair(true_resp, pred_resp, [float(m['affinity']) for m in lmdict[tree_index]], 'true-vs-inf-response-%d'%irow, titlestr='%s: response index %d / %d' % (smpstr, irow, n_tree_preds))
+                affy_vals = [float(m['affinity']) for m in lmdict[tree_index]]
+                if len(curve_diffs[smplstr]) < n_max_diffs:
+                    cdiff = resp_fcn_diff(true_resp, pred_resp, [mfn(affy_vals) for mfn in [min, max]])
+                    curve_diffs[smplstr].append(cdiff)
+                    # ldiff = get_curve_loss(true_resp, pred_resp)  # uncomment (also below) to print also the diff from the curve loss fcn (it should be the same, modulo different xbounds and nsteps
+                else:
+                    n_skipped_diffs[smplstr] += 1
+                    continue
+                if irow < n_plots:
+                    plot_true_pred_pair(true_resp, pred_resp, affy_vals, [cdiff], #, ldiff],
+                                        'true-vs-inf-response-%d'%irow, titlestr='%s: response index %d / %d' % (smplstr, irow, n_tree_preds))
                 # pfo_list.append({'birth-response' : pred_resp})
             # fn = plot_many_curves(outdir, '%sall-response'%smpl, pfo_list, titlestr='%s: %d / %d responses' % (smpl, n_plots, n_tree_preds))
             # add_fn(fn)
+            fn = plot_all_diffs(outdir+'/'+smpl, 'curve-diffs', curve_diffs, n_skipped_diffs=n_skipped_diffs)
+            add_fn(fn)
         elif model_type == 'per-cell':
             irow = 0  # row in file (per-cell, unlike previous block)
             itree = 0  # itree is zero-based index/count of tree in this file, whereas tree_index is index in original simulation sequence (e.g. if this file starts from 10th tree, itree starts at 0 but tree_index starts at 9)
@@ -748,13 +769,7 @@ def group_by_xvals(xvals, yvals, xbins, skip_overflows=False, debug=False):  # N
 
 # ----------------------------------------------------------------------------------------
 def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None, colors=None, add_true_pred_text=False,
-                     pred_xvals=None, pred_yvals=None, xbounds=None, xbins=affy_bins):
-    # ----------------------------------------------------------------------------------------
-    def add_curve_loss(resp_1, resp_2, diff_vals):
-        from gcdyn.nn import curve_loss
-        import tensorflow as tf
-        def split_resp(r): return [float(v) for v in [r.xscale, r.xshift, r.yscale]]
-        diff_vals.append(curve_loss(tf.constant([split_resp(resp_1)]), tf.constant([split_resp(resp_2)])))
+                     diff_vals=None, pred_xvals=None, pred_yvals=None, xbounds=None, xbins=affy_bins):
     # ----------------------------------------------------------------------------------------
     mpl_init()
     fig, ax = plt.subplots()
@@ -774,11 +789,7 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
     for ipf, pfo in enumerate(pfo_list):
         resp_plot(pfo['birth-response'], ax, alpha=0.15 if len(pfo_list)>5 else 0.5, color='#990012' if colors is None else colors[ipf], xbounds=xbounds)
     if add_true_pred_text:
-        assert len(pfo_list) == 2
-        assert affy_vals is not None
-        resp_1, resp_2 = [pfo_list[i]['birth-response'] for i in [0, 1]]
-        diff_vals = [resp_fcn_diff(resp_1, resp_2, [mfn(affy_vals) for mfn in [min, max]])]
-        # add_curve_loss(resp_1, resp_2, diff_vals)  # uncomment to print also the diff from the curve loss fcn (it should be the same, modulo different xbounds and nsteps
+        assert len(pfo_list) == 2  # pfo_list must be [true, inferred] responses
         add_param_text(fig, pfo_list[0], inf_pfo=pfo_list[1], diff_vals=diff_vals)
     ax.set(title='%d responses' % len(pfo_list) if titlestr is None else titlestr)
     fn = "%s/%s.svg" % (plotdir, plotname)
@@ -787,6 +798,7 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
     return fn
 
 # ----------------------------------------------------------------------------------------
+# NOTE duplicates a lot of plot_all_diffs()
 def affy_plot(affy_vals, ax, ax2=None, n_bins=30, xbounds=[-5, 5]):
     all_vals = [v for vlist in affy_vals.values() for v in vlist]
     xmin, xmax = min(xbounds + all_vals), max(xbounds + all_vals)
@@ -794,6 +806,26 @@ def affy_plot(affy_vals, ax, ax2=None, n_bins=30, xbounds=[-5, 5]):
         print('    %s all affinity values the same, can\'t plot (for some reason numpy histogram barfs)' % color('yellow', 'warning'))
         return
     sns.histplot(affy_vals if len(affy_vals)>1 else all_vals, ax=ax2, multiple="stack", binwidth=(xmax - xmin) / n_bins)
+
+# ----------------------------------------------------------------------------------------
+# NOTE duplicates a lot of affy_plot
+def plot_all_diffs(plotdir, plotname, curve_diffs, n_bins=30, xbounds=[0, 1], n_skipped_diffs=None):
+    mpl_init()
+    fig, ax = plt.subplots()
+    all_vals = [v for vlist in curve_diffs.values() for v in vlist]
+    xmin, xmax = min(xbounds + all_vals), max(xbounds + all_vals)
+    sns.histplot(curve_diffs if len(curve_diffs)>1 else all_vals, multiple='stack', binwidth=(xmax - xmin) / n_bins)
+    titlestr = ''
+    for ism, smpl in enumerate([s for s, v in sorted(curve_diffs.items()) if len(v)>0]):
+        fig.text(0.55, 0.6-0.065*ism, '%s:  mean %.3f'%(smpl, np.mean(curve_diffs[smpl])), fontsize=17)
+        titlestr += '%s%s: %d%s%s' % ('' if len(titlestr)==0 else ' (', smpl, len(curve_diffs[smpl]), ' responses' if len(titlestr)==0 else '', '' if len(titlestr)==0 else ')')
+        if n_skipped_diffs is not None:
+            fig.text(0.475, 0.45-0.07*ism, '%s: skipped %d'%(smpl, n_skipped_diffs[smpl]), fontsize=20)
+    ax.set(title=titlestr, xlabel='curve area loss')
+    fn = "%s/%s.svg" % (plotdir, plotname)
+    plt.savefig(fn)
+    plt.close()
+    return fn
 
 # ----------------------------------------------------------------------------------------
 def add_param_text(fig, pfo, inf_pfo=None, diff_vals=None):
@@ -1163,7 +1195,7 @@ def read_fastx(fname, name_key='name', seq_key='seq', add_info=True, dont_split_
         if n_random_queries > len(finfo):
             print('  %s asked for n_random_queries %d from file with only %d entries, so just taking all of them (%s)' % (color('yellow', 'warning'), n_random_queries, len(finfo), fname))
             n_random_queries = len(finfo)
-        finfo = numpy.random.choice(finfo, n_random_queries, replace=False)
+        finfo = np.random.choice(finfo, n_random_queries, replace=False)
 
     if look_for_tuples:  # this is because gctree writes broken fasta files with multiple uids in a line
         new_sfos, n_found = [], 0
@@ -1508,7 +1540,7 @@ class Hist(object):
         assert not include_overflows  # probably doesn't really make sense (since contents of overflows could've been from anywhere below/above, but we'd only return bin center), this is just a way to remind that it doesn't make sense
         self.normalize(include_overflows=include_overflows)  # if this is going to get called a lot with n_vals of 1, this would be slow, but otoh we *really* want to make sure things are normalized with include_overflows the same as it is here
         centers = self.get_bin_centers()
-        pvals = numpy.random.uniform(0, 1, size=n_vals)
+        pvals = np.random.uniform(0, 1, size=n_vals)
         return_vals = [None for _ in pvals]
         sum_prob, last_sum_prob = 0., 0.
         for ibin in self.ibiniter(include_overflows):
@@ -1694,11 +1726,11 @@ class Hist(object):
             print('  %s square_bins option needs to be checked/fixed, it does not work in some cases (seems to eat bins)' % wrnstr())
             import matplotlib.pyplot as plt
             if abs(xvals[-1] - xvals[0]) > 5:  # greater/less than five is kind of a shitty way to decide whether to int() and +/- 0.5 or not, but I'm calling it now with a range much less than 1, and I don't want the int()s, but where I call it elsewhere I do and the range is much larger, so...
-                npbins = list(numpy.arange(int(xvals[0]) - 0.5, int(xvals[-1]) - 0.5))
+                npbins = list(np.arange(int(xvals[0]) - 0.5, int(xvals[-1]) - 0.5))
                 npbins.append(npbins[-1] + 1)
             elif xvals[0] != xvals[-1]:
                 n_bins = len(xvals)  # uh, maybe?
-                npbins = list(numpy.arange(xvals[0], xvals[-1], (xvals[-1] - xvals[0]) / float(n_bins)))
+                npbins = list(np.arange(xvals[0], xvals[-1], (xvals[-1] - xvals[0]) / float(n_bins)))
             else:
                 npbins = [0, 1]
             kwargs = {k : kwargs[k] for k in kwargs if k not in ['marker', 'markersize']}
