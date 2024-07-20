@@ -120,7 +120,7 @@ def curve_loss(y_true, y_pred):  # copied from/modeled after utils.resp_fcn_diff
         print('    sum %.3f   diff %.5f' % (tf.reduce_sum(tf.math.abs(true_svals - pred_svals) * tf.constant(dx)).numpy(), normed_area.numpy()))
     # ----------------------------------------------------------------------------------------
     xbounds = [-5, 5]  # once we're passing in input affinity values, we won't need this somewhat abritrary choice
-    nsteps = 20  # even with like 10k steps training doesn't get any slower, so could increase this a lot
+    nsteps = 1000  # having this large (like 1k) seems sometimes important for training stability (and weirdly doesn't seem to slow down training)
     dx = (xbounds[1] - xbounds[0]) / nsteps
     xvals = tf.constant(list(onp.arange(xbounds[0], 0, dx)) + list(onp.arange(0, xbounds[1] + dx, dx)), dtype=tf.float32)
     true_svals, pred_svals = [sigval(xvals, params(yv)) for yv in [y_true, y_pred]]
@@ -130,6 +130,12 @@ def curve_loss(y_true, y_pred):  # copied from/modeled after utils.resp_fcn_diff
     normed_area = sumv / rect_area
     # print_debug()
     return normed_area
+
+# ----------------------------------------------------------------------------------------
+# This seems to be really important for training stability (without it, it often gets stuck at very large parameter values)
+# Note: should really sync minv/maxv with bounds in simulation, although they're not likely to really change so it's probably ok like this
+def clipfcn(x, minv=[0.01, -0.5, 1], maxv=[2, 3, 50]):
+    return tf.clip_by_value(x, clip_value_min=minv, clip_value_max=maxv)
 
 # ----------------------------------------------------------------------------------------
 class ParamNetworkModel:
@@ -205,7 +211,7 @@ class ParamNetworkModel:
             network_layers.append(layers.Dense(n_units, activation=self.actfn))
             if dropout_rate != 0 and idense < len(dense_unit_list) - 1:  # add a dropout layer after each one except the last
                 network_layers.append(layers.Dropout(dropout_rate))
-        network_layers.append(layers.Dense(self.num_parameters))
+        network_layers.append(layers.Dense(self.num_parameters, activation=clipfcn))  # clipfcn is important for training stability
 
         inputs = keras.Input(shape=(self.bundle_size, 4, self.max_leaf_count))
         outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
