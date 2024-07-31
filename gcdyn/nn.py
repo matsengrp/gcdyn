@@ -18,8 +18,7 @@ layers = keras.layers
 
 
 class Callback(tf.keras.callbacks.Callback):
-    """Class for control Keras verbosity"""
-
+    """Class to control Keras verbosity"""
     epoch = 0
     start_time = time.time()
     last_time = time.time()
@@ -29,37 +28,17 @@ class Callback(tf.keras.callbacks.Callback):
         self.use_validation = use_validation
 
     def on_train_begin(self, epoch, logs=None):
-        print(
-            "              %s   epoch   total"
-            % ("   valid" if self.use_validation else "")
-        )
-        print(
-            "   epoch  loss%s    time    time"
-            % ("    loss" if self.use_validation else "")
-        )
+        print("              %s   epoch   total" % ("   valid" if self.use_validation else ""))
+        print("   epoch  loss%s    time    time" % ("    loss" if self.use_validation else ""))
 
     def on_epoch_begin(self, epoch, logs=None):
         self.epoch = epoch
 
     def on_epoch_end(self, batch, logs=None):
         if self.epoch == 0 or self.epoch % self.n_between == 0:
-
-            def lfmt(lv):
-                return ("%7.3f" if lv < 1 else "%7.2f") % lv
-
-            print(
-                "  %3d  %s%s    %.1f     %.1f"
-                % (
-                    self.epoch,
-                    lfmt(logs["loss"]),
-                    " " + lfmt(logs["val_loss"]) if self.use_validation else "",
-                    time.time() - self.last_time,
-                    time.time() - self.start_time,
-                )
-            )
+            print("  {:3d}  {:7.3f}{:7.3f}    {:.1f}     {:.1f}".format(self.epoch, logs["loss"], logs["val_loss"], time.time() - self.last_time, time.time() - self.start_time))
             sys.stdout.flush()
         self.last_time = time.time()
-
 
 @keras.saving.register_keras_serializable()
 class BundleMeanLayer(layers.Layer):
@@ -105,7 +84,7 @@ def curve_loss(y_true, y_pred):  # copied from/modeled after utils.resp_fcn_diff
     # ----------------------------------------------------------------------------------------
     def params(yt):
         assert utils.sigmoid_params == ['xscale', 'xshift', 'yscale']  # ick
-        pvlist = tf.split(yt, [1, 1, 1], axis=1)  # axis 0 is N samples
+        pvlist = tf.split(tf.cast(yt, tf.float64), [1, 1, 1], axis=1)  # axis 0 is N samples
         return {p : v for p, v in zip(utils.sigmoid_params, pvlist)}
     # ----------------------------------------------------------------------------------------
     def sigval(xv, pvals):
@@ -122,11 +101,13 @@ def curve_loss(y_true, y_pred):  # copied from/modeled after utils.resp_fcn_diff
     xbounds = [-5, 5]  # once we're passing in input affinity values, we won't need this somewhat abritrary choice
     nsteps = 1000  # having this large (like 1k) seems sometimes important for training stability (and weirdly doesn't seem to slow down training)
     dx = (xbounds[1] - xbounds[0]) / nsteps
-    xvals = tf.constant(list(onp.arange(xbounds[0], 0, dx)) + list(onp.arange(0, xbounds[1] + dx, dx)), dtype=tf.float32)
+    xvals = tf.constant(list(onp.arange(xbounds[0], 0, dx)) + list(onp.arange(0, xbounds[1] + dx, dx)), dtype=tf.float64)
     true_svals, pred_svals = [sigval(xvals, params(yv)) for yv in [y_true, y_pred]]
-    sumv = tf.reduce_sum(tf.math.abs(true_svals - pred_svals) * tf.constant(dx))
+    sumv = tf.reduce_sum(tf.math.abs(true_svals - pred_svals) * tf.constant(dx, dtype=tf.float64))
     all_yvals = tf.concat([true_svals, pred_svals], 0)
-    rect_area = tf.math.abs(tf.constant(xbounds[1] - xbounds[0], dtype=tf.float32)) * tf.math.abs(tf.math.reduce_max(all_yvals) - tf.math.reduce_min(all_yvals))
+    xdist = tf.math.abs(tf.constant(xbounds[1] - xbounds[0], dtype=tf.float64))
+    ydist = tf.math.abs(tf.math.reduce_max(all_yvals) - tf.math.reduce_min(all_yvals))
+    rect_area = tf.reduce_sum(xdist * ydist)  # area of whole plot/rectangle
     normed_area = sumv / rect_area
     # print_debug()
     return normed_area
@@ -145,7 +126,7 @@ class ParamNetworkModel:
     Predicts the parameters of the response functions (atm, this means the three parameters of a sigmoid birth response, although minimal/no changes here would be required from some generalizations).
     """
 
-    def __init__(self, example_response_list, bundle_size=50):
+    def __init__(self, example_response_list, bundle_size=50, custom_loop=False):
         """
         example_response_list: list of response objects for a single tree (used for two things: to work out the number of
                      parameters, and how to encode/decode by calling its _flatten() fcn)
@@ -157,6 +138,7 @@ class ParamNetworkModel:
             len(rsp._param_dict) for rsp in self.example_response_list
         )
         self.bundle_size = bundle_size
+        self.custom_loop = custom_loop
 
     def build_model(
         self,
@@ -218,10 +200,12 @@ class ParamNetworkModel:
         self.network = keras.Model(inputs=inputs, outputs=outputs)
         # def pfn(x, line_break=False): print("      %s" % x)  # this doesn't seem to work with keras 3
         self.network.summary() #print_fn=pfn)
-        optimizer = keras.optimizers.Adam(
+        self.optimizer = keras.optimizers.Adam(
             learning_rate=learning_rate, use_ema=True, ema_momentum=ema_momentum
         )
-        self.network.compile(loss=curve_loss if loss_fcn=='curve' else loss_fcn, optimizer=optimizer)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
+        self.loss_fcn = curve_loss if loss_fcn=='curve' else loss_fcn
+        if not self.custom_loop:
+            self.network.compile(loss=curve_loss if loss_fcn=='curve' else self.loss_fcn, optimizer=self.optimizer)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
 
     @classmethod
     def _encode_responses(
@@ -326,19 +310,56 @@ class ParamNetworkModel:
                    number of parameters to predict for each tree. Each response (atm) should just be a constant response
                    with one parameter. (Responses that aren't being estimated need not be provided)
         """
+        # ----------------------------------------------------------------------------------------
+        @tf.function  # NOTE need to comment this decorator in order for .numpy() to work (and add run_eagerly to .compile() call, but note that training is WAY slower if it's commented
+        def train_fcn(xbtch, ybtch):
+            with tf.GradientTape() as tape:  # operations are recorded on the tape
+                logits = self.network(xbtch, training=True)
+                btch_loss = self.loss_fcn(ybtch, logits)
+            grads = tape.gradient(btch_loss, self.network.trainable_weights)  # retrieve gradients
+            self.optimizer.apply(grads, self.network.trainable_weights)  # run one gradient descent step
+            return btch_loss
+        # ----------------------------------------------------------------------------------------
         print("    fitting model with bundle size %d (%d training trees in %d bundles)" % (self.bundle_size, len(training_trees), len(training_trees) / self.bundle_size))
-        response_parameters = self._encode_responses(
-            self._take_one_identical_item_per_bundle(responses)
-        )
-        self.network.fit(
-            self._prepare_trees_for_network_input(training_trees),
-            response_parameters,
-            epochs=epochs,
-            batch_size=batch_size,
-            callbacks=[Callback(epochs, use_validation=validation_split > 0)],
-            verbose=0,
-            validation_split=validation_split,
-        )
+        response_parameters = self._encode_responses(self._take_one_identical_item_per_bundle(responses))
+
+        if self.custom_loop:  # this more or less works, but gives different loss value (shouldn't it be identical ish?), seems less stable, and seems also quite a bit slower
+            x_values, y_values = self._prepare_trees_for_network_input(training_trees), response_parameters
+            assert len(x_values) == len(y_values)
+            n_train = int(len(x_values) * (1 - validation_split))
+            x_val = x_values[n_train:]
+            y_val = y_values[n_train:]
+            x_train = x_values[:n_train]
+            y_train = y_values[:n_train]
+
+            train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
+            train_dataset = train_dataset.shuffle(buffer_size=1024).batch(batch_size)
+            val_dataset = tf.data.Dataset.from_tensor_slices((x_val, y_val))
+            val_dataset = val_dataset.batch(batch_size)
+
+            callbacks = tf.keras.callbacks.CallbackList([Callback(epochs, use_validation=validation_split > 0)])
+            callbacks.on_train_begin()
+            for epoch in range(epochs):
+                callbacks.on_epoch_begin(epoch)
+                for x_batch_train, y_batch_train in train_dataset:
+                    btch_loss = train_fcn(x_batch_train, y_batch_train)
+                    val_loss = tf.constant(0, dtype=tf.float64)
+                    for x_batch_val, y_batch_val in val_dataset:  # i don't think there's any actual reason to use batches on validation, but not sure how else to arrange it
+                        val_logits = self.network(x_batch_val, training=False)
+                        val_loss += self.loss_fcn(y_batch_val, val_logits)
+                logs = {'loss' : btch_loss, 'val_loss' : val_loss}
+                callbacks.on_epoch_end(epoch, logs=logs)
+        else:
+            self.network.fit(
+                self._prepare_trees_for_network_input(training_trees),
+                response_parameters,
+                epochs=epochs,
+                batch_size=batch_size,
+                callbacks=[Callback(epochs, use_validation=validation_split > 0)],
+                verbose=0,
+                validation_split=validation_split,
+                # validation_data=val_dataset,
+            )
 
     def predict(
         self,

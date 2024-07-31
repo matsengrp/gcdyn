@@ -29,6 +29,7 @@ setup(
         ],
     },
     install_requires=[
+        "dendropy",
         "ete3",
         "matplotlib",
         "pandas",

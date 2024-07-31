@@ -366,7 +366,7 @@ def train_and_test(args, start_time):
     # ----------------------------------------------------------------------------------------
     def train_sigmoid(smpldict, lscalers, max_leaf_count):
         responses = [[ConstantResponse(getattr(rsp, p)) for p in args.params_to_predict] for rsp in smpldict['train']['birth-responses']]  # order corresponds to args.params_to_predict (constant response is just a container for one value, and note we don't bother to set the name)
-        model = ParamNetworkModel(responses[0], bundle_size=args.dl_bundle_size)
+        model = ParamNetworkModel(responses[0], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
         assert args.params_to_predict == utils.sigmoid_params
         model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, prebundle_layer_cfg=args.prebundle_layer_cfg, loss_fcn=args.loss_fcn)
         model.fit(lscalers['train'].out_tensors, responses, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
@@ -467,8 +467,8 @@ def get_parser():
     parser.add_argument("--indir", required=True, help="training input directory with gcdyn simulation output (uses encoded trees .npy, summary stats .csv, and response .pkl files)", )
     parser.add_argument("--model-dir", help="file with saved deep learning model for inference")
     parser.add_argument("--outdir", required=True, help="output directory")
-    parser.add_argument("--model-type", choices=['sigmoid', 'per-cell'], default='per-cell', help='type of neural network model, sigmoid: infer 3 params of sigmoid fcn, per-cell: infer fitness of each individual cell')
-    parser.add_argument("--loss-fcn", choices=['mse', 'curve'], default='mse')
+    parser.add_argument("--model-type", choices=['sigmoid', 'per-cell'], default='sigmoid', help='type of neural network model, sigmoid: infer 3 params of sigmoid fcn, per-cell: infer fitness of each individual cell')
+    parser.add_argument("--loss-fcn", choices=['mse', 'curve'], default='curve')
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--batch-size", type=int)
     parser.add_argument("--dl-bundle-size", type=int, default=1, help='\'dl-\' is to differentiate from \'simu-\' bundle size when calling this from cf-gcdyn.py')
@@ -486,6 +486,7 @@ def get_parser():
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--use-trivial-encoding", action="store_true")
     parser.add_argument("--dont-scale-params", action="store_true")
+    parser.add_argument("--custom-loop", action="store_true")
     return parser
 
 
