@@ -350,7 +350,7 @@ def predict_and_plot(args, model, smpldict, smpls, lscaler=None):
     for smpl in smpls:
         prdfs[smpl] = get_prediction(args, model, smpldict[smpl], lscaler, smpl=smpl)
     seqmeta = read_meta_csv(args.indir)
-    utils.make_dl_plots(
+    utils.make_dl_plots(  # note that response bundles are collapsed (i.e. we only plot the first pair of each bundle) but seqmeta isn't, so we just plot the affinities from the first tree in the bundle (it would probably be better to combine all of the affinities from the bundle)
         args.model_type,
         prdfs,
         seqmeta,
@@ -470,7 +470,7 @@ def get_parser():
     parser.add_argument("--model-type", choices=['sigmoid', 'per-cell'], default='sigmoid', help='type of neural network model, sigmoid: infer 3 params of sigmoid fcn, per-cell: infer fitness of each individual cell')
     parser.add_argument("--loss-fcn", choices=['mse', 'curve'], default='curve')
     parser.add_argument("--epochs", type=int, default=30)
-    parser.add_argument("--batch-size", type=int)
+    parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--dl-bundle-size", type=int, default=1, help='\'dl-\' is to differentiate from \'simu-\' bundle size when calling this from cf-gcdyn.py')
     parser.add_argument("--discard-extra-trees", action="store_true", help='By default, the number of trees during inference must be evenly divisible by --dl-bundle-size. If this is set, however, any extras are discarded to allow inference.')
     parser.add_argument("--dropout-rate", type=float, default=0)

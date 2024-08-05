@@ -324,6 +324,7 @@ class ParamNetworkModel:
         response_parameters = self._encode_responses(self._take_one_identical_item_per_bundle(responses))
 
         if self.custom_loop:  # this more or less works, but gives different loss value (shouldn't it be identical ish?), seems less stable, and seems also quite a bit slower
+            print('    using custom training loop')
             x_values, y_values = self._prepare_trees_for_network_input(training_trees), response_parameters
             assert len(x_values) == len(y_values)
             n_train = int(len(x_values) * (1 - validation_split))
@@ -350,6 +351,7 @@ class ParamNetworkModel:
                 logs = {'loss' : btch_loss, 'val_loss' : val_loss}
                 callbacks.on_epoch_end(epoch, logs=logs)
         else:
+            print('    using network.fit')
             self.network.fit(
                 self._prepare_trees_for_network_input(training_trees),
                 response_parameters,

@@ -32,16 +32,17 @@ xscales=0.1:1:5:10; xshifts=-5:-2:-1:0:1:2:5
 # pranges="--xscale-range-list 0.01,2 --xshift-range-list=-0.5,3 --yscale-range-list 1,50 --initial-birth-rate-range-list 4,10 --time-to-sampling-range-list 10,30 --carry-cap-range-list 100,300 --n-seqs-range-list 40,90"
 # ppl="--params-to-predict-list xscale:xshift:yscale:xscale,xshift:xscale,yscale:xshift,yscale:xscale,xshift,yscale"
 # echo $bin $common --label vary-all --version v1 $pranges --n-replicates 1 --n-trials-list 5000:50000:500000:670000 --simu-bundle-size-list 1:50:67 --dl-bundle-size-list 1:50:67 --zip-vars simu-bundle-size:dl-bundle-size --epochs-list 250 --simu-extra-args=\"--n-max-procs 20\" $ppl
-pranges="--xscale-range-list 0.01,2 --xshift-range-list=-0.5,3 --yscale-range-list 1,50 --time-to-sampling-range-list 17,25"
+# pranges="--xscale-range-list 0.01,2 --xshift-range-list=-0.5,3 --yscale-range-list 1,50 --time-to-sampling-range-list 17,25"
 # echo $bin $common --label tree-infer-effect --version v2 --initial-birth-rate-range-list 0.5,1:1,5 --carry-cap-range-list 1000,1001 --init-population-list 1:100 --n-seqs-range-list 65,95 $pranges --n-replicates 1 --n-trials-list 75 --simu-extra-args=\"--n-max-procs 20 --init-population 100\"
 # echo $bin $common --label retrain --version v0 --carry-cap-range-list 750,1500 $pranges --n-replicates 1 --n-trials-list 100:5000 --n-seqs-range-list 65,95 --simu-bundle-size-list 1:50:67 --dl-bundle-size-list 1:50:67 --zip-vars simu-bundle-size:dl-bundle-size --simu-extra-args=\"--n-max-procs 20 --init-population 100 --initial-birth-rate-range 0.1 0.5\"
-echo $bin $common --label const-leaves --version v1 --carry-cap-range-list 750,1500 $pranges --n-replicates 1 --n-trials-list 100:5000:50000 --simu-extra-args=\"--n-max-procs 20 --initial-birth-rate-range 0.1 0.5 --n-seqs-values 70 --init-population 128\"
-# pranges="--xscale-range-list 1.77,1.78 --xshift-range-list=1.07,1.08 --yscale-range-list 10.9,10.95"
-# echo $bin $common --label const-params --version v0 --carry-cap-range-list 750,1500 $pranges --n-replicates 1 --n-trials-list 100:5000:50000 --simu-extra-args=\"--n-max-procs 20 --initial-birth-rate-range 0.1 1.5 --n-seqs-values 70 --init-population 128\"
-# --initial-birth-rate-range 1 3
+# echo $bin $common --label const-leaves --version v1 --carry-cap-range-list 750,1500 $pranges --n-replicates 1 --n-trials-list 100:5000:50000 --simu-extra-args=\"--n-max-procs 20 --initial-birth-rate-range 0.1 0.5 --n-seqs-values 70 --init-population 128\"
+# echo $bin $common --label const-leaves --version v2 --carry-cap-range-list 750,1500 $pranges --n-replicates 1 --n-trials-list 100:5000 --simu-bundle-size-list 1:10 --dl-bundle-size-list 1:10 --zip-vars simu-bundle-size:dl-bundle-size --simu-extra-args=\"--n-max-procs 20 --initial-birth-rate-range 0.1 0.5 --n-seqs-values 70 --init-population 128\"
+pranges="--xscale-range-list 0.01,2 --xshift-range-list=-0.5,3 --yscale-range-list 1,50 --time-to-sampling-range-list 17,25 --n-seqs-range-list 40,90"
+echo $bin $common --label retrain --version v1 --carry-cap-range-list 750,1500 $pranges --n-replicates 1 --n-trials-list 100:5000:50000 --simu-extra-args=\"--n-max-procs 20 --initial-birth-rate-range 0.1 0.5 --init-population 128\"
 
-# ----------------------------------------------------------------------------------------
-gcd-dl train --is-simu --indir /fh/fast/matsen_e/dralph/partis/gcdyn/const-leaves/v1/n-trials-100/simu --outdir $fs/tmp/dl-infer-curve --epochs 1000 --model-type sigmoid --validation-split 0.9 --learning-rate 0.0005 --dont-scale-params --loss-fcn curve --overwrite # --batch-size 1000
+# # ----------------------------------------------------------------------------------------
+# # cmd i was testing some stuff with (also has 50k (and 5k) trial)s
+# echo gcd-dl train --is-simu --indir /fh/fast/matsen_e/dralph/partis/gcdyn/const-leaves/v1/n-trials-100/simu --outdir $fs/tmp/dl-infer-curve --epochs 1000 --model-type sigmoid --validation-split 0.9 --learning-rate 0.0005 --dont-scale-params --loss-fcn curve --overwrite --batch-size 1000
 
 # maybe this is right (but can't read it now)? dld=/fh/fast/matsen_e/dralph/partis/gcdyn/vary-all/v1/n-trials-500000/simu-bundle-size-1/dl-bundle-size-1/params-to-predict-xscale:xshift:yscale/dl-infer
 # echo ./projects/cf-gcdyn.py --actions data --n-max-procs 5 --n-sub-procs 100 --base-outdir /fh/fast/matsen_e/dralph/partis/gcdyn --label test-data --version v0 --dry --dl-model-dir $dld --dl-bundle-size-list 1
