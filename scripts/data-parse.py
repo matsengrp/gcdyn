@@ -22,7 +22,7 @@ from historydag import beast_loader
 partis_dir = os.path.dirname(os.path.realpath(__file__)).replace('/projects/gcdyn/scripts', '')
 sys.path.insert(1, partis_dir) # + '/python')
 import python.treeutils as treeutils
-# import python.utils as utils
+import python.utils as partis_utils
 import python.datautils as datautils
 
 from experiments import replay
@@ -97,13 +97,13 @@ def get_beast_etree(dtree, idir, itr, kd_checks, gcid=None, debug=False):
 
 # ----------------------------------------------------------------------------------------
 def read_gct_kd():
-    gct_kd_fname = '%s/latest/merged-results/observed-seqs.csv' % args.shared_replay_dir
+    gct_kd_fname = '%s/merged-results/observed-seqs.csv' % args.shared_replay_dir
     print('  reading kd values from %s' % gct_kd_fname)
     kd_vals = {}
     with open(gct_kd_fname) as afile:  # note that I also use these kd vals in partis/bin/read-gctree-output.py, but there I'm using gctree output so it's a bit different (and is processed through datascripts/taraki-gctree-2021-10)
         reader = csv.DictReader(afile)
         for line in reader:
-            kdv = line['delta_bind_CGG_FVS_additive']
+            kdv = line['delta_bind']
             kd_vals[line['ID_HK']] = float(kdv) if kdv != '' else dms_df.delta_bind_CGG.min()
     return kd_vals
 
@@ -152,7 +152,7 @@ def write_tree(gcodir, dtree, trsfos, sstats, enc_tree, tr_lmfos):
     with open('%s/trees.nwk' % gcodir, 'w') as tfile:
         tfile.write('%s\n' % treeutils.as_str(dtree))
     utils.write_fasta(encode.output_fn(gcodir, 'seqs', None), trsfos)
-    encode.write_trees(encode.output_fn(gcodir, 'encoded-trees', None), [enc_tree])
+    encode.write_trees(encode.output_fn(gcodir, 'encoded-trees', None), [enc_tree], 'tree')
     encode.write_sstats(encode.output_fn(gcodir, 'summary-stats', None), [sstats])
     encode.write_leaf_meta(encode.output_fn(gcodir, 'meta', None), tr_lmfos)
 
@@ -203,6 +203,8 @@ def read_iqtree_dir(indir, idir, gclabel, gcodir):
     all_info['seqfos'].append(all_seqfos)
     all_info['dtrees'].append(dtree)
     all_info['gcids'].append(gcid)
+    if gcid not in rpmeta:
+        raise Exception('gcid %s not among: %s' % (gcid, rpmeta.keys()))
     all_info['metafos'].append(rpmeta[gcid])
 
 # ----------------------------------------------------------------------------------------
@@ -210,17 +212,28 @@ def read_beast_dir(bstdir, idir, gclabel, gcodir):
     gcid = datautils.fix_btt_id(gclabel)
 
     single_treefname = '%s/single-tree.history.trees' % gcodir
-    tfns = glob.glob('%s/beastannotated-*.history.trees' % bstdir)
+    tfns = glob.glob('%s/beastannotated-*.history.trees*' % bstdir)
     if len(tfns) != 1:
         raise Exception('expected one tree history file *.history.trees but got %d in %s' % (len(tfns), bstdir))
+    bstfn = tfns[0]
     if args.debug:
         print('             writing first tree from beast history file to new file %s' % single_treefname)
     # NOTE if you start reading more than one tree, it'll no longer really make sense to concat all the trees from all gc dirs together at the end
-    subprocess.check_call('grep -v \'^tree STATE_[1-9][^ ]\' %s >%s' % (tfns[0], single_treefname), shell=True)
+    grepstr = 'grep -v \'^tree STATE_[1-9][^ ]\''
+    if bstfn.split('.')[-1] == 'gz':
+        cmd = 'gunzip --to-stdout %s | %s >%s' % (bstfn, grepstr, single_treefname)
+    else:
+        cmd = ' %s %s >%s' % (grepstr, bstfn, single_treefname)
+    subprocess.check_call(cmd, shell=True)
 
     if args.debug:
         print('          loading trees from %s' % single_treefname)
-    res_gen, rmd_sites = beast_loader.load_beast_trees('%s/beastgen.xml'%bstdir, single_treefname)
+    xmlfn = utils.get_single_entry(glob.glob('%s/beastgen.xml*' % bstdir))
+    if xmlfn.split('.')[-1] == 'gz':
+        new_xfn = '%s/%s' % (gcodir, os.path.basename(xmlfn).replace('.gz', ''))
+        subprocess.check_call('gunzip --to-stdout %s >%s'%(xmlfn, new_xfn), shell=True)
+        xmlfn = new_xfn
+    res_gen, rmd_sites = beast_loader.load_beast_trees(xmlfn, single_treefname, single_treefname)
 
     kd_checks = {'ok' : 0, 'bad' : 0}
     for itr, dtree in enumerate(res_gen):
@@ -234,7 +247,10 @@ def read_beast_dir(bstdir, idir, gclabel, gcodir):
             else:
                 node.taxon.label = '%d-%s' % (idir, node.taxon.label)
             node.taxon.label = node.taxon.label.replace('@20', '').replace('@0', '')  # not sure what this is for
-            node.nuc_seq = node.observed_cg.to_sequence() if node.is_leaf() else node.cg.to_sequence()
+            if hasattr(node, 'gc'):  # old files
+                node.nuc_seq = node.observed_cg.to_sequence() if node.is_leaf() else node.cg.to_sequence()
+            else:  # new files (i don't know why they changed the format, but whatever this seems to work)
+                node.nuc_seq = node.comments[0].split('=')[-1].strip('"')
             trsfos.append({'name' : node.taxon.label, 'seq' : node.nuc_seq})
 
         etree, tr_lmfos = get_beast_etree(dtree, idir, itr, kd_checks, gcid=gcid, debug=args.debug)
@@ -258,6 +274,8 @@ def read_beast_dir(bstdir, idir, gclabel, gcodir):
     all_info['seqfos'].append(trsfos)
     all_info['dtrees'].append(dtree)
     all_info['gcids'].append(gcid)
+    if gcid not in rpmeta:
+        raise Exception('gcid %s not among: %s' % (gcid, rpmeta.keys()))
     all_info['metafos'].append(rpmeta[gcid])
 
 # ----------------------------------------------------------------------------------------
@@ -292,7 +310,7 @@ def write_final_output(outdir, infolists):
     if not os.path.exists(outdir):
         os.makedirs(outdir)
     print('  writing %d trees to %s' % (len(infolists['encoded_trees']), outdir))
-    encode.write_trees(encode.output_fn(outdir, 'encoded-trees', None), infolists['encoded_trees'])
+    encode.write_trees(encode.output_fn(outdir, 'encoded-trees', None), infolists['encoded_trees'], 'tree')
     encode.write_sstats(encode.output_fn(outdir, 'summary-stats', None), infolists['sstats'])
     encode.write_leaf_meta(encode.output_fn(outdir, 'meta', None), [lfo for lflist in infolists['lmetafos'] for lfo in lflist])
     utils.write_fasta(encode.output_fn(outdir, 'seqs', None), [s for slist in infolists['seqfos'] for s in slist])
@@ -316,10 +334,11 @@ class MultiplyInheritedFormatter(argparse.RawTextHelpFormatter, argparse.Argumen
 formatter_class = MultiplyInheritedFormatter
 parser = argparse.ArgumentParser(formatter_class=MultiplyInheritedFormatter, description=helpstr)
 parser.add_argument("--method", default="beast", choices=["beast", "iqtree"])
-parser.add_argument("--shared-replay-dir", default='/fh/fast/matsen_e/shared/replay-related/jareds-replay-fork/gcreplay/nextflow/results', help='base input dir with beast results and dms affinity info')
+parser.add_argument("--shared-replay-dir", default='/fh/fast/matsen_e/data/taraki-gctree-2021-10/gcreplay/nextflow/results', help='base input dir with beast results and dms affinity info')
 parser.add_argument('--taraki-replay-dir', default='/fh/fast/matsen_e/data/taraki-gctree-2021-10/gcreplay', help='dir with gctree results on gcreplay data from which we read seqs, affinity, mutation info, and trees)')
 parser.add_argument('--iqtree-dir', default='/fh/fast/matsen_e/processed-data/partis/taraki-gctree-2021-10/iqtree/v1', help='dir with iqtree trees from replay data run with datascripts/meta/taraki-gctree-2021-10/iqtree-run.py')
-parser.add_argument("--beast-version", default='2023-05-18-beast', help='subdir of --input-dir with beast results')
+# NOTE eventually it would be nice if both beast dirs were in the same parent dir, but jared said he didn't add one to the repo
+parser.add_argument("--beast-dirs", default='/fh/fast/matsen_e/shared/replay-related/jareds-replay-fork/gcreplay/nextflow/results/2023-05-18-beast:/fh/fast/matsen_e/data/taraki-gctree-2021-10/gcreplay/nextflow/results/archive/2024-06-23-beast-15-day')
 parser.add_argument("--output-version", default='test')
 parser.add_argument("--max-leaf-count", type=int, default=100)
 parser.add_argument("--igk-idx", type=int, default=336, help='zero-based index of first igk position in smooshed-together igh+igk sequence')
@@ -330,6 +349,7 @@ parser.add_argument("--cgg-naive-sites-fname", default='projects/gcdyn/experimen
 parser.add_argument("--test", action='store_true')
 parser.add_argument("--random-seed", type=int, default=1)
 args = parser.parse_args()
+args.beast_dirs = partis_utils.get_arg_list(args.beast_dirs)
 
 random.seed(args.random_seed)
 np.random.seed(args.random_seed)
@@ -343,7 +363,9 @@ if args.check_gct_kd:
     gct_kd_vals = read_gct_kd()
 
 if args.method == 'beast':
-    dir_list = glob.glob('%s/%s/beast/*-GC' % (args.shared_replay_dir, args.beast_version))
+    dir_list = []
+    for bstdir in args.beast_dirs:
+        dir_list += glob.glob('%s/beast/*-GC' % bstdir)
 elif args.method == 'iqtree':
     dir_list = glob.glob('%s/PR*'%args.iqtree_dir)
 else:
