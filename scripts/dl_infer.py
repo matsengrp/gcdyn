@@ -35,14 +35,16 @@ def csvfn(args, smpl):
 # ----------------------------------------------------------------------------------------
 class LScaler(object):
     # ----------------------------------------------------------------------------------------
-    def __init__(self, args, var_list, in_tensors, smpl=''):
+    # if <in_tensors> is set, fit/create a new scaler; otherwise you should pass in an existing <scaler>
+    def __init__(self, args, var_list, in_tensors=None, smpl='', scaler=None):
         self.args = args
         self.var_list = var_list
-        self.scaler = None
+        self.scaler = scaler
         self.in_tensors = in_tensors
-        self.in_vals = self.extract_tree_vals(self.in_tensors)  # in_vals and out_vals are formatted for scaling (list or rows, each row with an entry for each variable)
-        self.out_vals = self.scale(self.in_vals, smpl=smpl)
-        self.out_tensors = self.re_encode_tree_vals(self.out_vals, self.in_tensors)
+        if self.in_tensors is not None:
+            self.in_vals = self.extract_tree_vals(self.in_tensors)  # in_vals and out_vals are formatted for scaling (list or rows, each row with an entry for each variable)
+            self.out_vals = self.scale(self.in_vals, smpl=smpl)
+            self.out_tensors = self.re_encode_tree_vals(self.out_vals, self.in_tensors)
 
     # ----------------------------------------------------------------------------------------
     # convert encoded trees to one-variable-per-column format needed by scaler (reverse of re_encode_tree_vals())
@@ -322,7 +324,8 @@ def read_tree_files(args):
         for tk in ["birth", "death"]:
             samples[tk + "-responses"] = [tfo[tk] for tfo in pklfo]
     samples["trees"] = encode.read_trees(tfn)
-    samples["fitnesses"] = encode.read_trees(ffn)
+    if args.is_simu:
+        samples["fitnesses"] = encode.read_trees(ffn)
     samples["sstats"] = []
     with open(sfn) as sfile:
         reader = csv.DictReader(sfile)
@@ -401,7 +404,7 @@ def train_and_test(args, start_time):
     # handle various scaling/re-encoding stuff
     lscalers = {}
     for smpl in smplist:
-        lscalers[smpl] = LScaler(args, ['distance', 'phenotype'], smpldict[smpl]['trees'], smpl=smpl)
+        lscalers[smpl] = LScaler(args, ['distance', 'phenotype'], in_tensors=smpldict[smpl]['trees'], smpl=smpl)
     joblib.dump(lscalers['train'].scaler, encode.output_fn(args.outdir, 'train-scaler', None))
 
     # silly encodings for testing that essentially train on the output values
@@ -426,6 +429,7 @@ def train_and_test(args, start_time):
 
 # ----------------------------------------------------------------------------------------
 def read_model_files(args, samples):
+    scfn = encode.output_fn(args.model_dir, 'train-scaler', None)
     print('    reading training scaler from %s' % scfn)
     lscaler = LScaler(args, args.params_to_predict, scaler=joblib.load(scfn))
     if args.model_type == 'sigmoid':

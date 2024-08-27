@@ -40,7 +40,6 @@ class Callback(tf.keras.callbacks.Callback):
             sys.stdout.flush()
         self.last_time = time.time()
 
-@keras.saving.register_keras_serializable()
 class BundleMeanLayer(layers.Layer):
     """Assume that the input is of shape (number_of_bundles, bundle_size, feature_dim)."""
 
@@ -56,7 +55,6 @@ class BundleMeanLayer(layers.Layer):
             input_shape[2],
         )  # output shape is (number_of_bundles, feature_dim)
 
-@keras.saving.register_keras_serializable()
 class SigmoidTransposeLayer(layers.Layer):
     """Transpose inputs (used to be Lambda layer, but they're not really serializable."""
 
@@ -67,7 +65,6 @@ class SigmoidTransposeLayer(layers.Layer):
         # leave first (batch/sample) and second (bundle) dimensions the same, and swap third (dist/phenotyp) and fourth (leaf/internal node) dimensions
         return tf.transpose(inputs, perm=(0, 1, 3, 2))
 
-@keras.saving.register_keras_serializable()
 class PerCellTransposeLayer(layers.Layer):
     """Transpose inputs (used to be Lambda layer, but they're not really serializable."""
 
@@ -377,7 +374,7 @@ class ParamNetworkModel:
 
     def load(self, fname):
         print('    reading model file from %s' % fname)
-        with keras.utils.custom_object_scope({'BundleMeanLayer': BundleMeanLayer}):
+        with keras.utils.custom_object_scope({'BundleMeanLayer': BundleMeanLayer, 'SigmoidTransposeLayer' : SigmoidTransposeLayer, 'curve_loss' : curve_loss, 'clipfcn' : clipfcn}):
             self.network = keras.models.load_model(fname, safe_mode=False)
 
 # ----------------------------------------------------------------------------------------
