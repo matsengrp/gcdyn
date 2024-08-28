@@ -324,6 +324,7 @@ def read_tree_files(args):
         for tk in ["birth", "death"]:
             samples[tk + "-responses"] = [tfo[tk] for tfo in pklfo]
     samples["trees"] = encode.read_trees(tfn)
+    samples['trees'] = encode.pad_trees(samples['trees'], 'tree', args.min_n_max_leaves)
     if args.is_simu:
         samples["fitnesses"] = encode.read_trees(ffn)
     samples["sstats"] = []
@@ -399,7 +400,7 @@ def train_and_test(args, start_time):
     leaf_counts = set([len(t[0]) for t in smpldict["train"]["trees"]])  # length of first row in encoded tree (i guess really it'd be better to also include test trees in this, but in practice it probably doesn't matter)
     if len(leaf_counts) != 1:
         raise Exception("encoded trees have different lengths: %s" % " ".join(str(c) for c in leaf_counts))
-    max_leaf_count = list(leaf_counts)[0]
+    max_leaf_count = max(list(leaf_counts)[0], args.min_n_max_leaves)
 
     # handle various scaling/re-encoding stuff
     lscalers = {}
@@ -431,9 +432,9 @@ def train_and_test(args, start_time):
 def read_model_files(args, samples):
     scfn = encode.output_fn(args.model_dir, 'train-scaler', None)
     print('    reading training scaler from %s' % scfn)
-    lscaler = LScaler(args, args.params_to_predict, scaler=joblib.load(scfn))
+    lscaler = LScaler(args, ['distance', 'phenotype'], scaler=joblib.load(scfn))
     if args.model_type == 'sigmoid':
-        model = ParamNetworkModel([ConstantResponse(0) for _ in args.params_to_predict], bundle_size=args.dl_bundle_size)
+        model = ParamNetworkModel([ConstantResponse(0) for _ in args.params_to_predict], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
     elif args.model_type == 'per-cell':
         model = PerCellNetworkModel()
     else:
@@ -490,6 +491,7 @@ def get_parser():
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--use-trivial-encoding", action="store_true")
     parser.add_argument("--dont-scale-params", action="store_true")
+    parser.add_argument("--min-n-max-leaves", default=200, help='pad all encoded tree matrices to at least this width')
     parser.add_argument("--custom-loop", action="store_true")
     return parser
 

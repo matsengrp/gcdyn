@@ -236,7 +236,7 @@ def trivialize_encodings(encoded_trees, model_type, predict_vals, noise=False, m
 
 # ----------------------------------------------------------------------------------------
 def pad_trees(
-        trees: list[np.ndarray], mtype: str, min_n_max_leaves: int = 50, debug: bool = False
+        trees: list[np.ndarray], mtype: str, min_n_max_leaves: int = 200, debug: bool = False
 ):
     assert mtype in ['tree', 'fitness']
     debug = True
@@ -256,7 +256,7 @@ def pad_trees(
         )
         if debug and itree == 0:
             before_len = len(etree[0])
-            print("  padded length from %d to %d" % (before_len, len(etree[0])))
+            print("  padded length from %d to %d" % (before_len, len(padded_trees[-1][0])))
             # print(etree)
     return np.array(padded_trees)
 
