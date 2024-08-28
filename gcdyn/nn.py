@@ -40,6 +40,7 @@ class Callback(tf.keras.callbacks.Callback):
             sys.stdout.flush()
         self.last_time = time.time()
 
+# @keras.saving.register_keras_serializable()
 class BundleMeanLayer(layers.Layer):
     """Assume that the input is of shape (number_of_bundles, bundle_size, feature_dim)."""
 
@@ -55,6 +56,7 @@ class BundleMeanLayer(layers.Layer):
             input_shape[2],
         )  # output shape is (number_of_bundles, feature_dim)
 
+# @keras.saving.register_keras_serializable()
 class SigmoidTransposeLayer(layers.Layer):
     """Transpose inputs (used to be Lambda layer, but they're not really serializable."""
 
@@ -65,6 +67,7 @@ class SigmoidTransposeLayer(layers.Layer):
         # leave first (batch/sample) and second (bundle) dimensions the same, and swap third (dist/phenotyp) and fourth (leaf/internal node) dimensions
         return tf.transpose(inputs, perm=(0, 1, 3, 2))
 
+# @keras.saving.register_keras_serializable()
 class PerCellTransposeLayer(layers.Layer):
     """Transpose inputs (used to be Lambda layer, but they're not really serializable."""
 
@@ -76,6 +79,7 @@ class PerCellTransposeLayer(layers.Layer):
         return tf.transpose(inputs, perm=(0, 2, 1))
 
 # ----------------------------------------------------------------------------------------
+# @keras.saving.register_keras_serializable(package='gcdyn_nn', name='curve_loss_fcn')
 @tf.function  # NOTE need to comment this decorator in order for .numpy() to work (and add run_eagerly to .compile() call, but note that training is WAY the fuck slower if it's commented
 def curve_loss(y_true, y_pred):  # copied from/modeled after utils.resp_fcn_diff()
     # ----------------------------------------------------------------------------------------
@@ -112,6 +116,7 @@ def curve_loss(y_true, y_pred):  # copied from/modeled after utils.resp_fcn_diff
 # ----------------------------------------------------------------------------------------
 # This seems to be really important for training stability (without it, it often gets stuck at very large parameter values)
 # Note: should really sync minv/maxv with bounds in simulation, although they're not likely to really change so it's probably ok like this
+# @keras.saving.register_keras_serializable()
 def clipfcn(x, minv=[0.01, -0.5, 1], maxv=[2, 3, 50]):
     return tf.clip_by_value(x, clip_value_min=minv, clip_value_max=maxv)
 
@@ -136,6 +141,7 @@ class ParamNetworkModel:
         )
         self.bundle_size = bundle_size
         self.custom_loop = custom_loop
+        self.no_class_model = False  # TODO should remove this eventually, once I decide serialization is final
 
     def build_model(
         self,
@@ -181,18 +187,26 @@ class ParamNetworkModel:
             ],
         }
 
-        network_layers = [SigmoidTransposeLayer()]
-        for tlr in self.pre_bundle_layers[prebundle_layer_cfg]:
-            network_layers.append(layers.TimeDistributed(tlr))
-        network_layers.append(BundleMeanLayer())  # combine predictions from all trees in bundle
-        dense_unit_list = [48, 32, 16, 8]
-        for idense, n_units in enumerate(dense_unit_list):
-            network_layers.append(layers.Dense(n_units, activation=self.actfn))
-            if dropout_rate != 0 and idense < len(dense_unit_list) - 1:  # add a dropout layer after each one except the last
-                network_layers.append(layers.Dropout(dropout_rate))
-        network_layers.append(layers.Dense(self.num_parameters, activation=clipfcn))  # clipfcn is important for training stability
+        # TODO remove this once you've settled things down a bit more
+        if self.no_class_model:  # trivial model for testing serialization without our custom layers (didn't actually get the serialization working since i found the compile=False arg to load_model())
+            network_layers = []
+            for tlr in self.pre_bundle_layers[prebundle_layer_cfg]:
+                network_layers.append(tlr)
+            network_layers.append(layers.Dense(self.num_parameters, activation=clipfcn))  # clipfcn is important for training stability
+            inputs = keras.Input(shape=(self.max_leaf_count, 4))
+        else:
+            network_layers = [SigmoidTransposeLayer()]
+            for tlr in self.pre_bundle_layers[prebundle_layer_cfg]:
+                network_layers.append(layers.TimeDistributed(tlr))
+            network_layers.append(BundleMeanLayer())  # combine predictions from all trees in bundle
+            dense_unit_list = [48, 32, 16, 8]
+            for idense, n_units in enumerate(dense_unit_list):
+                network_layers.append(layers.Dense(n_units, activation=self.actfn))
+                if dropout_rate != 0 and idense < len(dense_unit_list) - 1:  # add a dropout layer after each one except the last
+                    network_layers.append(layers.Dropout(dropout_rate))
+            network_layers.append(layers.Dense(self.num_parameters, activation=clipfcn))  # clipfcn is important for training stability
+            inputs = keras.Input(shape=(self.bundle_size, 4, self.max_leaf_count))
 
-        inputs = keras.Input(shape=(self.bundle_size, 4, self.max_leaf_count))
         outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
         self.network = keras.Model(inputs=inputs, outputs=outputs)
         # def pfn(x, line_break=False): print("      %s" % x)  # this doesn't seem to work with keras 3
@@ -286,11 +300,16 @@ class ParamNetworkModel:
         """
         Reshape data to be of shape (num_bundles, bundle_size, 4, max_leaf_count).
         """
-        assert data.shape[0] % self.bundle_size == 0
-        num_bundles = data.shape[0] // self.bundle_size
-        return data.reshape(
-            (num_bundles, self.bundle_size, data.shape[1], data.shape[2])
-        )
+        if self.no_class_model:
+            return data.reshape(
+                (num_bundles, data.shape[2], data.shape[1])
+            )
+        else:
+            assert data.shape[0] % self.bundle_size == 0
+            num_bundles = data.shape[0] // self.bundle_size
+            return data.reshape(
+                (num_bundles, self.bundle_size, data.shape[1], data.shape[2])
+            )
 
     def _prepare_trees_for_network_input(self, trees):
         """
@@ -375,7 +394,8 @@ class ParamNetworkModel:
     def load(self, fname):
         print('    reading model file from %s' % fname)
         with keras.utils.custom_object_scope({'BundleMeanLayer': BundleMeanLayer, 'SigmoidTransposeLayer' : SigmoidTransposeLayer, 'curve_loss' : curve_loss, 'clipfcn' : clipfcn}):
-            self.network = keras.models.load_model(fname, safe_mode=False)
+            # NOTE that compile=False is fine since we're only calling .predict(), but if we wanted to e.g. continue training from the loaded model, we'd need to compile it (and getting serialization working [with compilation] was a huge clusterfuck)
+            self.network = keras.models.load_model(fname, safe_mode=False, compile=False)
 
 # ----------------------------------------------------------------------------------------
 @tf.function
@@ -456,6 +476,7 @@ class PerCellNetworkModel:
 
     # ----------------------------------------------------------------------------------------
     def load(self, fname):
+        # NOTE see other load fcn above if this isn't working
         print('    reading model file from %s' % fname)
         self.network = keras.models.load_model(fname, safe_mode=False)
 
