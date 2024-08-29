@@ -121,23 +121,25 @@ class LScaler(object):
 
 # ----------------------------------------------------------------------------------------
 def collapse_bundles(args, resps, sstats):
-    resps = [
-        ParamNetworkModel._collapse_identical_list(resps[i : i + args.dl_bundle_size])
-        for i in range(0, len(resps), args.dl_bundle_size)
-    ]
-    sstats = [
-        {
-            tkey: (min if tkey == "tree" else np.mean)(
-                [float(sstats[i + j][tkey]) for j in range(args.dl_bundle_size)]
-            )
-            for tkey in sstats[i]
-        }
-        for i in range(0, len(sstats), args.dl_bundle_size)
-    ]  # mean of each summary stat over trees in each bundle ('tree' key is an index, so take min/index of first one)
+    if resps is not None:
+        resps = [
+            ParamNetworkModel._collapse_identical_list(resps[i : i + args.dl_bundle_size])
+            for i in range(0, len(resps), args.dl_bundle_size)
+        ]
+    if sstats is not None:
+        sstats = [
+            {
+                tkey: (min if tkey == "tree" else np.mean)(
+                    [float(sstats[i + j][tkey]) for j in range(args.dl_bundle_size)]
+                )
+                for tkey in sstats[i]
+            }
+            for i in range(0, len(sstats), args.dl_bundle_size)
+        ]  # mean of each summary stat over trees in each bundle ('tree' key is an index, so take min/index of first one)
     return resps, sstats
 
 # ----------------------------------------------------------------------------------------
-def write_sigmoid_prediction(args, pred_vals, true_resps=None, true_sstats=None, smpl=None):
+def write_sigmoid_prediction(args, pred_vals, true_resps=None, sstats=None, smpl=None):
     dfdata = {  # make empty df
         "%s-%s" % (param, ptype): []
         for param in args.params_to_predict
@@ -146,18 +148,18 @@ def write_sigmoid_prediction(args, pred_vals, true_resps=None, true_sstats=None,
     dfdata['tree-index'] = []
     assert true_resps is None or len(pred_vals) == len(true_resps)
     for itr, prlist in enumerate(pred_vals):
-        dfdata['tree-index'].append(true_sstats[itr]['tree'])
+        dfdata['tree-index'].append(sstats[itr]['tree'])
         for ip, param in enumerate(args.params_to_predict):
             dfdata["%s-predicted" % param].append(prlist[ip])
             if true_resps is not None:
-                dfdata["%s-truth" % param].append(get_pval(param, true_resps[itr], true_sstats[itr]))
+                dfdata["%s-truth" % param].append(get_pval(param, true_resps[itr], sstats[itr]))
     df = pd.DataFrame(dfdata)
     print("  writing %s results to %s" % (smpl, args.outdir))
     df.to_csv(csvfn(args, smpl))
     return df
 
 # ----------------------------------------------------------------------------------------
-def write_per_cell_prediction(args, pred_fitnesses, enc_trees, true_fitnesses=None, true_resps=None, true_sstats=None, smpl=None):
+def write_per_cell_prediction(args, pred_fitnesses, enc_trees, true_fitnesses=None, true_resps=None, sstats=None, smpl=None):
     assert true_fitnesses is None or len(pred_fitnesses) == len(true_fitnesses)
     dfdata = {  # make empty df
         "fitness-%s"%ptype : []
@@ -177,9 +179,9 @@ def write_per_cell_prediction(args, pred_fitnesses, enc_trees, true_fitnesses=No
                 del pdict['fitness']
                 pdict['fitness-truth'] = tdict['fitness']
                 for ip, param in enumerate(utils.sigmoid_params):  # writes true parameter values for each cell, which kind of sucks, but they're only nonzero for the first cell in each tree
-                    dfdata["%s-truth" % param].append(get_pval(param, true_resps[itr], true_sstats[itr]) if icell==0 else 0)
+                    dfdata["%s-truth" % param].append(get_pval(param, true_resps[itr], sstats[itr]) if icell==0 else 0)
         for ndict in pred_ndicts:
-            dfdata['tree-index'].append(true_sstats[itr]['tree'])  # NOTE tree-index isn't necessarily equal to <itr>
+            dfdata['tree-index'].append(sstats[itr]['tree'])  # NOTE tree-index isn't necessarily equal to <itr>
             for tk in [k for k in ndict if k in dfdata]:
                 dfdata[tk].append(ndict[tk])
     df = pd.DataFrame(dfdata)
@@ -189,16 +191,18 @@ def write_per_cell_prediction(args, pred_fitnesses, enc_trees, true_fitnesses=No
 
 # ----------------------------------------------------------------------------------------
 def get_prediction(args, model, spld, lscaler, smpl=None):
-    true_fitnesses, true_resps, true_sstats = None, None, None
+    true_fitnesses, true_resps, sstats = None, None, None
     if args.model_type == 'sigmoid':
         const_pred_resps = model.predict(lscaler.apply_scaling(spld['trees'], smpl=smpl))  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
         pred_vals = [[float(rsp.value) for rsp in rlist] for rlist in const_pred_resps]
+        sstats = spld['sstats']
         if args.is_simu:
-            true_resps, true_sstats = [spld[tk] for tk in ["birth-responses", "sstats"]]
-            if args.dl_bundle_size > 1:
-                true_resps, true_sstats = collapse_bundles(args, true_resps, true_sstats)
+            true_resps = spld["birth-responses"]
+        if args.dl_bundle_size > 1:
+            true_resps, sstats = collapse_bundles(args, true_resps, sstats)
+        if args.is_simu:
             assert len(pred_vals) == len(true_resps)
-        df = write_sigmoid_prediction(args, pred_vals, true_resps=true_resps, true_sstats=true_sstats, smpl=smpl)
+        df = write_sigmoid_prediction(args, pred_vals, true_resps=true_resps, sstats=sstats, smpl=smpl)
     elif args.model_type == 'per-cell':
         assert args.dl_bundle_size == 1
         pred_fitnesses = model.predict(lscaler.apply_scaling(spld['trees'], smpl=smpl)).numpy()
@@ -206,10 +210,10 @@ def get_prediction(args, model, spld, lscaler, smpl=None):
             encode.reset_fill_entries(pfit, etree)
         # encode.mprint(pred_fitnesses[0])
         if args.is_simu:
-            true_fitnesses, true_resps, true_sstats = [spld[tk] for tk in ["fitnesses", "birth-responses", "sstats"]]
+            true_fitnesses, true_resps, sstats = [spld[tk] for tk in ["fitnesses", "birth-responses", "sstats"]]
             # encode.mprint(true_fitnesses[0])
             # sys.exit()
-        df = write_per_cell_prediction(args, pred_fitnesses, spld["trees"], true_fitnesses=true_fitnesses, true_resps=true_resps, true_sstats=true_sstats, smpl=smpl)
+        df = write_per_cell_prediction(args, pred_fitnesses, spld["trees"], true_fitnesses=true_fitnesses, true_resps=true_resps, sstats=sstats, smpl=smpl)
     else:
         assert False
     return df

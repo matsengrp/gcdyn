@@ -457,11 +457,11 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
         if not os.path.exists(outdir+'/'+smpl):
             os.makedirs(outdir+'/'+smpl)
         from gcdyn.poisson import SigmoidResponse, LinearResponse
-        # pfo_list = []
+        pfo_list = []
         curve_diffs = {smpl : [], 'validation' : []}
         n_pred_rows = len(prdfs[smpl].index)  # N cells for per-cell, N trees for sigmoid
         n_tree_preds = len(set(prdfs[smpl]['tree-index']))
-        n_plots = min(n_max_plots, n_tree_preds)
+        n_simu_plots = min(n_max_plots, n_tree_preds)
         lmdict = defaultdict(list)  # map from tree index to list of seq meta for that tree
         validation_indices = None
         if smpl == "train" and validation_split != 0:  # NOTE this obviously depends on keras continuing to do validation splits this way
@@ -472,26 +472,34 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             n_skipped_diffs = {s : 0 for s in curve_diffs}
             for irow in range(n_tree_preds):
                 tree_index = int(prdfs[smpl]['tree-index'][irow])
+                affy_vals = [float(m['affinity']) for m in lmdict[tree_index]]
                 is_valid = validation_indices is not None and tree_index in validation_indices
                 smplstr = 'validation' if is_valid else smpl
-                pdicts = [{p : prdfs[smpl]['%s-%s'%(p, tp)][irow] for p in sigmoid_params} for tp in ['truth', 'predicted']]
-                true_resp, pred_resp = [SigmoidResponse(**pd) for pd in pdicts]
-                affy_vals = [float(m['affinity']) for m in lmdict[tree_index]]
-                if len(curve_diffs[smplstr]) < n_max_diffs:
-                    cdiff = resp_fcn_diff(true_resp, pred_resp, [mfn(affy_vals) for mfn in [min, max]])
-                    curve_diffs[smplstr].append(cdiff)
-                    # ldiff = get_curve_loss(true_resp, pred_resp)  # uncomment (also below) to print also the diff from the curve loss fcn (it should be the same, modulo different xbounds and nsteps
+                titlestr = '%s: response index %d / %d' % (smplstr, irow, n_tree_preds)
+                if is_simu:
+                    pdicts = [{p : prdfs[smpl]['%s-%s'%(p, tp)][irow] for p in sigmoid_params} for tp in ['truth', 'predicted']]
+                    true_resp, pred_resp = [SigmoidResponse(**pd) for pd in pdicts]
+                    if len(curve_diffs[smplstr]) < n_max_diffs:
+                        cdiff = resp_fcn_diff(true_resp, pred_resp, [mfn(affy_vals) for mfn in [min, max]])
+                        curve_diffs[smplstr].append(cdiff)
+                        # ldiff = get_curve_loss(true_resp, pred_resp)  # uncomment (also below) to print also the diff from the curve loss fcn (it should be the same, modulo different xbounds and nsteps
+                    else:
+                        n_skipped_diffs[smplstr] += 1
+                        continue
+                    if irow < n_simu_plots:
+                        plot_true_pred_pair(true_resp, pred_resp, affy_vals, [cdiff], 'true-vs-inf-response-%d'%irow, titlestr=titlestr)  #, ldiff],
                 else:
-                    n_skipped_diffs[smplstr] += 1
-                    continue
-                if irow < n_plots:
-                    plot_true_pred_pair(true_resp, pred_resp, affy_vals, [cdiff], #, ldiff],
-                                        'true-vs-inf-response-%d'%irow, titlestr='%s: response index %d / %d' % (smplstr, irow, n_tree_preds))
-                # pfo_list.append({'birth-response' : pred_resp})
-            # fn = plot_many_curves(outdir, '%sall-response'%smpl, pfo_list, titlestr='%s: %d / %d responses' % (smpl, n_plots, n_tree_preds))
-            # add_fn(fn)
-            fn = plot_all_diffs(outdir+'/'+smpl, 'curve-diffs', curve_diffs, n_skipped_diffs=n_skipped_diffs)
-            add_fn(fn)
+                    pdict = {p : prdfs[smpl]['%s-%s'%(p, 'predicted')][irow] for p in sigmoid_params}
+                    pred_resp = SigmoidResponse(**pdict)
+                    fn = plot_many_curves(outdir, 'predicted-response-%d'%irow, [{'birth-response' : pred_resp}], affy_vals=affy_vals, titlestr=titlestr, colors=['#990012'])
+                    add_fn(fn)
+                pfo_list.append({'birth-response' : pred_resp, 'xbounds' : (min(affy_vals), max(affy_vals))})
+            if not is_simu: # i guess sometimes i want this plot in simu, but not atm, and it's often slow
+                fn = plot_many_curves(outdir, '%sall-response'%smpl, pfo_list, titlestr='%s: %d / %d responses' % (smpl, len(pfo_list), n_tree_preds))
+                add_fn(fn)
+            if is_simu:
+                fn = plot_all_diffs(outdir+'/'+smpl, 'curve-diffs', curve_diffs, n_skipped_diffs=n_skipped_diffs)
+                add_fn(fn)
         elif model_type == 'per-cell':
             irow = 0  # row in file (per-cell, unlike previous block)
             itree = 0  # itree is zero-based index/count of tree in this file, whereas tree_index is index in original simulation sequence (e.g. if this file starts from 10th tree, itree starts at 0 but tree_index starts at 9)
@@ -787,10 +795,13 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
     if xbounds is None:
         xbounds = [-5, 5]
     for ipf, pfo in enumerate(pfo_list):
-        resp_plot(pfo['birth-response'], ax, alpha=0.15 if len(pfo_list)>5 else 0.5, color='#990012' if colors is None else colors[ipf], xbounds=xbounds)
+        resp_plot(pfo['birth-response'], ax, alpha=0.05 if len(pfo_list)>5 else 0.5, color='#990012' if colors is None else colors[ipf], xbounds=pfo.get('xbounds', xbounds))
     if add_true_pred_text:
         assert len(pfo_list) == 2  # pfo_list must be [true, inferred] responses
         add_param_text(fig, pfo_list[0], inf_pfo=pfo_list[1], diff_vals=diff_vals)
+    # ax.set_yscale('log')
+    # plt.xlim(-5, 3)
+    # plt.ylim(0, 3)
     ax.set(title='%d responses' % len(pfo_list) if titlestr is None else titlestr)
     fn = "%s/%s.svg" % (plotdir, plotname)
     plt.savefig(fn)
