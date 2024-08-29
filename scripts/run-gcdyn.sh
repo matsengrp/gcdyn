@@ -39,6 +39,7 @@ pranges="--xscale-range-list 0.01,2 --xshift-range-list=-0.5,3 --yscale-range-li
 echo $bin $common --label const-leaves --version v2 --carry-cap-range-list 750,1500 $pranges --n-replicates 1 --n-trials-list 100:5000 --simu-bundle-size-list 1:10 --dl-bundle-size-list 1:10 --zip-vars simu-bundle-size:dl-bundle-size --simu-extra-args=\"--n-max-procs 20 --initial-birth-rate-range 0.1 0.5 --n-seqs-values 70 --init-population 128\"
 pranges="--xscale-range-list 0.01,2 --xshift-range-list=-0.5,3 --yscale-range-list 1,50 --time-to-sampling-range-list 17,25 --n-seqs-range-list 40,90"
 # echo $bin $common --label retrain --version v1 --carry-cap-range-list 750,1500 $pranges --n-replicates 1 --n-trials-list 100:5000:50000 --simu-extra-args=\"--n-max-procs 20 --initial-birth-rate-range 0.1 0.5 --init-population 128\" --learning-rate-list 0.001:0.01 --epochs-list 500:5000 --batch-size-list 32:128
+pranges="--xscale-range-list 0.01,2 --xshift-range-list=-0.5,3 --yscale-range-list 0.5,50 --time-to-sampling-range-list 17,25 --n-seqs-range-list 40,90"
 echo $bin $common --label for-data --version v0 --carry-cap-range-list 750,1500 $pranges --n-replicates 1 --n-trials-list 100:5000:50000 --simu-extra-args=\"--n-max-procs 20 --initial-birth-rate-range 0.1 0.5 --init-population 128\" --learning-rate-list 0.001 --epochs-list 500 --batch-size-list 32 --simu-bundle-size-list 1:10 --dl-bundle-size-list 1:10 --zip-vars simu-bundle-size:dl-bundle-size
 exit 0
 

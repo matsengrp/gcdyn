@@ -491,7 +491,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 else:
                     pdict = {p : prdfs[smpl]['%s-%s'%(p, 'predicted')][irow] for p in sigmoid_params}
                     pred_resp = SigmoidResponse(**pdict)
-                    fn = plot_many_curves(outdir, 'predicted-response-%d'%irow, [{'birth-response' : pred_resp}], affy_vals=affy_vals, titlestr=titlestr, colors=['#990012'])
+                    fn = plot_many_curves(outdir, 'predicted-response-%d'%irow, [{'birth-response' : pred_resp}], affy_vals=affy_vals, add_pred_text=True, titlestr=titlestr, colors=['#990012'])
                     add_fn(fn)
                 pfo_list.append({'birth-response' : pred_resp, 'xbounds' : (min(affy_vals), max(affy_vals))})
             if not is_simu: # i guess sometimes i want this plot in simu, but not atm, and it's often slow
@@ -776,7 +776,7 @@ def group_by_xvals(xvals, yvals, xbins, skip_overflows=False, debug=False):  # N
     return htmp
 
 # ----------------------------------------------------------------------------------------
-def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None, colors=None, add_true_pred_text=False,
+def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None, colors=None, add_true_pred_text=False, add_pred_text=False,
                      diff_vals=None, pred_xvals=None, pred_yvals=None, xbounds=None, xbins=affy_bins):
     # ----------------------------------------------------------------------------------------
     mpl_init()
@@ -799,6 +799,9 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
     if add_true_pred_text:
         assert len(pfo_list) == 2  # pfo_list must be [true, inferred] responses
         add_param_text(fig, pfo_list[0], inf_pfo=pfo_list[1], diff_vals=diff_vals)
+    if add_pred_text:
+        assert len(pfo_list) == 1
+        add_param_text(fig, pfo_list[0], upper_left=True)
     # ax.set_yscale('log')
     # plt.xlim(-5, 3)
     # plt.ylim(0, 3)
@@ -839,12 +842,12 @@ def plot_all_diffs(plotdir, plotname, curve_diffs, n_bins=30, xbounds=[0, 1], n_
     return fn
 
 # ----------------------------------------------------------------------------------------
-def add_param_text(fig, pfo, inf_pfo=None, diff_vals=None):
+def add_param_text(fig, pfo, inf_pfo=None, diff_vals=None, upper_left=False):
     param_text = ['%s %.1f%s' % (p, getattr(pfo['birth-response'], p), '' if inf_pfo is None else ' (%.1f)'%getattr(inf_pfo['birth-response'], p)) for p in ['xscale', 'xshift', 'yscale']]
     if diff_vals is not None:
         for dv in diff_vals:
             param_text.append('diff %.2f' % dv)
-    xv, yv = (0.6, 0.25) if inf_pfo is None else (0.19, 0.7 if diff_vals is None else 0.65)
+    xv, yv = (0.6, 0.25) if inf_pfo is None and not upper_left else (0.19, 0.7 if diff_vals is None else 0.65)
     fig.text(xv, yv, '\n'.join(param_text), fontsize=17)
 
 # ----------------------------------------------------------------------------------------
