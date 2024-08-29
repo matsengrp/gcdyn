@@ -14,10 +14,14 @@ import math
 import glob
 import json
 
+# fmt: off
 from gcdyn import bdms, gpmap, mutators, poisson, utils, encode
 from experiments import replay
 
-# fmt: off
+partis_dir = os.path.dirname(os.path.realpath(__file__)).replace('/projects/gcdyn/scripts', '')
+sys.path.insert(1, partis_dir) # + '/python')
+import python.treeutils as treeutils
+
 # ----------------------------------------------------------------------------------------
 def outfn(args, ftype, itrial=None, subd=None):
     odir = args.outdir
@@ -458,6 +462,9 @@ def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itri
     inf_seqfos = read_inferred_seqs()
     tree = utils.get_etree(fname=ofn(wkdir))
     relabel_nodes(args, tree, itrial, only_internal=True, seqfos=inf_seqfos + true_leaf_seqs)
+    dtree, new_seqfos = treeutils.get_binary_tree(None, inf_seqfos + true_leaf_seqs, etree=tree)
+    inf_seqfos += new_seqfos
+    tree = utils.get_etree(treestr=dtree.as_string(schema='newick').strip())
     utils.write_fasta('%s/inf-anc-seqs.fa'%wkdir, inf_seqfos)
 
     if debug > 1:
