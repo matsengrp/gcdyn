@@ -117,7 +117,8 @@ def curve_loss(y_true, y_pred):  # copied from/modeled after utils.resp_fcn_diff
 # This seems to be really important for training stability (without it, it often gets stuck at very large parameter values)
 # Note: should really sync minv/maxv with bounds in simulation, although they're not likely to really change so it's probably ok like this
 # @keras.saving.register_keras_serializable()
-def clipfcn(x, minv=[0.01, -0.5, 0.5], maxv=[2, 3, 50]):  # NOTE these should match the bounds in the simulation
+# def clipfcn(x, minv=[0.01, -0.5, 0.5], maxv=[2, 3, 50]):  # NOTE these should match the bounds in the simulation
+def clipfcn(x, minv=[0.005, -2.5, 0.1], maxv=[3, 5, 65]):  # NOTE these should be wider than the simulation bounds
     return tf.clip_by_value(x, clip_value_min=minv, clip_value_max=maxv)
 
 # ----------------------------------------------------------------------------------------

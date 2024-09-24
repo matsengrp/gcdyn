@@ -121,6 +121,14 @@ class LScaler(object):
 
 # ----------------------------------------------------------------------------------------
 def collapse_bundles(args, resps, sstats):
+    # ----------------------------------------------------------------------------------------
+    def group_vals(tkey, istart):
+        mfcn = min if tkey == "tree" else np.mean  # 'tree' means it's the tree index, in which case we want the index of the first tree in the bundle, otherwise we want the mean (although it should of course be the same for all trees in the bundle)
+        valstrs = [sstats[istart + j][tkey] for j in range(args.dl_bundle_size)]
+        if '' in valstrs:  # probably real data
+            return None
+        return mfcn([float(v) for v in valstrs])
+    # ----------------------------------------------------------------------------------------
     if resps is not None:
         resps = [
             ParamNetworkModel._collapse_identical_list(resps[i : i + args.dl_bundle_size])
@@ -128,12 +136,7 @@ def collapse_bundles(args, resps, sstats):
         ]
     if sstats is not None:
         sstats = [
-            {
-                tkey: (min if tkey == "tree" else np.mean)(
-                    [float(sstats[i + j][tkey]) for j in range(args.dl_bundle_size)]
-                )
-                for tkey in sstats[i]
-            }
+            {tkey : group_vals(tkey, i) for tkey in sstats[i]}
             for i in range(0, len(sstats), args.dl_bundle_size)
         ]  # mean of each summary stat over trees in each bundle ('tree' key is an index, so take min/index of first one)
     return resps, sstats
