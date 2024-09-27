@@ -19,6 +19,8 @@ import scipy.special as sp
 
 import gcdyn.utils
 
+from bdms.poisson import HomogeneousProcess
+
 # imports that are only used for type hints
 if TYPE_CHECKING:
     from gcdyn import bdms
@@ -346,7 +348,7 @@ class ExponentialResponse(PhenotypeResponse):
         self.yshift = d["yshift"]
 
 
-class SigmoidResponse(PhenotypeResponse):
+class SigmoidProcess(HomogeneousProcess):
     r"""Sigmoid response function on a :py:class:`bdms.TreeNode` object's
     phenotype attribute :math:`x`.
 
@@ -366,35 +368,22 @@ class SigmoidResponse(PhenotypeResponse):
         xshift: float = 0.0,
         yscale: float = 2.0,
         yshift: float = 0.0,
+        attr: str = "x",
     ):
         super().__init__()
         self.xscale = xscale
         self.xshift = xshift
         self.yscale = yscale
         self.yshift = yshift
+        super().__init__(attr=attr)
 
-    def λ_phenotype(self, x: float) -> float:
-        x = np.asarray(x)
+    def λ_homogeneous(
+        self, x: Hashable | Sequence[Hashable] | NDArray[Any]
+    ) -> NDArray[np.float64]:
         return self.yscale * sp.expit(self.xscale * (x - self.xshift)) + self.yshift
 
-    @property
-    def _param_dict(self) -> dict:
-        return dict(
-            xscale=self.xscale,
-            xshift=self.xshift,
-            yscale=self.yscale,
-            yshift=self.yshift,
-        )
 
-    @_param_dict.setter
-    def _param_dict(self, d):
-        self.xscale = d["xscale"]
-        self.xshift = d["xshift"]
-        self.yscale = d["yscale"]
-        self.yshift = d["yshift"]
-
-
-class SoftReluResponse(PhenotypeResponse):
+class SoftReluProcess(HomogeneousProcess):
     r"""Soft ReLU response function on a :py:class:`bdms.TreeNode` object's
     phenotype attribute :math:`x`.
 
@@ -414,14 +403,16 @@ class SoftReluResponse(PhenotypeResponse):
         xshift: float = 0.0,
         yscale: float = 1.0,
         yshift: float = 0.0,
+        attr: str = "x",
     ):
         super().__init__()
         self.xscale = xscale
         self.xshift = xshift
         self.yscale = yscale
         self.yshift = yshift
+        super().__init__(attr=attr)
 
-    def λ_phenotype(self, x: float) -> float:
+    def λ_homogeneous(self, x: float) -> float:
         x = np.asarray(x)
         return (
             self.yscale * np.logaddexp(0, self.xscale * (x - self.xshift)) + self.yshift
@@ -444,7 +435,7 @@ class SoftReluResponse(PhenotypeResponse):
         self.yshift = d["yshift"]
 
 
-class SequenceContextMutationResponse(HomogeneousResponse):
+class SequenceContextMutationProcess(HomogeneousProcess):
     r"""A Response that accepts a sequence and outputs an aggregate mutation
     rate.
 
@@ -459,9 +450,11 @@ class SequenceContextMutationResponse(HomogeneousResponse):
         self,
         mutability: pd.Series,
         mutation_intensity: float = 1.0,
+        attr: str = "x",
     ):
         self.mutability = (mutation_intensity * mutability).to_dict()
         self.cached_contexts = {}
+        super().__init__(attr=attr)
 
     def cleanup(self):
         """Clear cached contexts"""

@@ -15,6 +15,8 @@ import pandas as pd
 from scipy.stats import norm, gaussian_kde
 import ete3
 
+from bdms.mutators import Mutator as BDMSMutator
+
 from gcdyn.gpmap import GPMap
 from gcdyn import utils
 
@@ -226,7 +228,7 @@ class DiscreteMutator(AttrMutator):
         return np.log(p) if log else p
 
 
-class SequenceMutator(AttrMutator):
+class SequenceMutator(BDMSMutator):
     r"""Mutations on a DNA sequence.
 
     Nodes must have a ``sequence`` attribute
@@ -280,11 +282,13 @@ class ContextMutator(SequenceMutator):
         self,
         mutability: pd.Series,
         substitution: pd.DataFrame,
+        attr: str = "x",
     ):
         super().__init__()
         self.mutability = mutability.to_dict()
         self.substitution = substitution.fillna(0.0).T.to_dict()
         self.cached_ctx_muts = {}
+        super().__init__(attr=attr)
 
     def cleanup(self):
         """Clear cached context mutabilities"""
@@ -324,7 +328,7 @@ class ContextMutator(SequenceMutator):
         return super().node_attrs + ("chain_2_start_idx",)
 
 
-class SequencePhenotypeMutator(AttrMutator):
+class SequencePhenotypeMutator(BDMSMutator):
     r"""Class to mutate a node's sequence, and then translate that sequence
     modification into a modification of the node's phenotype (attribute).
 

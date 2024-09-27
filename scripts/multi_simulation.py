@@ -15,12 +15,13 @@ import glob
 import json
 
 # fmt: off
-from gcdyn import bdms, gpmap, mutators, poisson, utils, encode
+from gcdyn import gpmap, mutators, poisson, utils, encode
+from bdms import tree as bdmstree
+from bdms.poisson import ConstantProcess
 from experiments import replay
 
-partis_dir = os.path.dirname(os.path.realpath(__file__)).replace('/projects/gcdyn/scripts', '')
-sys.path.insert(1, partis_dir) # + '/python')
-import python.treeutils as treeutils
+# partis_dir = os.path.dirname(os.path.realpath(__file__)).replace('/projects/gcdyn/scripts', '')
+# sys.path.insert(1, partis_dir) # + '/python')
 
 # ----------------------------------------------------------------------------------------
 def outfn(args, ftype, itrial=None, subd=None):
@@ -36,7 +37,7 @@ def print_final_response_vals(tree, birth_resp, death_resp, final_time):
     xvals, bvals, dvals = [], [], []
     for tval in range(final_time + 1):  # kind of weird/arbitrary to take integer values
         txv = sorted(tree.slice(tval))
-        tbv, tdv = [[r.λ_phenotype(x) for x in txv] for r in [birth_resp, death_resp]]
+        tbv, tdv = [[r.λ_homogeneous(x) for x in txv] for r in [birth_resp, death_resp]]
         xvals += txv
         bvals += tbv
         dvals += tdv
@@ -79,18 +80,18 @@ def generate_sequences_and_tree(
     for itry in range(args.n_max_tries):
         try:
             tree_start = time.time()
-            tree = bdms.TreeNode()
+            tree = bdmstree.TreeNode()
             tree.x = gp_map(replay.NAIVE_SEQUENCE)
             tree.sequence = replay.NAIVE_SEQUENCE
             tree.chain_2_start_idx = replay.CHAIN_2_START_IDX
             tree.evolve(
                 params['time_to_sampling'],
-                birth_response=birth_resp,
-                death_response=death_resp,
-                mutation_response=mutation_resp,
+                birth_process=birth_resp,
+                death_process=death_resp,
+                mutation_process=mutation_resp,
                 mutator=mutator,
                 min_survivors=args.min_survivors,
-                birth_mutations=False,
+                birth_mutation_prob=0,
                 capacity=params["carry_cap"],
                 capacity_method=args.capacity_method,
                 init_population=args.init_population,
@@ -106,7 +107,7 @@ def generate_sequences_and_tree(
                 print_final_response_vals(tree, birth_resp, death_resp, params['time_to_sampling'])
             success = True
             break
-        except bdms.TreeError as terr:
+        except bdmstree.TreeError as terr:
             estr = terr.value
             if "min_survivors" in estr:
                 estr = "min survivors too small (less than %d)" % args.min_survivors
@@ -179,7 +180,7 @@ def scan_response(
 ):  # print output values of response function
     dx = (xmax - xmin) / nsteps
     xvals = list(np.arange(xmin, 0, dx)) + list(np.arange(0, xmax + dx, dx))
-    rvals = [birth_resp.λ_phenotype(x) for x in xvals]
+    rvals = [birth_resp.λ_homogeneous(x) for x in xvals]
     xstr = "   ".join("%7.2f" % x for x in xvals)
     rstr = "   ".join("%7.2f" % r for r in rvals)
     print("    x:", xstr)
@@ -190,7 +191,7 @@ def scan_response(
 def print_resp(bresp, dresp):
     print("        response    f(x=0)    function")
     for rname, rfcn in zip(["birth", "death"], [bresp, dresp]):
-        print("          %s   %7.3f      %s" % (rname, rfcn.λ_phenotype(0), rfcn))
+        print("          %s   %7.3f      %s" % (rname, rfcn.λ_homogeneous(0), rfcn))
 
 
 # ----------------------------------------------------------------------------------------
@@ -281,7 +282,7 @@ def get_responses(args, xscale, xshift, yscale, pcounts):
     # ----------------------------------------------------------------------------------------
     def get_birth():
         if args.birth_response == "constant":
-            bresp = poisson.ConstantResponse(yscale)
+            bresp = ConstantProcess(yscale, attr='x')
         elif args.birth_response in ["soft-relu", "sigmoid"]:
             if args.birth_response == "sigmoid":
                 assert xscale > 0 and yscale > 0, (
@@ -295,8 +296,8 @@ def get_responses(args, xscale, xshift, yscale, pcounts):
                 "yshift": args.yshift,
             }
             rfcns = {
-                "soft-relu": poisson.SoftReluResponse,
-                "sigmoid": poisson.SigmoidResponse,
+                "soft-relu": poisson.SoftReluProcess,
+                "sigmoid": poisson.SigmoidProcess,
             }
             bresp = rfcns[args.birth_response](**kwargs)
         else:
@@ -304,17 +305,17 @@ def get_responses(args, xscale, xshift, yscale, pcounts):
         return bresp
 
     # ----------------------------------------------------------------------------------------
-    dresp = poisson.ConstantResponse(args.death_value)
+    dresp = ConstantProcess(value=args.death_value, attr='x')
     bresp = get_birth()
-    print("      initial birth rate %.2f (range %s)" % (bresp.λ_phenotype(0), args.initial_birth_rate_range))
-    if bresp.λ_phenotype(0) < args.initial_birth_rate_range[0] - 1e-8 or bresp.λ_phenotype(0) > args.initial_birth_rate_range[1] + 1e-8:
-        wstr = 'initial birth response outside specified range: %.3f not in [%.3f, %.3f]' % (bresp.λ_phenotype(0), args.initial_birth_rate_range[0], args.initial_birth_rate_range[1])
+    print("      initial birth rate %.2f (range %s)" % (bresp.λ_homogeneous(0), args.initial_birth_rate_range))
+    if bresp.λ_homogeneous(0) < args.initial_birth_rate_range[0] - 1e-8 or bresp.λ_homogeneous(0) > args.initial_birth_rate_range[1] + 1e-8:
+        wstr = 'initial birth response outside specified range: %.3f not in [%.3f, %.3f]' % (bresp.λ_homogeneous(0), args.initial_birth_rate_range[0], args.initial_birth_rate_range[1])
         if args.use_generated_parameter_bounds:
             raise Exception(wstr)
         else:
             print('  %s %s' % (utils.color('yellow', 'warning'), wstr))
     print_resp(bresp, dresp)
-    add_pval(pcounts, "initial_birth_rate", bresp.λ_phenotype(0))
+    add_pval(pcounts, "initial_birth_rate", bresp.λ_homogeneous(0))
 
     # if args.debug:
     #     scan_response(bresp, dresp)
@@ -462,6 +463,7 @@ def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itri
     inf_seqfos = read_inferred_seqs()
     tree = utils.get_etree(fname=ofn(wkdir))
     relabel_nodes(args, tree, itrial, only_internal=True, seqfos=inf_seqfos + true_leaf_seqs)
+    import python.treeutils as treeutils
     dtree, new_seqfos = treeutils.get_binary_tree(None, inf_seqfos + true_leaf_seqs, etree=tree)
     inf_seqfos += new_seqfos
     tree = utils.get_etree(treestr=dtree.as_string(schema='newick').strip())
@@ -772,7 +774,7 @@ def run_sub_procs(args):
             if pname == 'yshift':  # not varying this atm (and maybe not ever)
                 continue
             add_pval(pcounts, pname, pval)
-        add_pval(pcounts, "initial_birth_rate", pkfo['birth'].λ_phenotype(0))
+        add_pval(pcounts, "initial_birth_rate", pkfo['birth'].λ_homogeneous(0))
     with open(outfn(args, 'summary-stats')) as cfile:
         reader = csv.DictReader(cfile)
         for line in reader:
@@ -846,7 +848,7 @@ def main():
         gp_map,
     )
 
-    mutation_resp = poisson.SequenceContextMutationResponse(
+    mutation_resp = poisson.SequenceContextMutationProcess(
         args.mutability_multiplier * replay.mutability(),
     )
 
