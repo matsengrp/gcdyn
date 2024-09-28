@@ -368,7 +368,7 @@ class SigmoidProcess(HomogeneousProcess):
         xshift: float = 0.0,
         yscale: float = 2.0,
         yshift: float = 0.0,
-        attr: str = "x",
+        attr: str = "state",
     ):
         super().__init__()
         self.xscale = xscale
@@ -378,9 +378,9 @@ class SigmoidProcess(HomogeneousProcess):
         super().__init__(attr=attr)
 
     def λ_homogeneous(
-        self, x: Hashable | Sequence[Hashable] | NDArray[Any]
+        self, state: Hashable | Sequence[Hashable] | NDArray[Any]
     ) -> NDArray[np.float64]:
-        return self.yscale * sp.expit(self.xscale * (x - self.xshift)) + self.yshift
+        return self.yscale * sp.expit(self.xscale * (state.x - self.xshift)) + self.yshift
 
 
 class SoftReluProcess(HomogeneousProcess):
@@ -403,7 +403,7 @@ class SoftReluProcess(HomogeneousProcess):
         xshift: float = 0.0,
         yscale: float = 1.0,
         yshift: float = 0.0,
-        attr: str = "x",
+        attr: str = "state",
     ):
         super().__init__()
         self.xscale = xscale
@@ -412,27 +412,12 @@ class SoftReluProcess(HomogeneousProcess):
         self.yshift = yshift
         super().__init__(attr=attr)
 
-    def λ_homogeneous(self, x: float) -> float:
-        x = np.asarray(x)
+    def λ_homogeneous(
+        self, state: Hashable | Sequence[Hashable] | NDArray[Any]
+    ) -> NDArray[np.float64]:
         return (
-            self.yscale * np.logaddexp(0, self.xscale * (x - self.xshift)) + self.yshift
+            self.yscale * np.logaddexp(0, self.xscale * (state.x - self.xshift)) + self.yshift
         )
-
-    @property
-    def _param_dict(self) -> dict:
-        return dict(
-            xscale=self.xscale,
-            xshift=self.xshift,
-            yscale=self.yscale,
-            yshift=self.yshift,
-        )
-
-    @_param_dict.setter
-    def _param_dict(self, d):
-        self.xscale = d["xscale"]
-        self.xshift = d["xshift"]
-        self.yscale = d["yscale"]
-        self.yshift = d["yshift"]
 
 
 class SequenceContextMutationProcess(HomogeneousProcess):
@@ -450,7 +435,7 @@ class SequenceContextMutationProcess(HomogeneousProcess):
         self,
         mutability: pd.Series,
         mutation_intensity: float = 1.0,
-        attr: str = "x",
+        attr: str = "state",
     ):
         self.mutability = (mutation_intensity * mutability).to_dict()
         self.cached_contexts = {}
@@ -468,12 +453,14 @@ class SequenceContextMutationProcess(HomogeneousProcess):
     def _param_dict(self, d):
         self.mutation_intensity = d["mutation_intensity"]
 
-    def λ_homogeneous(self, node: bdms.TreeNode) -> float:
-        if node.sequence not in self.cached_contexts:
-            self.cached_contexts[node.sequence] = sum(
-                self.mutability[context] for context in gcdyn.utils.node_contexts(node)
+    def λ_homogeneous(
+        self, state: Hashable | Sequence[Hashable] | NDArray[Any]
+    ) -> NDArray[np.float64]:
+        if state.sequence not in self.cached_contexts:
+            self.cached_contexts[state.sequence] = sum(
+                self.mutability[context] for context in gcdyn.utils.nodestate_contexts(state)
             )
-        return self.cached_contexts[node.sequence]
+        return self.cached_contexts[state.sequence]
 
 
 class PhenotypeTimeResponse(Response):

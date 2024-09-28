@@ -36,8 +36,9 @@ def print_final_response_vals(tree, birth_resp, death_resp, final_time):
     print("      time   N seqs.   min   max    min  max       min     max")
     xvals, bvals, dvals = [], [], []
     for tval in range(final_time + 1):  # kind of weird/arbitrary to take integer values
-        txv = sorted(tree.slice(tval))
-        tbv, tdv = [[r.λ_homogeneous(x) for x in txv] for r in [birth_resp, death_resp]]
+        tstatev = sorted(tree.slice(tval))
+        tbv, tdv = [[r.λ_homogeneous(tst) for tst in tstatev] for r in [birth_resp, death_resp]]
+        txv = [tst.x for tst in tstatev]
         xvals += txv
         bvals += tbv
         dvals += tdv
@@ -64,6 +65,17 @@ def relabel_nodes(args, tree, itrial, only_internal=False, seqfos=None):
         if seqfos is not None and old_name in seqdict:
             seqdict[old_name]['name'] = node.name
 
+class NodeState(object):  # kinda essentially used as a hashable node with no name (representing all nodes with common state, i.e. atm common x + sequence)
+    def __init__(self, **kwargs):
+        self.state_attrs = ('x', 'sequence', 'chain_2_start_idx')
+        for attr in kwargs:
+            assert attr in self.state_attrs
+            setattr(self, attr, kwargs[attr])
+    def __str__(self):
+        return '   x: %.2f  idx: %3d seq: %s' % (self.x, self.chain_2_start_idx, self.sequence)
+    def __lt__(self, other):
+        return self.x < other.x
+
 # ----------------------------------------------------------------------------------------
 def generate_sequences_and_tree(
     args,
@@ -80,10 +92,8 @@ def generate_sequences_and_tree(
     for itry in range(args.n_max_tries):
         try:
             tree_start = time.time()
-            tree = bdmstree.TreeNode()
-            tree.x = gp_map(replay.NAIVE_SEQUENCE)
-            tree.sequence = replay.NAIVE_SEQUENCE
-            tree.chain_2_start_idx = replay.CHAIN_2_START_IDX
+            nstate = NodeState(x=gp_map(replay.NAIVE_SEQUENCE), sequence=replay.NAIVE_SEQUENCE, chain_2_start_idx=replay.CHAIN_2_START_IDX)
+            tree = bdmstree.TreeNode(state=nstate)
             tree.evolve(
                 params['time_to_sampling'],
                 birth_process=birth_resp,
@@ -141,7 +151,8 @@ def generate_sequences_and_tree(
         print("  %s --n-seqs set to %d but tree only has %d live tips, so just sampling all of them" % (utils.color("yellow", "warning"), n_to_sample, len(live_leaves)))
         n_to_sample = len(live_leaves)
     tree.sample_survivors(n=n_to_sample, seed=seed)
-    tree.prune()
+# TODO wait don't we not need to prune any more?
+    tree.prune_unsampled()
     tree.remove_mutation_events()
     tree.check_binarity()
     relabel_nodes(args, tree, itrial)
@@ -164,7 +175,7 @@ def set_mut_stats(tree, debug=False):
     naive_seq_aa = utils.ltranslate(replay.NAIVE_SEQUENCE)
     for node in tree.iter_descendants(strategy="preorder"):
         node.total_mutations = node.n_mutations + node.up.total_mutations
-        node.total_aa_muts = utils.hamming_distance(naive_seq_aa, utils.ltranslate(node.sequence), amino_acid=True)
+        node.total_aa_muts = utils.hamming_distance(naive_seq_aa, utils.ltranslate(node.state.sequence), amino_acid=True)
 
     if debug:
         for tattr, tname in [('total_mutations', 'muts'), ('t', 'times')]:
@@ -180,7 +191,7 @@ def scan_response(
 ):  # print output values of response function
     dx = (xmax - xmin) / nsteps
     xvals = list(np.arange(xmin, 0, dx)) + list(np.arange(0, xmax + dx, dx))
-    rvals = [birth_resp.λ_homogeneous(x) for x in xvals]
+    rvals = [birth_resp.λ_homogeneous(NodeState(x=x)) for x in xvals]
     xstr = "   ".join("%7.2f" % x for x in xvals)
     rstr = "   ".join("%7.2f" % r for r in rvals)
     print("    x:", xstr)
@@ -191,7 +202,7 @@ def scan_response(
 def print_resp(bresp, dresp):
     print("        response    f(x=0)    function")
     for rname, rfcn in zip(["birth", "death"], [bresp, dresp]):
-        print("          %s   %7.3f      %s" % (rname, rfcn.λ_homogeneous(0), rfcn))
+        print("          %s   %7.3f      %s" % (rname, rfcn.λ_homogeneous(NodeState(x=0)), rfcn))
 
 
 # ----------------------------------------------------------------------------------------
@@ -282,7 +293,7 @@ def get_responses(args, xscale, xshift, yscale, pcounts):
     # ----------------------------------------------------------------------------------------
     def get_birth():
         if args.birth_response == "constant":
-            bresp = ConstantProcess(yscale, attr='x')
+            bresp = ConstantProcess(yscale)
         elif args.birth_response in ["soft-relu", "sigmoid"]:
             if args.birth_response == "sigmoid":
                 assert xscale > 0 and yscale > 0, (
@@ -305,17 +316,18 @@ def get_responses(args, xscale, xshift, yscale, pcounts):
         return bresp
 
     # ----------------------------------------------------------------------------------------
-    dresp = ConstantProcess(value=args.death_value, attr='x')
+    dresp = ConstantProcess(value=args.death_value)
     bresp = get_birth()
-    print("      initial birth rate %.2f (range %s)" % (bresp.λ_homogeneous(0), args.initial_birth_rate_range))
-    if bresp.λ_homogeneous(0) < args.initial_birth_rate_range[0] - 1e-8 or bresp.λ_homogeneous(0) > args.initial_birth_rate_range[1] + 1e-8:
-        wstr = 'initial birth response outside specified range: %.3f not in [%.3f, %.3f]' % (bresp.λ_homogeneous(0), args.initial_birth_rate_range[0], args.initial_birth_rate_range[1])
+    naive_brate = bresp.λ_homogeneous(NodeState(x=0))
+    print("      initial birth rate %.2f (range %s)" % (naive_brate, args.initial_birth_rate_range))
+    if naive_brate < args.initial_birth_rate_range[0] - 1e-8 or naive_brate > args.initial_birth_rate_range[1] + 1e-8:
+        wstr = 'initial birth response outside specified range: %.3f not in [%.3f, %.3f]' % (naive_brate, args.initial_birth_rate_range[0], args.initial_birth_rate_range[1])
         if args.use_generated_parameter_bounds:
             raise Exception(wstr)
         else:
             print('  %s %s' % (utils.color('yellow', 'warning'), wstr))
     print_resp(bresp, dresp)
-    add_pval(pcounts, "initial_birth_rate", bresp.λ_homogeneous(0))
+    add_pval(pcounts, "initial_birth_rate", naive_brate)
 
     # if args.debug:
     #     scan_response(bresp, dresp)
@@ -340,12 +352,13 @@ def write_final_outputs(args, all_seqs, all_trees, param_list, inferred=False, d
                 {
                     "tree-index": itr + args.itrial_start,
                     "name": node.name,
-                    "affinity": node.x,
+                    "affinity": node.state.x,
                     "n_muts": node.total_mutations,
                     "n_muts_aa": node.total_aa_muts,
                     "is_leaf" : node.is_leaf(),
                 }
             )
+    raise Exception('TODO not yet implemented past here')
     encode.write_leaf_meta(outfn(args, "meta", subd=subd), lmetafos)
 
     # encode trees
@@ -384,7 +397,7 @@ def add_seqs(args, all_seqs, itrial, tree):
     sample_nodes = [tree] + list(tree.iter_descendants()) if args.sample_internal_nodes else list(tree.iter_leaves())
     lseqs = []
     for node in sample_nodes:
-        sfo = {"name": str(node.name), "seq": node.sequence}  # when read from pickle, the node names sometimes end up as integers
+        sfo = {"name": str(node.name), "seq": node.state.sequence}  # when read from pickle, the node names sometimes end up as integers
         all_seqs.append(sfo)
         if node.is_leaf():
             lseqs.append(sfo)
@@ -498,7 +511,7 @@ def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itri
         def dstr(d): return utils.color('blue', '0', width=9) if float(d)==0 else '%9.6f'%d
         print('                               dist        t          x')
         for tnode in [tree] + list(tree.iter_descendants(strategy='preorder')):
-            print('            %15s  %s  %s   %s' % (tnode.name, dstr(tnode.dist), dstr(tnode.t), dstr(tnode.x)))
+            print('            %15s  %s  %s   %s' % (tnode.name, dstr(tnode.dist), dstr(tnode.t), dstr(tnode.state.x)))
 
     inf_pfo = {'%s-response'%r : pfo['%s-response'%r] for r in ['birth', 'death']}
     inf_pfo['tree'] = tree
@@ -774,7 +787,7 @@ def run_sub_procs(args):
             if pname == 'yshift':  # not varying this atm (and maybe not ever)
                 continue
             add_pval(pcounts, pname, pval)
-        add_pval(pcounts, "initial_birth_rate", pkfo['birth'].λ_homogeneous(0))
+        add_pval(pcounts, "initial_birth_rate", pkfo['birth'].λ_homogeneous(NodeState(x=0)))
     with open(outfn(args, 'summary-stats')) as cfile:
         reader = csv.DictReader(cfile)
         for line in reader:

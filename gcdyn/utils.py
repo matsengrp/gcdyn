@@ -50,13 +50,13 @@ def padded_fivemer_contexts_of_paired_sequences(sequence: str, chain_2_start_idx
     return simple_fivemer_contexts(chain_1_seq) + simple_fivemer_contexts(chain_2_seq)
 
 
-def node_contexts(node: ete3.TreeNode):
-    if hasattr(node, "chain_2_start_idx"):
+def nodestate_contexts(state):
+    if hasattr(state, "chain_2_start_idx"):
         return padded_fivemer_contexts_of_paired_sequences(
-            node.sequence, node.chain_2_start_idx
+            state.sequence, state.chain_2_start_idx
         )
     else:
-        return simple_fivemer_contexts(node.sequence)
+        return simple_fivemer_contexts(state.sequence)
 
 
 def ltranslate(nuc_seq):
