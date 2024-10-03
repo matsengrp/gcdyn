@@ -130,7 +130,8 @@ class Response(ABC):
         self,
         node: bdms.TreeNode,
         rate_multiplier: float = 1.0,
-        seed: Optional[Union[int, random.Generator]] = None,
+        seed: int = None,
+        rng = None,
     ) -> float:
         r"""Sample the waiting time :math:`\Delta t` until the first event,
         given the rate process starting at the provided node.
@@ -147,7 +148,8 @@ class Response(ABC):
         """
         if rate_multiplier == 0.0:
             return float("inf")
-        rng = random.default_rng(seed)
+        if rng is None:  # it's faster to use an rng passed in directly, than to pass an rng into the rng constructor and use that
+            rng = random.default_rng(seed)
         return self.Λ_inv(node, rng.exponential(scale=1 / rate_multiplier))
 
     def waiting_time_logsf(self, node: bdms.TreeNode, Δt: float) -> float:
@@ -268,7 +270,7 @@ class ConstantResponse(PhenotypeResponse):
         self.value = value
 
     def λ_phenotype(self, x: float) -> float:
-        return self.value * np.ones_like(x)
+        return self.value # * np.ones_like(x)  # this is *really* slow
 
     @property
     def _param_dict(self) -> dict:
@@ -374,7 +376,7 @@ class SigmoidResponse(PhenotypeResponse):
         self.yshift = yshift
 
     def λ_phenotype(self, x: float) -> float:
-        x = np.asarray(x)
+        # x = np.asarray(x)  # super slow, not sure that it's necessary
         return self.yscale * sp.expit(self.xscale * (x - self.xshift)) + self.yshift
 
     @property

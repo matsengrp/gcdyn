@@ -288,7 +288,7 @@ class TreeNode(ete3.Tree):
             waiting_time, event, event_node_name = min(
                 (
                     event_rates[event].waiting_time_rv(
-                        node, rate_multiplier=rate_multipliers[event], seed=rng
+                        node, rate_multiplier=rate_multipliers[event], rng=rng
                     ),
                     event,
                     node.name,
