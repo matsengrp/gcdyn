@@ -209,10 +209,13 @@ def read_iqtree_dir(indir, idir, gclabel, gcodir):
 
 # ----------------------------------------------------------------------------------------
 def read_beast_dir(bstdir, idir, gclabel, gcodir):
-    gcid = datautils.fix_btt_id(gclabel)
+    if args.is_beast_simu:
+        gcid = gclabel.replace('btt-', '')
+    else:
+        gcid = datautils.fix_btt_id(gclabel)
 
     single_treefname = '%s/single-tree.history.trees' % gcodir
-    tfns = glob.glob('%s/beastannotated-*.history.trees*' % bstdir)
+    tfns = glob.glob('%s/%s*.history.trees*' % (bstdir, '' if args.is_beast_simu else 'beastannotated-'))
     if len(tfns) != 1:
         raise Exception('expected one tree history file *.history.trees but got %d in %s' % (len(tfns), bstdir))
     bstfn = tfns[0]
@@ -274,9 +277,12 @@ def read_beast_dir(bstdir, idir, gclabel, gcodir):
     all_info['seqfos'].append(trsfos)
     all_info['dtrees'].append(dtree)
     all_info['gcids'].append(gcid)
-    if gcid not in rpmeta:
-        raise Exception('gcid %s not among: %s' % (gcid, rpmeta.keys()))
-    all_info['metafos'].append(rpmeta[gcid])
+    if args.is_beast_simu:
+        all_info['metafos'].append({})
+    else:
+        if gcid not in rpmeta:
+            raise Exception('gcid %s not among: %s' % (gcid, rpmeta.keys()))
+        all_info['metafos'].append(rpmeta[gcid])
 
 # ----------------------------------------------------------------------------------------
 def subset_info(timepoint):
@@ -340,10 +346,11 @@ parser.add_argument('--iqtree-dir', default='/fh/fast/matsen_e/processed-data/pa
 # NOTE eventually it would be nice if both beast dirs were in the same parent dir, but jared said he didn't add one to the repo
 parser.add_argument("--beast-dirs", default='/fh/fast/matsen_e/shared/replay-related/jareds-replay-fork/gcreplay/nextflow/results/2023-05-18-beast:/fh/fast/matsen_e/data/taraki-gctree-2021-10/gcreplay/nextflow/results/archive/2024-06-23-beast-15-day')
 parser.add_argument("--output-version", default='test')
+parser.add_argument("--is-beast-simu", action='store_true', help='atm only used for simulation that\'s been run through beast (i.e. we\'re reading from --beast-dirs)')
+parser.add_argument("--check-gct-kd", action='store_true')
 parser.add_argument("--max-leaf-count", type=int, default=100)
 parser.add_argument("--igk-idx", type=int, default=336, help='zero-based index of first igk position in smooshed-together igh+igk sequence')
 parser.add_argument("--debug", type=int, default=0)
-parser.add_argument("--check-gct-kd", action='store_true')
 parser.add_argument("--variant-score-fname", default='projects/gcdyn/experiments/final_variant_scores.csv')
 parser.add_argument("--cgg-naive-sites-fname", default='projects/gcdyn/experiments/CGGnaive_sites.csv')
 parser.add_argument("--test", action='store_true')
@@ -364,8 +371,9 @@ if args.check_gct_kd:
 
 if args.method == 'beast':
     dir_list = []
+    globstr = '*-iproc-*' if args.is_beast_simu else '*-GC'
     for bstdir in args.beast_dirs:
-        dir_list += glob.glob('%s/beast/*-GC' % bstdir)
+        dir_list += glob.glob('%s/beast/%s' % (bstdir, globstr))
 elif args.method == 'iqtree':
     dir_list = glob.glob('%s/PR*'%args.iqtree_dir)
 else:
@@ -378,8 +386,9 @@ for idir, indir in enumerate(dir_list):
         break
 
 all_tps = sorted(set(m['time'] for m in rpmeta.values()))
-for tps in all_tps:
-    subfo = subset_info(tps)
-    if len(subfo['encoded_trees']) > 0:
-        write_final_output('%s/%s-trees' % (baseoutdir, tps), subfo)
+if not args.is_beast_simu:
+    for tps in all_tps:
+        subfo = subset_info(tps)
+        if len(subfo['encoded_trees']) > 0:
+            write_final_output('%s/%s-trees' % (baseoutdir, tps), subfo)
 write_final_output('%s/all-trees' % baseoutdir, all_info)
