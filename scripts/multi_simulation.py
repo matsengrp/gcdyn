@@ -15,6 +15,11 @@ import glob
 import json
 
 # fmt: off
+# TODO rm this path stuff and pip install to go back to using installed bdms-sim (rather than cloned github copy)
+#   - pip install bdms-sim
+#   - pip uninstall bdms-sim
+bdms_dir = os.path.dirname(os.path.realpath(__file__)).replace('/gcdyn/scripts', '/bdms')
+sys.path.insert(1, bdms_dir)
 from gcdyn import gpmap, mutators, poisson, utils, encode
 from bdms import tree as bdmstree
 from bdms.poisson import ConstantProcess

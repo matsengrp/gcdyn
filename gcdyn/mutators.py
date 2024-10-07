@@ -15,6 +15,13 @@ import pandas as pd
 from scipy.stats import norm, gaussian_kde
 import ete3
 
+# TODO rm this path stuff and pip install to go back to using installed bdms-sim (rather than cloned github copy)
+#   - pip install bdms-sim
+#   - pip uninstall bdms-sim
+import os
+import sys
+bdms_dir = os.path.dirname(os.path.realpath(__file__)).replace('/gcdyn/gcdyn', '/bdms')
+sys.path.insert(1, bdms_dir)
 from bdms.mutators import Mutator as BDMSMutator
 
 from gcdyn.gpmap import GPMap
