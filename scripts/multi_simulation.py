@@ -358,7 +358,6 @@ def write_final_outputs(args, all_seqs, all_trees, param_list, inferred=False, d
                     "is_leaf" : node.is_leaf(),
                 }
             )
-    raise Exception('TODO not yet implemented past here')
     encode.write_leaf_meta(outfn(args, "meta", subd=subd), lmetafos)
 
     # encode trees

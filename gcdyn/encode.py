@@ -78,9 +78,9 @@ def encode_tree(intree, max_leaf_count=None, ladderize=True, dont_scale=False, m
         imt = imtxs[mtype]
         if mtype == 'tree':
             matrix[imt['distance'][ntype], index] = dist
-            matrix[imt['phenotype'][ntype], index] = node.x
+            matrix[imt['phenotype'][ntype], index] = node.state.x
         elif mtype == 'fitness':
-            matrix[imt['fitness'][ntype], index] = bresp.λ_phenotype(node.x)
+            matrix[imt['fitness'][ntype], index] = bresp.λ_homogeneous(node.state)
         if any(is_empty(matrix[imt[k][ntype], index]) for k in imt):
             raise Exception('filled matrix with empty value')
     # ----------------------------------------------------------------------------------------

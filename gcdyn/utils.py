@@ -132,7 +132,7 @@ def ladderize_tree(tree, attr="x", check_for_ties=False, debug=False):
         return total
     # ----------------------------------------------------------------------------------------
     def get_criteria(node):  # note that node.up.t would always be the same (the parent of the two nodes we're sorting), except the sort values of each internal node are the sort values of its first child (so, eventually, always a leaf)
-        return [node.t, node.up.t, age_sum(node), getattr(node, attr)]
+        return [node.t, node.up.t, age_sum(node), getattr(node.state, attr)]
     # ----------------------------------------------------------------------------------------
     if debug:
         print('      before ladderization:')
