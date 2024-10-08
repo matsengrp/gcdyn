@@ -342,7 +342,8 @@ parser = argparse.ArgumentParser(formatter_class=MultiplyInheritedFormatter, des
 parser.add_argument("--method", default="beast", choices=["beast", "iqtree"])
 parser.add_argument("--shared-replay-dir", default='/fh/fast/matsen_e/data/taraki-gctree-2021-10/gcreplay/nextflow/results', help='base input dir with beast results and dms affinity info')
 parser.add_argument('--taraki-replay-dir', default='/fh/fast/matsen_e/data/taraki-gctree-2021-10/gcreplay', help='dir with gctree results on gcreplay data from which we read seqs, affinity, mutation info, and trees)')
-parser.add_argument('--iqtree-dir', default='/fh/fast/matsen_e/processed-data/partis/taraki-gctree-2021-10/iqtree/v1', help='dir with iqtree trees from replay data run with datascripts/meta/taraki-gctree-2021-10/iqtree-run.py')
+parser.add_argument('--base-iqtree-dir', default='/fh/fast/matsen_e/processed-data/partis/taraki-gctree-2021-10/iqtree', help='dir with iqtree trees from replay data run with datascripts/meta/taraki-gctree-2021-10/iqtree-run.py')
+parser.add_argument('--iqtree-version', help='version of results in --base-iqtree-dir to use')
 # NOTE eventually it would be nice if both beast dirs were in the same parent dir, but jared said he didn't add one to the repo
 parser.add_argument("--beast-dirs", default='/fh/fast/matsen_e/shared/replay-related/jareds-replay-fork/gcreplay/nextflow/results/2023-05-18-beast:/fh/fast/matsen_e/data/taraki-gctree-2021-10/gcreplay/nextflow/results/archive/2024-06-23-beast-15-day')
 parser.add_argument("--output-version", default='test')
@@ -375,7 +376,10 @@ if args.method == 'beast':
     for bstdir in args.beast_dirs:
         dir_list += glob.glob('%s/beast/%s' % (bstdir, globstr))
 elif args.method == 'iqtree':
-    dir_list = glob.glob('%s/PR*'%args.iqtree_dir)
+    print('  reading iqtrees from %s/%s' % (args.base_iqtree_dir, args.iqtree_version))
+    if args.iqtree_version is None:
+        raise Exception('need to set --iqtree-version')
+    dir_list = glob.glob('%s/%s/PR*' % (args.base_iqtree_dir, args.iqtree_version))
 else:
     assert False
 infokeys = ['encoded_trees', 'sstats', 'lmetafos', 'seqfos', 'dtrees', 'gcids', 'metafos']
