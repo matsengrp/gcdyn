@@ -134,7 +134,7 @@ def generate_sequences_and_tree(
 
     if args.debug > 1:
         print('    tree before sampling:')
-        utils.print_dtree(tree)
+        utils.print_as_dtree(tree)
     n_to_sample = params["n_seqs"]
     if len(live_leaves) < n_to_sample:
         print("  %s --n-seqs set to %d but tree only has %d live tips, so just sampling all of them" % (utils.color("yellow", "warning"), n_to_sample, len(live_leaves)))
@@ -146,7 +146,7 @@ def generate_sequences_and_tree(
     relabel_nodes(args, tree, itrial)
     if args.debug > 1:
         print('    tree after sampling, pruning, relabeling, etc:')
-        utils.print_dtree(tree)
+        utils.print_as_dtree(tree)
 
     # check that node times and branch lengths are consistent
     for node in tree.iter_descendants():
@@ -460,34 +460,34 @@ def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itri
     else:
         run_method(ofn(wkdir))
     inf_seqfos = read_inferred_seqs()
-    tree = utils.get_etree(fname=ofn(wkdir))
-    relabel_nodes(args, tree, itrial, only_internal=True, seqfos=inf_seqfos + true_leaf_seqs)
-    dtree, new_seqfos = treeutils.get_binary_tree(None, inf_seqfos + true_leaf_seqs, etree=tree)
+    etree = utils.get_etree(fname=ofn(wkdir))
+    dtree, new_seqfos = treeutils.get_binary_tree(None, inf_seqfos + true_leaf_seqs, etree=etree)
     inf_seqfos += new_seqfos
-    tree = utils.get_etree(treestr=dtree.as_string(schema='newick').strip())
+    etree = utils.get_etree(treestr=dtree.as_string(schema='newick').strip())
+    relabel_nodes(args, etree, itrial, only_internal=True, seqfos=inf_seqfos + true_leaf_seqs)
     utils.write_fasta('%s/inf-anc-seqs.fa'%wkdir, inf_seqfos)
 
     if debug > 1:
         print('            %s tree before scaling:' % args.tree_inference_method)
-        utils.print_dtree(tree, extra_str='                ')
+        utils.print_as_dtree(etree, extra_str='                ')
 
     # set .x, .t, .total_mutations, and .total_aa_muts
     all_seqs = {s['name'] : s['seq'] for s in true_leaf_seqs + inf_seqfos}
     all_aa_seqs = {n : utils.ltranslate(s) for n, s in all_seqs.items()}
     hdcache, hdc_aa = {}, {}
-    for tnode in [tree] + list(tree.iter_descendants(strategy='preorder')):
+    for tnode in [etree] + list(etree.iter_descendants(strategy='preorder')):
         nseq, aa_seq = all_seqs[tnode.name], all_aa_seqs[tnode.name]
         tnode.x = gp_map(nseq)
         tnode.t = tnode.dist + (0 if tnode.is_root() else tnode.up.t)
         if nseq not in hdcache:
-            hdcache[nseq] = utils.hamming_distance(all_seqs[tree.name], nseq)
+            hdcache[nseq] = utils.hamming_distance(all_seqs[etree.name], nseq)
         if aa_seq not in hdc_aa:
-            hdc_aa[aa_seq] = utils.hamming_distance(all_aa_seqs[tree.name], aa_seq, amino_acid=True)
+            hdc_aa[aa_seq] = utils.hamming_distance(all_aa_seqs[etree.name], aa_seq, amino_acid=True)
         tnode.total_mutations = hdcache[nseq]
         tnode.total_aa_muts = hdc_aa[aa_seq]
-    encode.scale_tree(tree, new_mean_depth=params['time_to_sampling'])
+    encode.scale_tree(etree, new_mean_depth=params['time_to_sampling'])
 
-    naive_hdist = utils.hamming_distance(replay.NAIVE_SEQUENCE, all_seqs[tree.name])
+    naive_hdist = utils.hamming_distance(replay.NAIVE_SEQUENCE, all_seqs[etree.name])
     if naive_hdist != 0:
         print('              %s inferred root not equal to replay naive seq (%d bases differ)' % (utils.color('yellow', 'note'), naive_hdist))
 
@@ -495,11 +495,11 @@ def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itri
         print('            after scaling:')
         def dstr(d): return utils.color('blue', '0', width=9) if float(d)==0 else '%9.6f'%d
         print('                               dist        t          x')
-        for tnode in [tree] + list(tree.iter_descendants(strategy='preorder')):
+        for tnode in [etree] + list(etree.iter_descendants(strategy='preorder')):
             print('            %15s  %s  %s   %s' % (tnode.name, dstr(tnode.dist), dstr(tnode.t), dstr(tnode.x)))
 
     inf_pfo = {'%s-response'%r : pfo['%s-response'%r] for r in ['birth', 'death']}
-    inf_pfo['tree'] = tree
+    inf_pfo['tree'] = etree
     inf_trees.append(inf_pfo)
 
 # ----------------------------------------------------------------------------------------

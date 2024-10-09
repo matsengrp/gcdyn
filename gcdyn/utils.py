@@ -137,7 +137,7 @@ def ladderize_tree(tree, attr="x", check_for_ties=False, debug=False):
     if debug:
         print('      before ladderization:')
         # print(pad_lines(tree.get_ascii(show_internal=True)))
-        print_dtree(tree)
+        print_as_dtree(tree)
 
     # calculate sorting criteria values
     sort_criteria = defaultdict(list)
@@ -167,7 +167,7 @@ def ladderize_tree(tree, attr="x", check_for_ties=False, debug=False):
     if debug:
         print('      after ladderization:')
         # print(pad_lines(tree.get_ascii(show_internal=True)))
-        print_dtree(tree)
+        print_as_dtree(tree)
 
 
 def random_transition_matrix(length, seed=None):
@@ -1053,7 +1053,7 @@ def pad_lines(lstr, extra_str='            '):
     return '\n'.join(extra_str+l for l in lstr.split('\n'))
 
 # ----------------------------------------------------------------------------------------
-def print_dtree(etree, width=250, extra_str='            '):
+def print_as_dtree(etree, width=250, extra_str='            '):
     # # ete tree version (better than __str__()), although it still can't show distance:
     # print(pad_lines(tree.get_ascii(show_internal=True), extra_str=extra_str))
     import dendropy
