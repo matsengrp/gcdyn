@@ -50,10 +50,17 @@ exit 0
 datadir=/fh/fast/matsen_e/data/taraki-gctree-2021-10/beast-processed-data/v4  # actual data (beast version)
 # datadir=/fh/fast/matsen_e/data/taraki-gctree-2021-10/iqtree-processed-data/v2  # actual data (iqtree version)
 # datadir=/fh/fast/matsen_e/data/taraki-gctree-2021-10/beast-processed-data/bst-simu-v0/all-trees  # beast-processed simu
+dlabel=data-iqtree-trained-v0 #-iqtree-data-v0
+dsl=all-trees:d15-trees:d20-trees
+
+datadir=/fh/fast/matsen_e/dralph/partis/gcdyn/data-mimic/v0/seed-0
+dlabel=infer-on-data-mimic-v0
+dsl=simu:xxx
+
 bargs="--base-outdir /fh/fast/matsen_e/dralph/partis/gcdyn --data-dir $datadir"
 for bsize in 1 2 3; do
     let ntrial="50000 * $bsize"
-    dld=/fh/fast/matsen_e/dralph/partis/gcdyn/for-data/v0/n-trials-$ntrial/simu-bundle-size-$bsize/dl-bundle-size-$bsize/dl-infer
-    echo ./projects/cf-gcdyn.py --actions data --n-max-procs 5 --n-sub-procs 100 $bargs --label data-v0 --version bundle-size-$bsize --dry --dl-model-dir $dld --dl-bundle-size-list $bsize --data-samples-list all-trees:d15-trees:d20-trees
+    dld=/fh/fast/matsen_e/dralph/partis/gcdyn/for-data/v0/n-trials-$ntrial/simu-bundle-size-$bsize/dl-bundle-size-$bsize/dl-infer #/iqtree
+    echo ./projects/cf-gcdyn.py --actions data --n-max-procs 5 --n-sub-procs 100 $bargs --label $dlabel --version bundle-size-$bsize --dry --dl-model-dir $dld --dl-bundle-size-list $bsize --data-samples-list $dsl
 done
 exit 0
