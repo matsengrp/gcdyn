@@ -43,24 +43,28 @@ sxtra="--simu-extra-args=\"--n-max-procs 20 --initial-birth-rate-range 0.1 0.5 -
 dlargs="--learning-rate-list 0.001 --epochs-list 500 --batch-size-list 32"
 pranges="--xscale-range-list 0.01,2 --xshift-range-list=-0.5,3 --yscale-range-list 0.5,50 --time-to-sampling-range-list 17,25 --n-seqs-range-list 40,90"
 echo $bin $common --label for-data --version v0 --carry-cap-range-list 750,1500 $pranges --n-replicates 1 --n-trials-list 50000:100000:150000 $sxtra $dlargs --simu-bundle-size-list 1:2:3 --dl-bundle-size-list 1:2:3 --zip-vars simu-bundle-size:dl-bundle-size:n-trials --tree-inference-method iqtree
-echo $bin $common --label data-mimic --version v0 --carry-cap-range-list 750,1500 --n-replicates 2 --n-trials-list 120 --simu-extra-args=\"--xscale-values 0.5 --xshift-values 1.5 --yscale-values 1 --initial-birth-rate-range 0.1 0.5 --init-population 128\" --n-sub-procs 10 --tree-inference-method iqtree
+echo $bin $common --label data-mimic --version v2 --n-replicates 2 --n-trials-list 120 --simu-extra-args=\"--carry-cap-values 1500 --xscale-values 0.8 --xshift-values 1.6 --yscale-values 0.75 --initial-birth-rate-range 0.1 0.5 --n-seqs-range 60 95 --time-to-sampling-values 20 --init-population 128\" --n-sub-procs 60 --tree-inference-method iqtree
+# echo $bin $common --label match-data --version v1 --n-replicates 2 --n-trials-list 120 --simu-extra-args=\"--carry-cap-values 1500 --xscale-values 0.8 --xshift-values 1.6 --yscale-values 0.75 --initial-birth-rate-range 0.4 0.5 --n-seqs-range 40 90 --time-to-sampling-values 20 --init-population 32\" --n-sub-procs 60 --tree-inference-method iqtree
 exit 0
 
 # dld=/fh/fast/matsen_e/dralph/partis/gcdyn/retrain/v1/n-trials-50000/epochs-500/batch-size-32/learning-rate-0.001/dl-infer  # old (but still fine) model
 datadir=/fh/fast/matsen_e/data/taraki-gctree-2021-10/beast-processed-data/v4  # actual data (beast version)
 # datadir=/fh/fast/matsen_e/data/taraki-gctree-2021-10/iqtree-processed-data/v2  # actual data (iqtree version)
-# datadir=/fh/fast/matsen_e/data/taraki-gctree-2021-10/beast-processed-data/bst-simu-v0/all-trees  # beast-processed simu
-dlabel=data-iqtree-trained-v0 #-iqtree-data-v0
+# dlabel=data-iqtree-trained-v0 #-iqtree-data-v0
+datadir=/fh/fast/matsen_e/data/taraki-gctree-2021-10/beast-processed-data/bst-simu-v1  # beast-processed simu
+dlabel=bst-simu-v1
 dsl=all-trees:d15-trees:d20-trees
+dldstr=dl-infer/iqtree
 
-datadir=/fh/fast/matsen_e/dralph/partis/gcdyn/data-mimic/v0/seed-0
-dlabel=infer-on-data-mimic-v0
-dsl=simu:xxx
+# datadir=/fh/fast/matsen_e/dralph/partis/gcdyn/data-mimic/v1/seed-0
+# dlabel=infer-on-data-mimic-v1
+# dsl=simu:xxx
+# dldstr=dl-infer #/iqtree
 
 bargs="--base-outdir /fh/fast/matsen_e/dralph/partis/gcdyn --data-dir $datadir"
 for bsize in 1 2 3; do
     let ntrial="50000 * $bsize"
-    dld=/fh/fast/matsen_e/dralph/partis/gcdyn/for-data/v0/n-trials-$ntrial/simu-bundle-size-$bsize/dl-bundle-size-$bsize/dl-infer #/iqtree
+    dld=/fh/fast/matsen_e/dralph/partis/gcdyn/for-data/v0/n-trials-$ntrial/simu-bundle-size-$bsize/dl-bundle-size-$bsize/$dldstr
     echo ./projects/cf-gcdyn.py --actions data --n-max-procs 5 --n-sub-procs 100 $bargs --label $dlabel --version bundle-size-$bsize --dry --dl-model-dir $dld --dl-bundle-size-list $bsize --data-samples-list $dsl
 done
 exit 0

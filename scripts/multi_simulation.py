@@ -800,7 +800,7 @@ def main():
     for pname in ["xscale", "xshift", "yscale", "time_to_sampling", "carry_cap", "n_seqs"]:
         rangevals = getattr(args, pname + "_range")
         if rangevals is not None and len(rangevals) != 2:  # range with two values for continuous
-            raise Exception("range must consist of two values but got %d" % len(rangevals))
+            raise Exception("range for %s must consist of two values but got %d" % (pname, len(rangevals)))
     if args.dl_prediction_dir is not None:
         prfn = '%s/test.csv' % args.dl_prediction_dir
         print('  reading dl prediction from %s' % prfn)

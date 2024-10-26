@@ -120,7 +120,7 @@ class LScaler(object):
         return sc_pvals
 
 # ----------------------------------------------------------------------------------------
-def collapse_bundles(args, resps, sstats):
+def collapse_bundles(args, resps, sstats, gcids):
     # ----------------------------------------------------------------------------------------
     def group_vals(tkey, istart):
         mfcn = min if tkey == "tree" else np.mean  # 'tree' means it's the tree index, in which case we want the index of the first tree in the bundle, otherwise we want the mean (although it should of course be the same for all trees in the bundle)
@@ -139,19 +139,21 @@ def collapse_bundles(args, resps, sstats):
             {tkey : group_vals(tkey, i) for tkey in sstats[i]}
             for i in range(0, len(sstats), args.dl_bundle_size)
         ]  # mean of each summary stat over trees in each bundle ('tree' key is an index, so take min/index of first one)
-    return resps, sstats
+    return resps, sstats, gcids
 
 # ----------------------------------------------------------------------------------------
-def write_sigmoid_prediction(args, pred_vals, true_resps=None, sstats=None, smpl=None):
+def write_sigmoid_prediction(args, pred_vals, sstats, gcids, smpl, true_resps=None):
     dfdata = {  # make empty df
         "%s-%s" % (param, ptype): []
         for param in args.params_to_predict
         for ptype in (["predicted"] if true_resps is None else ["truth", "predicted"])
     }
     dfdata['tree-index'] = []
+    dfdata['gcids'] = []
     assert true_resps is None or len(pred_vals) == len(true_resps)
     for itr, prlist in enumerate(pred_vals):
         dfdata['tree-index'].append(sstats[itr]['tree'])
+        dfdata['gcids'].append(gcids[itr])
         for ip, param in enumerate(args.params_to_predict):
             dfdata["%s-predicted" % param].append(prlist[ip])
             if true_resps is not None:
@@ -198,14 +200,15 @@ def get_prediction(args, model, spld, lscaler, smpl=None):
     if args.model_type == 'sigmoid':
         const_pred_resps = model.predict(lscaler.apply_scaling(spld['trees'], smpl=smpl))  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
         pred_vals = [[float(rsp.value) for rsp in rlist] for rlist in const_pred_resps]
-        sstats = spld['sstats']
+        sstats, gcids = spld['sstats'], spld['gcids']
         if args.is_simu:
             true_resps = spld["birth-responses"]
         if args.dl_bundle_size > 1:
-            true_resps, sstats = collapse_bundles(args, true_resps, sstats)
+            raise Exception('need to handle gcids (also need better default gcids in previous lines)')
+            true_resps, sstats, gcids = collapse_bundles(args, true_resps, sstats, gcids)
         if args.is_simu:
             assert len(pred_vals) == len(true_resps)
-        df = write_sigmoid_prediction(args, pred_vals, true_resps=true_resps, sstats=sstats, smpl=smpl)
+        df = write_sigmoid_prediction(args, pred_vals, sstats, gcids, smpl, true_resps=true_resps)
     elif args.model_type == 'per-cell':
         assert args.dl_bundle_size == 1
         pred_fitnesses = model.predict(lscaler.apply_scaling(spld['trees'], smpl=smpl)).numpy()
@@ -319,9 +322,9 @@ def read_tree_files(args):
     # ----------------------------------------------------------------------------------------
     # read from various input files
     samples = {}
-    rfn, tfn, ffn, sfn = [
+    rfn, tfn, ffn, sfn, gfn = [
         "%s/%s" % (args.indir, s)
-        for s in ["responses.pkl", "encoded-trees.npy", "encoded-fitnesses.npy", "summary-stats.csv"]
+        for s in ["responses.pkl", "encoded-trees.npy", "encoded-fitnesses.npy", "summary-stats.csv", 'gcids.csv']
     ]
     rstr = ''
     if args.is_simu:
@@ -339,6 +342,12 @@ def read_tree_files(args):
         reader = csv.DictReader(sfile)
         for line in reader:
             samples["sstats"].append(line)
+    if os.path.exists(gfn):  # name/label for each tree/gc
+        with open(gfn) as gfile:
+            samples['gcids'] = [l['gcid'] for l in csv.DictReader(gfile)]
+    else:
+        samples['gcids'] = ['' for _ in samples['sstats']]
+    assert len(samples['gcids']) == len(samples['trees'])
     print("    read %d trees from %s%s" % (len(samples["trees"]), tfn, rstr))
     if args.is_simu:
         print("      first response pair:\n        birth: %s\n        death: %s" % (samples["birth-responses"][0], samples["death-responses"][0]))

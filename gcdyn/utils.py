@@ -475,8 +475,8 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 affy_vals = [float(m['affinity']) for m in lmdict[tree_index]]
                 is_valid = validation_indices is not None and tree_index in validation_indices
                 smplstr = 'validation' if is_valid else smpl
-                titlestr = '%s: response index %d / %d' % (smplstr, irow, n_tree_preds)
                 if is_simu:
+                    titlestr = '%s: response index %d / %d' % (smplstr, irow, n_tree_preds)
                     pdicts = [{p : prdfs[smpl]['%s-%s'%(p, tp)][irow] for p in sigmoid_params} for tp in ['truth', 'predicted']]
                     true_resp, pred_resp = [SigmoidResponse(**pd) for pd in pdicts]
                     if len(curve_diffs[smplstr]) < n_max_diffs:
@@ -489,6 +489,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                     if irow < n_simu_plots:
                         plot_true_pred_pair(true_resp, pred_resp, affy_vals, [cdiff], 'true-vs-inf-response-%d'%irow, titlestr=titlestr)  #, ldiff],
                 else:
+                    titlestr = '%s (%d / %d)' % (prdfs[smpl]['gcids'][irow] if 'gcids' in prdfs[smpl] else smplstr, irow, n_tree_preds)
                     pdict = {p : prdfs[smpl]['%s-%s'%(p, 'predicted')][irow] for p in sigmoid_params}
                     pred_resp = SigmoidResponse(**pdict)
                     fn = plot_many_curves(outdir, 'predicted-response-%d'%irow, [{'birth-response' : pred_resp}], affy_vals=affy_vals, add_pred_text=True, titlestr=titlestr, colors=['#990012'])
@@ -596,6 +597,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 assert False
     if model_type == 'sigmoid':
         for smpl in sorted(prdfs, reverse=True):
+            fnames.append([])
             for p1, p2 in itertools.combinations(params_to_predict, 2):
                 plot_param_or_pair('scatter', p1, smpl, param2=p2)
     make_html(outdir, fnames=fnames)
@@ -792,8 +794,10 @@ def group_by_xvals(xvals, yvals, xbins, skip_overflows=False, debug=False):  # N
 
 # ----------------------------------------------------------------------------------------
 def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None, colors=None, add_true_pred_text=False, add_pred_text=False,
-                     diff_vals=None, pred_xvals=None, pred_yvals=None, xbounds=None, ybounds=None, xbins=affy_bins):
+                     diff_vals=None, pred_xvals=None, pred_yvals=None, xbounds=None, ybounds=None, xbins=affy_bins, default_xbounds=None):
     # ----------------------------------------------------------------------------------------
+    if default_xbounds is None:
+        default_xbounds = [-5, 5]
     mpl_init()
     fig, ax = plt.subplots()
     if affy_vals is not None:
@@ -809,7 +813,7 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
         if xbounds is None:  # maybe should take more restrictive of the two?
             xbounds = [mfn(pred_xvals) for mfn in [min, max]]
     for ipf, pfo in enumerate(pfo_list):
-        resp_plot(pfo['birth-response'], ax, alpha=0.05 if len(pfo_list)>5 else 0.5, color='#990012' if colors is None else colors[ipf], xbounds=pfo.get('xbounds', xbounds))  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
+        resp_plot(pfo['birth-response'], ax, alpha=0.05 if len(pfo_list)>5 else 0.5, color='#990012' if colors is None else colors[ipf], xbounds=pfo.get('xbounds', default_xbounds))  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
     if add_true_pred_text:
         assert len(pfo_list) == 2  # pfo_list must be [true, inferred] responses
         add_param_text(fig, pfo_list[0], inf_pfo=pfo_list[1], diff_vals=diff_vals)
