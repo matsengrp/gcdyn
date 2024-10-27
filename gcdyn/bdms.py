@@ -435,10 +435,10 @@ class TreeNode(ete3.Tree):
         if self._SAMPLING_EVENT not in event_cache[self]:
             raise TreeError("cannot prune because no leaves were sampled")
 
-        def is_leaf_fn(node):  # true if node wasn't sampled
+        def not_sampled_fcn(node):  # true if node wasn't sampled
             return self._SAMPLING_EVENT not in event_cache[node]
 
-        for node in self.iter_leaves(is_leaf_fn=is_leaf_fn):  # loop over leaves that *weren't* sampled
+        for node in self.iter_leaves(is_leaf_fn=not_sampled_fcn):  # loop over leaves that *weren't* sampled
             parent = node.up
             parent.remove_child(node)
             assert parent.event == self._BIRTH_EVENT or parent.is_root()

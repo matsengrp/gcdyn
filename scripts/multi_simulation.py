@@ -46,6 +46,27 @@ def print_final_response_vals(tree, birth_resp, death_resp, final_time):
     print("     birth %6.2f    %6.2f    %6.2f" % (np.mean(bvals), min(bvals), max(bvals)))  # fmt: skip
     print("     death %7.3f   %7.3f   %7.3f" % (np.mean(dvals), min(dvals), max(dvals)))  # fmt: skip
 
+# ----------------------------------------------------------------------------------------
+evt_labels = {
+    bdms.TreeNode._BIRTH_EVENT : 'birth',
+    bdms.TreeNode._MUTATION_EVENT : 'mut',
+    bdms.TreeNode._DEATH_EVENT : 'death',
+    bdms.TreeNode._SURVIVAL_EVENT : 'surv',
+    bdms.TreeNode._SAMPLING_EVENT : 'sampl'
+}
+
+# ----------------------------------------------------------------------------------------
+def label_evt_nodes(etree):  # modify node labels so we can color them by their event
+    tcols = {'birth' : 'yellow', 'mut' : 'red', 'death' : 'reverse_video', 'surv' : None, 'sampl' : 'green'}
+    for tnode in etree.iter_descendants():
+        tnode.name = '%s-%s' % (tnode.name, evt_labels[tnode.event])
+    def label_fcn(l): return utils.color(tcols.get(l.split('-')[-1], None), l)
+    return label_fcn
+
+# ----------------------------------------------------------------------------------------
+def unlabel_evt_nodes(etree):  # reverse action of label_evt_nodes()
+    for tnode in etree.iter_descendants():  # remove the event labels from node names (ick)
+        tnode.name = tnode.name.replace('-'+evt_labels[tnode.event], '')
 
 # ----------------------------------------------------------------------------------------
 def relabel_nodes(args, tree, itrial, only_internal=False, seqfos=None):
@@ -134,7 +155,9 @@ def generate_sequences_and_tree(
 
     if args.debug > 1:
         print('    tree before sampling:')
-        utils.print_as_dtree(tree)
+        label_fcn = label_evt_nodes(tree)
+        utils.print_as_dtree(tree, label_fcn=label_fcn, width=300)
+        unlabel_evt_nodes(tree)
     n_to_sample = params["n_seqs"]
     if len(live_leaves) < n_to_sample:
         print("  %s --n-seqs set to %d but tree only has %d live tips, so just sampling all of them" % (utils.color("yellow", "warning"), n_to_sample, len(live_leaves)))
@@ -146,7 +169,9 @@ def generate_sequences_and_tree(
     relabel_nodes(args, tree, itrial)
     if args.debug > 1:
         print('    tree after sampling, pruning, relabeling, etc:')
-        utils.print_as_dtree(tree)
+        label_fcn = label_evt_nodes(tree)
+        utils.print_as_dtree(tree, label_fcn=label_fcn, width=300)
+        unlabel_evt_nodes(tree)
 
     # check that node times and branch lengths are consistent
     for node in tree.iter_descendants():
