@@ -217,12 +217,12 @@ class TreeNode(ete3.Tree):
 
         if verbose:
 
-            def print_progress(current_time, n_active_nodes):
-                print(f"t={current_time:.3f}, n={n_active_nodes}", end="   \r")
+            def print_progress(current_time, n_actv_nodes):
+                print(f"t={current_time:.3f}, n={n_actv_nodes}", end="   \r")
 
         else:
 
-            def print_progress(current_time, n_active_nodes):
+            def print_progress(current_time, n_actv_nodes):
                 pass
 
         current_time = self.t
@@ -233,9 +233,14 @@ class TreeNode(ete3.Tree):
             self._MUTATION_EVENT: mutation_response,
         }
 
+        active_nodes, n_nodes = {}, {'active' : 0}
+        def add_actv_node(node):
+            active_nodes[node.name] = node
+            n_nodes['active'] += 1
+        def rm_actv_node(node):
+            del active_nodes[node.name]
+            n_nodes['active'] -= 1
         # initialize population
-        active_nodes = {}
-        n_active_nodes = 0
         total_birth_rate = 0.0
         total_death_rate = 0.0
         while len(self.get_leaves()) < init_population:
@@ -248,8 +253,7 @@ class TreeNode(ete3.Tree):
                         setattr(cnode, attr, copy.copy(getattr(self, attr)))
                     pnode.add_child(cnode)
         for tnode in self.iter_leaves():
-            active_nodes[tnode.name] = tnode
-            n_active_nodes += 1
+            add_actv_node(tnode)
             total_birth_rate += birth_response(tnode)
             total_death_rate += death_response(tnode)
 
@@ -260,25 +264,24 @@ class TreeNode(ete3.Tree):
             self._DEATH_EVENT: 1.0,
             self._MUTATION_EVENT: 1.0,
         }
-        while n_active_nodes:
+        while n_nodes['active']:
             if capacity_method == "birth":
                 rate_multipliers[self._BIRTH_EVENT] = (
                     total_death_rate / total_birth_rate
-                ) ** (n_active_nodes / capacity)
+                ) ** (n_nodes['active'] / capacity)
             elif capacity_method == "death":
                 rate_multipliers[self._DEATH_EVENT] = (
                     total_birth_rate / total_death_rate
-                ) ** (n_active_nodes / capacity)
+                ) ** (n_nodes['active'] / capacity)
             elif capacity_method == "hard":
-                if n_active_nodes > capacity:
+                if n_nodes['active'] > capacity:
                     node_to_die = rng.choice(list(active_nodes.values()))
                     node_to_die.event = self._DEATH_EVENT
-                    del active_nodes[node_to_die.name]
-                    n_active_nodes -= 1
+                    rm_actv_node(node_to_die)
                     total_birth_rate -= birth_response(node_to_die)
                     total_death_rate -= death_response(node_to_die)
             elif capacity_method is None:
-                if n_active_nodes > capacity:
+                if n_nodes['active'] > capacity:
                     self._aborted_evolve_cleanup()
                     if verbose:
                         print()
@@ -312,8 +315,7 @@ class TreeNode(ete3.Tree):
             if current_time < end_time:
                 event_node = active_nodes[event_node_name]
                 event_node.event = event
-                del active_nodes[event_node.name]
-                n_active_nodes -= 1
+                rm_actv_node(event_node)
                 total_birth_rate -= birth_response(event_node)
                 total_death_rate -= death_response(event_node)
                 if event_node.event == self._DEATH_EVENT:
@@ -325,19 +327,18 @@ class TreeNode(ete3.Tree):
                 else:
                     raise ValueError(f"invalid event {event_node.event}")
                 for new_node in new_nodes:
-                    active_nodes[new_node.name] = new_node
-                    n_active_nodes += 1
+                    add_actv_node(new_node)
                     total_birth_rate += birth_response(new_node)
                     total_death_rate += death_response(new_node)
-                print_progress(current_time, n_active_nodes)
+                print_progress(current_time, n_nodes['active'])
             else:
-                print_progress(current_time, n_active_nodes)
-                for node in active_nodes.values():
+                print_progress(current_time, n_nodes['active'])
+                for node in list(active_nodes.values()):
                     node.event = self._SURVIVAL_EVENT
-                    n_active_nodes -= 1
+                    rm_actv_node(node)
                     utils.isclose(node.t, end_time, warn=True)
-                assert n_active_nodes == 0
-                active_nodes.clear()
+                assert n_nodes['active'] == 0
+                active_nodes.clear()  # shouldn't actually need this any more
         if verbose:
             print()
         n_survivors = sum(leaf.event == self._SURVIVAL_EVENT for leaf in self)
