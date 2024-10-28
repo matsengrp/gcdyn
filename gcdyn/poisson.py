@@ -280,6 +280,23 @@ class ConstantResponse(PhenotypeResponse):
     def _param_dict(self, d):
         self.value = d["value"]
 
+class ConstantNonsenseResponse(ConstantResponse):
+    """
+    Combines a constant response function with a separate constant value for nonsense phenotypes (e.g. stop codons).
+    You have to set both the phenotype (e.g. affinity) value that signifies nonsense seqs (which should match the
+    value you passed to AdditiveGPMap), as well as the response value for that phenotype.
+    """
+    def __init__(self, const_val, nonsense_phen_val, nonsense_resp_val):
+        super().__init__()
+        self.const_val = const_val
+        self.nonsense_phen_val = nonsense_phen_val
+        self.nonsense_resp_val = nonsense_resp_val
+
+    def λ_phenotype(self, x: float) -> float:
+        if x == self.nonsense_phen_val:
+            return self.nonsense_resp_val
+        else:
+            return self.const_val # * np.ones_like(x)  # this is *really* slow
 
 class LinearResponse(PhenotypeResponse):
     def __init__(self, slope: float = 1.0, intercept: float = 0):

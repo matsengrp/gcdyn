@@ -169,6 +169,7 @@ class TreeNode(ete3.Tree):
         seed: Optional[Union[int, np.random.Generator]] = None,
         debug: bool = False,
         print_progress: bool = False,
+        nonsense_phenotype_value: float = -99,
     ) -> None:
         r"""Evolve for time :math:`\Delta t`.
 
@@ -223,16 +224,19 @@ class TreeNode(ete3.Tree):
             self._MUTATION_EVENT: mutation_response,
         }
 
-        active_nodes, n_nodes = {}, {'active' : 0}
+        active_nodes, n_nodes = {}, {'active' : 0, 'nonsense' : 0}
         def add_actv_node(node):
             active_nodes[node.name] = node
             n_nodes['active'] += 1
+            rate_totals['birth'] += birth_response(node)
+            rate_totals['death'] += death_response(node)
         def rm_actv_node(node):
             del active_nodes[node.name]
             n_nodes['active'] -= 1
+            rate_totals['birth'] -= birth_response(node)
+            rate_totals['death'] -= death_response(node)
         # initialize population
-        total_birth_rate = 0.0
-        total_death_rate = 0.0
+        rate_totals = {'birth' : 0, 'death' : 0}
         while len(self.get_leaves()) < init_population:
             for pnode in self.get_leaves():
                 if not pnode.is_root():  # could probably also do it for root, but stuff below seems to assume root doesn't have an event
@@ -246,8 +250,6 @@ class TreeNode(ete3.Tree):
                 print('     doubled N initial nodes to %d' % len(self.get_leaves()))
         for tnode in self.iter_leaves():
             add_actv_node(tnode)
-            total_birth_rate += birth_response(tnode)
-            total_death_rate += death_response(tnode)
 
         # initialize rate multipliers, which are used to logistically modulate
         # rates in accordance with the carrying capacity
@@ -258,23 +260,22 @@ class TreeNode(ete3.Tree):
         }
         if debug:
             n_evts = 0
-            print('        N evts  time     event    evt node')
+            print('               current  wait                             N nodes')
+            print('        N evts   time   time      event   node  phen   total nonsense')
         while n_nodes['active']:
             if capacity_method == "birth":
                 rate_multipliers[self._BIRTH_EVENT] = (
-                    total_death_rate / total_birth_rate
+                    rate_totals['death'] / rate_totals['birth']
                 ) ** (n_nodes['active'] / capacity)
             elif capacity_method == "death":
                 rate_multipliers[self._DEATH_EVENT] = (
-                    total_birth_rate / total_death_rate
+                    rate_totals['birth'] / rate_totals['death']
                 ) ** (n_nodes['active'] / capacity)
             elif capacity_method == "hard":
                 if n_nodes['active'] > capacity:
                     node_to_die = rng.choice(list(active_nodes.values()))
                     node_to_die.event = self._DEATH_EVENT
                     rm_actv_node(node_to_die)
-                    total_birth_rate -= birth_response(node_to_die)
-                    total_death_rate -= death_response(node_to_die)
             elif capacity_method is None:
                 if n_nodes['active'] > capacity:
                     self._aborted_evolve_cleanup()
@@ -298,7 +299,11 @@ class TreeNode(ete3.Tree):
             current_time += Δt
             if debug:
                 n_evts += 1
-                print('        %3d    %5.2f   %8s    %s' % (n_evts, current_time, event, event_node_name))
+                def phval(tname): return active_nodes[tname].x
+                n_last_nonsense = n_nodes['nonsense']
+                n_nodes['nonsense'] = len([n for n in active_nodes.values() if phval(n.name)==nonsense_phenotype_value])
+                phvstr = utils.color('red' if phval(event_node_name)==nonsense_phenotype_value else None, '%5.1f'%phval(event_node_name))
+                print('        %3d     %5.2f  %5.2f   %8s %5s %s   %5d %s%s' % (n_evts, current_time, waiting_time, event, event_node_name, phvstr, n_nodes['active'], utils.color('blue', '-', width=5) if n_nodes['nonsense']==0 else '%5d'%n_nodes['nonsense'], '' if n_last_nonsense==n_nodes['nonsense'] else utils.color('red', '+' if n_nodes['nonsense']>n_last_nonsense else '-')))
             if current_time > end_time + 1e-8:  # 1e-8 is arbitrary, to account for floating point error
                 raise Exception("current time %f exceeded end time %f by more than %e" % (current_time, end_time, 1e-8))
             for node in active_nodes.values():
@@ -309,8 +314,6 @@ class TreeNode(ete3.Tree):
                 event_node = active_nodes[event_node_name]
                 event_node.event = event
                 rm_actv_node(event_node)
-                total_birth_rate -= birth_response(event_node)
-                total_death_rate -= death_response(event_node)
                 if event_node.event == self._DEATH_EVENT:
                     new_nodes = ()
                 elif event_node.event == self._BIRTH_EVENT:
@@ -321,8 +324,6 @@ class TreeNode(ete3.Tree):
                     raise ValueError(f"invalid event {event_node.event}")
                 for new_node in new_nodes:
                     add_actv_node(new_node)
-                    total_birth_rate += birth_response(new_node)
-                    total_death_rate += death_response(new_node)
                 if print_progress:
                     print(f"t={current_time:.3f}, n={n_nodes['active']}", end="   \r")
             else:

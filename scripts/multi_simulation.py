@@ -31,8 +31,8 @@ def outfn(args, ftype, itrial=None, subd=None):
 
 # ----------------------------------------------------------------------------------------
 def print_final_response_vals(tree, birth_resp, death_resp, final_time):
-    print("                           x         birth           death")
-    print("      time   N seqs.   min   max    min  max       min     max")
+    print("                             x         birth           death")
+    print("      time   N seqs.     min   max    min  max       min     max")
     xvals, bvals, dvals = [], [], []
     for tval in range(final_time + 1):  # kind of weird/arbitrary to take integer values
         txv = sorted(tree.slice(tval))
@@ -40,7 +40,7 @@ def print_final_response_vals(tree, birth_resp, death_resp, final_time):
         xvals += txv
         bvals += tbv
         dvals += tdv
-        print("      %3d   %4d     %5.2f %5.2f  %5.2f %5.2f   %6.3f %6.3f" % (tval, len(txv), min(txv), max(txv), min(tbv), max(tbv), min(tdv), max(tdv)))  # fmt: skip
+        print("      %3d   %4d     %7.2f   %5.2f  %5.2f %5.2f   %6.3f %6.3f" % (tval, len(txv), min(txv), max(txv), min(tbv), max(tbv), min(tdv), max(tdv)))  # fmt: skip
     print("             mean      min       max")  # fmt: skip
     print("       x   %6.2f    %6.2f    %6.2f" % (np.mean(xvals), min(xvals), max(xvals)))  # fmt: skip
     print("     birth %6.2f    %6.2f    %6.2f" % (np.mean(bvals), min(bvals), max(bvals)))  # fmt: skip
@@ -117,6 +117,7 @@ def generate_sequences_and_tree(
                 init_population=args.init_population,
                 seed=seed,
                 debug=args.debug > 1,
+                nonsense_phenotype_value=args.nonsense_phenotype_value,
             )
             live_leaves = [l for l in tree if l.event == tree._SURVIVAL_EVENT]
             print(
@@ -199,24 +200,25 @@ def set_mut_stats(tree, debug=False):
             print('          leaf %s (mean %.1f): %s' % (tname, np.mean(leaf_vals), ' '.join(tfn(n) for n in leaf_vals)))
 
 # ----------------------------------------------------------------------------------------
-def scan_response(
-    birth_resp, death_resp, xmin=-5, xmax=2, nsteps=10
-):  # print output values of response function
+def scan_response(args, rname, tresp, xmin=-5, xmax=2, nsteps=10):  # print output values of response function
     dx = (xmax - xmin) / nsteps
-    xvals = list(np.arange(xmin, 0, dx)) + list(np.arange(0, xmax + dx, dx))
-    rvals = [birth_resp.λ_phenotype(x) for x in xvals]
+    xvals = [args.nonsense_phenotype_value] + list(np.arange(xmin, 0, dx)) + list(np.arange(0, xmax + dx, dx))
+    rvals = [tresp.λ_phenotype(x) for x in xvals]
     xstr = "   ".join("%7.2f" % x for x in xvals)
     rstr = "   ".join("%7.2f" % r for r in rvals)
-    print("    x:", xstr)
-    print("    r:", rstr)
+    print('        %s response values:' % rname)
+    print("          x:", xstr)
+    print("          r:", rstr)
 
 
 # ----------------------------------------------------------------------------------------
-def print_resp(bresp, dresp):
+def print_resps(args, bresp, dresp):
     print("        response    f(x=0)    function")
     for rname, rfcn in zip(["birth", "death"], [bresp, dresp]):
         print("          %s   %7.3f      %s" % (rname, rfcn.λ_phenotype(0), rfcn))
-
+    if args.debug:
+        scan_response(args, 'birth', bresp)
+        scan_response(args, 'death', dresp)
 
 # ----------------------------------------------------------------------------------------
 def choose_val(args, pname, extra_bounds=None, dbgstrs=None):
@@ -329,7 +331,12 @@ def get_responses(args, xscale, xshift, yscale, pcounts):
         return bresp
 
     # ----------------------------------------------------------------------------------------
-    dresp = poisson.ConstantResponse(args.death_value)
+    if args.death_response == 'constant':
+        dresp = poisson.ConstantResponse(args.death_value)
+    elif args.death_response == 'constant-nonsense':
+        dresp = poisson.ConstantNonsenseResponse(args.death_value, args.nonsense_phenotype_value, args.nonsense_death_value)
+    else:
+        raise Exception('unexpected death response \'%s\'' % args.death_response)
     bresp = get_birth()
     print("      initial birth rate %.2f (range %s)" % (bresp.λ_phenotype(0), args.initial_birth_rate_range))
     if bresp.λ_phenotype(0) < args.initial_birth_rate_range[0] - 1e-8 or bresp.λ_phenotype(0) > args.initial_birth_rate_range[1] + 1e-8:
@@ -338,11 +345,8 @@ def get_responses(args, xscale, xshift, yscale, pcounts):
             raise Exception(wstr)
         else:
             print('  %s %s' % (utils.color('yellow', 'warning'), wstr))
-    print_resp(bresp, dresp)
+    print_resps(args, bresp, dresp)
     add_pval(pcounts, "initial_birth_rate", bresp.λ_phenotype(0))
-
-    # if args.debug:
-    #     scan_response(bresp, dresp)
     return bresp, dresp
 
 
@@ -578,8 +582,9 @@ def get_parser():
     parser.add_argument("--seed", default=0, type=int, help="random seed")
     parser.add_argument("--outdir", default=os.getcwd())
     parser.add_argument("--birth-response", default="sigmoid", choices=["constant", "soft-relu", "sigmoid"], help="birth rate response function")
-    # parser.add_argument('--birth-value', default=0.5, type=float, help='value (parameter) for constant birth response')
-    parser.add_argument("--death-value", default=0.1, type=float, help="value (parameter) for constant death response")
+    parser.add_argument("--death-response", default="constant-nonsense", choices=["constant", "constant-nonsense"], help="birth rate response function")
+    parser.add_argument("--death-value", default=0.1, type=float, help="(constant) death response value")
+    parser.add_argument("--nonsense-death-value", default=10, type=float, help="death response value for nonsense (e.g. stop) sequences")
     parser.add_argument("--xscale-values", default=[1], nargs="+", type=float, help="list of birth response xscale parameter values from which to choose")
     parser.add_argument("--xshift-values", default=[1], nargs="+", type=float, help="list of birth response xshift parameter values from which to choose")
     parser.add_argument("--yscale-values", default=[15], nargs="+", type=float, help="list of birth response yscale parameter values from which to choose")
@@ -589,6 +594,7 @@ def get_parser():
     parser.add_argument("--initial-birth-rate-range", default=[2, 10], nargs="+", type=float, help="Pair of values (min/max) for initial/default/average growth rate (i.e. when affinity/x=0). Used to set --yscale.")
     parser.add_argument("--yshift", default=0, type=float, help="atm this shouldn't (need to, at least) be changed")
     parser.add_argument("--mutability-multiplier", default=0.68, type=float)
+    parser.add_argument("--nonsense-phenotype-value", default=-99, type=float, help="phenotype (e.g. affinity) value to use for nonsense (e.g. stop codon) sequences")
     parser.add_argument('--dl-prediction-dir', help='If set, look for deep learning (dl) predictions in this dir, and simulate using the predicted parameter values therein')
     parser.add_argument("--sample-internal-nodes", action='store_true', help="By default, only sequences for leaf nodes are written to output (although affinities are written for both leaf and internal nodes). If this arg is set, we write seqs also for internal nodes.")
     parser.add_argument("--n-sub-procs", type=int, help="If set, the --n-trials are split among this many sub processes (which are recursively run with this script). Note that in terms of random seeds, results will not be identical with/without --n-sub-procs set (since there's no way to synchronize seeds partway through))")
@@ -858,9 +864,7 @@ def main():
             os.remove(sfn)
 
     dmsfo = replay.dms(debug=True)
-    gp_map = gpmap.AdditiveGPMap(
-        dmsfo["affinity"], nonsense_phenotype=dmsfo["affinity"].min().min()
-    )
+    gp_map = gpmap.AdditiveGPMap(dmsfo["affinity"], nonsense_phenotype=args.nonsense_phenotype_value) #dmsfo["affinity"].min().min()
     assert gp_map(replay.NAIVE_SEQUENCE) == 0
 
     mutator = mutators.SequencePhenotypeMutator(
