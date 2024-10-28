@@ -167,7 +167,8 @@ class TreeNode(ete3.Tree):
         capacity_method: Optional[Literal["birth", "death", "hard"]] = None,
         init_population: int = 1,
         seed: Optional[Union[int, np.random.Generator]] = None,
-        verbose: bool = False,
+        debug: bool = False,
+        print_progress: bool = False,
     ) -> None:
         r"""Evolve for time :math:`\Delta t`.
 
@@ -195,7 +196,7 @@ class TreeNode(ete3.Tree):
                   If ``None``, then fresh, unpredictable entropy will be pulled from the OS.
                   If an ``int``, then it will be used to derive the initial state.
                   If a :py:class:`numpy.random.Generator`, then it will be used directly.
-            verbose: Flag to indicate whether to print progress information.
+            print_progress: Flag to indicate whether to print progress information.
         """
         if not self.is_root():
             raise TreeError("Cannot evolve a non-root node")
@@ -214,17 +215,6 @@ class TreeNode(ete3.Tree):
                 )
 
         rng = np.random.default_rng(seed)
-
-        if verbose:
-
-            def print_progress(current_time, n_actv_nodes):
-                print(f"t={current_time:.3f}, n={n_actv_nodes}", end="   \r")
-
-        else:
-
-            def print_progress(current_time, n_actv_nodes):
-                pass
-
         current_time = self.t
         end_time = self.t + t
         event_rates = {
@@ -252,6 +242,8 @@ class TreeNode(ete3.Tree):
                     for attr in mutator.node_attrs:
                         setattr(cnode, attr, copy.copy(getattr(self, attr)))
                     pnode.add_child(cnode)
+            if debug:
+                print('     doubled N initial nodes to %d' % len(self.get_leaves()))
         for tnode in self.iter_leaves():
             add_actv_node(tnode)
             total_birth_rate += birth_response(tnode)
@@ -264,6 +256,9 @@ class TreeNode(ete3.Tree):
             self._DEATH_EVENT: 1.0,
             self._MUTATION_EVENT: 1.0,
         }
+        if debug:
+            n_evts = 0
+            print('        N evts  time     event    evt node')
         while n_nodes['active']:
             if capacity_method == "birth":
                 rate_multipliers[self._BIRTH_EVENT] = (
@@ -283,7 +278,7 @@ class TreeNode(ete3.Tree):
             elif capacity_method is None:
                 if n_nodes['active'] > capacity:
                     self._aborted_evolve_cleanup()
-                    if verbose:
+                    if print_progress:
                         print()
                     raise TreeError(f"{capacity=} exceeded at time={current_time}")
             else:
@@ -301,13 +296,11 @@ class TreeNode(ete3.Tree):
             )
             Δt = min(waiting_time, end_time - current_time)
             current_time += Δt
-            if (
-                current_time > end_time + 1e-8
-            ):  # 1e-8 is arbitrary, to account for floating point error
-                raise Exception(
-                    "current time %f exceeded end time %f by more than %e"
-                    % (current_time, end_time, 1e-8)
-                )
+            if debug:
+                n_evts += 1
+                print('        %3d    %5.2f   %8s    %s' % (n_evts, current_time, event, event_node_name))
+            if current_time > end_time + 1e-8:  # 1e-8 is arbitrary, to account for floating point error
+                raise Exception("current time %f exceeded end time %f by more than %e" % (current_time, end_time, 1e-8))
             for node in active_nodes.values():
                 node.dist += Δt
                 node.t = current_time
@@ -330,16 +323,16 @@ class TreeNode(ete3.Tree):
                     add_actv_node(new_node)
                     total_birth_rate += birth_response(new_node)
                     total_death_rate += death_response(new_node)
-                print_progress(current_time, n_nodes['active'])
+                if print_progress:
+                    print(f"t={current_time:.3f}, n={n_nodes['active']}", end="   \r")
             else:
-                print_progress(current_time, n_nodes['active'])
                 for node in list(active_nodes.values()):
                     node.event = self._SURVIVAL_EVENT
                     rm_actv_node(node)
                     utils.isclose(node.t, end_time, warn=True)
                 assert n_nodes['active'] == 0
                 active_nodes.clear()  # shouldn't actually need this any more
-        if verbose:
+        if print_progress:
             print()
         n_survivors = sum(leaf.event == self._SURVIVAL_EVENT for leaf in self)
         if n_survivors < min_survivors:

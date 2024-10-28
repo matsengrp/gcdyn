@@ -116,7 +116,7 @@ def generate_sequences_and_tree(
                 capacity_method=args.capacity_method,
                 init_population=args.init_population,
                 seed=seed,
-                verbose=args.debug > 1,
+                debug=args.debug > 1,
             )
             live_leaves = [l for l in tree if l.event == tree._SURVIVAL_EVENT]
             print(
