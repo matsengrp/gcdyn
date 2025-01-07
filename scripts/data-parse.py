@@ -208,40 +208,47 @@ def read_iqtree_dir(indir, idir, gclabel, gcodir):
     all_info['metafos'].append(rpmeta[gcid])
 
 # ----------------------------------------------------------------------------------------
-def read_beast_dir(bstdir, idir, gclabel, gcodir):
+def read_beast_dir(bstdir, idir, gclabel, gcodir, n_bst_trees=1):
     if args.is_beast_simu:
         gcid = gclabel.replace('btt-', '')
     else:
         gcid = datautils.fix_btt_id(gclabel)
 
-    single_treefname = '%s/single-tree.history.trees' % gcodir
+    short_treefn = '%s/few-trees.history.trees' % gcodir
     tfns = glob.glob('%s/%s*.history.trees*' % (bstdir, '' if args.is_beast_simu else 'beastannotated-'))
     if len(tfns) != 1:
         raise Exception('expected one tree history file *.history.trees but got %d in %s' % (len(tfns), bstdir))
     bstfn = tfns[0]
     if args.debug:
-        print('             writing first tree from beast history file to new file %s' % single_treefname)
+        print('             writing first tree from beast history file to new file %s' % short_treefn)
     # NOTE if you start reading more than one tree, it'll no longer really make sense to concat all the trees from all gc dirs together at the end
-    grepstr = 'grep -v \'^tree STATE_[1-9][^ ]\''
-    if bstfn.split('.')[-1] == 'gz':
-        cmd = 'gunzip --to-stdout %s | %s >%s' % (bstfn, grepstr, single_treefname)
-    else:
-        cmd = ' %s %s >%s' % (grepstr, bstfn, single_treefname)
-    subprocess.check_call(cmd, shell=True)
+    tmp_treefn, tmp_headerfn = ['%s/%s.txt'%(gcodir, f) for f in ['tree-lines', 'head-lines']]
+    catcmd = 'gunzip --to-stdout' if bstfn.split('.')[-1]=='gz' else 'cat'
+    cmds = [
+        '#!/bin/bash',
+        '%s %s | tee >(tail -n%d | grep -v End >%s) | grep -v \'^tree STATE_\' >%s' % (catcmd, bstfn, n_bst_trees+1, tmp_treefn, tmp_headerfn),
+        'head -n-1 %s >%s' % (tmp_headerfn, short_treefn),
+        'cat %s >>%s' % (tmp_treefn, short_treefn),
+        'echo \'End;\n\' >>%s' % short_treefn,
+    ]
+    partis_utils.simplerun('\n'.join(cmds), cmdfname='%s/run.sh'%gcodir)
+    for fn in [tmp_treefn, tmp_headerfn]:
+        os.remove(fn)
 
     if args.debug:
-        print('          loading trees from %s' % single_treefname)
+        print('          loading trees from %s' % short_treefn)
     xmlfn = utils.get_single_entry(glob.glob('%s/beastgen.xml*' % bstdir))
     if xmlfn.split('.')[-1] == 'gz':
         new_xfn = '%s/%s' % (gcodir, os.path.basename(xmlfn).replace('.gz', ''))
         subprocess.check_call('gunzip --to-stdout %s >%s'%(xmlfn, new_xfn), shell=True)
         xmlfn = new_xfn
-    res_gen, rmd_sites = beast_loader.load_beast_trees(xmlfn, single_treefname, single_treefname)
+    res_gen, rmd_sites = beast_loader.load_beast_trees(xmlfn, short_treefn)
 
     kd_checks = {'ok' : 0, 'bad' : 0}
     for itr, dtree in enumerate(res_gen):
         trsfos = []
         inodelabel = 0
+        # n_stop_seqs = 0  # eh, ended up not really needing this
         for node in dtree.preorder_node_iter():
             if node.taxon is None:
                 assert itr == 0  # if you start reading more than one tree, you [probably] need to change the node names so they tell you which tree they're from
@@ -254,6 +261,8 @@ def read_beast_dir(bstdir, idir, gclabel, gcodir):
                 node.nuc_seq = node.observed_cg.to_sequence() if node.is_leaf() else node.cg.to_sequence()
             else:  # new files (i don't know why they changed the format, but whatever this seems to work)
                 node.nuc_seq = node.comments[0].split('=')[-1].strip('"')
+            # if partis_utils.is_there_a_stop_codon(node.nuc_seq, '', '', 0):
+            #     n_stop_seqs += 1
             trsfos.append({'name' : node.taxon.label, 'seq' : node.nuc_seq})
 
         etree, tr_lmfos = get_beast_etree(dtree, idir, itr, kd_checks, gcid=gcid, debug=args.debug)
@@ -352,6 +361,7 @@ parser.add_argument("--check-gct-kd", action='store_true')
 parser.add_argument("--max-leaf-count", type=int, default=100)
 parser.add_argument("--igk-idx", type=int, default=336, help='zero-based index of first igk position in smooshed-together igh+igk sequence')
 parser.add_argument("--debug", type=int, default=0)
+parser.add_argument("--nonsense-affinity-value", type=float, default=-99)
 parser.add_argument("--variant-score-fname", default='projects/gcdyn/experiments/final_variant_scores.csv')
 parser.add_argument("--cgg-naive-sites-fname", default='projects/gcdyn/experiments/CGGnaive_sites.csv')
 parser.add_argument("--test", action='store_true')
