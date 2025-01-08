@@ -48,7 +48,7 @@ def get_affinity(nuc_seq, name, kd_checks, debug=False):
 
     has_stops = [any("*" in x for x in aa_muts[c]) for c in 'hl']
     if any(has_stops):  # should really be "affinity" or "delta bind" rather than kd_val
-        kd_val = dms_df.delta_bind_CGG.min()
+        kd_val = args.nonsense_affinity_value  # dms_df.delta_bind_CGG.min()
         kdstr = utils.color('red', ' stop')
     else:
         kd_val = dms_df.delta_bind_CGG[aa_muts['h'] + aa_muts['l']].sum()
@@ -97,7 +97,9 @@ def get_beast_etree(dtree, idir, itr, kd_checks, gcid=None, debug=False):
 
 # ----------------------------------------------------------------------------------------
 def read_gct_kd():
-    gct_kd_fname = '%s/merged-results/observed-seqs.csv' % args.shared_replay_dir
+    gct_kd_fname = '%s/nextflow/results/observed-seqs.csv' % args.shared_replay_dir
+    if not os.path.exists(gct_kd_fname):
+        gct_kd_fname = gct_kd_fname.replace('/nextflow/results', '/nextflow/results/merged-results')  # old dir structure
     print('  reading kd values from %s' % gct_kd_fname)
     kd_vals = {}
     with open(gct_kd_fname) as afile:  # note that I also use these kd vals in partis/bin/read-gctree-output.py, but there I'm using gctree output so it's a bit different (and is processed through datascripts/taraki-gctree-2021-10)
@@ -215,12 +217,17 @@ def read_beast_dir(bstdir, idir, gclabel, gcodir, n_bst_trees=1):
         gcid = datautils.fix_btt_id(gclabel)
 
     short_treefn = '%s/few-trees.history.trees' % gcodir
-    tfns = glob.glob('%s/%s*.history.trees*' % (bstdir, '' if args.is_beast_simu else 'beastannotated-'))
-    if len(tfns) != 1:
-        raise Exception('expected one tree history file *.history.trees but got %d in %s' % (len(tfns), bstdir))
-    bstfn = tfns[0]
     if args.debug:
         print('             writing first tree from beast history file to new file %s' % short_treefn)
+    if os.path.isdir(bstdir):
+        tfns = glob.glob('%s/%s*.history.trees*' % (bstdir, '' if args.is_beast_simu else 'beastannotated-'))
+        if len(tfns) != 1:
+            raise Exception('expected one tree history file *.history.trees but got %d in %s' % (len(tfns), bstdir))
+        bstfn = tfns[0]
+        xmlfn = partis_utils.get_single_entry(glob.glob('%s/beastgen.naiveroot.xml*' % bstdir))
+    else:  # new dir structure
+        bstfn = '%s.history.trees' % bstdir
+        xmlfn = '%s.beastgen.naiveroot.xml' % bstdir
     # NOTE if you start reading more than one tree, it'll no longer really make sense to concat all the trees from all gc dirs together at the end
     tmp_treefn, tmp_headerfn = ['%s/%s.txt'%(gcodir, f) for f in ['tree-lines', 'head-lines']]
     catcmd = 'gunzip --to-stdout' if bstfn.split('.')[-1]=='gz' else 'cat'
@@ -229,7 +236,7 @@ def read_beast_dir(bstdir, idir, gclabel, gcodir, n_bst_trees=1):
         '%s %s | tee >(tail -n%d | grep -v End >%s) | grep -v \'^tree STATE_\' >%s' % (catcmd, bstfn, n_bst_trees+1, tmp_treefn, tmp_headerfn),
         'head -n-1 %s >%s' % (tmp_headerfn, short_treefn),
         'cat %s >>%s' % (tmp_treefn, short_treefn),
-        'echo \'End;\n\' >>%s' % short_treefn,
+        'echo \'End;\' >>%s' % short_treefn,
     ]
     partis_utils.simplerun('\n'.join(cmds), cmdfname='%s/run.sh'%gcodir)
     for fn in [tmp_treefn, tmp_headerfn]:
@@ -237,7 +244,6 @@ def read_beast_dir(bstdir, idir, gclabel, gcodir, n_bst_trees=1):
 
     if args.debug:
         print('          loading trees from %s' % short_treefn)
-    xmlfn = utils.get_single_entry(glob.glob('%s/beastgen.xml*' % bstdir))
     if xmlfn.split('.')[-1] == 'gz':
         new_xfn = '%s/%s' % (gcodir, os.path.basename(xmlfn).replace('.gz', ''))
         subprocess.check_call('gunzip --to-stdout %s >%s'%(xmlfn, new_xfn), shell=True)
@@ -349,12 +355,12 @@ class MultiplyInheritedFormatter(argparse.RawTextHelpFormatter, argparse.Argumen
 formatter_class = MultiplyInheritedFormatter
 parser = argparse.ArgumentParser(formatter_class=MultiplyInheritedFormatter, description=helpstr)
 parser.add_argument("--method", default="beast", choices=["beast", "iqtree"])
-parser.add_argument("--shared-replay-dir", default='/fh/fast/matsen_e/data/taraki-gctree-2021-10/gcreplay/nextflow/results', help='base input dir with beast results and dms affinity info')
-parser.add_argument('--taraki-replay-dir', default='/fh/fast/matsen_e/data/taraki-gctree-2021-10/gcreplay', help='dir with gctree results on gcreplay data from which we read seqs, affinity, mutation info, and trees)')
+# parser.add_argument("--shared-replay-dir", default='/fh/fast/matsen_e/data/taraki-gctree-2021-10/gcreplay', help='base input dir with beast results and dms affinity info')
+parser.add_argument("--shared-replay-dir", default='/fh/fast/matsen_e/shared/replay/gcreplay', help='base input dir with beast results and dms affinity info')
 parser.add_argument('--base-iqtree-dir', default='/fh/fast/matsen_e/processed-data/partis/taraki-gctree-2021-10/iqtree', help='dir with iqtree trees from replay data run with datascripts/meta/taraki-gctree-2021-10/iqtree-run.py')
 parser.add_argument('--iqtree-version', help='version of results in --base-iqtree-dir to use')
-# NOTE eventually it would be nice if both beast dirs were in the same parent dir, but jared said he didn't add one to the repo
-parser.add_argument("--beast-dirs", default='/fh/fast/matsen_e/shared/replay-related/jareds-replay-fork/gcreplay/nextflow/results/2023-05-18-beast:/fh/fast/matsen_e/data/taraki-gctree-2021-10/gcreplay/nextflow/results/archive/2024-06-23-beast-15-day')
+# parser.add_argument("--beast-dirs", default='/fh/fast/matsen_e/shared/replay-related/jareds-replay-fork/gcreplay/nextflow/results/2023-05-18-beast:/fh/fast/matsen_e/data/taraki-gctree-2021-10/gcreplay/nextflow/results/archive/2024-06-23-beast-15-day')
+parser.add_argument("--beast-dirs", default='/fh/fast/matsen_e/shared/replay/gcreplay/nextflow/results/archive/beast-pipeline')
 parser.add_argument("--output-version", default='test')
 parser.add_argument("--is-beast-simu", action='store_true', help='atm only used for simulation that\'s been run through beast (i.e. we\'re reading from --beast-dirs)')
 parser.add_argument("--check-gct-kd", action='store_true')
@@ -374,7 +380,7 @@ np.random.seed(args.random_seed)
 
 baseoutdir = '/fh/fast/matsen_e/data/taraki-gctree-2021-10/%s-processed-data/%s' % (args.method, args.output_version)
 
-rpmeta = datautils.read_gcreplay_metadata(args.taraki_replay_dir)
+rpmeta = datautils.read_gcreplay_metadata(args.shared_replay_dir)
 
 dms_df, naive_seqs_aa, pos_maps = get_mut_info()
 if args.check_gct_kd:
@@ -382,9 +388,23 @@ if args.check_gct_kd:
 
 if args.method == 'beast':
     dir_list = []
-    globstr = '*-iproc-*' if args.is_beast_simu else '*-GC'
     for bstdir in args.beast_dirs:
-        dir_list += glob.glob('%s/beast/%s' % (bstdir, globstr))
+        if not os.path.exists(bstdir):
+            raise Exception('beast dir %s doesn\'t exist' % bstdir)
+        if args.is_beast_simu:
+            bsubd = '%s/beast' % bstdir
+            globstr = '*-iproc-*'
+        else:
+            if os.path.exists('%s/beast' % bstdir):  # old dir structure (separate dir for each GC)
+                bsubd = '%s/beast' % bstdir
+                globstr = '*-GC'
+            else:  #  new dir structure (all output files are in the same dir, plus the names all changed)
+                bsubd = '%s/BEAST_TIMETREE' % bstdir
+                globstr = '*.history.trees'  # have to use this to get the files for all GCs (but then remove it)
+        if not os.path.exists(bsubd):
+            raise Exception('beast subdir %s doesn\'t exist' % bsubd)
+        dir_list += [f.replace('.history.trees', '') for f in glob.glob('%s/%s' % (bsubd, globstr))]  # for new dir structure, pass a partial path (not the dir, not the full file name)
+    print('    glob\'d %d gc dirs from %d beast dir%s' % (len(dir_list), len(args.beast_dirs), partis_utils.plural(len(args.beast_dirs))))
 elif args.method == 'iqtree':
     print('  reading iqtrees from %s/%s' % (args.base_iqtree_dir, args.iqtree_version))
     if args.iqtree_version is None:

@@ -582,7 +582,7 @@ def get_parser():
     parser.add_argument("--seed", default=0, type=int, help="random seed")
     parser.add_argument("--outdir", default=os.getcwd())
     parser.add_argument("--birth-response", default="sigmoid", choices=["constant", "soft-relu", "sigmoid"], help="birth rate response function")
-    parser.add_argument("--death-response", default="constant-nonsense", choices=["constant", "constant-nonsense"], help="birth rate response function")
+    parser.add_argument("--death-response", default="constant-nonsense", choices=["constant", "constant-nonsense"], help="death rate response function")
     parser.add_argument("--death-value", default=0.1, type=float, help="(constant) death response value")
     parser.add_argument("--nonsense-death-value", default=10, type=float, help="death response value for nonsense (e.g. stop) sequences")
     parser.add_argument("--xscale-values", default=[1], nargs="+", type=float, help="list of birth response xscale parameter values from which to choose")
