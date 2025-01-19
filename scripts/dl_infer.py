@@ -172,17 +172,19 @@ def write_per_cell_prediction(args, pred_fitnesses, enc_trees, true_fitnesses=No
     }
     dfdata['tree-index'] = []
     dfdata['phenotype'] = []
-    for param in utils.sigmoid_params:
-        dfdata['%s-truth'%param] = []
+    if true_fitnesses is not None:
+        for param in utils.sigmoid_params:
+            dfdata['%s-truth'%param] = []
     for itr, efit in enumerate(pred_fitnesses):
         pred_ndicts = encode.decode_matrices(enc_trees[itr], efit)
         if true_fitnesses is not None:
             true_ndicts = encode.decode_matrices(enc_trees[itr], true_fitnesses[itr])
             assert len(pred_ndicts) == len(true_ndicts)
-            for icell, (pdict, tdict) in enumerate(zip(pred_ndicts, true_ndicts)):
-                pdict['fitness-predicted'] = pdict['fitness']
-                del pdict['fitness']
-                pdict['fitness-truth'] = tdict['fitness']
+        for icell, pdict in enumerate(pred_ndicts):
+            pdict['fitness-predicted'] = pdict['fitness']
+            del pdict['fitness']
+            if true_fitnesses is not None:
+                pdict['fitness-truth'] = true_ndicts[icell]['fitness']
                 for ip, param in enumerate(utils.sigmoid_params):  # writes true parameter values for each cell, which kind of sucks, but they're only nonzero for the first cell in each tree
                     dfdata["%s-truth" % param].append(get_pval(param, true_resps[itr], sstats[itr]) if icell==0 else 0)
         for ndict in pred_ndicts:
@@ -215,6 +217,7 @@ def get_prediction(args, model, spld, lscaler, smpl=None):
         for pfit, etree in zip(pred_fitnesses, spld['trees']):
             encode.reset_fill_entries(pfit, etree)
         # encode.mprint(pred_fitnesses[0])
+        sstats = spld['sstats']
         if args.is_simu:
             true_fitnesses, true_resps, sstats = [spld[tk] for tk in ["fitnesses", "birth-responses", "sstats"]]
             # encode.mprint(true_fitnesses[0])

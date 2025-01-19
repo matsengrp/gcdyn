@@ -26,6 +26,7 @@ import string
 
 sigmoid_params = ['xscale', 'xshift', 'yscale']  # ick
 affy_bins = [-15, -10, -7, -5, -3, -2, -1, -0.5, -0.25, 0.25, 0.5, 1, 1.5, 2, 2.5, 3.5, 4, 5, 7]
+zoom_affy_bins = [-2, -1, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.25, 1.5, 2, 2.5]
 fitness_bins = [-1.5, -1, -0.75, -0.5, -0.2, 0, 0.1, 0.25, 0.4, 0.5, 0.75, 1, 1.5, 2] #, 5, 15]
 
 def simple_fivemer_contexts(sequence: str):
@@ -508,27 +509,38 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 fn = plot_all_diffs(outdir+'/'+smpl, 'curve-diffs', curve_diffs, n_skipped_diffs=n_skipped_diffs)
                 add_fn(fn)
         elif model_type == 'per-cell':
+            all_xvals, all_yvals, all_true_responses = [], [], []
             irow = 0  # row in file (per-cell, unlike previous block)
             itree = 0  # itree is zero-based index/count of tree in this file, whereas tree_index is index in original simulation sequence (e.g. if this file starts from 10th tree, itree starts at 0 but tree_index starts at 9)
-            while itree < n_plots:
+            while itree < n_max_plots:
                 tree_index = int(prdfs[smpl]['tree-index'][irow])
                 if trivial_encoding:
                     true_resp = LinearResponse()
                     xbounds = None
                 else:
-                    pdict = {p : prdfs[smpl]['%s-truth'%p][irow] for p in sigmoid_params}
-                    true_resp = SigmoidResponse(**pdict)
+                    if is_simu:
+                        pdict = {p : prdfs[smpl]['%s-truth'%p][irow] for p in sigmoid_params}
+                        true_resp = SigmoidResponse(**pdict)
                     xbounds = [mfn([float(m['affinity']) for m in lmdict[tree_index]]) for mfn in [min, max]]
+                true_pfo_list = [{'birth-response' : true_resp, 'xbounds' : xbounds}] if is_simu else []
                 dfdata = {'phenotype' : [], 'fitness-predicted' : []}
                 while irow < n_pred_rows and int(prdfs[smpl]['tree-index'][irow]) == tree_index:  # until next tree
                     for tk in dfdata:
                         dfdata[tk].append(prdfs[smpl][tk][irow])
                     irow += 1
                 smpstr = smpl if validation_indices is None or tree_index not in validation_indices else 'validation'
-                fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-response-%d'%itree, [{'birth-response' : true_resp}], titlestr='%s: response index %d / %d' % (smpstr, itree, n_tree_preds),
-                                      colors=['#006600'], pred_xvals=dfdata['phenotype'], pred_yvals=dfdata['fitness-predicted'], xbounds=xbounds)
+                fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-response-%d'%itree, true_pfo_list, titlestr='%s: response index %d / %d' % (smpstr, itree, n_tree_preds),
+                                      colors=['#006600'], pred_xvals=dfdata['phenotype'], pred_yvals=dfdata['fitness-predicted']) #, xbounds=xbounds)
+                assert len(dfdata['phenotype']) == len(dfdata['fitness-predicted'])
+                all_xvals += dfdata['phenotype']
+                all_yvals += dfdata['fitness-predicted']
+                if is_simu:
+                    all_true_responses.append(true_pfo_list[0])
                 add_fn(fn)
                 itree += 1
+            fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-response', true_pfo_list, titlestr='%s: %d / %d responses' % (smpl, len(pfo_list), n_tree_preds),
+                                  pred_xvals=all_xvals, pred_yvals=all_yvals, xbins=zoom_affy_bins, xbounds=[-2.5, 2], colors=['green' for _ in true_pfo_list])
+            add_fn(fn)
         else:
             assert False
 
@@ -833,7 +845,7 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
                      diff_vals=None, pred_xvals=None, pred_yvals=None, xbounds=None, ybounds=None, xbins=affy_bins, default_xbounds=None,
                      nonsense_affy_val=-99, plot_median_curve=False):
     if default_xbounds is None:
-        default_xbounds = [-5, 5]
+        default_xbounds = [-2, 1.5]
     mpl_init()
     fig, ax = plt.subplots()
     if affy_vals is not None:
@@ -845,6 +857,15 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
         if xbounds is None:  # maybe should take more restrictive of the two?
             xbounds = [mfn(affy_vals) for mfn in [min, max]]
     if pred_xvals is not None and pred_yvals is not None:  # only used for per-cell prediction
+        if nonsense_affy_val in pred_xvals:
+            print('    %s removing %d / %d nonsense affinity values' % (wrnstr(), pred_xvals.count(nonsense_affy_val), len(pred_xvals)))
+            new_xvals, new_yvals = [], []
+            for xv, yv in zip(pred_xvals, pred_yvals):
+                if xv == nonsense_affy_val:
+                    continue
+                new_xvals.append(xv)
+                new_yvals.append(yv)
+            pred_xvals, pred_yvals = new_xvals, new_yvals
         # # binned with mean/std err (this is ok, but it kind of sucks to have binning, and we don't need it for individual tree plots)
         htmp = group_by_xvals(pred_xvals, pred_yvals, xbins) #, skip_overflows=True)
         htmp.mpl_plot(ax, square_bins=True, remove_empty_bins=True, color='darkred', no_vertical_bin_lines=True)
@@ -852,11 +873,15 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
         if xbounds is None:  # maybe should take more restrictive of the two?
             xbounds = [mfn(pred_xvals) for mfn in [min, max]]
     for ipf, pfo in enumerate(pfo_list):
-        resp_plot(pfo['birth-response'], ax, alpha=0.05 if len(pfo_list)>5 else 0.5, color='#990012' if colors is None else colors[ipf], xbounds=pfo.get('xbounds', default_xbounds))  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
+        xbtmp = pfo['xbounds'] if 'xbounds' in pfo and pfo['xbounds'] is not None else default_xbounds
+        resp_plot(pfo['birth-response'], ax, alpha=0.05 if len(pfo_list)>5 else 0.5, color='#990012' if colors is None else colors[ipf], xbounds=xbtmp)  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
     if len(pfo_list) > 1 and plot_median_curve:
         med_pfo = get_median_curve(pfo_list, default_xbounds)
         resp_plot(med_pfo['birth-response'], ax, alpha=0.5, color='green', xbounds=default_xbounds, linewidth=2, linestyle='--')  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
         add_param_text(fig, med_pfo, titlestr='median:', upper_left=True)
+        from gcdyn.poisson import SigmoidResponse
+        tmp_params = [1.6, 2, 7]
+        resp_plot(SigmoidResponse(xscale=tmp_params[0], xshift=tmp_params[1], yscale=tmp_params[2], yshift=0), ax, alpha=0.3, color='blue', xbounds=default_xbounds, linewidth=1, linestyle='--')  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
     if add_true_pred_text:
         assert len(pfo_list) == 2  # pfo_list must be [true, inferred] responses
         add_param_text(fig, pfo_list[0], inf_pfo=pfo_list[1], diff_vals=diff_vals)
@@ -901,7 +926,7 @@ def plot_all_diffs(plotdir, plotname, curve_diffs, n_bins=30, xbounds=[0, 1], n_
         titlestr += '%s%s: %d%s%s' % ('' if len(titlestr)==0 else ' (', smpl, len(curve_diffs[smpl]), ' responses' if len(titlestr)==0 else '', '' if len(titlestr)==0 else ')')
         if n_skipped_diffs is not None:
             fig.text(0.475, 0.45-0.07*ism, '%s: skipped %d'%(smpl, n_skipped_diffs[smpl]), fontsize=20)
-    ax.set(title=titlestr, xlabel='curve area loss')
+    ax.set(title=titlestr, xlabel='curve difference loss')
     fn = "%s/%s.svg" % (plotdir, plotname)
     plt.savefig(fn)
     plt.close()

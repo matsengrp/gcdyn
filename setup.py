@@ -42,6 +42,7 @@ setup(
         "scikit-learn",
         "colored-traceback",
         "sphinx-argparse",
+        "pysam",
     ],
     extras_require={
         "PyQt5": [

@@ -409,7 +409,10 @@ elif args.method == 'iqtree':
     print('  reading iqtrees from %s/%s' % (args.base_iqtree_dir, args.iqtree_version))
     if args.iqtree_version is None:
         raise Exception('need to set --iqtree-version')
-    dir_list = glob.glob('%s/%s/PR*' % (args.base_iqtree_dir, args.iqtree_version))
+    dir_list = glob.glob('%s/%s/PR*' % (args.base_iqtree_dir, args.iqtree_version))  # old dir structure
+    if len(dir_list) == 0:
+        dir_list = glob.glob('%s/%s/D[0-9]*' % (args.base_iqtree_dir, args.iqtree_version))  # new version
+    print('    glob\'d %d gc dirs from iqtree dir %s' % (len(dir_list), args.base_iqtree_dir))
 else:
     assert False
 infokeys = ['encoded_trees', 'sstats', 'lmetafos', 'seqfos', 'dtrees', 'gcids', 'metafos']
