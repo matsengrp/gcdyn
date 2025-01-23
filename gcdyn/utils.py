@@ -26,7 +26,8 @@ import string
 
 sigmoid_params = ['xscale', 'xshift', 'yscale']  # ick
 affy_bins = [-15, -10, -7, -5, -3, -2, -1, -0.5, -0.25, 0.25, 0.5, 1, 1.5, 2, 2.5, 3.5, 4, 5, 7]
-zoom_affy_bins = [-2, -1, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.25, 1.5, 2, 2.5]
+# zoom_affy_bins = [-2, -1, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.25, 1.5, 2, 2.5]
+zoom_affy_bins = [-2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3]
 fitness_bins = [-1.5, -1, -0.75, -0.5, -0.2, 0, 0.1, 0.25, 0.4, 0.5, 0.75, 1, 1.5, 2] #, 5, 15]
 
 def simple_fivemer_contexts(sequence: str):
@@ -904,7 +905,7 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
                      diff_vals=None, pred_xvals=None, pred_yvals=None, xbounds=None, ybounds=None, xbins=affy_bins, default_xbounds=None,
                      nonsense_affy_val=-99, plot_median_curve=False, pred_hists=None, alphas=None):
     if default_xbounds is None:
-        default_xbounds = [-2.5, 2.5]
+        default_xbounds = [-2.5, 3]
     mpl_init()
     fig, ax = plt.subplots()
     if affy_vals is not None:

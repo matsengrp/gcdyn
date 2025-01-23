@@ -252,7 +252,6 @@ def get_prediction(args, model, spld, lscaler, smpl=None):
         pred_fitness_bins = model.predict(lscaler.apply_scaling(spld['trees'], smpl=smpl)).numpy()
         sstats = spld['sstats']
         if args.is_simu:
-            print(spld.keys())
             true_fitness_bins, true_resps = [spld[tk] for tk in ["fitness-bins", "birth-responses"]]
         df = write_per_bin_prediction(args, pred_fitness_bins, spld["trees"], true_fitness_bins=true_fitness_bins, true_resps=true_resps, sstats=sstats, smpl=smpl)
     else:
