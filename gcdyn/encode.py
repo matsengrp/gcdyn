@@ -263,7 +263,7 @@ def pad_trees(
         assert len(etree) == mtx_lens[mtype]  # make sure it has the correct number of rows (not really necessary, but may as well enforce it)
         assert len(set(len(r) for r in etree)) == 1  # and that every row is the same length
         padded_trees.append(
-            np.pad(etree, ((0, 0), (0, max_leaf_count - len(etree[0]))))
+            np.pad(etree, ((0, 0), (0, max_leaf_count - len(etree[0]))), 'constant', constant_values=empty_val)
         )
         if debug and itree == 0:
             before_len = len(etree[0])
