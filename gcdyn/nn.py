@@ -78,6 +78,17 @@ class PerCellTransposeLayer(layers.Layer):
         # leave first (batch/sample) and second (bundle) dimensions the same, and swap third (dist/phenotyp) and fourth (leaf/internal node) dimensions
         return tf.transpose(inputs, perm=(0, 2, 1))
 
+# @keras.saving.register_keras_serializable()
+class PerBinTransposeLayer(layers.Layer):
+    """Transpose inputs (used to be Lambda layer, but they're not really serializable."""
+
+    def __init__(self, **kwargs):
+        super(PerBinTransposeLayer, self).__init__(**kwargs)
+
+    def call(self, inputs):
+        # leave first (batch/sample) and second (bundle) dimensions the same, and swap third (dist/phenotyp) and fourth (leaf/internal node) dimensions
+        return tf.transpose(inputs, perm=(0, 2, 1))
+
 # ----------------------------------------------------------------------------------------
 # @keras.saving.register_keras_serializable(package='gcdyn_nn', name='curve_loss_fcn')
 @tf.function  # NOTE need to comment this decorator in order for .numpy() to work (and add run_eagerly to .compile() call, but note that training is WAY the fuck slower if it's commented
@@ -399,7 +410,7 @@ class ParamNetworkModel:
 
 # ----------------------------------------------------------------------------------------
 @tf.function
-# I think this works, but I haven't tested a ton since the per-cell prediction isn't really working well evefn with constant N leaves
+# I think this works, but I haven't tested a ton since the per-cell prediction isn't really working well even with constant N leaves
 def per_cell_masked_loss(y_true, y_pred):
     loss = tf.square(y_true - y_pred)
     loss = tf.where(tf.cast(encode.is_empty(y_true), tf.bool), tf.zeros_like(loss), loss)  # if filled (fill_true == 1) use <loss>, otherwise set to zero (NOTE fill_pred is [probably?] useless)
@@ -424,6 +435,7 @@ class PerCellNetworkModel:
         loss_fcn="mean_squared_error",
         actfn: str = "elu",
     ):
+        raise Exception('doesn\'t work yet. Didn\'t really test per_cell_masked_loss(), and was doing most testing with constant-size trees (i.e. no padding), and it still wasn\'t working that well. If I want to resurrect it, should start with constant-size trees again to see if that\'s working better.')
         self.max_leaf_count = max_leaf_count
         self.actfn = actfn
         print("    building model with: dropout %.2f   learn rate %.4f   momentum %.4f" % (dropout_rate, learning_rate, ema_momentum))
@@ -456,13 +468,87 @@ class PerCellNetworkModel:
         optimizer = keras.optimizers.Adam(
             learning_rate=learning_rate, use_ema=True, ema_momentum=ema_momentum
         )
-        self.network.compile(loss=loss_fcn, optimizer=optimizer) #, run_eagerly=True)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
+        assert loss_fcn == 'per-cell-masked'
+        self.network.compile(loss=per_cell_masked_loss, optimizer=optimizer) #, run_eagerly=True)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
 
     # ----------------------------------------------------------------------------------------
     def fit(self, training_trees, training_fitnesses, epochs=30, batch_size=None, validation_split=0):
         self.network.fit(
             onp.stack(training_trees),
             onp.stack(training_fitnesses),
+            epochs=epochs,
+            callbacks=[Callback(epochs, use_validation=validation_split > 0)],
+            verbose=0,
+            validation_split=validation_split,
+        )
+
+    # ----------------------------------------------------------------------------------------
+    def predict(self, encoded_trees):
+        predicted_fitnesses = self.network(onp.stack(encoded_trees))
+        return predicted_fitnesses
+
+    # ----------------------------------------------------------------------------------------
+    def load(self, fname):
+        # NOTE see other load fcn above if this isn't working
+        print('    reading model file from %s' % fname)
+        self.network = keras.models.load_model(fname, safe_mode=False)
+
+# ----------------------------------------------------------------------------------------
+class PerBinNetworkModel:
+    def __init__(self):
+        pass
+
+    # ----------------------------------------------------------------------------------------
+    def build_model(
+        self,
+        n_bins: float,
+        max_leaf_count: float,
+        dropout_rate: float = 0.2,
+        learning_rate: float = 0.01,
+        ema_momentum: float = 0.99,
+        loss_fcn="mean_squared_error",
+        actfn: str = "elu",
+    ):
+        self.n_bins = n_bins
+        self.max_leaf_count = max_leaf_count
+        self.actfn = actfn
+        print("    building model with: dropout %.2f   learn rate %.4f   momentum %.4f" % (dropout_rate, learning_rate, ema_momentum))
+
+        tlayers = [
+            layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
+            layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
+            layers.MaxPooling1D(pool_size=2, strides=2),  # Downsampling by a factor of 2
+            layers.Conv1D(filters=40, kernel_size=4, activation=actfn),
+            layers.GlobalAveragePooling1D(),  # one number for each filter from the previous layer
+        ]
+
+        network_layers = [PerBinTransposeLayer()]
+        for tlr in tlayers:
+            network_layers.append(tlr)
+        dense_unit_list = [48, 32, 16, 8]
+        for idense, n_units in enumerate(dense_unit_list):
+            network_layers.append(layers.Dense(n_units, activation=self.actfn))
+            if dropout_rate != 0 and idense < len(dense_unit_list) - 1:  # add a dropout layer after each one except the last
+                network_layers.append(layers.Dropout(dropout_rate))
+        # network_layers.append(layers.Flatten())
+        network_layers.append(layers.Dense(self.n_bins))
+        # network_layers.append(layers.Reshape((encode.mtx_lens['fitness'], self.max_leaf_count)))
+
+        inputs = keras.Input(shape=(encode.mtx_lens['tree'], self.max_leaf_count))
+        outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
+        self.network = keras.Model(inputs=inputs, outputs=outputs)
+        # def pfn(x, line_break=False): print("      %s" % x)  # this doesn't seem to work with keras 3
+        self.network.summary() #print_fn=pfn)
+        optimizer = keras.optimizers.Adam(
+            learning_rate=learning_rate, use_ema=True, ema_momentum=ema_momentum
+        )
+        self.network.compile(loss=loss_fcn, optimizer=optimizer) #, run_eagerly=True)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
+
+    # ----------------------------------------------------------------------------------------
+    def fit(self, training_trees, training_fitness_bins, epochs=30, batch_size=None, validation_split=0):
+        self.network.fit(
+            onp.stack(training_trees),
+            onp.stack(training_fitness_bins),
             epochs=epochs,
             callbacks=[Callback(epochs, use_validation=validation_split > 0)],
             verbose=0,

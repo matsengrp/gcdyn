@@ -16,7 +16,7 @@ import copy
 import collections
 
 from gcdyn import utils, encode
-from gcdyn.nn import ParamNetworkModel, PerCellNetworkModel
+from gcdyn.nn import ParamNetworkModel, PerCellNetworkModel, PerBinNetworkModel
 from gcdyn.poisson import ConstantResponse
 
 # fmt: off
@@ -98,7 +98,7 @@ class LScaler(object):
                 return [[plist[ivar] for plist in pvs]]
             def fnstr(pvs, fn):  # apply fn to each list from get_lists(), returns resulting combined str
                 return " ".join("%8.2f" % fn(vl) for vl in get_lists(pvs))
-            assert self.args.model_type in ['sigmoid', 'per-cell']
+            assert self.args.model_type in ['sigmoid', 'per-cell', 'per-bin']
             for ivar, vname in enumerate(self.var_list):
                 for dstr, pvs in zip(("before", "after"), (pvals_before, pvals_scaled)):
                     bstr = "   " if dstr != "before" else "      %10s %7s" % (vname, smpl)
@@ -197,8 +197,35 @@ def write_per_cell_prediction(args, pred_fitnesses, enc_trees, true_fitnesses=No
     return df
 
 # ----------------------------------------------------------------------------------------
+def write_per_bin_prediction(args, pred_fitness_bins, enc_trees, true_fitness_bins=None, true_resps=None, sstats=None, smpl=None):
+    assert true_fitness_bins is None or len(pred_fitness_bins) == len(true_fitness_bins)
+    dfdata = {  # make empty df
+        "fitness-bins-%s-ival-%d"%(ptype, ival) : []
+        for ptype in (["predicted"] if true_fitness_bins is None else ["truth", "predicted"])
+        for ival in range(len(utils.zoom_affy_bins)-1)
+    }
+    dfdata['tree-index'] = []
+    if true_fitness_bins is not None:
+        for param in utils.sigmoid_params:
+            dfdata['%s-truth'%param] = []
+    for itr, pfbins in enumerate(pred_fitness_bins):
+        dfdata['tree-index'].append(sstats[itr]['tree'])  # NOTE tree-index isn't necessarily equal to <itr>
+        for ival, bval in enumerate(pfbins):
+            dfdata['fitness-bins-predicted-ival-%d'%ival].append(bval)  # it kind of sucks to expand these out to a column each, but the other options are a) make a new row for each one or b) more complicated csv formatting, both of which are worse
+            if true_fitness_bins is not None:
+                assert len(pfbins) == len(true_fitness_bins[itr])
+                dfdata['fitness-bins-truth-ival-%d'%ival].append(true_fitness_bins[itr][ival])
+        if true_fitness_bins is not None:
+            for ip, param in enumerate(utils.sigmoid_params):  # writes true parameter values for each cell, which kind of sucks, but they're only nonzero for the first cell in each tree
+                dfdata["%s-truth" % param].append(get_pval(param, true_resps[itr], sstats[itr]))
+    df = pd.DataFrame(dfdata)
+    print("  writing %s results to %s" % (smpl, args.outdir))
+    df.to_csv(csvfn(args, smpl))
+    return df
+
+# ----------------------------------------------------------------------------------------
 def get_prediction(args, model, spld, lscaler, smpl=None):
-    true_fitnesses, true_resps, sstats = None, None, None
+    true_fitnesses, true_fitness_bins, true_resps, sstats = None, None, None, None
     if args.model_type == 'sigmoid':
         const_pred_resps = model.predict(lscaler.apply_scaling(spld['trees'], smpl=smpl))  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
         pred_vals = [[float(rsp.value) for rsp in rlist] for rlist in const_pred_resps]
@@ -216,13 +243,18 @@ def get_prediction(args, model, spld, lscaler, smpl=None):
         pred_fitnesses = model.predict(lscaler.apply_scaling(spld['trees'], smpl=smpl)).numpy()
         for pfit, etree in zip(pred_fitnesses, spld['trees']):
             encode.reset_fill_entries(pfit, etree)
-        # encode.mprint(pred_fitnesses[0])
         sstats = spld['sstats']
         if args.is_simu:
-            true_fitnesses, true_resps, sstats = [spld[tk] for tk in ["fitnesses", "birth-responses", "sstats"]]
-            # encode.mprint(true_fitnesses[0])
-            # sys.exit()
+            true_fitnesses, true_resps = [spld[tk] for tk in ["fitnesses", "birth-responses"]]
         df = write_per_cell_prediction(args, pred_fitnesses, spld["trees"], true_fitnesses=true_fitnesses, true_resps=true_resps, sstats=sstats, smpl=smpl)
+    elif args.model_type == 'per-bin':
+        assert args.dl_bundle_size == 1
+        pred_fitness_bins = model.predict(lscaler.apply_scaling(spld['trees'], smpl=smpl)).numpy()
+        sstats = spld['sstats']
+        if args.is_simu:
+            print(spld.keys())
+            true_fitness_bins, true_resps = [spld[tk] for tk in ["fitness-bins", "birth-responses"]]
+        df = write_per_bin_prediction(args, pred_fitness_bins, spld["trees"], true_fitness_bins=true_fitness_bins, true_resps=true_resps, sstats=sstats, smpl=smpl)
     else:
         assert False
     return df
@@ -340,6 +372,8 @@ def read_tree_files(args):
     samples['trees'] = encode.pad_trees(samples['trees'], 'tree', args.min_n_max_leaves)
     if args.is_simu:
         samples["fitnesses"] = encode.read_trees(ffn)
+        # if os.path.exists(ffn.replace('fitnesses', 'fitness-bins')):
+        samples["fitness-bins"] = encode.read_trees(ffn.replace('fitnesses', 'fitness-bins'))
     samples["sstats"] = []
     with open(sfn) as sfile:
         reader = csv.DictReader(sfile)
@@ -403,6 +437,12 @@ def train_and_test(args, start_time):
         model.fit(lscalers['train'].out_tensors, smpldict['train']['fitnesses'], epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
         return model
     # ----------------------------------------------------------------------------------------
+    def train_per_bin(smpldict, lscalers, max_leaf_count):
+        model = PerBinNetworkModel()
+        model.build_model(len(utils.zoom_affy_bins) - 1, max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, loss_fcn=args.loss_fcn)
+        model.fit(lscalers['train'].out_tensors, smpldict['train']['fitness-bins'], epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
+        return model
+    # ----------------------------------------------------------------------------------------
     samples = read_tree_files(args)
 
     # separate train/test samples
@@ -440,6 +480,8 @@ def train_and_test(args, start_time):
         model = train_sigmoid(smpldict, lscalers, max_leaf_count)
     elif args.model_type == 'per-cell':
         model = train_per_cell(smpldict, lscalers, max_leaf_count)
+    elif args.model_type == 'per-bin':
+        model = train_per_bin(smpldict, lscalers, max_leaf_count)
     else:
         assert False
     model.network.save(encode.output_fn(args.outdir, 'model', None))
@@ -456,6 +498,8 @@ def read_model_files(args, samples):
         model = ParamNetworkModel([ConstantResponse(0) for _ in args.params_to_predict], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
     elif args.model_type == 'per-cell':
         model = PerCellNetworkModel()
+    elif args.model_type == 'per-bin':
+        model = PerBinNetworkModel()
     else:
         assert False
     model.load(encode.output_fn(args.model_dir, 'model', None))
@@ -491,8 +535,8 @@ def get_parser():
     parser.add_argument("--indir", required=True, help="training input directory with gcdyn simulation output (uses encoded trees .npy, summary stats .csv, and response .pkl files)", )
     parser.add_argument("--model-dir", help="file with saved deep learning model for inference")
     parser.add_argument("--outdir", required=True, help="output directory")
-    parser.add_argument("--model-type", choices=['sigmoid', 'per-cell'], default='sigmoid', help='type of neural network model, sigmoid: infer 3 params of sigmoid fcn, per-cell: infer fitness of each individual cell')
-    parser.add_argument("--loss-fcn", choices=['mse', 'curve'], default='curve')
+    parser.add_argument("--model-type", choices=['sigmoid', 'per-cell', 'per-bin'], default='sigmoid', help='type of neural network model, sigmoid: infer 3 params of sigmoid fcn, per-cell: infer fitness of each individual cell, per-bin: infer response function shape in bins of affinity')
+    parser.add_argument("--loss-fcn", choices=['mse', 'curve', 'per-cell-masked'], default='curve')
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--dl-bundle-size", type=int, default=1, help='\'dl-\' is to differentiate from \'simu-\' bundle size when calling this from cf-gcdyn.py')
@@ -531,7 +575,9 @@ def main():
         args.dont_scale_params = True
     if args.model_dir is not None and args.action == 'train':
         raise Exception('doesn\'t make sense to set --model-dir when training')
-
+    if args.model_type == 'per-bin' and args.loss_fcn == 'curve':
+        print('    note: setting --loss-fcn to \'mse\' for per-bin model')
+        args.loss_fcn = 'mse'
     random.seed(args.random_seed)
     np.random.seed(args.random_seed)
     import tensorflow as tf  # this is super slow, don't want to wait for this to get help message

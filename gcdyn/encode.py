@@ -12,15 +12,25 @@ from gcdyn import utils
 # fmt: off
 
 # ----------------------------------------------------------------------------------------
-empty_val = -99999999.999999999e-8  # encoded tree entries with this value indicate that they weren't filled, i.e. don't correspond to a tree node
-eps = 1e-12
+# it would be nice if this could be a value that can't occur by accident (e.g. really big), and in the loss fcn/output matrices we can mask it out.
+#  but the value still appears in the input matrices, which still totally breaks training, so it seems like this value has to be a normal-ish value
+empty_val = 0.12345678901234567 #-99999999  # encoded tree entries with this value indicate that they weren't filled, i.e. don't correspond to a tree node
+old_empty_vals = [-1e-8, -99999999.999999999e-8, -99999999]  # arggghgh this is/was so dumb
+eps = 1e-10 #12
 def is_empty(val):
     return abs(val - empty_val) < eps
 
 # ----------------------------------------------------------------------------------------
 def mprint(mtx):
+    def cfn(val):
+        if is_empty(val):
+            return utils.color('blue', '-', width=5) #'%.0e'%val)
+        elif any(abs(val-o)<eps for o in old_empty_vals):
+            return utils.color('red', '%5.2f'%val)
+        else:
+            return utils.color(None, '%5.2f'%val)
     for trow in mtx:
-        print(' '.join(utils.color('blue' if is_empty(v) else None, '%5.2f'%v) for v in trow))
+        print(' '.join(cfn(v) for v in trow))
 
 # expected number of rows in each matrix type
 mtx_lens = {
@@ -270,7 +280,25 @@ def read_trees(filename: str):
     return np.load(filename) #, allow_pickle=True)
 
 # ----------------------------------------------------------------------------------------
-final_ofn_strs = ["seqs", "trees", "meta", "encoded-trees", "encoded-fitnesses", "responses", "summary-stats"]
+def encode_fitness_bins(intrees, birth_responses, xbins):
+    assert len(intrees) == len(birth_responses)
+    enc_fbins = []
+    for itr, (intree, bresp) in enumerate(zip(intrees, birth_responses)):
+        htmp = utils.Hist(xmin=xbins[0], xmax=xbins[-1], xbins=xbins, n_bins=len(xbins)-1)
+        ybinvals = [bresp.λ_phenotype(c) for c in htmp.get_bin_centers(ignore_overflows=True)]
+        enc_fbins.append(np.array(ybinvals))
+    return enc_fbins
+
+# ----------------------------------------------------------------------------------------
+def decode_fitness_bins(fbvals, xbins):
+    assert len(fbvals) == len(utils.zoom_affy_bins) - 1
+    htmp = utils.Hist(xmin=xbins[0], xmax=xbins[-1], xbins=xbins, n_bins=len(xbins)-1)
+    for ival, fval in enumerate(fbvals):
+        htmp.set_ibin(ival+1, fval, 0)
+    return htmp
+
+# ----------------------------------------------------------------------------------------
+final_ofn_strs = ["seqs", "trees", "meta", "encoded-trees", "encoded-fitnesses", "encoded-fitness-bins", "responses", "summary-stats"]
 model_state_ofn_strs = ["model", "train-scaler", "example-responses"]
 sstat_fieldnames = ["tree", "mean_branch_length", "total_branch_length", "carry_cap", "time_to_sampling"]
 leaf_meta_fields = ["tree-index", "name", "affinity", "n_muts", "n_muts_aa", "gc", "is_leaf"]
@@ -286,6 +314,7 @@ def output_fn(odir, ftype, itrial):
             "trees": "nwk",
             "encoded-trees": "npy",
             "encoded-fitnesses": "npy",
+            "encoded-fitness-bins": "npy",
             "responses": "pkl",
             "meta": "csv",
             "summary-stats": "csv",
@@ -318,7 +347,7 @@ def write_leaf_meta(ofn, lmetafos):
             writer.writerow(lmfo)
 
 # ----------------------------------------------------------------------------------------
-def write_training_files(outdir, encoded_trees, responses, sstats, encoded_fitnesses=None, dbgstr=""):
+def write_training_files(outdir, encoded_trees, responses, sstats, encoded_fitnesses=None, encoded_fitness_bins=None, dbgstr=""):
     """Write encoded tree .npy, response fcn .pkl, and summary stat .csv files for training/testing on simulation."""
     if dbgstr != "":
         print("      writing %s files to %s" % (dbgstr, outdir))
@@ -328,6 +357,8 @@ def write_training_files(outdir, encoded_trees, responses, sstats, encoded_fitne
         write_trees(output_fn(outdir, "encoded-trees", None), encoded_trees, 'tree')
     if encoded_fitnesses is not None:
         write_trees(output_fn(outdir, "encoded-fitnesses", None), encoded_fitnesses, 'fitness')
+    if encoded_fitness_bins is not None:
+        np.save(output_fn(outdir, "encoded-fitness-bins", None), encoded_fitness_bins)
     with open(output_fn(outdir, "responses", None), "wb") as pfile:
         dill.dump(responses, pfile)
     write_sstats(output_fn(outdir, "summary-stats", None), sstats)

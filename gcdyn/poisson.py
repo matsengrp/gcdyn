@@ -412,6 +412,8 @@ class SigmoidResponse(PhenotypeResponse):
         self.yscale = d["yscale"]
         self.yshift = d["yshift"]
 
+    def __eq__(self, resp2):
+        return all(getattr(self, p) == getattr(resp2, p) for p in self._param_dict)
 
 class SoftReluResponse(PhenotypeResponse):
     r"""Soft ReLU response function on a :py:class:`bdms.TreeNode` object's

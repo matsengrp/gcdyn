@@ -383,6 +383,7 @@ def write_final_outputs(args, all_seqs, all_trees, param_list, inferred=False, d
     else:
         scale_vals, encoded_trees = encode.encode_trees([pfo["tree"] for pfo in all_trees])
         _, encoded_fitnesses = encode.encode_trees([pfo["tree"] for pfo in all_trees], mtype='fitness', birth_responses=[pfo["birth-response"] for pfo in all_trees])  # this re-scales the tree, which i think is just a waste of time
+        encoded_fitness_bins = encode.encode_fitness_bins([pfo["tree"] for pfo in all_trees], [pfo["birth-response"] for pfo in all_trees], utils.zoom_affy_bins)
 
     # write summary stats
     if len(param_list) != len(all_trees):
@@ -405,7 +406,7 @@ def write_final_outputs(args, all_seqs, all_trees, param_list, inferred=False, d
         {k: p["%s-response" % k] for k in ["birth", "death"]} for p in all_trees
     ]
 
-    encode.write_training_files(os.path.dirname(outfn(args, "seqs", subd=subd)), encoded_trees, responses, sstats, encoded_fitnesses=encoded_fitnesses)
+    encode.write_training_files(os.path.dirname(outfn(args, "seqs", subd=subd)), encoded_trees, responses, sstats, encoded_fitnesses=encoded_fitnesses, encoded_fitness_bins=encoded_fitness_bins)
 
 # ----------------------------------------------------------------------------------------
 def add_seqs(args, all_seqs, itrial, tree):
@@ -686,12 +687,15 @@ def run_sub_procs(args):
                     subprocess.check_call(cmd, shell=True)
                 if ftype == 'trees':
                     n_total_trees = int(subprocess.check_output('wc -l %s | cut -d\' \' -f1' % ofn, shell=True))
-            elif ftype in ["encoded-trees", "encoded-fitnesses"]:
+            elif ftype in ["encoded-trees", "encoded-fitnesses", "encoded-fitness-bins"]:
                 elists = [encode.read_trees(fn) for fn in fnames]
                 n_total_trees = sum(len(l) for l in elists)
                 missing_trees = [n_per_proc - len(l) for l in elists]
-                all_etrees = [e for fn in fnames for e in encode.read_trees(fn)]
-                encode.write_trees(ofn, all_etrees, 'tree' if 'tree' in ftype else 'fitness')
+                all_etrees = [e for l in elists for e in l]
+                if ftype == 'encoded-fitness-bins':
+                    np.save(ofn, all_etrees)
+                else:
+                    encode.write_trees(ofn, all_etrees, 'tree' if 'tree' in ftype else 'fitness')
             elif ftype in ["responses"]:
                 all_responses = []
                 for fn in fnames:

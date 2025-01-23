@@ -462,7 +462,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             os.makedirs(outdir+'/'+smpl)
         from gcdyn.poisson import SigmoidResponse, LinearResponse
         median_pfo = None
-        pfo_list = []
+        pfo_list, true_pfo_list, all_afvals, phist_list = [], [], [], []
         curve_diffs = {smpl : [], 'validation' : []}
         n_pred_rows = len(prdfs[smpl].index)  # N cells for per-cell, N trees for sigmoid
         n_tree_preds = len(set(prdfs[smpl]['tree-index']))
@@ -484,6 +484,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                     titlestr = '%s: response index %d / %d' % (smplstr, irow, n_tree_preds)
                     pdicts = [{p : prdfs[smpl]['%s-%s'%(p, tp)][irow] for p in sigmoid_params} for tp in ['truth', 'predicted']]
                     true_resp, pred_resp = [SigmoidResponse(**pd) for pd in pdicts]
+                    true_pfo_list.append({'birth-response' : true_resp})
                     if len(curve_diffs[smplstr]) < n_max_diffs:
                         cdiff = resp_fcn_diff(true_resp, pred_resp, [mfn(affy_vals) for mfn in [min, max]])
                         curve_diffs[smplstr].append(cdiff)
@@ -500,11 +501,19 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                     fn = plot_many_curves(outdir, 'predicted-response-%d'%irow, [{'birth-response' : pred_resp}], affy_vals=affy_vals, add_pred_text=True, titlestr=titlestr, colors=['#990012'])
                     add_fn(fn)
                 pfo_list.append({'birth-response' : pred_resp, 'xbounds' : (min(affy_vals), max(affy_vals))})
-            if not is_simu: # i guess sometimes i want this plot in simu, but not atm, and it's often slow
-                fn, _ = plot_many_curves(outdir, '%s-all-response'%smpl, pfo_list, titlestr='%s: %d / %d responses' % (smpl, len(pfo_list), n_tree_preds), plot_median_curve=True)
-                add_fn(fn, force_new_row=True)
-                fn, median_pfo = plot_many_curves(outdir, '%s-all-response-zoom'%smpl, pfo_list, titlestr='%s: %d / %d responses' % (smpl, len(pfo_list), n_tree_preds), xbounds=[-5, 3], ybounds=[-0.1, 1.25], plot_median_curve=True)
+                all_afvals += affy_vals
+            # if len(set(tuple(sorted(p['birth-response']._param_dict.values())) for p in true_pfo_list)) == 1:  # all true responses equal
+            if not is_simu or all(p['birth-response']==true_pfo_list[0]['birth-response'] for p in true_pfo_list):  # all true responses equal
+                # fn, _ = plot_many_curves(outdir, '%s-all-response'%smpl, pfo_list, titlestr='%s: %d / %d responses' % (smpl, len(pfo_list), n_tree_preds), plot_median_curve=True) #, affy_vals=all_afvals)
+                # add_fn(fn, force_new_row=True)
+                xbounds = [-2.5, 3]
+                fn, median_pfo = plot_many_curves(outdir, '%s-all-response-zoom'%smpl, pfo_list + [true_pfo_list[0]],
+                                                  titlestr='%s: %d / %d responses' % (smpl, len(pfo_list), n_tree_preds),
+                                                  colors=['#990012' for _ in pfo_list] + ['green'], alphas=[0.05 for _ in pfo_list] + [0.5],
+                                                  plot_median_curve=True, xbounds=xbounds, ybounds=[-0.1, 4])
+                afn = plot_many_curves(outdir, '%s-all-affy-vals'%smpl, [], titlestr='%d total affinity values' % (len(all_afvals)), affy_vals=all_afvals, xbounds=xbounds)
                 add_fn(fn)
+                add_fn(afn)
             if is_simu:
                 fn = plot_all_diffs(outdir+'/'+smpl, 'curve-diffs', curve_diffs, n_skipped_diffs=n_skipped_diffs)
                 add_fn(fn)
@@ -522,25 +531,64 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                         pdict = {p : prdfs[smpl]['%s-truth'%p][irow] for p in sigmoid_params}
                         true_resp = SigmoidResponse(**pdict)
                     xbounds = [mfn([float(m['affinity']) for m in lmdict[tree_index]]) for mfn in [min, max]]
-                true_pfo_list = [{'birth-response' : true_resp, 'xbounds' : xbounds}] if is_simu else []
+                tpfl = [{'birth-response' : true_resp, 'xbounds' : xbounds}] if is_simu else []  # short for true_pfo_list, but this one we only use within this block
                 dfdata = {'phenotype' : [], 'fitness-predicted' : []}
                 while irow < n_pred_rows and int(prdfs[smpl]['tree-index'][irow]) == tree_index:  # until next tree
                     for tk in dfdata:
                         dfdata[tk].append(prdfs[smpl][tk][irow])
                     irow += 1
                 smpstr = smpl if validation_indices is None or tree_index not in validation_indices else 'validation'
-                fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-response-%d'%itree, true_pfo_list, titlestr='%s: response index %d / %d' % (smpstr, itree, n_tree_preds),
+                fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-response-%d'%itree, tpfl, titlestr='%s: response index %d / %d' % (smpstr, itree, n_tree_preds),
                                       colors=['#006600'], pred_xvals=dfdata['phenotype'], pred_yvals=dfdata['fitness-predicted']) #, xbounds=xbounds)
                 assert len(dfdata['phenotype']) == len(dfdata['fitness-predicted'])
                 all_xvals += dfdata['phenotype']
                 all_yvals += dfdata['fitness-predicted']
                 if is_simu:
-                    all_true_responses.append(true_pfo_list[0])
+                    all_true_responses.append(tpfl[0])
                 add_fn(fn)
                 itree += 1
-            fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-response', true_pfo_list, titlestr='%s: %d / %d responses' % (smpl, len(pfo_list), n_tree_preds),
-                                  pred_xvals=all_xvals, pred_yvals=all_yvals, xbins=zoom_affy_bins, xbounds=[-2.5, 2], colors=['green' for _ in true_pfo_list])
+            fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-response', tpfl, titlestr='%s: %d / %d responses' % (smpl, len(pfo_list), n_tree_preds),
+                                  pred_xvals=all_xvals, pred_yvals=all_yvals, xbins=zoom_affy_bins, xbounds=[-2.5, 2], colors=['green' for _ in tpfl])
             add_fn(fn)
+        elif model_type == 'per-bin':
+            import gcdyn.encode as encode
+            n_skipped_diffs = {s : 0 for s in curve_diffs}
+            for irow in range(n_tree_preds):
+                tree_index = int(prdfs[smpl]['tree-index'][irow])
+                affy_vals = [float(m['affinity']) for m in lmdict[tree_index]]
+                is_valid = validation_indices is not None and tree_index in validation_indices
+                smplstr = 'validation' if is_valid else smpl
+                pbvals = [prdfs[smpl]['fitness-bins-predicted-ival-%d'%ival][irow] for ival in range(len(zoom_affy_bins)-1)]  # could also get the bin truth values if we wanted them
+                pred_hist = encode.decode_fitness_bins(pbvals, zoom_affy_bins)
+                if is_simu:
+                    titlestr = '%s: response index %d / %d' % (smplstr, irow, n_tree_preds)
+                    true_resp = SigmoidResponse(**{p : prdfs[smpl]['%s-truth'%p][irow] for p in sigmoid_params})
+                    true_pfo_list.append({'birth-response' : true_resp})  # , 'xbounds' : xbounds
+                    if len(curve_diffs[smplstr]) < n_max_diffs:
+                        cdiff = resp_fcn_diff(true_resp, pred_hist, [mfn(affy_vals) for mfn in [min, max]], resp2_is_hist=True)
+                        curve_diffs[smplstr].append(cdiff)
+                    else:
+                        n_skipped_diffs[smplstr] += 1
+                        continue
+                    if irow < n_simu_plots:
+                        fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-fitness-bins-%d'%irow, [{'birth-response' : true_resp}], pred_hists=[pred_hist], titlestr=titlestr, affy_vals=affy_vals, colors=['#006600'], diff_vals=[cdiff], add_pred_text=True)
+                        add_fn(fn)
+                else:
+                    titlestr = '%s (%d / %d)' % (prdfs[smpl]['gcids'][irow] if 'gcids' in prdfs[smpl] else smplstr, irow, n_tree_preds)
+                    fn = plot_many_curves(outdir+'/'+smpl, 'predicted-fitness-bins-%d'%irow, [], pred_hists=[pred_hist], titlestr=titlestr, affy_vals=affy_vals, colors=['#990012'])
+                    add_fn(fn)
+                phist_list.append(pred_hist)
+                all_afvals += affy_vals
+            # if len(set(tuple(sorted(p['birth-response']._param_dict.values())) for p in true_pfo_list)) == 1:  # all true responses equal
+            if not is_simu or all(p['birth-response']==true_pfo_list[0]['birth-response'] for p in true_pfo_list):  # all true responses equal
+                fn = plot_many_curves(outdir+'/'+smpl, '%s-all-fitness-bins'%smpl, [true_pfo_list[0]], titlestr='%s: %d / %d responses' % (smpl, len(phist_list), n_tree_preds), pred_hists=phist_list, xbounds=[-2.5, 2.5], colors=['#006600']) #, plot_median_curve=True)
+                add_fn(fn, force_new_row=True)
+                xbounds = [-2.5, 3]
+                afn = plot_many_curves(outdir+'/'+smpl, '%s-all-affy-vals'%smpl, [], titlestr='%d total affinity values' % (len(all_afvals)), affy_vals=all_afvals, xbounds=xbounds)
+                add_fn(afn)
+            if is_simu:
+                fn = plot_all_diffs(outdir+'/'+smpl, 'curve-diffs', curve_diffs, n_skipped_diffs=n_skipped_diffs)
+                add_fn(fn)
         else:
             assert False
 
@@ -609,16 +657,17 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
     for smpl in sorted(prdfs, reverse=True):
         fnames.append([])
         median_pfo = plot_responses(smpl)
-    for ptype in ['scatter', 'box']:
-        for smpl in sorted(prdfs, reverse=True):
-            fnames.append([])
-            if model_type == 'sigmoid':
-                for param in params_to_predict:
-                    plot_param_or_pair(ptype, param, smpl, median_pfo=median_pfo)
-            elif model_type == 'per-cell':
-                plot_param_or_pair(ptype, 'fitness', smpl)
-            else:
-                assert False
+    if model_type in ['sigmoid', 'per-cell']:
+        for ptype in ['scatter', 'box']:
+            for smpl in sorted(prdfs, reverse=True):
+                fnames.append([])
+                if model_type == 'sigmoid':
+                    for param in params_to_predict:
+                        plot_param_or_pair(ptype, param, smpl, median_pfo=median_pfo)
+                elif model_type == 'per-cell':
+                    plot_param_or_pair(ptype, 'fitness', smpl)
+                else:
+                    assert False
     if model_type == 'sigmoid':
         for smpl in sorted(prdfs, reverse=True):
             fnames.append([])
@@ -761,7 +810,17 @@ def get_resp_vals(resp, xbounds, nsteps, normalize=False):
     return rvals
 
 # ----------------------------------------------------------------------------------------
-def resp_fcn_diff(resp1, resp2, xbounds, dont_normalize=False, nsteps=40, debug=False):  # see also nn.curve_loss()
+def get_hist_vals(htmp, xbounds, nsteps, normalize=False):
+    xvals, dx = get_resp_xvals(xbounds, nsteps)
+    rvals = [htmp.bin_contents[htmp.find_bin(x)] for x in xvals]
+    if normalize:
+        sumv = sum(rvals)
+        rvals = [v / sumv for v in rvals]
+    return rvals
+
+# ----------------------------------------------------------------------------------------
+# can set resp2 to a hist if you set resp2_is_hist
+def resp_fcn_diff(resp1, resp2, xbounds, dont_normalize=False, nsteps=40, resp2_is_hist=False, debug=False):  # see also nn.curve_loss()
     # ----------------------------------------------------------------------------------------
     def prdbg():
         def prvls(lbl, vlist, p=3):
@@ -775,7 +834,7 @@ def resp_fcn_diff(resp1, resp2, xbounds, dont_normalize=False, nsteps=40, debug=
             print('   normd diff: %.3f / %.3f = %.3f' % (sumv, rect_area, sumv / rect_area))
     # ----------------------------------------------------------------------------------------
     xvals, dx = get_resp_xvals(xbounds, nsteps)
-    vals1, vals2 = [get_resp_vals(r, xbounds, nsteps) for r in [resp1, resp2]]  # , normalize=normalize
+    vals1, vals2 = [f(r, xbounds, nsteps) for r, f in zip([resp1, resp2], [get_resp_vals, get_hist_vals if resp2_is_hist else get_resp_vals])]  # , normalize=normalize
     sumv = sum(abs(v1-v2) * dx for v1, v2 in zip(vals1, vals2))
     if not dont_normalize:  # divide area between curves by area of rectangle defined by xbounds and min/max of either fcn
         rect_area = abs(xbounds[1] - xbounds[0]) * abs(max(vals1+vals2) - min(vals1+vals2))
@@ -843,9 +902,9 @@ def group_by_xvals(xvals, yvals, xbins, skip_overflows=False, debug=False):  # N
 # ----------------------------------------------------------------------------------------
 def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None, colors=None, add_true_pred_text=False, add_pred_text=False,
                      diff_vals=None, pred_xvals=None, pred_yvals=None, xbounds=None, ybounds=None, xbins=affy_bins, default_xbounds=None,
-                     nonsense_affy_val=-99, plot_median_curve=False):
+                     nonsense_affy_val=-99, plot_median_curve=False, pred_hists=None, alphas=None):
     if default_xbounds is None:
-        default_xbounds = [-2, 1.5]
+        default_xbounds = [-2.5, 2.5]
     mpl_init()
     fig, ax = plt.subplots()
     if affy_vals is not None:
@@ -872,12 +931,19 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
         ax.scatter(pred_xvals, pred_yvals, color='#2b65ec', alpha=0.45, marker='.', s=85)
         if xbounds is None:  # maybe should take more restrictive of the two?
             xbounds = [mfn(pred_xvals) for mfn in [min, max]]
+    if pred_hists is not None:
+        if len(pred_hists) < 5:
+            for phist in pred_hists:
+                phist.mpl_plot(ax, square_bins=True, remove_empty_bins=True, color='darkred', no_vertical_bin_lines=True, alpha=0.6 if len(pred_hists)==1 else 0.1)
+        else:
+            hmean = make_mean_hist(pred_hists, ignore_empty_bins=True)
+            hmean.mpl_plot(ax, square_bins=True, remove_empty_bins=True, color='darkred', no_vertical_bin_lines=True, alpha=0.6)
     for ipf, pfo in enumerate(pfo_list):
         xbtmp = pfo['xbounds'] if 'xbounds' in pfo and pfo['xbounds'] is not None else default_xbounds
-        resp_plot(pfo['birth-response'], ax, alpha=0.05 if len(pfo_list)>5 else 0.5, color='#990012' if colors is None else colors[ipf], xbounds=xbtmp)  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
+        resp_plot(pfo['birth-response'], ax, alpha=(0.05 if len(pfo_list)>5 else 0.5) if alphas is None else alphas[ipf], color='#990012' if colors is None else colors[ipf], xbounds=xbtmp)  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
     if len(pfo_list) > 1 and plot_median_curve:
         med_pfo = get_median_curve(pfo_list, default_xbounds)
-        resp_plot(med_pfo['birth-response'], ax, alpha=0.5, color='green', xbounds=default_xbounds, linewidth=2, linestyle='--')  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
+        resp_plot(med_pfo['birth-response'], ax, alpha=0.5, color='black', xbounds=default_xbounds, linewidth=2, linestyle='--')  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
         add_param_text(fig, med_pfo, titlestr='median:', upper_left=True)
         from gcdyn.poisson import SigmoidResponse
         tmp_params = [1.6, 2, 7]
@@ -887,7 +953,7 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
         add_param_text(fig, pfo_list[0], inf_pfo=pfo_list[1], diff_vals=diff_vals)
     if add_pred_text:
         assert len(pfo_list) == 1
-        add_param_text(fig, pfo_list[0], upper_left=True)
+        add_param_text(fig, pfo_list[0], upper_left=True, diff_vals=diff_vals)
     if ybounds is not None and ybounds[0] != ybounds[1]:
         plt.ylim(ybounds[0], ybounds[1])
     if xbounds is not None and xbounds[0] != xbounds[1]:
@@ -1936,5 +2002,28 @@ class Hist(object):
             fargs['xticks'] = self.get_bin_centers()
             fargs['xticklabels'] = self.bin_labels
         return plotting.mpl_finish(ax, plotdir, plotname, **fargs)
+
+# ----------------------------------------------------------------------------------------
+def make_mean_hist(hists, ignore_empty_bins=False):
+    """ return the hist with bin contents the mean over <hists> of each bin """
+    binvals = {}
+    for hist in hists:  # I could probably do this with list comprehensions or something, but this way handles different bin bounds
+        for ib in range(0, hist.n_bins + 2):
+            low_edge = hist.low_edges[ib]
+            if low_edge not in binvals:
+                binvals[low_edge] = []
+            binvals[low_edge].append(hist.bin_contents[ib])
+    binlist = sorted(binvals.keys())
+    meanhist = Hist(len(binlist) - 2, binlist[1], binlist[-1], xbins=binlist[1 :])
+    for ib in range(len(binlist)):
+        vlist = binvals[binlist[ib]]
+        if ignore_empty_bins:
+            vlist = [v for v in vlist if v > 0]
+        if len(vlist) == 0:
+            continue
+        meanhist.set_ibin(ib, np.mean(vlist), error=0 if len(vlist)==1 else (np.std(vlist, ddof=1) / math.sqrt(len(vlist))))
+    # meanhist.normalize()
+    return meanhist
+
 
 # fmt: on
