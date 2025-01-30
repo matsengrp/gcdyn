@@ -114,7 +114,7 @@ def generate_sequences_and_tree(
                 birth_mutations=False,
                 capacity=params["carry_cap"],
                 capacity_method=args.capacity_method,
-                init_population=args.init_population,
+                init_population=params["init_population"],
                 seed=seed,
                 debug=args.debug > 1,
                 nonsense_phenotype_value=args.nonsense_phenotype_value,
@@ -166,6 +166,7 @@ def generate_sequences_and_tree(
     tree.sample_survivors(n=n_to_sample, seed=seed)
     tree.prune()
     tree.remove_mutation_events()
+    tree.prune_nonsense_leaves(args.nonsense_phenotype_value)
     tree.check_binarity()
     relabel_nodes(args, tree, itrial)
     if args.debug > 1:
@@ -232,7 +233,7 @@ def choose_val(args, pname, extra_bounds=None, dbgstrs=None):
         print("        choosing %s within [%.2f, %.2f]%s" % (pname, minv, maxv, '' if (dbgstrs is None or len(dbgstrs)==0) else ' (%s)'%', '.join(dbgstrs)))
         if minv > maxv:
             raise Exception('arrived at nonsense range for %s: [%.2f, %.2f]' % (pname, minv, maxv))
-        if pname in ["time_to_sampling", 'carry-cap']:
+        if pname in ["time_to_sampling", 'carry-cap', 'init-population']:
             return np.random.choice(range(minv, maxv + 1))  # integers (note that this is inclusive)
         else:
             return np.random.uniform(minv, maxv)  # floats
@@ -275,7 +276,7 @@ def add_pval(pcounts, pname, pval):
 # ----------------------------------------------------------------------------------------
 def choose_params(args, pcounts, itrial):
     params = {}
-    plist = ["xscale", "xshift", "yscale", "time_to_sampling", "carry_cap", "n_seqs"]  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
+    plist = ["xscale", "xshift", "yscale", "time_to_sampling", "carry_cap", "init_population", "n_seqs"]  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
     for pname in plist:  # NOTE compare to loop at end of run_sub_procs()
         extra_bounds, dbgstrs = None, []
         if args.use_generated_parameter_bounds:
@@ -289,7 +290,7 @@ def choose_params(args, pcounts, itrial):
             params[pname] = args.dl_pvals[itrial % len(args.dl_pvals)][pname]
         else:
             params[pname] = choose_val(args, pname, extra_bounds=extra_bounds, dbgstrs=dbgstrs)
-        if pname in ["time_to_sampling", "carry_cap", "n_seqs"]:
+        if pname in ["time_to_sampling", "carry_cap", "init_population", "n_seqs"]:
             params[pname] = int(params[pname])
         add_pval(pcounts, pname, params[pname])
     if args.min_survivors is None:
@@ -298,7 +299,7 @@ def choose_params(args, pcounts, itrial):
         print('    setting --min-survivors to %.2f * N seqs = %d' % (tfrac, args.min_survivors))
     if any(params["carry_cap"] < p for p in [args.min_survivors, params["n_seqs"]]):
         print('  %s chose carry cap (%d) smaller than either min survivors %d or N seqs %d, so you\'ll probably either get a lot of failed tree runs, or fail sampling seqs' % (utils.color('yellow', 'warning'), params["carry_cap"], args.min_survivors, params["n_seqs"]))
-    pvstrs = ["%s %s" % (p, ("%d" if p in ["time_to_sampling", "carry_cap", "n_seqs"] else "%.2f") % v) for p, v in sorted(params.items())]
+    pvstrs = ["%s %s" % (p, ("%d" if p in ["time_to_sampling", "carry_cap", "init_population", "n_seqs"] else "%.2f") % v) for p, v in sorted(params.items())]
     print("    chose new parameter values%s: %s" % ('' if args.simu_bundle_size == 1 else ' (for next bundle of size %d)' % args.simu_bundle_size, "  ".join(pvstrs)))
     return params
 
@@ -398,6 +399,7 @@ def write_final_outputs(args, all_seqs, all_trees, param_list, inferred=False, d
                     n.dist for n in pfo["tree"].iter_descendants()
                 ),
                 "carry_cap": params["carry_cap"],
+                "init_population": params["init_population"],
                 "time_to_sampling": params["time_to_sampling"],
                 # NOTE if you add something here, also add it to encode.sstat_fieldnames
             }
@@ -579,7 +581,8 @@ def get_parser():
     parser.add_argument("--carry-cap-values", default=[300], nargs='+', type=int)
     parser.add_argument("--carry-cap-range", nargs='+', type=int)
     parser.add_argument("--capacity-method", default="birth", choices=["birth", "death", "hard", None], help="see bdms.evolve() docs. Note that 'death' often involves a ton of churn, which makes for very slow simulations.")
-    parser.add_argument("--init-population", type=int, default=2)
+    parser.add_argument("--init-population-values", type=int, default=2, nargs='+')
+    parser.add_argument("--init-population-range", help='DO NOT USE (use --init-population-values instead)')
     parser.add_argument("--seed", default=0, type=int, help="random seed")
     parser.add_argument("--outdir", default=os.getcwd())
     parser.add_argument("--birth-response", default="sigmoid", choices=["constant", "soft-relu", "sigmoid"], help="birth rate response function")
@@ -811,7 +814,7 @@ def run_sub_procs(args):
     with open(outfn(args, 'summary-stats')) as cfile:
         reader = csv.DictReader(cfile)
         for line in reader:
-            for pname in [p for p in ['carry_cap', 'time_to_sampling', 'n_seqs'] if p in line]:  # old files don't have these
+            for pname in [p for p in ['carry_cap', 'init_population', 'time_to_sampling', 'n_seqs'] if p in line]:  # old files don't have these
                 add_pval(pcounts, pname, float(line[pname]))
     plot_params_responses(args, pcounts)
 
@@ -822,8 +825,8 @@ def main():
     print("    gcdyn commit: %s" % subprocess.check_output(["git", "--git-dir", git_dir, "rev-parse", "HEAD"]).strip())
     parser = get_parser()
     args = parser.parse_args()
-    if args.init_population < 2 or (args.init_population & (args.init_population-1) != 0):
-        raise Exception('--init-population must be a positive power of 2, but got %d' % args.init_population)
+    if any(p < 2 or (p & (p-1) != 0) for p in args.init_population_values):
+        raise Exception('--init-population must be a positive power of 2, but got: %s' % ' '.join(str(p) for p in args.init_population_values))
     if args.simu_bundle_size != 1 and args.n_trials % args.simu_bundle_size != 0:
         raise Exception("--n-trials %d not evenly divisible by --simu-bundle-size %d" % (args.n_trials, args.simu_bundle_size))
     args.use_generated_parameter_bounds = args.birth_response == "sigmoid" and None not in [args.yscale_range, args.initial_birth_rate_range]  # if either yscale or initial birth rate have no specified range, we can't calculate xshift and yscale ranges (well maybe could do one, but generally if you want ranges, specify them)
@@ -832,7 +835,7 @@ def main():
     else:
         print("  note: not using additional generated parameter bounds since at least one of --yscale-range, --initial-birth-rate-range was unset (this may result in lots of failed simulation runs if the initial birth rate is either too small or too large)")
     # handle args that can have either a list of a few values, or choose from a uniform interval specified with two (min, max) values
-    for pname in ["xscale", "xshift", "yscale", "time_to_sampling", "carry_cap", "n_seqs"]:
+    for pname in ["xscale", "xshift", "yscale", "time_to_sampling", "carry_cap", "init_population", "n_seqs"]:
         rangevals = getattr(args, pname + "_range")
         if rangevals is not None and len(rangevals) != 2:  # range with two values for continuous
             raise Exception("range for %s must consist of two values but got %d" % (pname, len(rangevals)))

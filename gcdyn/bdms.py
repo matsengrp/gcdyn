@@ -454,6 +454,14 @@ class TreeNode(ete3.Tree):
                 node.children[0].n_mutations += 1
                 node.delete(prevent_nondicotomic=False, preserve_branch_length=True)
 
+    def prune_nonsense_leaves(self, nonsense_phenotype_value) -> None:
+        r""" remove nonsense (stop) leaves and their ancestors"""
+        for node in self.iter_leaves(is_leaf_fn=lambda n: n.x==nonsense_phenotype_value):
+            parent = node.up
+            parent.remove_child(node)
+            assert parent.event == self._BIRTH_EVENT or parent.is_root()
+            parent.delete(prevent_nondicotomic=False, preserve_branch_length=True)
+
     def check_binarity(self) -> None:
         bad_nodes = [(n.name, len(n.children)) for n in [self] + list(self.iter_descendants()) if len(n.children) not in [0, 2]]
         if len(bad_nodes) == 0:
