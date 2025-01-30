@@ -92,7 +92,7 @@ class PerBinTransposeLayer(layers.Layer):
 # ----------------------------------------------------------------------------------------
 # @keras.saving.register_keras_serializable(package='gcdyn_nn', name='curve_loss_fcn')
 @tf.function  # NOTE need to comment this decorator in order for .numpy() to work (and add run_eagerly to .compile() call, but note that training is WAY the fuck slower if it's commented
-def curve_loss(y_true, y_pred):  # copied from/modeled after utils.resp_fcn_diff()
+def curve_loss(y_true, y_pred, rect_area=False):  # copied from/modeled after utils.resp_fcn_diff()
     # ----------------------------------------------------------------------------------------
     def params(yt):
         assert utils.sigmoid_params == ['xscale', 'xshift', 'yscale']  # ick
@@ -110,17 +110,20 @@ def curve_loss(y_true, y_pred):  # copied from/modeled after utils.resp_fcn_diff
         print('     abs diff', tf.math.abs(true_svals - pred_svals).numpy())
         print('    sum %.3f   diff %.5f' % (tf.reduce_sum(tf.math.abs(true_svals - pred_svals) * tf.constant(dx)).numpy(), normed_area.numpy()))
     # ----------------------------------------------------------------------------------------
-    xbounds = [-5, 5]  # once we're passing in input affinity values, we won't need this somewhat abritrary choice
+    xbounds = [-2.5, 3] #[-5, 5]  # once we're passing in input affinity values, we won't need this somewhat abritrary choice
     nsteps = 1000  # having this large (like 1k) seems sometimes important for training stability (and weirdly doesn't seem to slow down training)
     dx = (xbounds[1] - xbounds[0]) / nsteps
     xvals = tf.constant(list(onp.arange(xbounds[0], 0, dx)) + list(onp.arange(0, xbounds[1] + dx, dx)), dtype=tf.float64)
     true_svals, pred_svals = [sigval(xvals, params(yv)) for yv in [y_true, y_pred]]
     sumv = tf.reduce_sum(tf.math.abs(true_svals - pred_svals) * tf.constant(dx, dtype=tf.float64))
-    all_yvals = tf.concat([true_svals, pred_svals], 0)
-    xdist = tf.math.abs(tf.constant(xbounds[1] - xbounds[0], dtype=tf.float64))
-    ydist = tf.math.abs(tf.math.reduce_max(all_yvals) - tf.math.reduce_min(all_yvals))
-    rect_area = tf.reduce_sum(xdist * ydist)  # area of whole plot/rectangle
-    normed_area = sumv / rect_area
+    if rect_area:  # old-style full rectangular area for denominator
+        all_yvals = tf.concat([true_svals, pred_svals], 0)
+        xdist = tf.math.abs(tf.constant(xbounds[1] - xbounds[0], dtype=tf.float64))
+        ydist = tf.math.abs(tf.math.reduce_max(all_yvals) - tf.math.reduce_min(all_yvals))
+        area_val = tf.reduce_sum(xdist * ydist)  # area of whole plot/rectangle
+    else:  # area between furthest curve and x axis
+        area_val = tf.reduce_sum(tf.math.maximum(tf.math.abs(true_svals), tf.math.abs(pred_svals)) * tf.constant(dx, dtype=tf.float64))
+    normed_area = sumv / area_val
     # print_debug()
     return normed_area
 

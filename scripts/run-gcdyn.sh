@@ -39,30 +39,33 @@ xscales=0.1:1:5:10; xshifts=-5:-2:-1:0:1:2:5
 # echo $bin $common --label const-leaves --version v2 --carry-cap-range-list 750,1500 $pranges --n-replicates 1 --n-trials-list 100:5000 --simu-bundle-size-list 1:10 --dl-bundle-size-list 1:10 --zip-vars simu-bundle-size:dl-bundle-size --simu-extra-args=\"--n-max-procs 20 --initial-birth-rate-range 0.1 0.5 --n-seqs-values 70 --init-population 128\"
 # pranges="--xscale-range-list 0.01,2 --xshift-range-list=-0.5,3 --yscale-range-list 1,50 --time-to-sampling-range-list 17,25 --n-seqs-range-list 40,90"
 # echo $bin $common --label retrain --version v1 --carry-cap-range-list 750,1500 $pranges --n-replicates 1 --n-trials-list 100:5000:50000 --simu-extra-args=\"--n-max-procs 20 --initial-birth-rate-range 0.1 0.5 --init-population 128\" --learning-rate-list 0.001:0.01 --epochs-list 500:5000 --batch-size-list 32:128
-sxtra="--simu-extra-args=\"--n-max-procs 20 --initial-birth-rate-range 0.1 0.5 --init-population 128\""
-dlargs="--learning-rate-list 0.001 --epochs-list 200 --batch-size-list 32"
-pranges="--xscale-range-list 0.01,2 --xshift-range-list=-0.5,3 --yscale-range-list 0.5,50 --time-to-sampling-range-list 17,25 --n-seqs-range-list 40,90"
-# echo $bin $common --label for-data --version v1 --carry-cap-range-list 750,1500 $pranges --n-replicates 1 --n-trials-list 5000:50000 $sxtra $dlargs --tree-inference-method iqtree
-echo $bin $common --label data-mimic --version v4 --n-replicates 2 --n-trials-list 120 --simu-extra-args=\"--carry-cap-values 1500 --xscale-values 1.4 --xshift-values 1.5 --yscale-values 3.3 --initial-birth-rate-range 0.1 0.5 --n-seqs-range 60 95 --time-to-sampling-values 20 --init-population 128\" --n-sub-procs 20 --tree-inference-method iqtree
-echo $bin $common --label match-data-sumstats --version v14 --n-replicates 2 --n-trials-list 120 --simu-extra-args=\"--carry-cap-values 1000 --xscale-values 1.6 --xshift-values 2 --yscale-values 7 --initial-birth-rate-range 0.1 0.5 --n-seqs-range 60 95 --time-to-sampling-values 20 --init-population 32\" --n-sub-procs 20 --tree-inference-method iqtree
-exit 0
+sxtra="--simu-extra-args=\"--n-max-procs 20 --initial-birth-rate-range 0.1 0.5\""
+dlargs="--learning-rate-list 0.001 --epochs-list 100 --batch-size-list 32 --model-type-list sigmoid:per-bin"
+pranges="--xscale-range-list 0.01,2 --xshift-range-list=-0.5,3 --yscale-range-list 0.5,35 --carry-cap-range-list 500,1250 --init-population-values-list 8,16,32,64,128 --time-to-sampling-range-list 17,25 --n-seqs-range-list 40,90"
+echo $bin $common --label for-data --version v3 $pranges --n-replicates 1 --n-trials-list 5000:50000 $sxtra $dlargs --tree-inference-method iqtree
+# echo $bin $common --label data-mimic --version v4 --n-replicates 2 --n-trials-list 120 --simu-extra-args=\"--carry-cap-values 1500 --xscale-values 1.4 --xshift-values 1.5 --yscale-values 3.3 --initial-birth-rate-range 0.1 0.5 --n-seqs-range 60 95 --time-to-sampling-values 20 --init-population 128\" --n-sub-procs 20 --tree-inference-method iqtree
+# echo $bin $common --label match-data-sumstats --version v14 --n-replicates 2 --n-trials-list 120 --simu-extra-args=\"--carry-cap-values 1000 --xscale-values 1.6 --xshift-values 2 --yscale-values 7 --initial-birth-rate-range 0.1 0.5 --n-seqs-range 60 95 --time-to-sampling-values 20 --init-population 32\" --n-sub-procs 20 --tree-inference-method iqtree
+# exit 0
 
 # dld=/fh/fast/matsen_e/dralph/partis/gcdyn/retrain/v1/n-trials-50000/epochs-500/batch-size-32/learning-rate-0.001/dl-infer  # old (but still fine) model
 # datadir=/fh/fast/matsen_e/data/taraki-gctree-2021-10/beast-processed-data/v6  # actual data (beast version)
 datadir=/fh/fast/matsen_e/data/taraki-gctree-2021-10/iqtree-processed-data/v3  # actual data (iqtree version)
 # dlabel=data-iqtree-trained-v1
-dlabel=data-iqtree-trained-iqtree-data-v1
+dlabel=data-iqtree-trained-iqtree-data; dvsn=v2
 # datadir=/fh/fast/matsen_e/data/taraki-gctree-2021-10/beast-processed-data/bst-simu-v1  # beast-processed simu
 # dlabel=bst-simu-v1
 dsl=all-trees:d15-trees:d20-trees #:w10-trees
 dldstr=dl-infer/iqtree  # subdir from which to get model dir
 
 datadir=/fh/fast/matsen_e/dralph/partis/gcdyn/data-mimic/v4/seed-0
-dlabel=infer-on-data-mimic-v4
+dlabel=infer-on-data-mimic; dvsn=v6
 dsl=simu:xxx
 dldstr=dl-infer/iqtree
+xargs="--dl-extra-args=\"--is-simu\""
 
 bargs="--base-outdir /fh/fast/matsen_e/dralph/partis/gcdyn --data-dir $datadir"
 ntrial=50000
-dld=/fh/fast/matsen_e/dralph/partis/gcdyn/for-data/v1/n-trials-$ntrial/$dldstr
-echo ./projects/cf-gcdyn.py --actions data --n-max-procs 5 --n-sub-procs 100 $bargs --label $dlabel --version v0 --dry --dl-model-dir $dld --data-samples-list $dsl
+for mtype in sigmoid per-bin; do
+    dld=/fh/fast/matsen_e/dralph/partis/gcdyn/for-data/v3/n-trials-$ntrial/model-type-$mtype/$dldstr
+    echo ./projects/cf-gcdyn.py --actions data --n-max-procs 5 --n-sub-procs 100 $bargs --label $dlabel-$mtype --version $dvsn --dry --dl-model-dir $dld --data-samples-list $dsl --model-type $mtype $xargs
+done

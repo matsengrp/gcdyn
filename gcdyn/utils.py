@@ -435,18 +435,19 @@ def sns_xy_plot(ptype, smpl, tdf, xkey, ykey, xvals=None, true_x_eq_y=False, dis
         assert False
     if xtra_text is not None:
         plt.text(0.05, 0.75 if smp_name=='valid' else 0.85, xtra_text, transform=ax.transAxes, color='red' if smp_name=='valid' else None)
+    return ax
 
 # ----------------------------------------------------------------------------------------
 # plot scatter + box/whisker plot comparing true and predicted values for deep learning inference
 # NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
-def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu=False, data_val=0, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15, trivial_encoding=False):
+def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu=False, data_val=0, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15, trivial_encoding=False, nonsense_affy_val=-99):
     # ----------------------------------------------------------------------------------------
     def add_fn(fn, n_per_row=4, force_new_row=False):
         if force_new_row or len(fnames) == 0 or len(fnames[-1]) >= n_per_row:
             fnames.append([])
         fnames[-1].append(fn)
     # ----------------------------------------------------------------------------------------
-    def plot_responses(smpl, n_max_plots=20, n_max_diffs=1000):
+    def plot_responses(smpl, n_max_plots=20, n_max_diffs=1000, default_xbounds=None):
         # ----------------------------------------------------------------------------------------
         def plot_true_pred_pair(true_resp, pred_resp, affy_vals, diff_vals, plotname, titlestr=None):
             fn = plot_many_curves(outdir+'/'+smpl, plotname, [{'birth-response' : r} for r in [true_resp, pred_resp]], titlestr=titlestr,
@@ -459,6 +460,8 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             def split_resp(r): return [float(v) for v in [r.xscale, r.xshift, r.yscale]]
             return curve_loss(tf.constant([split_resp(resp_1)]), tf.constant([split_resp(resp_2)]))
         # ----------------------------------------------------------------------------------------
+        if default_xbounds is None:
+            default_xbounds = [-2.5, 3]
         if not os.path.exists(outdir+'/'+smpl):
             os.makedirs(outdir+'/'+smpl)
         from gcdyn.poisson import SigmoidResponse, LinearResponse
@@ -478,7 +481,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             n_skipped_diffs = {s : 0 for s in curve_diffs}
             for irow in range(n_tree_preds):
                 tree_index = int(prdfs[smpl]['tree-index'][irow])
-                affy_vals = [float(m['affinity']) for m in lmdict[tree_index]]
+                affy_vals = [float(m['affinity']) for m in lmdict[tree_index] if float(m['affinity'])!=nonsense_affy_val]
                 is_valid = validation_indices is not None and tree_index in validation_indices
                 smplstr = 'validation' if is_valid else smpl
                 if is_simu:
@@ -486,15 +489,17 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                     pdicts = [{p : prdfs[smpl]['%s-%s'%(p, tp)][irow] for p in sigmoid_params} for tp in ['truth', 'predicted']]
                     true_resp, pred_resp = [SigmoidResponse(**pd) for pd in pdicts]
                     true_pfo_list.append({'birth-response' : true_resp})
+                    cdiff = None
                     if len(curve_diffs[smplstr]) < n_max_diffs:
-                        cdiff = resp_fcn_diff(true_resp, pred_resp, [mfn(affy_vals) for mfn in [min, max]])
+                        # diff_xbds = [mfn([a for a in affy_vals if a!=nonsense_affy_val]) for mfn in [min, max]]  # these bounds go way too far to the left, which is quite different to the loss function bounds (since we don't know the affinites in that function), plus very negative affinities aren't pretty uninformative
+                        cdiff = resp_fcn_diff(true_resp, pred_resp, default_xbounds)
                         curve_diffs[smplstr].append(cdiff)
                         # ldiff = get_curve_loss(true_resp, pred_resp)  # uncomment (also below) to print also the diff from the curve loss fcn (it should be the same, modulo different xbounds and nsteps
                     else:
                         n_skipped_diffs[smplstr] += 1
                         continue
-                    if irow < n_simu_plots:
-                        plot_true_pred_pair(true_resp, pred_resp, affy_vals, [cdiff], 'true-vs-inf-response-%d'%irow, titlestr=titlestr)  #, ldiff],
+                    if irow < n_simu_plots: # or pred_resp.yscale>55 or (cdiff is not None and cdiff > 0.75):
+                        plot_true_pred_pair(true_resp, pred_resp, affy_vals, [cdiff], 'true-vs-inf-response-%d'%irow, titlestr=titlestr)  #, ldiff], # add this if you want the plot to display xbounds next to curve diff: [{'diff' : cdiff, 'xbounds' : diff_xbds}]
                 else:
                     titlestr = '%s (%d / %d)' % (prdfs[smpl]['gcids'][irow] if 'gcids' in prdfs[smpl] else smplstr, irow, n_tree_preds)
                     pdict = {p : prdfs[smpl]['%s-%s'%(p, 'predicted')][irow] for p in sigmoid_params}
@@ -503,16 +508,12 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                     add_fn(fn)
                 pfo_list.append({'birth-response' : pred_resp, 'xbounds' : (min(affy_vals), max(affy_vals))})
                 all_afvals += affy_vals
-            # if len(set(tuple(sorted(p['birth-response']._param_dict.values())) for p in true_pfo_list)) == 1:  # all true responses equal
             if not is_simu or all(p['birth-response']==true_pfo_list[0]['birth-response'] for p in true_pfo_list):  # all true responses equal
-                # fn, _ = plot_many_curves(outdir, '%s-all-response'%smpl, pfo_list, titlestr='%s: %d / %d responses' % (smpl, len(pfo_list), n_tree_preds), plot_median_curve=True) #, affy_vals=all_afvals)
-                # add_fn(fn, force_new_row=True)
-                xbounds = [-2.5, 3]
-                fn, median_pfo = plot_many_curves(outdir, '%s-all-response-zoom'%smpl, pfo_list + [true_pfo_list[0]],
+                fn, median_pfo = plot_many_curves(outdir, '%s-all-response'%smpl, pfo_list + ([true_pfo_list[0]] if is_simu else []),
                                                   titlestr='%s: %d / %d responses' % (smpl, len(pfo_list), n_tree_preds),
                                                   colors=['#990012' for _ in pfo_list] + ['green'], alphas=[0.05 for _ in pfo_list] + [0.5],
-                                                  plot_median_curve=True, xbounds=xbounds, ybounds=[-0.1, 4])
-                afn = plot_many_curves(outdir, '%s-all-affy-vals'%smpl, [], titlestr='%d total affinity values' % (len(all_afvals)), affy_vals=all_afvals, xbounds=xbounds)
+                                                  plot_median_curve=True, xbounds=default_xbounds, ybounds=[-0.1, 4])
+                afn = plot_many_curves(outdir, '%s-all-affy-vals'%smpl, [], titlestr='%d total affinity values' % (len(all_afvals)), affy_vals=all_afvals, xbounds=default_xbounds)
                 add_fn(fn)
                 add_fn(afn)
             if is_simu:
@@ -549,7 +550,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 add_fn(fn)
                 itree += 1
             fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-response', tpfl, titlestr='%s: %d / %d responses' % (smpl, len(pfo_list), n_tree_preds),
-                                  pred_xvals=all_xvals, pred_yvals=all_yvals, xbins=zoom_affy_bins, xbounds=[-2.5, 2], colors=['green' for _ in tpfl])
+                                  pred_xvals=all_xvals, pred_yvals=all_yvals, xbins=zoom_affy_bins, xbounds=default_xbounds, colors=['green' for _ in tpfl])
             add_fn(fn)
         elif model_type == 'per-bin':
             import gcdyn.encode as encode
@@ -565,13 +566,14 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                     titlestr = '%s: response index %d / %d' % (smplstr, irow, n_tree_preds)
                     true_resp = SigmoidResponse(**{p : prdfs[smpl]['%s-truth'%p][irow] for p in sigmoid_params})
                     true_pfo_list.append({'birth-response' : true_resp})  # , 'xbounds' : xbounds
+                    cdiff = None
                     if len(curve_diffs[smplstr]) < n_max_diffs:
-                        cdiff = resp_fcn_diff(true_resp, pred_hist, [mfn(affy_vals) for mfn in [min, max]], resp2_is_hist=True)
+                        cdiff = resp_fcn_diff(true_resp, pred_hist, None, resp2_is_hist=True, nsteps=None)  # [mfn(affy_vals) for mfn in [min, max]]
                         curve_diffs[smplstr].append(cdiff)
                     else:
                         n_skipped_diffs[smplstr] += 1
                         continue
-                    if irow < n_simu_plots:
+                    if irow < n_simu_plots: # or (cdiff is not None and cdiff > 0.75):
                         fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-fitness-bins-%d'%irow, [{'birth-response' : true_resp}], pred_hists=[pred_hist], titlestr=titlestr, affy_vals=affy_vals, colors=['#006600'], diff_vals=[cdiff], add_pred_text=True)
                         add_fn(fn)
                 else:
@@ -580,12 +582,10 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                     add_fn(fn)
                 phist_list.append(pred_hist)
                 all_afvals += affy_vals
-            # if len(set(tuple(sorted(p['birth-response']._param_dict.values())) for p in true_pfo_list)) == 1:  # all true responses equal
             if not is_simu or all(p['birth-response']==true_pfo_list[0]['birth-response'] for p in true_pfo_list):  # all true responses equal
-                fn = plot_many_curves(outdir+'/'+smpl, '%s-all-fitness-bins'%smpl, [true_pfo_list[0]], titlestr='%s: %d / %d responses' % (smpl, len(phist_list), n_tree_preds), pred_hists=phist_list, xbounds=[-2.5, 2.5], colors=['#006600']) #, plot_median_curve=True)
+                fn = plot_many_curves(outdir+'/'+smpl, '%s-all-fitness-bins'%smpl, [true_pfo_list[0]] if is_simu else [], titlestr='%s: %d / %d responses' % (smpl, len(phist_list), n_tree_preds), pred_hists=phist_list, xbounds=default_xbounds, colors=['#006600']) #, plot_median_curve=True)
                 add_fn(fn, force_new_row=True)
-                xbounds = [-2.5, 3]
-                afn = plot_many_curves(outdir+'/'+smpl, '%s-all-affy-vals'%smpl, [], titlestr='%d total affinity values' % (len(all_afvals)), affy_vals=all_afvals, xbounds=xbounds)
+                afn = plot_many_curves(outdir+'/'+smpl, '%s-all-affy-vals'%smpl, [], titlestr='%d total affinity values' % (len(all_afvals)), affy_vals=all_afvals, xbounds=default_xbounds)
                 add_fn(afn)
             if is_simu:
                 fn = plot_all_diffs(outdir+'/'+smpl, 'curve-diffs', curve_diffs, n_skipped_diffs=n_skipped_diffs)
@@ -595,7 +595,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
 
         return median_pfo
     # ----------------------------------------------------------------------------------------
-    def plot_param_or_pair(ptype, param1, smpl, xkey=None, ykey=None, param2=None, median_pfo=None):
+    def plot_param_or_pair(ptype, param1, smpl, xkey=None, ykey=None, param2=None, median_pfo=None, n_max_scatter_points=500):
         # ----------------------------------------------------------------------------------------
         def get_mae_text(smpl, tdf):
             if not is_simu:
@@ -608,6 +608,12 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
         # ----------------------------------------------------------------------------------------
         plt.clf()
         all_df = prdfs[smpl]
+        downsample_text = ''
+        if ptype == 'scatter' and len(all_df) > n_max_scatter_points:  # too busy, don't bother making them
+            # if param2 is None:
+            #     return
+            downsample_text = '%d/%d points' % (n_max_scatter_points, len(all_df))
+            all_df = all_df.sample(n=n_max_scatter_points)
         xlabel, ylabel = xkey, ykey
         emph_vals = None
         if xkey is None or ykey is None:
@@ -626,15 +632,13 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 if median_pfo is not None:
                     emph_vals = [[getattr(median_pfo['birth-response'], k) for k in [param1, param2]]]
         discrete = param2 is None and len(set(all_df[xkey])) < 15  # if simulation has discrete parameter values (well, mostly turned off now i think)
-        if ptype == 'scatter' and len(all_df) > 500:  # too busy, don't bother making them
-            return None
         bin_edges = fitness_bins if param1=='fitness' else None
         plt_df = all_df.copy()
         if smpl == "train" and validation_split != 0:
             plt_df = all_df.copy()[: len(all_df) - int(validation_split * len(all_df))]  # NOTE this obviously depends on keras continuing to do validation splits this way
             vld_df = all_df.copy()[len(all_df) - int(validation_split * len(all_df)) :]
-            sns_xy_plot(ptype, 'valid', vld_df, xkey, ykey, xvals=all_df[xkey], discrete=discrete, bin_edges=bin_edges, leave_ticks=True, xtra_text=get_mae_text('valid', vld_df))  # well, leave ticks *and* don't plot true dashed line
-        sns_xy_plot(ptype, smpl, plt_df, xkey, ykey, xvals=all_df[xkey], true_x_eq_y=True, discrete=discrete, bin_edges=bin_edges, xtra_text=get_mae_text(smpl, plt_df), emph_vals=emph_vals)
+            ax1 = sns_xy_plot(ptype, 'valid', vld_df, xkey, ykey, xvals=all_df[xkey], discrete=discrete, bin_edges=bin_edges, leave_ticks=True, xtra_text=get_mae_text('valid', vld_df))  # well, leave ticks *and* don't plot true dashed line
+        ax2 = sns_xy_plot(ptype, smpl, plt_df, xkey, ykey, xvals=all_df[xkey], true_x_eq_y=True, discrete=discrete, bin_edges=bin_edges, xtra_text=get_mae_text(smpl, plt_df), emph_vals=emph_vals)
         if param2 is None:
             plt.xlabel("%s value" % xlabel)
             plt.ylabel(ylabel)
@@ -645,6 +649,8 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             titlestr = "predicted values%s" % ('' if smpl=='infer' else ' (%s)'%smpl)
         if xtra_txt is not None:
             titlestr += xtra_txt
+        if downsample_text != '':
+            plt.text(0.05, 0.85, downsample_text, transform=ax2.transAxes)
         plt.title(titlestr, fontweight="bold", fontsize=20)  # if len(title) < 25 else 15)
         fn = "%s/%s%s-%s-%s-hist.svg" % (outdir, param1, '' if param2 is None else '-vs-%s'%param2, smpl, ptype)
         plt.savefig(fn)
@@ -799,11 +805,15 @@ def plot_chosen_params(plotdir, param_counters, pbounds, n_bins=15, fnames=None)
 def get_resp_xvals(xbounds, nsteps):
     dx = (xbounds[1] - xbounds[0]) / nsteps
     xvals = list(np.arange(xbounds[0], 0, dx)) + list(np.arange(0, xbounds[1] + dx, dx))
-    return xvals, dx
+    return xvals, dx  # NOTE len(xvals) is nsteps + 2
 
 # ----------------------------------------------------------------------------------------
-def get_resp_vals(resp, xbounds, nsteps, normalize=False):
-    xvals, dx = get_resp_xvals(xbounds, nsteps)
+# if you already have xvals, you can pass them in directly and set xbounds and nsteps to None
+def get_resp_vals(resp, xbounds, nsteps, normalize=False, xvals=None):
+    if xvals is None:
+        xvals, dx = get_resp_xvals(xbounds, nsteps)
+    else:
+        assert xbounds is None and nsteps is None
     rvals = [float(resp.λ_phenotype(x)) for x in xvals]
     if normalize:
         sumv = sum(rvals)
@@ -812,37 +822,65 @@ def get_resp_vals(resp, xbounds, nsteps, normalize=False):
 
 # ----------------------------------------------------------------------------------------
 def get_hist_vals(htmp, xbounds, nsteps, normalize=False):
-    xvals, dx = get_resp_xvals(xbounds, nsteps)
-    rvals = [htmp.bin_contents[htmp.find_bin(x)] for x in xvals]
+    if xbounds is None:  # use bin centers
+        assert nsteps is None
+        rvals = [htmp.bin_contents[i] for i in htmp.ibiniter(include_overflows=False)]
+    else:
+        xvals, dx = get_resp_xvals(xbounds, nsteps)
+        rvals = [htmp.bin_contents[htmp.find_bin(x)] for x in xvals]
     if normalize:
         sumv = sum(rvals)
         rvals = [v / sumv for v in rvals]
     return rvals
 
 # ----------------------------------------------------------------------------------------
-# can set resp2 to a hist if you set resp2_is_hist
-def resp_fcn_diff(resp1, resp2, xbounds, dont_normalize=False, nsteps=40, resp2_is_hist=False, debug=False):  # see also nn.curve_loss()
+# can set resp2 to a hist if you set resp2_is_hist (rect_area: old-style full rectangular area for denominator)
+def resp_fcn_diff(resp1, resp2, xbounds, dont_normalize=False, nsteps=40, resp2_is_hist=False, rect_area=False, debug=False):  # see also nn.curve_loss()
     # ----------------------------------------------------------------------------------------
     def prdbg():
         def prvls(lbl, vlist, p=3):
-            print('    %5s'%lbl, '  '.join(('%7.'+str(p)+'f')%v for v in vlist))
-        print('   %d bins with xbounds %.3f to %.3f (width %.3f):' % (nsteps, xbounds[0], xbounds[1], dx))
+            print('     %10s'%lbl, '  '.join(('%7.'+str(p)+'f')%v for v in vlist))
+        if resp2_is_hist:
+            print('   %d bins with xbounds %.3f to %.3f (widths %s):' % (resp2.n_bins, resp2.xmin, resp2.xmax, ' '.join('%.2f'%w for w in dxvlist)))
+        else:
+            print('   %d bins with xbounds %.3f to %.3f (width %.3f):' % (nsteps, xbounds[0], xbounds[1], dxvlist[0]))
         prvls('x', xvals, p=1)
         diffs = [v1-v2 for v1, v2 in zip(vals1, vals2)]
-        for l, vl in [('v1', vals1), ('v2', vals2), ('diff', diffs), ('area', [abs(d)*dx for d in diffs])]:
+        vlists = [('v1', vals1), ('v2', vals2), ('diff', diffs), ('diff area', [abs(d)*dx for d, dx in zip(diffs, dxvlist)])]
+        if not rect_area:
+            vlists.append(('denom area', area_vlist))
+        for l, vl in vlists:
             prvls(l, vl)
         if not dont_normalize:
-            print('   normd diff: %.3f / %.3f = %.3f' % (sumv, rect_area, sumv / rect_area))
+            print('   normd diff: %.3f / %.3f = %.3f' % (sumv, area_val, sumv / area_val))
     # ----------------------------------------------------------------------------------------
-    xvals, dx = get_resp_xvals(xbounds, nsteps)
-    vals1, vals2 = [f(r, xbounds, nsteps) for r, f in zip([resp1, resp2], [get_resp_vals, get_hist_vals if resp2_is_hist else get_resp_vals])]  # , normalize=normalize
-    sumv = sum(abs(v1-v2) * dx for v1, v2 in zip(vals1, vals2))
-    if not dont_normalize:  # divide area between curves by area of rectangle defined by xbounds and min/max of either fcn
-        rect_area = abs(xbounds[1] - xbounds[0]) * abs(max(vals1+vals2) - min(vals1+vals2))
-        sumv /= rect_area
+    if resp2_is_hist:
+        assert xbounds is None and nsteps is None  # don't really have to do it this way, but I think it's better to enforce it
+        xbounds = (resp2.xmin, resp2.xmax)
+        nsteps = resp2.n_bins - 2
+        xvals = resp2.get_bin_centers(ignore_overflows=True)
+        dxvlist = [resp2.binwidth(i) for i in resp2.ibiniter(include_overflows=False)]
+    else:
+        xvals, dx = get_resp_xvals(xbounds, nsteps)
+        dxvlist = [dx for _ in xvals]
+    assert len(xvals) == len(dxvlist)
+    if resp2_is_hist:
+        vals1, vals2 = get_resp_vals(resp1, None, None, xvals=xvals), get_hist_vals(resp2, None, None)
+    else:
+        vals1, vals2 = [f(r, xbounds, nsteps) for r, f in zip([resp1, resp2], [get_resp_vals, get_hist_vals if resp2_is_hist else get_resp_vals])]
+    assert len(vals1) == len(xvals)
+    sumv = sum(abs(v1-v2) * dx for v1, v2, dx in zip(vals1, vals2, dxvlist))
+    return_val = sumv
+    if not dont_normalize:
+        if rect_area:
+            area_val = abs(xbounds[1] - xbounds[0]) * abs(max(vals1+vals2) - min(vals1+vals2))  # divide area between curves by area of rectangle defined by xbounds and min/max of either fcn
+        else:
+            area_vlist = [max([abs(v1), abs(v2)]) * dx for v1, v2, dx in zip(vals1, vals2, dxvlist)]
+            area_val = sum(area_vlist)  # area between furthest curve and x axis (in this increment of dx) (don't really need dx, but maybe it makes it more intuitive)
+        return_val /= area_val
     if debug:
         prdbg()
-    return sumv
+    return return_val
 
 # ----------------------------------------------------------------------------------------
 def resp_plot(bresp, ax, xbounds, alpha=0.8, color="#990012", nsteps=40, linewidth=3, linestyle='-'):
@@ -914,8 +952,8 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
             affy_vals = [v for v in affy_vals if v != nonsense_affy_val]
         ax2 = ax.twinx()
         affy_plot({'all' : affy_vals}, ax, ax2=ax2)
-        if xbounds is None:  # maybe should take more restrictive of the two?
-            xbounds = [mfn(affy_vals) for mfn in [min, max]]
+        # if xbounds is None:  # maybe should take more restrictive of the two?
+        #     xbounds = [mfn(affy_vals) for mfn in [min, max]]
     if pred_xvals is not None and pred_yvals is not None:  # only used for per-cell prediction
         if nonsense_affy_val in pred_xvals:
             print('    %s removing %d / %d nonsense affinity values' % (wrnstr(), pred_xvals.count(nonsense_affy_val), len(pred_xvals)))
@@ -940,8 +978,7 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
             hmean = make_mean_hist(pred_hists, ignore_empty_bins=True)
             hmean.mpl_plot(ax, square_bins=True, remove_empty_bins=True, color='darkred', no_vertical_bin_lines=True, alpha=0.6)
     for ipf, pfo in enumerate(pfo_list):
-        xbtmp = pfo['xbounds'] if 'xbounds' in pfo and pfo['xbounds'] is not None else default_xbounds
-        resp_plot(pfo['birth-response'], ax, alpha=(0.05 if len(pfo_list)>5 else 0.5) if alphas is None else alphas[ipf], color='#990012' if colors is None else colors[ipf], xbounds=xbtmp)  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
+        resp_plot(pfo['birth-response'], ax, alpha=(0.05 if len(pfo_list)>5 else 0.5) if alphas is None else alphas[ipf], color='#990012' if colors is None else colors[ipf], xbounds=pfo['xbounds'] if 'xbounds' in pfo and pfo['xbounds'] is not None else default_xbounds)  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
     if len(pfo_list) > 1 and plot_median_curve:
         med_pfo = get_median_curve(pfo_list, default_xbounds)
         resp_plot(med_pfo['birth-response'], ax, alpha=0.5, color='black', xbounds=default_xbounds, linewidth=2, linestyle='--')  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
@@ -1004,7 +1041,10 @@ def add_param_text(fig, pfo, inf_pfo=None, diff_vals=None, upper_left=False, tit
     param_text = ['%s %.1f%s' % (p, getattr(pfo['birth-response'], p), '' if inf_pfo is None else ' (%.1f)'%getattr(inf_pfo['birth-response'], p)) for p in ['xscale', 'xshift', 'yscale']]
     if diff_vals is not None:
         for dv in diff_vals:
-            param_text.append('diff %.2f' % dv)
+            if hasattr(dv, 'keys'):
+                param_text.append('diff %.2f (%.1f %.1f)' % (dv['diff'], dv['xbounds'][0], dv['xbounds'][1]))
+            else:
+                param_text.append('diff %.2f' % dv)
     xv, yv = (0.6, 0.25) if inf_pfo is None and not upper_left else (0.19, 0.7 if diff_vals is None else 0.65)
     if titlestr is not None:
         param_text.insert(0, titlestr)

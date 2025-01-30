@@ -125,6 +125,7 @@ def encode_tree(intree, max_leaf_count=None, ladderize=True, dont_scale=False, m
 # ----------------------------------------------------------------------------------------
 def decode_matrices(enc_tree, enc_fit):
     assert set(len(r) for r in enc_tree) == set(len(r) for r in enc_fit)  # all rows the same length
+    # TODO decode these together, so you only skip an entry/node if it has an empty value in both matrices
     tdicts, fdicts = decode_matrix('tree', enc_tree), decode_matrix('fitness', enc_fit)
     if len(tdicts) != len(fdicts):  # got the same number of info dicts from each matrix (this doesn't really enforce that the two matrices are from the same tree, but it's still worth checking)
         raise Exception('info dict lists decoded from tree %d and fitness %d matrices had different lengths (maybe had some non-empty entries that were equal to the empty value? although that shouldn\'t really happen any more)' % (len(tdicts), len(fdicts)))
