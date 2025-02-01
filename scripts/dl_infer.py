@@ -35,16 +35,21 @@ def csvfn(args, smpl):
 # ----------------------------------------------------------------------------------------
 class LScaler(object):
     # ----------------------------------------------------------------------------------------
-    # if <in_tensors> is set, fit/create a new scaler; otherwise you should pass in an existing <scaler>
-    def __init__(self, args, var_list, in_tensors=None, smpl='', scaler=None):
+    # if either inputs are set, fit/create a new scaler; otherwise you should pass in an existing <scaler>
+    # inputs can be either <in_tensors> (encoded trees or fitnesses, which need to be converted to a form that the internal scaler can work on), or <in_vals> which are directly usable by the internal scaler
+    def __init__(self, args, var_list, in_tensors=None, in_vals=None, smpl='', scaler=None):
         self.args = args
         self.var_list = var_list
         self.scaler = scaler
         self.in_tensors = in_tensors
-        if self.in_tensors is not None:
-            self.in_vals = self.extract_tree_vals(self.in_tensors)  # in_vals and out_vals are formatted for scaling (list or rows, each row with an entry for each variable)
+        self.in_vals = in_vals
+        if self.in_tensors is not None or self.in_vals is not None:  # taking input and scaling it
+            assert self.in_vals is None or self.in_tensors is None  # only set one of them
+            if self.in_tensors is not None:
+                self.in_vals = self.extract_tree_vals(self.in_tensors)  # in_vals and out_vals are formatted for scaling (list of rows [one for each node], each row with an entry for each variable)
             self.out_vals = self.scale(self.in_vals, smpl=smpl)
-            self.out_tensors = self.re_encode_tree_vals(self.out_vals, self.in_tensors)
+            if self.in_tensors is not None:
+                self.out_tensors = self.re_encode_tree_vals(self.out_vals, self.in_tensors)
 
     # ----------------------------------------------------------------------------------------
     # convert encoded trees to one-variable-per-column format needed by scaler (reverse of re_encode_tree_vals())
@@ -78,13 +83,19 @@ class LScaler(object):
         return new_trees
 
     # ----------------------------------------------------------------------------------------
-    # apply existing scaling to new tensors <in_tensors>
-    def apply_scaling(self, in_tensors, smpl='', debug=True):
+    # apply existing scaling to new tensors <in_tensors> or values <in_vals> (see description of difference in __init__ above)
+    def apply_scaling(self, in_tensors=None, in_vals=None, smpl='', debug=True):
         assert self.scaler is not None or self.args.dont_scale_params
-        in_vals = self.extract_tree_vals(in_tensors)
+        if in_vals is None:
+            in_vals = self.extract_tree_vals(in_tensors)
+        else:
+            assert in_tensors is None
         out_vals = self.scale(in_vals, smpl=smpl)
-        out_tensors = self.re_encode_tree_vals(out_vals, in_tensors)
-        return out_tensors
+        if in_tensors is None:
+            return out_vals
+        else:
+            out_tensors = self.re_encode_tree_vals(out_vals, in_tensors)
+            return out_tensors
 
     # ----------------------------------------------------------------------------------------
     def scale(self, invals, inverse=False, smpl='', debug=True):
@@ -97,11 +108,11 @@ class LScaler(object):
             def get_lists(pvs,):  # picks values from rows/columns to get a list of values for each parameter
                 return [[plist[ivar] for plist in pvs]]
             def fnstr(pvs, fn):  # apply fn to each list from get_lists(), returns resulting combined str
-                return " ".join("%8.2f" % fn(vl) for vl in get_lists(pvs))
+                return " ".join(("%8.2f" if fn(vl)<1e3 else '%8.1e') % fn(vl) for vl in get_lists(pvs))
             assert self.args.model_type in ['sigmoid', 'per-cell', 'per-bin']
             for ivar, vname in enumerate(self.var_list):
                 for dstr, pvs in zip(("before", "after"), (pvals_before, pvals_scaled)):
-                    bstr = "   " if dstr != "before" else "      %10s %7s" % (vname, smpl)
+                    bstr = "   " if dstr != "before" else "      %15s %7s" % (vname, smpl)
                     print("%s %s%s %s%s" % (bstr, fnstr(pvs, np.mean), fnstr(pvs, np.var), fnstr(pvs, min), fnstr(pvs, max), ), end="" if dstr == "before" else "\n")
         # ----------------------------------------------------------------------------------------
         if self.args.dont_scale_params:
@@ -113,9 +124,9 @@ class LScaler(object):
         sc_pvals = self.scaler.inverse_transform(invals) if inverse else self.scaler.transform(invals)
         if debug:
             if debug:  # and smpl == smplist[0]:
-                print("    %sscaling %d variables: %s" % ("reverse " if inverse else "", len(self.var_list), self.var_list,))
-                print("                                  before                             after")
-                print("                           mean    var      min    max          mean    var      min    max")
+                print("    %sscaling %d variables: %s" % ("reverse " if inverse else "", len(self.var_list), ' '.join(self.var_list)))
+                print("                                         before                             after")
+                print("                                  mean    var      min    max          mean    var      min    max")
             print_debug(invals, sc_pvals)
         return sc_pvals
 
@@ -224,12 +235,14 @@ def write_per_bin_prediction(args, pred_fitness_bins, enc_trees, true_fitness_bi
     return df
 
 # ----------------------------------------------------------------------------------------
-def get_prediction(args, model, spld, lscaler, smpl=None):
+def get_prediction(args, model, spld, lscalers, smpl=None):
     true_fitnesses, true_fitness_bins, true_resps, sstats = None, None, None, None
+    sstats = spld['sstats']
+    carry_caps, init_pops = zip(*lscalers['per-tree'].apply_scaling(in_vals=[[int(d[k]) for k in ['carry_cap', 'init_population']] for d in spld['sstats']]))
     if args.model_type == 'sigmoid':
-        const_pred_resps = model.predict(lscaler.apply_scaling(spld['trees'], smpl=smpl))  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
+        const_pred_resps = model.predict(lscalers['per-node'].apply_scaling(in_tensors=spld['trees'], smpl=smpl), carry_caps, init_pops)  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
         pred_vals = [[float(rsp.value) for rsp in rlist] for rlist in const_pred_resps]
-        sstats, gcids = spld['sstats'], spld['gcids']
+        gcids = spld['gcids']
         if args.is_simu:
             true_resps = spld["birth-responses"]
         if args.dl_bundle_size > 1:
@@ -240,17 +253,15 @@ def get_prediction(args, model, spld, lscaler, smpl=None):
         df = write_sigmoid_prediction(args, pred_vals, sstats, gcids, smpl, true_resps=true_resps)
     elif args.model_type == 'per-cell':
         assert args.dl_bundle_size == 1
-        pred_fitnesses = model.predict(lscaler.apply_scaling(spld['trees'], smpl=smpl)).numpy()
+        pred_fitnesses = model.predict(lscalers['per-node'].apply_scaling(in_tensors=spld['trees'], smpl=smpl)).numpy()
         for pfit, etree in zip(pred_fitnesses, spld['trees']):
             encode.reset_fill_entries(pfit, etree)
-        sstats = spld['sstats']
         if args.is_simu:
             true_fitnesses, true_resps = [spld[tk] for tk in ["fitnesses", "birth-responses"]]
         df = write_per_cell_prediction(args, pred_fitnesses, spld["trees"], true_fitnesses=true_fitnesses, true_resps=true_resps, sstats=sstats, smpl=smpl)
     elif args.model_type == 'per-bin':
         assert args.dl_bundle_size == 1
-        pred_fitness_bins = model.predict(lscaler.apply_scaling(spld['trees'], smpl=smpl)).numpy()
-        sstats = spld['sstats']
+        pred_fitness_bins = model.predict(lscalers['per-node'].apply_scaling(in_tensors=spld['trees'], smpl=smpl), carry_caps, init_pops).numpy()
         if args.is_simu:
             true_fitness_bins, true_resps = [spld[tk] for tk in ["fitness-bins", "birth-responses"]]
         df = write_per_bin_prediction(args, pred_fitness_bins, spld["trees"], true_fitness_bins=true_fitness_bins, true_resps=true_resps, sstats=sstats, smpl=smpl)
@@ -399,12 +410,12 @@ def read_tree_files(args):
     return samples
 
 # ----------------------------------------------------------------------------------------
-def predict_and_plot(args, model, smpldict, smpls, lscaler=None):
+def predict_and_plot(args, model, smpldict, smpls, lscalers=None):
     if not os.path.exists(args.outdir):
         os.makedirs(args.outdir)
     prdfs = {}
     for smpl in smpls:
-        prdfs[smpl] = get_prediction(args, model, smpldict[smpl], lscaler, smpl=smpl)
+        prdfs[smpl] = get_prediction(args, model, smpldict[smpl], lscalers, smpl=smpl)
     seqmeta = read_meta_csv(args.indir)
     utils.make_dl_plots(  # note that response bundles are collapsed (i.e. we only plot the first pair of each bundle) but seqmeta isn't, so we just plot the affinities from the first tree in the bundle (it would probably be better to combine all of the affinities from the bundle)
         args.model_type,
@@ -425,7 +436,8 @@ def train_and_test(args, start_time):
         model = ParamNetworkModel(responses[0], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
         assert args.params_to_predict == utils.sigmoid_params
         model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, prebundle_layer_cfg=args.prebundle_layer_cfg, loss_fcn=args.loss_fcn)
-        model.fit(lscalers['train'].out_tensors, responses, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
+        carry_caps, init_pops = zip(*lscalers['train']['per-tree'].out_vals)
+        model.fit(lscalers['train']['per-node'].out_tensors, responses, carry_caps, init_pops, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
         return model
     # ----------------------------------------------------------------------------------------
     def train_per_cell(smpldict, lscalers, max_leaf_count):
@@ -439,7 +451,8 @@ def train_and_test(args, start_time):
     def train_per_bin(smpldict, lscalers, max_leaf_count):
         model = PerBinNetworkModel()
         model.build_model(len(utils.zoom_affy_bins) - 1, max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, loss_fcn=args.loss_fcn)
-        model.fit(lscalers['train'].out_tensors, smpldict['train']['fitness-bins'], epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
+        carry_caps, init_pops = zip(*lscalers['train']['per-tree'].out_vals)
+        model.fit(lscalers['train']['per-node'].out_tensors, smpldict['train']['fitness-bins'], carry_caps, init_pops, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
         return model
     # ----------------------------------------------------------------------------------------
     samples = read_tree_files(args)
@@ -463,8 +476,12 @@ def train_and_test(args, start_time):
     # handle various scaling/re-encoding stuff
     lscalers = {}
     for smpl in smplist:
-        lscalers[smpl] = LScaler(args, ['distance', 'phenotype'], in_tensors=smpldict[smpl]['trees'], smpl=smpl)
-    joblib.dump(lscalers['train'].scaler, encode.output_fn(args.outdir, 'train-scaler', None))
+        lscalers[smpl] = {
+            'per-node' : LScaler(args, ['distance', 'phenotype'], in_tensors=smpldict[smpl]['trees'], smpl=smpl),
+            'per-tree' : LScaler(args, ['carry_cap', 'init_population'], in_vals=[[int(d[k]) for k in ['carry_cap', 'init_population']] for d in smpldict[smpl]['sstats']], smpl=smpl),
+        }
+    for tstr in ['per-node', 'per-tree']:
+        joblib.dump(lscalers['train'][tstr].scaler, encode.output_fn(args.outdir, '%s-train-scaler'%tstr, None))
 
     # silly encodings for testing that essentially train on the output values
     if args.use_trivial_encoding:
@@ -485,14 +502,17 @@ def train_and_test(args, start_time):
         assert False
     model.network.save(encode.output_fn(args.outdir, 'model', None))
 
-    predict_and_plot(args, model, smpldict, ['train', 'test'], lscaler=lscalers["train"])
+    predict_and_plot(args, model, smpldict, ['train', 'test'], lscalers=lscalers["train"])
     print("    total dl inference time: %.1f sec" % (time.time() - start_time))
 
 # ----------------------------------------------------------------------------------------
 def read_model_files(args, samples):
-    scfn = encode.output_fn(args.model_dir, 'train-scaler', None)
-    print('    reading training scaler from %s' % scfn)
-    lscaler = LScaler(args, ['distance', 'phenotype'], scaler=joblib.load(scfn))
+    scfns = {tstr : encode.output_fn(args.model_dir, '%s-train-scaler'%tstr, None) for tstr in ['per-node', 'per-tree']}
+    print('    reading training scalers from %s' % ' '.join(scfns.values()))
+    lscalers = {
+        'per-node' : LScaler(args, ['distance', 'phenotype'], scaler=joblib.load(scfns['per-node'])),
+        'per-tree' : LScaler(args, ['carry_cap', 'init_population'], scaler=joblib.load(scfns['per-tree'])),
+    }
     if args.model_type == 'sigmoid':
         model = ParamNetworkModel([ConstantResponse(0) for _ in args.params_to_predict], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
     elif args.model_type == 'per-cell':
@@ -502,13 +522,13 @@ def read_model_files(args, samples):
     else:
         assert False
     model.load(encode.output_fn(args.model_dir, 'model', None))
-    return lscaler, model
+    return lscalers, model
 
 # ----------------------------------------------------------------------------------------
 def infer(args, start_time):
     smpldict = {'infer' : read_tree_files(args)}
-    lscaler, model = read_model_files(args, smpldict['infer'])
-    predict_and_plot(args, model, smpldict, ['infer'], lscaler=lscaler)
+    lscalers, model = read_model_files(args, smpldict['infer'])
+    predict_and_plot(args, model, smpldict, ['infer'], lscalers=lscalers)
     print("    total dl inference time: %.1f sec" % (time.time() - start_time))
 
 # ----------------------------------------------------------------------------------------

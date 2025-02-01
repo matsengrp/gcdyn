@@ -65,7 +65,7 @@ class SigmoidTransposeLayer(layers.Layer):
 
     def call(self, inputs):
         # leave first (batch/sample) and second (bundle) dimensions the same, and swap third (dist/phenotyp) and fourth (leaf/internal node) dimensions
-        return tf.transpose(inputs, perm=(0, 1, 3, 2))
+        return tf.transpose(inputs, perm=(0, 2, 1)) #(0, 1, 3, 2))
 
 # @keras.saving.register_keras_serializable()
 class PerCellTransposeLayer(layers.Layer):
@@ -155,7 +155,6 @@ class ParamNetworkModel:
         )
         self.bundle_size = bundle_size
         self.custom_loop = custom_loop
-        self.no_class_model = False  # TODO should remove this eventually, once I decide serialization is final
 
     def build_model(
         self,
@@ -201,28 +200,27 @@ class ParamNetworkModel:
             ],
         }
 
-        # TODO remove this once you've settled things down a bit more
-        if self.no_class_model:  # trivial model for testing serialization without our custom layers (didn't actually get the serialization working since i found the compile=False arg to load_model())
-            network_layers = []
-            for tlr in self.pre_bundle_layers[prebundle_layer_cfg]:
-                network_layers.append(tlr)
-            network_layers.append(layers.Dense(self.num_parameters, activation=clipfcn))  # clipfcn is important for training stability
-            inputs = keras.Input(shape=(self.max_leaf_count, 4))
-        else:
-            network_layers = [SigmoidTransposeLayer()]
-            for tlr in self.pre_bundle_layers[prebundle_layer_cfg]:
-                network_layers.append(layers.TimeDistributed(tlr))
-            network_layers.append(BundleMeanLayer())  # combine predictions from all trees in bundle
-            dense_unit_list = [48, 32, 16, 8]
-            for idense, n_units in enumerate(dense_unit_list):
-                network_layers.append(layers.Dense(n_units, activation=self.actfn))
-                if dropout_rate != 0 and idense < len(dense_unit_list) - 1:  # add a dropout layer after each one except the last
-                    network_layers.append(layers.Dropout(dropout_rate))
-            network_layers.append(layers.Dense(self.num_parameters, activation=clipfcn))  # clipfcn is important for training stability
-            inputs = keras.Input(shape=(self.bundle_size, 4, self.max_leaf_count))
+        tree_input = keras.Input(shape=(encode.mtx_lens['tree'], self.max_leaf_count), name='tree_input')
+        carry_cap_input = keras.Input(shape=(1,), name='carry_cap_input')
+        init_pop_input = keras.Input(shape=(1,), name='init_pop_input')
 
-        outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
-        self.network = keras.Model(inputs=inputs, outputs=outputs)
+        x = SigmoidTransposeLayer()(tree_input)
+        for layer in self.pre_bundle_layers[prebundle_layer_cfg]:
+            x = layer(x)
+        # x = BundleMeanLayer(x)  # combine predictions from all trees in bundle
+        dense_unit_list = [48, 32, 16, 8]
+        for idense, n_units in enumerate(dense_unit_list):
+            x = layers.Dense(n_units, activation=self.actfn)(x)
+            if dropout_rate != 0 and idense < len(dense_unit_list) - 1:
+                x = layers.Dropout(dropout_rate)(x)
+        merged = layers.Concatenate()([x, carry_cap_input, init_pop_input])
+        outputs = layers.Dense(self.num_parameters)(merged)
+
+        self.network = keras.Model(
+            inputs=[tree_input, carry_cap_input, init_pop_input],
+            outputs=outputs
+        )
+
         # def pfn(x, line_break=False): print("      %s" % x)  # this doesn't seem to work with keras 3
         self.network.summary() #print_fn=pfn)
         self.optimizer = keras.optimizers.Adam(
@@ -314,16 +312,11 @@ class ParamNetworkModel:
         """
         Reshape data to be of shape (num_bundles, bundle_size, 4, max_leaf_count).
         """
-        if self.no_class_model:
-            return data.reshape(
-                (num_bundles, data.shape[2], data.shape[1])
-            )
-        else:
-            assert data.shape[0] % self.bundle_size == 0
-            num_bundles = data.shape[0] // self.bundle_size
-            return data.reshape(
-                (num_bundles, self.bundle_size, data.shape[1], data.shape[2])
-            )
+        assert data.shape[0] % self.bundle_size == 0
+        num_bundles = data.shape[0] // self.bundle_size
+        return data.reshape(
+            (num_bundles, self.bundle_size, data.shape[1], data.shape[2])
+        )
 
     def _prepare_trees_for_network_input(self, trees):
         """
@@ -331,7 +324,7 @@ class ParamNetworkModel:
         """
         return self._reshape_data_wrt_bundle_size(onp.stack(trees))
 
-    def fit(self, training_trees: list[onp.ndarray], responses: list[list[poisson.Response]], epochs: int = 30, batch_size: int = None, validation_split: float = 0):
+    def fit(self, training_trees: list[onp.ndarray], responses: list[list[poisson.Response]], carry_caps, init_pops, epochs: int = 30, batch_size: int = None, validation_split: float = 0):
         """
         Trains neural network on given trees and responses.
         training_trees: list of encoded trees
@@ -351,9 +344,11 @@ class ParamNetworkModel:
             return btch_loss
         # ----------------------------------------------------------------------------------------
         print("    fitting model with bundle size %d (%d training trees in %d bundles)" % (self.bundle_size, len(training_trees), len(training_trees) / self.bundle_size))
-        response_parameters = self._encode_responses(self._take_one_identical_item_per_bundle(responses))
+        # response_parameters = self._encode_responses(self._take_one_identical_item_per_bundle(responses))
+        response_parameters = self._encode_responses(responses)
 
         if self.custom_loop:  # this more or less works, but gives different loss value (shouldn't it be identical ish?), seems less stable, and seems also quite a bit slower
+            assert False  # needs updating
             print('    using custom training loop')
             x_values, y_values = self._prepare_trees_for_network_input(training_trees), response_parameters
             assert len(x_values) == len(y_values)
@@ -383,7 +378,8 @@ class ParamNetworkModel:
         else:
             print('    using network.fit')
             self.network.fit(
-                self._prepare_trees_for_network_input(training_trees),
+                # self._prepare_trees_for_network_input(training_trees),
+                [onp.stack(training_trees), onp.stack(carry_caps), onp.stack(init_pops)],
                 response_parameters,
                 epochs=epochs,
                 batch_size=batch_size,
@@ -395,12 +391,13 @@ class ParamNetworkModel:
 
     def predict(
         self,
-        encoded_trees: list[onp.ndarray],
+        encoded_trees: list[onp.ndarray], carry_caps, init_pops,
     ) -> list[list[poisson.Response]]:
         """Returns the Response objects predicted for each tree."""
 
         predicted_responses = self.network(
-            self._prepare_trees_for_network_input(encoded_trees)
+            # self._prepare_trees_for_network_input(onp.stack(encoded_trees)), self._prepare_trees_for_network_input(onp.stack(carry_caps)), self._prepare_trees_for_network_input(onp.stack(init_pops))
+            [onp.stack(encoded_trees), onp.stack(carry_caps), onp.stack(init_pops)]
         )
 
         return self._decode_responses(predicted_responses, example_response_list=self.example_response_list)
@@ -517,6 +514,10 @@ class PerBinNetworkModel:
         self.actfn = actfn
         print("    building model with: dropout %.2f   learn rate %.4f   momentum %.4f" % (dropout_rate, learning_rate, ema_momentum))
 
+        tree_input = keras.Input(shape=(encode.mtx_lens['tree'], self.max_leaf_count), name='tree_input')
+        carry_cap_input = keras.Input(shape=(1,), name='carry_cap_input')
+        init_pop_input = keras.Input(shape=(1,), name='init_pop_input')
+
         tlayers = [
             layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
             layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
@@ -525,32 +526,31 @@ class PerBinNetworkModel:
             layers.GlobalAveragePooling1D(),  # one number for each filter from the previous layer
         ]
 
-        network_layers = [PerBinTransposeLayer()]
-        for tlr in tlayers:
-            network_layers.append(tlr)
+        x = PerBinTransposeLayer()(tree_input)
+        for layer in tlayers:
+            x = layer(x)
         dense_unit_list = [48, 32, 16, 8]
         for idense, n_units in enumerate(dense_unit_list):
-            network_layers.append(layers.Dense(n_units, activation=self.actfn))
-            if dropout_rate != 0 and idense < len(dense_unit_list) - 1:  # add a dropout layer after each one except the last
-                network_layers.append(layers.Dropout(dropout_rate))
-        # network_layers.append(layers.Flatten())
-        network_layers.append(layers.Dense(self.n_bins))
-        # network_layers.append(layers.Reshape((encode.mtx_lens['fitness'], self.max_leaf_count)))
+            x = layers.Dense(n_units, activation=self.actfn)(x)
+            if dropout_rate != 0 and idense < len(dense_unit_list) - 1:
+                x = layers.Dropout(dropout_rate)(x)
+        merged = layers.Concatenate()([x, carry_cap_input, init_pop_input])
+        outputs = layers.Dense(self.n_bins)(merged)
 
-        inputs = keras.Input(shape=(encode.mtx_lens['tree'], self.max_leaf_count))
-        outputs = reduce(lambda x, layer: layer(x), network_layers, inputs)
-        self.network = keras.Model(inputs=inputs, outputs=outputs)
-        # def pfn(x, line_break=False): print("      %s" % x)  # this doesn't seem to work with keras 3
-        self.network.summary() #print_fn=pfn)
+        self.network = keras.Model(
+            inputs=[tree_input, carry_cap_input, init_pop_input],
+            outputs=outputs
+        )
+        self.network.summary()
         optimizer = keras.optimizers.Adam(
             learning_rate=learning_rate, use_ema=True, ema_momentum=ema_momentum
         )
         self.network.compile(loss=loss_fcn, optimizer=optimizer) #, run_eagerly=True)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
 
     # ----------------------------------------------------------------------------------------
-    def fit(self, training_trees, training_fitness_bins, epochs=30, batch_size=None, validation_split=0):
+    def fit(self, training_trees, training_fitness_bins, carry_caps, init_pops, epochs=30, batch_size=None, validation_split=0):
         self.network.fit(
-            onp.stack(training_trees),
+            [onp.stack(training_trees), onp.stack(carry_caps), onp.stack(init_pops)],
             onp.stack(training_fitness_bins),
             epochs=epochs,
             callbacks=[Callback(epochs, use_validation=validation_split > 0)],
@@ -559,8 +559,8 @@ class PerBinNetworkModel:
         )
 
     # ----------------------------------------------------------------------------------------
-    def predict(self, encoded_trees):
-        predicted_fitnesses = self.network(onp.stack(encoded_trees))
+    def predict(self, encoded_trees, carry_caps, init_pops):
+        predicted_fitnesses = self.network([onp.stack(encoded_trees), onp.stack(carry_caps), onp.stack(init_pops)])
         return predicted_fitnesses
 
     # ----------------------------------------------------------------------------------------

@@ -300,8 +300,8 @@ def decode_fitness_bins(fbvals, xbins):
 
 # ----------------------------------------------------------------------------------------
 final_ofn_strs = ["seqs", "trees", "meta", "encoded-trees", "encoded-fitnesses", "encoded-fitness-bins", "responses", "summary-stats"]
-model_state_ofn_strs = ["model", "train-scaler", "example-responses"]
-sstat_fieldnames = ["tree", "mean_branch_length", "total_branch_length", "carry_cap", "time_to_sampling"]
+model_state_ofn_strs = ["model", "per-node-train-scaler", "per-tree-train-scaler", "example-responses"]
+sstat_fieldnames = ["tree", "mean_branch_length", "total_branch_length", "carry_cap", "init_population", "time_to_sampling"]
 leaf_meta_fields = ["tree-index", "name", "affinity", "n_muts", "n_muts_aa", "gc", "is_leaf"]
 
 # ----------------------------------------------------------------------------------------
@@ -321,7 +321,8 @@ def output_fn(odir, ftype, itrial):
             "summary-stats": "csv",
             # model state:
             "model": "keras",
-            "train-scaler": "pkl",
+            "per-node-train-scaler": "pkl",
+            "per-tree-train-scaler": "pkl",
             "example-responses": "pkl",
         }
         sfx = suffixes.get(ftype, "simu")
