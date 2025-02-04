@@ -291,11 +291,16 @@ def encode_fitness_bins(intrees, birth_responses, xbins):
     return enc_fbins
 
 # ----------------------------------------------------------------------------------------
-def decode_fitness_bins(fbvals, xbins):
+def decode_fitness_bins(fbvals, xbins, affy_vals=None):
     assert len(fbvals) == len(utils.zoom_affy_bins) - 1
     htmp = utils.Hist(xmin=xbins[0], xmax=xbins[-1], xbins=xbins, n_bins=len(xbins)-1)
     for ival, fval in enumerate(fbvals):
         htmp.set_ibin(ival+1, fval, 0)
+    if affy_vals is not None:  # set prediction to zero if there were no affinity values in this bin (empty bins are then ignored when getting mean hist and plotting)
+        txmin, txmax = [mfn(affy_vals) for mfn in [min, max]]
+        for ibin in htmp.ibiniter(include_overflows=False):
+            if txmin > htmp.low_edges[ibin+1] or txmax < htmp.low_edges[ibin]:
+                htmp.set_ibin(ibin, 0, 0)
     return htmp
 
 # ----------------------------------------------------------------------------------------
@@ -330,7 +335,10 @@ def output_fn(odir, ftype, itrial):
         assert ftype is None
         ftype = "tree_%d" % itrial
         sfx = "pkl"
-    return f"{odir}/{ftype}.{sfx}"
+    ofn = f"{odir}/{ftype}.{sfx}"
+    if not os.path.exists(ofn):
+        ofn = ofn.replace('per-node-', '')
+    return ofn
 
 # ----------------------------------------------------------------------------------------
 def write_sstats(ofn, sstats):

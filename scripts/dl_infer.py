@@ -238,9 +238,9 @@ def write_per_bin_prediction(args, pred_fitness_bins, enc_trees, true_fitness_bi
 def get_prediction(args, model, spld, lscalers, smpl=None):
     true_fitnesses, true_fitness_bins, true_resps, sstats = None, None, None, None
     sstats = spld['sstats']
-    carry_caps, init_pops = zip(*lscalers['per-tree'].apply_scaling(in_vals=[[int(d[k]) for k in ['carry_cap', 'init_population']] for d in spld['sstats']]))
+    carry_caps, init_pops = zip(*lscalers['per-tree'].apply_scaling(in_vals=[[int(d[k]) for k in ['carry_cap', 'init_population']] for d in spld['sstats']])) if args.non_sigmoid_input else (None, None)
     if args.model_type == 'sigmoid':
-        const_pred_resps = model.predict(lscalers['per-node'].apply_scaling(in_tensors=spld['trees'], smpl=smpl), carry_caps, init_pops)  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
+        const_pred_resps = model.predict(lscalers['per-node'].apply_scaling(in_tensors=spld['trees'], smpl=smpl), carry_caps, init_pops, non_sigmoid_input=args.non_sigmoid_input)  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
         pred_vals = [[float(rsp.value) for rsp in rlist] for rlist in const_pred_resps]
         gcids = spld['gcids']
         if args.is_simu:
@@ -261,7 +261,7 @@ def get_prediction(args, model, spld, lscalers, smpl=None):
         df = write_per_cell_prediction(args, pred_fitnesses, spld["trees"], true_fitnesses=true_fitnesses, true_resps=true_resps, sstats=sstats, smpl=smpl)
     elif args.model_type == 'per-bin':
         assert args.dl_bundle_size == 1
-        pred_fitness_bins = model.predict(lscalers['per-node'].apply_scaling(in_tensors=spld['trees'], smpl=smpl), carry_caps, init_pops).numpy()
+        pred_fitness_bins = model.predict(lscalers['per-node'].apply_scaling(in_tensors=spld['trees'], smpl=smpl), carry_caps, init_pops, non_sigmoid_input=args.non_sigmoid_input).numpy()
         if args.is_simu:
             true_fitness_bins, true_resps = [spld[tk] for tk in ["fitness-bins", "birth-responses"]]
         df = write_per_bin_prediction(args, pred_fitness_bins, spld["trees"], true_fitness_bins=true_fitness_bins, true_resps=true_resps, sstats=sstats, smpl=smpl)
@@ -323,7 +323,6 @@ def write_traintest_samples(args, smpldict):
             responses,
             dbgstr=smpl,
         )
-
 
 # ----------------------------------------------------------------------------------------
 def read_meta_csv(mdir):
@@ -435,9 +434,9 @@ def train_and_test(args, start_time):
         responses = [[ConstantResponse(getattr(rsp, p)) for p in args.params_to_predict] for rsp in smpldict['train']['birth-responses']]  # order corresponds to args.params_to_predict (constant response is just a container for one value, and note we don't bother to set the name)
         model = ParamNetworkModel(responses[0], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
         assert args.params_to_predict == utils.sigmoid_params
-        model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, prebundle_layer_cfg=args.prebundle_layer_cfg, loss_fcn=args.loss_fcn)
-        carry_caps, init_pops = zip(*lscalers['train']['per-tree'].out_vals)
-        model.fit(lscalers['train']['per-node'].out_tensors, responses, carry_caps, init_pops, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
+        model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, prebundle_layer_cfg=args.prebundle_layer_cfg, loss_fcn=args.loss_fcn, non_sigmoid_input=args.non_sigmoid_input)
+        carry_caps, init_pops = zip(*lscalers['train']['per-tree'].out_vals) if args.non_sigmoid_input else (None, None)
+        model.fit(lscalers['train']['per-node'].out_tensors, responses, carry_caps, init_pops, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split, non_sigmoid_input=args.non_sigmoid_input)
         return model
     # ----------------------------------------------------------------------------------------
     def train_per_cell(smpldict, lscalers, max_leaf_count):
@@ -450,9 +449,9 @@ def train_and_test(args, start_time):
     # ----------------------------------------------------------------------------------------
     def train_per_bin(smpldict, lscalers, max_leaf_count):
         model = PerBinNetworkModel()
-        model.build_model(len(utils.zoom_affy_bins) - 1, max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, loss_fcn=args.loss_fcn)
-        carry_caps, init_pops = zip(*lscalers['train']['per-tree'].out_vals)
-        model.fit(lscalers['train']['per-node'].out_tensors, smpldict['train']['fitness-bins'], carry_caps, init_pops, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
+        model.build_model(len(utils.zoom_affy_bins) - 1, max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, loss_fcn=args.loss_fcn, non_sigmoid_input=args.non_sigmoid_input)
+        carry_caps, init_pops = zip(*lscalers['train']['per-tree'].out_vals) if args.non_sigmoid_input else (None, None)
+        model.fit(lscalers['train']['per-node'].out_tensors, smpldict['train']['fitness-bins'], carry_caps, init_pops, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split, non_sigmoid_input=args.non_sigmoid_input)
         return model
     # ----------------------------------------------------------------------------------------
     samples = read_tree_files(args)
@@ -476,11 +475,10 @@ def train_and_test(args, start_time):
     # handle various scaling/re-encoding stuff
     lscalers = {}
     for smpl in smplist:
-        lscalers[smpl] = {
-            'per-node' : LScaler(args, ['distance', 'phenotype'], in_tensors=smpldict[smpl]['trees'], smpl=smpl),
-            'per-tree' : LScaler(args, ['carry_cap', 'init_population'], in_vals=[[int(d[k]) for k in ['carry_cap', 'init_population']] for d in smpldict[smpl]['sstats']], smpl=smpl),
-        }
-    for tstr in ['per-node', 'per-tree']:
+        lscalers[smpl] = {'per-node' : LScaler(args, ['distance', 'phenotype'], in_tensors=smpldict[smpl]['trees'], smpl=smpl)}
+        if args.non_sigmoid_input:
+            lscalers[smpl]['per-tree'] = LScaler(args, ['carry_cap', 'init_population'], in_vals=[[int(d[k]) for k in ['carry_cap', 'init_population']] for d in smpldict[smpl]['sstats']], smpl=smpl)
+    for tstr in ['per-node', 'per-tree'] if args.non_sigmoid_input else ['per-node']:
         joblib.dump(lscalers['train'][tstr].scaler, encode.output_fn(args.outdir, '%s-train-scaler'%tstr, None))
 
     # silly encodings for testing that essentially train on the output values
@@ -507,12 +505,11 @@ def train_and_test(args, start_time):
 
 # ----------------------------------------------------------------------------------------
 def read_model_files(args, samples):
-    scfns = {tstr : encode.output_fn(args.model_dir, '%s-train-scaler'%tstr, None) for tstr in ['per-node', 'per-tree']}
+    scfns = {tstr : encode.output_fn(args.model_dir, '%s-train-scaler'%tstr, None) for tstr in (['per-node', 'per-tree'] if args.non_sigmoid_input else ['per-node'])}
     print('    reading training scalers from %s' % ' '.join(scfns.values()))
-    lscalers = {
-        'per-node' : LScaler(args, ['distance', 'phenotype'], scaler=joblib.load(scfns['per-node'])),
-        'per-tree' : LScaler(args, ['carry_cap', 'init_population'], scaler=joblib.load(scfns['per-tree'])),
-    }
+    lscalers = {'per-node' : LScaler(args, ['distance', 'phenotype'], scaler=joblib.load(scfns['per-node']))}
+    if args.non_sigmoid_input:
+        lscalers['per-tree'] = LScaler(args, ['carry_cap', 'init_population'], scaler=joblib.load(scfns['per-tree']))
     if args.model_type == 'sigmoid':
         model = ParamNetworkModel([ConstantResponse(0) for _ in args.params_to_predict], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
     elif args.model_type == 'per-cell':
@@ -568,6 +565,7 @@ def get_parser():
     parser.add_argument("--validation-split", type=float, default=0.1, help="fraction of training sample to tell keras to hold out for validation during training")
     parser.add_argument("--params-to-predict", default=["xscale", "xshift", "yscale"], nargs="+", choices=["xscale", "xshift", "yscale"] + [k for k in sum_stat_scaled])
     parser.add_argument("--test", action="store_true", help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly")
+    parser.add_argument("--non-sigmoid-input", action="store_true", help="if set, input non-sigmoid parameters (carry_cap, init_population) to first dense layer after convolutional layers in the NN")
     parser.add_argument("--is-simu", action="store_true", help="set to this if running on simulation")
     parser.add_argument("--random-seed", default=0, type=int, help="random seed")
     parser.add_argument("--overwrite", action="store_true")
