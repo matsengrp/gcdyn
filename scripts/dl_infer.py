@@ -238,7 +238,17 @@ def write_per_bin_prediction(args, pred_fitness_bins, enc_trees, true_fitness_bi
 def get_prediction(args, model, spld, lscalers, smpl=None):
     true_fitnesses, true_fitness_bins, true_resps, sstats = None, None, None, None
     sstats = spld['sstats']
-    carry_caps, init_pops = zip(*lscalers['per-tree'].apply_scaling(in_vals=[[int(d[k]) for k in ['carry_cap', 'init_population']] for d in spld['sstats']])) if args.non_sigmoid_input else (None, None)
+    if args.non_sigmoid_input:
+        if args.is_simu:
+            in_vals = [[int(d[k]) for k in ['carry_cap', 'init_population']] for d in spld['sstats']]
+        else:
+            in_vals = [[args.carry_cap_values, args.init_population_values] for _ in spld['trees']]
+        carry_caps, init_pops = zip(*lscalers['per-tree'].apply_scaling(in_vals=in_vals))
+        if not args.is_simu:
+            print('    carry caps: %d --> %s' % (args.carry_cap_values, carry_caps[:5]))
+            print('    init pops: %d --> %s' % (args.init_population_values, init_pops[:5]))
+    else:
+        carry_caps, init_pops = None, None
     if args.model_type == 'sigmoid':
         const_pred_resps = model.predict(lscalers['per-node'].apply_scaling(in_tensors=spld['trees'], smpl=smpl), carry_caps, init_pops, non_sigmoid_input=args.non_sigmoid_input)  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
         pred_vals = [[float(rsp.value) for rsp in rlist] for rlist in const_pred_resps]
@@ -566,6 +576,8 @@ def get_parser():
     parser.add_argument("--params-to-predict", default=["xscale", "xshift", "yscale"], nargs="+", choices=["xscale", "xshift", "yscale"] + [k for k in sum_stat_scaled])
     parser.add_argument("--test", action="store_true", help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly")
     parser.add_argument("--non-sigmoid-input", action="store_true", help="if set, input non-sigmoid parameters (carry_cap, init_population) to first dense layer after convolutional layers in the NN")
+    parser.add_argument("--carry-cap-values", type=int, help="input parameter value for data inference (single valued, it\'s just plural to avoid making a new arg in cf-gcdyn.py)")
+    parser.add_argument("--init-population-values", type=int, help="input parameter value for data inference (single valued, it\'s just plural to avoid making a new arg in cf-gcdyn.py)")
     parser.add_argument("--is-simu", action="store_true", help="set to this if running on simulation")
     parser.add_argument("--random-seed", default=0, type=int, help="random seed")
     parser.add_argument("--overwrite", action="store_true")
@@ -595,6 +607,9 @@ def main():
     if args.model_type == 'per-bin' and args.loss_fcn == 'curve':
         print('    note: setting --loss-fcn to \'mse\' for per-bin model')
         args.loss_fcn = 'mse'
+    if args.carry_cap_values is not None or args.init_population_values is not None:
+        if args.is_simu:
+            raise Exception('can only set carry cap and init population for data (otherwise they come from the simulation files)')
     random.seed(args.random_seed)
     np.random.seed(args.random_seed)
     import tensorflow as tf  # this is super slow, don't want to wait for this to get help message
