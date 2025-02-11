@@ -442,10 +442,12 @@ def sns_xy_plot(ptype, smpl, tdf, xkey, ykey, xvals=None, true_x_eq_y=False, dis
 # NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
 def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu=False, data_val=0, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15, trivial_encoding=False, nonsense_affy_val=-99):
     # ----------------------------------------------------------------------------------------
-    def add_fn(fn, n_per_row=4, force_new_row=False):
-        if force_new_row or len(fnames) == 0 or len(fnames[-1]) >= n_per_row:
-            fnames.append([])
-        fnames[-1].append(fn)
+    def add_fn(fn, n_per_row=4, force_new_row=False, fns=None):
+        if fns is None:
+            fns = fnames  # from parent scope, which is kind of ugly, but keeps things more concise
+        if force_new_row or len(fns) == 0 or len(fns[-1]) >= n_per_row:
+            fns.append([])
+        fns[-1].append(fn)
     # ----------------------------------------------------------------------------------------
     def plot_responses(smpl, n_max_plots=20, n_max_diffs=1000, default_xbounds=None):
         # ----------------------------------------------------------------------------------------
@@ -474,6 +476,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
         # ----------------------------------------------------------------------------------------
         if default_xbounds is None:
             default_xbounds = [-2.5, 3]
+        default_ybounds = [-0.1, 4]
         if not os.path.exists(outdir+'/'+smpl):
             os.makedirs(outdir+'/'+smpl)
         from gcdyn.poisson import SigmoidResponse, LinearResponse
@@ -518,15 +521,17 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                     titlestr = '%s (%d / %d)' % (prdfs[smpl]['gcids'][irow] if 'gcids' in prdfs[smpl] else smplstr, irow, n_tree_preds)
                     pdict = {p : prdfs[smpl]['%s-%s'%(p, 'predicted')][irow] for p in sigmoid_params}
                     pred_pfo = {'birth-response' : SigmoidResponse(**pdict), 'xbounds' : affy_xbds}
-                    fn = plot_many_curves(outdir, 'predicted-response-%d'%irow, [pred_pfo], affy_vals=affy_vals, add_pred_text=True, titlestr=titlestr, colors=['#990012'], xbounds=default_xbounds)
-                    add_fn(fn)
+                    fn = plot_many_curves(outdir+'/'+smpl, 'predicted-response-%d'%irow, [pred_pfo], affy_vals=affy_vals, add_pred_text=True, titlestr=titlestr, colors=['#1f77b4'], xbounds=default_xbounds, ybounds=default_ybounds)
+                    add_fn(fn, fns=single_curve_fns)
+                    if irow < n_max_plots:
+                        add_fn(fn)
                 pfo_list.append(pred_pfo)
                 all_afvals += affy_vals
             if not is_simu or all(p['birth-response']==true_pfo_list[0]['birth-response'] for p in true_pfo_list):  # all true responses equal
-                fn, median_pfo = plot_many_curves(outdir, '%s-all-response'%smpl, pfo_list + ([true_pfo_list[0]] if is_simu else []), affy_vals=all_afvals,
+                fn, median_pfo = plot_many_curves(outdir+'/'+smpl, '%s-all-response'%smpl, pfo_list + ([true_pfo_list[0]] if is_simu else []), affy_vals=all_afvals,
                                                   titlestr='%s: %d / %d responses' % (smpl, len(pfo_list), n_tree_preds),
                                                   colors=['#1f77b4' for _ in pfo_list] + ['green'], alphas=[0.05 for _ in pfo_list] + [0.5],
-                                                  plot_median_curve=True, xbounds=default_xbounds, ybounds=[-0.1, 4])
+                                                  plot_median_curve=True, xbounds=default_xbounds, ybounds=default_ybounds)
                 add_fn(fn)
             if is_simu:
                 fn = plot_all_diffs(outdir+'/'+smpl, 'curve-diffs', curve_diffs, n_skipped_diffs=n_skipped_diffs)
@@ -591,8 +596,10 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                         add_fn(fn)
                 else:
                     titlestr = '%s (%d / %d)' % (prdfs[smpl]['gcids'][irow] if 'gcids' in prdfs[smpl] else smplstr, irow, n_tree_preds)
-                    fn = plot_many_curves(outdir+'/'+smpl, 'predicted-fitness-bins-%d'%irow, [], pred_hists=[pred_hist], titlestr=titlestr, affy_vals=affy_vals, colors=['#990012'])
-                    add_fn(fn)
+                    fn = plot_many_curves(outdir+'/'+smpl, 'predicted-fitness-bins-%d'%irow, [], pred_hists=[pred_hist], titlestr=titlestr, affy_vals=affy_vals, colors=['#990012'], xbounds=default_xbounds, ybounds=default_ybounds)
+                    add_fn(fn, fns=single_curve_fns)
+                    if irow < n_max_plots:
+                        add_fn(fn)
                 phist_list.append(pred_hist)
                 all_afvals += affy_vals
             if not is_simu or all(p['birth-response']==true_pfo_list[0]['birth-response'] for p in true_pfo_list):  # all true responses equal
@@ -671,7 +678,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
     mpl_init()
     if not os.path.exists(outdir):
         os.makedirs(outdir)
-    fnames = []
+    fnames, single_curve_fns = [], []
     median_pfo = None
     for smpl in sorted(prdfs, reverse=True):
         fnames.append([])
@@ -692,7 +699,8 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             fnames.append([])
             for p1, p2 in itertools.combinations(params_to_predict, 2):
                 plot_param_or_pair('scatter', p1, smpl, param2=p2, median_pfo=median_pfo)
-    make_html(outdir, fnames=fnames)
+    make_html(outdir, fnames=fnames, extra_links=[('single curves', '%s/single-curves.html'%os.path.basename(outdir)), ])
+    make_html(outdir, fnames=single_curve_fns, htmlfname='%s/single-curves.html'%outdir)
 
 # ----------------------------------------------------------------------------------------
 def plot_n_vs_time(plotdir, tree, max_time, itrial):
