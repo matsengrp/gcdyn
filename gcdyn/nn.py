@@ -230,7 +230,7 @@ class ParamNetworkModel:
             #     x = layers.Concatenate()([x, carry_cap_input, init_pop_input])
             #     outputs = layers.Dense(self.num_parameters)(x)
             # else:
-            outputs = layers.Dense(self.num_parameters)(x)
+            outputs = layers.Dense(self.num_parameters, activation=clipfcn)(x)
             self.network = keras.Model(
                 inputs=[tree_input, carry_cap_input, init_pop_input] if non_sigmoid_input else tree_input,
                 outputs=outputs

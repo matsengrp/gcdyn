@@ -251,7 +251,6 @@ def pad_trees(
         trees: list[np.ndarray], mtype: str, min_n_max_leaves: int = 200, debug: bool = False
 ):
     assert mtype in ['tree', 'fitness']
-    debug = True
     """Pad a list of encoded trees with zeros so that they're all the same length.
     Returns a new array with the padded trees (does not modify input trees).
     """
