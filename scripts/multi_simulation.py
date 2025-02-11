@@ -284,10 +284,14 @@ def choose_params(args, pcounts, itrial):
                 extra_bounds = get_xshift_bounds(args, params["xscale"], dbgstrs)
             if pname == "yscale":
                 extra_bounds = get_yscale_bounds(args, params["xscale"], params["xshift"], dbgstrs)
-        if args.dl_prediction_dir is not None and pname in utils.sigmoid_params:
+        if args.dl_prediction_file is not None and pname in utils.sigmoid_params:
             if pname == plist[0]:
                 print('        choosing dl prediction at index %d (of %d) for: %s' % (itrial % len(args.dl_pvals), len(args.dl_pvals), ' '.join(utils.sigmoid_params)))
             params[pname] = args.dl_pvals[itrial % len(args.dl_pvals)][pname]
+            # shouldn't happen any more, so I should be able to delete this:
+            # if pname in ['xscale', 'yscale'] and params[pname] < 0:
+            #     print('%s %s value %.2f negative, using 0.01 instead' % (utils.wrnstr(), pname, params[pname]))
+            #     params[pname] = 0.01
         else:
             params[pname] = choose_val(args, pname, extra_bounds=extra_bounds, dbgstrs=dbgstrs)
         if pname in ["time_to_sampling", "carry_cap", "init_population", "n_seqs"]:
@@ -345,7 +349,7 @@ def get_responses(args, xscale, xshift, yscale, pcounts):
         if args.use_generated_parameter_bounds:
             raise Exception(wstr)
         else:
-            print('  %s %s' % (utils.color('yellow', 'warning'), wstr))
+            print('      %s %s' % (utils.color('yellow', 'warning'), wstr))
     print_resps(args, bresp, dresp)
     add_pval(pcounts, "initial_birth_rate", bresp.λ_phenotype(0))
     return bresp, dresp
@@ -523,7 +527,7 @@ def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itri
     if naive_hdist != 0:
         print('              %s inferred root not equal to replay naive seq (%d bases differ)' % (utils.color('yellow', 'note'), naive_hdist))
 
-    if debug:
+    if debug > 1:
         print('            after scaling:')
         def dstr(d): return utils.color('blue', '0', width=9) if float(d)==0 else '%9.6f'%d
         print('                               dist        t          x')
@@ -595,11 +599,11 @@ def get_parser():
     parser.add_argument("--xscale-range", nargs="+", type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response xscale parameter for each tree. Overrides --xscale-values. Suggest 0.5 5")
     parser.add_argument("--xshift-range", nargs="+", type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response xshift parameter for each tree. Overrides --xshift-values. Suggest -0.5 3")
     parser.add_argument("--yscale-range", nargs="+", type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response yscale parameter for each tree. Overrides --yscale-values. Suggest 1 50")
-    parser.add_argument("--initial-birth-rate-range", default=[2, 10], nargs="+", type=float, help="Pair of values (min/max) for initial/default/average growth rate (i.e. when affinity/x=0). Used to set --yscale.")
+    parser.add_argument("--initial-birth-rate-range", default=[0.1, 10], nargs="+", type=float, help="Pair of values (min/max) for initial/default/average growth rate (i.e. when affinity/x=0). Used to set --yscale.")
     parser.add_argument("--yshift", default=0, type=float, help="atm this shouldn't (need to, at least) be changed")
     parser.add_argument("--mutability-multiplier", default=0.68, type=float)
     parser.add_argument("--nonsense-phenotype-value", default=-99, type=float, help="phenotype (e.g. affinity) value to use for nonsense (e.g. stop codon) sequences")
-    parser.add_argument('--dl-prediction-dir', help='If set, look for deep learning (dl) predictions in this dir, and simulate using the predicted parameter values therein')
+    parser.add_argument('--dl-prediction-file', help='If set, read deep learning (dl) predictions from this file, and simulate using the predicted parameter values therein')
     parser.add_argument("--sample-internal-nodes", action='store_true', help="By default, only sequences for leaf nodes are written to output (although affinities are written for both leaf and internal nodes). If this arg is set, we write seqs also for internal nodes.")
     parser.add_argument("--n-sub-procs", type=int, help="If set, the --n-trials are split among this many sub processes (which are recursively run with this script). Note that in terms of random seeds, results will not be identical with/without --n-sub-procs set (since there's no way to synchronize seeds partway through))")
     parser.add_argument("--n-max-procs", type=int, help="If set (and --n-sub-procs is set), only run this many sub procs at a time (e.g. to conserve memory).")
@@ -655,7 +659,7 @@ def plot_params_responses(args, pcounts, all_trees=None, all_fns=None):
     utils.plot_chosen_params(args.outdir + "/plots/params", pcounts, {p: getattr(args, p.replace("-", "_") + "_range") for p in pcounts}, fnames=all_fns)
     utils.make_html(args.outdir + "/plots", fnames=all_fns)
 
-    print("    sampled parameter values:               min      max")
+    print("            sampled parameter values:               min      max")
     for pname, pvals in sorted(pcounts.items()):
         print("                      %27s  %7.2f  %7.2f" % (pname, min(pvals), max(pvals)))
 
@@ -839,14 +843,15 @@ def main():
         rangevals = getattr(args, pname + "_range")
         if rangevals is not None and len(rangevals) != 2:  # range with two values for continuous
             raise Exception("range for %s must consist of two values but got %d" % (pname, len(rangevals)))
-    if args.dl_prediction_dir is not None:
-        prfn = '%s/test.csv' % args.dl_prediction_dir
-        print('  reading dl prediction from %s' % prfn)
+    if args.dl_prediction_file is not None:
         args.dl_pvals = []
-        with open(prfn) as cfile:
+        with open(args.dl_prediction_file) as cfile:
             reader = csv.DictReader(cfile)
             for line in reader:
                 args.dl_pvals.append({p : float(line['%s-predicted'%p]) for p in utils.sigmoid_params})
+        print('  read %d dl predictions from %s' % (len(args.dl_pvals), args.dl_prediction_file))
+        if args.n_trials < len(args.dl_pvals):
+            print('    %s fewer N trials %d than dl predictions %d, so won\'t use all the dl predictions' % (utils.wrnstr(), args.n_trials, len(args.dl_pvals)))
     if args.tree_inference_method is not None and args.sample_internal_nodes:
         raise Exception('this isn\'t implemented, and it\'s not really clear that it should be -- for instance, do the internal nodes get passed to tree inference, or do we just sample the inferred internal nodes?')
 
