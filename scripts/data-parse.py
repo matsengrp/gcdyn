@@ -300,7 +300,7 @@ def read_beast_dir(bstdir, idir, gclabel, gcodir, n_bst_trees=1):
         all_info['metafos'].append(rpmeta[gcid])
 
 # ----------------------------------------------------------------------------------------
-def subset_info(timepoint):
+def subset_info(timepoints, strains):
     n_kept, n_tot = 0, 0
     returnfo = {k : [] for k in infokeys}
     if len(set(len(vlist) for vlist in all_info.values())) > 1:
@@ -308,13 +308,15 @@ def subset_info(timepoint):
     for itree in range(len(all_info['encoded_trees'])):
         n_tot += 1
         mfo = all_info['metafos'][itree]
-        tps = mfo['time']
-        if tps != timepoint:
+        if mfo['time'] not in timepoints:
+            continue
+        if mfo['strain'] not in strains:
             continue
         n_kept += 1
         for tk in infokeys:
             returnfo[tk].append(all_info[tk][itree])
-    print('  %s: kept %d / %d trees' % (timepoint, n_kept, n_tot))
+    if len(returnfo['encoded_trees']) > 0:
+        print('  %s %s: kept %d / %d trees' % (utils.color('blue', ' '.join(timepoints)), utils.color('green', ' '.join(strains)), n_kept, n_tot))
     return returnfo
 
 # ----------------------------------------------------------------------------------------
@@ -330,7 +332,7 @@ def write_final_output(outdir, infolists):
     # concatenate all the trees read from each dir NOTE this only really makes sense if you only read *one* from each dir (each dir corresponds to one gc, but has lots of sampled beast trees for that gc)
     if not os.path.exists(outdir):
         os.makedirs(outdir)
-    print('  writing %d trees to %s' % (len(infolists['encoded_trees']), outdir))
+    print('      writing %d trees to %s' % (len(infolists['encoded_trees']), outdir))
     encode.write_trees(encode.output_fn(outdir, 'encoded-trees', None), infolists['encoded_trees'], 'tree')
     encode.write_sstats(encode.output_fn(outdir, 'summary-stats', None), infolists['sstats'])
     encode.write_leaf_meta(encode.output_fn(outdir, 'meta', None), [lfo for lflist in infolists['lmetafos'] for lfo in lflist])
@@ -360,11 +362,12 @@ parser.add_argument("--shared-replay-dir", default='/fh/fast/matsen_e/shared/rep
 parser.add_argument('--base-iqtree-dir', default='/fh/fast/matsen_e/processed-data/partis/taraki-gctree-2021-10/iqtree', help='dir with iqtree trees from replay data run with datascripts/meta/taraki-gctree-2021-10/iqtree-run.py')
 parser.add_argument('--iqtree-version', help='version of results in --base-iqtree-dir to use')
 # parser.add_argument("--beast-dirs", default='/fh/fast/matsen_e/shared/replay-related/jareds-replay-fork/gcreplay/nextflow/results/2023-05-18-beast:/fh/fast/matsen_e/data/taraki-gctree-2021-10/gcreplay/nextflow/results/archive/2024-06-23-beast-15-day')
-parser.add_argument("--beast-dirs", default='/fh/fast/matsen_e/shared/replay/gcreplay/nextflow/results/archive/beast-pipeline')
+parser.add_argument("--beast-dirs", default='/fh/fast/matsen_e/shared/replay/gcreplay/nextflow/beast-results')
 parser.add_argument("--output-version", default='test')
 parser.add_argument("--is-beast-simu", action='store_true', help='atm only used for simulation that\'s been run through beast (i.e. we\'re reading from --beast-dirs)')
 parser.add_argument("--check-gct-kd", action='store_true')
 parser.add_argument("--max-leaf-count", type=int, default=100)
+parser.add_argument("--combo-cfg", default='d15,d20:wt', help='list (of lists) of (timepoints, strains) to include in a merged sample')
 parser.add_argument("--igk-idx", type=int, default=336, help='zero-based index of first igk position in smooshed-together igh+igk sequence')
 parser.add_argument("--debug", type=int, default=0)
 parser.add_argument("--nonsense-affinity-value", type=float, default=-99)
@@ -374,6 +377,7 @@ parser.add_argument("--test", action='store_true')
 parser.add_argument("--random-seed", type=int, default=1)
 args = parser.parse_args()
 args.beast_dirs = partis_utils.get_arg_list(args.beast_dirs)
+args.combo_cfg = partis_utils.get_arg_list(args.combo_cfg, list_of_lists=True)
 
 random.seed(args.random_seed)
 np.random.seed(args.random_seed)
@@ -411,7 +415,7 @@ elif args.method == 'iqtree':
         raise Exception('need to set --iqtree-version')
     dir_list = glob.glob('%s/%s/PR*' % (args.base_iqtree_dir, args.iqtree_version))  # old dir structure
     if len(dir_list) == 0:
-        dir_list = glob.glob('%s/%s/D[0-9]*' % (args.base_iqtree_dir, args.iqtree_version))  # new version
+        dir_list = glob.glob('%s/%s/[WD][0-9]*' % (args.base_iqtree_dir, args.iqtree_version))  # new version
     print('    glob\'d %d gc dirs from iqtree dir %s' % (len(dir_list), args.base_iqtree_dir))
 else:
     assert False
@@ -422,10 +426,13 @@ for idir, indir in enumerate(dir_list):
     if args.test and idir > 3:
         break
 
-all_tps = sorted(set(m['time'] for m in rpmeta.values()))
+print('  all trees:')
+write_final_output('%s/all-trees' % baseoutdir, all_info)
+all_tps, all_strains = [sorted(set(m[tstr] for m in rpmeta.values())) for tstr in ['time', 'strain']]
 if not args.is_beast_simu:
     for tps in all_tps:
-        subfo = subset_info(tps)
-        if len(subfo['encoded_trees']) > 0:
-            write_final_output('%s/%s-trees' % (baseoutdir, tps), subfo)
-write_final_output('%s/all-trees' % baseoutdir, all_info)
+        for strn in all_strains:
+            subfo = subset_info([tps], [strn])
+            if len(subfo['encoded_trees']) > 0:
+                write_final_output('%s/%s-%s-trees' % (baseoutdir, tps, strn), subfo)
+write_final_output('%s/combo-trees' % baseoutdir, subset_info(args.combo_cfg[0], args.combo_cfg[1]))
