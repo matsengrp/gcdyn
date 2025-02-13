@@ -154,11 +154,13 @@ def collapse_bundles(args, resps, sstats, gcids):
 
 # ----------------------------------------------------------------------------------------
 def write_sigmoid_prediction(args, pred_vals, sstats, gcids, smpl, true_resps=None):
-    dfdata = {  # make empty df
-        "%s-%s" % (param, ptype): []
-        for param in args.params_to_predict
-        for ptype in (["predicted"] if true_resps is None else ["truth", "predicted"])
-    }
+    # ----------------------------------------------------------------------------------------
+    def get_empty_df(ptype, plist):
+        return {"%s-%s" % (param, ptype): [] for param in plist}
+    # ----------------------------------------------------------------------------------------
+    dfdata = get_empty_df('predicted', args.params_to_predict) #{"%s-%s" % (param, 'predicted') : [] for param in args.params_to_predict}
+    if true_resps is not None:
+        dfdata.update(get_empty_df('truth', true_resps[0]._param_dict)) #{"%s-%s" % (param, 'truth') : [] for param in true_resps[0]._param_dict})
     dfdata['tree-index'] = []
     dfdata['gcids'] = []
     assert true_resps is None or len(pred_vals) == len(true_resps)
@@ -167,7 +169,8 @@ def write_sigmoid_prediction(args, pred_vals, sstats, gcids, smpl, true_resps=No
         dfdata['gcids'].append(gcids[itr])
         for ip, param in enumerate(args.params_to_predict):
             dfdata["%s-predicted" % param].append(prlist[ip])
-            if true_resps is not None:
+        if true_resps is not None:
+            for param in true_resps[itr]._param_dict:
                 dfdata["%s-truth" % param].append(get_pval(param, true_resps[itr], sstats[itr]))
     df = pd.DataFrame(dfdata)
     print("  writing %s results to %s" % (smpl, args.outdir))
@@ -217,7 +220,7 @@ def write_per_bin_prediction(args, pred_fitness_bins, enc_trees, true_fitness_bi
     }
     dfdata['tree-index'] = []
     if true_fitness_bins is not None:
-        for param in utils.sigmoid_params:
+        for param in true_resps[0]._param_dict:
             dfdata['%s-truth'%param] = []
     for itr, pfbins in enumerate(pred_fitness_bins):
         dfdata['tree-index'].append(sstats[itr]['tree'])  # NOTE tree-index isn't necessarily equal to <itr>
@@ -227,7 +230,7 @@ def write_per_bin_prediction(args, pred_fitness_bins, enc_trees, true_fitness_bi
                 assert len(pfbins) == len(true_fitness_bins[itr])
                 dfdata['fitness-bins-truth-ival-%d'%ival].append(true_fitness_bins[itr][ival])
         if true_fitness_bins is not None:
-            for ip, param in enumerate(utils.sigmoid_params):  # writes true parameter values for each cell, which kind of sucks, but they're only nonzero for the first cell in each tree
+            for param in true_resps[itr]._param_dict:  # writes true parameter values for each cell, which kind of sucks, but they're only nonzero for the first cell in each tree
                 dfdata["%s-truth" % param].append(get_pval(param, true_resps[itr], sstats[itr]))
     df = pd.DataFrame(dfdata)
     print("  writing %s results to %s" % (smpl, args.outdir))
@@ -416,6 +419,13 @@ def read_tree_files(args):
                 samples[tk] = samples[tk][: len(samples[tk]) - n_remain]
         else:
             raise Exception('N trees %d not divisible by bundle size %d' % (len(samples["trees"]), args.dl_bundle_size))
+    if args.n_max_trees is not None:
+        for tk in samples:
+            assert args.n_max_trees < len(samples[tk])
+            n_before = len(samples[tk])
+            samples[tk] = samples[tk][:args.n_max_trees]
+            assert len(samples[tk]) == args.n_max_trees
+        print('    --n-max-trees: only using first %d / %d trees' % (len(samples[tk]), n_before))
     return samples
 
 # ----------------------------------------------------------------------------------------
@@ -580,6 +590,7 @@ def get_parser():
     parser.add_argument("--init-population-values", type=int, help="input parameter value for data inference (single valued, it\'s just plural to avoid making a new arg in cf-gcdyn.py)")
     parser.add_argument("--is-simu", action="store_true", help="set to this if running on simulation")
     parser.add_argument("--random-seed", default=0, type=int, help="random seed")
+    parser.add_argument("--n-max-trees", type=int, help="if set, after reading this many trees from input, discard any extras")
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--use-trivial-encoding", action="store_true")
     parser.add_argument("--dont-scale-params", action="store_true")

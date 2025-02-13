@@ -474,12 +474,17 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 if txmin > htmp.low_edges[ibin+1] or txmax < htmp.low_edges[ibin]:
                     htmp.set_ibin(ibin, 0, 0)
         # ----------------------------------------------------------------------------------------
+        def getresp(ptype, plist, irow):
+            pdict = {p : prdfs[smpl]['%s-%s'%(p, ptype)][irow] for p in plist}
+            resp_type = SigmoidCeilingResponse if ptype=='truth' and 'x_ceil_start' in pdict else SigmoidResponse
+            return resp_type(**pdict)
+        # ----------------------------------------------------------------------------------------
         if default_xbounds is None:
             default_xbounds = [-2.5, 3]
         default_ybounds = [-0.1, 4]
         if not os.path.exists(outdir+'/'+smpl):
             os.makedirs(outdir+'/'+smpl)
-        from gcdyn.poisson import SigmoidResponse, LinearResponse
+        from gcdyn.poisson import SigmoidResponse, SigmoidCeilingResponse, LinearResponse
         median_pfo = None
         pfo_list, true_pfo_list, all_afvals, phist_list = [], [], [], []
         curve_diffs = {smpl : [], 'validation' : []}
@@ -501,8 +506,8 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 smplstr = 'validation' if is_valid else smpl
                 if is_simu:
                     titlestr = '%s: response index %d / %d' % (smplstr, irow, n_tree_preds)
-                    pdicts = [{p : prdfs[smpl]['%s-%s'%(p, tp)][irow] for p in sigmoid_params} for tp in ['truth', 'predicted']]
-                    true_resp, pred_resp = [SigmoidResponse(**pd) for pd in pdicts]
+                    pred_resp = getresp('predicted', sigmoid_params, irow)
+                    true_resp = getresp('truth', (sigmoid_params + ['x_ceil_start', 'y_ceil']) if 'x_ceil_start-truth' in prdfs[smpl] else sigmoid_params, irow)
                     true_pfo, pred_pfo = [{'birth-response' : r} for r in [true_resp, pred_resp]]
                     pred_pfo['xbounds'] = affy_xbds
                     true_pfo_list.append(true_pfo)
@@ -582,7 +587,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 truncate_phist(pred_hist, affy_xbds)
                 if is_simu:
                     titlestr = '%s: response index %d / %d' % (smplstr, irow, n_tree_preds)
-                    true_resp = SigmoidResponse(**{p : prdfs[smpl]['%s-truth'%p][irow] for p in sigmoid_params})
+                    true_resp = getresp('truth', (sigmoid_params + ['x_ceil_start', 'y_ceil']) if 'x_ceil_start-truth' in prdfs[smpl] else sigmoid_params, irow)
                     true_pfo_list.append({'birth-response' : true_resp})  # , 'xbounds' : xbounds
                     cdiff = None
                     if len(curve_diffs[smplstr]) < n_max_diffs:
@@ -1053,7 +1058,8 @@ def plot_all_diffs(plotdir, plotname, curve_diffs, n_bins=30, xbounds=[0, 1], n_
     mpl_init()
     fig, ax = plt.subplots()
     all_vals = [v for vlist in curve_diffs.values() for v in vlist]
-    xmin, xmax = min(xbounds + all_vals), max(xbounds + all_vals)
+    range_list = (xbounds+all_vals) if max(all_vals)-min(all_vals)>0.1 else all_vals  # if all_vals has a very narrow spread, then a bug in sns causes a crash (when range of all_vals is too small compared to bin width) [kinda guessing on 0.1, it may need to be adjusted]
+    xmin, xmax = [mfn(range_list) for mfn in [min, max]]
     sns.histplot(curve_diffs if len(curve_diffs)>1 else all_vals, multiple='stack', binwidth=(xmax - xmin) / n_bins)
     titlestr = ''
     for ism, smpl in enumerate([s for s, v in sorted(curve_diffs.items()) if len(v)>0]):
@@ -1069,7 +1075,14 @@ def plot_all_diffs(plotdir, plotname, curve_diffs, n_bins=30, xbounds=[0, 1], n_
 
 # ----------------------------------------------------------------------------------------
 def add_param_text(fig, pfo, inf_pfo=None, diff_vals=None, upper_left=False, titlestr=None):
-    param_text = ['%s %.1f%s' % (p, getattr(pfo['birth-response'], p), '' if inf_pfo is None else ' (%.1f)'%getattr(inf_pfo['birth-response'], p)) for p in ['xscale', 'xshift', 'yscale']]
+    # ----------------------------------------------------------------------------------------
+    def ptext(pname):
+        rstr = '%s %.1f' % (pname, getattr(pfo['birth-response'], pname))
+        if inf_pfo is not None:
+            rstr += ' (%.1f)' % getattr(inf_pfo['birth-response'], pname)
+        return rstr
+    # ----------------------------------------------------------------------------------------
+    param_text = [ptext(p) for p in ['xscale', 'xshift', 'yscale', 'x_ceil_start'] if hasattr(pfo['birth-response'], p)]
     if diff_vals is not None:
         for dv in diff_vals:
             if hasattr(dv, 'keys'):

@@ -415,6 +415,60 @@ class SigmoidResponse(PhenotypeResponse):
     def __eq__(self, resp2):
         return all(getattr(self, p) == getattr(resp2, p) for p in self._param_dict)
 
+class SigmoidCeilingResponse(PhenotypeResponse):
+    r""" Piecewise function: sigmoid below x value <x_ceil_start>, but with constant y value <y_ceil> above.
+    If y_ceil is None, ceiling is set to sigmoid(x_ceil_start)."""
+    def __init__(
+        self,
+        xscale: float = 1.0,
+        xshift: float = 0.0,
+        yscale: float = 2.0,
+        yshift: float = 0.0,
+        x_ceil_start: float = 1,
+        y_ceil: float = None,
+    ):
+        super().__init__()
+        self.xscale = xscale
+        self.xshift = xshift
+        self.yscale = yscale
+        self.yshift = yshift
+        self.x_ceil_start = x_ceil_start
+        self.y_ceil = y_ceil
+
+    def λ_phenotype(self, x: float) -> float:
+        # x = np.asarray(x)  # super slow, not sure that it's necessary
+        if x < self.x_ceil_start or self.y_ceil is None:
+            if x >= self.x_ceil_start:
+                assert self.y_ceil is None
+                x = self.x_ceil_start
+            return self.yscale * sp.expit(self.xscale * (x - self.xshift)) + self.yshift
+
+        else:
+            return self.y_ceil
+
+    @property
+    def _param_dict(self) -> dict:
+        return dict(
+            xscale=self.xscale,
+            xshift=self.xshift,
+            yscale=self.yscale,
+            yshift=self.yshift,
+            x_ceil_start=self.x_ceil_start,
+            y_ceil=self.y_ceil,
+        )
+
+    @_param_dict.setter
+    def _param_dict(self, d):
+        self.xscale = d["xscale"]
+        self.xshift = d["xshift"]
+        self.yscale = d["yscale"]
+        self.yshift = d["yshift"]
+        self.x_ceil_start = d["x_ceil_start"]
+        self.y_ceil = d["y_ceil"]
+
+    def __eq__(self, resp2):
+        return all(getattr(self, p) == getattr(resp2, p) for p in self._param_dict)
+
 class SoftReluResponse(PhenotypeResponse):
     r"""Soft ReLU response function on a :py:class:`bdms.TreeNode` object's
     phenotype attribute :math:`x`.

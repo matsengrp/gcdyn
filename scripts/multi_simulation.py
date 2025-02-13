@@ -243,7 +243,7 @@ def choose_val(args, pname, extra_bounds=None, dbgstrs=None):
 
 # ----------------------------------------------------------------------------------------
 def get_xshift_bounds(args, xscale, dbgstrs):  # see algebra here https://photos.app.goo.gl/i8jM5Aa8QXvbDD267
-    assert args.birth_response == "sigmoid"
+    assert args.birth_response in ["sigmoid", 'sigmoid-ceil']
     ysc_lo, ysc_hi = args.yscale_range
     br_lo, br_hi = args.initial_birth_rate_range
     lo = (
@@ -258,7 +258,7 @@ def get_xshift_bounds(args, xscale, dbgstrs):  # see algebra here https://photos
 
 # ----------------------------------------------------------------------------------------
 def get_yscale_bounds(args, xscale, xshift, dbgstrs):  # similar to previous fcn
-    assert args.birth_response == "sigmoid"
+    assert args.birth_response in ["sigmoid", 'sigmoid-ceil']
     br_lo, br_hi = args.initial_birth_rate_range
     lo = br_lo * (1 + math.exp(xscale * xshift))
     hi = br_hi * (1 + math.exp(xscale * xshift))
@@ -276,7 +276,7 @@ def add_pval(pcounts, pname, pval):
 # ----------------------------------------------------------------------------------------
 def choose_params(args, pcounts, itrial):
     params = {}
-    plist = ["xscale", "xshift", "yscale", "time_to_sampling", "carry_cap", "init_population", "n_seqs"]  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
+    plist = ["xscale", "xshift", "yscale", 'x_ceil_start', "time_to_sampling", "carry_cap", "init_population", "n_seqs"]  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
     for pname in plist:  # NOTE compare to loop at end of run_sub_procs()
         extra_bounds, dbgstrs = None, []
         if args.use_generated_parameter_bounds:
@@ -296,7 +296,8 @@ def choose_params(args, pcounts, itrial):
             params[pname] = choose_val(args, pname, extra_bounds=extra_bounds, dbgstrs=dbgstrs)
         if pname in ["time_to_sampling", "carry_cap", "init_population", "n_seqs"]:
             params[pname] = int(params[pname])
-        add_pval(pcounts, pname, params[pname])
+        if pname not in args.constant_params:
+            add_pval(pcounts, pname, params[pname])
     if args.min_survivors is None:
         tfrac = 0.2
         args.min_survivors = tfrac * params['n_seqs']
@@ -309,13 +310,13 @@ def choose_params(args, pcounts, itrial):
 
 
 # ----------------------------------------------------------------------------------------
-def get_responses(args, xscale, xshift, yscale, pcounts):
+def get_responses(args, xscale, xshift, yscale, pcounts, x_ceil_start=None):
     # ----------------------------------------------------------------------------------------
     def get_birth():
         if args.birth_response == "constant":
             bresp = poisson.ConstantResponse(yscale)
-        elif args.birth_response in ["soft-relu", "sigmoid"]:
-            if args.birth_response == "sigmoid":
+        elif args.birth_response in ["soft-relu", "sigmoid", "sigmoid-ceil"]:
+            if args.birth_response in ["sigmoid", "sigmoid-ceil"]:
                 assert xscale > 0 and yscale > 0, (
                     "xscale and yscale must both be greater than zero for sigmoid response function, but got xscale %.2f, yscale %.2f"
                     % (xscale, yscale)
@@ -326,9 +327,15 @@ def get_responses(args, xscale, xshift, yscale, pcounts):
                 "yscale": yscale,
                 "yshift": args.yshift,
             }
+            if args.birth_response == 'sigmoid-ceil':
+                kwargs.update({
+                    'x_ceil_start' : x_ceil_start,
+                    'y_ceil' : args.y_ceil,
+                })
             rfcns = {
                 "soft-relu": poisson.SoftReluResponse,
                 "sigmoid": poisson.SigmoidResponse,
+                "sigmoid-ceil": poisson.SigmoidCeilingResponse,
             }
             bresp = rfcns[args.birth_response](**kwargs)
         else:
@@ -589,7 +596,7 @@ def get_parser():
     parser.add_argument("--init-population-range", help='DO NOT USE (use --init-population-values instead)')
     parser.add_argument("--seed", default=0, type=int, help="random seed")
     parser.add_argument("--outdir", default=os.getcwd())
-    parser.add_argument("--birth-response", default="sigmoid", choices=["constant", "soft-relu", "sigmoid"], help="birth rate response function")
+    parser.add_argument("--birth-response", default="sigmoid", choices=["constant", "soft-relu", "sigmoid", 'sigmoid-ceil'], help="birth rate response function")
     parser.add_argument("--death-response", default="constant-nonsense", choices=["constant", "constant-nonsense"], help="death rate response function")
     parser.add_argument("--death-value", default=0.1, type=float, help="(constant) death response value")
     parser.add_argument("--nonsense-death-value", default=10, type=float, help="death response value for nonsense (e.g. stop) sequences")
@@ -601,6 +608,9 @@ def get_parser():
     parser.add_argument("--yscale-range", nargs="+", type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response yscale parameter for each tree. Overrides --yscale-values. Suggest 1 50")
     parser.add_argument("--initial-birth-rate-range", default=[0.1, 10], nargs="+", type=float, help="Pair of values (min/max) for initial/default/average growth rate (i.e. when affinity/x=0). Used to set --yscale.")
     parser.add_argument("--yshift", default=0, type=float, help="atm this shouldn't (need to, at least) be changed")
+    parser.add_argument("--x-ceil-start-range", nargs='+', type=float, help="x value at which \"affinity ceiling\" begins in sigmoid-ceil response")
+    parser.add_argument("--x-ceil-start-values", nargs='+', type=float)
+    parser.add_argument("--y-ceil", type=float, help="y value of \"affinity ceiling\" in sigmoid-ceil response")
     parser.add_argument("--mutability-multiplier", default=0.68, type=float)
     parser.add_argument("--nonsense-phenotype-value", default=-99, type=float, help="phenotype (e.g. affinity) value to use for nonsense (e.g. stop codon) sequences")
     parser.add_argument('--dl-prediction-file', help='If set, read deep learning (dl) predictions from this file, and simulate using the predicted parameter values therein')
@@ -616,8 +626,9 @@ def get_parser():
     parser.add_argument("--make-plots", action="store_true", help="")
     parser.add_argument("--label-leaf-internal-nodes", action="store_true", help="Instead of the default node naming scheme of pure integers, add a prefix to the integer indicating if it\'s a leaf (\'leaf-\') or internal (\'mrca-\') node.")
     parser.add_argument("--n-to-plot", type=int, default=10, help="number of tree slice plots to make")
-    parser.add_argument("--tree-inference-method")
+    parser.add_argument("--tree-inference-method", default='iqtree', help='if not set (would have to change here, not on command line), doesn\'t run any inference after simulation')
     parser.add_argument("--partis-dir", default='%s/work/partis'%os.getenv('HOME'))
+    parser.add_argument("--constant-params", default=['y_ceil', 'yshift'], help="for internal use only")
     return parser
 
 
@@ -652,7 +663,7 @@ def set_test_args(args):
 def plot_params_responses(args, pcounts, all_trees=None, all_fns=None):
     if all_fns is None:
         all_fns = [[]]
-    if args.birth_response == "sigmoid":  # could plot other ones, but I think I need to modify some things, and I don't need it atm
+    if args.birth_response in ["sigmoid", 'sigmoid-ceil']:  # could plot other ones, but I think I need to modify some things, and I don't need it atm
         if args.make_plots and all_trees is not None:
             utils.plot_phenotype_response(args.outdir + "/plots/responses", all_trees, bundle_size=args.simu_bundle_size, fnames=all_fns)
     # make summary param plots even if --make-plots isn't set (just cause atm i don't want to add another arg to make some-but-not-all plots)
@@ -811,7 +822,7 @@ def run_sub_procs(args):
     pcounts = {}
     for pkfo in pklfos:
         for pname, pval in pkfo['birth']._param_dict.items():  # NOTE compare to loop in choose_params()
-            if pname == 'yshift':  # not varying this atm (and maybe not ever)
+            if pname in args.constant_params:  # not varying these atm (and maybe not ever)
                 continue
             add_pval(pcounts, pname, pval)
         add_pval(pcounts, "initial_birth_rate", pkfo['birth'].λ_phenotype(0))
@@ -833,7 +844,7 @@ def main():
         raise Exception('--init-population must be a positive power of 2, but got: %s' % ' '.join(str(p) for p in args.init_population_values))
     if args.simu_bundle_size != 1 and args.n_trials % args.simu_bundle_size != 0:
         raise Exception("--n-trials %d not evenly divisible by --simu-bundle-size %d" % (args.n_trials, args.simu_bundle_size))
-    args.use_generated_parameter_bounds = args.birth_response == "sigmoid" and None not in [args.yscale_range, args.initial_birth_rate_range]  # if either yscale or initial birth rate have no specified range, we can't calculate xshift and yscale ranges (well maybe could do one, but generally if you want ranges, specify them)
+    args.use_generated_parameter_bounds = args.birth_response in ["sigmoid", 'sigmoid-ceil'] and None not in [args.yscale_range, args.initial_birth_rate_range]  # if either yscale or initial birth rate have no specified range, we can't calculate xshift and yscale ranges (well maybe could do one, but generally if you want ranges, specify them)
     if args.use_generated_parameter_bounds:
         print("    using additional generated parameter bounds")
     else:
@@ -922,7 +933,7 @@ def main():
             n_missing += 1
             continue
         sys.stdout.flush()
-        birth_resp, death_resp = get_responses(args, params["xscale"], params["xshift"], params["yscale"], pcounts)
+        birth_resp, death_resp = get_responses(args, params["xscale"], params["xshift"], params["yscale"], pcounts, x_ceil_start=params.get('x_ceil_start'))
         fnlist, tree = generate_sequences_and_tree(
             args,
             params,
