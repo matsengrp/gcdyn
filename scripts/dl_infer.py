@@ -624,6 +624,7 @@ def main():
     random.seed(args.random_seed)
     np.random.seed(args.random_seed)
     import tensorflow as tf  # this is super slow, don't want to wait for this to get help message
+    assert args.non_sigmoid_input  # maybe should change the default, but I'm mostly just scared I'll forget the arg
 
     tf.keras.utils.set_random_seed(args.random_seed)
 

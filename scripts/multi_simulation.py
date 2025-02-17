@@ -224,6 +224,8 @@ def print_resps(args, bresp, dresp):
 # ----------------------------------------------------------------------------------------
 def choose_val(args, pname, extra_bounds=None, dbgstrs=None):
     minmax, vals = [getattr(args, pname + "_" + str) for str in ["range", "values"]]
+    if minmax is None and vals is None:
+        return None
     if minmax is not None:  # range with two values for continuous
         minv, maxv = minmax
         if extra_bounds is not None:
@@ -293,7 +295,10 @@ def choose_params(args, pcounts, itrial):
             #     print('%s %s value %.2f negative, using 0.01 instead' % (utils.wrnstr(), pname, params[pname]))
             #     params[pname] = 0.01
         else:
-            params[pname] = choose_val(args, pname, extra_bounds=extra_bounds, dbgstrs=dbgstrs)
+            pval = choose_val(args, pname, extra_bounds=extra_bounds, dbgstrs=dbgstrs)
+            if pval is None:
+                continue
+            params[pname] = pval
         if pname in ["time_to_sampling", "carry_cap", "init_population", "n_seqs"]:
             params[pname] = int(params[pname])
         if pname not in args.constant_params:
@@ -583,7 +588,7 @@ def get_parser():
     parser = argparse.ArgumentParser(formatter_class=MultiplyInheritedFormatter, description=helpstr)
     parser.add_argument("--n-seqs-values", default=[70], nargs="+", type=int, help="Number of sequences to observe (list of values)")
     parser.add_argument("--n-seqs-range", nargs="+", type=int)
-    parser.add_argument("--n-trials", default=51, type=int, help="Number of trials/GCs to simulate")
+    parser.add_argument("--n-trials", default=120, type=int, help="Number of trials/GCs to simulate")
     parser.add_argument("--n-max-tries", default=100, type=int, help="Number of times to retry simulation if it fails due to reaching either the min or max number of leaves.")
     parser.add_argument("--time-to-sampling-values", default=[20], nargs="+", type=int, help="List of values from which to choose for time to sampling.")
     parser.add_argument("--time-to-sampling-range", nargs="+", type=int, help="Pair of values (min/max) between which to choose at uniform random the time to sampling for each tree. Overrides --time-to-sampling-values.")

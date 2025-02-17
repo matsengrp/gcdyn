@@ -1078,7 +1078,7 @@ def add_param_text(fig, pfo, inf_pfo=None, diff_vals=None, upper_left=False, tit
     # ----------------------------------------------------------------------------------------
     def ptext(pname):
         rstr = '%s %.1f' % (pname, getattr(pfo['birth-response'], pname))
-        if inf_pfo is not None:
+        if inf_pfo is not None and hasattr(inf_pfo['birth-response'], pname):
             rstr += ' (%.1f)' % getattr(inf_pfo['birth-response'], pname)
         return rstr
     # ----------------------------------------------------------------------------------------
