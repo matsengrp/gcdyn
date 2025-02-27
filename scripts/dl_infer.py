@@ -117,7 +117,7 @@ class LScaler(object):
         if inverse:
             assert self.scaler is not None
         if self.scaler is None:  # note: fits each column separately (i.e. each row should contain one value for each parameter/variable)
-            self.scaler = sys.modules['preprocessing'].StandardScaler().fit(invals)
+            self.scaler = sys.modules['sklearn.preprocessing'].StandardScaler().fit(invals)
         sc_pvals = self.scaler.inverse_transform(invals) if inverse else self.scaler.transform(invals)
         if debug:
             if debug:  # and smpl == smplists['train'][0]:
@@ -139,7 +139,7 @@ def collapse_bundles(args, resps, sstats, gcids):
     # ----------------------------------------------------------------------------------------
     if resps is not None:
         resps = [
-            sys.modules['ParamNetworkModel']._collapse_identical_list(resps[i : i + args.dl_bundle_size])
+            sys.modules['gcdyn.nn'].ParamNetworkModel._collapse_identical_list(resps[i : i + args.dl_bundle_size])
             for i in range(0, len(resps), args.dl_bundle_size)
         ]
     if sstats is not None:
@@ -448,7 +448,7 @@ def train_and_test(args, start_time):
     # ----------------------------------------------------------------------------------------
     def train_sigmoid(smpldict, lscalers, max_leaf_count):
         responses = [[ConstantResponse(getattr(rsp, p)) for p in args.params_to_predict] for rsp in smpldict['train']['birth-responses']]  # order corresponds to args.params_to_predict (constant response is just a container for one value, and note we don't bother to set the name)
-        model = sys.modules['ParamNetworkModel'](responses[0], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
+        model = sys.modules['gcdyn.nn'].ParamNetworkModel(responses[0], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
         assert args.params_to_predict == utils.sigmoid_params
         model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, prebundle_layer_cfg=args.prebundle_layer_cfg, loss_fcn=args.loss_fcn, non_sigmoid_input=args.non_sigmoid_input)
         carry_caps, init_pops = zip(*lscalers['train']['per-tree'].out_vals) if args.non_sigmoid_input else (None, None)
@@ -458,13 +458,13 @@ def train_and_test(args, start_time):
     def train_per_cell(smpldict, lscalers, max_leaf_count):
         # seqmeta = read_meta_csv(args.indir)
         # affy_vals = [float(m['affinity']) for m in seqmeta]
-        model = sys.modules['PerCellNetworkModel']()
+        model = sys.modules['gcdyn.nn'].PerCellNetworkModel()
         model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, loss_fcn=args.loss_fcn)
         model.fit(lscalers['train'].out_tensors, smpldict['train']['fitnesses'], epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
         return model
     # ----------------------------------------------------------------------------------------
     def train_per_bin(smpldict, lscalers, max_leaf_count):
-        model = sys.modules['PerBinNetworkModel']()
+        model = sys.modules['gcdyn.nn'].PerBinNetworkModel()
         model.build_model(len(utils.zoom_affy_bins) - 1, max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, loss_fcn=args.loss_fcn, non_sigmoid_input=args.non_sigmoid_input)
         carry_caps, init_pops = zip(*lscalers['train']['per-tree'].out_vals) if args.non_sigmoid_input else (None, None)
         model.fit(lscalers['train']['per-node'].out_tensors, smpldict['train']['fitness-bins'], carry_caps, init_pops, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split, non_sigmoid_input=args.non_sigmoid_input)
@@ -527,11 +527,11 @@ def read_model_files(args, samples):
     if args.non_sigmoid_input:
         lscalers['per-tree'] = LScaler(args, ['carry_cap', 'init_population'], scaler=joblib.load(scfns['per-tree']))
     if args.model_type == 'sigmoid':
-        model = sys.modules['ParamNetworkModel']([ConstantResponse(0) for _ in args.params_to_predict], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
+        model = sys.modules['gcdyn.nn'].ParamNetworkModel([ConstantResponse(0) for _ in args.params_to_predict], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
     elif args.model_type == 'per-cell':
-        model = sys.modules['PerCellNetworkModel']()
+        model = sys.modules['gcdyn.nn'].PerCellNetworkModel()
     elif args.model_type == 'per-bin':
-        model = sys.modules['PerBinNetworkModel']()
+        model = sys.modules['gcdyn.nn'].PerBinNetworkModel()
     else:
         assert False
     model.load(encode.output_fn(args.model_dir, 'model', None))
