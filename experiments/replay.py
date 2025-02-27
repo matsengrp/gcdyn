@@ -76,20 +76,13 @@ def dms(
         .reset_index()
         .drop(columns="position")
     )
-    psr_df = (
-        dms_df.pivot(index="position", columns="mutant", values="delta_psr")
-        .reset_index()
-        .drop(columns="position")
-    )
 
     # the DMS has one additional codon wrt replay sequence
     bind_df.drop(index=bind_df.index[-1], inplace=True)
     expr_df.drop(index=expr_df.index[-1], inplace=True)
-    psr_df.drop(index=psr_df.index[-1], inplace=True)
 
     # replace NaNs with 0 (some single mutants are missing in DMS data)
     bind_df.fillna(0, inplace=True)
     expr_df.fillna(0, inplace=True)
-    psr_df.fillna(0, inplace=True)
 
-    return dict(affinity=bind_df, expr=expr_df, psr=psr_df)
+    return dict(affinity=bind_df, expr=expr_df)

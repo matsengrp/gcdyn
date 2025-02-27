@@ -530,6 +530,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                     titlestr = '%s (%d / %d)' % (prdfs[smpl]['gcids'][irow] if 'gcids' in prdfs[smpl] else smplstr, irow, n_tree_preds)
                     pdict = {p : prdfs[smpl]['%s-%s'%(p, 'predicted')][irow] for p in sigmoid_params}
                     pred_pfo = {'birth-response' : SigmoidResponse(**pdict), 'xbounds' : default_xbounds}
+                    add_slope_vals(pred_pfo['birth-response'], default_xbounds, pred_pfo)
                     fn = plot_many_curves(outdir+'/'+smpl, 'predicted-response-%d'%irow, [pred_pfo], affy_vals=affy_vals, param_text_pfos=[None, pred_pfo], titlestr=titlestr, colors=['#1f77b4'], xbounds=default_xbounds, ybounds=default_ybounds)
                     add_fn(fn, fns=single_curve_fns)
                     if irow < n_max_plots:
@@ -551,7 +552,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 fn = plot_many_curves(outdir+'/'+smpl, '%s-all-response'%smpl, pfo_list + ([tpfo] if is_simu else []), affy_vals=all_afvals,
                                                   titlestr='%s: %d / %d responses' % (smpl, len(pfo_list), n_tree_preds),
                                                   colors=['#1f77b4' for _ in pfo_list] + ['green'], alphas=[0.05 for _ in pfo_list] + [0.5],
-                                                  median_pfo=median_pfo, xbounds=default_xbounds, ybounds=default_ybounds, param_text_pfos=[tpfo, 'median'] if is_simu else ['median'], diff_vals=[cdiff] if is_simu else None)
+                                                  median_pfo=median_pfo, xbounds=default_xbounds, ybounds=default_ybounds, param_text_pfos=[tpfo, 'median'] if is_simu else [None, 'median'], diff_vals=[cdiff] if is_simu else None)
                 add_fn(fn)
             if is_simu:
                 fn = plot_all_diffs(outdir+'/'+smpl, 'curve-diffs', curve_diffs, n_skipped_diffs=n_skipped_diffs)
@@ -641,7 +642,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                     cdiff = resp_fcn_diff(tpfo['birth-response'], mean_pfo['birth-hist'], default_xbounds, resp2_is_hist=True, nsteps=None)
                 titlestr = '%s: %d / %d responses' % (smpl, len(phist_list), n_tree_preds)
                 fn = plot_many_curves(outdir+'/'+smpl, '%s-all-fitness-bins'%smpl, [tpfo] if is_simu else [], titlestr=titlestr, pred_hists=phist_list, mean_pfo=mean_pfo,
-                                      param_text_pfos=[tpfo, 'mean'] if is_simu else ['mean'], affy_vals=all_afvals, xbounds=default_xbounds, colors=['#006600'], ybounds=[-0.1, 4], diff_vals=[cdiff] if is_simu else None)
+                                      param_text_pfos=[tpfo, 'mean'] if is_simu else [None, 'mean'], affy_vals=all_afvals, xbounds=default_xbounds, colors=['#006600'], ybounds=[-0.1, 4], diff_vals=[cdiff] if is_simu else None)
                 add_fn(fn, force_new_row=True)
             if is_simu:
                 fn = plot_all_diffs(outdir+'/'+smpl, 'curve-diffs', curve_diffs, n_skipped_diffs=n_skipped_diffs)
@@ -666,7 +667,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             if pname in pfo:
                 return pfo[pname]
             else:
-                tresp = pfo['birth-response'] if 'birth-response' in pfo else pfo['birth-hist']  # well, second option is a hist not a a response
+                tresp = pfo['birth-response'] if 'birth-response' in pfo else pfo['birth-hist']  # well, second option is a hist not a response
                 return getattr(tresp, pname)
         # ----------------------------------------------------------------------------------------
         plt.clf()
@@ -905,7 +906,7 @@ def get_hist_vals(htmp, xbounds, xvals=None, normalize=False):
 # add slope-type metrics (max slope and the x value at which it occurs, and the naive birth rate) corresponding to <tresp> to <tpfo>
 def add_slope_vals(tresp, xbounds, tpfo, is_hist=False, nsteps=None, debug=False):
     if not is_hist and nsteps is None:
-        nsteps = 40
+        nsteps = 120
     nsteps, xbounds, xvals, dxvlist = get_resp_xlists(tresp, xbounds, nsteps, is_hist=is_hist)
     rvals = get_hist_vals(tresp, None, xvals=xvals) if is_hist else get_resp_vals(tresp, None, None, xvals=xvals)
     assert len(rvals) == len(xvals) and len(xvals) == len(dxvlist)
@@ -1088,6 +1089,8 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
         # tmp_params = [1.6, 2, 7]
         # resp_plot(SigmoidResponse(xscale=tmp_params[0], xshift=tmp_params[1], yscale=tmp_params[2], yshift=0), ax, alpha=0.3, color='blue', xbounds=default_xbounds, linewidth=1, linestyle='--')  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
     if param_text_pfos is not None:  # first one should be the true one
+        if len(param_text_pfos) < 2:
+            param_text_pfos.append(None)
         assert len(param_text_pfos) == 2
         param_text_pfos = [p if p!='median' else median_pfo for p in param_text_pfos]
         add_param_text(fig, param_text_pfos[0], inf_pfo=param_text_pfos[1], diff_vals=diff_vals, upper_left=True)
@@ -1139,20 +1142,32 @@ def plot_all_diffs(plotdir, plotname, curve_diffs, n_bins=30, xbounds=[0, 1], n_
     return fn
 
 # ----------------------------------------------------------------------------------------
-def add_param_text(fig, pfo, inf_pfo=None, diff_vals=None, upper_left=False, titlestr=None):
+def add_param_text(fig, true_pfo, inf_pfo=None, diff_vals=None, upper_left=False, titlestr=None):
+    # ----------------------------------------------------------------------------------------
+    def get_pval(tpfo, pname):
+        if tpfo is None:
+            return None
+        elif pname in tpfo:
+            return tpfo[pname]
+        elif 'birth-response' in tpfo and hasattr(tpfo['birth-response'], pname):
+            return getattr(tpfo['birth-response'], pname)
+        else:
+            return None
     # ----------------------------------------------------------------------------------------
     def ptext(pname):
-        rstr = '%s %.1f' % (pname, getattr(pfo['birth-response'], pname))
-        if inf_pfo is not None and 'birth-response' in inf_pfo and hasattr(inf_pfo['birth-response'], pname):
-            rstr += ' (%.1f)' % getattr(inf_pfo['birth-response'], pname)
+        true_pval, inf_pval = [get_pval(tpfo, pname) for tpfo in [true_pfo, inf_pfo]]
+        rstr = ''
+        if true_pval is not None:
+            rstr += '%s %.1f' % (pname, true_pval)
+        if inf_pval is not None:
+            rstr += '%s (%.1f)' % (pname if rstr=='' else '', inf_pval)
         return rstr
     # ----------------------------------------------------------------------------------------
-    param_text = [ptext(p) for p in ['xscale', 'xshift', 'yscale', 'x_ceil_start'] if 'birth-response' in pfo and hasattr(pfo['birth-response'], p)]
     xv, yv = (0.6, 0.25) if inf_pfo is None and not upper_left else (0.19, 0.7 if diff_vals is None else 0.65)
-    if 'max_slope' in pfo:
-        for tk in ['max_slope', 'x_max_slope', 'init_birth']:
-            param_text.append('%s %.1f%s' % (tk.replace('max_', '').replace('init_', '').replace('_', ' '), pfo[tk], (' (%.1f)'%inf_pfo[tk]) if inf_pfo is not None and tk in inf_pfo else ''))
-            yv -= 0.05
+    param_text = [ptext(p) for p in ['xscale', 'xshift', 'yscale', 'x_ceil_start'] + ['max_slope', 'x_max_slope', 'init_birth']]
+    param_text = [t for t in param_text if t is not None]
+    if len(param_text) > 3:
+        yv -= 0.05 * (len(param_text) - 3)
     if diff_vals is not None:
         for dv in diff_vals:
             if hasattr(dv, 'keys'):

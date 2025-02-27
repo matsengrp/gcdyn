@@ -594,6 +594,7 @@ def get_parser():
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--use-trivial-encoding", action="store_true")
     parser.add_argument("--dont-scale-params", action="store_true")
+    # parser.add_argument("--yscale-bounds")
     parser.add_argument("--min-n-max-leaves", default=200, help='pad all encoded tree matrices to at least this width')
     parser.add_argument("--custom-loop", action="store_true")
     return parser
