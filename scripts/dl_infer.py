@@ -1,13 +1,12 @@
 #!/usr/bin/env python
+import time
 import numpy as np
 import argparse
 import os
 import sys
-from sklearn import preprocessing
 import joblib
 import dill
 import colored_traceback.always  # noqa: F401
-import time
 import pickle
 import pandas as pd
 import random
@@ -16,7 +15,6 @@ import copy
 import collections
 
 from gcdyn import utils, encode
-from gcdyn.nn import ParamNetworkModel, PerCellNetworkModel, PerBinNetworkModel
 from gcdyn.poisson import ConstantResponse
 
 # fmt: off
@@ -25,8 +23,7 @@ from gcdyn.poisson import ConstantResponse
 sum_stat_scaled = {
     "total_branch_length": True
 }  # whether to scale summary stats with branch length
-smplist = ["train", "test"]
-
+smplists = {'train' : ["train", "test"], 'infer' : ['infer']}
 
 # ----------------------------------------------------------------------------------------
 def csvfn(args, smpl):
@@ -120,10 +117,10 @@ class LScaler(object):
         if inverse:
             assert self.scaler is not None
         if self.scaler is None:  # note: fits each column separately (i.e. each row should contain one value for each parameter/variable)
-            self.scaler = preprocessing.StandardScaler().fit(invals)
+            self.scaler = sys.modules['preprocessing'].StandardScaler().fit(invals)
         sc_pvals = self.scaler.inverse_transform(invals) if inverse else self.scaler.transform(invals)
         if debug:
-            if debug:  # and smpl == smplist[0]:
+            if debug:  # and smpl == smplists['train'][0]:
                 print("    %sscaling %d variables: %s" % ("reverse " if inverse else "", len(self.var_list), ' '.join(self.var_list)))
                 print("                                         before                             after")
                 print("                                  mean    var      min    max          mean    var      min    max")
@@ -142,7 +139,7 @@ def collapse_bundles(args, resps, sstats, gcids):
     # ----------------------------------------------------------------------------------------
     if resps is not None:
         resps = [
-            ParamNetworkModel._collapse_identical_list(resps[i : i + args.dl_bundle_size])
+            sys.modules['ParamNetworkModel']._collapse_identical_list(resps[i : i + args.dl_bundle_size])
             for i in range(0, len(resps), args.dl_bundle_size)
         ]
     if sstats is not None:
@@ -285,7 +282,7 @@ def get_prediction(args, model, spld, lscalers, smpl=None):
 # ----------------------------------------------------------------------------------------
 def plot_existing_results(args):
     prdfs, smpldict = {}, {}
-    for smpl in ["train", "test"]:
+    for smpl in smplists[args.action]:
         prdfs[smpl] = pd.read_csv(csvfn(args, smpl))
     seqmeta = read_meta_csv(args.indir)
     utils.make_dl_plots(
@@ -298,7 +295,6 @@ def plot_existing_results(args):
         validation_split=args.validation_split,
         trivial_encoding=args.use_trivial_encoding,
     )
-
 
 # ----------------------------------------------------------------------------------------
 def get_traintest_indices(args, samples):
@@ -323,7 +319,7 @@ def get_pval(pname, bresp, sts):  # get parameter value from response fcn
 
 # ----------------------------------------------------------------------------------------
 def write_traintest_samples(args, smpldict):
-    for smpl in smplist:
+    for smpl in smplists['train']:
         subdict = smpldict[smpl]
         responses = [
             {k: subdict[k + "-responses"][i] for k in ["birth", "death"]}
@@ -452,7 +448,7 @@ def train_and_test(args, start_time):
     # ----------------------------------------------------------------------------------------
     def train_sigmoid(smpldict, lscalers, max_leaf_count):
         responses = [[ConstantResponse(getattr(rsp, p)) for p in args.params_to_predict] for rsp in smpldict['train']['birth-responses']]  # order corresponds to args.params_to_predict (constant response is just a container for one value, and note we don't bother to set the name)
-        model = ParamNetworkModel(responses[0], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
+        model = sys.modules['ParamNetworkModel'](responses[0], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
         assert args.params_to_predict == utils.sigmoid_params
         model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, prebundle_layer_cfg=args.prebundle_layer_cfg, loss_fcn=args.loss_fcn, non_sigmoid_input=args.non_sigmoid_input)
         carry_caps, init_pops = zip(*lscalers['train']['per-tree'].out_vals) if args.non_sigmoid_input else (None, None)
@@ -462,13 +458,13 @@ def train_and_test(args, start_time):
     def train_per_cell(smpldict, lscalers, max_leaf_count):
         # seqmeta = read_meta_csv(args.indir)
         # affy_vals = [float(m['affinity']) for m in seqmeta]
-        model = PerCellNetworkModel()
+        model = sys.modules['PerCellNetworkModel']()
         model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, loss_fcn=args.loss_fcn)
         model.fit(lscalers['train'].out_tensors, smpldict['train']['fitnesses'], epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
         return model
     # ----------------------------------------------------------------------------------------
     def train_per_bin(smpldict, lscalers, max_leaf_count):
-        model = PerBinNetworkModel()
+        model = sys.modules['PerBinNetworkModel']()
         model.build_model(len(utils.zoom_affy_bins) - 1, max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, loss_fcn=args.loss_fcn, non_sigmoid_input=args.non_sigmoid_input)
         carry_caps, init_pops = zip(*lscalers['train']['per-tree'].out_vals) if args.non_sigmoid_input else (None, None)
         model.fit(lscalers['train']['per-node'].out_tensors, smpldict['train']['fitness-bins'], carry_caps, init_pops, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split, non_sigmoid_input=args.non_sigmoid_input)
@@ -479,11 +475,11 @@ def train_and_test(args, start_time):
     # separate train/test samples
     idxs = get_traintest_indices(args, samples)
     smpldict = {}  # separate train/test trees and responses by index
-    for smpl in smplist:
+    for smpl in smplists['train']:
         smpldict[smpl] = {
             key: [val[i] for i in idxs[smpl]] for key, val in samples.items()
         }
-    print("      N trees: %s" % "   ".join("%s %d" % (s, len(smpldict[s]["trees"])) for s in smplist))
+    print("      N trees: %s" % "   ".join("%s %d" % (s, len(smpldict[s]["trees"])) for s in smplists['train']))
 
     write_traintest_samples(args, smpldict)
 
@@ -494,7 +490,7 @@ def train_and_test(args, start_time):
 
     # handle various scaling/re-encoding stuff
     lscalers = {}
-    for smpl in smplist:
+    for smpl in smplists['train']:
         lscalers[smpl] = {'per-node' : LScaler(args, ['distance', 'phenotype'], in_tensors=smpldict[smpl]['trees'], smpl=smpl)}
         if args.non_sigmoid_input:
             lscalers[smpl]['per-tree'] = LScaler(args, ['carry_cap', 'init_population'], in_vals=[[int(d[k]) for k in ['carry_cap', 'init_population']] for d in smpldict[smpl]['sstats']], smpl=smpl)
@@ -503,7 +499,7 @@ def train_and_test(args, start_time):
 
     # silly encodings for testing that essentially train on the output values
     if args.use_trivial_encoding:
-        for smpl in smplist:
+        for smpl in smplists['train']:
             if args.model_type == 'per-cell':
                 predict_vals = smpldict[smpl]['fitnesses']
             else:
@@ -531,11 +527,11 @@ def read_model_files(args, samples):
     if args.non_sigmoid_input:
         lscalers['per-tree'] = LScaler(args, ['carry_cap', 'init_population'], scaler=joblib.load(scfns['per-tree']))
     if args.model_type == 'sigmoid':
-        model = ParamNetworkModel([ConstantResponse(0) for _ in args.params_to_predict], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
+        model = sys.modules['ParamNetworkModel']([ConstantResponse(0) for _ in args.params_to_predict], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
     elif args.model_type == 'per-cell':
-        model = PerCellNetworkModel()
+        model = sys.modules['PerCellNetworkModel']()
     elif args.model_type == 'per-bin':
-        model = PerBinNetworkModel()
+        model = sys.modules['PerBinNetworkModel']()
     else:
         assert False
     model.load(encode.output_fn(args.model_dir, 'model', None))
@@ -622,18 +618,22 @@ def main():
     if args.carry_cap_values is not None or args.init_population_values is not None:
         if args.is_simu:
             raise Exception('can only set carry cap and init population for data (otherwise they come from the simulation files)')
+    assert args.non_sigmoid_input  # maybe should change the default, but I'm mostly just scared I'll forget the arg
     random.seed(args.random_seed)
     np.random.seed(args.random_seed)
-    import tensorflow as tf  # this is super slow, don't want to wait for this to get help message
-    assert args.non_sigmoid_input  # maybe should change the default, but I'm mostly just scared I'll forget the arg
+
+    if all(os.path.exists(csvfn(args, s)) for s in smplists[args.action]) and not args.overwrite:
+        print("    csv files already exist, so just replotting (override with --overwrite): %s" % ' '.join(csvfn(args, s) for s in smplists[args.action]))
+        plot_existing_results(args)
+        sys.exit(0)
+
+    # these imports are super slow, so don't want to wait for them to get help message or plot existing csvs
+    import tensorflow as tf
+    from gcdyn.nn import ParamNetworkModel, PerCellNetworkModel, PerBinNetworkModel
+    from sklearn import preprocessing
 
     tf.keras.utils.set_random_seed(args.random_seed)
-
     if args.action == 'train':
-        if os.path.exists(csvfn(args, "test")) and not args.overwrite:
-            print("    csv files already exist, so just replotting (override with --overwrite): %s" % csvfn(args, "test"))
-            plot_existing_results(args)
-            sys.exit(0)
         train_and_test(args, start_time)
     elif args.action == 'infer':
         infer(args, start_time)

@@ -543,7 +543,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 for tk in ['max_slope', 'x_max_slope', 'init_birth']:
                     prdfs[smpl]['%s-truth'%tk] = [p[tk] for p in true_pfo_list]
             if not is_simu or all(p['birth-response']==true_pfo_list[0]['birth-response'] for p in true_pfo_list):  # all true responses equal
-                median_pfo = copy.copy(get_median_curve(pfo_list, default_xbounds))
+                median_pfo = copy.copy(get_median_curve(pfo_list, default_xbounds))  # copy is because it returns an element from the list
                 add_slope_vals(median_pfo['birth-response'], default_xbounds, median_pfo)
                 if is_simu:
                     tpfo = copy.copy(true_pfo_list[0])
@@ -632,17 +632,16 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 for tk in ['max_slope', 'x_max_slope', 'init_birth']:
                     prdfs[smpl]['%s-truth'%tk] = [p[tk] for p in true_pfo_list]
             if not is_simu or all(p['birth-response']==true_pfo_list[0]['birth-response'] for p in true_pfo_list):  # all true responses equal
-                hmean = make_mean_hist([p['birth-hist'] for p in phist_list], ignore_empty_bins=True, percentile_err=True)
-                mean_pfo = {'birth-hist' : hmean}
-                median_pfo = mean_pfo  # don't want to just call it 'median', but want to pass the same way I do the median up, but UGH
-                add_slope_vals(hmean, default_xbounds, mean_pfo, is_hist=True)
+                # median_pfo = {'birth-hist' : make_mean_hist([p['birth-hist'] for p in phist_list], ignore_empty_bins=True, percentile_err=True)}
+                median_pfo = copy.copy(get_median_curve(phist_list, default_xbounds, nsteps=None, is_hist=True))  # copy is because it returns an element from the list
+                add_slope_vals(median_pfo['birth-hist'], default_xbounds, median_pfo, is_hist=True)
                 if is_simu:
                     tpfo = copy.copy(true_pfo_list[0])
                     add_slope_vals(tpfo['birth-response'], default_xbounds, tpfo)  # re-get slope vals with default bounds
-                    cdiff = resp_fcn_diff(tpfo['birth-response'], mean_pfo['birth-hist'], default_xbounds, resp2_is_hist=True, nsteps=None)
+                    cdiff = resp_fcn_diff(tpfo['birth-response'], median_pfo['birth-hist'], default_xbounds, resp2_is_hist=True, nsteps=None)
                 titlestr = '%s: %d / %d responses' % (smpl, len(phist_list), n_tree_preds)
-                fn = plot_many_curves(outdir+'/'+smpl, '%s-all-fitness-bins'%smpl, [tpfo] if is_simu else [], titlestr=titlestr, pred_hists=phist_list, mean_pfo=mean_pfo,
-                                      param_text_pfos=[tpfo, 'mean'] if is_simu else [None, 'mean'], affy_vals=all_afvals, xbounds=default_xbounds, colors=['#006600'], ybounds=[-0.1, 4], diff_vals=[cdiff] if is_simu else None)
+                fn = plot_many_curves(outdir+'/'+smpl, '%s-all-fitness-bins'%smpl, [tpfo] if is_simu else [], titlestr=titlestr, pred_hists=phist_list, median_pfo=median_pfo,
+                                      param_text_pfos=[tpfo, 'median'] if is_simu else [None, 'median'], affy_vals=all_afvals, xbounds=default_xbounds, colors=['#006600'], ybounds=[-0.1, 4], diff_vals=[cdiff] if is_simu else None)
                 add_fn(fn, force_new_row=True)
             if is_simu:
                 fn = plot_all_diffs(outdir+'/'+smpl, 'curve-diffs', curve_diffs, n_skipped_diffs=n_skipped_diffs)
@@ -992,19 +991,24 @@ def resp_plot(bresp, ax, xbounds, alpha=0.8, color="#990012", nsteps=40, linewid
     sns.lineplot(data, x="affinity", y="lambda", ax=ax, linewidth=linewidth, linestyle=linestyle, color=color, alpha=alpha)
 
 # ----------------------------------------------------------------------------------------
-def get_median_curve(pfo_list, xbounds, nsteps=50, debug=False):
+# returns the element from <pfo_list> with minimal "distance" to the others
+def get_median_curve(pfo_list, xbounds, is_hist=False, nsteps=50, debug=False):
     # ----------------------------------------------------------------------------------------
     def diff_fcn(r1vals, r2vals):
         assert len(r1vals) == len(r2vals)
         return sum((r2 - r1)**2 for r1, r2 in zip(r1vals, r2vals))
     # ----------------------------------------------------------------------------------------
+    nsteps, xbounds, xvals, dxvlist = get_resp_xlists(pfo_list[0]['birth-hist'] if is_hist else None, xbounds, nsteps, is_hist=is_hist)
     if debug:
-        print('   finding median among %d curves' % len(pfo_list))
-        xvals, dx = get_resp_xvals(xbounds, nsteps)
+        print('   finding median among %d %s' % (len(pfo_list), 'hists' if is_hist else 'curves'))
         print('      x           %s' % ' '.join('%5.1f'%x for x in xvals))
     rvlists = []
     for pfo in pfo_list:
-        rvlists.append(get_resp_vals(pfo['birth-response'], xbounds, nsteps))
+        if is_hist:
+            rvals = get_hist_vals(pfo['birth-hist'], None, xvals=xvals)
+        else:
+            rvals = get_resp_vals(pfo['birth-response'], xbounds, nsteps)
+        rvlists.append(rvals)
     sumvals = [sum(diff_fcn(r1vals, r2vals) for r2vals in rvlists) for r1vals in rvlists]  # don't think there's any point in skipping the current one
     min_sum = min(sumvals)
     if debug:
@@ -1044,7 +1048,7 @@ def group_by_xvals(xvals, yvals, xbins, skip_overflows=False, debug=False):  # N
 def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None, colors=None,
                      add_sigmoid_true_pred_text=False, add_per_bin_true_pred_text=False, add_pred_text=False, param_text_pfos=None,
                      diff_vals=None, pred_xvals=None, pred_yvals=None, xbounds=None, ybounds=None, xbins=affy_bins, default_xbounds=None,
-                     nonsense_affy_val=-99, median_pfo=None, mean_pfo=None, pred_hists=None, alphas=None):
+                     nonsense_affy_val=-99, median_pfo=None, pred_hists=None, alphas=None):
     if default_xbounds is None:
         default_xbounds = [-2.5, 3]
     mpl_init()
@@ -1077,14 +1081,14 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
     if pred_hists is not None:
         for pfo in pred_hists:
             pfo['birth-hist'].mpl_plot(ax, square_bins=True, remove_empty_bins=True, color='#1f77b4', no_vertical_bin_lines=True, alpha=0.6 if len(pred_hists)==1 else 0.1, linewidth=1.5 if len(pred_hists)>1 else 3, errors=False)
-        if mean_pfo is not None:
-            mean_pfo['birth-hist'].mpl_plot(ax, square_bins=True, remove_empty_bins=True, color='#ff7f0e', no_vertical_bin_lines=True, alpha=0.8, linewidth=3, errors=False)
-        param_text_pfos = [p if p!='mean' else mean_pfo for p in param_text_pfos]
     for ipf, pfo in enumerate(pfo_list):
         alpha = (0.1 if len(pfo_list)>5 else 0.5) if alphas is None else alphas[ipf]
         resp_plot(pfo['birth-response'], ax, alpha=alpha, color='#990012' if colors is None else colors[ipf], xbounds=pfo['xbounds'] if 'xbounds' in pfo and pfo['xbounds'] is not None else default_xbounds, linewidth=1 if colors is None else 2)  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
     if median_pfo is not None:
-        resp_plot(median_pfo['birth-response'], ax, alpha=0.8, color='#ff7f0e', xbounds=default_xbounds, linewidth=2, linestyle='--')  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
+        if 'birth-hist' in median_pfo:  # it's a hist
+            median_pfo['birth-hist'].mpl_plot(ax, square_bins=True, remove_empty_bins=True, color='#ff7f0e', no_vertical_bin_lines=True, alpha=0.8, linewidth=3, errors=False)
+        else:  # it's a response
+            resp_plot(median_pfo['birth-response'], ax, alpha=0.8, color='#ff7f0e', xbounds=default_xbounds, linewidth=2, linestyle='--')  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
         # from gcdyn.poisson import SigmoidResponse
         # tmp_params = [1.6, 2, 7]
         # resp_plot(SigmoidResponse(xscale=tmp_params[0], xshift=tmp_params[1], yscale=tmp_params[2], yshift=0), ax, alpha=0.3, color='blue', xbounds=default_xbounds, linewidth=1, linestyle='--')  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
@@ -1154,18 +1158,21 @@ def add_param_text(fig, true_pfo, inf_pfo=None, diff_vals=None, upper_left=False
         else:
             return None
     # ----------------------------------------------------------------------------------------
+    def gpn(pname):
+        return pname.replace('max_', '').replace('init_', '').replace('_', ' ')
+    # ----------------------------------------------------------------------------------------
     def ptext(pname):
         true_pval, inf_pval = [get_pval(tpfo, pname) for tpfo in [true_pfo, inf_pfo]]
         rstr = ''
         if true_pval is not None:
-            rstr += '%s %.1f' % (pname, true_pval)
+            rstr += '%s %.1f' % (gpn(pname), true_pval)
         if inf_pval is not None:
-            rstr += '%s (%.1f)' % (pname if rstr=='' else '', inf_pval)
+            rstr += '%s (%.1f)' % (gpn(pname) if rstr=='' else '', inf_pval)
         return rstr
     # ----------------------------------------------------------------------------------------
     xv, yv = (0.6, 0.25) if inf_pfo is None and not upper_left else (0.19, 0.7 if diff_vals is None else 0.65)
     param_text = [ptext(p) for p in ['xscale', 'xshift', 'yscale', 'x_ceil_start'] + ['max_slope', 'x_max_slope', 'init_birth']]
-    param_text = [t for t in param_text if t is not None]
+    param_text = [t for t in param_text if t != '']
     if len(param_text) > 3:
         yv -= 0.05 * (len(param_text) - 3)
     if diff_vals is not None:
