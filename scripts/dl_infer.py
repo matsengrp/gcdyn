@@ -293,6 +293,7 @@ def plot_existing_results(args):
         is_simu=args.is_simu,
         validation_split=args.validation_split,
         trivial_encoding=args.use_trivial_encoding,
+        force_many_plot=args.force_many_plot,
     )
 
 # ----------------------------------------------------------------------------------------
@@ -440,6 +441,7 @@ def predict_and_plot(args, model, smpldict, smpls, lscalers=None):
         is_simu=args.is_simu,
         validation_split=0 if smpl=='infer' else args.validation_split,
         trivial_encoding=args.use_trivial_encoding,
+        force_many_plot=args.force_many_plot,
     )
 
 # ----------------------------------------------------------------------------------------
@@ -592,6 +594,7 @@ def get_parser():
     # parser.add_argument("--yscale-bounds")
     parser.add_argument("--min-n-max-leaves", default=200, help='pad all encoded tree matrices to at least this width')
     parser.add_argument("--custom-loop", action="store_true")
+    parser.add_argument("--force-many-plot", action="store_true", help='make plot with response functions for all GCs on top of each other, even if this isn\'t simulation and/or they don\'t all have the same parameters.')
     return parser
 
 

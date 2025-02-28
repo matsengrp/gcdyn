@@ -442,7 +442,7 @@ def sns_xy_plot(ptype, smpl, tdf, xkey, ykey, xvals=None, true_x_eq_y=False, dis
 # ----------------------------------------------------------------------------------------
 # plot scatter + box/whisker plot comparing true and predicted values for deep learning inference
 # NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
-def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu=False, data_val=0, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15, trivial_encoding=False, nonsense_affy_val=-99):
+def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu=False, data_val=0, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15, trivial_encoding=False, nonsense_affy_val=-99, force_many_plot=False):
     # ----------------------------------------------------------------------------------------
     def add_fn(fn, n_per_row=4, force_new_row=False, fns=None):
         if fns is None:
@@ -542,16 +542,23 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             if is_simu:
                 for tk in ['max_slope', 'x_max_slope', 'init_birth']:
                     prdfs[smpl]['%s-truth'%tk] = [p[tk] for p in true_pfo_list]
-            if not is_simu or all(p['birth-response']==true_pfo_list[0]['birth-response'] for p in true_pfo_list):  # all true responses equal
+            if force_many_plot or not is_simu or all(p['birth-response']==true_pfo_list[0]['birth-response'] for p in true_pfo_list):  # all true responses equal
                 median_pfo = copy.copy(get_median_curve(pfo_list, default_xbounds))  # copy is because it returns an element from the list
                 add_slope_vals(median_pfo['birth-response'], default_xbounds, median_pfo)
+                plt_pfos, colors, alphas = pfo_list, ['#1f77b4' for _ in pfo_list], [0.05 for _ in pfo_list]
                 if is_simu:
                     tpfo = copy.copy(true_pfo_list[0])
+                    if force_many_plot:
+                        tpfo = copy.copy(get_median_curve(true_pfo_list, default_xbounds))
+                        plt_pfos.append(tpfo)
+                        colors.append('green')
+                        alphas.append(1)
                     add_slope_vals(tpfo['birth-response'], default_xbounds, tpfo)  # re-get slope vals with default bounds
                     cdiff = resp_fcn_diff(tpfo['birth-response'], median_pfo['birth-response'], default_xbounds)
-                fn = plot_many_curves(outdir+'/'+smpl, '%s-all-response'%smpl, pfo_list + ([tpfo] if is_simu else []), affy_vals=all_afvals,
-                                                  titlestr='%s: %d / %d responses' % (smpl, len(pfo_list), n_tree_preds),
-                                                  colors=['#1f77b4' for _ in pfo_list] + ['green'], alphas=[0.05 for _ in pfo_list] + [0.5],
+                    plt_pfos += true_pfo_list if force_many_plot else [tpfo]
+                    colors += ['green' for _ in range(len(plt_pfos)-len(colors))]
+                    alphas += [(0.05 if force_many_plot else 0.5) for _ in range(len(plt_pfos)-len(alphas))]
+                fn = plot_many_curves(outdir+'/'+smpl, '%s-all-response'%smpl, plt_pfos, affy_vals=all_afvals, titlestr='%s: %d responses' % (smpl, n_tree_preds), colors=colors, alphas=alphas,
                                                   median_pfo=median_pfo, xbounds=default_xbounds, ybounds=default_ybounds, param_text_pfos=[tpfo, 'median'] if is_simu else [None, 'median'], diff_vals=[cdiff] if is_simu else None)
                 add_fn(fn)
             if is_simu:
@@ -631,6 +638,8 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             if is_simu:
                 for tk in ['max_slope', 'x_max_slope', 'init_birth']:
                     prdfs[smpl]['%s-truth'%tk] = [p[tk] for p in true_pfo_list]
+            if force_many_plot:
+                print('    %s --force-may-plot not implemented for per-bin model' % wrnstr())
             if not is_simu or all(p['birth-response']==true_pfo_list[0]['birth-response'] for p in true_pfo_list):  # all true responses equal
                 # median_pfo = {'birth-hist' : make_mean_hist([p['birth-hist'] for p in phist_list], ignore_empty_bins=True, percentile_err=True)}
                 median_pfo = copy.copy(get_median_curve(phist_list, default_xbounds, nsteps=None, is_hist=True))  # copy is because it returns an element from the list
@@ -1049,6 +1058,10 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
                      add_sigmoid_true_pred_text=False, add_per_bin_true_pred_text=False, add_pred_text=False, param_text_pfos=None,
                      diff_vals=None, pred_xvals=None, pred_yvals=None, xbounds=None, ybounds=None, xbins=affy_bins, default_xbounds=None,
                      nonsense_affy_val=-99, median_pfo=None, pred_hists=None, alphas=None):
+    if colors is not None and len(colors) != len(pfo_list):
+        raise Exception('colors %d different length to pfo_list %d' % (len(colors), len(pfo_list)))
+    if alphas is not None and len(alphas) != len(pfo_list):
+        raise Exception('alphas %d different length to pfo_list %d' % (len(alphas), len(pfo_list)))
     if default_xbounds is None:
         default_xbounds = [-2.5, 3]
     mpl_init()

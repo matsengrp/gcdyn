@@ -4,7 +4,7 @@ Developer tools
 Environment setup::
 
   export PYTHONNOUSERSITE=1  # isolate this environment from any existing system packages
-  micromamba create -n gcdyn -c conda-forge python=3.9
+  micromamba create -n gcdyn python=3.9  #  -c conda-forge  (setting this channel  uses the anaconda url, which is blocked now)
   micromamba activate gcdyn
 
 Developer install::
