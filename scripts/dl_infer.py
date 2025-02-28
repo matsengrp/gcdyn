@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import time
-import numpy as np
 import argparse
 import os
 import sys
@@ -110,7 +109,7 @@ class LScaler(object):
             for ivar, vname in enumerate(self.var_list):
                 for dstr, pvs in zip(("before", "after"), (pvals_before, pvals_scaled)):
                     bstr = "   " if dstr != "before" else "      %15s %7s" % (vname, smpl)
-                    print("%s %s%s %s%s" % (bstr, fnstr(pvs, np.mean), fnstr(pvs, np.var), fnstr(pvs, min), fnstr(pvs, max), ), end="" if dstr == "before" else "\n")
+                    print("%s %s%s %s%s" % (bstr, fnstr(pvs, sys.modules['numpy'].mean), fnstr(pvs, sys.modules['numpy'].var), fnstr(pvs, min), fnstr(pvs, max), ), end="" if dstr == "before" else "\n")
         # ----------------------------------------------------------------------------------------
         if self.args.dont_scale_params:
             return copy.copy(invals)
@@ -131,7 +130,7 @@ class LScaler(object):
 def collapse_bundles(args, resps, sstats, gcids):
     # ----------------------------------------------------------------------------------------
     def group_vals(tkey, istart):
-        mfcn = min if tkey == "tree" else np.mean  # 'tree' means it's the tree index, in which case we want the index of the first tree in the bundle, otherwise we want the mean (although it should of course be the same for all trees in the bundle)
+        mfcn = min if tkey == "tree" else sys.modules['numpy'].mean  # 'tree' means it's the tree index, in which case we want the index of the first tree in the bundle, otherwise we want the mean (although it should of course be the same for all trees in the bundle)
         valstrs = [sstats[istart + j][tkey] for j in range(args.dl_bundle_size)]
         if '' in valstrs:  # probably real data
             return None
@@ -619,18 +618,21 @@ def main():
         if args.is_simu:
             raise Exception('can only set carry cap and init population for data (otherwise they come from the simulation files)')
     assert args.non_sigmoid_input  # maybe should change the default, but I'm mostly just scared I'll forget the arg
-    random.seed(args.random_seed)
-    np.random.seed(args.random_seed)
+    outputs_exist = all(os.path.exists(csvfn(args, s)) for s in smplists[args.action]) and not args.overwrite
 
-    if all(os.path.exists(csvfn(args, s)) for s in smplists[args.action]) and not args.overwrite:
+    if not outputs_exist:
+        # these imports are super slow, so don't want to wait for them to get help message or plot existing csvs
+        import tensorflow as tf
+        from gcdyn.nn import ParamNetworkModel, PerCellNetworkModel, PerBinNetworkModel
+        from sklearn import preprocessing
+    import numpy  # has to be imported *after* tf
+    random.seed(args.random_seed)
+    numpy.random.seed(args.random_seed)
+
+    if outputs_exist:
         print("    csv files already exist, so just replotting (override with --overwrite): %s" % ' '.join(csvfn(args, s) for s in smplists[args.action]))
         plot_existing_results(args)
         sys.exit(0)
-
-    # these imports are super slow, so don't want to wait for them to get help message or plot existing csvs
-    import tensorflow as tf
-    from gcdyn.nn import ParamNetworkModel, PerCellNetworkModel, PerBinNetworkModel
-    from sklearn import preprocessing
 
     tf.keras.utils.set_random_seed(args.random_seed)
     if args.action == 'train':
