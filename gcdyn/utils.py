@@ -553,7 +553,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                         tpfo = copy.copy(get_median_curve(true_pfo_list, default_xbounds))
                         plt_pfos.append(tpfo)
                         colors.append('green')
-                        alphas.append(1)
+                        alphas.append(0.5)
                     add_slope_vals(tpfo['birth-response'], default_xbounds, tpfo)  # re-get slope vals with default bounds
                     cdiff = resp_fcn_diff(tpfo['birth-response'], median_pfo['birth-response'], default_xbounds)
                     plt_pfos += true_pfo_list if force_many_plot else [tpfo]

@@ -278,7 +278,7 @@ def add_pval(pcounts, pname, pval):
 # ----------------------------------------------------------------------------------------
 def choose_params(args, pcounts, itrial):
     params = {}
-    plist = ["xscale", "xshift", "yscale", 'x_ceil_start', "time_to_sampling", "carry_cap", "init_population", "n_seqs"]  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
+    plist = ["xscale", "xshift", "yscale", 'x_ceil_start', 'death', "time_to_sampling", "carry_cap", "init_population", "n_seqs"]  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
     for pname in plist:  # NOTE compare to loop at end of run_sub_procs()
         extra_bounds, dbgstrs = None, []
         if args.use_generated_parameter_bounds:
@@ -301,6 +301,8 @@ def choose_params(args, pcounts, itrial):
             params[pname] = pval
         if pname in ["time_to_sampling", "carry_cap", "init_population", "n_seqs"]:
             params[pname] = int(params[pname])
+        if 'death' in pname:
+            assert params[pname] >= 0
         if pname not in args.constant_params:
             add_pval(pcounts, pname, params[pname])
     if args.min_survivors is None:
@@ -315,26 +317,26 @@ def choose_params(args, pcounts, itrial):
 
 
 # ----------------------------------------------------------------------------------------
-def get_responses(args, xscale, xshift, yscale, pcounts, x_ceil_start=None):
+def get_responses(args, params, pcounts):
     # ----------------------------------------------------------------------------------------
     def get_birth():
         if args.birth_response == "constant":
-            bresp = poisson.ConstantResponse(yscale)
+            bresp = poisson.ConstantResponse(params['yscale'])
         elif args.birth_response in ["soft-relu", "sigmoid", "sigmoid-ceil"]:
             if args.birth_response in ["sigmoid", "sigmoid-ceil"]:
-                assert xscale > 0 and yscale > 0, (
+                assert params['xscale'] > 0 and params['yscale'] > 0, (
                     "xscale and yscale must both be greater than zero for sigmoid response function, but got xscale %.2f, yscale %.2f"
-                    % (xscale, yscale)
+                    % (params['xscale'], params['yscale'])
                 )
             kwargs = {
-                "xscale": xscale,
-                "xshift": xshift,
-                "yscale": yscale,
+                "xscale": params['xscale'],
+                "xshift": params['xshift'],
+                "yscale": params['yscale'],
                 "yshift": args.yshift,
             }
             if args.birth_response == 'sigmoid-ceil':
                 kwargs.update({
-                    'x_ceil_start' : x_ceil_start,
+                    'x_ceil_start' : params['x_ceil_start'],
                     'y_ceil' : args.y_ceil,
                 })
             rfcns = {
@@ -349,9 +351,9 @@ def get_responses(args, xscale, xshift, yscale, pcounts, x_ceil_start=None):
 
     # ----------------------------------------------------------------------------------------
     if args.death_response == 'constant':
-        dresp = poisson.ConstantResponse(args.death_value)
+        dresp = poisson.ConstantResponse(params['death'])
     elif args.death_response == 'constant-nonsense':
-        dresp = poisson.ConstantNonsenseResponse(args.death_value, args.nonsense_phenotype_value, args.nonsense_death_value)
+        dresp = poisson.ConstantNonsenseResponse(params['death'], args.nonsense_phenotype_value, args.nonsense_death_value)
     else:
         raise Exception('unexpected death response \'%s\'' % args.death_response)
     bresp = get_birth()
@@ -603,7 +605,8 @@ def get_parser():
     parser.add_argument("--outdir", default=os.getcwd())
     parser.add_argument("--birth-response", default="sigmoid", choices=["constant", "soft-relu", "sigmoid", 'sigmoid-ceil'], help="birth rate response function")
     parser.add_argument("--death-response", default="constant-nonsense", choices=["constant", "constant-nonsense"], help="death rate response function")
-    parser.add_argument("--death-value", default=0.1, type=float, help="(constant) death response value")
+    parser.add_argument("--death-values", default=[0.1], nargs='+', type=float, help="list of values from which to choose (constant) death response value")
+    parser.add_argument("--death-range", nargs='+', type=float, help="range from which to choose (constant) death response value")
     parser.add_argument("--nonsense-death-value", default=10, type=float, help="death response value for nonsense (e.g. stop) sequences")
     parser.add_argument("--xscale-values", default=[1], nargs="+", type=float, help="list of birth response xscale parameter values from which to choose")
     parser.add_argument("--xshift-values", default=[1], nargs="+", type=float, help="list of birth response xshift parameter values from which to choose")
@@ -855,7 +858,7 @@ def main():
     else:
         print("  note: not using additional generated parameter bounds since at least one of --yscale-range, --initial-birth-rate-range was unset (this may result in lots of failed simulation runs if the initial birth rate is either too small or too large)")
     # handle args that can have either a list of a few values, or choose from a uniform interval specified with two (min, max) values
-    for pname in ["xscale", "xshift", "yscale", "time_to_sampling", "carry_cap", "init_population", "n_seqs"]:
+    for pname in ["xscale", "xshift", "yscale", 'death', "time_to_sampling", "carry_cap", "init_population", "n_seqs"]:
         rangevals = getattr(args, pname + "_range")
         if rangevals is not None and len(rangevals) != 2:  # range with two values for continuous
             raise Exception("range for %s must consist of two values but got %d" % (pname, len(rangevals)))
@@ -882,8 +885,6 @@ def main():
         run_sub_procs(args)
         print("    total simulation time: %.1f sec" % (time.time() - start))
         sys.exit(0)
-
-    assert args.death_value >= 0
 
     if not os.path.exists(args.outdir):
         os.makedirs(args.outdir)
@@ -938,7 +939,7 @@ def main():
             n_missing += 1
             continue
         sys.stdout.flush()
-        birth_resp, death_resp = get_responses(args, params["xscale"], params["xshift"], params["yscale"], pcounts, x_ceil_start=params.get('x_ceil_start'))
+        birth_resp, death_resp = get_responses(args, params, pcounts)
         fnlist, tree = generate_sequences_and_tree(
             args,
             params,
