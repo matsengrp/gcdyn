@@ -126,7 +126,8 @@ def curve_loss(y_true, y_pred, rect_area=False):  # copied from/modeled after ut
         ydist = tf.math.abs(tf.math.reduce_max(all_yvals) - tf.math.reduce_min(all_yvals))
         area_val = tf.reduce_sum(xdist * ydist)  # area of whole plot/rectangle
     else:  # area between furthest curve and x axis
-        area_val = tf.reduce_sum(tf.math.maximum(tf.math.abs(true_svals), tf.math.abs(pred_svals)) * tf.constant(dx, dtype=tf.float64))
+        # area_val = tf.reduce_sum(tf.math.maximum(tf.math.abs(true_svals), tf.math.abs(pred_svals)) * tf.constant(dx, dtype=tf.float64))
+        area_val = tf.reduce_sum(tf.math.abs(true_svals) * tf.constant(dx, dtype=tf.float64))
     normed_area = sumv / area_val
     # print_debug()
     return normed_area

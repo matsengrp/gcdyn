@@ -25,6 +25,7 @@ import itertools
 from Bio.Seq import Seq
 import math
 import string
+import csv
 
 sigmoid_params = ['xscale', 'xshift', 'yscale']  # ick
 affy_bins = [-15, -10, -7, -5, -3, -2, -1, -0.5, -0.25, 0.25, 0.5, 1, 1.5, 2, 2.5, 3.5, 4, 5, 7]
@@ -626,7 +627,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                         add_fn(fn)
                 else:
                     titlestr = '%s (%d / %d)' % (prdfs[smpl]['gcids'][irow] if 'gcids' in prdfs[smpl] else smplstr, irow, n_tree_preds)
-                    fn = plot_many_curves(outdir+'/'+smpl, 'predicted-fitness-bins-%d'%irow, [], pred_hists=[pred_pfo], titlestr=titlestr, affy_vals=affy_vals, colors=['#990012'],
+                    fn = plot_many_curves(outdir+'/'+smpl, 'predicted-fitness-bins-%d'%irow, [], pred_hists=[pred_pfo], titlestr=titlestr, affy_vals=affy_vals,
                                           param_text_pfos=[None, pred_pfo], xbounds=default_xbounds, ybounds=default_ybounds)
                     add_fn(fn, fns=single_curve_fns)
                     if irow < n_max_plots:
@@ -650,7 +651,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                     cdiff = resp_fcn_diff(tpfo['birth-response'], median_pfo['birth-hist'], default_xbounds, resp2_is_hist=True, nsteps=None)
                 titlestr = '%s: %d / %d responses' % (smpl, len(phist_list), n_tree_preds)
                 fn = plot_many_curves(outdir+'/'+smpl, '%s-all-fitness-bins'%smpl, [tpfo] if is_simu else [], titlestr=titlestr, pred_hists=phist_list, median_pfo=median_pfo,
-                                      param_text_pfos=[tpfo, 'median'] if is_simu else [None, 'median'], affy_vals=all_afvals, xbounds=default_xbounds, colors=['#006600'], ybounds=[-0.1, 4], diff_vals=[cdiff] if is_simu else None)
+                                      param_text_pfos=[tpfo, 'median'] if is_simu else [None, 'median'], affy_vals=all_afvals, xbounds=default_xbounds, colors=['#006600'] if is_simu else None, ybounds=[-0.1, 4], diff_vals=[cdiff] if is_simu else None)
                 add_fn(fn, force_new_row=True)
             if is_simu:
                 fn = plot_all_diffs(outdir+'/'+smpl, 'curve-diffs', curve_diffs, n_skipped_diffs=n_skipped_diffs)
@@ -736,6 +737,11 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
     for smpl in sorted(prdfs, reverse=True):
         fnames.append([])
         median_pfos[smpl] = plot_responses(smpl)
+        if model_type == 'sigmoid':
+            with open('%s/median-curve-%s.csv' % (outdir, smpl), 'w') as mfile:  # this is trying to match the train/test/infer csvs, which are written with the df to_csv fcn
+                writer = csv.DictWriter(mfile, ['%s-predicted'%p for p in sigmoid_params])
+                writer.writeheader()
+                writer.writerow({'%s-predicted'%p : getattr(median_pfos[smpl]['birth-response'], p) for p in sigmoid_params})
     for ptype in ['scatter', 'box']:
         for smpl in sorted(prdfs, reverse=True):
             if model_type in ['sigmoid', 'per-bin']:
@@ -954,6 +960,7 @@ def get_resp_xlists(tresp, xbounds, nsteps, is_hist=False):
 
 # ----------------------------------------------------------------------------------------
 # can set resp2 to a hist if you set resp2_is_hist (rect_area: old-style full rectangular area for denominator)
+# NOTE not symmetric: resp1 is used in the denominator (i.e. it should be the true response)
 def resp_fcn_diff(resp1, resp2, xbounds, dont_normalize=False, nsteps=40, resp2_is_hist=False, rect_area=False, debug=False):  # see also nn.curve_loss()
     # ----------------------------------------------------------------------------------------
     def prdbg():
@@ -985,7 +992,8 @@ def resp_fcn_diff(resp1, resp2, xbounds, dont_normalize=False, nsteps=40, resp2_
         if rect_area:
             area_val = abs(xbounds[1] - xbounds[0]) * abs(max(vals1+vals2) - min(vals1+vals2))  # divide area between curves by area of rectangle defined by xbounds and min/max of either fcn
         else:
-            area_vlist = [max([abs(v1), abs(v2)]) * dx for v1, v2, dx in zip(vals1, vals2, dxvlist)]
+            # area_vlist = [max([abs(v1), abs(v2)]) * dx for v1, v2, dx in zip(vals1, vals2, dxvlist)]
+            area_vlist = [abs(v1) * dx for v1, dx in zip(vals1, dxvlist)]
             area_val = sum(area_vlist)  # area between furthest curve and x axis (in this increment of dx) (don't really need dx, but maybe it makes it more intuitive)
         return_val /= area_val
     if debug:
