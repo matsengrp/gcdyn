@@ -878,6 +878,9 @@ def plot_chosen_params(plotdir, param_counters, pbounds, n_bins=15, fnames=None)
         fnames = [[]]
     if len(fnames[-1]) > 0:  # add an empty row if there's already file names there
         fnames.append([])
+    n_pval_list = [len(pvals) for pvals in param_counters.values()]
+    if len(set(n_pval_list)) != 1:   # make sure nobody got incremented twice
+        raise Exception('different number of counts for different parameters: %s' % ' '.join('%s %d'%(p, len(pvals)) for p, pvals in param_counters.items()))
     for pname in param_counters:
         fn = plot_param(pname)
         addfn(fnames, fn)

@@ -300,7 +300,7 @@ def decode_fitness_bins(fbvals, xbins):
 # ----------------------------------------------------------------------------------------
 final_ofn_strs = ["seqs", "trees", "meta", "encoded-trees", "encoded-fitnesses", "encoded-fitness-bins", "responses", "summary-stats"]
 model_state_ofn_strs = ["model", "per-node-train-scaler", "per-tree-train-scaler", "example-responses"]
-sstat_fieldnames = ["tree", "mean_branch_length", "total_branch_length", "carry_cap", "init_population", "time_to_sampling"]
+sstat_fieldnames = ["tree", "mean_branch_length", "total_branch_length", "carry_cap", "init_population", "time_to_sampling", 'death']
 leaf_meta_fields = ["tree-index", "name", "affinity", "n_muts", "n_muts_aa", "gc", "is_leaf"]
 
 # ----------------------------------------------------------------------------------------

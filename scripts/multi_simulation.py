@@ -239,8 +239,9 @@ def choose_val(args, pname, extra_bounds=None, dbgstrs=None):
             return np.random.choice(range(minv, maxv + 1))  # integers (note that this is inclusive)
         else:
             return np.random.uniform(minv, maxv)  # floats
+
     else:  # discrete values
-        return np.random.choice(vals)
+        return float(np.random.choice(vals))
 
 
 # ----------------------------------------------------------------------------------------
@@ -282,10 +283,10 @@ def choose_params(args, pcounts, itrial):
     for pname in plist:  # NOTE compare to loop at end of run_sub_procs()
         extra_bounds, dbgstrs = None, []
         if args.use_generated_parameter_bounds:
-            if pname == "xshift":
-                extra_bounds = get_xshift_bounds(args, params["xscale"], dbgstrs)
-            if pname == "yscale":
-                extra_bounds = get_yscale_bounds(args, params["xscale"], params["xshift"], dbgstrs)
+            if pname == 'xshift':
+                extra_bounds = get_xshift_bounds(args, params['xscale'], dbgstrs)
+            if pname == 'yscale':
+                extra_bounds = get_yscale_bounds(args, params['xscale'], params['xshift'], dbgstrs)
         if args.dl_prediction_file is not None and pname in utils.sigmoid_params:
             if pname == plist[0]:
                 print('        choosing dl prediction at index %d (of %d) for: %s' % (itrial % len(args.dl_pvals), len(args.dl_pvals), ' '.join(utils.sigmoid_params)))
@@ -299,7 +300,7 @@ def choose_params(args, pcounts, itrial):
             if pval is None:
                 continue
             params[pname] = pval
-        if pname in ["time_to_sampling", "carry_cap", "init_population", "n_seqs"]:
+        if pname in args.int_params:
             params[pname] = int(params[pname])
         if 'death' in pname:
             assert params[pname] >= 0
@@ -309,10 +310,10 @@ def choose_params(args, pcounts, itrial):
         tfrac = 0.2
         args.min_survivors = tfrac * params['n_seqs']
         print('    setting --min-survivors to %.2f * N seqs = %d' % (tfrac, args.min_survivors))
-    if any(params["carry_cap"] < p for p in [args.min_survivors, params["n_seqs"]]):
-        print('  %s chose carry cap (%d) smaller than either min survivors %d or N seqs %d, so you\'ll probably either get a lot of failed tree runs, or fail sampling seqs' % (utils.color('yellow', 'warning'), params["carry_cap"], args.min_survivors, params["n_seqs"]))
-    pvstrs = ["%s %s" % (p, ("%d" if p in ["time_to_sampling", "carry_cap", "init_population", "n_seqs"] else "%.2f") % v) for p, v in sorted(params.items())]
-    print("    chose new parameter values%s: %s" % ('' if args.simu_bundle_size == 1 else ' (for next bundle of size %d)' % args.simu_bundle_size, "  ".join(pvstrs)))
+    if any(params['carry_cap'] < p for p in [args.min_survivors, params['n_seqs']]):
+        print('  %s chose carry cap (%d) smaller than either min survivors %d or N seqs %d, so you\'ll probably either get a lot of failed tree runs, or fail sampling seqs' % (utils.color('yellow', 'warning'), params['carry_cap'], args.min_survivors, params['n_seqs']))
+    pvstrs = ['%s %s' % (p, ('%d' if p in ['time_to_sampling', 'carry_cap', 'init_population', 'n_seqs'] else '%.2f') % v) for p, v in sorted(params.items())]
+    print('    chose new parameter values%s: %s' % ('' if args.simu_bundle_size == 1 else ' (for next bundle of size %d)' % args.simu_bundle_size, '  '.join(pvstrs)))
     return params
 
 
@@ -320,7 +321,7 @@ def choose_params(args, pcounts, itrial):
 def get_responses(args, params, pcounts):
     # ----------------------------------------------------------------------------------------
     def get_birth():
-        if args.birth_response == "constant":
+        if args.birth_response == 'constant':
             bresp = poisson.ConstantResponse(params['yscale'])
         elif args.birth_response in ["soft-relu", "sigmoid", "sigmoid-ceil"]:
             if args.birth_response in ["sigmoid", "sigmoid-ceil"]:
@@ -419,6 +420,7 @@ def write_final_outputs(args, all_seqs, all_trees, param_list, inferred=False, d
                 "carry_cap": params["carry_cap"],
                 "init_population": params["init_population"],
                 "time_to_sampling": params["time_to_sampling"],
+                "death": params["death"],
                 # NOTE if you add something here, also add it to encode.sstat_fieldnames
             }
         )
@@ -448,6 +450,11 @@ def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itri
     assert args.tree_inference_method in ['iqtree', 'gctree']
     # ----------------------------------------------------------------------------------------
     def run_method(ofn):
+        existing_fns = os.listdir(wkdir)
+        if len(existing_fns) > 0:
+            print('  %s removing %d existing files before running %s (e.g. iqtree will read existing checkpoint file, which will break things if input seqs changed) from %s' % (utils.wrnstr(), len(existing_fns), args.tree_inference_method, wkdir))
+            for tfn in existing_fns:
+                os.remove('%s/%s' % (wkdir, tfn))
         ifn = '%s/input-seqs.fa' % wkdir
         input_seqs = true_leaf_seqs
         if args.tree_inference_method == 'gctree':
@@ -634,9 +641,10 @@ def get_parser():
     parser.add_argument("--make-plots", action="store_true", help="")
     parser.add_argument("--label-leaf-internal-nodes", action="store_true", help="Instead of the default node naming scheme of pure integers, add a prefix to the integer indicating if it\'s a leaf (\'leaf-\') or internal (\'mrca-\') node.")
     parser.add_argument("--n-to-plot", type=int, default=10, help="number of tree slice plots to make")
-    parser.add_argument("--tree-inference-method", default='iqtree', help='if not set (would have to change here, not on command line), doesn\'t run any inference after simulation')
+    parser.add_argument("--tree-inference-method", help='if not set, doesn\'t run any inference after simulation')
     parser.add_argument("--partis-dir", default='%s/work/partis'%os.getenv('HOME'))
     parser.add_argument("--constant-params", default=['y_ceil', 'yshift'], help="for internal use only")
+    parser.add_argument("--int-params", default=["time_to_sampling", "carry_cap", "init_population", "n_seqs"], help="for internal use only")
     return parser
 
 
@@ -834,6 +842,7 @@ def run_sub_procs(args):
                 continue
             add_pval(pcounts, pname, pval)
         add_pval(pcounts, "initial_birth_rate", pkfo['birth'].λ_phenotype(0))
+        add_pval(pcounts, "death", pkfo['death'].const_val)
     with open(outfn(args, 'summary-stats')) as cfile:
         reader = csv.DictReader(cfile)
         for line in reader:

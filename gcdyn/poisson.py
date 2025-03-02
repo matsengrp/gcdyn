@@ -291,6 +291,7 @@ class ConstantNonsenseResponse(ConstantResponse):
         self.const_val = const_val
         self.nonsense_phen_val = nonsense_phen_val
         self.nonsense_resp_val = nonsense_resp_val
+        self.value = None  # use .const_val instead of .value to make really clear that this isn't a simple constant response
 
     def λ_phenotype(self, x: float) -> float:
         if x == self.nonsense_phen_val:
