@@ -479,6 +479,8 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
         # ----------------------------------------------------------------------------------------
         def getresp(ptype, plist, irow):
             pdict = {p : prdfs[smpl]['%s-%s'%(p, ptype)][irow] for p in plist}
+            if 'y_ceil' in pdict and math.isnan(pdict['y_ceil']):  # for some reason pandas reads an empty column as nan instead of None
+                pdict['y_ceil'] = None
             resp_type = SigmoidCeilingResponse if ptype=='truth' and 'x_ceil_start' in pdict else SigmoidResponse
             return resp_type(**pdict)
         # ----------------------------------------------------------------------------------------
@@ -737,7 +739,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
     for smpl in sorted(prdfs, reverse=True):
         fnames.append([])
         median_pfos[smpl] = plot_responses(smpl)
-        if model_type == 'sigmoid':
+        if model_type == 'sigmoid' and median_pfos[smpl] is not None:
             with open('%s/median-curve-%s.csv' % (outdir, smpl), 'w') as mfile:  # this is trying to match the train/test/infer csvs, which are written with the df to_csv fcn
                 writer = csv.DictWriter(mfile, ['%s-predicted'%p for p in sigmoid_params])
                 writer.writeheader()
