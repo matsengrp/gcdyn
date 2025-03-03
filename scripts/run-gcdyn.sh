@@ -14,9 +14,9 @@ echo $bin --actions simu --label for-data --version v5 --carry-cap-range-list 50
 
 dlxtra="--dl-model-label-str for-data/v5/n-trials-25000 --dl-model-vars model-type"
 dmargs="--xscale-values-list 1.5 --xshift-values-list 1.9 --simu-extra-args=\"--carry-cap-values 2000 --init-population-values 8 --mutability-multiplier 0.5 --time-to-sampling-values 20 --n-seqs-range 60 95 --n-trials 120\" --n-sub-procs 30"
-# echo $bin --actions simu --label data-mimic --version v7-death --yscale-values-list 6.5 --death-values-list 0.05:0.1:0.2 $dlargs $dlxtra $common $dmargs
+echo $bin --actions simu --label data-mimic --version v7-death --yscale-values-list 6.5 --death-values-list 0.05:0.1:0.2:0.5 $dlargs $dlxtra $common $dmargs
 # echo $bin --actions simu --label data-mimic --version v7-yscale --yscale-values-list 5:10:20 $dlargs $dlxtra $common $dmargs
-echo $bin --actions simu --label x-ceil --version v4 --yscale-values-list 6.5 --birth-response-list sigmoid-ceil --x-ceil-start-range-list 0.5,2.5 $dlargs $dlxtra $common $dmargs
+# echo $bin --actions simu --label x-ceil --version v4 --yscale-values-list 6.5 --birth-response-list sigmoid-ceil --x-ceil-start-range-list 0.5,2.5 $dlargs $dlxtra $common $dmargs
 exit 0
 
 datadir=/fh/fast/matsen_e/data/taraki-gctree-2021-10/iqtree-processed-data/$iqvsn  # actual data

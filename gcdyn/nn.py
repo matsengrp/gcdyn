@@ -60,15 +60,14 @@ class BundleMeanLayer(layers.Layer):
 class SigmoidTransposeLayer(layers.Layer):
     """Transpose inputs (used to be Lambda layer, but they're not really serializable."""
 
-    def __init__(self, non_sigmoid_input, **kwargs):
-        self.non_sigmoid_input = non_sigmoid_input
+    def __init__(self, bundle_size, **kwargs):
+        self.bundle_size = bundle_size
         super(SigmoidTransposeLayer, self).__init__(**kwargs)
 
     def call(self, inputs):
-        # leave first (batch/sample) and second (bundle) dimensions the same, and swap third (dist/phenotyp) and fourth (leaf/internal node) dimensions
-        if self.non_sigmoid_input:
-            return tf.transpose(inputs, perm=(0, 2, 1)) #(0, 1, 3, 2))
-        else:
+        if self.bundle_size is None:  # same as next bit (see comment), but without bundle dimension
+            return tf.transpose(inputs, perm=(0, 2, 1))
+        else:  # leave first (batch/sample) and second (bundle) dimensions the same, and swap third (dist/phenotyp) and fourth (leaf/internal node) dimensions
             return tf.transpose(inputs, perm=(0, 1, 3, 2))
 
 # @keras.saving.register_keras_serializable()
@@ -147,7 +146,7 @@ class ParamNetworkModel:
     Predicts the parameters of the response functions (atm, this means the three parameters of a sigmoid birth response, although minimal/no changes here would be required from some generalizations).
     """
 
-    def __init__(self, example_response_list, bundle_size=50, custom_loop=False):
+    def __init__(self, example_response_list, bundle_size=None, custom_loop=False):
         """
         example_response_list: list of response objects for a single tree (used for two things: to work out the number of
                      parameters, and how to encode/decode by calling its _flatten() fcn)
@@ -170,7 +169,6 @@ class ParamNetworkModel:
         prebundle_layer_cfg: str = 'default',
         loss_fcn="mean_squared_error",
         actfn: str = "elu",
-        non_sigmoid_input=False,
     ):
         # The TimeDistributed layer wrapper allows us to apply the inner layer (e.g., Conv1D) to each "time step"
         # of the input tensor independently. In our specific context, our data is structured in the format of:
@@ -180,7 +178,7 @@ class ParamNetworkModel:
 
         self.max_leaf_count = max_leaf_count
         self.actfn = actfn
-        print("    building model with bundle size %d: dropout %.2f   learn rate %.4f   momentum %.4f" % (self.bundle_size, dropout_rate, learning_rate, ema_momentum))
+        print("    building model with%s: dropout %.2f   learn rate %.4f   momentum %.4f" % ('' if self.bundle_size is None else (' bundle size %d'%self.bundle_size), dropout_rate, learning_rate, ema_momentum))
 
         # various config options for the layers before the bundle mean layer
         self.pre_bundle_layers = {
@@ -206,38 +204,27 @@ class ParamNetworkModel:
             ],
         }
 
-        tree_input = keras.Input(shape=(encode.mtx_lens['tree'], self.max_leaf_count) if non_sigmoid_input else (self.bundle_size, encode.mtx_lens['tree'], self.max_leaf_count), name='tree_input')
-        if non_sigmoid_input:
-            carry_cap_input = keras.Input(shape=(1,), name='carry_cap_input')
-            init_pop_input = keras.Input(shape=(1,), name='init_pop_input')
+        tree_input = keras.Input(shape=(encode.mtx_lens['tree'], self.max_leaf_count), name='tree_input')
+        carry_cap_input = keras.Input(shape=(1,), name='carry_cap_input')
+        init_pop_input = keras.Input(shape=(1,), name='init_pop_input')
 
-        if non_sigmoid_input:
-# TODO clean the *#(!$ out of this
-            x = SigmoidTransposeLayer(non_sigmoid_input)(tree_input)
+        if self.bundle_size is None:
+            x = SigmoidTransposeLayer(self.bundle_size)(tree_input)
             for layer in self.pre_bundle_layers[prebundle_layer_cfg]:
-                if non_sigmoid_input:
-                    x = layer(x)
-                else:
-                    x = layers.TimeDistributed(layer(x))
-            if not non_sigmoid_input:
-                x = BundleMeanLayer()(x)  # combine predictions from all trees in bundle
+                x = layer(x)
             x = layers.Concatenate()([x, carry_cap_input, init_pop_input])
             dense_unit_list = [48, 32, 16, 8]
             for idense, n_units in enumerate(dense_unit_list):
                 x = layers.Dense(n_units, activation=self.actfn)(x)
                 if dropout_rate != 0 and idense < len(dense_unit_list) - 1:
                     x = layers.Dropout(dropout_rate)(x)
-            # if non_sigmoid_input:
-            #     x = layers.Concatenate()([x, carry_cap_input, init_pop_input])
-            #     outputs = layers.Dense(self.num_parameters)(x)
-            # else:
             outputs = layers.Dense(self.num_parameters, activation=clipfcn)(x)
             self.network = keras.Model(
-                inputs=[tree_input, carry_cap_input, init_pop_input] if non_sigmoid_input else tree_input,
+                inputs=[tree_input, carry_cap_input, init_pop_input],
                 outputs=outputs
             )
         else:
-            network_layers = [SigmoidTransposeLayer(non_sigmoid_input)]
+            network_layers = [SigmoidTransposeLayer(self.bundle_size)]
             for tlr in self.pre_bundle_layers[prebundle_layer_cfg]:
                 network_layers.append(layers.TimeDistributed(tlr))
             network_layers.append(BundleMeanLayer())  # combine predictions from all trees in bundle
@@ -357,7 +344,7 @@ class ParamNetworkModel:
         """
         return self._reshape_data_wrt_bundle_size(onp.stack(trees))
 
-    def fit(self, training_trees: list[onp.ndarray], responses: list[list[poisson.Response]], carry_caps, init_pops, epochs: int = 30, batch_size: int = None, validation_split: float = 0, non_sigmoid_input=False):
+    def fit(self, training_trees: list[onp.ndarray], responses: list[list[poisson.Response]], carry_caps, init_pops, epochs: int = 30, batch_size: int = None, validation_split: float = 0):
         """
         Trains neural network on given trees and responses.
         training_trees: list of encoded trees
@@ -376,7 +363,7 @@ class ParamNetworkModel:
             self.optimizer.apply(grads, self.network.trainable_weights)  # run one gradient descent step
             return btch_loss
         # ----------------------------------------------------------------------------------------
-        print("    fitting model with bundle size %d (%d training trees in %d bundles)" % (self.bundle_size, len(training_trees), len(training_trees) / self.bundle_size))
+        print("    fitting model with%s (%d training trees%s)" % ('' if self.bundle_size is None else (' bundle size %d'%self.bundle_size), len(training_trees), '' if self.bundle_size is None else (' in %d bundles'%(len(training_trees) / self.bundle_size))))
         # response_parameters = self._encode_responses(self._take_one_identical_item_per_bundle(responses))
         response_parameters = self._encode_responses(responses)
 
@@ -412,7 +399,7 @@ class ParamNetworkModel:
             print('    using network.fit')
             self.network.fit(
                 # self._prepare_trees_for_network_input(training_trees),
-                [onp.stack(training_trees), onp.stack(carry_caps), onp.stack(init_pops)] if non_sigmoid_input else self._prepare_trees_for_network_input(onp.stack(training_trees)),
+                [onp.stack(training_trees), onp.stack(carry_caps), onp.stack(init_pops)] if self.bundle_size is None else self._prepare_trees_for_network_input(onp.stack(training_trees)),
                 response_parameters,
                 epochs=epochs,
                 batch_size=batch_size,
@@ -424,13 +411,13 @@ class ParamNetworkModel:
 
     def predict(
         self,
-        encoded_trees: list[onp.ndarray], carry_caps, init_pops, non_sigmoid_input=False,
+        encoded_trees: list[onp.ndarray], carry_caps, init_pops,
     ) -> list[list[poisson.Response]]:
         """Returns the Response objects predicted for each tree."""
 
         predicted_responses = self.network(
-            # self._prepare_trees_for_network_input(onp.stack(encoded_trees)), self._prepare_trees_for_network_input(onp.stack(carry_caps)), self._prepare_trees_for_network_input(onp.stack(init_pops)) if non_sigmoid_input else self._prepare_trees_for_network_input(onp.stack(encoded_trees))
-            [onp.stack(encoded_trees), onp.stack(carry_caps), onp.stack(init_pops)] if non_sigmoid_input else self._prepare_trees_for_network_input(onp.stack(encoded_trees))
+            # self._prepare_trees_for_network_input(onp.stack(encoded_trees)), self._prepare_trees_for_network_input(onp.stack(carry_caps)), self._prepare_trees_for_network_input(onp.stack(init_pops)) if self.bundle_size is None else self._prepare_trees_for_network_input(onp.stack(encoded_trees))
+            [onp.stack(encoded_trees), onp.stack(carry_caps), onp.stack(init_pops)] if self.bundle_size is None else self._prepare_trees_for_network_input(onp.stack(encoded_trees))
         )
 
         return self._decode_responses(predicted_responses, example_response_list=self.example_response_list)
@@ -541,7 +528,6 @@ class PerBinNetworkModel:
         ema_momentum: float = 0.99,
         loss_fcn="mean_squared_error",
         actfn: str = "elu",
-        non_sigmoid_input=False,
     ):
         self.n_bins = n_bins
         self.max_leaf_count = max_leaf_count
@@ -549,9 +535,8 @@ class PerBinNetworkModel:
         print("    building model with: dropout %.2f   learn rate %.4f   momentum %.4f" % (dropout_rate, learning_rate, ema_momentum))
 
         tree_input = keras.Input(shape=(encode.mtx_lens['tree'], self.max_leaf_count), name='tree_input')
-        if non_sigmoid_input:
-            carry_cap_input = keras.Input(shape=(1,), name='carry_cap_input')
-            init_pop_input = keras.Input(shape=(1,), name='init_pop_input')
+        carry_cap_input = keras.Input(shape=(1,), name='carry_cap_input')
+        init_pop_input = keras.Input(shape=(1,), name='init_pop_input')
 
         tlayers = [
             layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
@@ -564,8 +549,7 @@ class PerBinNetworkModel:
         x = PerBinTransposeLayer()(tree_input)
         for layer in tlayers:
             x = layer(x)
-        if non_sigmoid_input:
-            x = layers.Concatenate()([x, carry_cap_input, init_pop_input])
+        x = layers.Concatenate()([x, carry_cap_input, init_pop_input])
         dense_unit_list = [48, 32, 16, 8]
         for idense, n_units in enumerate(dense_unit_list):
             x = layers.Dense(n_units, activation=self.actfn)(x)
@@ -574,7 +558,7 @@ class PerBinNetworkModel:
         outputs = layers.Dense(self.n_bins)(x)
 
         self.network = keras.Model(
-            inputs=[tree_input, carry_cap_input, init_pop_input] if non_sigmoid_input else tree_input,
+            inputs=[tree_input, carry_cap_input, init_pop_input],
             outputs=outputs
         )
         self.network.summary()
@@ -584,9 +568,9 @@ class PerBinNetworkModel:
         self.network.compile(loss=loss_fcn, optimizer=optimizer) #, run_eagerly=True)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
 
     # ----------------------------------------------------------------------------------------
-    def fit(self, training_trees, training_fitness_bins, carry_caps, init_pops, epochs=30, batch_size=None, validation_split=0, non_sigmoid_input=False):
+    def fit(self, training_trees, training_fitness_bins, carry_caps, init_pops, epochs=30, batch_size=None, validation_split=0):
         self.network.fit(
-            [onp.stack(training_trees), onp.stack(carry_caps), onp.stack(init_pops)] if non_sigmoid_input else onp.stack(training_trees),
+            [onp.stack(training_trees), onp.stack(carry_caps), onp.stack(init_pops)],
             onp.stack(training_fitness_bins),
             epochs=epochs,
             callbacks=[Callback(epochs, use_validation=validation_split > 0)],
@@ -595,8 +579,8 @@ class PerBinNetworkModel:
         )
 
     # ----------------------------------------------------------------------------------------
-    def predict(self, encoded_trees, carry_caps, init_pops, non_sigmoid_input=False):
-        predicted_fitnesses = self.network([onp.stack(encoded_trees), onp.stack(carry_caps), onp.stack(init_pops)] if non_sigmoid_input else onp.stack(encoded_trees))
+    def predict(self, encoded_trees, carry_caps, init_pops):
+        predicted_fitnesses = self.network([onp.stack(encoded_trees), onp.stack(carry_caps), onp.stack(init_pops)])
         return predicted_fitnesses
 
     # ----------------------------------------------------------------------------------------

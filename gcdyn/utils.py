@@ -663,7 +663,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
 
         return median_pfo
     # ----------------------------------------------------------------------------------------
-    def plot_param_or_pair(ptype, param1, smpl, xkey=None, ykey=None, param2=None, median_pfo=None, n_max_scatter_points=500):
+    def plot_param_or_pair(ptype, param1, smpl, xkey=None, ykey=None, param2=None, median_pfo=None, n_max_scatter_points=250):
         # ----------------------------------------------------------------------------------------
         def get_mae_text(smpl, tdf):
             if not is_simu:
@@ -684,9 +684,9 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
         plt.clf()
         all_df = prdfs[smpl]
         downsample_text = ''
-        if ptype == 'scatter' and len(all_df) > n_max_scatter_points:  # too busy, don't bother making them
-            # if param2 is None:
-            #     return
+        if ptype == 'scatter' and len(all_df) > n_max_scatter_points:
+            if param2 is None:
+                return
             downsample_text = '%d/%d points' % (n_max_scatter_points, len(all_df))
             all_df = all_df.sample(n=n_max_scatter_points)
         xlabel, ylabel = xkey, ykey

@@ -239,31 +239,28 @@ def write_per_bin_prediction(args, pred_fitness_bins, enc_trees, true_fitness_bi
 def get_prediction(args, model, spld, lscalers, smpl=None):
     true_fitnesses, true_fitness_bins, true_resps, sstats = None, None, None, None
     sstats = spld['sstats']
-    if args.non_sigmoid_input:
-        if args.is_simu:
-            in_vals = [[int(d[k]) for k in ['carry_cap', 'init_population']] for d in spld['sstats']]
-        else:
-            in_vals = [[args.carry_cap_values, args.init_population_values] for _ in spld['trees']]
-        carry_caps, init_pops = zip(*lscalers['per-tree'].apply_scaling(in_vals=in_vals))
-        if not args.is_simu:
-            print('    carry caps: %d --> %s' % (args.carry_cap_values, carry_caps[:5]))
-            print('    init pops: %d --> %s' % (args.init_population_values, init_pops[:5]))
+    if args.is_simu:
+        in_vals = [[int(d[k]) for k in ['carry_cap', 'init_population']] for d in spld['sstats']]
     else:
-        carry_caps, init_pops = None, None
+        in_vals = [[args.carry_cap_values, args.init_population_values] for _ in spld['trees']]
+    carry_caps, init_pops = zip(*lscalers['per-tree'].apply_scaling(in_vals=in_vals))
+    if not args.is_simu:
+        print('    carry caps: %d --> %s' % (args.carry_cap_values, carry_caps[:5]))
+        print('    init pops: %d --> %s' % (args.init_population_values, init_pops[:5]))
     gcids = spld['gcids']
     if args.model_type == 'sigmoid':
-        const_pred_resps = model.predict(lscalers['per-node'].apply_scaling(in_tensors=spld['trees'], smpl=smpl), carry_caps, init_pops, non_sigmoid_input=args.non_sigmoid_input)  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
+        const_pred_resps = model.predict(lscalers['per-node'].apply_scaling(in_tensors=spld['trees'], smpl=smpl), carry_caps, init_pops)  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
         pred_vals = [[float(rsp.value) for rsp in rlist] for rlist in const_pred_resps]
         if args.is_simu:
             true_resps = spld["birth-responses"]
-        if args.dl_bundle_size > 1:
+        if args.dl_bundle_size is not None:
             raise Exception('need to handle gcids (also need better default gcids in previous lines)')
             true_resps, sstats, gcids = collapse_bundles(args, true_resps, sstats, gcids)
         if args.is_simu:
             assert len(pred_vals) == len(true_resps)
         df = write_sigmoid_prediction(args, pred_vals, sstats, gcids, smpl, true_resps=true_resps)
     elif args.model_type == 'per-cell':
-        assert args.dl_bundle_size == 1
+        assert args.dl_bundle_size is None
         pred_fitnesses = model.predict(lscalers['per-node'].apply_scaling(in_tensors=spld['trees'], smpl=smpl)).numpy()
         for pfit, etree in zip(pred_fitnesses, spld['trees']):
             encode.reset_fill_entries(pfit, etree)
@@ -271,8 +268,8 @@ def get_prediction(args, model, spld, lscalers, smpl=None):
             true_fitnesses, true_resps = [spld[tk] for tk in ["fitnesses", "birth-responses"]]
         df = write_per_cell_prediction(args, pred_fitnesses, spld["trees"], true_fitnesses=true_fitnesses, true_resps=true_resps, sstats=sstats, smpl=smpl)
     elif args.model_type == 'per-bin':
-        assert args.dl_bundle_size == 1
-        pred_fitness_bins = model.predict(lscalers['per-node'].apply_scaling(in_tensors=spld['trees'], smpl=smpl), carry_caps, init_pops, non_sigmoid_input=args.non_sigmoid_input).numpy()
+        assert args.dl_bundle_size is None
+        pred_fitness_bins = model.predict(lscalers['per-node'].apply_scaling(in_tensors=spld['trees'], smpl=smpl), carry_caps, init_pops).numpy()
         if args.is_simu:
             true_fitness_bins, true_resps = [spld[tk] for tk in ["fitness-bins", "birth-responses"]]
         df = write_per_bin_prediction(args, pred_fitness_bins, spld["trees"], true_fitness_bins=true_fitness_bins, true_resps=true_resps, sstats=sstats, smpl=smpl, gcids=gcids)
@@ -408,8 +405,9 @@ def read_tree_files(args):
     print("    read %d trees from %s%s" % (len(samples["trees"]), tfn, rstr))
     if args.is_simu:
         print("      first response pair:\n        birth: %s\n        death: %s" % (samples["birth-responses"][0], samples["death-responses"][0]))
-        check_bundles(samples)
-    if len(samples["trees"]) % args.dl_bundle_size != 0:
+        if args.dl_bundle_size is not None:
+            check_bundles(samples)
+    if args.dl_bundle_size is not None and len(samples["trees"]) % args.dl_bundle_size != 0:
         if args.discard_extra_trees:
             n_remain = len(samples["trees"]) % args.dl_bundle_size
             print('  --discard-extra-trees: discarding %d trees from end of input since total N trees %d isn\'t evenly divisible by bundle size %d' % (n_remain, len(samples['trees']), args.dl_bundle_size))
@@ -453,9 +451,9 @@ def train_and_test(args, start_time):
         responses = [[ConstantResponse(getattr(rsp, p)) for p in args.params_to_predict] for rsp in smpldict['train']['birth-responses']]  # order corresponds to args.params_to_predict (constant response is just a container for one value, and note we don't bother to set the name)
         model = sys.modules['gcdyn.nn'].ParamNetworkModel(responses[0], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
         assert args.params_to_predict == utils.sigmoid_params
-        model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, prebundle_layer_cfg=args.prebundle_layer_cfg, loss_fcn=args.loss_fcn, non_sigmoid_input=args.non_sigmoid_input)
-        carry_caps, init_pops = zip(*lscalers['train']['per-tree'].out_vals) if args.non_sigmoid_input else (None, None)
-        model.fit(lscalers['train']['per-node'].out_tensors, responses, carry_caps, init_pops, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split, non_sigmoid_input=args.non_sigmoid_input)
+        model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, prebundle_layer_cfg=args.prebundle_layer_cfg, loss_fcn=args.loss_fcn)
+        carry_caps, init_pops = zip(*lscalers['train']['per-tree'].out_vals)
+        model.fit(lscalers['train']['per-node'].out_tensors, responses, carry_caps, init_pops, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
         return model
     # ----------------------------------------------------------------------------------------
     def train_per_cell(smpldict, lscalers, max_leaf_count):
@@ -468,9 +466,9 @@ def train_and_test(args, start_time):
     # ----------------------------------------------------------------------------------------
     def train_per_bin(smpldict, lscalers, max_leaf_count):
         model = sys.modules['gcdyn.nn'].PerBinNetworkModel()
-        model.build_model(len(utils.zoom_affy_bins) - 1, max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, loss_fcn=args.loss_fcn, non_sigmoid_input=args.non_sigmoid_input)
-        carry_caps, init_pops = zip(*lscalers['train']['per-tree'].out_vals) if args.non_sigmoid_input else (None, None)
-        model.fit(lscalers['train']['per-node'].out_tensors, smpldict['train']['fitness-bins'], carry_caps, init_pops, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split, non_sigmoid_input=args.non_sigmoid_input)
+        model.build_model(len(utils.zoom_affy_bins) - 1, max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, loss_fcn=args.loss_fcn)
+        carry_caps, init_pops = zip(*lscalers['train']['per-tree'].out_vals)
+        model.fit(lscalers['train']['per-node'].out_tensors, smpldict['train']['fitness-bins'], carry_caps, init_pops, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
         return model
     # ----------------------------------------------------------------------------------------
     samples = read_tree_files(args)
@@ -495,9 +493,8 @@ def train_and_test(args, start_time):
     lscalers = {}
     for smpl in smplists['train']:
         lscalers[smpl] = {'per-node' : LScaler(args, ['distance', 'phenotype'], in_tensors=smpldict[smpl]['trees'], smpl=smpl)}
-        if args.non_sigmoid_input:
-            lscalers[smpl]['per-tree'] = LScaler(args, ['carry_cap', 'init_population'], in_vals=[[int(d[k]) for k in ['carry_cap', 'init_population']] for d in smpldict[smpl]['sstats']], smpl=smpl)
-    for tstr in ['per-node', 'per-tree'] if args.non_sigmoid_input else ['per-node']:
+        lscalers[smpl]['per-tree'] = LScaler(args, ['carry_cap', 'init_population'], in_vals=[[int(d[k]) for k in ['carry_cap', 'init_population']] for d in smpldict[smpl]['sstats']], smpl=smpl)
+    for tstr in ['per-node', 'per-tree']:
         joblib.dump(lscalers['train'][tstr].scaler, encode.output_fn(args.outdir, '%s-train-scaler'%tstr, None))
 
     # silly encodings for testing that essentially train on the output values
@@ -524,11 +521,10 @@ def train_and_test(args, start_time):
 
 # ----------------------------------------------------------------------------------------
 def read_model_files(args, samples):
-    scfns = {tstr : encode.output_fn(args.model_dir, '%s-train-scaler'%tstr, None) for tstr in (['per-node', 'per-tree'] if args.non_sigmoid_input else ['per-node'])}
+    scfns = {tstr : encode.output_fn(args.model_dir, '%s-train-scaler'%tstr, None) for tstr in ['per-node', 'per-tree']}
     print('    reading training scalers from %s' % ' '.join(scfns.values()))
     lscalers = {'per-node' : LScaler(args, ['distance', 'phenotype'], scaler=joblib.load(scfns['per-node']))}
-    if args.non_sigmoid_input:
-        lscalers['per-tree'] = LScaler(args, ['carry_cap', 'init_population'], scaler=joblib.load(scfns['per-tree']))
+    lscalers['per-tree'] = LScaler(args, ['carry_cap', 'init_population'], scaler=joblib.load(scfns['per-tree']))
     if args.model_type == 'sigmoid':
         model = sys.modules['gcdyn.nn'].ParamNetworkModel([ConstantResponse(0) for _ in args.params_to_predict], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
     elif args.model_type == 'per-cell':
@@ -574,7 +570,7 @@ def get_parser():
     parser.add_argument("--loss-fcn", choices=['mse', 'curve', 'per-cell-masked'], default='curve')
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--batch-size", type=int, default=32)
-    parser.add_argument("--dl-bundle-size", type=int, default=1, help='\'dl-\' is to differentiate from \'simu-\' bundle size when calling this from cf-gcdyn.py')
+    parser.add_argument("--dl-bundle-size", type=int, help='\'dl-\' is to differentiate from \'simu-\' bundle size when calling this from cf-gcdyn.py')
     parser.add_argument("--discard-extra-trees", action="store_true", help='By default, the number of trees during inference must be evenly divisible by --dl-bundle-size. If this is set, however, any extras are discarded to allow inference.')
     parser.add_argument("--dropout-rate", type=float, default=0)
     parser.add_argument("--learning-rate", type=float, default=0.001)
@@ -584,7 +580,6 @@ def get_parser():
     parser.add_argument("--validation-split", type=float, default=0.1, help="fraction of training sample to tell keras to hold out for validation during training")
     parser.add_argument("--params-to-predict", default=["xscale", "xshift", "yscale"], nargs="+", choices=["xscale", "xshift", "yscale"] + [k for k in sum_stat_scaled])
     parser.add_argument("--test", action="store_true", help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly")
-    parser.add_argument("--non-sigmoid-input", action="store_true", help="if set, input non-sigmoid parameters (carry_cap, init_population) to first dense layer after convolutional layers in the NN")
     parser.add_argument("--carry-cap-values", type=int, help="input parameter value for data inference (single valued, it\'s just plural to avoid making a new arg in cf-gcdyn.py)")
     parser.add_argument("--init-population-values", type=int, help="input parameter value for data inference (single valued, it\'s just plural to avoid making a new arg in cf-gcdyn.py)")
     parser.add_argument("--is-simu", action="store_true", help="set to this if running on simulation")
@@ -622,7 +617,6 @@ def main():
     if args.carry_cap_values is not None or args.init_population_values is not None:
         if args.is_simu:
             raise Exception('can only set carry cap and init population for data (otherwise they come from the simulation files)')
-    assert args.non_sigmoid_input  # maybe should change the default, but I'm mostly just scared I'll forget the arg
     outputs_exist = all(os.path.exists(csvfn(args, s)) for s in smplists[args.action]) and not args.overwrite
 
     if not outputs_exist:
