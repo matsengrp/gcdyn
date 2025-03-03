@@ -207,7 +207,7 @@ def write_per_cell_prediction(args, pred_fitnesses, enc_trees, true_fitnesses=No
     return df
 
 # ----------------------------------------------------------------------------------------
-def write_per_bin_prediction(args, pred_fitness_bins, enc_trees, true_fitness_bins=None, true_resps=None, sstats=None, smpl=None):
+def write_per_bin_prediction(args, pred_fitness_bins, enc_trees, true_fitness_bins=None, true_resps=None, sstats=None, gcids=None, smpl=None):
     assert true_fitness_bins is None or len(pred_fitness_bins) == len(true_fitness_bins)
     dfdata = {  # make empty df
         "fitness-bins-%s-ival-%d"%(ptype, ival) : []
@@ -215,11 +215,13 @@ def write_per_bin_prediction(args, pred_fitness_bins, enc_trees, true_fitness_bi
         for ival in range(len(utils.zoom_affy_bins)-1)
     }
     dfdata['tree-index'] = []
+    dfdata['gcids'] = []
     if true_fitness_bins is not None:
         for param in true_resps[0]._param_dict:
             dfdata['%s-truth'%param] = []
     for itr, pfbins in enumerate(pred_fitness_bins):
         dfdata['tree-index'].append(sstats[itr]['tree'])  # NOTE tree-index isn't necessarily equal to <itr>
+        dfdata['gcids'].append(gcids[itr])
         for ival, bval in enumerate(pfbins):
             dfdata['fitness-bins-predicted-ival-%d'%ival].append(bval)  # it kind of sucks to expand these out to a column each, but the other options are a) make a new row for each one or b) more complicated csv formatting, both of which are worse
             if true_fitness_bins is not None:
@@ -248,10 +250,10 @@ def get_prediction(args, model, spld, lscalers, smpl=None):
             print('    init pops: %d --> %s' % (args.init_population_values, init_pops[:5]))
     else:
         carry_caps, init_pops = None, None
+    gcids = spld['gcids']
     if args.model_type == 'sigmoid':
         const_pred_resps = model.predict(lscalers['per-node'].apply_scaling(in_tensors=spld['trees'], smpl=smpl), carry_caps, init_pops, non_sigmoid_input=args.non_sigmoid_input)  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
         pred_vals = [[float(rsp.value) for rsp in rlist] for rlist in const_pred_resps]
-        gcids = spld['gcids']
         if args.is_simu:
             true_resps = spld["birth-responses"]
         if args.dl_bundle_size > 1:
@@ -273,7 +275,7 @@ def get_prediction(args, model, spld, lscalers, smpl=None):
         pred_fitness_bins = model.predict(lscalers['per-node'].apply_scaling(in_tensors=spld['trees'], smpl=smpl), carry_caps, init_pops, non_sigmoid_input=args.non_sigmoid_input).numpy()
         if args.is_simu:
             true_fitness_bins, true_resps = [spld[tk] for tk in ["fitness-bins", "birth-responses"]]
-        df = write_per_bin_prediction(args, pred_fitness_bins, spld["trees"], true_fitness_bins=true_fitness_bins, true_resps=true_resps, sstats=sstats, smpl=smpl)
+        df = write_per_bin_prediction(args, pred_fitness_bins, spld["trees"], true_fitness_bins=true_fitness_bins, true_resps=true_resps, sstats=sstats, smpl=smpl, gcids=gcids)
     else:
         assert False
     return df
