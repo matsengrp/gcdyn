@@ -484,6 +484,8 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             resp_type = SigmoidCeilingResponse if ptype=='truth' and 'x_ceil_start' in pdict else SigmoidResponse
             return resp_type(**pdict)
         # ----------------------------------------------------------------------------------------
+        if model_type == 'per-cell':
+            raise Exception('needs updating (see commented block below)')
         if default_xbounds is None:
             default_xbounds = [-2.5, 3]
         default_ybounds = [-0.1, 4]
@@ -491,7 +493,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             os.makedirs(outdir+'/'+smpl)
         from gcdyn.poisson import SigmoidResponse, SigmoidCeilingResponse, LinearResponse
         median_pfo = None
-        pfo_list, true_pfo_list, all_afvals, phist_list = [], [], [], []
+        inf_pfo_list, true_pfo_list, all_afvals = [], [], []
         curve_diffs = {smpl : [], 'validation' : []}
         n_pred_rows = len(prdfs[smpl].index)  # N cells for per-cell, N trees for sigmoid
         n_tree_preds = len(set(prdfs[smpl]['tree-index']))
@@ -502,164 +504,130 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             validation_indices = [i for i in range(n_tree_preds - int(validation_split * n_tree_preds), n_tree_preds)]
         for mfo in seqmeta:
             lmdict[int(mfo['tree-index'])].append(mfo)
-        if model_type == 'sigmoid':
             n_skipped_diffs = {s : 0 for s in curve_diffs}
-            for irow in range(n_tree_preds):
-                tree_index = int(prdfs[smpl]['tree-index'][irow])
-                affy_vals, affy_xbds = init_affy(lmdict, tree_index)
-                is_valid = validation_indices is not None and tree_index in validation_indices
-                smplstr = 'validation' if is_valid else smpl
-                if is_simu:
-                    titlestr = '%s: response index %d / %d' % (smplstr, irow, n_tree_preds)
-                    pred_resp = getresp('predicted', sigmoid_params, irow)
-                    true_resp = getresp('truth', (sigmoid_params + ['x_ceil_start', 'y_ceil']) if 'x_ceil_start-truth' in prdfs[smpl] else sigmoid_params, irow)
-                    true_pfo, pred_pfo = [{'birth-response' : r} for r in [true_resp, pred_resp]]
-                    pred_pfo['xbounds'] = default_xbounds #affy_xbds
-                    for tpfo in [true_pfo, pred_pfo]:
-                        add_slope_vals(tpfo['birth-response'], default_xbounds, tpfo)
-                    true_pfo_list.append(true_pfo)
-                    cdiff = None
-                    if len(curve_diffs[smplstr]) < n_max_diffs:
-                        cdiff = resp_fcn_diff(true_resp, pred_resp, default_xbounds) #affy_xbds) #
-                        curve_diffs[smplstr].append(cdiff)
-                        # ldiff = get_curve_loss(true_resp, pred_resp)  # uncomment (also below) to print also the diff from the curve loss fcn (it should be the same, modulo different xbounds and nsteps
-                    else:
-                        n_skipped_diffs[smplstr] += 1
-                    if irow < n_simu_plots: # or pred_resp.yscale>55 or (cdiff is not None and cdiff > 0.75):
-                        fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-response-%d'%irow, [true_pfo, pred_pfo], titlestr=titlestr, xbounds=default_xbounds,
-                                              affy_vals=affy_vals, colors=['#006600', '#1f77b4'], param_text_pfos=[true_pfo, pred_pfo], diff_vals=[{'diff' : cdiff, 'xbounds' : default_xbounds}] if cdiff is not None else None) #[cdiff]) , ldiff
-                        add_fn(fn)
-                else:
-                    titlestr = '%s (%d / %d)' % (prdfs[smpl]['gcids'][irow] if 'gcids' in prdfs[smpl] else smplstr, irow, n_tree_preds)
-                    pdict = {p : prdfs[smpl]['%s-%s'%(p, 'predicted')][irow] for p in sigmoid_params}
-                    pred_pfo = {'birth-response' : SigmoidResponse(**pdict), 'xbounds' : default_xbounds}
-                    add_slope_vals(pred_pfo['birth-response'], default_xbounds, pred_pfo)
-                    fn = plot_many_curves(outdir+'/'+smpl, 'predicted-response-%d'%irow, [pred_pfo], affy_vals=affy_vals, param_text_pfos=[None, pred_pfo], titlestr=titlestr, colors=['#1f77b4'], xbounds=default_xbounds, ybounds=default_ybounds)
-                    add_fn(fn, fns=single_curve_fns)
-                    if irow < n_max_plots:
-                        add_fn(fn)
-                pfo_list.append(pred_pfo)
-                all_afvals += affy_vals
-            for tk in ['max_slope', 'x_max_slope', 'init_birth']:
-                prdfs[smpl]['%s-predicted'%tk] = [p[tk] for p in pfo_list]
-            if is_simu:
-                for tk in ['max_slope', 'x_max_slope', 'init_birth']:
-                    prdfs[smpl]['%s-truth'%tk] = [p[tk] for p in true_pfo_list]
-            if force_many_plot or not is_simu or all(p['birth-response']==true_pfo_list[0]['birth-response'] for p in true_pfo_list):  # all true responses equal
-                median_pfo = copy.copy(get_median_curve(pfo_list, default_xbounds))  # copy is because it returns an element from the list
-                add_slope_vals(median_pfo['birth-response'], default_xbounds, median_pfo)
-                plt_pfos, colors, alphas = pfo_list, ['#1f77b4' for _ in pfo_list], [0.05 for _ in pfo_list]
-                if is_simu:
-                    tpfo = copy.copy(true_pfo_list[0])
-                    if force_many_plot:
-                        tpfo = copy.copy(get_median_curve(true_pfo_list, default_xbounds))
-                        plt_pfos.append(tpfo)
-                        colors.append('green')
-                        alphas.append(0.5)
-                    add_slope_vals(tpfo['birth-response'], default_xbounds, tpfo)  # re-get slope vals with default bounds
-                    cdiff = resp_fcn_diff(tpfo['birth-response'], median_pfo['birth-response'], default_xbounds)
-                    plt_pfos += true_pfo_list if force_many_plot else [tpfo]
-                    colors += ['green' for _ in range(len(plt_pfos)-len(colors))]
-                    alphas += [(0.05 if force_many_plot else 0.5) for _ in range(len(plt_pfos)-len(alphas))]
-                fn = plot_many_curves(outdir+'/'+smpl, '%s-all-response'%smpl, plt_pfos, affy_vals=all_afvals, titlestr='%s: %d responses' % (smpl, n_tree_preds), colors=colors, alphas=alphas,
-                                                  median_pfo=median_pfo, xbounds=default_xbounds, ybounds=default_ybounds, param_text_pfos=[tpfo, 'median'] if is_simu else [None, 'median'], diff_vals=[cdiff] if is_simu else None)
-                add_fn(fn)
-            if is_simu:
-                fn = plot_all_diffs(outdir+'/'+smpl, 'curve-diffs', curve_diffs, n_skipped_diffs=n_skipped_diffs)
-                add_fn(fn)
-        elif model_type == 'per-cell':
-            all_xvals, all_yvals, all_true_responses = [], [], []
-            irow = 0  # row in file (per-cell, unlike previous block)
-            itree = 0  # itree is zero-based index/count of tree in this file, whereas tree_index is index in original simulation sequence (e.g. if this file starts from 10th tree, itree starts at 0 but tree_index starts at 9)
-            while itree < n_max_plots:
-                tree_index = int(prdfs[smpl]['tree-index'][irow])
-                if trivial_encoding:
-                    true_resp = LinearResponse()
-                    xbounds = None
-                else:
-                    if is_simu:
-                        pdict = {p : prdfs[smpl]['%s-truth'%p][irow] for p in sigmoid_params}
-                        true_resp = SigmoidResponse(**pdict)
-                    xbounds = [mfn([float(m['affinity']) for m in lmdict[tree_index]]) for mfn in [min, max]]
-                tpfl = [{'birth-response' : true_resp, 'xbounds' : xbounds}] if is_simu else []  # short for true_pfo_list, but this one we only use within this block
-                dfdata = {'phenotype' : [], 'fitness-predicted' : []}
-                while irow < n_pred_rows and int(prdfs[smpl]['tree-index'][irow]) == tree_index:  # until next tree
-                    for tk in dfdata:
-                        dfdata[tk].append(prdfs[smpl][tk][irow])
-                    irow += 1
-                smpstr = smpl if validation_indices is None or tree_index not in validation_indices else 'validation'
-                fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-response-%d'%itree, tpfl, titlestr='%s: response index %d / %d' % (smpstr, itree, n_tree_preds),
-                                      colors=['#006600'], pred_xvals=dfdata['phenotype'], pred_yvals=dfdata['fitness-predicted']) #, xbounds=xbounds)
-                assert len(dfdata['phenotype']) == len(dfdata['fitness-predicted'])
-                all_xvals += dfdata['phenotype']
-                all_yvals += dfdata['fitness-predicted']
-                if is_simu:
-                    all_true_responses.append(tpfl[0])
-                add_fn(fn)
-                itree += 1
-            fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-response', tpfl, titlestr='%s: %d / %d responses' % (smpl, len(pfo_list), n_tree_preds),
-                                  pred_xvals=all_xvals, pred_yvals=all_yvals, xbins=zoom_affy_bins, xbounds=default_xbounds, colors=['green' for _ in tpfl])
-            add_fn(fn)
+        if model_type == 'sigmoid':
+            pstr, rkey, nsteps, is_hist = 'response', 'birth-response', 40, False
         elif model_type == 'per-bin':
             import gcdyn.encode as encode
-            n_skipped_diffs = {s : 0 for s in curve_diffs}
-            for irow in range(n_tree_preds):
-                tree_index = int(prdfs[smpl]['tree-index'][irow])
-                affy_vals, affy_xbds = init_affy(lmdict, tree_index)
-                is_valid = validation_indices is not None and tree_index in validation_indices
-                smplstr = 'validation' if is_valid else smpl
+            pstr, rkey, nsteps, is_hist = 'fitness-bins', 'birth-hist', None, True
+        else:
+            assert False  # per-cell needs (minimal) updating
+        for irow in range(n_tree_preds):
+            tree_index = int(prdfs[smpl]['tree-index'][irow])
+            affy_vals, affy_xbds = init_affy(lmdict, tree_index)
+            is_valid = validation_indices is not None and tree_index in validation_indices
+            smplstr = 'validation' if is_valid else smpl
+            if model_type == 'sigmoid':
+                pred_resp = getresp('predicted', sigmoid_params, irow)
+                pred_pfo = {'birth-response' : pred_resp, 'xbounds' : default_xbounds} #affy_xbds
+            elif model_type == 'per-bin':
                 pbvals = [prdfs[smpl]['fitness-bins-predicted-ival-%d'%ival][irow] for ival in range(len(zoom_affy_bins)-1)]  # could also get the bin truth values if we wanted them
                 pred_pfo = {'birth-hist' : encode.decode_fitness_bins(pbvals, zoom_affy_bins)}
-                add_slope_vals(pred_pfo['birth-hist'], default_xbounds, pred_pfo, is_hist=True)
-                # truncate_phist(pred_pfo['birth-hist'], affy_xbds)
-                if is_simu:
-                    titlestr = '%s: response index %d / %d' % (smplstr, irow, n_tree_preds)
-                    true_pfo = {'birth-response' : getresp('truth', (sigmoid_params + ['x_ceil_start', 'y_ceil']) if 'x_ceil_start-truth' in prdfs[smpl] else sigmoid_params, irow)}
-                    add_slope_vals(true_pfo['birth-response'], default_xbounds, true_pfo)
-                    true_pfo_list.append(true_pfo)
-                    cdiff = None
-                    if len(curve_diffs[smplstr]) < n_max_diffs:
-                        cdiff = resp_fcn_diff(true_pfo['birth-response'], pred_pfo['birth-hist'], default_xbounds, resp2_is_hist=True, nsteps=None)
-                        curve_diffs[smplstr].append(cdiff)
-                    else:
-                        n_skipped_diffs[smplstr] += 1
-                    if irow < n_simu_plots: # or (cdiff is not None and cdiff > 0.75):
-                        fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-fitness-bins-%d'%irow, [true_pfo], pred_hists=[pred_pfo], titlestr=titlestr, affy_vals=affy_vals, colors=['#006600'],
-                                              diff_vals=[{'diff' : cdiff, 'xbounds' : default_xbounds}] if cdiff is not None else None, param_text_pfos=[true_pfo, pred_pfo], xbounds=default_xbounds)
-                        add_fn(fn)
+            else:
+                assert False
+            add_slope_vals(pred_pfo[rkey], default_xbounds, pred_pfo, is_hist=is_hist)
+            # truncate_phist(pred_pfo['birth-hist'], affy_xbds)  # would of course only turn this for per-bin
+            if is_simu:
+                titlestr = '%s: response index %d / %d' % (smplstr, irow, n_tree_preds)
+                true_pfo = {'birth-response' : getresp('truth', (sigmoid_params + ['x_ceil_start', 'y_ceil']) if 'x_ceil_start-truth' in prdfs[smpl] else sigmoid_params, irow)}
+                add_slope_vals(true_pfo['birth-response'], default_xbounds, true_pfo)
+                true_pfo_list.append(true_pfo)
+                cdiff = None
+                if len(curve_diffs[smplstr]) < n_max_diffs:
+                    cdiff = resp_fcn_diff(true_pfo['birth-response'], pred_pfo[rkey], default_xbounds, resp2_is_hist=is_hist, nsteps=nsteps)
+                    curve_diffs[smplstr].append(cdiff)
+                    # ldiff = get_curve_loss(true_pfo['birth-response'], pred_resp)  # uncomment (also below) to print also the diff from the curve loss fcn (it should be the same, modulo different xbounds and nsteps
                 else:
-                    titlestr = '%s (%d / %d)' % (prdfs[smpl]['gcids'][irow] if 'gcids' in prdfs[smpl] else smplstr, irow, n_tree_preds)
-                    fn = plot_many_curves(outdir+'/'+smpl, 'predicted-fitness-bins-%d'%irow, [], pred_hists=[pred_pfo], titlestr=titlestr, affy_vals=affy_vals,
-                                          param_text_pfos=[None, pred_pfo], xbounds=default_xbounds, ybounds=default_ybounds)
-                    add_fn(fn, fns=single_curve_fns)
-                    if irow < n_max_plots:
-                        add_fn(fn)
-                phist_list.append(pred_pfo)
-                all_afvals += affy_vals
+                    n_skipped_diffs[smplstr] += 1
+                if irow < n_simu_plots: # or pred_resp.yscale>55 or (cdiff is not None and cdiff > 0.75):
+                    if model_type=='sigmoid':
+                        pfl, phists, colors = [true_pfo, pred_pfo], None, ['#006600', '#1f77b4']
+                    else:
+                        pfl, phists, colors = [true_pfo], [pred_pfo], ['#006600']
+                    fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-%s-%d'%(pstr, irow), pfl, pred_hists=phists,
+                                          titlestr=titlestr, xbounds=default_xbounds, affy_vals=affy_vals, colors=colors,
+                                          diff_vals=[{'diff' : cdiff, 'xbounds' : default_xbounds}] if cdiff is not None else None, param_text_pfos=[true_pfo, pred_pfo])
+                    add_fn(fn)
+            else:
+                titlestr = '%s (%d / %d)' % (prdfs[smpl]['gcids'][irow] if 'gcids' in prdfs[smpl] else smplstr, irow, n_tree_preds)
+                pfl, phists, colors = ([pred_pfo], None, ['#1f77b4']) if model_type=='sigmoid' else ([], [pred_pfo], None)
+                fn = plot_many_curves(outdir+'/'+smpl, 'predicted-%s-%d'%(pstr, irow), pfl, pred_hists=phists, param_text_pfos=[None, pred_pfo],
+                                      titlestr=titlestr, affy_vals=affy_vals, xbounds=default_xbounds, ybounds=default_ybounds, colors=colors)
+                add_fn(fn, fns=single_curve_fns)
+                if irow < n_max_plots:
+                    add_fn(fn)
+            inf_pfo_list.append(pred_pfo)
+            all_afvals += affy_vals
+        for tk in ['max_slope', 'x_max_slope', 'init_birth']:
+            prdfs[smpl]['%s-predicted'%tk] = [p[tk] for p in inf_pfo_list]
+        if is_simu:
             for tk in ['max_slope', 'x_max_slope', 'init_birth']:
-                prdfs[smpl]['%s-predicted'%tk] = [p[tk] for p in phist_list]
+                prdfs[smpl]['%s-truth'%tk] = [p[tk] for p in true_pfo_list]
+        if force_many_plot and model_type=='per-bin':
+            print('    %s --force-many-plot needs to be checked for per-bin model' % wrnstr())
+        if force_many_plot or not is_simu or all(p['birth-response']==true_pfo_list[0]['birth-response'] for p in true_pfo_list):  # all true responses equal
+            # median_pfo = {'birth-hist' : make_mean_hist([p['birth-hist'] for p in inf_pfo_list], ignore_empty_bins=True, percentile_err=True)}
+            median_pfo = copy.copy(get_median_curve(inf_pfo_list, default_xbounds, nsteps=nsteps, is_hist=is_hist))  # copy is because it returns an element from the list
+            add_slope_vals(median_pfo[rkey], default_xbounds, median_pfo, is_hist=is_hist)
+
+            if model_type == 'sigmoid':
+                plt_pfos, colors, alphas, phists = inf_pfo_list, ['#1f77b4' for _ in inf_pfo_list], [0.05 for _ in inf_pfo_list], None
+            else:
+                plt_pfos, colors, alphas, phists = [], (['#006600'] if is_simu else None), ([] if is_simu else None), inf_pfo_list
             if is_simu:
-                for tk in ['max_slope', 'x_max_slope', 'init_birth']:
-                    prdfs[smpl]['%s-truth'%tk] = [p[tk] for p in true_pfo_list]
-            if force_many_plot:
-                print('    %s --force-may-plot not implemented for per-bin model' % wrnstr())
-            if not is_simu or all(p['birth-response']==true_pfo_list[0]['birth-response'] for p in true_pfo_list):  # all true responses equal
-                # median_pfo = {'birth-hist' : make_mean_hist([p['birth-hist'] for p in phist_list], ignore_empty_bins=True, percentile_err=True)}
-                median_pfo = copy.copy(get_median_curve(phist_list, default_xbounds, nsteps=None, is_hist=True))  # copy is because it returns an element from the list
-                add_slope_vals(median_pfo['birth-hist'], default_xbounds, median_pfo, is_hist=True)
-                if is_simu:
-                    tpfo = copy.copy(true_pfo_list[0])
-                    add_slope_vals(tpfo['birth-response'], default_xbounds, tpfo)  # re-get slope vals with default bounds
-                    cdiff = resp_fcn_diff(tpfo['birth-response'], median_pfo['birth-hist'], default_xbounds, resp2_is_hist=True, nsteps=None)
-                titlestr = '%s: %d / %d responses' % (smpl, len(phist_list), n_tree_preds)
-                fn = plot_many_curves(outdir+'/'+smpl, '%s-all-fitness-bins'%smpl, [tpfo] if is_simu else [], titlestr=titlestr, pred_hists=phist_list, median_pfo=median_pfo,
-                                      param_text_pfos=[tpfo, 'median'] if is_simu else [None, 'median'], affy_vals=all_afvals, xbounds=default_xbounds, colors=['#006600'] if is_simu else None, ybounds=[-0.1, 4], diff_vals=[cdiff] if is_simu else None)
-                add_fn(fn, force_new_row=True)
-            if is_simu:
-                fn = plot_all_diffs(outdir+'/'+smpl, 'curve-diffs', curve_diffs, n_skipped_diffs=n_skipped_diffs)
-                add_fn(fn)
-        else:
-            assert False
+                tpfo = copy.copy(true_pfo_list[0])
+                if force_many_plot:
+                    tpfo = copy.copy(get_median_curve(true_pfo_list, default_xbounds))
+                    plt_pfos.append(tpfo)
+                    colors.append('green')
+                    alphas.append(0.5)
+                add_slope_vals(tpfo['birth-response'], default_xbounds, tpfo)  # re-get slope vals with default bounds
+                cdiff = resp_fcn_diff(tpfo['birth-response'], median_pfo[rkey], default_xbounds, resp2_is_hist=is_hist, nsteps=nsteps)
+                plt_pfos += true_pfo_list if force_many_plot else [tpfo]
+                colors += ['green' for _ in range(len(plt_pfos)-len(colors))]
+                alphas += [(0.05 if force_many_plot else 0.5) for _ in range(len(plt_pfos)-len(alphas))]
+            titlestr = '%s: %d responses' % (smpl, n_tree_preds)  # '%s: %d / %d responses' % (smpl, len(inf_pfo_list), n_tree_preds)
+            fn = plot_many_curves(outdir+'/'+smpl, '%s-all-%s'%(smpl, pstr), plt_pfos, pred_hists=phists,
+                                  titlestr=titlestr, median_pfo=median_pfo, affy_vals=all_afvals, xbounds=default_xbounds, ybounds=default_ybounds, diff_vals=[cdiff] if is_simu else None,
+                                  colors=colors, alphas=alphas, param_text_pfos=[tpfo, 'median'] if is_simu else [None, 'median'])
+            add_fn(fn, force_new_row=True)
+        if is_simu:
+            fn = plot_all_diffs(outdir+'/'+smpl, 'curve-diffs', curve_diffs, n_skipped_diffs=n_skipped_diffs)
+            add_fn(fn)
+        # NOTE I just combined the sigmoid+per-cell blocks (above), and still need to integrate this or put in a separate block, but don't want to bother now since I'm not sure I'll ever need it
+        # elif model_type == 'per-cell':
+        #     all_xvals, all_yvals, all_true_responses = [], [], []
+        #     irow = 0  # row in file (per-cell, unlike previous block)
+        #     itree = 0  # itree is zero-based index/count of tree in this file, whereas tree_index is index in original simulation sequence (e.g. if this file starts from 10th tree, itree starts at 0 but tree_index starts at 9)
+        #     while itree < n_max_plots:
+        #         tree_index = int(prdfs[smpl]['tree-index'][irow])
+        #         if trivial_encoding:
+        #             true_resp = LinearResponse()
+        #             xbounds = None
+        #         else:
+        #             if is_simu:
+        #                 pdict = {p : prdfs[smpl]['%s-truth'%p][irow] for p in sigmoid_params}
+        #                 true_resp = SigmoidResponse(**pdict)
+        #             xbounds = [mfn([float(m['affinity']) for m in lmdict[tree_index]]) for mfn in [min, max]]
+        #         tpfl = [{'birth-response' : true_resp, 'xbounds' : xbounds}] if is_simu else []  # short for true_pfo_list, but this one we only use within this block
+        #         dfdata = {'phenotype' : [], 'fitness-predicted' : []}
+        #         while irow < n_pred_rows and int(prdfs[smpl]['tree-index'][irow]) == tree_index:  # until next tree
+        #             for tk in dfdata:
+        #                 dfdata[tk].append(prdfs[smpl][tk][irow])
+        #             irow += 1
+        #         smpstr = smpl if validation_indices is None or tree_index not in validation_indices else 'validation'
+        #         fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-response-%d'%itree, tpfl, titlestr='%s: response index %d / %d' % (smpstr, itree, n_tree_preds),
+        #                               colors=['#006600'], pred_xvals=dfdata['phenotype'], pred_yvals=dfdata['fitness-predicted']) #, xbounds=xbounds)
+        #         assert len(dfdata['phenotype']) == len(dfdata['fitness-predicted'])
+        #         all_xvals += dfdata['phenotype']
+        #         all_yvals += dfdata['fitness-predicted']
+        #         if is_simu:
+        #             all_true_responses.append(tpfl[0])
+        #         add_fn(fn)
+        #         itree += 1
+        #     fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-response', tpfl, titlestr='%s: %d / %d responses' % (smpl, len(pfo_list), n_tree_preds),
+        #                           pred_xvals=all_xvals, pred_yvals=all_yvals, xbins=zoom_affy_bins, xbounds=default_xbounds, colors=['green' for _ in tpfl])
+        #     add_fn(fn)
 
         return median_pfo
     # ----------------------------------------------------------------------------------------
@@ -684,11 +652,15 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
         plt.clf()
         all_df = prdfs[smpl]
         downsample_text = ''
-        if ptype == 'scatter' and len(all_df) > n_max_scatter_points:
-            if param2 is None:
-                return
-            downsample_text = '%d/%d points' % (n_max_scatter_points, len(all_df))
-            all_df = all_df.sample(n=n_max_scatter_points)
+        if len(all_df) > n_max_scatter_points:
+            if ptype == 'scatter':
+                if param2 is None:
+                    return
+                downsample_text = '%d/%d points' % (n_max_scatter_points, len(all_df))
+                all_df = all_df.sample(n=n_max_scatter_points)
+        # elif ptype == 'box':
+        #     print('      skipping box plot for N points %d < %d' % (len(all_df), n_max_scatter_points))
+        #     return
         xlabel, ylabel = xkey, ykey
         emph_vals = None
         if xkey is None or ykey is None:
