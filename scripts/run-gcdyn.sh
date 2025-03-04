@@ -5,7 +5,7 @@
 bin=./projects/cf-gcdyn.py
 iqvsn=v4  # iqtree version [$iqvsn from taraki-gctree-2021-10/run.sh]
 common="--dry --n-max-procs 5 --n-sub-procs 100 --tree-inference-method iqtree --base-outdir /fh/fast/matsen_e/dralph/partis/gcdyn --iqtree-version $iqvsn" #/fh/local/dralph/partis/gcdyn"
-dlargs="--model-type-list sigmoid:per-bin --dl-extra-args=\"--epochs 35 --non-sigmoid-input\""  #  --non-sigmoid-input-list 0:1
+dlargs="--model-type-list sigmoid:per-bin --dl-extra-args=\"--epochs 35\""
 sig_ranges="--xscale-range-list 0.01,2 --xshift-range-list=-0.5,3 --yscale-range-list 0.5,35"
 sxtra="$sig_ranges --simu-extra-args=\"--time-to-sampling-range 17 25 --n-seqs-range 60 95 --n-max-procs 20\""
 # echo  ./projects/cf-gcdyn.py --actions dl-infer --n-max-procs 5 --n-sub-procs 100 --base-outdir /fh/fast/matsen_e/dralph/partis/gcdyn --label for-data --version v3 --xscale-range-list 0.01,2 --xshift-range-list=-0.5,3 --yscale-range-list 0.5,35 --carry-cap-range-list 500,1250 --init-population-values-list 8,16,32,64,128 --time-to-sampling-range-list 17,25 --n-seqs-range-list 40,90 --n-replicates 1 --n-trials-list 5000:50000 --simu-extra-args=\"--n-max-procs 20 --initial-birth-rate-range 0.1 0.5\" --learning-rate-list 0.001 --epochs-list 100 --batch-size-list 32 --model-type-list sigmoid:per-bin --non-sigmoid-input-list 0:1 --tree-inference-method iqtree --dry

@@ -395,27 +395,43 @@ def mpl_init(fsize=20, label_fsize=15):
 
 
 # ----------------------------------------------------------------------------------------
-# plot the two column <xkey> and <ykey> in <tdf> vs each other (pass in xvals separately since we want to have the same range for all [train/test/validation] dfs)
-def sns_xy_plot(ptype, smpl, tdf, xkey, ykey, xvals=None, true_x_eq_y=False, discrete=False, n_bins=8, bin_edges=None, leave_ticks=False, xtra_text=None, emph_vals=None):
-    def tcolor(def_val): return 'darkgreen' if smpl == 'true' else ('red' if smpl=='valid' else def_val)
-    if xvals is None:
-        xvals = tdf[xkey]
+# plot the two column <xkey> and <ykey> in <tdf> vs each other (pass in all_xvals separately for bounds/bins stuff since we want to have the same range for all [train/test/validation] dfs)
+def sns_xy_plot(ptype, smpl, tdf, xkey, ykey, all_xvals=None, true_x_eq_y=False, discrete=False, n_bins=8, bin_edges=None, leave_ticks=False, xtra_text=None, emph_vals=None, n_max_points=None):
+    # ----------------------------------------------------------------------------------------
+    def tcolor(def_val):
+        return 'darkgreen' if smpl == 'true' else ('red' if smpl=='valid' else def_val)
+    # ----------------------------------------------------------------------------------------
+    def addtext(txt, xtra_text):
+        if xtra_text is None:
+            xtra_text = []
+        xtra_text.append(txt)
+        return xtra_text
+    # ----------------------------------------------------------------------------------------
+    if all_xvals is None:
+        all_xvals = tdf[xkey]
+    assert len(tdf[xkey]) == len(tdf[ykey])
+    n_none = len([i for i, (x, y) in enumerate(zip(tdf[xkey], tdf[ykey])) if any(math.isnan(v) for v in [x, y])])
+    if n_none > 0:
+        xtra_text = addtext('%d non-None values (of %d)' % (len(tdf[xkey]) - n_none, len(tdf[xkey])), xtra_text)
+    if n_none == 0 and len(tdf) > n_max_points and ptype == 'scatter':
+        xtra_text = addtext('%d/%d points' % (n_max_points, len(tdf)), xtra_text)
+        tdf = tdf.sample(n=n_max_points)
     if ptype == 'scatter':
         if discrete:
-            ax = sns.swarmplot(tdf, x=xkey, y=ykey, size=4, alpha=0.6, order=sorted(set(xvals)))  # ax.set(title=smpl)
+            ax = sns.swarmplot(tdf, x=xkey, y=ykey, size=4, alpha=0.6, order=sorted(set(all_xvals)))  # ax.set(title=smpl)
         else:
             ax = sns.scatterplot(tdf, x=xkey, y=ykey, alpha=0.6, color=tcolor(None))
             if true_x_eq_y: # and smpl in ['train', 'infer']:  # 'train' and 'valid' go on the same plot, but we don't want to plot the dashed line twice
-                plt.plot([0.95 * min(xvals), 1.05 * max(xvals)], [0.95 * min(xvals), 1.05 * max(xvals)], color="darkgreen", linestyle="--", linewidth=3, alpha=0.7)
+                plt.plot([0.95 * min(all_xvals), 1.05 * max(all_xvals)], [0.95 * min(all_xvals), 1.05 * max(all_xvals)], color="darkgreen", linestyle="--", linewidth=3, alpha=0.7)
         if emph_vals is not None:
             ax.scatter([emph_vals[0][0]], [emph_vals[0][1]], color='red', alpha=0.45, s=100)
     elif ptype == 'box':
         if discrete:
-            bkey, order = xkey, sorted(set(xvals))
+            bkey, order = xkey, sorted(set(all_xvals))
         else:
             if bin_edges is None:
-                dx = (max(xvals) - min(xvals)) / float(n_bins)
-                bin_edges = np.arange(min(xvals), max(xvals) + dx, dx)
+                dx = (max(all_xvals) - min(all_xvals)) / float(n_bins)
+                bin_edges = np.arange(min(all_xvals), max(all_xvals) + dx, dx)
             tdf['x_bins'] = pd.cut(tdf[xkey], bins=bin_edges) #n_bins)
             bkey, order = 'x_bins', None
         boxprops = {"facecolor": "None", 'edgecolor': tcolor('black'), 'linewidth' : 5 if smpl=='valid' else 2}
@@ -437,7 +453,9 @@ def sns_xy_plot(ptype, smpl, tdf, xkey, ykey, xvals=None, true_x_eq_y=False, dis
     else:
         assert False
     if xtra_text is not None:
-        plt.text(0.05, 0.75 if smp_name=='valid' else 0.85, xtra_text, transform=ax.transAxes, color='red' if smp_name=='valid' else None)
+        for itxt, ttxt in enumerate(xtra_text):
+            ypos = 0.75 if smpl=='valid' else 0.85
+            plt.text(0.05, ypos - 0.1 * itxt, ttxt, transform=ax.transAxes, color='red' if smpl=='valid' else None)
     return ax
 
 # ----------------------------------------------------------------------------------------
@@ -535,7 +553,8 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 cdiff = None
                 if len(curve_diffs[smplstr]) < n_max_diffs:
                     cdiff = resp_fcn_diff(true_pfo['birth-response'], pred_pfo[rkey], default_xbounds, resp2_is_hist=is_hist, nsteps=nsteps)
-                    curve_diffs[smplstr].append(cdiff)
+                    pred_pfo['curve-diff'] = cdiff  # I don't like putting the cdiff both in here and in curve_diffs, but the latter splits apart train/valid but inf_pfo_list doesn't (and they subsequently get used in different ways)
+                    curve_diffs[smplstr].append(cdiff)  # NOTE len(curve_diffs[smplstr]) is *not* the same as irow since e.g. train and validation come from same sample
                     # ldiff = get_curve_loss(true_pfo['birth-response'], pred_resp)  # uncomment (also below) to print also the diff from the curve loss fcn (it should be the same, modulo different xbounds and nsteps
                 else:
                     n_skipped_diffs[smplstr] += 1
@@ -558,8 +577,8 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                     add_fn(fn)
             inf_pfo_list.append(pred_pfo)
             all_afvals += affy_vals
-        for tk in ['max_slope', 'x_max_slope', 'init_birth']:
-            prdfs[smpl]['%s-predicted'%tk] = [p[tk] for p in inf_pfo_list]
+        for tk in ['max_slope', 'x_max_slope', 'init_birth', 'curve-diff']:
+            prdfs[smpl]['%s-predicted'%tk] = [p.get(tk) for p in inf_pfo_list]
         if is_simu:
             for tk in ['max_slope', 'x_max_slope', 'init_birth']:
                 prdfs[smpl]['%s-truth'%tk] = [p[tk] for p in true_pfo_list]
@@ -632,15 +651,15 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
         return median_pfo
     # ----------------------------------------------------------------------------------------
     def plot_param_or_pair(ptype, param1, smpl, xkey=None, ykey=None, param2=None, median_pfo=None, n_max_scatter_points=250):
-        # ----------------------------------------------------------------------------------------
-        def get_mae_text(smpl, tdf):
-            if not is_simu:
-                return None
-            mae = np.mean([
-                abs(pval - tval)
-                for tval, pval in zip(tdf[xkey], tdf['%s-predicted'%param1])
-            ])
-            xtra_text = '%s mae: %.4f'%(smpl, mae)
+        # # ----------------------------------------------------------------------------------------
+        # def get_mae_text(smpl, tdf):
+        #     if not is_simu:
+        #         return None
+        #     mae = np.mean([
+        #         abs(pval - tval)
+        #         for tval, pval in zip(tdf[xkey], tdf['%s-predicted'%param1])
+        #     ])
+        #     return '%s mae: %.4f' % (smpl, mae)
         # ----------------------------------------------------------------------------------------
         def get_pval(pfo, pname):
             if pname in pfo:
@@ -651,16 +670,9 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
         # ----------------------------------------------------------------------------------------
         plt.clf()
         all_df = prdfs[smpl]
-        downsample_text = ''
-        if len(all_df) > n_max_scatter_points:
-            if ptype == 'scatter':
-                if param2 is None:
-                    return
-                downsample_text = '%d/%d points' % (n_max_scatter_points, len(all_df))
-                all_df = all_df.sample(n=n_max_scatter_points)
-        # elif ptype == 'box':
-        #     print('      skipping box plot for N points %d < %d' % (len(all_df), n_max_scatter_points))
-        #     return
+        if ptype == 'scatter' and len(all_df) > n_max_scatter_points:
+            if param2 is None:  # don't make true/inferred plots with lots of points (the box plots are sufficient)
+                return
         xlabel, ylabel = xkey, ykey
         emph_vals = None
         if xkey is None or ykey is None:
@@ -684,8 +696,8 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
         if smpl == "train" and validation_split != 0:
             plt_df = all_df.copy()[: len(all_df) - int(validation_split * len(all_df))]  # NOTE this obviously depends on keras continuing to do validation splits this way
             vld_df = all_df.copy()[len(all_df) - int(validation_split * len(all_df)) :]
-            ax1 = sns_xy_plot(ptype, 'valid', vld_df, xkey, ykey, xvals=all_df[xkey], discrete=discrete, bin_edges=bin_edges, leave_ticks=True, xtra_text=get_mae_text('valid', vld_df))  # well, leave ticks *and* don't plot true dashed line
-        ax2 = sns_xy_plot(ptype, smpl, plt_df, xkey, ykey, xvals=all_df[xkey], true_x_eq_y=xkey.replace('-truth', '')==ykey.replace('-predicted', ''), discrete=discrete, bin_edges=bin_edges, xtra_text=get_mae_text(smpl, plt_df), emph_vals=emph_vals)
+            ax1 = sns_xy_plot(ptype, 'valid', vld_df, xkey, ykey, all_xvals=all_df[xkey], discrete=discrete, bin_edges=bin_edges, leave_ticks=True, n_max_points=n_max_scatter_points)  # well, leave ticks *and* don't plot true dashed line
+        ax2 = sns_xy_plot(ptype, smpl, plt_df, xkey, ykey, all_xvals=all_df[xkey], true_x_eq_y=xkey.replace('-truth', '')==ykey.replace('-predicted', ''), discrete=discrete, bin_edges=bin_edges, emph_vals=emph_vals, n_max_points=n_max_scatter_points)
         if param2 is None:
             plt.xlabel("%s value" % xlabel)
             plt.ylabel(ylabel)
@@ -696,8 +708,6 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             titlestr = "predicted values%s" % ('' if smpl=='infer' else ' (%s)'%smpl)
         if xtra_txt is not None:
             titlestr += xtra_txt
-        if downsample_text != '':
-            plt.text(0.05, 0.85, downsample_text, transform=ax2.transAxes)
         plt.title(titlestr, fontweight="bold", fontsize=20)  # if len(title) < 25 else 15)
         fn = "%s/%s%s-%s-%s-hist.svg" % (outdir, param1, '' if param2 is None else '-vs-%s'%param2, smpl, ptype)
         plt.savefig(fn)
@@ -722,6 +732,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 fnames.append([])
                 for param in ['init_birth', 'x_max_slope', 'max_slope']:
                     plot_param_or_pair(ptype, param, smpl, median_pfo=median_pfos[smpl])
+                plot_param_or_pair(ptype, 'xscale', smpl, param2='curve-diff')
             if model_type == 'sigmoid':
                 fnames.append([])
                 for param in params_to_predict:
@@ -729,11 +740,11 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             if model_type == 'per-cell':
                 fnames.append([])
                 plot_param_or_pair(ptype, 'fitness', smpl)
-    if model_type == 'sigmoid':
-        for smpl in sorted(prdfs, reverse=True):
-            fnames.append([])
-            for p1, p2 in itertools.combinations(params_to_predict, 2):
-                plot_param_or_pair('scatter', p1, smpl, param2=p2, median_pfo=median_pfos[smpl])
+    # if model_type == 'sigmoid':  # 2d param1 vs param2 plots
+    #     for smpl in sorted(prdfs, reverse=True):
+    #         fnames.append([])
+    #         for p1, p2 in itertools.combinations(params_to_predict, 2):
+    #             plot_param_or_pair('scatter', p1, smpl, param2=p2, median_pfo=median_pfos[smpl])
     make_html(outdir, fnames=fnames, extra_links=[('single curves', '%s/single-curves.html'%os.path.basename(outdir)), ])
     make_html(outdir, fnames=single_curve_fns, htmlfname='%s/single-curves.html'%outdir)
 
@@ -1128,7 +1139,7 @@ def affy_plot(affy_vals, ax, n_bins=50, xbounds=None, color=None, alpha=0.6):  #
 def plot_all_diffs(plotdir, plotname, curve_diffs, n_bins=30, xbounds=[0, 1], n_skipped_diffs=None):
     mpl_init()
     fig, ax = plt.subplots()
-    all_vals = [v for vlist in curve_diffs.values() for v in vlist]
+    all_vals = [v for vlist in curve_diffs.values() for v in vlist if v is not None]
     range_list = (xbounds+all_vals) if max(all_vals)-min(all_vals)>0.1 else all_vals  # if all_vals has a very narrow spread, then a bug in sns causes a crash (when range of all_vals is too small compared to bin width) [kinda guessing on 0.1, it may need to be adjusted]
     xmin, xmax = [mfn(range_list) for mfn in [min, max]]
     sns.histplot(curve_diffs if len(curve_diffs)>1 else all_vals, multiple='stack', binwidth=(xmax - xmin) / n_bins)
