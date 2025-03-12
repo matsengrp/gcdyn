@@ -362,7 +362,7 @@ parser.add_argument("--shared-replay-dir", default='/fh/fast/matsen_e/shared/rep
 parser.add_argument('--base-iqtree-dir', default='/fh/fast/matsen_e/processed-data/partis/taraki-gctree-2021-10/iqtree', help='dir with iqtree trees from replay data run with datascripts/meta/taraki-gctree-2021-10/iqtree-run.py')
 parser.add_argument('--iqtree-version', help='version of results in --base-iqtree-dir to use')
 # parser.add_argument("--beast-dirs", default='/fh/fast/matsen_e/shared/replay-related/jareds-replay-fork/gcreplay/nextflow/results/2023-05-18-beast:/fh/fast/matsen_e/data/taraki-gctree-2021-10/gcreplay/nextflow/results/archive/2024-06-23-beast-15-day')
-parser.add_argument("--beast-dirs", default='/fh/fast/matsen_e/shared/replay/gcreplay/nextflow/beast-results')
+parser.add_argument("--beast-dirs", default='/fh/fast/matsen_e/shared/replay/gcreplay/beast-results')
 parser.add_argument("--output-version", default='test')
 parser.add_argument("--is-beast-simu", action='store_true', help='atm only used for simulation that\'s been run through beast (i.e. we\'re reading from --beast-dirs)')
 parser.add_argument("--check-gct-kd", action='store_true')

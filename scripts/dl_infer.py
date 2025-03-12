@@ -422,6 +422,20 @@ def read_tree_files(args):
             samples[tk] = samples[tk][:args.n_max_trees]
             assert len(samples[tk]) == args.n_max_trees
         print('    --n-max-trees: only using first %d / %d trees' % (len(samples[tk]), n_before))
+#     if args.is_simu:
+#         new_samples = {k : [] for k in samples}
+#         for ismpl in range(len(samples['trees'])):
+#             if samples['birth-responses'][ismpl].yscale > 20:
+#                 continue
+#             if samples['birth-responses'][ismpl].xscale < 0.5:
+#                 continue
+#             if samples['birth-responses'][ismpl].xshift < 1:
+#                 continue
+#             for tk in samples:
+#                 new_samples[tk].append(samples[tk][ismpl])
+#         samples = new_samples
+#         # print('    --n-max-trees: only using first %d / %d trees' % (len(samples[tk]), n_before))
+
     return samples
 
 # ----------------------------------------------------------------------------------------

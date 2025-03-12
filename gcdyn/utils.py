@@ -32,6 +32,7 @@ affy_bins = [-15, -10, -7, -5, -3, -2, -1, -0.5, -0.25, 0.25, 0.5, 1, 1.5, 2, 2.
 # zoom_affy_bins = [-2, -1, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.25, 1.5, 2, 2.5]
 zoom_affy_bins = [-2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3]
 fitness_bins = [-1.5, -1, -0.75, -0.5, -0.2, 0, 0.1, 0.25, 0.4, 0.5, 0.75, 1, 1.5, 2] #, 5, 15]
+pltlabels = {'affinity' : 'affinity ($ -\Delta log_{10} K_D $)'}
 
 def simple_fivemer_contexts(sequence: str):
     r"""Decompose a sequence into a list of its 5mer contexts.
@@ -410,7 +411,7 @@ def sns_xy_plot(ptype, smpl, tdf, xkey, ykey, all_xvals=None, true_x_eq_y=False,
     if all_xvals is None:
         all_xvals = tdf[xkey]
     assert len(tdf[xkey]) == len(tdf[ykey])
-    n_none = len([i for i, (x, y) in enumerate(zip(tdf[xkey], tdf[ykey])) if any(math.isnan(v) for v in [x, y])])
+    n_none = len([i for i, (x, y) in enumerate(zip(tdf[xkey], tdf[ykey])) if any(v is None or math.isnan(v) for v in [x, y])])
     if n_none > 0:
         xtra_text = addtext('%d non-None values (of %d)' % (len(tdf[xkey]) - n_none, len(tdf[xkey])), xtra_text)
     if n_none == 0 and len(tdf) > n_max_points and ptype == 'scatter':
@@ -497,7 +498,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
         # ----------------------------------------------------------------------------------------
         def getresp(ptype, plist, irow):
             pdict = {p : prdfs[smpl]['%s-%s'%(p, ptype)][irow] for p in plist}
-            if 'y_ceil' in pdict and math.isnan(pdict['y_ceil']):  # for some reason pandas reads an empty column as nan instead of None
+            if 'y_ceil' in pdict and pdict['y_ceil'] is not None and math.isnan(pdict['y_ceil']):  # for some reason pandas reads an empty column as nan instead of None
                 pdict['y_ceil'] = None
             resp_type = SigmoidCeilingResponse if ptype=='truth' and 'x_ceil_start' in pdict else SigmoidResponse
             return resp_type(**pdict)
@@ -565,7 +566,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                         pfl, phists, colors = [true_pfo], [pred_pfo], ['#006600']
                     fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-%s-%d'%(pstr, irow), pfl, pred_hists=phists,
                                           titlestr=titlestr, xbounds=default_xbounds, affy_vals=affy_vals, colors=colors,
-                                          diff_vals=[{'diff' : cdiff, 'xbounds' : default_xbounds}] if cdiff is not None else None, param_text_pfos=[true_pfo, pred_pfo])
+                                          diff_vals=[{'diff' : cdiff}] if cdiff is not None else None, param_text_pfos=[true_pfo, pred_pfo])  # , 'xbounds' : default_xbounds
                     add_fn(fn)
             else:
                 titlestr = '%s (%d / %d)' % (prdfs[smpl]['gcids'][irow] if 'gcids' in prdfs[smpl] else smplstr, irow, n_tree_preds)
@@ -714,6 +715,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
         add_fn(fn)
     # ----------------------------------------------------------------------------------------
     mpl_init()
+    mpl.rcParams["mathtext.default"] = 'regular'
     if not os.path.exists(outdir):
         os.makedirs(outdir)
     fnames, single_curve_fns = [], []
@@ -732,7 +734,8 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 fnames.append([])
                 for param in ['init_birth', 'x_max_slope', 'max_slope']:
                     plot_param_or_pair(ptype, param, smpl, median_pfo=median_pfos[smpl])
-                plot_param_or_pair(ptype, 'xscale', smpl, param2='curve-diff')
+                if is_simu:
+                    plot_param_or_pair(ptype, 'xscale' if model_type=='sigmoid' else 'max_slope', smpl, param2='curve-diff')
             if model_type == 'sigmoid':
                 fnames.append([])
                 for param in params_to_predict:
@@ -993,6 +996,7 @@ def resp_plot(bresp, ax, xbounds, alpha=0.8, color="#990012", nsteps=40, linewid
     xvals, dx = get_resp_xvals(xbounds, nsteps)
     rvals = get_resp_vals(bresp, xbounds, nsteps)
     data = {"affinity": xvals, "lambda": rvals}
+    ax.set(xlabel=pltlabels.get('affinity')) #, ylabel='lambda')
     sns.lineplot(data, x="affinity", y="lambda", ax=ax, linewidth=linewidth, linestyle=linestyle, color=color, alpha=alpha)
 
 # ----------------------------------------------------------------------------------------
@@ -1090,7 +1094,7 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
     if pred_hists is not None:
         for pfo in pred_hists:
             pfo['birth-hist'].mpl_plot(ax, square_bins=True, remove_empty_bins=True, color='#1f77b4', no_vertical_bin_lines=True, alpha=0.6 if len(pred_hists)==1 else 0.1, linewidth=1.5 if len(pred_hists)>1 else 3, errors=False)
-        ax.set(xlabel='affinity', ylabel='lambda')
+        ax.set(xlabel=pltlabels.get('affinity'), ylabel='lambda')
     for ipf, pfo in enumerate(pfo_list):
         alpha = (0.1 if len(pfo_list)>5 else 0.5) if alphas is None else alphas[ipf]
         resp_plot(pfo['birth-response'], ax, alpha=alpha, color='#990012' if colors is None else colors[ipf], xbounds=pfo['xbounds'] if 'xbounds' in pfo and pfo['xbounds'] is not None else default_xbounds, linewidth=1 if colors is None else 2)  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
@@ -1142,7 +1146,7 @@ def plot_all_diffs(plotdir, plotname, curve_diffs, n_bins=30, xbounds=[0, 1], n_
     all_vals = [v for vlist in curve_diffs.values() for v in vlist if v is not None]
     range_list = (xbounds+all_vals) if max(all_vals)-min(all_vals)>0.1 else all_vals  # if all_vals has a very narrow spread, then a bug in sns causes a crash (when range of all_vals is too small compared to bin width) [kinda guessing on 0.1, it may need to be adjusted]
     xmin, xmax = [mfn(range_list) for mfn in [min, max]]
-    sns.histplot(curve_diffs if len(curve_diffs)>1 else all_vals, multiple='stack', binwidth=(xmax - xmin) / n_bins)
+    sns.histplot({s : vals for s, vals in curve_diffs.items() if len(vals)>0} if len(curve_diffs)>1 else all_vals, multiple='dodge', binwidth=(xmax - xmin) / n_bins)
     titlestr = ''
     for ism, smpl in enumerate([s for s, v in sorted(curve_diffs.items()) if len(v)>0]):
         fig.text(0.55, 0.6-0.065*ism, '%s:  mean %.3f'%(smpl, np.mean(curve_diffs[smpl])), fontsize=17)
@@ -1150,6 +1154,7 @@ def plot_all_diffs(plotdir, plotname, curve_diffs, n_bins=30, xbounds=[0, 1], n_
         if n_skipped_diffs is not None and n_skipped_diffs[smpl] > 0:
             fig.text(0.475, 0.45-0.07*ism, '%s: skipped %d'%(smpl, n_skipped_diffs[smpl]), fontsize=20)
     ax.set(title=titlestr, xlabel='curve difference loss')
+    ax.set_yscale('log')
     fn = "%s/%s.svg" % (plotdir, plotname)
     plt.savefig(fn)
     plt.close()
