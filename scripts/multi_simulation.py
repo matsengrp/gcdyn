@@ -606,7 +606,7 @@ def get_parser():
     parser.add_argument("--carry-cap-values", default=[300], nargs='+', type=int)
     parser.add_argument("--carry-cap-range", nargs='+', type=int)
     parser.add_argument("--capacity-method", default="birth", choices=["birth", "death", "hard", None], help="see bdms.evolve() docs. Note that 'death' often involves a ton of churn, which makes for very slow simulations.")
-    parser.add_argument("--init-population-values", type=int, default=2, nargs='+')
+    parser.add_argument("--init-population-values", type=int, default=[2], nargs='+')
     parser.add_argument("--init-population-range", help='DO NOT USE (use --init-population-values instead)')
     parser.add_argument("--seed", default=0, type=int, help="random seed")
     parser.add_argument("--outdir", default=os.getcwd())
