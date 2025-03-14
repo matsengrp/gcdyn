@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# zenodo dir: /fh/fast/matsen_e/dralph/partis/gcdyn/zenodo/
+
 # TEST ./projects/cf-gcdyn.py --actions simu:dl-infer --n-replicates 1 --label test --version v0 --dry --test --n-trials 6 --n-sub-procs 3
 
 bin=./projects/cf-gcdyn.py

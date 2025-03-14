@@ -43,6 +43,7 @@ setup(
         "colored-traceback",
         "sphinx-argparse",
         "pysam",
+        "make",
     ],
     extras_require={
         "PyQt5": [
