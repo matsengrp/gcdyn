@@ -120,6 +120,14 @@ def generate_sequences_and_tree(
                 nonsense_phenotype_value=args.nonsense_phenotype_value,
             )
             live_leaves = [l for l in tree if l.event == tree._SURVIVAL_EVENT]
+            if len(live_leaves) == 0:
+                print('    %s zero live leaves in final tree, failing' % utils.wrnstr())
+                estr = 'zero-live'
+                if estr not in err_strs:
+                    err_strs[estr] = 0
+                err_strs[estr] += 1
+                success = False
+                continue
             print(
                 "    finished tree with %d live tips (%d total tips) at time %.1f%s (%.1f sec)"
                 % (len(live_leaves), len(tree), np.mean([l.t for l in tree.iter_leaves()]), '' if itry==0 else '  try %d' % (itry + 1),  time.time() - tree_start)
@@ -163,7 +171,11 @@ def generate_sequences_and_tree(
     if len(live_leaves) < n_to_sample:
         print("  %s --n-seqs set to %d but tree only has %d live tips, so just sampling all of them" % (utils.color("yellow", "warning"), n_to_sample, len(live_leaves)))
         n_to_sample = len(live_leaves)
-    tree.sample_survivors(n=n_to_sample, seed=seed)
+    # assert n_to_sample is None or args.sample_fraction is None
+    if args.sample_fraction is not None:
+        print('    %s ignoring n_to_sample since --sample-fraction was set' % utils.wrnstr())
+        n_to_sample = None
+    tree.sample_survivors(n=n_to_sample, p=args.sample_fraction, seed=seed)
     tree.prune()
     tree.remove_mutation_events()
     tree.prune_nonsense_leaves(args.nonsense_phenotype_value)
@@ -597,6 +609,7 @@ def get_parser():
     parser = argparse.ArgumentParser(formatter_class=MultiplyInheritedFormatter, description=helpstr)
     parser.add_argument("--n-seqs-values", default=[70], nargs="+", type=int, help="Number of sequences to observe (list of values)")
     parser.add_argument("--n-seqs-range", nargs="+", type=int)
+    parser.add_argument("--sample-fraction", type=float, help="fraction of final leaves to observe")
     parser.add_argument("--n-trials", default=120, type=int, help="Number of trials/GCs to simulate")
     parser.add_argument("--n-max-tries", default=100, type=int, help="Number of times to retry simulation if it fails due to reaching either the min or max number of leaves.")
     parser.add_argument("--time-to-sampling-values", default=[20], nargs="+", type=int, help="List of values from which to choose for time to sampling.")
@@ -842,7 +855,7 @@ def run_sub_procs(args):
                 continue
             add_pval(pcounts, pname, pval)
         add_pval(pcounts, "initial_birth_rate", pkfo['birth'].λ_phenotype(0))
-        add_pval(pcounts, "death", pkfo['death'].const_val)
+        add_pval(pcounts, "death", pkfo['death'].const_val if args.death_response=='constant-nonsense' else pkfo['death'].value)
     with open(outfn(args, 'summary-stats')) as cfile:
         reader = csv.DictReader(cfile)
         for line in reader:
