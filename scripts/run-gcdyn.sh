@@ -16,9 +16,10 @@ sxtra="$sig_ranges --simu-extra-args=\"--time-to-sampling-range 17 25 --n-seqs-r
 
 dlxtra="--dl-model-label-str for-data/v5/n-trials-25000 --dl-model-vars model-type"
 dmargs="--xscale-values-list 1.5 --xshift-values-list 1.9 --simu-extra-args=\"--carry-cap-values 2000 --init-population-values 8 --mutability-multiplier 0.5 --time-to-sampling-values 20 --n-seqs-range 60 95 --n-trials 120\" --n-sub-procs 30"
-echo $bin --actions simu --label data-mimic --version v7-death --yscale-values-list 6.5 --death-values-list 0.05:0.1:0.2:0.5 $dlargs $dlxtra $common $dmargs
+# echo $bin --actions simu --label data-mimic --version v7-death --yscale-values-list 6.5 --death-values-list 0.05:0.1:0.2:0.5 $dlargs $dlxtra $common $dmargs
 # echo $bin --actions simu --label data-mimic --version v7-yscale --yscale-values-list 5:10:20 $dlargs $dlxtra $common $dmargs
 # echo $bin --actions simu --label x-ceil --version v5 --yscale-values-list 6.5 --birth-response-list sigmoid-ceil --x-ceil-start-values-list 1.5 $dlargs $dlxtra $common $dmargs
+echo $bin --actions simu --label thanasis --version v0 $dlargs $dlxtra $common --simu-extra-args=\"--xscale-values 1.5 --xshift-values -0.1 --yscale-values 2.5 --yshift 0.6 --death-response constant --min-survivors 0 --death-values 1 --carry-cap-values 1000 --init-population-values 2 --mutability-multiplier 1 --time-to-sampling-values 15 --sample-fraction 0.1 --capacity-method hard --n-trials 120\" --n-sub-procs 30
 exit 0
 
 datadir=/fh/fast/matsen_e/data/taraki-gctree-2021-10/iqtree-processed-data/$iqvsn  # actual data
