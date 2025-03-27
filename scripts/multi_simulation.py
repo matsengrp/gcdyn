@@ -34,7 +34,11 @@ def print_final_response_vals(tree, birth_resp, death_resp, final_time):
     print("                             x         birth           death")
     print("      time   N seqs.     min   max    min  max       min     max")
     xvals, bvals, dvals = [], [], []
-    for tval in range(final_time + 1):  # kind of weird/arbitrary to take integer values
+    max_node_time = max(node.t for node in tree)
+    if final_time > max_node_time:
+        print('    %s sampling time %d greater than max time in tree %d when trying to slice, so decreasing max slice time' % (utils.wrnstr(), final_time, max_node_time))
+        final_time = max_node_time
+    for tval in range(int(final_time) + 1):  # kind of weird/arbitrary to take integer values
         txv = sorted(tree.slice(tval))
         tbv, tdv = [[r.λ_phenotype(x) for x in txv] for r in [birth_resp, death_resp]]
         xvals += txv
@@ -97,6 +101,7 @@ def generate_sequences_and_tree(
     seed=0,
 ):
     err_strs, success = {}, False
+    total_start = time.time()
     for itry in range(args.n_max_tries):
         try:
             tree_start = time.time()
@@ -120,18 +125,15 @@ def generate_sequences_and_tree(
                 nonsense_phenotype_value=args.nonsense_phenotype_value,
             )
             live_leaves = [l for l in tree if l.event == tree._SURVIVAL_EVENT]
-            if len(live_leaves) == 0:
-                print('    %s zero live leaves in final tree, failing' % utils.wrnstr())
-                estr = 'zero-live'
+            if len(live_leaves) < args.min_survivors:
+                print('    %s fewer live leaves %d than --min-survivors %d in final tree, failing' % (utils.wrnstr(), len(live_leaves), args.min_survivors))
+                estr = 'few-live'
                 if estr not in err_strs:
                     err_strs[estr] = 0
                 err_strs[estr] += 1
                 success = False
                 continue
-            print(
-                "    finished tree with %d live tips (%d total tips) at time %.1f%s (%.1f sec)"
-                % (len(live_leaves), len(tree), np.mean([l.t for l in tree.iter_leaves()]), '' if itry==0 else '  try %d' % (itry + 1),  time.time() - tree_start)
-            )
+            print("%s  finished tree with %d live tips (%d total tips) sampled at time %.1f%s (this try time: %.1fs, all tries: %.1fs)" % ('' if itry==0 else '\n', len(live_leaves), len(tree), np.mean([l.t for l in tree.iter_leaves()]), '' if itry==0 else '  try %d' % (itry + 1),  time.time() - tree_start,  time.time() - total_start))
             if args.debug:
                 print_final_response_vals(tree, birth_resp, death_resp, params['time_to_sampling'])
             success = True
@@ -145,11 +147,7 @@ def generate_sequences_and_tree(
             if estr not in err_strs:
                 err_strs[estr] = 0
             err_strs[estr] += 1
-            print(
-                "%s%s" % ("failures: " if sum(err_strs.values()) == 1 else "", "."),
-                end="",
-                flush=True,
-            )
+            print("%s%s" % ("    failures: " if sum(err_strs.values()) == 1 else "", "."), end="", flush=True)
             continue
     print()
     for estr in sorted([k for k, v in err_strs.items() if v > 0]):
@@ -192,6 +190,7 @@ def generate_sequences_and_tree(
         assert np.isclose(node.t - node.up.t, node.dist)
 
     set_mut_stats(tree, debug=args.debug)
+    print('    total tree time: %.1fs' % (time.time() - total_start))
 
     return fnlist, tree
 
@@ -291,7 +290,7 @@ def add_pval(pcounts, pname, pval):
 # ----------------------------------------------------------------------------------------
 def choose_params(args, pcounts, itrial):
     params = {}
-    plist = ["xscale", "xshift", "yscale", 'x_ceil_start', 'death', "time_to_sampling", "carry_cap", "init_population", "n_seqs"]  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
+    plist = ['xscale', 'xshift', 'yscale', 'yshift', 'x_ceil_start', 'death', 'time_to_sampling', 'carry_cap', 'init_population', 'n_seqs']  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
     for pname in plist:  # NOTE compare to loop at end of run_sub_procs()
         extra_bounds, dbgstrs = None, []
         if args.use_generated_parameter_bounds:
@@ -345,7 +344,7 @@ def get_responses(args, params, pcounts):
                 "xscale": params['xscale'],
                 "xshift": params['xshift'],
                 "yscale": params['yscale'],
-                "yshift": args.yshift,
+                "yshift": params['yshift'],
             }
             if args.birth_response == 'sigmoid-ceil':
                 kwargs.update({
@@ -374,7 +373,8 @@ def get_responses(args, params, pcounts):
     if bresp.λ_phenotype(0) < args.initial_birth_rate_range[0] - 1e-8 or bresp.λ_phenotype(0) > args.initial_birth_rate_range[1] + 1e-8:
         wstr = 'initial birth response outside specified range: %.3f not in [%.3f, %.3f]' % (bresp.λ_phenotype(0), args.initial_birth_rate_range[0], args.initial_birth_rate_range[1])
         if args.use_generated_parameter_bounds:
-            raise Exception(wstr)
+            print('      %s %s' % (utils.color('yellow', 'warning'), wstr))
+            # raise Exception(wstr)
         else:
             print('      %s %s' % (utils.color('yellow', 'warning'), wstr))
     print_resps(args, bresp, dresp)
@@ -468,6 +468,8 @@ def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itri
             for tfn in existing_fns:
                 os.remove('%s/%s' % (wkdir, tfn))
         ifn = '%s/input-seqs.fa' % wkdir
+        if len(true_leaf_seqs) < 3:
+            raise Exception('can\'t make inferred tree with fewer than %d seqs (got %d)' % (3, len(true_leaf_seqs)))
         input_seqs = true_leaf_seqs
         if args.tree_inference_method == 'gctree':
             input_seqs.insert(0, {'name' : 'naive', 'seq' : replay.NAIVE_SEQUENCE})
@@ -631,11 +633,12 @@ def get_parser():
     parser.add_argument("--xscale-values", default=[1], nargs="+", type=float, help="list of birth response xscale parameter values from which to choose")
     parser.add_argument("--xshift-values", default=[1], nargs="+", type=float, help="list of birth response xshift parameter values from which to choose")
     parser.add_argument("--yscale-values", default=[15], nargs="+", type=float, help="list of birth response yscale parameter values from which to choose")
+    parser.add_argument("--yshift-values", default=[0], nargs="+", type=float, help="list of birth response yshift parameter values from which to choose")
     parser.add_argument("--xscale-range", nargs="+", type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response xscale parameter for each tree. Overrides --xscale-values. Suggest 0.5 5")
     parser.add_argument("--xshift-range", nargs="+", type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response xshift parameter for each tree. Overrides --xshift-values. Suggest -0.5 3")
     parser.add_argument("--yscale-range", nargs="+", type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response yscale parameter for each tree. Overrides --yscale-values. Suggest 1 50")
-    parser.add_argument("--initial-birth-rate-range", default=[0.1, 10], nargs="+", type=float, help="Pair of values (min/max) for initial/default/average growth rate (i.e. when affinity/x=0). Used to set --yscale.")
-    parser.add_argument("--yshift", default=0, type=float, help="atm this shouldn't (need to, at least) be changed")
+    parser.add_argument("--yshift-range", nargs="+", type=float, help="Pair of values (min/max) between which to choose at uniform random the birth response yshift parameter for each tree. Overrides --yshift-values")
+    parser.add_argument("--initial-birth-rate-range", default=[0.1, 15], nargs="+", type=float, help="Pair of values (min/max) for initial/default/average growth rate (i.e. when affinity/x=0). Used to set --yscale.")
     parser.add_argument("--x-ceil-start-range", nargs='+', type=float, help="x value at which \"affinity ceiling\" begins in sigmoid-ceil response")
     parser.add_argument("--x-ceil-start-values", nargs='+', type=float)
     parser.add_argument("--y-ceil", type=float, help="y value of \"affinity ceiling\" in sigmoid-ceil response")
@@ -656,7 +659,7 @@ def get_parser():
     parser.add_argument("--n-to-plot", type=int, default=10, help="number of tree slice plots to make")
     parser.add_argument("--tree-inference-method", help='if not set, doesn\'t run any inference after simulation')
     parser.add_argument("--partis-dir", default='%s/work/partis'%os.getenv('HOME'))
-    parser.add_argument("--constant-params", default=['y_ceil', 'yshift'], help="for internal use only")
+    parser.add_argument("--constant-params", default=['y_ceil'], help="for internal use only")
     parser.add_argument("--int-params", default=["time_to_sampling", "carry_cap", "init_population", "n_seqs"], help="for internal use only")
     return parser
 
@@ -895,6 +898,8 @@ def main():
             print('    %s fewer N trials %d than dl predictions %d, so won\'t use all the dl predictions' % (utils.wrnstr(), args.n_trials, len(args.dl_pvals)))
     if args.tree_inference_method is not None and args.sample_internal_nodes:
         raise Exception('this isn\'t implemented, and it\'s not really clear that it should be -- for instance, do the internal nodes get passed to tree inference, or do we just sample the inferred internal nodes?')
+    if args.min_survivors is not None and args.min_survivors == 0:
+        raise Exception('--min-survivors must be positive')
 
     random.seed(args.seed)
     np.random.seed(args.seed)
@@ -943,6 +948,7 @@ def main():
             params = choose_params(args, pcounts, itrial)  # NOTE make *sure* you always get to this point in the loop (i.e. don't put any continue statements above it)
             n_times_used = 0
         n_times_used += 1
+        birth_resp, death_resp = get_responses(args, params, pcounts)
         if os.path.exists(ofn) and not args.overwrite:
             print("    output %s already exists, skipping" % ofn)
             pfo = read_dill_file(ofn)
@@ -961,7 +967,6 @@ def main():
             n_missing += 1
             continue
         sys.stdout.flush()
-        birth_resp, death_resp = get_responses(args, params, pcounts)
         fnlist, tree = generate_sequences_and_tree(
             args,
             params,

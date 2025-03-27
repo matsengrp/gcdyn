@@ -27,7 +27,7 @@ import math
 import string
 import csv
 
-sigmoid_params = ['xscale', 'xshift', 'yscale']  # ick
+sigmoid_params = ['xscale', 'xshift', 'yscale', 'yshift']  # ick
 affy_bins = [-15, -10, -7, -5, -3, -2, -1, -0.5, -0.25, 0.25, 0.5, 1, 1.5, 2, 2.5, 3.5, 4, 5, 7]
 # zoom_affy_bins = [-2, -1, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.25, 1.5, 2, 2.5]
 zoom_affy_bins = [-2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3]
@@ -477,12 +477,12 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             fn = plot_many_curves(outdir+'/'+smpl, plotname, [{'birth-response' : r} for r in [true_resp, pred_resp]], titlestr=titlestr,
                                   affy_vals=affy_vals, colors=['#006600', '#990012'], add_true_pred_text=True, diff_vals=diff_vals, xbounds=xbounds)
             add_fn(fn)
-        # ----------------------------------------------------------------------------------------
-        def get_curve_loss(resp_1, resp_2):
-            from gcdyn.nn import curve_loss
-            import tensorflow as tf
-            def split_resp(r): return [float(v) for v in [r.xscale, r.xshift, r.yscale]]
-            return curve_loss(tf.constant([split_resp(resp_1)]), tf.constant([split_resp(resp_2)]))
+        # # ----------------------------------------------------------------------------------------
+        # def get_curve_loss(resp_1, resp_2):
+        #     from gcdyn.nn import curve_loss
+        #     import tensorflow as tf
+        #     def split_resp(r): return [float(v) for v in [r.xscale, r.xshift, r.yscale]]
+        #     return curve_loss(tf.constant([split_resp(resp_1)]), tf.constant([split_resp(resp_2)]))
         # ----------------------------------------------------------------------------------------
         def init_affy(lmdict, tree_index):
             affy_vals = [float(m['affinity']) for m in lmdict[tree_index] if float(m['affinity'])!=nonsense_affy_val]
@@ -544,12 +544,12 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 pred_pfo = {'birth-hist' : encode.decode_fitness_bins(pbvals, zoom_affy_bins)}
             else:
                 assert False
-            add_slope_vals(pred_pfo[rkey], default_xbounds, pred_pfo, is_hist=is_hist)
+            # add_slope_vals(pred_pfo[rkey], default_xbounds, pred_pfo, is_hist=is_hist)  # these are really slow, so turning off
             # truncate_phist(pred_pfo['birth-hist'], affy_xbds)  # would of course only turn this for per-bin
             if is_simu:
                 titlestr = '%s: response index %d / %d' % (smplstr, irow, n_tree_preds)
                 true_pfo = {'birth-response' : getresp('truth', (sigmoid_params + ['x_ceil_start', 'y_ceil']) if 'x_ceil_start-truth' in prdfs[smpl] else sigmoid_params, irow)}
-                add_slope_vals(true_pfo['birth-response'], default_xbounds, true_pfo)
+                # add_slope_vals(true_pfo['birth-response'], default_xbounds, true_pfo)  # these are really slow, so turning off
                 true_pfo_list.append(true_pfo)
                 cdiff = None
                 if len(curve_diffs[smplstr]) < n_max_diffs:
@@ -582,7 +582,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             prdfs[smpl]['%s-predicted'%tk] = [p.get(tk) for p in inf_pfo_list]
         if is_simu:
             for tk in ['max_slope', 'x_max_slope', 'init_birth']:
-                prdfs[smpl]['%s-truth'%tk] = [p[tk] for p in true_pfo_list]
+                prdfs[smpl]['%s-truth'%tk] = [p.get(tk) for p in true_pfo_list]
         if force_many_plot and model_type=='per-bin':
             print('    %s --force-many-plot needs to be checked for per-bin model' % wrnstr())
         if force_many_plot or not is_simu or all(p['birth-response']==true_pfo_list[0]['birth-response'] for p in true_pfo_list):  # all true responses equal
@@ -732,8 +732,9 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
         for smpl in sorted(prdfs, reverse=True):
             if model_type in ['sigmoid', 'per-bin']:
                 fnames.append([])
-                for param in ['init_birth', 'x_max_slope', 'max_slope']:
-                    plot_param_or_pair(ptype, param, smpl, median_pfo=median_pfos[smpl])
+                if model_type == 'per-bin':
+                    for param in ['init_birth', 'x_max_slope', 'max_slope']:
+                        plot_param_or_pair(ptype, param, smpl, median_pfo=median_pfos[smpl])
                 if is_simu:
                     plot_param_or_pair(ptype, 'xscale' if model_type=='sigmoid' else 'max_slope', smpl, param2='curve-diff')
             if model_type == 'sigmoid':
@@ -1186,7 +1187,7 @@ def add_param_text(fig, true_pfo, inf_pfo=None, diff_vals=None, upper_left=False
         return rstr
     # ----------------------------------------------------------------------------------------
     xv, yv = (0.6, 0.25) if inf_pfo is None and not upper_left else (0.19, 0.7 if diff_vals is None else 0.65)
-    param_text = [ptext(p) for p in ['xscale', 'xshift', 'yscale', 'x_ceil_start'] + ['max_slope', 'x_max_slope', 'init_birth']]
+    param_text = [ptext(p) for p in ['xscale', 'xshift', 'yscale', 'yshift', 'x_ceil_start'] + ['max_slope', 'x_max_slope', 'init_birth']]
     param_text = [t for t in param_text if t != '']
     if len(param_text) > 3:
         yv -= 0.05 * (len(param_text) - 3)

@@ -98,12 +98,13 @@ class PerBinTransposeLayer(layers.Layer):
 def curve_loss(y_true, y_pred, rect_area=False):  # copied from/modeled after utils.resp_fcn_diff()
     # ----------------------------------------------------------------------------------------
     def params(yt):
-        assert utils.sigmoid_params == ['xscale', 'xshift', 'yscale']  # ick
-        pvlist = tf.split(tf.cast(yt, tf.float64), [1, 1, 1], axis=1)  # axis 0 is N samples
+        assert utils.sigmoid_params == ['xscale', 'xshift', 'yscale', 'yshift']  # ick
+        #     pvlist = tf.split(tf.cast(yt, tf.float64), [1, 1, 1], axis=1)  # axis 0 is N samples
+        pvlist = tf.split(tf.cast(yt, tf.float64), [1, 1, 1, 1], axis=1)  # axis 0 is N samples
         return {p : v for p, v in zip(utils.sigmoid_params, pvlist)}
     # ----------------------------------------------------------------------------------------
     def sigval(xv, pvals):
-        return pvals['yscale'] * tf.math.sigmoid(pvals['xscale'] * (xv - pvals['xshift']))
+        return pvals['yscale'] * tf.math.sigmoid(pvals['xscale'] * (xv - pvals['xshift'])) + pvals['yshift'] #pvals.get('yshift', 0)
     # ----------------------------------------------------------------------------------------
     def print_debug():  # NOTE to run this, you probably need to comment @tf.function above, as well as add run_eagerly=True in .compile()
         print('params:', y_true, y_pred)
@@ -135,7 +136,8 @@ def curve_loss(y_true, y_pred, rect_area=False):  # copied from/modeled after ut
 # @keras.saving.register_keras_serializable()
 # This seems to be really important for training stability (without it, it often gets stuck at very large parameter values)
 # It might also be nice to move this to a command line arg
-def clipfcn(x, minv=[0.001, -1.5, 0.1], maxv=[3.5, 5, 65]):  # NOTE these should be significantly wider than the simulation bounds
+# def clipfcn(x, minv=[0.001, -1.5, 0.1], maxv=[3.5, 5, 65]):  # NOTE these should be significantly wider than the simulation bounds
+def clipfcn(x, minv=[0.001, -1.5, 0.1, -5], maxv=[3.5, 5, 65, 10]):  # NOTE these should be significantly wider than the simulation bounds
     return tf.clip_by_value(x, clip_value_min=minv, clip_value_max=maxv)
 
 # ----------------------------------------------------------------------------------------

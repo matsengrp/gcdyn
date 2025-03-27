@@ -23,6 +23,7 @@ sum_stat_scaled = {
     "total_branch_length": True
 }  # whether to scale summary stats with branch length
 smplists = {'train' : ["train", "test"], 'infer' : ['infer']}
+default_param_vals = {'yshift' : 0}
 
 # ----------------------------------------------------------------------------------------
 def csvfn(args, smpl):
@@ -154,7 +155,7 @@ def write_sigmoid_prediction(args, pred_vals, sstats, gcids, smpl, true_resps=No
     def get_empty_df(ptype, plist):
         return {"%s-%s" % (param, ptype): [] for param in plist}
     # ----------------------------------------------------------------------------------------
-    dfdata = get_empty_df('predicted', args.params_to_predict) #{"%s-%s" % (param, 'predicted') : [] for param in args.params_to_predict}
+    dfdata = get_empty_df('predicted', utils.sigmoid_params)
     if true_resps is not None:
         dfdata.update(get_empty_df('truth', true_resps[0]._param_dict)) #{"%s-%s" % (param, 'truth') : [] for param in true_resps[0]._param_dict})
     dfdata['tree-index'] = []
@@ -163,8 +164,11 @@ def write_sigmoid_prediction(args, pred_vals, sstats, gcids, smpl, true_resps=No
     for itr, prlist in enumerate(pred_vals):
         dfdata['tree-index'].append(sstats[itr]['tree'])
         dfdata['gcids'].append(gcids[itr])
+        assert len(prlist) == len(args.params_to_predict)
         for ip, param in enumerate(args.params_to_predict):
             dfdata["%s-predicted" % param].append(prlist[ip])
+        for xpm in [p for p in utils.sigmoid_params if p not in args.params_to_predict]:
+            dfdata["%s-predicted" % xpm].append(default_param_vals[xpm])
         if true_resps is not None:
             for param in true_resps[itr]._param_dict:
                 dfdata["%s-truth" % param].append(get_pval(param, true_resps[itr], sstats[itr]))
@@ -464,7 +468,6 @@ def train_and_test(args, start_time):
     def train_sigmoid(smpldict, lscalers, max_leaf_count):
         responses = [[ConstantResponse(getattr(rsp, p)) for p in args.params_to_predict] for rsp in smpldict['train']['birth-responses']]  # order corresponds to args.params_to_predict (constant response is just a container for one value, and note we don't bother to set the name)
         model = sys.modules['gcdyn.nn'].ParamNetworkModel(responses[0], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
-        assert args.params_to_predict == utils.sigmoid_params
         model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, prebundle_layer_cfg=args.prebundle_layer_cfg, loss_fcn=args.loss_fcn)
         carry_caps, init_pops = zip(*lscalers['train']['per-tree'].out_vals)
         model.fit(lscalers['train']['per-node'].out_tensors, responses, carry_caps, init_pops, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
@@ -592,7 +595,7 @@ def get_parser():
     parser.add_argument("--prebundle-layer-cfg", default='default') #, choices=['default', 'small', 'big', 'huge'])
     parser.add_argument("--train-frac", type=float, default=0.8, help="train on this fraction of the trees")
     parser.add_argument("--validation-split", type=float, default=0.1, help="fraction of training sample to tell keras to hold out for validation during training")
-    parser.add_argument("--params-to-predict", default=["xscale", "xshift", "yscale"], nargs="+", choices=["xscale", "xshift", "yscale"] + [k for k in sum_stat_scaled])
+    parser.add_argument("--params-to-predict", default=["xscale", "xshift", "yscale", "yshift"], nargs="+", choices=["xscale", "xshift", "yscale", "yshift"] + [k for k in sum_stat_scaled])
     parser.add_argument("--test", action="store_true", help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly")
     parser.add_argument("--carry-cap-values", type=int, help="input parameter value for data inference (single valued, it\'s just plural to avoid making a new arg in cf-gcdyn.py)")
     parser.add_argument("--init-population-values", type=int, help="input parameter value for data inference (single valued, it\'s just plural to avoid making a new arg in cf-gcdyn.py)")
@@ -602,7 +605,6 @@ def get_parser():
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--use-trivial-encoding", action="store_true")
     parser.add_argument("--dont-scale-params", action="store_true")
-    # parser.add_argument("--yscale-bounds")
     parser.add_argument("--min-n-max-leaves", default=200, help='pad all encoded tree matrices to at least this width')
     parser.add_argument("--custom-loop", action="store_true")
     parser.add_argument("--force-many-plot", action="store_true", help='make plot with response functions for all GCs on top of each other, even if this isn\'t simulation and/or they don\'t all have the same parameters.')
