@@ -591,9 +591,11 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             add_slope_vals(median_pfo[rkey], default_xbounds, median_pfo, is_hist=is_hist)
 
             if model_type == 'sigmoid':
-                plt_pfos, colors, alphas, phists = inf_pfo_list, ['#1f77b4' for _ in inf_pfo_list], [0.05 for _ in inf_pfo_list], None
+                # plt_pfos, colors, alphas, phists = inf_pfo_list, ['#1f77b4' for _ in inf_pfo_list], [0.05 for _ in inf_pfo_list], None  # this line gives you the old-style plot-all-curves-with-low-alpha
+                plt_pfos, colors, alphas, phists = [], [], [], None
             else:
-                plt_pfos, colors, alphas, phists = [], (['#006600'] if is_simu else None), ([] if is_simu else None), inf_pfo_list
+                # plt_pfos, colors, alphas, phists = [], (['#006600'] if is_simu else None), ([] if is_simu else None), inf_pfo_list  # this line gives you the old-style plot-all-curves-with-low-alpha
+                plt_pfos, colors, alphas, phists = [], (['#006600'] if is_simu else None), ([] if is_simu else None), None
             if is_simu:
                 tpfo = copy.copy(true_pfo_list[0])
                 if force_many_plot:
@@ -607,7 +609,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 colors += ['green' for _ in range(len(plt_pfos)-len(colors))]
                 alphas += [(0.05 if force_many_plot else 0.5) for _ in range(len(plt_pfos)-len(alphas))]
             titlestr = '%s: %d responses' % (smpl, n_tree_preds)  # '%s: %d / %d responses' % (smpl, len(inf_pfo_list), n_tree_preds)
-            fn = plot_many_curves(outdir+'/'+smpl, '%s-all-%s'%(smpl, pstr), plt_pfos, pred_hists=phists,
+            fn = plot_many_curves(outdir+'/'+smpl, '%s-all-%s'%(smpl, pstr), plt_pfos, pred_hists=phists, ci_pfos=inf_pfo_list,
                                   titlestr=titlestr, median_pfo=median_pfo, affy_vals=all_afvals, xbounds=default_xbounds, ybounds=default_ybounds, diff_vals=[cdiff] if is_simu else None,
                                   colors=colors, alphas=alphas, param_text_pfos=[tpfo, 'median'] if is_simu else [None, 'median'])
             add_fn(fn, force_new_row=True)
@@ -993,6 +995,14 @@ def resp_fcn_diff(resp1, resp2, xbounds, dont_normalize=False, nsteps=40, resp2_
     return return_val
 
 # ----------------------------------------------------------------------------------------
+def get_rvals(pfo, xvals, xbounds, nsteps):
+    if 'birth-hist' in pfo: # is_hist
+        rvals = get_hist_vals(pfo['birth-hist'], None, xvals=xvals)
+    else:
+        rvals = get_resp_vals(pfo['birth-response'], xbounds, nsteps)
+    return rvals
+
+# ----------------------------------------------------------------------------------------
 def resp_plot(bresp, ax, xbounds, alpha=0.8, color="#990012", nsteps=40, linewidth=3, linestyle='-'):
     xvals, dx = get_resp_xvals(xbounds, nsteps)
     rvals = get_resp_vals(bresp, xbounds, nsteps)
@@ -1014,10 +1024,7 @@ def get_median_curve(pfo_list, xbounds, is_hist=False, nsteps=50, debug=False):
         print('      x           %s' % ' '.join('%5.1f'%x for x in xvals))
     rvlists = []
     for pfo in pfo_list:
-        if is_hist:
-            rvals = get_hist_vals(pfo['birth-hist'], None, xvals=xvals)
-        else:
-            rvals = get_resp_vals(pfo['birth-response'], xbounds, nsteps)
+        rvals = get_rvals(pfo, xvals, xbounds, nsteps)
         rvlists.append(rvals)
     sumvals = [sum(diff_fcn(r1vals, r2vals) for r2vals in rvlists) for r1vals in rvlists]  # don't think there's any point in skipping the current one
     min_sum = min(sumvals)
@@ -1055,7 +1062,19 @@ def group_by_xvals(xvals, yvals, xbins, skip_overflows=False, debug=False):  # N
     return htmp
 
 # ----------------------------------------------------------------------------------------
-def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None, colors=None,
+def plot_curve_confidence_bands(pfo_list, xbounds, nsteps=50):
+    curve_vals = []
+    xvals, dx = get_resp_xvals(xbounds, nsteps)
+    for ipf, pfo in enumerate(pfo_list):
+        rvals = get_rvals(pfo, xvals, xbounds, nsteps)
+        curve_vals.append(rvals)
+    lower_1sigma, upper_1sigma = [np.percentile(curve_vals, p, axis=0) for p in [16, 84]]
+    plt.fill_between(xvals, lower_1sigma, upper_1sigma, color='steelblue', alpha=0.3)
+    lower_2sigma, upper_2sigma = [np.percentile(curve_vals, p, axis=0) for p in [2, 97.5]]
+    plt.fill_between(xvals, lower_2sigma, upper_2sigma, color='skyblue', alpha=0.3)
+
+# ----------------------------------------------------------------------------------------
+def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None, colors=None, ci_pfos=None,
                      add_sigmoid_true_pred_text=False, add_per_bin_true_pred_text=False, add_pred_text=False, param_text_pfos=None,
                      diff_vals=None, pred_xvals=None, pred_yvals=None, xbounds=None, ybounds=None, xbins=affy_bins, default_xbounds=None,
                      nonsense_affy_val=-99, median_pfo=None, pred_hists=None, alphas=None):
@@ -1067,15 +1086,6 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
         default_xbounds = [-2.5, 3]
     mpl_init()
     fig, ax = plt.subplots()
-    ax2 = None
-    if affy_vals is not None:
-        if nonsense_affy_val in affy_vals:
-            print('    %s removing %d / %d nonsense affinity values' % (wrnstr(), affy_vals.count(nonsense_affy_val), len(affy_vals)))
-            affy_vals = [v for v in affy_vals if v != nonsense_affy_val]
-        ax2 = ax.twinx()
-        affy_plot({'all' : affy_vals}, ax2, color='#808080', alpha=0.3 if any(l is not None for l in [pfo_list, pred_hists]) else None) #, xbounds=default_xbounds)
-        # if xbounds is None:  # maybe should take more restrictive of the two?
-        #     xbounds = [mfn(affy_vals) for mfn in [min, max]]
     if pred_xvals is not None and pred_yvals is not None:  # only used for per-cell prediction
         if nonsense_affy_val in pred_xvals:
             print('    %s removing %d / %d nonsense affinity values' % (wrnstr(), pred_xvals.count(nonsense_affy_val), len(pred_xvals)))
@@ -1096,6 +1106,8 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
         for pfo in pred_hists:
             pfo['birth-hist'].mpl_plot(ax, square_bins=True, remove_empty_bins=True, color='#1f77b4', no_vertical_bin_lines=True, alpha=0.6 if len(pred_hists)==1 else 0.1, linewidth=1.5 if len(pred_hists)>1 else 3, errors=False)
         ax.set(xlabel=pltlabels.get('affinity'), ylabel='lambda')
+    if ci_pfos is not None:
+        plot_curve_confidence_bands(ci_pfos, xbounds=default_xbounds)
     for ipf, pfo in enumerate(pfo_list):
         alpha = (0.1 if len(pfo_list)>5 else 0.5) if alphas is None else alphas[ipf]
         resp_plot(pfo['birth-response'], ax, alpha=alpha, color='#990012' if colors is None else colors[ipf], xbounds=pfo['xbounds'] if 'xbounds' in pfo and pfo['xbounds'] is not None else default_xbounds, linewidth=1 if colors is None else 2)  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
@@ -1107,6 +1119,15 @@ def plot_many_curves(plotdir, plotname, pfo_list, titlestr=None, affy_vals=None,
         # from gcdyn.poisson import SigmoidResponse
         # tmp_params = [1.6, 2, 7]
         # resp_plot(SigmoidResponse(xscale=tmp_params[0], xshift=tmp_params[1], yscale=tmp_params[2], yshift=0), ax, alpha=0.3, color='blue', xbounds=default_xbounds, linewidth=1, linestyle='--')  # it's important to use each curve's own xbounds to plot it, so that each curve only gets plotted over x values at which its gc had affinity values
+    ax2 = None
+    if affy_vals is not None:
+        if nonsense_affy_val in affy_vals:
+            print('    %s removing %d / %d nonsense affinity values' % (wrnstr(), affy_vals.count(nonsense_affy_val), len(affy_vals)))
+            affy_vals = [v for v in affy_vals if v != nonsense_affy_val]
+        ax2 = ax.twinx()
+        affy_plot({'all' : affy_vals}, ax2, color='#808080', alpha=0.3 if any(l is not None for l in [pfo_list, pred_hists]) else None) #, xbounds=default_xbounds)
+        # if xbounds is None:  # maybe should take more restrictive of the two?
+        #     xbounds = [mfn(affy_vals) for mfn in [min, max]]
     if param_text_pfos is not None:  # first one should be the true one
         if len(param_text_pfos) < 2:
             param_text_pfos.append(None)
@@ -1187,7 +1208,8 @@ def add_param_text(fig, true_pfo, inf_pfo=None, diff_vals=None, upper_left=False
         return rstr
     # ----------------------------------------------------------------------------------------
     xv, yv = (0.6, 0.25) if inf_pfo is None and not upper_left else (0.19, 0.7 if diff_vals is None else 0.65)
-    param_text = [ptext(p) for p in ['xscale', 'xshift', 'yscale', 'yshift', 'x_ceil_start'] + ['max_slope', 'x_max_slope', 'init_birth']]
+    plist = ['xscale', 'xshift', 'yscale', 'yshift', 'x_ceil_start'] if 'birth-response' in true_pfo else ['max_slope', 'x_max_slope', 'init_birth']
+    param_text = [ptext(p) for p in plist]
     param_text = [t for t in param_text if t != '']
     if len(param_text) > 3:
         yv -= 0.05 * (len(param_text) - 3)
