@@ -463,6 +463,7 @@ def sns_xy_plot(ptype, smpl, tdf, xkey, ykey, all_xvals=None, true_x_eq_y=False,
 # plot scatter + box/whisker plot comparing true and predicted values for deep learning inference
 # NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
 def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu=False, data_val=0, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15, trivial_encoding=False, nonsense_affy_val=-99, force_many_plot=False):
+    quick = False  # turn this on to speed things up by skipping some plots
     # ----------------------------------------------------------------------------------------
     def add_fn(fn, n_per_row=4, force_new_row=False, fns=None):
         if fns is None:
@@ -471,7 +472,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             fns.append([])
         fns[-1].append(fn)
     # ----------------------------------------------------------------------------------------
-    def plot_responses(smpl, n_max_plots=20, n_max_diffs=1000, default_xbounds=None):
+    def plot_responses(smpl, n_max_plots=2 if quick else 20, n_max_diffs=100 if quick else 1000, default_xbounds=None):
         # ----------------------------------------------------------------------------------------
         def plot_true_pred_pair(true_resp, pred_resp, affy_vals, diff_vals, plotname, titlestr=None, xbounds=None):
             fn = plot_many_curves(outdir+'/'+smpl, plotname, [{'birth-response' : r} for r in [true_resp, pred_resp]], titlestr=titlestr,
@@ -653,7 +654,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
 
         return median_pfo
     # ----------------------------------------------------------------------------------------
-    def plot_param_or_pair(ptype, param1, smpl, xkey=None, ykey=None, param2=None, median_pfo=None, n_max_scatter_points=250):
+    def plot_param_or_pair(ptype, param1, smpl, xkey=None, ykey=None, param2=None, median_pfo=None, n_max_scatter_points=25 if quick else 250):
         # # ----------------------------------------------------------------------------------------
         # def get_mae_text(smpl, tdf):
         #     if not is_simu:

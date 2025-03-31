@@ -95,16 +95,16 @@ class PerBinTransposeLayer(layers.Layer):
 # ----------------------------------------------------------------------------------------
 # @keras.saving.register_keras_serializable(package='gcdyn_nn', name='curve_loss_fcn')
 @tf.function  # NOTE need to comment this decorator in order for .numpy() to work (and add run_eagerly to .compile() call, but note that training is WAY the fuck slower if it's commented
-def curve_loss(y_true, y_pred, rect_area=False):  # copied from/modeled after utils.resp_fcn_diff()
+def base_curve_loss(y_true, y_pred, rect_area=False, params_to_predict=utils.sigmoid_params):  # copied from/modeled after utils.resp_fcn_diff()
     # ----------------------------------------------------------------------------------------
     def params(yt):
-        assert utils.sigmoid_params == ['xscale', 'xshift', 'yscale', 'yshift']  # ick
-        #     pvlist = tf.split(tf.cast(yt, tf.float64), [1, 1, 1], axis=1)  # axis 0 is N samples
-        pvlist = tf.split(tf.cast(yt, tf.float64), [1, 1, 1, 1], axis=1)  # axis 0 is N samples
-        return {p : v for p, v in zip(utils.sigmoid_params, pvlist)}
+        assert utils.sigmoid_params == ['xscale', 'xshift', 'yscale', 'yshift']
+        assert params_to_predict == utils.sigmoid_params[:len(params_to_predict)]
+        pvlist = tf.split(tf.cast(yt, tf.float64), [1 for _ in range(len(params_to_predict))], axis=1)  # axis 0 is N samples
+        return {p : v for p, v in zip(params_to_predict, pvlist)}
     # ----------------------------------------------------------------------------------------
-    def sigval(xv, pvals):
-        return pvals['yscale'] * tf.math.sigmoid(pvals['xscale'] * (xv - pvals['xshift'])) + pvals['yshift'] #pvals.get('yshift', 0)
+    def sigval(xv, pvals):  # atm yshift is the only one that's actually optional
+        return pvals['yscale'] * tf.math.sigmoid(pvals['xscale'] * (xv - pvals['xshift'])) + pvals.get('yshift', 0)
     # ----------------------------------------------------------------------------------------
     def print_debug():  # NOTE to run this, you probably need to comment @tf.function above, as well as add run_eagerly=True in .compile()
         print('params:', y_true, y_pred)
@@ -133,12 +133,26 @@ def curve_loss(y_true, y_pred, rect_area=False):  # copied from/modeled after ut
     return normed_area
 
 # ----------------------------------------------------------------------------------------
+def three_param_curve_loss(y_true, y_pred):
+    return base_curve_loss(y_true, y_pred, params_to_predict=utils.sigmoid_params[:3])
+
+# ----------------------------------------------------------------------------------------
+def four_param_curve_loss(y_true, y_pred):
+    return base_curve_loss(y_true, y_pred, params_to_predict=utils.sigmoid_params)
+
+# ----------------------------------------------------------------------------------------
 # @keras.saving.register_keras_serializable()
 # This seems to be really important for training stability (without it, it often gets stuck at very large parameter values)
 # It might also be nice to move this to a command line arg
-# def clipfcn(x, minv=[0.001, -1.5, 0.1], maxv=[3.5, 5, 65]):  # NOTE these should be significantly wider than the simulation bounds
-def clipfcn(x, minv=[0.001, -1.5, 0.1, -5], maxv=[3.5, 5, 65, 10]):  # NOTE these should be significantly wider than the simulation bounds
+clip_mins = [0.001, -1.5, 0.1, -5]  # NOTE these should be significantly wider than the simulation bounds
+clip_maxs = [3.5, 5, 65, 10]
+def base_clipfcn(x, num_parameters=len(utils.sigmoid_params)):
+    minv, maxv = clip_mins[:num_parameters], clip_maxs[:num_parameters]
     return tf.clip_by_value(x, clip_value_min=minv, clip_value_max=maxv)
+def three_param_clipfcn(x):
+    return base_clipfcn(x, num_parameters=3)
+def four_param_clipfcn(x):
+    return base_clipfcn(x, num_parameters=4)
 
 # ----------------------------------------------------------------------------------------
 class ParamNetworkModel:
@@ -148,7 +162,7 @@ class ParamNetworkModel:
     Predicts the parameters of the response functions (atm, this means the three parameters of a sigmoid birth response, although minimal/no changes here would be required from some generalizations).
     """
 
-    def __init__(self, example_response_list, bundle_size=None, custom_loop=False):
+    def __init__(self, example_response_list, bundle_size=None, custom_loop=False, params_to_predict=utils.sigmoid_params):
         """
         example_response_list: list of response objects for a single tree (used for two things: to work out the number of
                      parameters, and how to encode/decode by calling its _flatten() fcn)
@@ -159,8 +173,10 @@ class ParamNetworkModel:
         self.num_parameters = sum(
             len(rsp._param_dict) for rsp in self.example_response_list
         )
+        assert self.num_parameters == len(params_to_predict)  # addings params_to_predict late, maybe won't keep it
         self.bundle_size = bundle_size
         self.custom_loop = custom_loop
+        self.params_to_predict = params_to_predict
 
     def build_model(
         self,
@@ -206,6 +222,9 @@ class ParamNetworkModel:
             ],
         }
 
+        assert self.num_parameters in [3, 4]
+        clipfcn = three_param_clipfcn if self.num_parameters==3 else four_param_clipfcn  # UGH (serialization makes it hard to do this more cleanly)
+
         tree_input = keras.Input(shape=(encode.mtx_lens['tree'], self.max_leaf_count), name='tree_input')
         carry_cap_input = keras.Input(shape=(1,), name='carry_cap_input')
         init_pop_input = keras.Input(shape=(1,), name='init_pop_input')
@@ -248,9 +267,11 @@ class ParamNetworkModel:
         self.optimizer = keras.optimizers.Adam(
             learning_rate=learning_rate, use_ema=True, ema_momentum=ema_momentum
         )
+        assert self.num_parameters in [3, 4]
+        curve_loss = three_param_curve_loss if self.num_parameters==3 else four_param_curve_loss  # UGH (serialization makes it hard to do this more cleanly)
         self.loss_fcn = curve_loss if loss_fcn=='curve' else loss_fcn
         if not self.custom_loop:
-            self.network.compile(loss=curve_loss if loss_fcn=='curve' else self.loss_fcn, optimizer=self.optimizer)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
+            self.network.compile(loss=self.loss_fcn, optimizer=self.optimizer)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
 
     @classmethod
     def _encode_responses(
@@ -426,7 +447,17 @@ class ParamNetworkModel:
 
     def load(self, fname):
         print('    reading model file from %s' % fname)
-        with keras.utils.custom_object_scope({'BundleMeanLayer': BundleMeanLayer, 'SigmoidTransposeLayer' : SigmoidTransposeLayer, 'curve_loss' : curve_loss, 'clipfcn' : clipfcn}):
+        obj_dict = {
+            'BundleMeanLayer': BundleMeanLayer,
+            'SigmoidTransposeLayer' : SigmoidTransposeLayer,
+            'base_curve_loss' : base_curve_loss,
+            'base_clipfcn' : base_clipfcn,
+            'three_param_curve_loss' : three_param_curve_loss,
+            'four_param_curve_loss' : four_param_curve_loss,
+            'three_param_clipfcn' : three_param_clipfcn,
+            'four_param_clipfcn' : four_param_clipfcn,
+        }
+        with keras.utils.custom_object_scope(obj_dict):
             # NOTE that compile=False is fine since we're only calling .predict(), but if we wanted to e.g. continue training from the loaded model, we'd need to compile it (and getting serialization working [with compilation] was a huge clusterfuck)
             self.network = keras.models.load_model(fname, safe_mode=False, compile=False)
 

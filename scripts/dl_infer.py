@@ -467,7 +467,7 @@ def train_and_test(args, start_time):
     # ----------------------------------------------------------------------------------------
     def train_sigmoid(smpldict, lscalers, max_leaf_count):
         responses = [[ConstantResponse(getattr(rsp, p)) for p in args.params_to_predict] for rsp in smpldict['train']['birth-responses']]  # order corresponds to args.params_to_predict (constant response is just a container for one value, and note we don't bother to set the name)
-        model = sys.modules['gcdyn.nn'].ParamNetworkModel(responses[0], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
+        model = sys.modules['gcdyn.nn'].ParamNetworkModel(responses[0], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop, params_to_predict=args.params_to_predict)
         model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, prebundle_layer_cfg=args.prebundle_layer_cfg, loss_fcn=args.loss_fcn)
         carry_caps, init_pops = zip(*lscalers['train']['per-tree'].out_vals)
         model.fit(lscalers['train']['per-node'].out_tensors, responses, carry_caps, init_pops, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
@@ -543,7 +543,7 @@ def read_model_files(args, samples):
     lscalers = {'per-node' : LScaler(args, ['distance', 'phenotype'], scaler=joblib.load(scfns['per-node']))}
     lscalers['per-tree'] = LScaler(args, ['carry_cap', 'init_population'], scaler=joblib.load(scfns['per-tree']))
     if args.model_type == 'sigmoid':
-        model = sys.modules['gcdyn.nn'].ParamNetworkModel([ConstantResponse(0) for _ in args.params_to_predict], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop)
+        model = sys.modules['gcdyn.nn'].ParamNetworkModel([ConstantResponse(0) for _ in args.params_to_predict], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop, params_to_predict=args.params_to_predict)
     elif args.model_type == 'per-cell':
         model = sys.modules['gcdyn.nn'].PerCellNetworkModel()
     elif args.model_type == 'per-bin':
@@ -595,7 +595,7 @@ def get_parser():
     parser.add_argument("--prebundle-layer-cfg", default='default') #, choices=['default', 'small', 'big', 'huge'])
     parser.add_argument("--train-frac", type=float, default=0.8, help="train on this fraction of the trees")
     parser.add_argument("--validation-split", type=float, default=0.1, help="fraction of training sample to tell keras to hold out for validation during training")
-    parser.add_argument("--params-to-predict", default=["xscale", "xshift", "yscale", "yshift"], nargs="+", choices=["xscale", "xshift", "yscale", "yshift"] + [k for k in sum_stat_scaled])
+    parser.add_argument("--params-to-predict", default=utils.sigmoid_params, nargs="+", choices=["xscale", "xshift", "yscale", "yshift"] + [k for k in sum_stat_scaled])
     parser.add_argument("--test", action="store_true", help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly")
     parser.add_argument("--carry-cap-values", type=int, help="input parameter value for data inference (single valued, it\'s just plural to avoid making a new arg in cf-gcdyn.py)")
     parser.add_argument("--init-population-values", type=int, help="input parameter value for data inference (single valued, it\'s just plural to avoid making a new arg in cf-gcdyn.py)")
@@ -633,6 +633,8 @@ def main():
     if args.carry_cap_values is not None or args.init_population_values is not None:
         if args.is_simu:
             raise Exception('can only set carry cap and init population for data (otherwise they come from the simulation files)')
+    if [p for p in utils.sigmoid_params if p in args.params_to_predict] != args.params_to_predict:
+        raise Exception('--params-to-predict (%s) must be in same order as utils.sigmoid_params (%s)' % (' '.join(args.params_to_predict), ' '.join(utils.sigmoid_params)))
     outputs_exist = all(os.path.exists(csvfn(args, s)) for s in smplists[args.action]) and not args.overwrite
 
     if not outputs_exist:

@@ -290,7 +290,8 @@ def add_pval(pcounts, pname, pval):
 # ----------------------------------------------------------------------------------------
 def choose_params(args, pcounts, itrial):
     params = {}
-    plist = ['xscale', 'xshift', 'yscale', 'yshift', 'x_ceil_start', 'death', 'time_to_sampling', 'carry_cap', 'init_population', 'n_seqs']  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
+    plist = ['xscale', 'xshift', 'yscale', 'yshift']  # NOTE order of first three has to stay like this (well you'd have to redo the algebra to change the order)
+    plist += ['x_ceil_start', 'death', 'time_to_sampling', 'carry_cap', 'init_population', 'n_seqs']
     for pname in plist:  # NOTE compare to loop at end of run_sub_procs()
         extra_bounds, dbgstrs = None, []
         if args.use_generated_parameter_bounds:
