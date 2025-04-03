@@ -272,10 +272,12 @@ class TreeNode(ete3.Tree):
                     rate_totals['birth'] / rate_totals['death']
                 ) ** (n_nodes['active'] / capacity)
             elif capacity_method == "hard":
+                cap_dbstr = ''
                 if n_nodes['active'] > capacity:
                     node_to_die = rng.choice(list(active_nodes.values()))
                     node_to_die.event = self._DEATH_EVENT
                     rm_actv_node(node_to_die)
+                    cap_dbstr = 'killing active node with hard capacity'
             elif capacity_method is None:
                 if n_nodes['active'] > capacity:
                     self._aborted_evolve_cleanup()
@@ -303,7 +305,7 @@ class TreeNode(ete3.Tree):
                 n_last_nonsense = n_nodes['nonsense']
                 n_nodes['nonsense'] = len([n for n in active_nodes.values() if phval(n.name)==nonsense_phenotype_value])
                 phvstr = utils.color('red' if phval(event_node_name)==nonsense_phenotype_value else None, '%5.1f'%phval(event_node_name))
-                print('        %3d     %5.2f  %5.2f   %8s %5s %s   %5d %s%s' % (n_evts, current_time, waiting_time, event, event_node_name, phvstr, n_nodes['active'], utils.color('blue', '-', width=5) if n_nodes['nonsense']==0 else '%5d'%n_nodes['nonsense'], '' if n_last_nonsense==n_nodes['nonsense'] else utils.color('red', '+' if n_nodes['nonsense']>n_last_nonsense else '-')))
+                print('        %3d     %5.2f  %5.2f   %8s %5s %s   %5d %s%s   %s' % (n_evts, current_time, waiting_time, event, event_node_name, phvstr, n_nodes['active'], utils.color('blue', '-', width=5) if n_nodes['nonsense']==0 else '%5d'%n_nodes['nonsense'], '' if n_last_nonsense==n_nodes['nonsense'] else utils.color('red', '+' if n_nodes['nonsense']>n_last_nonsense else '-'), cap_dbstr))
             if current_time > end_time + 1e-8:  # 1e-8 is arbitrary, to account for floating point error
                 raise Exception("current time %f exceeded end time %f by more than %e" % (current_time, end_time, 1e-8))
             for node in active_nodes.values():
