@@ -545,12 +545,14 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 pred_pfo = {'birth-hist' : encode.decode_fitness_bins(pbvals, zoom_affy_bins)}
             else:
                 assert False
-            # add_slope_vals(pred_pfo[rkey], default_xbounds, pred_pfo, is_hist=is_hist)  # these are really slow, so turning off
+            if model_type == 'per-bin':
+                add_slope_vals(pred_pfo[rkey], default_xbounds, pred_pfo, is_hist=is_hist)  # these are really slow, so turning off
             # truncate_phist(pred_pfo['birth-hist'], affy_xbds)  # would of course only turn this for per-bin
             if is_simu:
                 titlestr = '%s: response index %d / %d' % (smplstr, irow, n_tree_preds)
                 true_pfo = {'birth-response' : getresp('truth', (sigmoid_params + ['x_ceil_start', 'y_ceil']) if 'x_ceil_start-truth' in prdfs[smpl] else sigmoid_params, irow)}
-                # add_slope_vals(true_pfo['birth-response'], default_xbounds, true_pfo)  # these are really slow, so turning off
+                if model_type == 'per-bin':
+                    add_slope_vals(true_pfo['birth-response'], default_xbounds, true_pfo)  # these are really slow, so turning off
                 true_pfo_list.append(true_pfo)
                 cdiff = None
                 if len(curve_diffs[smplstr]) < n_max_diffs:

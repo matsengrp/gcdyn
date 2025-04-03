@@ -375,7 +375,7 @@ def get_responses(args, params, pcounts):
         wstr = 'initial birth response outside specified range: %.3f not in [%.3f, %.3f]' % (bresp.λ_phenotype(0), args.initial_birth_rate_range[0], args.initial_birth_rate_range[1])
         if args.use_generated_parameter_bounds:
             print('      %s %s' % (utils.color('yellow', 'warning'), wstr))
-            # raise Exception(wstr)
+            # raise Exception(wstr)  # should really turn this back on, but I need to redo all the sigmoid parameter bound algebra with floating yshift, which I think'll be kind of a mess, and it doesn't really seem to matter (would I think just slightly change the distribution of resulting parameters, but they're already fine)
         else:
             print('      %s %s' % (utils.color('yellow', 'warning'), wstr))
     print_resps(args, bresp, dresp)
