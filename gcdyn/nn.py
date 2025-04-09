@@ -107,12 +107,12 @@ def base_curve_loss(y_true, y_pred, rect_area=False, params_to_predict=utils.sig
         return pvals['yscale'] * tf.math.sigmoid(pvals['xscale'] * (xv - pvals['xshift'])) + pvals.get('yshift', 0)
     # ----------------------------------------------------------------------------------------
     def print_debug():  # NOTE to run this, you probably need to comment @tf.function above, as well as add run_eagerly=True in .compile()
-        print('params:', y_true, y_pred)
+        print('params:', y_true.numpy(), y_pred.numpy())
         print('     true    ', true_svals.numpy())
         print('     pred    ', pred_svals.numpy())
         print('     diff    ', (true_svals - pred_svals).numpy())
         print('     abs diff', tf.math.abs(true_svals - pred_svals).numpy())
-        print('    sum %.3f   diff %.5f' % (tf.reduce_sum(tf.math.abs(true_svals - pred_svals) * tf.constant(dx)).numpy(), normed_area.numpy()))
+        print('    sum %.3f   diff %.5f' % (sumv.numpy(), normed_area.numpy()))
     # ----------------------------------------------------------------------------------------
     xbounds = [-2.5, 3] #[-5, 5]  # once we're passing in input affinity values, we won't need this somewhat abritrary choice
     nsteps = 1000  # having this large (like 1k) seems sometimes important for training stability (and weirdly doesn't seem to slow down training)

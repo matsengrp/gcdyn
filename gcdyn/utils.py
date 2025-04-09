@@ -493,12 +493,12 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             fn = plot_many_curves(outdir+'/'+smpl, plotname, [{'birth-response' : r} for r in [true_resp, pred_resp]], titlestr=titlestr,
                                   affy_vals=affy_vals, colors=['#006600', '#990012'], add_true_pred_text=True, diff_vals=diff_vals, xbounds=xbounds)
             add_fn(fn)
-        # # ----------------------------------------------------------------------------------------
-        # def get_curve_loss(resp_1, resp_2):
-        #     from gcdyn.nn import curve_loss
-        #     import tensorflow as tf
-        #     def split_resp(r): return [float(v) for v in [r.xscale, r.xshift, r.yscale]]
-        #     return curve_loss(tf.constant([split_resp(resp_1)]), tf.constant([split_resp(resp_2)]))
+        # ----------------------------------------------------------------------------------------
+        def get_nn_curve_loss(resp_1, resp_2):
+            from gcdyn.nn import base_curve_loss
+            import tensorflow as tf
+            def split_resp(r): return [float(v) for v in [r.xscale, r.xshift, r.yscale, r.yshift]]
+            return base_curve_loss(tf.constant([split_resp(resp_1)]), tf.constant([split_resp(resp_2)])).numpy()
         # ----------------------------------------------------------------------------------------
         def init_affy(lmdict, tree_index):
             affy_vals = [float(m['affinity']) for m in lmdict[tree_index] if float(m['affinity'])!=nonsense_affy_val]
