@@ -28,11 +28,20 @@ import string
 import csv
 
 sigmoid_params = ['xscale', 'xshift', 'yscale', 'yshift']  # ick
+slp_vals = ['max_slope', 'x_max_slope', 'init_birth', 'mean_val', 'max_val'] #, 'max_diff']
 affy_bins = [-15, -10, -7, -5, -3, -2, -1, -0.5, -0.25, 0.25, 0.5, 1, 1.5, 2, 2.5, 3.5, 4, 5, 7]
 # zoom_affy_bins = [-2, -1, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.25, 1.5, 2, 2.5]
 zoom_affy_bins = [-2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3]
 fitness_bins = [-1.5, -1, -0.75, -0.5, -0.2, 0, 0.1, 0.25, 0.4, 0.5, 0.75, 1, 1.5, 2] #, 5, 15]
-pltlabels = {'affinity' : 'affinity ($ -\Delta log_{10} K_D $)'}
+pltlabels = {
+    'affinity' : 'affinity ($ -\Delta log_{10} K_D $)',
+    'init_birth' : 'naive birth rate',
+    'x_max_slope' : 'x value of max slope',
+    'max_slope' : 'max slope',
+    'mean_val' : 'mean value',
+    'max_val' : 'max value',
+    'max_diff' : 'max diff',
+}
 
 def simple_fivemer_contexts(sequence: str):
     r"""Decompose a sequence into a list of its 5mer contexts.
@@ -397,7 +406,7 @@ def mpl_init(fsize=20, label_fsize=15):
 
 # ----------------------------------------------------------------------------------------
 # plot the two column <xkey> and <ykey> in <tdf> vs each other (pass in all_xvals separately for bounds/bins stuff since we want to have the same range for all [train/test/validation] dfs)
-def sns_xy_plot(ptype, smpl, tdf, xkey, ykey, all_xvals=None, true_x_eq_y=False, discrete=False, n_bins=8, bin_edges=None, leave_ticks=False, xtra_text=None, emph_vals=None, n_max_points=None):
+def sns_xy_plot(ptype, smpl, tdf, xkey, ykey, all_xvals=None, true_x_eq_y=False, discrete=False, n_bins=15, bin_edges=None, leave_ticks=False, xtra_text=None, emph_vals=None, n_max_points=None, bad_cdiff_val=-1.5):
     # ----------------------------------------------------------------------------------------
     def tcolor(def_val):
         return 'darkgreen' if smpl == 'true' else ('red' if smpl=='valid' else def_val)
@@ -411,21 +420,27 @@ def sns_xy_plot(ptype, smpl, tdf, xkey, ykey, all_xvals=None, true_x_eq_y=False,
     if all_xvals is None:
         all_xvals = tdf[xkey]
     assert len(tdf[xkey]) == len(tdf[ykey])
-    n_none = len([i for i, (x, y) in enumerate(zip(tdf[xkey], tdf[ykey])) if any(v is None or math.isnan(v) for v in [x, y])])
-    if n_none > 0:
-        xtra_text = addtext('%d non-None values (of %d)' % (len(tdf[xkey]) - n_none, len(tdf[xkey])), xtra_text)
-    if n_none == 0 and len(tdf) > n_max_points and ptype == 'scatter':
-        xtra_text = addtext('%d/%d points' % (n_max_points, len(tdf)), xtra_text)
+    i_none = [i for (i, x, y, d) in zip(tdf.index, tdf[xkey], tdf[ykey], tdf['curve-diff-predicted']) if any(v is None or math.isnan(v) for v in [x, y, d])]
+    if len(i_none) > 0:
+        xtra_text = addtext('%d non-None values (of %d)' % (len(tdf[xkey]) - len(i_none), len(tdf[xkey])), xtra_text)
+        tdf = tdf.loc[[i for i in tdf.index if i not in i_none]]
+    if len(tdf) > n_max_points and ptype == 'scatter':
+        xtra_text = addtext('%s%d/%d points' % ('%s: '%smpl, n_max_points, len(tdf)), xtra_text)
         tdf = tdf.sample(n=n_max_points)
     if ptype == 'scatter':
         if discrete:
             ax = sns.swarmplot(tdf, x=xkey, y=ykey, size=4, alpha=0.6, order=sorted(set(all_xvals)))  # ax.set(title=smpl)
         else:
             ax = sns.scatterplot(tdf, x=xkey, y=ykey, alpha=0.6, color=tcolor(None))
+            bad_rows = tdf[tdf['curve-diff-predicted']<bad_cdiff_val]
+            # if len(bad_rows) > 0:
+            #     print('  %s %s' % (xkey, ykey))
+            #     print('    %d / %d bad rows (cdiff < %.2f)' % (len(bad_rows), len(tdf), bad_cdiff_val))
+            ax = sns.scatterplot(bad_rows, x=xkey, y=ykey, alpha=0.6, color='red', edgecolor='black', facecolor=None, s=50)
             if true_x_eq_y: # and smpl in ['train', 'infer']:  # 'train' and 'valid' go on the same plot, but we don't want to plot the dashed line twice
                 plt.plot([0.95 * min(all_xvals), 1.05 * max(all_xvals)], [0.95 * min(all_xvals), 1.05 * max(all_xvals)], color="darkgreen", linestyle="--", linewidth=3, alpha=0.7)
         if emph_vals is not None:
-            ax.scatter([emph_vals[0][0]], [emph_vals[0][1]], color='red', alpha=0.45, s=100)
+            ax.scatter([emph_vals[0][0]], [emph_vals[0][1]], color='red', alpha=0.45, s=250)
     elif ptype == 'box':
         if discrete:
             bkey, order = xkey, sorted(set(all_xvals))
@@ -508,7 +523,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             raise Exception('needs updating (see commented block below)')
         if default_xbounds is None:
             default_xbounds = [-2.5, 3]
-        default_ybounds = [-0.1, 4]
+        default_ybounds = [-0.1, 15]
         if not os.path.exists(outdir+'/'+smpl):
             os.makedirs(outdir+'/'+smpl)
         from gcdyn.poisson import SigmoidResponse, SigmoidCeilingResponse, LinearResponse
@@ -581,10 +596,10 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                     add_fn(fn)
             inf_pfo_list.append(pred_pfo)
             all_afvals += affy_vals
-        for tk in ['max_slope', 'x_max_slope', 'init_birth', 'curve-diff']:
+        for tk in slp_vals + ['curve-diff']:
             prdfs[smpl]['%s-predicted'%tk] = [p.get(tk) for p in inf_pfo_list]
         if is_simu:
-            for tk in ['max_slope', 'x_max_slope', 'init_birth']:
+            for tk in slp_vals:
                 prdfs[smpl]['%s-truth'%tk] = [p.get(tk) for p in true_pfo_list]
         if force_many_plot and model_type=='per-bin':
             print('    %s --force-many-plot needs to be checked for per-bin model' % wrnstr())
@@ -656,7 +671,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
 
         return median_pfo
     # ----------------------------------------------------------------------------------------
-    def plot_param_or_pair(ptype, param1, smpl, xkey=None, ykey=None, param2=None, median_pfo=None, n_max_scatter_points=25 if quick else 250):
+    def plot_param_or_pair(ptype, param1, smpl, xkey=None, ykey=None, param2=None, vtypes=['truth', 'predicted'], median_pfo=None, n_max_scatter_points=25 if quick else 750):
         # # ----------------------------------------------------------------------------------------
         # def get_mae_text(smpl, tdf):
         #     if not is_simu:
@@ -686,14 +701,14 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             if param2 is None:  # plotting true vs inferred values (if data, "true" is a single arbitrary value)
                 xkstr = "truth" if is_simu else "data"
                 xlabel, ylabel = xkstr.replace("truth", "true"), "predicted value"
-                xkey, ykey = ["%s-%s" % (param1, vtype) for vtype in [xkstr, "predicted"]]
+                xkey, ykey = ["%s-%s" % (param1, v) for v in [xkstr, "predicted"]]  # should really switch to vtypes, but data stuff complicates that
                 if not is_simu:  # set x value for data (since there's no truth, we pick an arbitrary x value at which to display the points)
-                    all_df[xkey] = [data_val for _ in all_df["%s-predicted"%param1]]
+                    all_df[xkey] = [data_val for _ in all_df['%s-predicted'%param1]]
                 if median_pfo is not None:
                     emph_vals = [[data_val, get_pval(median_pfo, param1)]]
             else:  # plotting two different variables vs each other
-                xkey, ykey = ["%s-predicted" % p for p in [param1, param2]]
-                xlabel, ylabel = [param1, param2]
+                xkey, ykey = ["%s-%s" % (p, v) for p, v in zip([param1, param2], vtypes)]
+                xlabel, ylabel = ['%s %s' % (v.replace('truth', 'true'), pltlabels.get(p, p)) for v, p in zip(vtypes, [param1, param2])]
                 if median_pfo is not None:
                     emph_vals = [[get_pval(median_pfo, p) for p in [param1, param2]]]
         discrete = param2 is None and len(set(all_df[xkey])) < 15  # if simulation has discrete parameter values (well, mostly turned off now i think)
@@ -711,7 +726,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
         else:
             plt.xlabel(xlabel)
             plt.ylabel(ylabel)
-            titlestr = "predicted values%s" % ('' if smpl=='infer' else ' (%s)'%smpl)
+            titlestr = '' if smpl=='infer' else smpl
         if xtra_txt is not None:
             titlestr += xtra_txt
         plt.title(titlestr, fontweight="bold", fontsize=20)  # if len(title) < 25 else 15)
@@ -733,27 +748,23 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 writer = csv.DictWriter(mfile, ['%s-predicted'%p for p in sigmoid_params])
                 writer.writeheader()
                 writer.writerow({'%s-predicted'%p : getattr(median_pfos[smpl]['birth-response'], p) for p in sigmoid_params})
+    plt_params = sigmoid_params if model_type=='sigmoid' else slp_vals
     for ptype in ['scatter', 'box']:
         for smpl in sorted(prdfs, reverse=True):
             if model_type in ['sigmoid', 'per-bin']:
                 fnames.append([])
-                if model_type == 'per-bin':
-                    for param in ['init_birth', 'x_max_slope', 'max_slope']:
-                        plot_param_or_pair(ptype, param, smpl, median_pfo=median_pfos[smpl])
                 if is_simu:
-                    plot_param_or_pair(ptype, 'xscale' if model_type=='sigmoid' else 'max_slope', smpl, param2='curve-diff')
-            if model_type == 'sigmoid':
-                fnames.append([])
-                for param in params_to_predict:
-                    plot_param_or_pair(ptype, param, smpl, median_pfo=median_pfos[smpl])
-            if model_type == 'per-cell':
-                fnames.append([])
-                plot_param_or_pair(ptype, 'fitness', smpl)
-    # if model_type == 'sigmoid':  # 2d param1 vs param2 plots
-    #     for smpl in sorted(prdfs, reverse=True):
-    #         fnames.append([])
-    #         for p1, p2 in itertools.combinations(params_to_predict, 2):
-    #             plot_param_or_pair('scatter', p1, smpl, param2=p2, median_pfo=median_pfos[smpl])
+                    for tpm in plt_params:
+                        # plot_param_or_pair(ptype, tpm, smpl, median_pfo=median_pfos[smpl])  # true vs inferred params
+                        plot_param_or_pair(ptype, tpm, smpl, param2='curve-diff', vtypes=['truth', 'predicted'])  # true params vs loss function   NOTE per-bin uses mse, so this isn't actually its loss function
+            # if model_type == 'per-cell':
+            #     fnames.append([])
+            #     plot_param_or_pair(ptype, 'fitness', smpl)
+    if model_type == 'sigmoid':  # 2d param1 vs param2 plots
+        for smpl in sorted(prdfs, reverse=True):
+            fnames.append([])
+            for p1, p2 in itertools.combinations(plt_params, 2):
+                plot_param_or_pair('scatter', p1, smpl, param2=p2, median_pfo=median_pfos[smpl], vtypes=['truth', 'truth'])
     make_html(outdir, fnames=fnames, extra_links=[('single curves', '%s/single-curves.html'%os.path.basename(outdir)), ])
     make_html(outdir, fnames=single_curve_fns, htmlfname='%s/single-curves.html'%outdir)
 
@@ -925,6 +936,7 @@ def add_slope_vals(tresp, xbounds, tpfo, is_hist=False, nsteps=None, debug=False
     dxmax = (dxvlist[imaxdiff] + dxvlist[imaxdiff+1]) / 2  # the dx values are bin widths (if it's a hist), so we want the average bin width over the two bins we're subtracting
     x_init, init_birth = sorted([(x, v) for x, v in zip(xvals, rvals)], key=lambda p: abs(0-p[0]))[0]  # sort by nearness to 0
     tpfo['max_slope'], tpfo['x_max_slope'], tpfo['init_birth'] = rmaxdiff / dxmax, xvals[imaxdiff], init_birth
+    tpfo['mean_val'], tpfo['max_val'], tpfo['max_diff'] = np.mean(rvals), max(rvals), max(rvals) - min(rvals)
     if debug:
         print('    slope difference values%s with %d x grid points:' % (' for hist' if is_hist else '', len(xvals)))
         def prlist(tn, lst, offset=False):
@@ -933,7 +945,7 @@ def add_slope_vals(tresp, xbounds, tpfo, is_hist=False, nsteps=None, debug=False
         prlist('dx', dxvlist)
         prlist('resp', rvals)
         prlist('rdiff', [rvals[i+1]-rvals[i] for i in range(len(rvals)-1)], offset=True)
-        print('      max slope %.2f   x max slope %.2f    init birth %.2f' % (tpfo['max_slope'], tpfo['x_max_slope'], tpfo['init_birth']))
+        print('      max slope %.2f   x max slope %.2f    init birth %.2f   mean val: %.2f   max val: %.2f   max diff: %.2f' % (tpfo['max_slope'], tpfo['x_max_slope'], tpfo['init_birth'], tpfo['mean_val'], tpfo['max_val'], tpfo['max_diff']))
 
 # ----------------------------------------------------------------------------------------
 # get all lists (x, y, dx, etc)
@@ -1211,7 +1223,7 @@ def add_param_text(fig, true_pfo, inf_pfo=None, diff_vals=None, upper_left=False
         return rstr
     # ----------------------------------------------------------------------------------------
     xv, yv = (0.6, 0.25) if inf_pfo is None and not upper_left else (0.19, 0.7 if diff_vals is None else 0.65)
-    plist = ['xscale', 'xshift', 'yscale', 'yshift', 'x_ceil_start'] if 'birth-response' in true_pfo else ['max_slope', 'x_max_slope', 'init_birth']
+    plist = ['xscale', 'xshift', 'yscale', 'yshift', 'x_ceil_start'] if 'birth-response' in non_none([true_pfo, inf_pfo]) else ['max_slope', 'x_max_slope', 'init_birth']
     param_text = [ptext(p) for p in plist]
     param_text = [t for t in param_text if t != '']
     if len(param_text) > 3:

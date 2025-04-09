@@ -126,8 +126,8 @@ def base_curve_loss(y_true, y_pred, rect_area=False, params_to_predict=utils.sig
         ydist = tf.math.abs(tf.math.reduce_max(all_yvals) - tf.math.reduce_min(all_yvals))
         area_val = tf.reduce_sum(xdist * ydist)  # area of whole plot/rectangle
     else:  # area between furthest curve and x axis
-        # area_val = tf.reduce_sum(tf.math.maximum(tf.math.abs(true_svals), tf.math.abs(pred_svals)) * tf.constant(dx, dtype=tf.float64))
-        area_val = tf.reduce_sum(tf.math.abs(true_svals) * tf.constant(dx, dtype=tf.float64))
+        # area_val = tf.reduce_sum(tf.math.maximum(tf.math.abs(true_svals), tf.math.abs(pred_svals)) * tf.constant(dx, dtype=tf.float64))  # max of true/pred
+        area_val = tf.reduce_sum(tf.math.abs(true_svals) * tf.constant(dx, dtype=tf.float64))  # just use true
     normed_area = sumv / area_val
     # print_debug()
     return normed_area
@@ -228,12 +228,13 @@ class ParamNetworkModel:
         tree_input = keras.Input(shape=(encode.mtx_lens['tree'], self.max_leaf_count), name='tree_input')
         carry_cap_input = keras.Input(shape=(1,), name='carry_cap_input')
         init_pop_input = keras.Input(shape=(1,), name='init_pop_input')
+        death_input = keras.Input(shape=(1,), name='death_input')
 
         if self.bundle_size is None:
             x = SigmoidTransposeLayer(self.bundle_size)(tree_input)
             for layer in self.pre_bundle_layers[prebundle_layer_cfg]:
                 x = layer(x)
-            x = layers.Concatenate()([x, carry_cap_input, init_pop_input])
+            x = layers.Concatenate()([x, carry_cap_input, init_pop_input, death_input])
             dense_unit_list = [48, 32, 16, 8]
             for idense, n_units in enumerate(dense_unit_list):
                 x = layers.Dense(n_units, activation=self.actfn)(x)
@@ -241,7 +242,7 @@ class ParamNetworkModel:
                     x = layers.Dropout(dropout_rate)(x)
             outputs = layers.Dense(self.num_parameters, activation=clipfcn)(x)
             self.network = keras.Model(
-                inputs=[tree_input, carry_cap_input, init_pop_input],
+                inputs=[tree_input, carry_cap_input, init_pop_input, death_input],
                 outputs=outputs
             )
         else:
@@ -367,7 +368,7 @@ class ParamNetworkModel:
         """
         return self._reshape_data_wrt_bundle_size(onp.stack(trees))
 
-    def fit(self, training_trees: list[onp.ndarray], responses: list[list[poisson.Response]], carry_caps, init_pops, epochs: int = 30, batch_size: int = None, validation_split: float = 0):
+    def fit(self, training_trees: list[onp.ndarray], responses: list[list[poisson.Response]], carry_caps, init_pops, deaths, epochs: int = 30, batch_size: int = None, validation_split: float = 0):
         """
         Trains neural network on given trees and responses.
         training_trees: list of encoded trees
@@ -422,7 +423,7 @@ class ParamNetworkModel:
             print('    using network.fit')
             self.network.fit(
                 # self._prepare_trees_for_network_input(training_trees),
-                [onp.stack(training_trees), onp.stack(carry_caps), onp.stack(init_pops)] if self.bundle_size is None else self._prepare_trees_for_network_input(onp.stack(training_trees)),
+                [onp.stack(training_trees), onp.stack(carry_caps), onp.stack(init_pops), onp.stack(deaths)] if self.bundle_size is None else self._prepare_trees_for_network_input(onp.stack(training_trees)),
                 response_parameters,
                 epochs=epochs,
                 batch_size=batch_size,
@@ -434,13 +435,13 @@ class ParamNetworkModel:
 
     def predict(
         self,
-        encoded_trees: list[onp.ndarray], carry_caps, init_pops,
+        encoded_trees: list[onp.ndarray], carry_caps, init_pops, deaths,
     ) -> list[list[poisson.Response]]:
         """Returns the Response objects predicted for each tree."""
 
         predicted_responses = self.network(
             # self._prepare_trees_for_network_input(onp.stack(encoded_trees)), self._prepare_trees_for_network_input(onp.stack(carry_caps)), self._prepare_trees_for_network_input(onp.stack(init_pops)) if self.bundle_size is None else self._prepare_trees_for_network_input(onp.stack(encoded_trees))
-            [onp.stack(encoded_trees), onp.stack(carry_caps), onp.stack(init_pops)] if self.bundle_size is None else self._prepare_trees_for_network_input(onp.stack(encoded_trees))
+            [onp.stack(encoded_trees), onp.stack(carry_caps), onp.stack(init_pops), onp.stack(deaths)] if self.bundle_size is None else self._prepare_trees_for_network_input(onp.stack(encoded_trees))
         )
 
         return self._decode_responses(predicted_responses, example_response_list=self.example_response_list)
@@ -570,6 +571,7 @@ class PerBinNetworkModel:
         tree_input = keras.Input(shape=(encode.mtx_lens['tree'], self.max_leaf_count), name='tree_input')
         carry_cap_input = keras.Input(shape=(1,), name='carry_cap_input')
         init_pop_input = keras.Input(shape=(1,), name='init_pop_input')
+        death_input = keras.Input(shape=(1,), name='death_input')
 
         tlayers = [
             layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
@@ -582,7 +584,7 @@ class PerBinNetworkModel:
         x = PerBinTransposeLayer()(tree_input)
         for layer in tlayers:
             x = layer(x)
-        x = layers.Concatenate()([x, carry_cap_input, init_pop_input])
+        x = layers.Concatenate()([x, carry_cap_input, init_pop_input, death_input])
         dense_unit_list = [48, 32, 16, 8]
         for idense, n_units in enumerate(dense_unit_list):
             x = layers.Dense(n_units, activation=self.actfn)(x)
@@ -591,7 +593,7 @@ class PerBinNetworkModel:
         outputs = layers.Dense(self.n_bins)(x)
 
         self.network = keras.Model(
-            inputs=[tree_input, carry_cap_input, init_pop_input],
+            inputs=[tree_input, carry_cap_input, init_pop_input, death_input],
             outputs=outputs
         )
         self.network.summary()
@@ -601,9 +603,9 @@ class PerBinNetworkModel:
         self.network.compile(loss=loss_fcn, optimizer=optimizer) #, run_eagerly=True)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
 
     # ----------------------------------------------------------------------------------------
-    def fit(self, training_trees, training_fitness_bins, carry_caps, init_pops, epochs=30, batch_size=None, validation_split=0):
+    def fit(self, training_trees, training_fitness_bins, carry_caps, init_pops, deaths, epochs=30, batch_size=None, validation_split=0):
         self.network.fit(
-            [onp.stack(training_trees), onp.stack(carry_caps), onp.stack(init_pops)],
+            [onp.stack(training_trees), onp.stack(carry_caps), onp.stack(init_pops), onp.stack(deaths)],
             onp.stack(training_fitness_bins),
             epochs=epochs,
             callbacks=[Callback(epochs, use_validation=validation_split > 0)],
@@ -612,8 +614,8 @@ class PerBinNetworkModel:
         )
 
     # ----------------------------------------------------------------------------------------
-    def predict(self, encoded_trees, carry_caps, init_pops):
-        predicted_fitnesses = self.network([onp.stack(encoded_trees), onp.stack(carry_caps), onp.stack(init_pops)])
+    def predict(self, encoded_trees, carry_caps, init_pops, deaths):
+        predicted_fitnesses = self.network([onp.stack(encoded_trees), onp.stack(carry_caps), onp.stack(init_pops), onp.stack(deaths)])
         return predicted_fitnesses
 
     # ----------------------------------------------------------------------------------------
