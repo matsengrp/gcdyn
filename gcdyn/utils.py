@@ -419,6 +419,8 @@ def sns_xy_plot(ptype, smpl, tdf, xkey, ykey, all_xvals=None, true_x_eq_y=False,
     # ----------------------------------------------------------------------------------------
     if all_xvals is None:
         all_xvals = tdf[xkey]
+    if len(set(all_xvals)) == 1:
+        return
     assert len(tdf[xkey]) == len(tdf[ykey])
     i_none = [i for (i, x, y, d) in zip(tdf.index, tdf[xkey], tdf[ykey], tdf['curve-diff-predicted']) if any(v is None or math.isnan(v) for v in [x, y, d])]
     if len(i_none) > 0:
@@ -1001,8 +1003,8 @@ def resp_fcn_diff(resp1, resp2, xbounds, dont_normalize=False, nsteps=40, resp2_
         if rect_area:
             area_val = abs(xbounds[1] - xbounds[0]) * abs(max(vals1+vals2) - min(vals1+vals2))  # divide area between curves by area of rectangle defined by xbounds and min/max of either fcn
         else:
-            # area_vlist = [max([abs(v1), abs(v2)]) * dx for v1, v2, dx in zip(vals1, vals2, dxvlist)]
-            area_vlist = [abs(v1) * dx for v1, dx in zip(vals1, dxvlist)]
+            # area_vlist = [max([abs(v1), abs(v2)]) * dx for v1, v2, dx in zip(vals1, vals2, dxvlist)]  # max of true/pred
+            area_vlist = [abs(v1) * dx for v1, dx in zip(vals1, dxvlist)]  # just use true
             area_val = sum(area_vlist)  # area between furthest curve and x axis (in this increment of dx) (don't really need dx, but maybe it makes it more intuitive)
         return_val /= area_val
     if debug:

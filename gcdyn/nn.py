@@ -119,15 +119,15 @@ def base_curve_loss(y_true, y_pred, rect_area=False, params_to_predict=utils.sig
     dx = (xbounds[1] - xbounds[0]) / nsteps
     xvals = tf.constant(list(onp.arange(xbounds[0], 0, dx)) + list(onp.arange(0, xbounds[1] + dx, dx)), dtype=tf.float64)
     true_svals, pred_svals = [sigval(xvals, params(yv)) for yv in [y_true, y_pred]]
-    sumv = tf.reduce_sum(tf.math.abs(true_svals - pred_svals) * tf.constant(dx, dtype=tf.float64))
+    sumv = tf.reduce_sum(tf.math.abs(true_svals - pred_svals)) #* tf.constant(dx, dtype=tf.float64))
     if rect_area:  # old-style full rectangular area for denominator
         all_yvals = tf.concat([true_svals, pred_svals], 0)
         xdist = tf.math.abs(tf.constant(xbounds[1] - xbounds[0], dtype=tf.float64))
         ydist = tf.math.abs(tf.math.reduce_max(all_yvals) - tf.math.reduce_min(all_yvals))
         area_val = tf.reduce_sum(xdist * ydist)  # area of whole plot/rectangle
     else:  # area between furthest curve and x axis
-        # area_val = tf.reduce_sum(tf.math.maximum(tf.math.abs(true_svals), tf.math.abs(pred_svals)) * tf.constant(dx, dtype=tf.float64))  # max of true/pred
-        area_val = tf.reduce_sum(tf.math.abs(true_svals) * tf.constant(dx, dtype=tf.float64))  # just use true
+        # area_val = tf.reduce_sum(tf.maximum(tf.reduce_sum(tf.math.abs(true_svals)), tf.reduce_sum(tf.math.abs(pred_svals)))) # * tf.constant(dx, dtype=tf.float64))  # max of true/pred
+        area_val = tf.reduce_sum(tf.math.abs(true_svals)) #* tf.constant(dx, dtype=tf.float64))  # just use true
     normed_area = sumv / area_val
     # print_debug()
     return normed_area
@@ -548,6 +548,13 @@ class PerCellNetworkModel:
         self.network = keras.models.load_model(fname, safe_mode=False)
 
 # ----------------------------------------------------------------------------------------
+@tf.function  # NOTE need to comment this decorator in order for .numpy() to work (and add run_eagerly to .compile() call, but note that training is WAY the fuck slower if it's commented
+def per_bin_loss(y_true, y_pred):
+    # return tf.reduce_mean(tf.square(y_true - y_pred)) / tf.reduce_sum(tf.math.abs(y_true))
+    return tf.reduce_sum(tf.math.abs(y_true - y_pred)) / tf.reduce_sum(tf.math.abs(y_true))
+    # return tf.reduce_sum(tf.math.abs(y_true - y_pred)) / tf.maximum(tf.reduce_sum(tf.math.abs(y_true)), tf.reduce_sum(tf.math.abs(y_pred)))
+
+# ----------------------------------------------------------------------------------------
 class PerBinNetworkModel:
     def __init__(self):
         pass
@@ -600,7 +607,8 @@ class PerBinNetworkModel:
         optimizer = keras.optimizers.Adam(
             learning_rate=learning_rate, use_ema=True, ema_momentum=ema_momentum
         )
-        self.network.compile(loss=loss_fcn, optimizer=optimizer) #, run_eagerly=True)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
+        # lfn = 'mean_squared_error' #'mean_absolute_error' #'mean_absolute_percentage_error' #'mean_squared_error' #
+        self.network.compile(loss=per_bin_loss, optimizer=optimizer) #, run_eagerly=True)  # turn on this to allow to call .numpy() on tf tensors to get float value: , run_eagerly=True)
 
     # ----------------------------------------------------------------------------------------
     def fit(self, training_trees, training_fitness_bins, carry_caps, init_pops, deaths, epochs=30, batch_size=None, validation_split=0):

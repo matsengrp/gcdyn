@@ -33,13 +33,16 @@ def csvfn(args, smpl):
 class LScaler(object):
     # ----------------------------------------------------------------------------------------
     # if either inputs are set, fit/create a new scaler; otherwise you should pass in an existing <scaler>
-    # inputs can be either <in_tensors> (encoded trees or fitnesses, which need to be converted to a form that the internal scaler can work on), or <in_vals> which are directly usable by the internal scaler
-    def __init__(self, args, var_list, in_tensors=None, in_vals=None, smpl='', scaler=None):
+    # inputs can be either <in_tensors> (encoded trees or fitnesses [latter for per-cell model], which need to be converted to a form that the internal scaler can work on), or <in_vals> which are directly usable by the internal scaler
+    def __init__(self, args, var_list, in_tensors=None, in_vals=None, smpl='', scaler=None, dont_scale_params=False):
         self.args = args
         self.var_list = var_list
         self.scaler = scaler
         self.in_tensors = in_tensors
         self.in_vals = in_vals
+        self.dont_scale_params = dont_scale_params
+        if self.in_vals is not None and len(self.in_vals[0]) != len(self.var_list):
+            raise Exception('each column in in_vals should correspond to a variable to scale, but got %d columns and %d vars' % (len(self.in_vals[0]), len(self.var_list)))
         if self.in_tensors is not None or self.in_vals is not None:  # taking input and scaling it
             assert self.in_vals is None or self.in_tensors is None  # only set one of them
             if self.in_tensors is not None:
@@ -82,7 +85,7 @@ class LScaler(object):
     # ----------------------------------------------------------------------------------------
     # apply existing scaling to new tensors <in_tensors> or values <in_vals> (see description of difference in __init__ above)
     def apply_scaling(self, in_tensors=None, in_vals=None, smpl='', debug=True):
-        assert self.scaler is not None or self.args.dont_scale_params
+        assert self.scaler is not None or self.dont_scale_params
         if in_vals is None:
             in_vals = self.extract_tree_vals(in_tensors)
         else:
@@ -112,7 +115,7 @@ class LScaler(object):
                     bstr = "   " if dstr != "before" else "      %15s %7s" % (vname, smpl)
                     print("%s %s%s %s%s" % (bstr, fnstr(pvs, sys.modules['numpy'].mean), fnstr(pvs, sys.modules['numpy'].var), fnstr(pvs, min), fnstr(pvs, max), ), end="" if dstr == "before" else "\n")
         # ----------------------------------------------------------------------------------------
-        if self.args.dont_scale_params:
+        if self.dont_scale_params:
             return copy.copy(invals)
         if inverse:
             assert self.scaler is not None
@@ -256,6 +259,7 @@ def get_prediction(args, model, spld, lscalers, smpl=None):
     if args.model_type == 'sigmoid':
         const_pred_resps = model.predict(lscalers['per-node'].apply_scaling(in_tensors=spld['trees'], smpl=smpl), carry_caps, init_pops, deaths)  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)
         pred_vals = [[float(rsp.value) for rsp in rlist] for rlist in const_pred_resps]
+        pred_vals = lscalers['output'].scale(pred_vals, inverse=True, smpl=smpl)
         if args.is_simu:
             true_resps = spld["birth-responses"]
         if args.dl_bundle_size is not None:
@@ -275,6 +279,7 @@ def get_prediction(args, model, spld, lscalers, smpl=None):
     elif args.model_type == 'per-bin':
         assert args.dl_bundle_size is None
         pred_fitness_bins = model.predict(lscalers['per-node'].apply_scaling(in_tensors=spld['trees'], smpl=smpl), carry_caps, init_pops, deaths).numpy()
+        pred_fitness_bins = encode.wrap_fitness_bins(lscalers['output'].scale(encode.unwrap_fitness_bins(pred_fitness_bins), inverse=True, smpl=smpl), len(pred_fitness_bins[0]))
         if args.is_simu:
             true_fitness_bins, true_resps = [spld[tk] for tk in ["fitness-bins", "birth-responses"]]
         df = write_per_bin_prediction(args, pred_fitness_bins, spld["trees"], true_fitness_bins=true_fitness_bins, true_resps=true_resps, sstats=sstats, smpl=smpl, gcids=gcids)
@@ -471,7 +476,7 @@ def predict_and_plot(args, model, smpldict, smpls, lscalers=None):
 def train_and_test(args, start_time):
     # ----------------------------------------------------------------------------------------
     def train_sigmoid(smpldict, lscalers, max_leaf_count):
-        responses = [[ConstantResponse(getattr(rsp, p)) for p in args.params_to_predict] for rsp in smpldict['train']['birth-responses']]  # order corresponds to args.params_to_predict (constant response is just a container for one value, and note we don't bother to set the name)
+        responses = [[ConstantResponse(p) for p in plist] for plist in lscalers['train']['output'].out_vals]  # order corresponds to args.params_to_predict (constant response is just a container for one value, and note we don't bother to set the name)
         model = sys.modules['gcdyn.nn'].ParamNetworkModel(responses[0], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop, params_to_predict=args.params_to_predict)
         model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, prebundle_layer_cfg=args.prebundle_layer_cfg, loss_fcn=args.loss_fcn)
         carry_caps, init_pops, deaths = zip(*lscalers['train']['per-tree'].out_vals)
@@ -490,7 +495,8 @@ def train_and_test(args, start_time):
         model = sys.modules['gcdyn.nn'].PerBinNetworkModel()
         model.build_model(len(utils.zoom_affy_bins) - 1, max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, loss_fcn=args.loss_fcn)
         carry_caps, init_pops, deaths = zip(*lscalers['train']['per-tree'].out_vals)
-        model.fit(lscalers['train']['per-node'].out_tensors, smpldict['train']['fitness-bins'], carry_caps, init_pops, deaths, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
+        scaled_fitness_bins = encode.wrap_fitness_bins(lscalers['train']['output'].out_vals, len(smpldict['train']['fitness-bins'][0]))
+        model.fit(lscalers['train']['per-node'].out_tensors, scaled_fitness_bins, carry_caps, init_pops, deaths, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
         return model
     # ----------------------------------------------------------------------------------------
     samples = read_tree_files(args)
@@ -514,9 +520,13 @@ def train_and_test(args, start_time):
     # handle various scaling/re-encoding stuff
     lscalers = {}
     for smpl in smplists['train']:
-        lscalers[smpl] = {'per-node' : LScaler(args, ['distance', 'phenotype'], in_tensors=smpldict[smpl]['trees'], smpl=smpl)}
-        lscalers[smpl]['per-tree'] = LScaler(args, ['carry_cap', 'init_population', 'death'], in_vals=[[float(d[k]) for k in ['carry_cap', 'init_population', 'death']] for d in smpldict[smpl]['sstats']], smpl=smpl)
-    for tstr in ['per-node', 'per-tree']:
+        lscalers[smpl] = {'per-node' : LScaler(args, ['distance', 'phenotype'], in_tensors=smpldict[smpl]['trees'], smpl=smpl, dont_scale_params=args.dont_scale_input_params)}
+        lscalers[smpl]['per-tree'] = LScaler(args, ['carry_cap', 'init_population', 'death'], in_vals=[[float(d[k]) for k in ['carry_cap', 'init_population', 'death']] for d in smpldict[smpl]['sstats']], smpl=smpl, dont_scale_params=args.dont_scale_input_params)
+        if args.model_type == 'sigmoid':
+            lscalers[smpl]['output'] = LScaler(args, args.params_to_predict, in_vals=[[getattr(r, p) for p in args.params_to_predict] for r in smpldict[smpl]['birth-responses']], smpl=smpl, dont_scale_params=not args.scale_output_params)
+        else:
+            lscalers[smpl]['output'] = LScaler(args, ['fitness-bins'], in_vals=encode.unwrap_fitness_bins(smpldict[smpl]['fitness-bins']), smpl=smpl, dont_scale_params=not args.scale_output_params)
+    for tstr in ['per-node', 'per-tree', 'output']:
         joblib.dump(lscalers['train'][tstr].scaler, encode.output_fn(args.outdir, '%s-train-scaler'%tstr, None))
 
     # silly encodings for testing that essentially train on the output values
@@ -543,10 +553,16 @@ def train_and_test(args, start_time):
 
 # ----------------------------------------------------------------------------------------
 def read_model_files(args, samples):
-    scfns = {tstr : encode.output_fn(args.model_dir, '%s-train-scaler'%tstr, None) for tstr in ['per-node', 'per-tree']}
+    assert False # needs updating
+    scfns = {tstr : encode.output_fn(args.model_dir, '%s-train-scaler'%tstr, None) for tstr in ['per-node', 'per-tree', 'output']}
     print('    reading training scalers from %s' % ' '.join(scfns.values()))
-    lscalers = {'per-node' : LScaler(args, ['distance', 'phenotype'], scaler=joblib.load(scfns['per-node']))}
-    lscalers['per-tree'] = LScaler(args, ['carry_cap', 'init_population', 'death'], scaler=joblib.load(scfns['per-tree']))
+# TODO use loop
+    # for tstr in ['per-node', 'per-tree', 'output']:
+    lscalers = {'per-node' : LScaler(args, ['distance', 'phenotype'], scaler=joblib.load(scfns['per-node']), dont_scale_params=args.dont_scale_input_params)}
+    lscalers['per-tree'] = LScaler(args, ['carry_cap', 'init_population', 'death'], scaler=joblib.load(scfns['per-tree']), dont_scale_params=args.dont_scale_input_params)
+# TODO clean up
+    assert args.model_type in ['sigmoid', 'per-bin']
+    lscaler['output'] = LScaler(args, args.params_to_predict if args.model_type=='sigmoid' else ['fitness-bins'], scaler=joblib.load(scfns['output']), dont_scale_params=not args.scale_output_params)
     if args.model_type == 'sigmoid':
         model = sys.modules['gcdyn.nn'].ParamNetworkModel([ConstantResponse(0) for _ in args.params_to_predict], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop, params_to_predict=args.params_to_predict)
     elif args.model_type == 'per-cell':
@@ -610,7 +626,8 @@ def get_parser():
     parser.add_argument("--n-max-trees", type=int, help="if set, after reading this many trees from input, discard any extras")
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--use-trivial-encoding", action="store_true")
-    parser.add_argument("--dont-scale-params", action="store_true")
+    parser.add_argument("--dont-scale-input-params", action="store_true")
+    parser.add_argument("--scale-output-params", action="store_true")
     parser.add_argument("--min-n-max-leaves", default=200, help='pad all encoded tree matrices to at least this width')
     parser.add_argument("--custom-loop", action="store_true")
     parser.add_argument("--force-many-plot", action="store_true", help='make plot with response functions for all GCs on top of each other, even if this isn\'t simulation and/or they don\'t all have the same parameters.')
@@ -628,14 +645,14 @@ def main():
         args.epochs = 10
     if args.action == 'train' and not args.is_simu:
         raise Exception('need to set --is-simu when training')
-    if args.use_trivial_encoding and not args.dont_scale_params:
+    if args.use_trivial_encoding and not args.dont_scale_input_params:
         print('  %s --use-trivial-encoding: turning on --dont-scale-params since parameter scaling needs fixing to work with trivial encoding' % utils.wrnstr())
-        args.dont_scale_params = True
+        args.dont_scale_input_params = True
     if args.model_dir is not None and args.action == 'train':
         raise Exception('doesn\'t make sense to set --model-dir when training')
     if args.model_type == 'per-bin' and args.loss_fcn == 'curve':
-        print('    note: setting --loss-fcn to \'mse\' for per-bin model')
-        args.loss_fcn = 'mse'
+        print('    note: setting --loss-fcn to \'mean abs relative error\' for per-bin model (this var doesn\'t have any effect atm')
+        args.loss_fcn = 'mean abs relative error'
     if args.carry_cap_values is not None or args.init_population_values is not None or args.death_values is not None:
         if args.is_simu:
             raise Exception('can only set carry cap, init population, or death for data (otherwise they come from the simulation files)')

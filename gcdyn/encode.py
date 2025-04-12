@@ -280,6 +280,7 @@ def read_trees(filename: str):
     return np.load(filename) #, allow_pickle=True)
 
 # ----------------------------------------------------------------------------------------
+# convert birth response to list of (i.e. binned) values
 def encode_fitness_bins(intrees, birth_responses, xbins):
     assert len(intrees) == len(birth_responses)
     enc_fbins = []
@@ -290,6 +291,7 @@ def encode_fitness_bins(intrees, birth_responses, xbins):
     return enc_fbins
 
 # ----------------------------------------------------------------------------------------
+# convert list of (i.e. binned) values to histogram (not really the reverse of the previous fcn)
 def decode_fitness_bins(fbvals, xbins):
     assert len(fbvals) == len(utils.zoom_affy_bins) - 1
     htmp = utils.Hist(xmin=xbins[0], xmax=xbins[-1], xbins=xbins, n_bins=len(xbins)-1)
@@ -298,8 +300,25 @@ def decode_fitness_bins(fbvals, xbins):
     return htmp
 
 # ----------------------------------------------------------------------------------------
+# convert list of [fitness bins] to single list of fitness bin values
+def unwrap_fitness_bins(fitness_bins):
+    return [[f] for flist in fitness_bins for f in flist]
+
+# ----------------------------------------------------------------------------------------
+# convert single list of fitness bin values to list of [fitness bins]
+def wrap_fitness_bins(vlist, n_bins):
+    fitness_bins = [[]]
+    for ifv, fval in enumerate(vlist):
+        assert len(fval) == 1
+        fitness_bins[-1].append(fval[0])
+        if len(fitness_bins[-1]) == n_bins and ifv != len(vlist)-1:
+            fitness_bins.append([])
+    assert set(len(vl) for vl in fitness_bins) == set([n_bins])
+    return fitness_bins
+
+# ----------------------------------------------------------------------------------------
 final_ofn_strs = ["seqs", "trees", "meta", "encoded-trees", "encoded-fitnesses", "encoded-fitness-bins", "responses", "summary-stats"]
-model_state_ofn_strs = ["model", "per-node-train-scaler", "per-tree-train-scaler", "example-responses"]
+model_state_ofn_strs = ["model", "per-node-train-scaler", "per-tree-train-scaler", "output-train-scaler", "example-responses"]
 sstat_fieldnames = ["tree", "mean_branch_length", "total_branch_length", "carry_cap", "init_population", "time_to_sampling", 'death']
 leaf_meta_fields = ["tree-index", "name", "affinity", "n_muts", "n_muts_aa", "gc", "is_leaf"]
 
