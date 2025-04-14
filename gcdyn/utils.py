@@ -479,7 +479,7 @@ def sns_xy_plot(ptype, smpl, tdf, xkey, ykey, all_xvals=None, true_x_eq_y=False,
 # ----------------------------------------------------------------------------------------
 # plot scatter + box/whisker plot comparing true and predicted values for deep learning inference
 # NOTE leaving some commented code that makes plots we've been using recently, since we're not sure which plots we'll end up wanting in the end (and what's here is very unlikely to stay for very long)
-def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu=False, data_val=0, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15, trivial_encoding=False, nonsense_affy_val=-99, force_many_plot=False):
+def make_dl_plots(model_type, prdfs, seqmeta, sstats, params_to_predict, outdir, is_simu=False, data_val=0, validation_split=0, xtra_txt=None, fsize=20, label_fsize=15, trivial_encoding=False, nonsense_affy_val=-99, force_many_plot=False):
     quick = False  # turn this on to speed things up by skipping some plots
     # ----------------------------------------------------------------------------------------
     def add_fn(fn, n_per_row=4, force_new_row=False, fns=None):
@@ -530,18 +530,20 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
             os.makedirs(outdir+'/'+smpl)
         from gcdyn.poisson import SigmoidResponse, SigmoidCeilingResponse, LinearResponse
         median_pfo = None
-        inf_pfo_list, true_pfo_list, all_afvals = [], [], []
+        inf_pfo_list, true_pfo_list, all_afvals, sstat_list = [], [], [], []
         curve_diffs = {smpl : [], 'validation' : []}
         n_pred_rows = len(prdfs[smpl].index)  # N cells for per-cell, N trees for sigmoid
         n_tree_preds = len(set(prdfs[smpl]['tree-index']))
         n_simu_plots = min(n_max_plots, n_tree_preds)
-        lmdict = defaultdict(list)  # map from tree index to list of seq meta for that tree
+        lmdict, ssdict = defaultdict(list), {}  # map from tree index to list of seq meta for that tree, same for sstats
         validation_indices = None
         if smpl == "train" and validation_split != 0:  # NOTE this obviously depends on keras continuing to do validation splits this way
             validation_indices = [i for i in range(n_tree_preds - int(validation_split * n_tree_preds), n_tree_preds)]
         for mfo in seqmeta:
             lmdict[int(mfo['tree-index'])].append(mfo)
             n_skipped_diffs = {s : 0 for s in curve_diffs}
+        for ssfo in sstats:
+            ssdict[int(ssfo['tree'])] = ssfo
         if model_type == 'sigmoid':
             pstr, rkey, nsteps, is_hist = 'response', 'birth-response', 40, False
         elif model_type == 'per-bin':
@@ -562,31 +564,36 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 pred_pfo = {'birth-hist' : encode.decode_fitness_bins(pbvals, zoom_affy_bins)}
             else:
                 assert False
-            if model_type == 'per-bin':
+            if True: #model_type == 'per-bin':
                 add_slope_vals(pred_pfo[rkey], default_xbounds, pred_pfo, is_hist=is_hist)  # these are really slow, so turning off
             # truncate_phist(pred_pfo['birth-hist'], affy_xbds)  # would of course only turn this for per-bin
             if is_simu:
                 titlestr = '%s: response index %d / %d' % (smplstr, irow, n_tree_preds)
                 true_pfo = {'birth-response' : getresp('truth', (sigmoid_params + ['x_ceil_start', 'y_ceil']) if 'x_ceil_start-truth' in prdfs[smpl] else sigmoid_params, irow)}
-                if model_type == 'per-bin':
+                if True: #model_type == 'per-bin':
                     add_slope_vals(true_pfo['birth-response'], default_xbounds, true_pfo)  # these are really slow, so turning off
                 true_pfo_list.append(true_pfo)
                 cdiff = None
-                if len(curve_diffs[smplstr]) < n_max_diffs:
+                if len(curve_diffs[smplstr]) < n_max_diffs:  # NOTE sns_xy_plot() skips all rows with none-type curve-diff-predicted values
                     cdiff = resp_fcn_diff(true_pfo['birth-response'], pred_pfo[rkey], default_xbounds, resp2_is_hist=is_hist, nsteps=nsteps)
                     pred_pfo['curve-diff'] = cdiff  # I don't like putting the cdiff both in here and in curve_diffs, but the latter splits apart train/valid but inf_pfo_list doesn't (and they subsequently get used in different ways)
                     curve_diffs[smplstr].append(cdiff)  # NOTE len(curve_diffs[smplstr]) is *not* the same as irow since e.g. train and validation come from same sample
-                    # ldiff = get_curve_loss(true_pfo['birth-response'], pred_resp)  # uncomment (also below) to print also the diff from the curve loss fcn (it should be the same, modulo different xbounds and nsteps
+                    # ldiff = get_nn_curve_loss(true_pfo['birth-response'], pred_resp)  # uncomment (also below) to print also the diff from the curve loss fcn (it should be the same, modulo different xbounds and nsteps
+                    # fdiff = (ldiff - cdiff) / cdiff
+                    # print('    %3d  %7.3f  %7.3f  %7.3f  %s' % (irow, cdiff, ldiff, fdiff, '' if fdiff < 0.05 else color('red', 'x')))
                 else:
                     n_skipped_diffs[smplstr] += 1
-                if irow < n_simu_plots: # or pred_resp.yscale>55 or (cdiff is not None and cdiff > 0.75):
+                if irow < n_simu_plots: # or cdiff is not None and cdiff < -3.5: # or pred_resp.yscale>55 or (cdiff is not None and cdiff > 0.75):
+                # if irow in [5, 18, 39, 59, 78, 82, 99, 104, 122, 128, 134, 135]: # or cdiff is not None and cdiff < -3.5: # or pred_resp.yscale>55 or (cdiff is not None and cdiff > 0.75):
+                # if cdiff is not None and cdiff > 2: # or pred_resp.yscale>55 or (cdiff is not None and cdiff > 0.75):
+                # if irow < n_max_diffs and true_pfo['max_val'] < 2:
                     if model_type=='sigmoid':
                         pfl, phists, colors = [true_pfo, pred_pfo], None, ['#006600', '#1f77b4']
                     else:
                         pfl, phists, colors = [true_pfo], [pred_pfo], ['#006600']
                     fn = plot_many_curves(outdir+'/'+smpl, 'true-vs-inf-%s-%d'%(pstr, irow), pfl, pred_hists=phists,
                                           titlestr=titlestr, xbounds=default_xbounds, affy_vals=affy_vals, colors=colors,
-                                          diff_vals=[{'diff' : cdiff}] if cdiff is not None else None, param_text_pfos=[true_pfo, pred_pfo])  # , 'xbounds' : default_xbounds
+                                          diff_vals=[{'diff' : cdiff}] if cdiff is not None else None, param_text_pfos=[true_pfo, pred_pfo])  # , 'xbounds' : default_xbounds  # , {'diff' : ldiff}
                     add_fn(fn)
             else:
                 titlestr = '%s (%d / %d)' % (prdfs[smpl]['gcids'][irow] if 'gcids' in prdfs[smpl] else smplstr, irow, n_tree_preds)
@@ -598,11 +605,14 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                     add_fn(fn)
             inf_pfo_list.append(pred_pfo)
             all_afvals += affy_vals
+            sstat_list.append(ssdict[tree_index])
         for tk in slp_vals + ['curve-diff']:
             prdfs[smpl]['%s-predicted'%tk] = [p.get(tk) for p in inf_pfo_list]
         if is_simu:
             for tk in slp_vals:
                 prdfs[smpl]['%s-truth'%tk] = [p.get(tk) for p in true_pfo_list]
+            for tk in sstats[0]:
+                prdfs[smpl]['%s-truth'%tk] = [float(ssfo[tk]) for ssfo in sstat_list]
         if force_many_plot and model_type=='per-bin':
             print('    %s --force-many-plot needs to be checked for per-bin model' % wrnstr())
         if force_many_plot or not is_simu or all(p['birth-response']==true_pfo_list[0]['birth-response'] for p in true_pfo_list):  # all true responses equal
@@ -750,23 +760,23 @@ def make_dl_plots(model_type, prdfs, seqmeta, params_to_predict, outdir, is_simu
                 writer = csv.DictWriter(mfile, ['%s-predicted'%p for p in sigmoid_params])
                 writer.writeheader()
                 writer.writerow({'%s-predicted'%p : getattr(median_pfos[smpl]['birth-response'], p) for p in sigmoid_params})
-    plt_params = sigmoid_params if model_type=='sigmoid' else slp_vals
+    plt_params = (sigmoid_params+['max_val']) if model_type=='sigmoid' else slp_vals
     for ptype in ['scatter', 'box']:
         for smpl in sorted(prdfs, reverse=True):
             if model_type in ['sigmoid', 'per-bin']:
                 fnames.append([])
                 if is_simu:
-                    for tpm in plt_params:
+                    for tpm in plt_params: #encode.sstat_fieldnames  # can also plot various simulation truth/summary stat values
                         # plot_param_or_pair(ptype, tpm, smpl, median_pfo=median_pfos[smpl])  # true vs inferred params
                         plot_param_or_pair(ptype, tpm, smpl, param2='curve-diff', vtypes=['truth', 'predicted'])  # true params vs loss function   NOTE per-bin uses mse, so this isn't actually its loss function
             # if model_type == 'per-cell':
             #     fnames.append([])
             #     plot_param_or_pair(ptype, 'fitness', smpl)
-    if model_type == 'sigmoid':  # 2d param1 vs param2 plots
-        for smpl in sorted(prdfs, reverse=True):
-            fnames.append([])
-            for p1, p2 in itertools.combinations(plt_params, 2):
-                plot_param_or_pair('scatter', p1, smpl, param2=p2, median_pfo=median_pfos[smpl], vtypes=['truth', 'truth'])
+    # if model_type == 'sigmoid':  # 2d param1 vs param2 plots
+    #     for smpl in sorted(prdfs, reverse=True):
+    #         fnames.append([])
+    #         for p1, p2 in itertools.combinations(plt_params, 2):
+    #             plot_param_or_pair('scatter', p1, smpl, param2=p2, median_pfo=median_pfos[smpl], vtypes=['truth', 'truth'])
     make_html(outdir, fnames=fnames, extra_links=[('single curves', '%s/single-curves.html'%os.path.basename(outdir)), ])
     make_html(outdir, fnames=single_curve_fns, htmlfname='%s/single-curves.html'%outdir)
 

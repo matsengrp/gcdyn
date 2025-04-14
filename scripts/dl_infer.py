@@ -289,14 +289,16 @@ def get_prediction(args, model, spld, lscalers, smpl=None):
 
 # ----------------------------------------------------------------------------------------
 def plot_existing_results(args):
-    prdfs, smpldict = {}, {}
+    prdfs = {}
     for smpl in smplists[args.action]:
         prdfs[smpl] = pd.read_csv(csvfn(args, smpl))
-    seqmeta = read_meta_csv(args.indir)
+    seqmeta = read_csv('%s/meta.csv'%args.indir)
+    sstats = read_csv('%s/summary-stats.csv'%args.indir)
     utils.make_dl_plots(
         args.model_type,
         prdfs,
         seqmeta,
+        sstats,
         args.params_to_predict,
         args.outdir + "/plots",
         is_simu=args.is_simu,
@@ -343,9 +345,9 @@ def write_traintest_samples(args, smpldict):
         )
 
 # ----------------------------------------------------------------------------------------
-def read_meta_csv(mdir):
+def read_csv(mfn):
     metafos = []
-    with open('%s/meta.csv'%mdir) as lmfile:
+    with open(mfn) as lmfile:
         reader = csv.DictReader(lmfile)
         for line in reader:
             metafos.append(line)
@@ -399,14 +401,9 @@ def read_tree_files(args):
     samples['trees'] = encode.pad_trees(samples['trees'], 'tree', args.min_n_max_leaves)
     if args.is_simu:
         samples["fitnesses"] = encode.read_trees(ffn)
-        # if os.path.exists(ffn.replace('fitnesses', 'fitness-bins')):
         samples["fitness-bins"] = encode.read_trees(ffn.replace('fitnesses', 'fitness-bins'))
-    samples["sstats"] = []
-    with open(sfn) as sfile:
-        reader = csv.DictReader(sfile)
-        for line in reader:
-            samples["sstats"].append(line)
-    if os.path.exists(gfn):  # name/label for each tree/gc
+    samples["sstats"] = read_csv(sfn)
+    if os.path.exists(gfn):  # name/label for each tree/gc (only for data)
         with open(gfn) as gfile:
             samples['gcids'] = [l['gcid'] for l in csv.DictReader(gfile)]
     else:
@@ -459,11 +456,13 @@ def predict_and_plot(args, model, smpldict, smpls, lscalers=None):
     prdfs = {}
     for smpl in smpls:
         prdfs[smpl] = get_prediction(args, model, smpldict[smpl], lscalers, smpl=smpl)
-    seqmeta = read_meta_csv(args.indir)
+    seqmeta = read_csv('%s/meta.csv'%args.indir)
+    sstats = read_csv('%s/summary-stats.csv'%args.indir)
     utils.make_dl_plots(  # note that response bundles are collapsed (i.e. we only plot the first pair of each bundle) but seqmeta isn't, so we just plot the affinities from the first tree in the bundle (it would probably be better to combine all of the affinities from the bundle)
         args.model_type,
         prdfs,
         seqmeta,
+        sstats,
         args.params_to_predict,
         args.outdir + "/plots",
         is_simu=args.is_simu,
@@ -484,8 +483,6 @@ def train_and_test(args, start_time):
         return model
     # ----------------------------------------------------------------------------------------
     def train_per_cell(smpldict, lscalers, max_leaf_count):
-        # seqmeta = read_meta_csv(args.indir)
-        # affy_vals = [float(m['affinity']) for m in seqmeta]
         model = sys.modules['gcdyn.nn'].PerCellNetworkModel()
         model.build_model(max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, loss_fcn=args.loss_fcn)
         model.fit(lscalers['train'].out_tensors, smpldict['train']['fitnesses'], epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
@@ -493,7 +490,7 @@ def train_and_test(args, start_time):
     # ----------------------------------------------------------------------------------------
     def train_per_bin(smpldict, lscalers, max_leaf_count):
         model = sys.modules['gcdyn.nn'].PerBinNetworkModel()
-        model.build_model(len(utils.zoom_affy_bins) - 1, max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, loss_fcn=args.loss_fcn)
+        model.build_model(len(utils.zoom_affy_bins) - 1, max_leaf_count, dropout_rate=args.dropout_rate, learning_rate=args.learning_rate, ema_momentum=args.ema_momentum, prebundle_layer_cfg=args.prebundle_layer_cfg, loss_fcn=args.loss_fcn)
         carry_caps, init_pops, deaths = zip(*lscalers['train']['per-tree'].out_vals)
         scaled_fitness_bins = encode.wrap_fitness_bins(lscalers['train']['output'].out_vals, len(smpldict['train']['fitness-bins'][0]))
         model.fit(lscalers['train']['per-node'].out_tensors, scaled_fitness_bins, carry_caps, init_pops, deaths, epochs=args.epochs, batch_size=args.batch_size, validation_split=args.validation_split)
@@ -503,7 +500,7 @@ def train_and_test(args, start_time):
 
     # separate train/test samples
     idxs = get_traintest_indices(args, samples)
-    smpldict = {}  # separate train/test trees and responses by index
+    smpldict = {}  # separate train/test trees, responses, etc by index
     for smpl in smplists['train']:
         smpldict[smpl] = {
             key: [val[i] for i in idxs[smpl]] for key, val in samples.items()

@@ -317,10 +317,11 @@ def wrap_fitness_bins(vlist, n_bins):
     return fitness_bins
 
 # ----------------------------------------------------------------------------------------
-final_ofn_strs = ["seqs", "trees", "meta", "encoded-trees", "encoded-fitnesses", "encoded-fitness-bins", "responses", "summary-stats"]
-model_state_ofn_strs = ["model", "per-node-train-scaler", "per-tree-train-scaler", "output-train-scaler", "example-responses"]
-sstat_fieldnames = ["tree", "mean_branch_length", "total_branch_length", "carry_cap", "init_population", "time_to_sampling", 'death']
-leaf_meta_fields = ["tree-index", "name", "affinity", "n_muts", "n_muts_aa", "gc", "is_leaf"]
+final_ofn_strs = ['seqs', 'trees', 'meta', 'encoded-trees', 'encoded-fitnesses', 'encoded-fitness-bins', 'responses', 'summary-stats', 'slice-info']
+model_state_ofn_strs = ['model', 'per-node-train-scaler', 'per-tree-train-scaler', 'output-train-scaler', 'example-responses']
+sstat_fieldnames = ['tree', 'mean_branch_length', 'total_branch_length', 'carry_cap', 'init_population', 'time_to_sampling', 'death', 'final_capacity_fraction', 'mean_capacity_fraction']  # , 'n_final_nodes', 'n_mean_nodes'
+slice_headers = ['tree', 'time', 'n-nodes']
+leaf_meta_fields = ['tree-index', 'name', 'affinity', 'n_muts', 'n_muts_aa', 'gc', 'is_leaf']
 
 # ----------------------------------------------------------------------------------------
 def output_fn(odir, ftype, itrial):
@@ -329,37 +330,38 @@ def output_fn(odir, ftype, itrial):
     if itrial is None:
         suffixes = {
             # final ofn:
-            "seqs": "fasta",
-            "trees": "nwk",
-            "encoded-trees": "npy",
-            "encoded-fitnesses": "npy",
-            "encoded-fitness-bins": "npy",
-            "responses": "pkl",
-            "meta": "csv",
-            "summary-stats": "csv",
+            'seqs': 'fasta',
+            'trees': 'nwk',
+            'encoded-trees': 'npy',
+            'encoded-fitnesses': 'npy',
+            'encoded-fitness-bins': 'npy',
+            'responses': 'pkl',
+            'meta': 'csv',
+            'summary-stats': 'csv',
+            'slice-info': 'csv',
             # model state:
-            "model": "keras",
-            "per-node-train-scaler": "pkl",
-            "per-tree-train-scaler": "pkl",
-            "example-responses": "pkl",
+            'model': 'keras',
+            'per-node-train-scaler': 'pkl',
+            'per-tree-train-scaler': 'pkl',
+            'example-responses': 'pkl',
         }
-        sfx = suffixes.get(ftype, "simu")
+        sfx = suffixes.get(ftype, 'simu')
     else:
         assert ftype is None
-        ftype = "tree_%d" % itrial
-        sfx = "pkl"
-    ofn = f"{odir}/{ftype}.{sfx}"
+        ftype = 'tree_%d' % itrial
+        sfx = 'pkl'
+    ofn = f'{odir}/{ftype}.{sfx}'
     if not os.path.exists(ofn):
         ofn = ofn.replace('per-node-', '')
     return ofn
 
 # ----------------------------------------------------------------------------------------
-def write_sstats(ofn, sstats):
+def write_csv(ofn, sstats, headers):
     with open(ofn, "w") as sfile:
-        writer = csv.DictWriter(sfile, sstat_fieldnames)
+        writer = csv.DictWriter(sfile, headers)
         writer.writeheader()
         for sline in sstats:
-            writer.writerow({k: v for k, v in sline.items() if k in sstat_fieldnames})
+            writer.writerow({k: v for k, v in sline.items() if k in headers})
 
 # ----------------------------------------------------------------------------------------
 def write_leaf_meta(ofn, lmetafos):
@@ -370,7 +372,7 @@ def write_leaf_meta(ofn, lmetafos):
             writer.writerow(lmfo)
 
 # ----------------------------------------------------------------------------------------
-def write_training_files(outdir, encoded_trees, responses, sstats, encoded_fitnesses=None, encoded_fitness_bins=None, dbgstr=""):
+def write_training_files(outdir, encoded_trees, responses, sstats, encoded_fitnesses=None, encoded_fitness_bins=None, slice_info=None, dbgstr=""):
     """Write encoded tree .npy, response fcn .pkl, and summary stat .csv files for training/testing on simulation."""
     if dbgstr != "":
         print("      writing %s files to %s" % (dbgstr, outdir))
@@ -384,6 +386,8 @@ def write_training_files(outdir, encoded_trees, responses, sstats, encoded_fitne
         np.save(output_fn(outdir, "encoded-fitness-bins", None), encoded_fitness_bins)
     with open(output_fn(outdir, "responses", None), "wb") as pfile:
         dill.dump(responses, pfile)
-    write_sstats(output_fn(outdir, "summary-stats", None), sstats)
+    write_csv(output_fn(outdir, "summary-stats", None), sstats, sstat_fieldnames)
+    if slice_info is not None:
+        write_csv(output_fn(outdir, "slice-info", None), slice_info, slice_headers)
 
 # fmt: on

@@ -93,6 +93,45 @@ class PerBinTransposeLayer(layers.Layer):
         return tf.transpose(inputs, perm=(0, 2, 1))
 
 # ----------------------------------------------------------------------------------------
+def get_prebundle_layers(cfg, actfn):
+    pre_bundle_layers = {
+        'small' : [
+            layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
+            layers.GlobalAveragePooling1D(),  # one number for each filter from the previous layer
+        ],
+        'default' : [
+            layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
+            layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
+            layers.MaxPooling1D(pool_size=2, strides=2),  # Downsampling by a factor of 2
+            layers.Conv1D(filters=40, kernel_size=4, activation=actfn),
+            layers.GlobalAveragePooling1D(),  # one number for each filter from the previous layer
+        ],
+        'big' : [
+            layers.Conv1D(filters=50, kernel_size=4, activation=actfn),
+            layers.Conv1D(filters=50, kernel_size=4, activation=actfn),
+            layers.Conv1D(filters=50, kernel_size=4, activation=actfn),
+            layers.MaxPooling1D(pool_size=2, strides=2),  # Downsampling by a factor of 2
+            layers.Conv1D(filters=60, kernel_size=4, activation=actfn),
+            layers.Conv1D(filters=60, kernel_size=4, activation=actfn),
+            layers.GlobalAveragePooling1D(),  # one number for each filter from the previous layer
+        ],
+        'huge' : [
+            layers.Conv1D(filters=100, kernel_size=4, activation=actfn),
+            layers.Conv1D(filters=100, kernel_size=4, activation=actfn),
+            layers.Conv1D(filters=100, kernel_size=4, activation=actfn),
+            layers.Conv1D(filters=100, kernel_size=4, activation=actfn),
+            layers.Conv1D(filters=100, kernel_size=4, activation=actfn),
+            layers.MaxPooling1D(pool_size=2, strides=2),  # Downsampling by a factor of 2
+            layers.Conv1D(filters=150, kernel_size=4, activation=actfn),
+            layers.Conv1D(filters=150, kernel_size=4, activation=actfn),
+            layers.Conv1D(filters=150, kernel_size=4, activation=actfn),
+            layers.Conv1D(filters=150, kernel_size=4, activation=actfn),
+            layers.GlobalAveragePooling1D(),  # one number for each filter from the previous layer
+        ],
+    }
+    return pre_bundle_layers[cfg]
+
+# ----------------------------------------------------------------------------------------
 # @keras.saving.register_keras_serializable(package='gcdyn_nn', name='curve_loss_fcn')
 @tf.function  # NOTE need to comment this decorator in order for .numpy() to work (and add run_eagerly to .compile() call, but note that training is WAY the fuck slower if it's commented
 def base_curve_loss(y_true, y_pred, rect_area=False, params_to_predict=utils.sigmoid_params):  # copied from/modeled after utils.resp_fcn_diff()
@@ -199,28 +238,6 @@ class ParamNetworkModel:
         print("    building model with%s: dropout %.2f   learn rate %.4f   momentum %.4f" % ('' if self.bundle_size is None else (' bundle size %d'%self.bundle_size), dropout_rate, learning_rate, ema_momentum))
 
         # various config options for the layers before the bundle mean layer
-        self.pre_bundle_layers = {
-            'small' : [
-                layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
-                layers.GlobalAveragePooling1D(),  # one number for each filter from the previous layer
-            ],
-            'default' : [
-                layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
-                layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
-                layers.MaxPooling1D(pool_size=2, strides=2),  # Downsampling by a factor of 2
-                layers.Conv1D(filters=40, kernel_size=4, activation=actfn),
-                layers.GlobalAveragePooling1D(),  # one number for each filter from the previous layer
-            ],
-            'big' : [
-                layers.Conv1D(filters=50, kernel_size=4, activation=actfn),
-                layers.Conv1D(filters=50, kernel_size=4, activation=actfn),
-                layers.Conv1D(filters=50, kernel_size=4, activation=actfn),
-                layers.MaxPooling1D(pool_size=2, strides=2),  # Downsampling by a factor of 2
-                layers.Conv1D(filters=60, kernel_size=4, activation=actfn),
-                layers.Conv1D(filters=60, kernel_size=4, activation=actfn),
-                layers.GlobalAveragePooling1D(),  # one number for each filter from the previous layer
-            ],
-        }
 
         assert self.num_parameters in [3, 4]
         clipfcn = three_param_clipfcn if self.num_parameters==3 else four_param_clipfcn  # UGH (serialization makes it hard to do this more cleanly)
@@ -232,7 +249,7 @@ class ParamNetworkModel:
 
         if self.bundle_size is None:
             x = SigmoidTransposeLayer(self.bundle_size)(tree_input)
-            for layer in self.pre_bundle_layers[prebundle_layer_cfg]:
+            for layer in get_prebundle_layers(prebundle_layer_cfg, actfn):
                 x = layer(x)
             x = layers.Concatenate()([x, carry_cap_input, init_pop_input, death_input])
             dense_unit_list = [48, 32, 16, 8]
@@ -247,7 +264,7 @@ class ParamNetworkModel:
             )
         else:
             network_layers = [SigmoidTransposeLayer(self.bundle_size)]
-            for tlr in self.pre_bundle_layers[prebundle_layer_cfg]:
+            for tlr in get_prebundle_layers(prebundle_layer_cfg, actfn):
                 network_layers.append(layers.TimeDistributed(tlr))
             network_layers.append(BundleMeanLayer())  # combine predictions from all trees in bundle
             dense_unit_list = [48, 32, 16, 8]
@@ -567,6 +584,7 @@ class PerBinNetworkModel:
         dropout_rate: float = 0.2,
         learning_rate: float = 0.01,
         ema_momentum: float = 0.99,
+        prebundle_layer_cfg: str = 'default',
         loss_fcn="mean_squared_error",
         actfn: str = "elu",
     ):
@@ -580,16 +598,8 @@ class PerBinNetworkModel:
         init_pop_input = keras.Input(shape=(1,), name='init_pop_input')
         death_input = keras.Input(shape=(1,), name='death_input')
 
-        tlayers = [
-            layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
-            layers.Conv1D(filters=25, kernel_size=4, activation=actfn),
-            layers.MaxPooling1D(pool_size=2, strides=2),  # Downsampling by a factor of 2
-            layers.Conv1D(filters=40, kernel_size=4, activation=actfn),
-            layers.GlobalAveragePooling1D(),  # one number for each filter from the previous layer
-        ]
-
         x = PerBinTransposeLayer()(tree_input)
-        for layer in tlayers:
+        for layer in get_prebundle_layers(prebundle_layer_cfg, actfn):
             x = layer(x)
         x = layers.Concatenate()([x, carry_cap_input, init_pop_input, death_input])
         dense_unit_list = [48, 32, 16, 8]

@@ -89,6 +89,22 @@ def relabel_nodes(args, tree, itrial, only_internal=False, seqfos=None):
             seqdict[old_name]['name'] = node.name
 
 # ----------------------------------------------------------------------------------------
+def get_slicefo(tree, max_time, n_slices=None, dtypes=['n-nodes']): #, 'affinity']):
+    if n_slices is None:
+        n_slices = max_time
+    dt = round(max_time / float(n_slices))
+    tdatas = []
+    for stime in list(range(dt, max_time, dt)) + [max_time]:
+        tslice = tree.slice(stime)  # by default, slice() returns a list of attribute 'x' values
+        tdt = {'time' : stime}
+        if 'n-nodes' in dtypes:
+            tdt['n-nodes'] = len(tslice)
+        if 'affinity' in dtypes:
+            tdt['affinity'] = [a for a in tslice]
+        tdatas.append(tdt)
+    return tdatas
+
+# ----------------------------------------------------------------------------------------
 def generate_sequences_and_tree(
     args,
     params,
@@ -154,8 +170,9 @@ def generate_sequences_and_tree(
         print("      %s %d failures with message '%s'" % (utils.color("yellow", "warning"), err_strs[estr], estr))
     if not success:
         print("    %s exceeded maximum number of tries %d so giving up" % (utils.color("yellow", "warning"), args.n_max_tries))
-        return None, None
+        return None, None, None
 
+    slice_info = get_slicefo(tree, params['time_to_sampling'])
     fnlist = None
     if args.make_plots:
         fnlist = utils.plot_n_vs_time(args.outdir + "/plots/tree-slices", tree, params['time_to_sampling'], itrial)
@@ -192,8 +209,7 @@ def generate_sequences_and_tree(
     set_mut_stats(tree, debug=args.debug)
     print('    total tree time: %.1fs' % (time.time() - total_start))
 
-    return fnlist, tree
-
+    return fnlist, tree, slice_info
 
 # ----------------------------------------------------------------------------------------
 def set_mut_stats(tree, debug=False):
@@ -421,7 +437,7 @@ def write_final_outputs(args, all_seqs, all_trees, param_list, inferred=False, d
     # write summary stats
     if len(param_list) != len(all_trees):
         raise Exception('parameter list %d not same length as trees %d' % (len(param_list), len(all_trees)))
-    sstats = []
+    sstats, slice_info = [], []
     for itr, (sval, pfo, params) in enumerate(zip(scale_vals, all_trees, param_list)):
         sstats.append(
             {
@@ -434,14 +450,21 @@ def write_final_outputs(args, all_seqs, all_trees, param_list, inferred=False, d
                 "init_population": params["init_population"],
                 "time_to_sampling": params["time_to_sampling"],
                 "death": params["death"],
+                'n_final_nodes' : pfo['slice-info'][-1]['n-nodes'],
+                'n_mean_nodes' : np.mean([sfo['n-nodes'] for sfo in pfo['slice-info']]),  # mean N nodes over all time slices
+                'final_capacity_fraction' : pfo['slice-info'][-1]['n-nodes'] / params['carry_cap'],
+                'mean_capacity_fraction' : np.mean([sfo['n-nodes'] for sfo in pfo['slice-info']]) / params['carry_cap'],
                 # NOTE if you add something here, also add it to encode.sstat_fieldnames
             }
         )
+        for sfo in pfo['slice-info']:
+            sfo['tree'] = itr + args.itrial_start
+        slice_info += pfo['slice-info']
     responses = [
         {k: p["%s-response" % k] for k in ["birth", "death"]} for p in all_trees
     ]
 
-    encode.write_training_files(os.path.dirname(outfn(args, "seqs", subd=subd)), encoded_trees, responses, sstats, encoded_fitnesses=encoded_fitnesses, encoded_fitness_bins=encoded_fitness_bins)
+    encode.write_training_files(os.path.dirname(outfn(args, "seqs", subd=subd)), encoded_trees, responses, sstats, encoded_fitnesses=encoded_fitnesses, encoded_fitness_bins=encoded_fitness_bins, slice_info=slice_info)
 
 # ----------------------------------------------------------------------------------------
 def add_seqs(args, all_seqs, itrial, tree):
@@ -572,6 +595,7 @@ def get_inferred_tree(args, params, pfo, gp_map, inf_trees, true_leaf_seqs, itri
 
     inf_pfo = {'%s-response'%r : pfo['%s-response'%r] for r in ['birth', 'death']}
     inf_pfo['tree'] = etree
+    inf_pfo['slice-info'] = pfo['slice-info']
     inf_trees.append(inf_pfo)
 
 # ----------------------------------------------------------------------------------------
@@ -726,7 +750,7 @@ def run_sub_procs(args):
             ]
             start = time.time()
             n_total_trees = ''
-            if ftype in ["seqs", "trees", "meta", "summary-stats"]:
+            if ftype in ["seqs", "trees", "meta", "summary-stats", 'slice-info']:
                 if ftype in ["meta", "summary-stats"]:
                     cmds = [
                         "head -n1 %s >%s" % (fnames[0], ofn),
@@ -968,7 +992,7 @@ def main():
             n_missing += 1
             continue
         sys.stdout.flush()
-        fnlist, tree = generate_sequences_and_tree(
+        fnlist, tree, slice_info = generate_sequences_and_tree(
             args,
             params,
             birth_resp,
@@ -986,9 +1010,9 @@ def main():
             for fn in fnlist:
                 utils.addfn(all_fns, fn)
         with open(ofn, "wb") as fp:
-            dill.dump({"tree": tree, "birth-response": birth_resp, "death-response": death_resp}, fp)
+            dill.dump({"tree": tree, "birth-response": birth_resp, "death-response": death_resp, 'slice-info' : slice_info}, fp)
         tree_leaf_seqs = add_seqs(args, all_seqs, itrial, tree)
-        pfo = {"tree": tree, "birth-response": birth_resp, "death-response": death_resp}
+        pfo = {"tree": tree, "birth-response": birth_resp, "death-response": death_resp, 'slice-info' : slice_info}
         add_tree(all_trees, itrial, pfo)
         plist.append(params)
         if args.tree_inference_method is not None:
