@@ -28,6 +28,7 @@ import string
 import csv
 
 sigmoid_params = ['xscale', 'xshift', 'yscale', 'yshift']  # ick
+non_sigmoid_input_params = ['carry_cap', 'init_population', 'death']
 slp_vals = ['max_slope', 'x_max_slope', 'init_birth', 'mean_val', 'max_val'] #, 'max_diff']
 affy_bins = [-15, -10, -7, -5, -3, -2, -1, -0.5, -0.25, 0.25, 0.5, 1, 1.5, 2, 2.5, 3.5, 4, 5, 7]
 # zoom_affy_bins = [-2, -1, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.25, 1.5, 2, 2.5]
@@ -766,7 +767,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, sstats, params_to_predict, outdir,
             if model_type in ['sigmoid', 'per-bin']:
                 fnames.append([])
                 if is_simu:
-                    for tpm in plt_params: #encode.sstat_fieldnames  # can also plot various simulation truth/summary stat values
+                    for tpm in ['yscale', 'max_val']: #encode.sstat_fieldnames  # can also plot various simulation truth/summary stat values
                         # plot_param_or_pair(ptype, tpm, smpl, median_pfo=median_pfos[smpl])  # true vs inferred params
                         plot_param_or_pair(ptype, tpm, smpl, param2='curve-diff', vtypes=['truth', 'predicted'])  # true params vs loss function   NOTE per-bin uses mse, so this isn't actually its loss function
             # if model_type == 'per-cell':
@@ -940,9 +941,9 @@ def get_hist_vals(htmp, xbounds, xvals=None, normalize=False):
 # add slope-type metrics (max slope and the x value at which it occurs, and the naive birth rate) corresponding to <tresp> to <tpfo>
 def add_slope_vals(tresp, xbounds, tpfo, is_hist=False, nsteps=None, debug=False):
     if not is_hist and nsteps is None:
-        nsteps = 120
+        nsteps = 25 #120
     nsteps, xbounds, xvals, dxvlist = get_resp_xlists(tresp, xbounds, nsteps, is_hist=is_hist)
-    rvals = get_hist_vals(tresp, None, xvals=xvals) if is_hist else get_resp_vals(tresp, None, None, xvals=xvals)
+    rvals = get_hist_vals(tresp, None, xvals=xvals) if is_hist else get_resp_vals(tresp, None, None, xvals=xvals)  # get_resp_vals is really slow if you use a lot of points
     assert len(rvals) == len(xvals) and len(xvals) == len(dxvlist)
     imaxdiff, rmaxdiff = sorted([(i, abs(rvals[i+1]-rvals[i])) for i in range(len(rvals)-1)], key=lambda p: p[1], reverse=True)[0]
     dxmax = (dxvlist[imaxdiff] + dxvlist[imaxdiff+1]) / 2  # the dx values are bin widths (if it's a hist), so we want the average bin width over the two bins we're subtracting

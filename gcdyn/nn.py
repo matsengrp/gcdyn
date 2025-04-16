@@ -638,8 +638,12 @@ class PerBinNetworkModel:
 
     # ----------------------------------------------------------------------------------------
     def load(self, fname):
-        # NOTE see other load fcn above if this isn't working
         print('    reading model file from %s' % fname)
-        self.network = keras.models.load_model(fname, safe_mode=False)
+        obj_dict = {
+            'per_bin_loss': per_bin_loss,
+        }
+        with keras.utils.custom_object_scope(obj_dict):
+            # NOTE that compile=False is fine since we're only calling .predict(), but if we wanted to e.g. continue training from the loaded model, we'd need to compile it (and getting serialization working [with compilation] was a huge clusterfuck)
+            self.network = keras.models.load_model(fname, safe_mode=False, compile=False)
 
 # fmt: on

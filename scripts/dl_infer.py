@@ -247,7 +247,7 @@ def get_prediction(args, model, spld, lscalers, smpl=None):
     true_fitnesses, true_fitness_bins, true_resps, sstats = None, None, None, None
     sstats = spld['sstats']
     if args.is_simu:
-        in_vals = [[float(d[k]) for k in ['carry_cap', 'init_population', 'death']] for d in spld['sstats']]
+        in_vals = [[float(d[k]) for k in utils.non_sigmoid_input_params] for d in spld['sstats']]
     else:
         in_vals = [[args.carry_cap_values, args.init_population_values, args.death_values] for _ in spld['trees']]
     carry_caps, init_pops, deaths = zip(*lscalers['per-tree'].apply_scaling(in_vals=in_vals))
@@ -429,23 +429,47 @@ def read_tree_files(args):
             samples[tk] = samples[tk][:args.n_max_trees]
             assert len(samples[tk]) == args.n_max_trees
         print('    --n-max-trees: only using first %d / %d trees' % (len(samples[tk]), n_before))
-    # if args.is_simu:
-    #     n_skipped = 0
-    #     new_samples = {k : [] for k in samples}
-    #     print('    ', sys.modules['numpy'].mean([s.yscale for s in samples['birth-responses']]))
-    #     for ismpl in range(len(samples['trees'])):
-    #         if samples['birth-responses'][ismpl].yscale > 10:
-    #             n_skipped += 1
-    #             continue
-    #         # if samples['birth-responses'][ismpl].xscale < 0.5:
-    #         #     continue
-    #         # if samples['birth-responses'][ismpl].xshift < 1:
-    #         #     continue
-    #         for tk in samples:
-    #             new_samples[tk].append(samples[tk][ismpl])
-    #     samples = new_samples
-    #     print('  %s skipped %d / %d trees (kept %d)' % (utils.wrnstr(), n_skipped, n_skipped + len(samples[tk]), len(samples[tk])))
-    #     print('    ', sys.modules['numpy'].mean([s.yscale for s in samples['birth-responses']]))
+    if args.is_simu and args.resample_param is not None:
+        n_max = 100  # max denominator in fraction to skip (just to make math easier below)
+        def gpv(i): return getattr(samples['birth-responses'][i], args.resample_param)
+        def gpvs(): return [gpv(i) for i in range(len(samples['trees']))]
+        def prdbg(tstr, skpairs, skhist, before_hist=None):
+            print('    %s: %d total' % (tstr, len(gpvs())))
+            print('       low edge: %s' % ' '.join('%7.2f'%skhist.low_edges[i] for i in skhist.ibiniter(False)))
+            print('      skip frac:    %s' % ' '.join('%7.2f'%f for _, f in skpairs))
+            print('         N vals:    %s' % ' '.join('%7d'%skhist.bin_contents[i] for i in skhist.ibiniter(False)))
+            if before_hist is not None:
+                fdvals = [(before_hist.bin_contents[i] - skhist.bin_contents[i])/before_hist.bin_contents[i] if before_hist.bin_contents[i]!=0 else 0 for i in skhist.ibiniter(False)]
+                print('         N vals:    %s' % ' '.join('%7.2f'%v for v in fdvals))
+        skpairs = []
+        for skpstr in args.resample_cfg.split(':'):
+            skip_val, skfracstr = skpstr.split(',')
+            skip_val = float(skip_val)
+            if '/' in skfracstr:
+                num, denom = [int(v) for v in skfracstr.split('/')]
+                assert denom < n_max  # just to make math easier below
+                skip_frac = float(num / denom)
+            else:
+                skip_frac = float(skfracstr)
+            skpairs.append([skip_val, skip_frac])
+        xmin = min(gpvs())-0.1
+        skhist = utils.Hist(n_bins=len(skpairs), xmin=xmin, xmax=skpairs[-1][0], xbins=[xmin] + [v for v, _ in skpairs], value_list=gpvs())
+        prdbg('before', skpairs, skhist)
+        
+        new_samples = {k : [] for k in samples}
+        n_skipped = 0
+        for ismpl in range(len(samples['trees'])):
+            ibin = skhist.find_bin(gpv(ismpl))
+            skip_val, skip_frac = skpairs[ibin-1]
+            if random.randint(0, n_max) < skip_frac * n_max:
+                n_skipped += 1
+                continue
+            for tk in samples:
+                new_samples[tk].append(samples[tk][ismpl])
+        samples = new_samples
+        fin_hist = utils.Hist(n_bins=len(skpairs), xmin=xmin, xmax=skpairs[-1][0], xbins=[xmin] + [v for v, _ in skpairs], value_list=gpvs())
+        prdbg('after', skpairs, fin_hist, before_hist=skhist)
+        print('  --resample-param %s: skipped %d / %d trees using (kept %d)' % (args.resample_param, n_skipped, n_skipped + len(samples[tk]), len(samples[tk])))
 
     return samples
 
@@ -518,7 +542,7 @@ def train_and_test(args, start_time):
     lscalers = {}
     for smpl in smplists['train']:
         lscalers[smpl] = {'per-node' : LScaler(args, ['distance', 'phenotype'], in_tensors=smpldict[smpl]['trees'], smpl=smpl, dont_scale_params=args.dont_scale_input_params)}
-        lscalers[smpl]['per-tree'] = LScaler(args, ['carry_cap', 'init_population', 'death'], in_vals=[[float(d[k]) for k in ['carry_cap', 'init_population', 'death']] for d in smpldict[smpl]['sstats']], smpl=smpl, dont_scale_params=args.dont_scale_input_params)
+        lscalers[smpl]['per-tree'] = LScaler(args, utils.non_sigmoid_input_params, in_vals=[[float(d[k]) for k in utils.non_sigmoid_input_params] for d in smpldict[smpl]['sstats']], smpl=smpl, dont_scale_params=args.dont_scale_input_params)
         if args.model_type == 'sigmoid':
             lscalers[smpl]['output'] = LScaler(args, args.params_to_predict, in_vals=[[getattr(r, p) for p in args.params_to_predict] for r in smpldict[smpl]['birth-responses']], smpl=smpl, dont_scale_params=not args.scale_output_params)
         else:
@@ -550,16 +574,12 @@ def train_and_test(args, start_time):
 
 # ----------------------------------------------------------------------------------------
 def read_model_files(args, samples):
-    assert False # needs updating
     scfns = {tstr : encode.output_fn(args.model_dir, '%s-train-scaler'%tstr, None) for tstr in ['per-node', 'per-tree', 'output']}
     print('    reading training scalers from %s' % ' '.join(scfns.values()))
-# TODO use loop
-    # for tstr in ['per-node', 'per-tree', 'output']:
     lscalers = {'per-node' : LScaler(args, ['distance', 'phenotype'], scaler=joblib.load(scfns['per-node']), dont_scale_params=args.dont_scale_input_params)}
-    lscalers['per-tree'] = LScaler(args, ['carry_cap', 'init_population', 'death'], scaler=joblib.load(scfns['per-tree']), dont_scale_params=args.dont_scale_input_params)
-# TODO clean up
+    lscalers['per-tree'] = LScaler(args, utils.non_sigmoid_input_params, scaler=joblib.load(scfns['per-tree']), dont_scale_params=args.dont_scale_input_params)
     assert args.model_type in ['sigmoid', 'per-bin']
-    lscaler['output'] = LScaler(args, args.params_to_predict if args.model_type=='sigmoid' else ['fitness-bins'], scaler=joblib.load(scfns['output']), dont_scale_params=not args.scale_output_params)
+    lscalers['output'] = LScaler(args, args.params_to_predict if args.model_type=='sigmoid' else ['fitness-bins'], scaler=joblib.load(scfns['output']), dont_scale_params=not args.scale_output_params)
     if args.model_type == 'sigmoid':
         model = sys.modules['gcdyn.nn'].ParamNetworkModel([ConstantResponse(0) for _ in args.params_to_predict], bundle_size=args.dl_bundle_size, custom_loop=args.custom_loop, params_to_predict=args.params_to_predict)
     elif args.model_type == 'per-cell':
@@ -614,10 +634,12 @@ def get_parser():
     parser.add_argument("--train-frac", type=float, default=0.8, help="train on this fraction of the trees")
     parser.add_argument("--validation-split", type=float, default=0.1, help="fraction of training sample to tell keras to hold out for validation during training")
     parser.add_argument("--params-to-predict", default=utils.sigmoid_params, nargs="+", choices=["xscale", "xshift", "yscale", "yshift"] + [k for k in sum_stat_scaled])
+    parser.add_argument("--resample-param", default='yscale', choices=utils.sigmoid_params, help='parameter to use for resampling simulation (i.e. use the value of this parameter to decide which GCs to keep/discard for training). See also --resample-cfg.')
+    parser.add_argument("--resample-cfg", default='5,0:10,1/2:15,1/2:20,1/2:30,1/2:40,1/2', help='configure how to resample --resample-param: colon-separated list of comma-separated pairs, with first element of each pair the upper edge of a bin, and the second element the fraction of entries to discard in that bin.')
     parser.add_argument("--test", action="store_true", help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly")
     parser.add_argument("--carry-cap-values", type=int, help="input parameter value for data inference (single valued, it\'s just plural to avoid making a new arg in cf-gcdyn.py)")
     parser.add_argument("--init-population-values", type=int, help="input parameter value for data inference (single valued, it\'s just plural to avoid making a new arg in cf-gcdyn.py)")
-    parser.add_argument("--death-values", type=int, help="input parameter value for data inference (single valued, it\'s just plural to avoid making a new arg in cf-gcdyn.py)")
+    parser.add_argument("--death-values", type=float, help="input parameter value for data inference (single valued, it\'s just plural to avoid making a new arg in cf-gcdyn.py)")
     parser.add_argument("--is-simu", action="store_true", help="set to this if running on simulation")
     parser.add_argument("--random-seed", default=0, type=int, help="random seed")
     parser.add_argument("--n-max-trees", type=int, help="if set, after reading this many trees from input, discard any extras")
