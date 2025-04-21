@@ -228,7 +228,7 @@ def set_mut_stats(tree, debug=False):
             print('          leaf %s (mean %.1f): %s' % (tname, np.mean(leaf_vals), ' '.join(tfn(n) for n in leaf_vals)))
 
 # ----------------------------------------------------------------------------------------
-def scan_response(args, rname, tresp, xmin=-5, xmax=2, nsteps=10):  # print output values of response function
+def scan_response(args, rname, tresp, xmin, xmax, nsteps):  # print output values of response function
     dx = (xmax - xmin) / nsteps
     xvals = [args.nonsense_phenotype_value] + list(np.arange(xmin, 0, dx)) + list(np.arange(0, xmax + dx, dx))
     rvals = [tresp.λ_phenotype(x) for x in xvals]
@@ -240,13 +240,14 @@ def scan_response(args, rname, tresp, xmin=-5, xmax=2, nsteps=10):  # print outp
 
 
 # ----------------------------------------------------------------------------------------
-def print_resps(args, bresp, dresp):
+def print_resps(args, resp_list, nsteps=10):
+    xmin, xmax = args.default_xbounds
     print("        response    f(x=0)    function")
-    for rname, rfcn in zip(["birth", "death"], [bresp, dresp]):
+    for rname, rfcn in resp_list:
         print("          %s   %7.3f      %s" % (rname, rfcn.λ_phenotype(0), rfcn))
     if args.debug:
-        scan_response(args, 'birth', bresp)
-        scan_response(args, 'death', dresp)
+        for rname, rfcn in resp_list:
+            scan_response(args, rname, rfcn, xmin, xmax, nsteps)
 
 # ----------------------------------------------------------------------------------------
 def choose_val(args, pname, extra_bounds=None, dbgstrs=None):
@@ -394,7 +395,12 @@ def get_responses(args, params, pcounts):
             # raise Exception(wstr)  # should really turn this back on, but I need to redo all the sigmoid parameter bound algebra with floating yshift, which I think'll be kind of a mess, and it doesn't really seem to matter (would I think just slightly change the distribution of resulting parameters, but they're already fine)
         else:
             print('      %s %s' % (utils.color('yellow', 'warning'), wstr))
-    print_resps(args, bresp, dresp)
+    print_resps(args, zip(["birth", "death"], [bresp, dresp]))
+    for rname, rfcn in zip(["birth", "death"], [bresp, dresp]):
+        rvals = utils.get_resp_vals(rfcn, args.default_xbounds, 40)
+        if any(v < 0 for v in rvals):
+            print_resps(args, [[rname, rfcn]], nsteps=40)
+            raise Exception('negative %s response value (see previous lines)' % rname)
     add_pval(pcounts, "initial_birth_rate", bresp.λ_phenotype(0))
     return bresp, dresp
 
@@ -686,6 +692,7 @@ def get_parser():
     parser.add_argument("--partis-dir", default='%s/work/partis'%os.getenv('HOME'))
     parser.add_argument("--constant-params", default=['y_ceil'], help="for internal use only")
     parser.add_argument("--int-params", default=["time_to_sampling", "carry_cap", "init_population", "n_seqs"], help="for internal use only")
+    parser.add_argument("--default-xbounds", default=[-2.5, 3], help="range in which to check that response have only positive values")
     return parser
 
 

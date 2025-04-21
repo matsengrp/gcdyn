@@ -254,7 +254,7 @@ def get_prediction(args, model, spld, lscalers, smpl=None):
     if not args.is_simu:
         print('    carry caps: %d --> %s' % (args.carry_cap_values, carry_caps[:5]))
         print('    init pops: %d --> %s' % (args.init_population_values, init_pops[:5]))
-        print('    deaths: %d --> %s' % (args.death_values, deaths[:5]))
+        print('    deaths: %.2f --> %s' % (args.death_values, deaths[:5]))
     gcids = spld['gcids']
     if args.model_type == 'sigmoid':
         const_pred_resps = model.predict(lscalers['per-node'].apply_scaling(in_tensors=spld['trees'], smpl=smpl), carry_caps, init_pops, deaths)  # note that this returns constant response fcns that are just holders for the predicted values (i.e. don't directly relate to true/input response fcns)

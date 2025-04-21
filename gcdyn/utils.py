@@ -440,8 +440,11 @@ def sns_xy_plot(ptype, smpl, tdf, xkey, ykey, all_xvals=None, true_x_eq_y=False,
             #     print('  %s %s' % (xkey, ykey))
             #     print('    %d / %d bad rows (cdiff < %.2f)' % (len(bad_rows), len(tdf), bad_cdiff_val))
             ax = sns.scatterplot(bad_rows, x=xkey, y=ykey, alpha=0.6, color='red', edgecolor='black', facecolor=None, s=50)
-            if true_x_eq_y: # and smpl in ['train', 'infer']:  # 'train' and 'valid' go on the same plot, but we don't want to plot the dashed line twice
+            if true_x_eq_y and smpl!='valid':  # 'train' and 'valid' go on the same plot, but we don't want to plot the dashed line twice
                 plt.plot([0.95 * min(all_xvals), 1.05 * max(all_xvals)], [0.95 * min(all_xvals), 1.05 * max(all_xvals)], color="darkgreen", linestyle="--", linewidth=3, alpha=0.7)
+            if 'signed-cdiff' in ykey and smpl!='valid':
+                ax.axhline(y=0, color='darkgreen', linestyle='--', linewidth=3, alpha=0.7)
+                # plt.ylim(-1.05, 1.05)
         if emph_vals is not None:
             ax.scatter([emph_vals[0][0]], [emph_vals[0][1]], color='red', alpha=0.45, s=250)
     elif ptype == 'box':
@@ -464,8 +467,12 @@ def sns_xy_plot(ptype, smpl, tdf, xkey, ykey, all_xvals=None, true_x_eq_y=False,
                     lo, hi = [float(s.lstrip('(').rstrip(']')) for s in xvl._text.split(', ')]
                     tyv = np.mean([lo, hi])  # true/y val
                     xtls.append('%.1f-%.1f'%(lo, hi))
-                if true_x_eq_y:
+                if true_x_eq_y and smpl!='valid':
                     plt.plot([xv - 0.5, xv + 0.5], [tyv, tyv], color="darkgreen", linestyle="--", linewidth=3, alpha=0.7)
+            if 'signed-cdiff' in ykey and smpl!='valid':
+                xmin, xmax = ax.get_xlim()
+                ax.axhline(y=0, color='darkgreen', linestyle='--', linewidth=3, alpha=0.7)
+                # plt.ylim(-1.05, 1.05)
             if not discrete:
                 ax.set_xticks(ax.get_xticks())
                 ax.set_xticklabels(xtls, rotation=90, ha='right')
@@ -489,6 +496,17 @@ def make_dl_plots(model_type, prdfs, seqmeta, sstats, params_to_predict, outdir,
         if force_new_row or len(fns) == 0 or len(fns[-1]) >= n_per_row:
             fns.append([])
         fns[-1].append(fn)
+    # ----------------------------------------------------------------------------------------
+    def get_valid_indices(smpl):
+        validation_indices, train_indices = None, None
+        if smpl == "train" and validation_split != 0:  # NOTE this obviously depends on keras continuing to do validation splits this way
+            n_tree_preds = len(set(prdfs[smpl]['tree-index']))
+            assert n_tree_preds == len(prdfs[smpl]['tree-index'])  # shouldn't really need this
+            n_train = round((1 - validation_split) * n_tree_preds)
+            validation_indices = [tree_index for ientry, tree_index in enumerate(prdfs[smpl]['tree-index']) if ientry>n_train]  # NOTE this obviously depends on keras continuing to do validation splits this way
+            train_indices = [tree_index for ientry, tree_index in enumerate(prdfs[smpl]['tree-index']) if ientry<=n_train]  # NOTE this obviously depends on keras continuing to do validation splits this way
+            # assert len(validation_indices) == round(validation_split * n_tree_preds)
+        return validation_indices, train_indices
     # ----------------------------------------------------------------------------------------
     def plot_responses(smpl, n_max_plots=2 if quick else 20, n_max_diffs=100 if quick else 1000, default_xbounds=None):
         # ----------------------------------------------------------------------------------------
@@ -532,14 +550,13 @@ def make_dl_plots(model_type, prdfs, seqmeta, sstats, params_to_predict, outdir,
         from gcdyn.poisson import SigmoidResponse, SigmoidCeilingResponse, LinearResponse
         median_pfo = None
         inf_pfo_list, true_pfo_list, all_afvals, sstat_list = [], [], [], []
-        curve_diffs = {smpl : [], 'validation' : []}
+        curve_diffs, signed_cdiffs = {smpl : [], 'validation' : []}, {smpl : [], 'validation' : []}
         n_pred_rows = len(prdfs[smpl].index)  # N cells for per-cell, N trees for sigmoid
-        n_tree_preds = len(set(prdfs[smpl]['tree-index']))
+        # assert len(prdfs[smpl]['tree-index']) == len(set(prdfs[smpl]['tree-index']))  # TODO why tf was there a set() in the next line?
+        n_tree_preds = len(prdfs[smpl]['tree-index'])
         n_simu_plots = min(n_max_plots, n_tree_preds)
         lmdict, ssdict = defaultdict(list), {}  # map from tree index to list of seq meta for that tree, same for sstats
-        validation_indices = None
-        if smpl == "train" and validation_split != 0:  # NOTE this obviously depends on keras continuing to do validation splits this way
-            validation_indices = [i for i in range(n_tree_preds - int(validation_split * n_tree_preds), n_tree_preds)]
+        validation_indices, _ = get_valid_indices(smpl)
         for mfo in seqmeta:
             lmdict[int(mfo['tree-index'])].append(mfo)
             n_skipped_diffs = {s : 0 for s in curve_diffs}
@@ -576,9 +593,10 @@ def make_dl_plots(model_type, prdfs, seqmeta, sstats, params_to_predict, outdir,
                 true_pfo_list.append(true_pfo)
                 cdiff = None
                 if len(curve_diffs[smplstr]) < n_max_diffs:  # NOTE sns_xy_plot() skips all rows with none-type curve-diff-predicted values
-                    cdiff = resp_fcn_diff(true_pfo['birth-response'], pred_pfo[rkey], default_xbounds, resp2_is_hist=is_hist, nsteps=nsteps)
-                    pred_pfo['curve-diff'] = cdiff  # I don't like putting the cdiff both in here and in curve_diffs, but the latter splits apart train/valid but inf_pfo_list doesn't (and they subsequently get used in different ways)
+                    cdiff, scdf = resp_fcn_diffs(true_pfo['birth-response'], pred_pfo[rkey], default_xbounds, resp2_is_hist=is_hist, nsteps=nsteps)
+                    pred_pfo['curve-diff'], pred_pfo['signed-cdiff'] = cdiff, scdf  # I don't like putting the cdiff both in here and in curve_diffs, but the latter splits apart train/valid but inf_pfo_list doesn't (and they subsequently get used in different ways)
                     curve_diffs[smplstr].append(cdiff)  # NOTE len(curve_diffs[smplstr]) is *not* the same as irow since e.g. train and validation come from same sample
+                    signed_cdiffs[smplstr].append(scdf)
                     # ldiff = get_nn_curve_loss(true_pfo['birth-response'], pred_resp)  # uncomment (also below) to print also the diff from the curve loss fcn (it should be the same, modulo different xbounds and nsteps
                     # fdiff = (ldiff - cdiff) / cdiff
                     # print('    %3d  %7.3f  %7.3f  %7.3f  %s' % (irow, cdiff, ldiff, fdiff, '' if fdiff < 0.05 else color('red', 'x')))
@@ -607,7 +625,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, sstats, params_to_predict, outdir,
             inf_pfo_list.append(pred_pfo)
             all_afvals += affy_vals
             sstat_list.append(ssdict[tree_index])
-        for tk in slp_vals + ['curve-diff']:
+        for tk in slp_vals + ['curve-diff', 'signed-cdiff']:
             prdfs[smpl]['%s-predicted'%tk] = [p.get(tk) for p in inf_pfo_list]
         if is_simu:
             for tk in slp_vals:
@@ -635,7 +653,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, sstats, params_to_predict, outdir,
                     colors.append('green')
                     alphas.append(0.5)
                 add_slope_vals(tpfo['birth-response'], default_xbounds, tpfo)  # re-get slope vals with default bounds
-                cdiff = resp_fcn_diff(tpfo['birth-response'], median_pfo[rkey], default_xbounds, resp2_is_hist=is_hist, nsteps=nsteps)
+                cdiff, scdf = resp_fcn_diffs(tpfo['birth-response'], median_pfo[rkey], default_xbounds, resp2_is_hist=is_hist, nsteps=nsteps)
                 plt_pfos += true_pfo_list if force_many_plot else [tpfo]
                 colors += ['green' for _ in range(len(plt_pfos)-len(colors))]
                 alphas += [(0.05 if force_many_plot else 0.5) for _ in range(len(plt_pfos)-len(alphas))]
@@ -646,7 +664,9 @@ def make_dl_plots(model_type, prdfs, seqmeta, sstats, params_to_predict, outdir,
             add_fn(fn, force_new_row=True)
         if is_simu:
             fn = plot_all_diffs(outdir+'/'+smpl, 'curve-diffs', curve_diffs, n_skipped_diffs=n_skipped_diffs)
+            sfn = plot_all_diffs(outdir+'/'+smpl, 'signed-cdiffs', signed_cdiffs, n_skipped_diffs=n_skipped_diffs)
             add_fn(fn)
+            add_fn(sfn)
         # NOTE I just combined the sigmoid+per-cell blocks (above), and still need to integrate this or put in a separate block, but don't want to bother now since I'm not sure I'll ever need it
         # elif model_type == 'per-cell':
         #     all_xvals, all_yvals, all_true_responses = [], [], []
@@ -770,6 +790,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, sstats, params_to_predict, outdir,
                     for tpm in ['yscale', 'max_val']: #encode.sstat_fieldnames  # can also plot various simulation truth/summary stat values
                         # plot_param_or_pair(ptype, tpm, smpl, median_pfo=median_pfos[smpl])  # true vs inferred params
                         plot_param_or_pair(ptype, tpm, smpl, param2='curve-diff', vtypes=['truth', 'predicted'])  # true params vs loss function   NOTE per-bin uses mse, so this isn't actually its loss function
+                        plot_param_or_pair(ptype, tpm, smpl, param2='signed-cdiff', vtypes=['truth', 'predicted'])  # true params vs loss function   NOTE per-bin uses mse, so this isn't actually its loss function
             # if model_type == 'per-cell':
             #     fnames.append([])
             #     plot_param_or_pair(ptype, 'fitness', smpl)
@@ -777,7 +798,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, sstats, params_to_predict, outdir,
     #     for smpl in sorted(prdfs, reverse=True):
     #         fnames.append([])
     #         for p1, p2 in itertools.combinations(plt_params, 2):
-    #             plot_param_or_pair('scatter', p1, smpl, param2=p2, median_pfo=median_pfos[smpl], vtypes=['truth', 'truth'])
+    #             plot_param_or_pair('scatter', p1, smpl, param2=p2, median_pfo=median_pfos[smpl], vtypes=['predicted', 'predicted'])
     make_html(outdir, fnames=fnames, extra_links=[('single curves', '%s/single-curves.html'%os.path.basename(outdir)), ])
     make_html(outdir, fnames=single_curve_fns, htmlfname='%s/single-curves.html'%outdir)
 
@@ -982,8 +1003,9 @@ def get_resp_xlists(tresp, xbounds, nsteps, is_hist=False):
 
 # ----------------------------------------------------------------------------------------
 # can set resp2 to a hist if you set resp2_is_hist (rect_area: old-style full rectangular area for denominator)
+# returns both unsigned (actual loss function that uses abs) and signed (without abs, i.e. a measure of bias)
 # NOTE not symmetric: resp1 is used in the denominator (i.e. it should be the true response)
-def resp_fcn_diff(resp1, resp2, xbounds, dont_normalize=False, nsteps=40, resp2_is_hist=False, rect_area=False, debug=False):  # see also nn.curve_loss()
+def resp_fcn_diffs(resp1, resp2, xbounds, dont_normalize=False, nsteps=40, resp2_is_hist=False, rect_area=False, debug=False):  # see also nn.curve_loss()
     # ----------------------------------------------------------------------------------------
     def prdbg():
         def prvls(lbl, vlist, p=3):
@@ -1002,25 +1024,33 @@ def resp_fcn_diff(resp1, resp2, xbounds, dont_normalize=False, nsteps=40, resp2_
         if not dont_normalize:
             print('   normd diff: %.3f / %.3f = %.3f' % (sumv, area_val, sumv / area_val))
     # ----------------------------------------------------------------------------------------
+    def get_val(xbounds, dxvlist, vals1, vals2, signed=False):
+        if signed:
+            sumv = sum((v1-v2) * dx for v1, v2, dx in zip(vals1, vals2, dxvlist))
+        else:
+            sumv = sum(abs(v1-v2) * dx for v1, v2, dx in zip(vals1, vals2, dxvlist))
+        return_val = sumv
+        if not dont_normalize:
+            if rect_area:
+                area_val = abs(xbounds[1] - xbounds[0]) * abs(max(vals1+vals2) - min(vals1+vals2))  # divide area between curves by area of rectangle defined by xbounds and min/max of either fcn
+            else:
+                # area_vlist = [max([abs(v1), abs(v2)]) * dx for v1, v2, dx in zip(vals1, vals2, dxvlist)]  # max of true/pred
+                area_vlist = [abs(v1) * dx for v1, dx in zip(vals1, dxvlist)]  # just use true
+                area_val = sum(area_vlist)  # area between furthest curve and x axis (in this increment of dx) (don't really need dx, but maybe it makes it more intuitive)
+            return_val /= area_val
+        if debug:
+            prdbg()
+        return return_val
+    # ----------------------------------------------------------------------------------------
     nsteps, xbounds, xvals, dxvlist = get_resp_xlists(resp2, xbounds, nsteps, is_hist=resp2_is_hist)  # resp2 is the one that can be a hist, so may as well use it for this
     if resp2_is_hist:
-        vals1, vals2 = get_resp_vals(resp1, None, None, xvals=xvals), get_hist_vals(resp2, None, xvals=xvals)
+        vals1, vals2 = get_resp_vals(resp1, None, None, xvals=xvals), get_hist_vals(resp2, None, xvals=xvals)  # this step is expensive
     else:
         vals1, vals2 = [get_resp_vals(r, xbounds, nsteps) for r in [resp1, resp2]]
     assert len(vals1) == len(xvals) and len(vals2) == len(xvals)
-    sumv = sum(abs(v1-v2) * dx for v1, v2, dx in zip(vals1, vals2, dxvlist))
-    return_val = sumv
-    if not dont_normalize:
-        if rect_area:
-            area_val = abs(xbounds[1] - xbounds[0]) * abs(max(vals1+vals2) - min(vals1+vals2))  # divide area between curves by area of rectangle defined by xbounds and min/max of either fcn
-        else:
-            # area_vlist = [max([abs(v1), abs(v2)]) * dx for v1, v2, dx in zip(vals1, vals2, dxvlist)]  # max of true/pred
-            area_vlist = [abs(v1) * dx for v1, dx in zip(vals1, dxvlist)]  # just use true
-            area_val = sum(area_vlist)  # area between furthest curve and x axis (in this increment of dx) (don't really need dx, but maybe it makes it more intuitive)
-        return_val /= area_val
-    if debug:
-        prdbg()
-    return return_val
+    loss_val = get_val(xbounds, dxvlist, vals1, vals2)
+    signed_val = get_val(xbounds, dxvlist, vals1, vals2, signed=True)
+    return loss_val, signed_val
 
 # ----------------------------------------------------------------------------------------
 def get_rvals(pfo, xvals, xbounds, nsteps):
@@ -1203,7 +1233,7 @@ def plot_all_diffs(plotdir, plotname, curve_diffs, n_bins=30, xbounds=[0, 1], n_
         titlestr += '%s%s: %d%s%s' % ('' if len(titlestr)==0 else ' (', smpl, len(curve_diffs[smpl]), ' responses' if len(titlestr)==0 else '', '' if len(titlestr)==0 else ')')
         if n_skipped_diffs is not None and n_skipped_diffs[smpl] > 0:
             fig.text(0.475, 0.45-0.07*ism, '%s: skipped %d'%(smpl, n_skipped_diffs[smpl]), fontsize=20)
-    ax.set(title=titlestr, xlabel='curve difference loss')
+    ax.set(title=titlestr, xlabel='%scurve difference loss'%('signed ' if 'signed-' in plotname else ''))
     ax.set_yscale('log')
     fn = "%s/%s.svg" % (plotdir, plotname)
     plt.savefig(fn)

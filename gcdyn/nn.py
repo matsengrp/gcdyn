@@ -183,7 +183,7 @@ def four_param_curve_loss(y_true, y_pred):
 # @keras.saving.register_keras_serializable()
 # This seems to be really important for training stability (without it, it often gets stuck at very large parameter values)
 # It might also be nice to move this to a command line arg
-clip_mins = [0.001, -1.5, 0.1, -5]  # NOTE these should be significantly wider than the simulation bounds
+clip_mins = [0.001, -1.5, 0.1, 0]  # NOTE these should be significantly wider than the simulation bounds
 clip_maxs = [3.5, 5, 65, 10]
 def base_clipfcn(x, num_parameters=len(utils.sigmoid_params)):
     minv, maxv = clip_mins[:num_parameters], clip_maxs[:num_parameters]

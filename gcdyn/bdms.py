@@ -260,9 +260,10 @@ class TreeNode(ete3.Tree):
         }
         if debug:
             n_evts = 0
-            print('               current  wait                             N nodes')
-            print('        N evts   time   time      event   node  phen   total nonsense')
+            print('               current  wait                              N nodes')
+            print('        N evts   time   time       event   node  phen   total nonsense')
         while n_nodes['active']:
+            cap_dbstr = ''
             if capacity_method == "birth":
                 rate_multipliers[self._BIRTH_EVENT] = (
                     rate_totals['death'] / rate_totals['birth']
@@ -272,7 +273,6 @@ class TreeNode(ete3.Tree):
                     rate_totals['birth'] / rate_totals['death']
                 ) ** (n_nodes['active'] / capacity)
             elif capacity_method == "hard":
-                cap_dbstr = ''
                 if n_nodes['active'] > capacity:
                     node_to_die = rng.choice(list(active_nodes.values()))
                     node_to_die.event = self._DEATH_EVENT
@@ -305,9 +305,11 @@ class TreeNode(ete3.Tree):
                 n_last_nonsense = n_nodes['nonsense']
                 n_nodes['nonsense'] = len([n for n in active_nodes.values() if phval(n.name)==nonsense_phenotype_value])
                 phvstr = utils.color('red' if phval(event_node_name)==nonsense_phenotype_value else None, '%5.1f'%phval(event_node_name))
-                print('        %3d     %5.2f  %5.2f   %8s %5s %s   %5d %s%s   %s' % (n_evts, current_time, waiting_time, event, event_node_name, phvstr, n_nodes['active'], utils.color('blue', '-', width=5) if n_nodes['nonsense']==0 else '%5d'%n_nodes['nonsense'], '' if n_last_nonsense==n_nodes['nonsense'] else utils.color('red', '+' if n_nodes['nonsense']>n_last_nonsense else '-'), cap_dbstr))
+                print('        %3d     %5.2f  %6.3f   %8s %5s %s   %5d %s%s   %s' % (n_evts, current_time, waiting_time, event, event_node_name, phvstr, n_nodes['active'], utils.color('blue', '-', width=5) if n_nodes['nonsense']==0 else '%5d'%n_nodes['nonsense'], '' if n_last_nonsense==n_nodes['nonsense'] else utils.color('red', '+' if n_nodes['nonsense']>n_last_nonsense else '-'), cap_dbstr))
             if current_time > end_time + 1e-8:  # 1e-8 is arbitrary, to account for floating point error
                 raise Exception("current time %f exceeded end time %f by more than %e" % (current_time, end_time, 1e-8))
+            if current_time < 0 or waiting_time < 0:
+                raise Exception('negative waiting time (response function probably has negative value): %.3f' % waiting_time)
             for node in active_nodes.values():
                 node.dist += Δt
                 node.t = current_time
