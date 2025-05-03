@@ -803,18 +803,49 @@ def make_dl_plots(model_type, prdfs, seqmeta, sstats, params_to_predict, outdir,
     make_html(outdir, fnames=single_curve_fns, htmlfname='%s/single-curves.html'%outdir)
 
 # ----------------------------------------------------------------------------------------
-def plot_n_vs_time(plotdir, tree, max_time, itrial):
+def plot_tree_slices(plotdir, slice_info, itrial, nonsense_phenotype_value=None):
     # ----------------------------------------------------------------------------------------
-    def make_n_vs_time_plot(ndata):
+    def get_data():
+        tdata = {'time': [], 'n-nodes': [], 'affinities' : [], 'birth-rates' : []}
+        n_skipped = 0
+        for tdt in slice_info:
+            tdata['time'].append(tdt['time'])
+            tdata['n-nodes'].append(tdt['n-nodes'])
+            assert len(tdt['birth-rates']) == len(tdt['affinities'])  # it is actually a little fiddly to be sure these are the same length (because of the cell vs node distinction), and we *need* each pair of values to correspond
+            tdata['birth-rates'].append([])
+            tdata['affinities'].append([])
+            for bval, aval in zip(tdt['birth-rates'], tdt['affinities']):
+                if nonsense_phenotype_value is not None and aval==nonsense_phenotype_value:
+                    n_skipped += 1
+                    continue
+                tdata['birth-rates'][-1].append(bval)
+                tdata['affinities'][-1].append(aval)
+        if n_skipped > 0:
+            print('    %s itree %d: skipped %d (of %d over %d slices) values with nonsense phenotype' % (wrnstr(), tdt['tree'], n_skipped, sum(len(tdt['birth-rates']) for tdt in slice_info), len(slice_info)))
+        return tdata
+    # ----------------------------------------------------------------------------------------
+    def make_slice_plot(svar, ndata, delta_t=5):
         fig, ax = plt.subplots()
-        sns.lineplot(x=ndata['time'], y=ndata['n-nodes'], linewidth=5, alpha=0.5)
-        ax.set(xlabel='time', ylabel='N nodes')
-        plt.ylim(0, ax.get_ylim()[1])
-        fn = "%s/n-vs-time-tree-%d.svg" % (plotdir, itrial)
+        if svar == 'n-nodes':
+            xlabel = 'time'
+            sns.lineplot(x=ndata['time'], y=ndata['n-nodes'], linewidth=5, alpha=0.5)
+            plt.ylim(0, ax.get_ylim()[1])
+        elif svar in ['birth-rates', 'affinities']:
+            for stime, avals, bvals in zip(ndata['time'], ndata['affinities'], ndata['birth-rates']):
+                if stime % delta_t != 0:
+                    continue
+                # sns.lineplot(pd.DataFrame([{'affinity' : a, 'birth-rate' : b} for a, b in zip(avals, bvals)]), x='affinity', y='birth-rate', alpha=0.6)  # super fuckin slow
+                plt.scatter(avals, bvals, label='%d (%.1f)'%(stime, np.mean(avals)), alpha=0.6)
+            plt.legend(title='time (mean x)')
+            xlabel = 'affinity'  # 'time'
+        else:
+            assert False
+        ax.set(xlabel=xlabel, ylabel=tlabels.get(svar, svar))
+        fn = "%s/%s-vs-time-tree-%d.svg" % (plotdir, svar, itrial)
         plt.savefig(fn)
         fnlist.append(fn)
     # ----------------------------------------------------------------------------------------
-    def make_affy_slice_plot(tdata):
+    def make_affy_joyplot(tdata):  # not really using atm, but don't want to delete either
         # ----------------------------------------------------------------------------------------
         def label_fn(x, color, label):
             ax = plt.gca()  # get current axis
@@ -836,32 +867,18 @@ def plot_n_vs_time(plotdir, tree, max_time, itrial):
         plt.savefig(fn)
         fnlist.append(fn)
     # ----------------------------------------------------------------------------------------
-    def get_data(dtype, n_slices):
-        dt = round(max_time / float(n_slices))
-        assert dtype in ['n-nodes', 'affinity']
-        tdata = {'time': [], dtype: []}
-        for stime in list(range(dt, max_time, dt)) + [max_time]:
-            tslice = tree.slice(stime)
-            if dtype == 'n-nodes':
-                tdata['time'].append(stime)
-                tdata['n-nodes'].append(len(tslice))
-            elif dtype == 'affinity':
-                for aval in tslice:
-                    tdata["time"].append(stime)
-                    tdata["affinity"].append(aval)
-            else:
-                assert False
-        return tdata
-    # ----------------------------------------------------------------------------------------
+    tlabels = {'n-nodes' : 'N nodes', 'birth-rates' : 'binary birth rates'}
     mpl_init()
     if not os.path.exists(plotdir):
         os.makedirs(plotdir)
     fnlist = []
-    make_n_vs_time_plot(get_data('n-nodes', max_time))
-    # old slice plots:
-    # ugh i give up, this plot is ugly and not that useful
+    ndata = get_data()
+    make_slice_plot('n-nodes', ndata)
+    make_slice_plot('birth-rates', ndata)
+    # make_slice_plot('affinities')  # NOTE doesn't work yet
+    # # ugh i give up, this plot is ugly and not that useful
     # with warnings.catch_warnings():
-    #     make_affy_slice_plot(get_data('affinity', '5'))
+    #     make_affy_joyplot(get_data('affinity', '5'))
 
     return fnlist
 

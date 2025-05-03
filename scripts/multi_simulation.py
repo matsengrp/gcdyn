@@ -89,20 +89,24 @@ def relabel_nodes(args, tree, itrial, only_internal=False, seqfos=None):
             seqdict[old_name]['name'] = node.name
 
 # ----------------------------------------------------------------------------------------
-def get_slicefo(tree, max_time, n_slices=None, dtypes=['n-nodes']): #, 'affinity']):
+def get_slicefo(tree, max_time, cell_slice_values, n_slices=None):
     if n_slices is None:
         n_slices = max_time
     dt = round(max_time / float(n_slices))
-    tdatas = []
+    slice_info = []
     for stime in list(range(dt, max_time, dt)) + [max_time]:
-        tslice = tree.slice(stime)  # by default, slice() returns a list of attribute 'x' values
         tdt = {'time' : stime}
-        if 'n-nodes' in dtypes:
-            tdt['n-nodes'] = len(tslice)
-        if 'affinity' in dtypes:
-            tdt['affinity'] = [a for a in tslice]
-        tdatas.append(tdt)
-    return tdatas
+        tslice = tree.slice(stime)  # by default, slice() returns a list of attribute 'x' values (see comment in slice() fcn definition re: difference to <cell_slice_values>)
+        tdt['n-nodes'] = len(tslice)
+        # tdt['affinities'] = [a for a in tslice]  # NOTE do *not* get affinity here -- we need each affinity to correspond to the birth rate (i.e. per-cell, not per-node) so get it from <cell_slice_values> below)
+        tmin, bvals, avals = sorted([(b['time'], b['rates'], b['x']) for b in cell_slice_values], key=lambda p: abs(p[0]-stime))[0]  # find value with time closest to <stime>
+        if abs(tmin - stime) > 0.1:  # if events are very rare in the tree, I guess the nearest node time won't be very close to stime
+            print('    %s tmin %.2f not very close to stime %.2f' % (utils.wrnstr(), tmin, stime))
+        tdt['birth-rates'] = bvals
+        tdt['affinities'] = avals
+        slice_info.append(tdt)
+
+    return slice_info
 
 # ----------------------------------------------------------------------------------------
 def generate_sequences_and_tree(
@@ -125,7 +129,7 @@ def generate_sequences_and_tree(
             tree.x = gp_map(replay.NAIVE_SEQUENCE)
             tree.sequence = replay.NAIVE_SEQUENCE
             tree.chain_2_start_idx = replay.CHAIN_2_START_IDX
-            tree.evolve(
+            cell_slice_values = tree.evolve(
                 params['time_to_sampling'],
                 birth_response=birth_resp,
                 death_response=death_resp,
@@ -172,10 +176,7 @@ def generate_sequences_and_tree(
         print("    %s exceeded maximum number of tries %d so giving up" % (utils.color("yellow", "warning"), args.n_max_tries))
         return None, None, None
 
-    slice_info = get_slicefo(tree, params['time_to_sampling'])
-    fnlist = None
-    if args.make_plots:
-        fnlist = utils.plot_n_vs_time(args.outdir + "/plots/tree-slices", tree, params['time_to_sampling'], itrial)
+    slice_info = get_slicefo(tree, params['time_to_sampling'], cell_slice_values)
 
     if args.debug > 1:
         print('    tree before sampling:')
@@ -209,7 +210,7 @@ def generate_sequences_and_tree(
     set_mut_stats(tree, debug=args.debug)
     print('    total tree time: %.1fs' % (time.time() - total_start))
 
-    return fnlist, tree, slice_info
+    return tree, slice_info
 
 # ----------------------------------------------------------------------------------------
 def set_mut_stats(tree, debug=False):
@@ -732,6 +733,10 @@ def plot_params_responses(args, pcounts, all_trees=None, all_fns=None):
             utils.plot_phenotype_response(args.outdir + "/plots/responses", all_trees, bundle_size=args.simu_bundle_size, fnames=all_fns)
     # make summary param plots even if --make-plots isn't set (just cause atm i don't want to add another arg to make some-but-not-all plots)
     utils.plot_chosen_params(args.outdir + "/plots/params", pcounts, {p: getattr(args, p.replace("-", "_") + "_range") for p in pcounts}, fnames=all_fns)
+    if args.make_plots and all_trees is not None:
+        for pfo in all_trees:
+            fnlist = utils.plot_tree_slices(args.outdir + "/plots/tree-slices", pfo['slice-info'], pfo['itrial'], nonsense_phenotype_value=args.nonsense_phenotype_value)
+            all_fns.append(fnlist)
     utils.make_html(args.outdir + "/plots", fnames=all_fns)
 
     print("            sampled parameter values:               min      max")
@@ -970,7 +975,7 @@ def main():
     all_seqs, all_trees, inf_trees = [], [], []
     n_missing = 0
     rng = np.random.default_rng(seed=args.seed)
-    params, n_times_used, pcounts, plist = None, 0, {}, []  # parameter values, and number of trees that we've simulated with these parameter values (pcounts keeps track of counts of each parameter (for summary printing/plots) whereas plist keeps all parameter values so we can write summary stats at the end)
+    params, n_times_used, pcounts, param_list = None, 0, {}, []  # parameter values, and number of trees that we've simulated with these parameter values (pcounts keeps track of counts of each parameter (for summary printing/plots) whereas param_list keeps all parameter values so we can write summary stats at the end)
     all_fns = [[]]  # just for plotting
     for itrial in range(args.itrial_start, args.n_trials):
         print(utils.color("blue", "trial %d:" % itrial), end=" ")
@@ -982,16 +987,15 @@ def main():
         n_times_used += 1
         birth_resp, death_resp = get_responses(args, params, pcounts)
         if os.path.exists(ofn) and not args.overwrite:
-            print("    output %s already exists, skipping" % ofn)
+            print("    trial %d output already exists, not rerunning: %s" % (itrial, ofn))
             pfo = read_dill_file(ofn)
-            if args.make_plots:
-                print("    note: can't make N vs time plots when reading pickle files since we write pruned trees (i.e. you need to rm/overwrite to actually rerun the simulation)")
             if pfo is None:  # file is screwed up and we want to rerun
                 print("    rerunning since pickle file read failed")
             else:
+                pfo['itrial'] = itrial
                 tree_leaf_seqs = add_seqs(args, all_seqs, itrial, pfo["tree"])
-                add_tree(all_trees, itrial, pfo)
-                plist.append(params)
+                all_trees.append(pfo)
+                param_list.append(params)
                 if args.tree_inference_method is not None:
                     get_inferred_tree(args, params, pfo, gp_map, inf_trees, tree_leaf_seqs, itrial, debug=args.debug)
                 continue
@@ -999,7 +1003,7 @@ def main():
             n_missing += 1
             continue
         sys.stdout.flush()
-        fnlist, tree, slice_info = generate_sequences_and_tree(
+        tree, slice_info = generate_sequences_and_tree(
             args,
             params,
             birth_resp,
@@ -1013,15 +1017,12 @@ def main():
         if tree is None:
             n_missing += 1
             continue
-        if fnlist is not None:
-            for fn in fnlist:
-                utils.addfn(all_fns, fn)
         with open(ofn, "wb") as fp:
             dill.dump({"tree": tree, "birth-response": birth_resp, "death-response": death_resp, 'slice-info' : slice_info}, fp)
         tree_leaf_seqs = add_seqs(args, all_seqs, itrial, tree)
-        pfo = {"tree": tree, "birth-response": birth_resp, "death-response": death_resp, 'slice-info' : slice_info}
-        add_tree(all_trees, itrial, pfo)
-        plist.append(params)
+        pfo = {'itrial' : itrial, "tree": tree, "birth-response": birth_resp, "death-response": death_resp, 'slice-info' : slice_info}
+        all_trees.append(pfo)
+        param_list.append(params)
         if args.tree_inference_method is not None:
             get_inferred_tree(args, params, pfo, gp_map, inf_trees, tree_leaf_seqs, itrial, debug=args.debug)
 
@@ -1033,9 +1034,9 @@ def main():
         print("  %s no resulting trees, exiting without writing or plotting anything" % utils.color("yellow", "warning"))
         sys.exit(0)
 
-    write_final_outputs(args, all_seqs, all_trees, plist)
+    write_final_outputs(args, all_seqs, all_trees, param_list)
     if args.tree_inference_method is not None:
-        write_final_outputs(args, all_seqs, inf_trees, plist, inferred=True, dont_encode=args.tree_inference_method=='gctree')  # need to turn on --fix-multifurcations above if i want to encode gctrees (atm just want to make replay comparison plots, which doesn't require encoding)
+        write_final_outputs(args, all_seqs, inf_trees, param_list, inferred=True, dont_encode=args.tree_inference_method=='gctree')  # need to turn on --fix-multifurcations above if i want to encode gctrees (atm just want to make replay comparison plots, which doesn't require encoding)
 
     plot_params_responses(args, pcounts, all_trees=all_trees, all_fns=all_fns)
     print("    total simulation time: %.1f sec" % (time.time() - start))

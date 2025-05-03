@@ -99,6 +99,7 @@ def encode_tree(intree, max_leaf_count=None, ladderize=True, dont_scale=False, m
         _, intree = scale_tree(intree)
     # assert utils.isclose(np.mean([lf.t for lf in intree.iter_leaves()]), 1), "trees must be scaled to 1 before encoding"
     if ladderize:
+        # NOTE would be nice nice to only copy the distance bits that we might actually change here, in case some really big attributes get added (it's *incredibly* slow if you add e.g. structure with per node info like cell_slice_values)
         worktree = intree.copy()  # make a copy so the ladderization doesn't modify the input tree
         utils.ladderize_tree(worktree)
     else:
@@ -320,7 +321,7 @@ def wrap_fitness_bins(vlist, n_bins):
 final_ofn_strs = ['seqs', 'trees', 'meta', 'encoded-trees', 'encoded-fitnesses', 'encoded-fitness-bins', 'responses', 'summary-stats', 'slice-info']
 model_state_ofn_strs = ['model', 'per-node-train-scaler', 'per-tree-train-scaler', 'output-train-scaler', 'example-responses']
 sstat_fieldnames = ['tree', 'mean_branch_length', 'total_branch_length', 'carry_cap', 'init_population', 'time_to_sampling', 'death', 'final_capacity_fraction', 'mean_capacity_fraction']  # , 'n_final_nodes', 'n_mean_nodes'
-slice_headers = ['tree', 'time', 'n-nodes']
+slice_headers = ['tree', 'time', 'n-nodes', 'affinities', 'birth-rates']
 leaf_meta_fields = ['tree-index', 'name', 'affinity', 'n_muts', 'n_muts_aa', 'gc', 'is_leaf']
 
 # ----------------------------------------------------------------------------------------
@@ -356,12 +357,19 @@ def output_fn(odir, ftype, itrial):
     return ofn
 
 # ----------------------------------------------------------------------------------------
-def write_csv(ofn, sstats, headers):
+def write_csv(ofn, sstats, headers, list_headers=None):
+    # ----------------------------------------------------------------------------------------
+    def cfn(key, value):
+        if list_headers is None or key not in list_headers:
+            return value
+        else:
+            return ':'.join(str(v) for v in value)
+    # ----------------------------------------------------------------------------------------
     with open(ofn, "w") as sfile:
         writer = csv.DictWriter(sfile, headers)
         writer.writeheader()
         for sline in sstats:
-            writer.writerow({k: v for k, v in sline.items() if k in headers})
+            writer.writerow({k: cfn(k, v) for k, v in sline.items() if k in headers})
 
 # ----------------------------------------------------------------------------------------
 def write_leaf_meta(ofn, lmetafos):
@@ -388,6 +396,6 @@ def write_training_files(outdir, encoded_trees, responses, sstats, encoded_fitne
         dill.dump(responses, pfile)
     write_csv(output_fn(outdir, "summary-stats", None), sstats, sstat_fieldnames)
     if slice_info is not None:
-        write_csv(output_fn(outdir, "slice-info", None), slice_info, slice_headers)
+        write_csv(output_fn(outdir, "slice-info", None), slice_info, slice_headers, list_headers=['affinities', 'birth-rates'])
 
 # fmt: on

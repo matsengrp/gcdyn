@@ -170,6 +170,7 @@ class TreeNode(ete3.Tree):
         debug: bool = False,
         print_progress: bool = False,
         nonsense_phenotype_value: float = -99,
+        slice_interval: float = 1,
     ) -> None:
         r"""Evolve for time :math:`\Delta t`.
 
@@ -198,6 +199,7 @@ class TreeNode(ete3.Tree):
                   If an ``int``, then it will be used to derive the initial state.
                   If a :py:class:`numpy.random.Generator`, then it will be used directly.
             print_progress: Flag to indicate whether to print progress information.
+            slice_interval: save cell- (not node-) specific info at roughly this interval
         """
         if not self.is_root():
             raise TreeError("Cannot evolve a non-root node")
@@ -223,6 +225,8 @@ class TreeNode(ete3.Tree):
             self._DEATH_EVENT: death_response,
             self._MUTATION_EVENT: mutation_response,
         }
+
+        cell_slice_values = []  # values of variables (e.g. binary birth rate) for every cell (not node, since this in general is *between* nodes on each lineage) alive at the time of each [update: some] event[s] NOTE do *not* make this a property of the tree, since we copy the tree during encoding and it's really fuckin slow if you do
 
         active_nodes, n_nodes = {}, {'active' : 0, 'nonsense' : 0}
         def add_actv_node(node):
@@ -251,8 +255,7 @@ class TreeNode(ete3.Tree):
         for tnode in self.iter_leaves():
             add_actv_node(tnode)
 
-        # initialize rate multipliers, which are used to logistically modulate
-        # rates in accordance with the carrying capacity
+        # initialize rate multipliers, which are used to logistically modulate rates in accordance with the carrying capacity
         rate_multipliers = {
             self._BIRTH_EVENT: 1.0,
             self._DEATH_EVENT: 1.0,
@@ -310,6 +313,11 @@ class TreeNode(ete3.Tree):
                 raise Exception("current time %f exceeded end time %f by more than %e" % (current_time, end_time, 1e-8))
             if current_time < 0 or waiting_time < 0:
                 raise Exception('negative waiting time (response function probably has negative value): %.3f' % waiting_time)
+            def get_binary_brate(tnode):
+                return rate_multipliers[self._BIRTH_EVENT] * event_rates[self._BIRTH_EVENT].λ_phenotype(tnode.x) - event_rates[self._DEATH_EVENT].λ_phenotype(tnode.x)
+            # NOTE it's weird, but we want this (cell_slice_values) to be a separate structure to the tree because we want this info (especially birth rate) to be at a specific time for all cells, whereas each node exists only at the time of its event (secondarily, atm we .copy() the tree during encoding, which is *prohibitively* slow if this object is part of the tree)
+            if len(cell_slice_values)==0 or current_time - cell_slice_values[-1]['time'] > slice_interval:  # use the first event that occurs more than <slice_interval> after the last time at which we sliced
+                cell_slice_values.append({'time' : current_time, 'x' : [n.x for n in active_nodes.values()], 'rates' : [get_binary_brate(n) for n in active_nodes.values()]})
             for node in active_nodes.values():
                 node.dist += Δt
                 node.t = current_time
@@ -347,6 +355,8 @@ class TreeNode(ete3.Tree):
             )
         mutation_response.cleanup()
         mutator.cleanup()
+
+        return cell_slice_values
 
     def _aborted_evolve_cleanup(self) -> None:
         """Remove any children added to the root node during an aborted
@@ -392,7 +402,10 @@ class TreeNode(ete3.Tree):
     # NOTE: this could be generalized to take an ordered array-valued t, and made efficient via ordered traversal
     def slice(self, t: float, attr: str = "x") -> list[Any]:
         r"""Return a list of attribute ``attr`` at time :math:`t` for all
-        lineages alive at that time.
+        lineages alive at that time. NOTE that this returns the attribute's value for each *node*,
+        i.e. that corresponds to the time when that node's event happened. This can be *very* different to
+        the time you're asking it to slice at (which in general will be along a branch, between nodes), so
+        for quantities that vary with time it's better to use <slice_info>.
 
         Args:
             t: Slice the tree at time :math:`t`.
@@ -413,7 +426,7 @@ class TreeNode(ete3.Tree):
         if self.t == t:
             return [getattr(self, attr)]
 
-        def is_leaf_fn(node):
+        def is_leaf_fn(node):  # was <node> a leaf at time <t> (well, does <t> fall between the time of <node> and its parent)
             return node.t >= t and node.up.t < t
 
         return [
