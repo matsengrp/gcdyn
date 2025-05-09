@@ -634,6 +634,7 @@ def get_parser():
     parser.add_argument("--train-frac", type=float, default=0.8, help="train on this fraction of the trees")
     parser.add_argument("--validation-split", type=float, default=0.1, help="fraction of training sample to tell keras to hold out for validation during training")
     parser.add_argument("--params-to-predict", default=utils.sigmoid_params, nargs="+", choices=["xscale", "xshift", "yscale", "yshift"] + [k for k in sum_stat_scaled])
+    # parser.add_argument("--resample-param", choices=utils.sigmoid_params, help='parameter to use for resampling simulation (i.e. use the value of this parameter to decide which GCs to keep/discard for training). See also --resample-cfg.')
     parser.add_argument("--resample-param", default='yscale', choices=utils.sigmoid_params, help='parameter to use for resampling simulation (i.e. use the value of this parameter to decide which GCs to keep/discard for training). See also --resample-cfg.')
     parser.add_argument("--resample-cfg", default='5,0:10,1/2:15,1/2:20,1/2:30,1/2:40,1/2', help='configure how to resample --resample-param: colon-separated list of comma-separated pairs, with first element of each pair the upper edge of a bin, and the second element the fraction of entries to discard in that bin.')
     parser.add_argument("--test", action="store_true", help="sets things to be super fast, so not useful for real inference, but just to check if things are running properly")

@@ -42,6 +42,10 @@ pltlabels = {
     'mean_val' : 'mean value',
     'max_val' : 'max value',
     'max_diff' : 'max diff',
+    'n-nodes' : 'N nodes',
+    'birth-rates' : '$m \lambda - \mu$',
+    'lambda' : '$\lambda$',
+
 }
 
 def simple_fivemer_contexts(sequence: str):
@@ -583,13 +587,13 @@ def make_dl_plots(model_type, prdfs, seqmeta, sstats, params_to_predict, outdir,
             else:
                 assert False
             if True: #model_type == 'per-bin':
-                add_slope_vals(pred_pfo[rkey], default_xbounds, pred_pfo, is_hist=is_hist)  # these are really slow, so turning off
+                add_slope_vals(pred_pfo[rkey], default_xbounds, tpfo=pred_pfo, is_hist=is_hist)  # these are really slow, so turning off
             # truncate_phist(pred_pfo['birth-hist'], affy_xbds)  # would of course only turn this for per-bin
             if is_simu:
                 titlestr = '%s: response index %d / %d' % (smplstr, irow, n_tree_preds)
                 true_pfo = {'birth-response' : getresp('truth', (sigmoid_params + ['x_ceil_start', 'y_ceil']) if 'x_ceil_start-truth' in prdfs[smpl] else sigmoid_params, irow)}
                 if True: #model_type == 'per-bin':
-                    add_slope_vals(true_pfo['birth-response'], default_xbounds, true_pfo)  # these are really slow, so turning off
+                    add_slope_vals(true_pfo['birth-response'], default_xbounds, tpfo=true_pfo)  # these are really slow, so turning off
                 true_pfo_list.append(true_pfo)
                 cdiff = None
                 if len(curve_diffs[smplstr]) < n_max_diffs:  # NOTE sns_xy_plot() skips all rows with none-type curve-diff-predicted values
@@ -637,7 +641,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, sstats, params_to_predict, outdir,
         if force_many_plot or not is_simu or all(p['birth-response']==true_pfo_list[0]['birth-response'] for p in true_pfo_list):  # all true responses equal
             # median_pfo = {'birth-hist' : make_mean_hist([p['birth-hist'] for p in inf_pfo_list], ignore_empty_bins=True, percentile_err=True)}
             median_pfo = copy.copy(get_median_curve(inf_pfo_list, default_xbounds, nsteps=nsteps, is_hist=is_hist))  # copy is because it returns an element from the list
-            add_slope_vals(median_pfo[rkey], default_xbounds, median_pfo, is_hist=is_hist)
+            add_slope_vals(median_pfo[rkey], default_xbounds, tpfo=median_pfo, is_hist=is_hist)
 
             if model_type == 'sigmoid':
                 # plt_pfos, colors, alphas, phists = inf_pfo_list, ['#1f77b4' for _ in inf_pfo_list], [0.05 for _ in inf_pfo_list], None  # this line gives you the old-style plot-all-curves-with-low-alpha
@@ -652,7 +656,7 @@ def make_dl_plots(model_type, prdfs, seqmeta, sstats, params_to_predict, outdir,
                     plt_pfos.append(tpfo)
                     colors.append('green')
                     alphas.append(0.5)
-                add_slope_vals(tpfo['birth-response'], default_xbounds, tpfo)  # re-get slope vals with default bounds
+                add_slope_vals(tpfo['birth-response'], default_xbounds, tpfo=tpfo)  # re-get slope vals with default bounds
                 cdiff, scdf = resp_fcn_diffs(tpfo['birth-response'], median_pfo[rkey], default_xbounds, resp2_is_hist=is_hist, nsteps=nsteps)
                 plt_pfos += true_pfo_list if force_many_plot else [tpfo]
                 colors += ['green' for _ in range(len(plt_pfos)-len(colors))]
@@ -787,8 +791,9 @@ def make_dl_plots(model_type, prdfs, seqmeta, sstats, params_to_predict, outdir,
             if model_type in ['sigmoid', 'per-bin']:
                 fnames.append([])
                 if is_simu:
+                    # for tpm in plt_params:
+                    #     plot_param_or_pair(ptype, tpm, smpl, median_pfo=median_pfos[smpl])  # true vs inferred params
                     for tpm in ['yscale', 'max_val']: #encode.sstat_fieldnames  # can also plot various simulation truth/summary stat values
-                        # plot_param_or_pair(ptype, tpm, smpl, median_pfo=median_pfos[smpl])  # true vs inferred params
                         plot_param_or_pair(ptype, tpm, smpl, param2='curve-diff', vtypes=['truth', 'predicted'])  # true params vs loss function   NOTE per-bin uses mse, so this isn't actually its loss function
                         plot_param_or_pair(ptype, tpm, smpl, param2='signed-cdiff', vtypes=['truth', 'predicted'])  # true params vs loss function   NOTE per-bin uses mse, so this isn't actually its loss function
             # if model_type == 'per-cell':
@@ -824,25 +829,51 @@ def plot_tree_slices(plotdir, slice_info, itrial, nonsense_phenotype_value=None)
             print('    %s itree %d: skipped %d (of %d over %d slices) values with nonsense phenotype' % (wrnstr(), tdt['tree'], n_skipped, sum(len(tdt['birth-rates']) for tdt in slice_info), len(slice_info)))
         return tdata
     # ----------------------------------------------------------------------------------------
-    def make_slice_plot(svar, ndata, delta_t=5):
+    def make_slice_plot(svar, ndata, delta_t=10, xbounds=[-4, 4], min_dx=0.1):
+        # ----------------------------------------------------------------------------------------
+        def subsample_points(avals, bvals):
+            xvals, rvals, last_x = [], [], None  # discard points with x closer than <min_dx>
+            for xv, rv in sorted([[a, b] for a, b in zip(avals, bvals)], key=lambda p: p[0]):  # sort pairs by affinity value
+                if last_x is None or xv - last_x > min_dx:
+                    xvals.append(xv)
+                    rvals.append(rv)
+                    last_x = xv
+            return xvals, rvals
+        # ----------------------------------------------------------------------------------------
         fig, ax = plt.subplots()
         if svar == 'n-nodes':
             xlabel = 'time'
-            sns.lineplot(x=ndata['time'], y=ndata['n-nodes'], linewidth=5, alpha=0.5)
-            plt.ylim(0, ax.get_ylim()[1])
+            sns.lineplot(x=ndata['time'], y=ndata['n-nodes'], linewidth=5, alpha=0.5, color='#2b65ec')
+            ax2 = ax.twinx()
+            sns.lineplot(x=ndata['time'], y=[np.mean(avals) for avals in ndata['affinities']], linewidth=5, alpha=0.5, ax=ax2, color='#990012')
+            ax2.set(ylabel='mean affinity')
+            ax2.yaxis.label.set_color('#990012')
+            ax.yaxis.label.set_color('#2b65ec')
+            # plt.ylim(0, ax.get_ylim()[1])
         elif svar in ['birth-rates', 'affinities']:
+            norm = mpl.colors.Normalize(vmin=min(ndata['time']), vmax=max(ndata['time']))
+            smap = plt.cm.ScalarMappable(norm=norm, cmap='viridis')
             for stime, avals, bvals in zip(ndata['time'], ndata['affinities'], ndata['birth-rates']):
                 if stime % delta_t != 0:
                     continue
                 # sns.lineplot(pd.DataFrame([{'affinity' : a, 'birth-rate' : b} for a, b in zip(avals, bvals)]), x='affinity', y='birth-rate', alpha=0.6)  # super fuckin slow
-                plt.scatter(avals, bvals, label='%d (%.1f)'%(stime, np.mean(avals)), alpha=0.6)
-            plt.legend(title='time (mean x)')
-            xlabel = 'affinity'  # 'time'
+                tcolor = rgb_to_hex(smap.to_rgba(stime)[:3])
+                xvals, rvals = subsample_points(avals, bvals)
+                _, x_ceil_start = find_x_ceil_start(xvals, rvals)
+                if x_ceil_start is not None:
+                    ax.axvline(x=x_ceil_start, color=tcolor, linestyle='--', linewidth=3, alpha=0.7)
+                plt.scatter(xvals, rvals, label='%d (%.1f)'%(stime, np.mean(avals)), alpha=0.6, color=tcolor)  # this np.mean() uses *all* values, not the subsampled ones
+            ax.axhline(y=0, color='grey', linestyle='--', linewidth=3, alpha=0.7)
+            plt.legend(title='time (mean affinity)')
+            ax.set_xlim(xbounds[0], xbounds[1])
+            ax.set_ylim(-0.25, 1)
+            xlabel = pltlabels['affinity']  # 'time'
         else:
             assert False
-        ax.set(xlabel=xlabel, ylabel=tlabels.get(svar, svar))
+        ax.set(xlabel=xlabel, ylabel=pltlabels.get(svar, svar))
         fn = "%s/%s-vs-time-tree-%d.svg" % (plotdir, svar, itrial)
         plt.savefig(fn)
+        plt.close()
         fnlist.append(fn)
     # ----------------------------------------------------------------------------------------
     def make_affy_joyplot(tdata):  # not really using atm, but don't want to delete either
@@ -867,7 +898,6 @@ def plot_tree_slices(plotdir, slice_info, itrial, nonsense_phenotype_value=None)
         plt.savefig(fn)
         fnlist.append(fn)
     # ----------------------------------------------------------------------------------------
-    tlabels = {'n-nodes' : 'N nodes', 'birth-rates' : 'binary birth rates'}
     mpl_init()
     if not os.path.exists(plotdir):
         os.makedirs(plotdir)
@@ -976,27 +1006,85 @@ def get_hist_vals(htmp, xbounds, xvals=None, normalize=False):
     return rvals
 
 # ----------------------------------------------------------------------------------------
+def find_max_slope(xvals, rvals, dxvlist, slopefn):  # max abs value of slope
+    i_max, max_slope = sorted([(i, abs(slopefn(i))) for i in range(len(rvals)-1)], key=lambda p: p[1], reverse=True)[0]
+    return i_max, max_slope
+
+# ----------------------------------------------------------------------------------------
+# debug fcn for printing lists
+def prlist(tn, lst, offset=False, i_emph=None):
+    def cfn(s, i): return color(None if i_emph is None or i not in i_emph else 'red', s)
+    print('        %5s %s%s' % (tn, '   ' if offset else '', ' '.join(cfn('%5.2f'%v, i) for i, v in enumerate(lst))))
+
+# ----------------------------------------------------------------------------------------
+def find_x_ceil_start(xvals, rvals, dxvlist=None, max_slope=None, i_max=None, ceil_start_factor=2, debug=False):
+    # ----------------------------------------------------------------------------------------
+    def getslope(iv):  # slope between iv and iv + 1
+        if iv > len(rvals)-1:
+            raise Exception('index %d too large (>len - 1 = %d)' % (iv, len(rvals)-1))
+        jv = iv + 1
+        return (rvals[jv] - rvals[iv]) / dxvlist[iv]
+    # ----------------------------------------------------------------------------------------
+    if dxvlist is None:  # NOTE this is set up for list of x/y values (*not* hist bins) whereas add_slope_vals() version can handle either
+        dxvlist = [xvals[i+1] - xvals[i] for i in range(len(xvals)-1)] # length is one less than xvals
+    if max_slope is None:
+        i_max, max_slope = find_max_slope(xvals, rvals, dxvlist, getslope)
+    ceil_start_slope = max_slope / ceil_start_factor  # define the "start" of the ceiling as the point where slope has dropped by a factor 1/<ceil_start_factor> from its max value
+    i_cstart, x_cstart, cstart_slope = None, None, None  # find the first slope after <i_max> that drops below <ceil_start_slope> (if there is one)
+    if debug:
+        print('    looking for first slope below %.2f / %d = %.2f' % (ceil_start_slope * ceil_start_factor, ceil_start_factor, ceil_start_slope))
+    for iv in range(i_max, len(rvals)-1):
+        tslope = getslope(iv)
+        if tslope < ceil_start_slope and i_cstart is None:  # first point at which slope falls by 1 / <ceil_start_factor>
+            i_cstart = iv
+            x_cstart = xvals[iv]
+            cstart_slope = tslope
+        if i_cstart is not None and tslope > ceil_start_slope:  # if we're already past the ceiling start, make sure it doesn't get steeper again (e.g. a noisy per-bin prediction)
+            print('    %s slope increased after ceiling start (%.2f to %.2f) at x value %.2f' % (wrnstr(), cstart_slope, tslope, xvals[iv+1]))
+    if debug:
+        prlist('x', xvals)
+        prlist('dx', dxvlist, offset=True)
+        prlist('resp', rvals)
+        prlist('slope', [getslope(i) for i in range(len(rvals)-1)], offset=True, i_emph=[i_max, i_cstart])
+        if x_cstart is None:
+            print('     no ceiling found')
+        else:
+            print('     x ceil start: %.2f   (i %d)' % (x_cstart, i_cstart))
+    return i_cstart, x_cstart
+
+# ----------------------------------------------------------------------------------------
 # add slope-type metrics (max slope and the x value at which it occurs, and the naive birth rate) corresponding to <tresp> to <tpfo>
-def add_slope_vals(tresp, xbounds, tpfo, is_hist=False, nsteps=None, debug=False):
+def add_slope_vals(tresp, xbounds, tpfo=None, is_hist=False, nsteps=None, debug=False):
+    # ----------------------------------------------------------------------------------------
+    def getslope(iv):  # slope between iv and iv + 1
+        jv = iv + 1
+        if is_hist:  # avg bin width
+            dx = (0.5 * (dxvlist[iv] + dxvlist[jv]))
+        else:
+            dx = dxvlist[iv]
+        return (rvals[jv] - rvals[iv]) / dx
+    # ----------------------------------------------------------------------------------------
+    if tpfo is None:
+        tpfo = {}
     if not is_hist and nsteps is None:
         nsteps = 25 #120
     nsteps, xbounds, xvals, dxvlist = get_resp_xlists(tresp, xbounds, nsteps, is_hist=is_hist)
     rvals = get_hist_vals(tresp, None, xvals=xvals) if is_hist else get_resp_vals(tresp, None, None, xvals=xvals)  # get_resp_vals is really slow if you use a lot of points
     assert len(rvals) == len(xvals) and len(xvals) == len(dxvlist)
-    imaxdiff, rmaxdiff = sorted([(i, abs(rvals[i+1]-rvals[i])) for i in range(len(rvals)-1)], key=lambda p: p[1], reverse=True)[0]
-    dxmax = (dxvlist[imaxdiff] + dxvlist[imaxdiff+1]) / 2  # the dx values are bin widths (if it's a hist), so we want the average bin width over the two bins we're subtracting
+    imaxslope, max_slope = find_max_slope(xvals, rvals, dxvlist, getslope)
     x_init, init_birth = sorted([(x, v) for x, v in zip(xvals, rvals)], key=lambda p: abs(0-p[0]))[0]  # sort by nearness to 0
-    tpfo['max_slope'], tpfo['x_max_slope'], tpfo['init_birth'] = rmaxdiff / dxmax, xvals[imaxdiff], init_birth
+    tpfo['max_slope'], tpfo['x_max_slope'], tpfo['init_birth'] = max_slope, xvals[imaxslope], init_birth
     tpfo['mean_val'], tpfo['max_val'], tpfo['max_diff'] = np.mean(rvals), max(rvals), max(rvals) - min(rvals)
+    i_cstart, tpfo['x_ceil_start'] = find_x_ceil_start(xvals, rvals, dxvlist=dxvlist, max_slope=tpfo['max_slope'], i_max=imaxslope)
     if debug:
         print('    slope difference values%s with %d x grid points:' % (' for hist' if is_hist else '', len(xvals)))
-        def prlist(tn, lst, offset=False):
-            print('        %5s %s%s' % (tn, '   ' if offset else '', ' '.join('%5.2f'%v for v in lst)))
         prlist('x', xvals)
         prlist('dx', dxvlist)
         prlist('resp', rvals)
-        prlist('rdiff', [rvals[i+1]-rvals[i] for i in range(len(rvals)-1)], offset=True)
-        print('      max slope %.2f   x max slope %.2f    init birth %.2f   mean val: %.2f   max val: %.2f   max diff: %.2f' % (tpfo['max_slope'], tpfo['x_max_slope'], tpfo['init_birth'], tpfo['mean_val'], tpfo['max_val'], tpfo['max_diff']))
+        prlist('rdiff', [rvals[i+1]-rvals[i] for i in range(len(rvals)-1)], offset=True, i_emph=[imaxslope])
+        prlist('slope', [getslope(i) for i in range(len(rvals)-1)], offset=True, i_emph=[imaxslope, i_cstart])
+        print('      %s' % '   '.join('%s %.2f'%(k, tpfo[k]) for k in ['max_slope', 'x_max_slope', 'init_birth', 'mean_val', 'max_val', 'max_diff', 'x_ceil_start']))
+    return tpfo
 
 # ----------------------------------------------------------------------------------------
 # get all lists (x, y, dx, etc)
@@ -1082,7 +1170,7 @@ def resp_plot(bresp, ax, xbounds, alpha=0.8, color="#990012", nsteps=40, linewid
     xvals, dx = get_resp_xvals(xbounds, nsteps)
     rvals = get_resp_vals(bresp, xbounds, nsteps)
     data = {"affinity": xvals, "lambda": rvals}
-    ax.set(xlabel=pltlabels.get('affinity')) #, ylabel='lambda')
+    ax.set(xlabel=pltlabels.get('affinity'), ylabel=pltlabels.get('lambda')) #, ylabel='lambda')
     sns.lineplot(data, x="affinity", y="lambda", ax=ax, linewidth=linewidth, linestyle=linestyle, color=color, alpha=alpha)
 
 # ----------------------------------------------------------------------------------------
@@ -1258,7 +1346,7 @@ def plot_all_diffs(plotdir, plotname, curve_diffs, n_bins=30, xbounds=[0, 1], n_
     return fn
 
 # ----------------------------------------------------------------------------------------
-def add_param_text(fig, true_pfo, inf_pfo=None, diff_vals=None, upper_left=False, titlestr=None):
+def add_param_text(fig, true_pfo, inf_pfo=None, diff_vals=None, upper_left=False, text_loc=None, titlestr=None):
     # ----------------------------------------------------------------------------------------
     def get_pval(tpfo, pname):
         if tpfo is None:
@@ -1282,7 +1370,10 @@ def add_param_text(fig, true_pfo, inf_pfo=None, diff_vals=None, upper_left=False
             rstr += '%s (%.1f)' % (gpn(pname) if rstr=='' else '', inf_pval)
         return rstr
     # ----------------------------------------------------------------------------------------
-    xv, yv = (0.6, 0.25) if inf_pfo is None and not upper_left else (0.19, 0.7 if diff_vals is None else 0.65)
+    if text_loc is None:
+        xv, yv = (0.6, 0.25) if inf_pfo is None and not upper_left else (0.19, 0.7 if diff_vals is None else 0.65)
+    else:
+        xv, yv = text_loc
     plist = ['xscale', 'xshift', 'yscale', 'yshift', 'x_ceil_start'] if 'birth-response' in non_none([true_pfo, inf_pfo]) else ['max_slope', 'x_max_slope', 'init_birth']
     param_text = [ptext(p) for p in plist]
     param_text = [t for t in param_text if t != '']
@@ -1303,7 +1394,7 @@ def add_param_text(fig, true_pfo, inf_pfo=None, diff_vals=None, upper_left=False
     fig.text(xv, yv, '\n'.join(param_text), fontsize=17)
 
 # ----------------------------------------------------------------------------------------
-def plot_phenotype_response(plotdir, pfo_list, n_to_plot=20, bundle_size=1, fnames=None):
+def plot_phenotype_response(plotdir, pfo_list, n_to_plot=20, bundle_size=1, fnames=None, default_xbounds=[-4, 4]):
     # ----------------------------------------------------------------------------------------
     def get_afplot(pfo, ax, itree):
         leaves = list(pfo["tree"].iter_leaves())
@@ -1317,11 +1408,15 @@ def plot_phenotype_response(plotdir, pfo_list, n_to_plot=20, bundle_size=1, fnam
         plt.clf()
         fig, ax = plt.subplots()
         ax2 = ax.twinx()
-        xbounds = get_afplot(pfo, ax2, itree)
-        resp_plot(pfo['birth-response'], ax, xbounds)
-        add_param_text(fig, pfo)
+        afp_xbounds = get_afplot(pfo, ax2, itree)  # not using the returned bounds atm
+        resp_plot(pfo['birth-response'], ax, default_xbounds)
+        add_param_text(fig, pfo, text_loc=[0.19, 0.5])
+        tpfo = add_slope_vals(pfo['birth-response'], default_xbounds)
+        if tpfo['x_ceil_start'] is not None:
+            ax.axvline(x=tpfo['x_ceil_start'], color='#cc0000', linestyle='--', linewidth=2, alpha=0.7)
         fn = "%s/trees-%d.svg" % (plotdir, itree)
         plt.savefig(fn)
+        plt.close()
         return fn
     # ----------------------------------------------------------------------------------------
     print("    plotting trees to %s" % plotdir)
@@ -1756,6 +1851,11 @@ def csv_wmode(mode='w'):
         return mode + 'b'
     else:
         return mode
+
+# ----------------------------------------------------------------------------------------
+def rgb_to_hex(rgb_tuple):
+    assert len(rgb_tuple) == 3
+    return '#%02x%02x%02x' %tuple([int(x*255) for x in rgb_tuple[:3]])
 
 # ----------------------------------------------------------------------------------------
 # copied from partis
