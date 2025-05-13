@@ -43,7 +43,8 @@ pltlabels = {
     'max_val' : 'max value',
     'max_diff' : 'max diff',
     'n-nodes' : 'N nodes',
-    'birth-rates' : '$m \lambda - \mu$',
+    'm_lambda_mu' : '$m \lambda - \mu$',
+    'lambda_lambdabar' : '$m (\lambda - \overline{\lambda})$',
     'lambda' : '$\lambda$',
 
 }
@@ -811,25 +812,30 @@ def make_dl_plots(model_type, prdfs, seqmeta, sstats, params_to_predict, outdir,
 def plot_tree_slices(plotdir, slice_info, itrial, nonsense_phenotype_value=None):
     # ----------------------------------------------------------------------------------------
     def get_data():
-        tdata = {'time': [], 'n-nodes': [], 'affinities' : [], 'birth-rates' : []}
+        tdata = {'time': [], 'n-nodes': [], 'affinities' : [], 'm_lambda_mu' : [], 'lambda_lambdabar' : []}
         n_skipped = 0
         for tdt in slice_info:
             tdata['time'].append(tdt['time'])
             tdata['n-nodes'].append(tdt['n-nodes'])
-            assert len(tdt['birth-rates']) == len(tdt['affinities'])  # it is actually a little fiddly to be sure these are the same length (because of the cell vs node distinction), and we *need* each pair of values to correspond
-            tdata['birth-rates'].append([])
+            assert len(tdt['lambda']) == len(tdt['affinities'])  # it is actually a little fiddly to be sure these are the same length (because of the cell vs node distinction), and we *need* each pair of values to correspond
+            tdata['m_lambda_mu'].append([])
+            tdata['lambda_lambdabar'].append([])
             tdata['affinities'].append([])
-            for bval, aval in zip(tdt['birth-rates'], tdt['affinities']):
+            mean_lambda = np.mean(tdt['lambda'])
+            # print('slice %.1f   m %.2f   mean lambda %.2f' % (tdt['time'], tdt['m_birth'], mean_lambda))
+            for aval, lambda_val, mu_val in zip(tdt['affinities'], tdt['lambda'], tdt['mu']):
                 if nonsense_phenotype_value is not None and aval==nonsense_phenotype_value:
                     n_skipped += 1
                     continue
-                tdata['birth-rates'][-1].append(bval)
+                tdata['m_lambda_mu'][-1].append(tdt['m_birth'] * lambda_val - mu_val)
+                tdata['lambda_lambdabar'][-1].append(tdt['m_birth'] * (lambda_val - mean_lambda))
                 tdata['affinities'][-1].append(aval)
+                # print('     %7.2f  %7.2f      %7.2f' % (lambda_val, lambda_val - mean_lambda, tdt['m_birth'] * (lambda_val - mean_lambda)))
         if n_skipped > 0:
-            print('    %s itree %d: skipped %d (of %d over %d slices) values with nonsense phenotype' % (wrnstr(), tdt['tree'], n_skipped, sum(len(tdt['birth-rates']) for tdt in slice_info), len(slice_info)))
+            print('    %s itree %d: skipped %d (of %d over %d slices) values with nonsense phenotype' % (wrnstr(), itrial, n_skipped, sum(len(tdt['affinities']) for tdt in slice_info), len(slice_info)))
         return tdata
     # ----------------------------------------------------------------------------------------
-    def make_slice_plot(svar, ndata, delta_t=10, xbounds=[-4, 4], min_dx=0.1):
+    def make_slice_plot(svar, ndata, xbounds=[-4, 4], min_dx=0.1):
         # ----------------------------------------------------------------------------------------
         def subsample_points(avals, bvals):
             xvals, rvals, last_x = [], [], None  # discard points with x closer than <min_dx>
@@ -839,6 +845,12 @@ def plot_tree_slices(plotdir, slice_info, itrial, nonsense_phenotype_value=None)
                     rvals.append(rv)
                     last_x = xv
             return xvals, rvals
+        # # ----------------------------------------------------------------------------------------
+        # def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
+        #     new_cmap = mpl.colors.LinearSegmentedColormap.from_list(
+        #         'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
+        #         cmap(numpy.linspace(minval, maxval, n)))
+        #     return new_cmap
         # ----------------------------------------------------------------------------------------
         fig, ax = plt.subplots()
         if svar == 'n-nodes':
@@ -849,11 +861,18 @@ def plot_tree_slices(plotdir, slice_info, itrial, nonsense_phenotype_value=None)
             ax2.set(ylabel='mean affinity')
             ax2.yaxis.label.set_color('#990012')
             ax.yaxis.label.set_color('#2b65ec')
-            # plt.ylim(0, ax.get_ylim()[1])
-        elif svar in ['birth-rates', 'affinities']:
+            ax.set_ylim(0, 1.05 * ax.get_ylim()[1])
+            # ax2.set_ylim(-0.15, 1.05 * ax2.get_ylim()[1])
+            ax2.set_ylim(-0.15, 2.7) #1.05 * ax2.get_ylim()[1])
+        elif svar in ['m_lambda_mu', 'lambda_lambdabar', 'affinities']:
             norm = mpl.colors.Normalize(vmin=min(ndata['time']), vmax=max(ndata['time']))
-            smap = plt.cm.ScalarMappable(norm=norm, cmap='viridis')
-            for stime, avals, bvals in zip(ndata['time'], ndata['affinities'], ndata['birth-rates']):
+            # cmap = truncate_colormap(plt.cm.get_cmap('viridis'), minval=0, maxval=) #Blues  #cm.get_cmap('jet')
+            smap = plt.cm.ScalarMappable(norm=norm, cmap='viridis_r')  # reverse the colormap so the vertical dashed lines (for last timepoints) aren't yellow
+            dtvals = [2, 3, 5, 10, 25]
+            delta_t = max([v for v in dtvals if max(ndata['time']) / v > 2])  # largest delta_t that gives more than 3 slices
+            if delta_t > max(ndata['time']) / 3:
+                print('    %s delta_t %.1f for slice plots too large (max time %.1f)' % (wrnstr(), delta_t, max(ndata['time'])))
+            for stime, avals, bvals in zip(ndata['time'], ndata['affinities'], ndata[svar]):
                 if stime % delta_t != 0:
                     continue
                 # sns.lineplot(pd.DataFrame([{'affinity' : a, 'birth-rate' : b} for a, b in zip(avals, bvals)]), x='affinity', y='birth-rate', alpha=0.6)  # super fuckin slow
@@ -861,12 +880,14 @@ def plot_tree_slices(plotdir, slice_info, itrial, nonsense_phenotype_value=None)
                 xvals, rvals = subsample_points(avals, bvals)
                 _, x_ceil_start = find_x_ceil_start(xvals, rvals)
                 if x_ceil_start is not None:
-                    ax.axvline(x=x_ceil_start, color=tcolor, linestyle='--', linewidth=3, alpha=0.7)
-                plt.scatter(xvals, rvals, label='%d (%.1f)'%(stime, np.mean(avals)), alpha=0.6, color=tcolor)  # this np.mean() uses *all* values, not the subsampled ones
-            ax.axhline(y=0, color='grey', linestyle='--', linewidth=3, alpha=0.7)
-            plt.legend(title='time (mean affinity)')
+                    ax.axvline(x=x_ceil_start, color=tcolor, linestyle='--', linewidth=2, alpha=0.7)
+                plt.scatter(xvals, rvals, label='%d (%.1f)'%(stime, np.mean(avals)), alpha=0.6, color=tcolor) #, edgecolors='black')  # this np.mean() uses *all* values, not the subsampled ones
+            ax.axhline(y=0, color='grey', linestyle='-', linewidth=1.5, alpha=0.5)
+            ax.axvline(x=0, color='grey', linestyle='-', linewidth=1.5, alpha=0.5)
+            plt.legend(title='time (mean aff.)')
             ax.set_xlim(xbounds[0], xbounds[1])
-            ax.set_ylim(-0.25, 1)
+            ax.set_ylim(-0.25, 0.6)
+            # ax.set_ylim(-0.2, 0.25)
             xlabel = pltlabels['affinity']  # 'time'
         else:
             assert False
@@ -904,7 +925,8 @@ def plot_tree_slices(plotdir, slice_info, itrial, nonsense_phenotype_value=None)
     fnlist = []
     ndata = get_data()
     make_slice_plot('n-nodes', ndata)
-    make_slice_plot('birth-rates', ndata)
+    make_slice_plot('m_lambda_mu', ndata)
+    make_slice_plot('lambda_lambdabar', ndata)
     # make_slice_plot('affinities')  # NOTE doesn't work yet
     # # ugh i give up, this plot is ugly and not that useful
     # with warnings.catch_warnings():
@@ -913,8 +935,8 @@ def plot_tree_slices(plotdir, slice_info, itrial, nonsense_phenotype_value=None)
     return fnlist
 
 # ----------------------------------------------------------------------------------------
-def addfn(fnames, fn, n_columns=4):
-    if len(fnames[-1]) >= n_columns:
+def addfn(fnames, fn, n_columns=4, force_column=False):
+    if len(fnames[-1]) >= n_columns or force_column:
         fnames.append([])
     fnames[-1].append(fn)
 
@@ -1394,7 +1416,7 @@ def add_param_text(fig, true_pfo, inf_pfo=None, diff_vals=None, upper_left=False
     fig.text(xv, yv, '\n'.join(param_text), fontsize=17)
 
 # ----------------------------------------------------------------------------------------
-def plot_phenotype_response(plotdir, pfo_list, n_to_plot=20, bundle_size=1, fnames=None, default_xbounds=[-4, 4]):
+def plot_phenotype_response(plotdir, pfo_list, n_to_plot=20, bundle_size=1, fnames=None, add_fn_to_columns=False, default_xbounds=[-4, 4]):
     # ----------------------------------------------------------------------------------------
     def get_afplot(pfo, ax, itree):
         leaves = list(pfo["tree"].iter_leaves())
@@ -1414,6 +1436,8 @@ def plot_phenotype_response(plotdir, pfo_list, n_to_plot=20, bundle_size=1, fnam
         tpfo = add_slope_vals(pfo['birth-response'], default_xbounds)
         if tpfo['x_ceil_start'] is not None:
             ax.axvline(x=tpfo['x_ceil_start'], color='#cc0000', linestyle='--', linewidth=2, alpha=0.7)
+        ax.axhline(y=0, color='grey', linestyle='-', linewidth=1.5, alpha=0.5)
+        ax.axvline(x=0, color='grey', linestyle='-', linewidth=1.5, alpha=0.5)
         fn = "%s/trees-%d.svg" % (plotdir, itree)
         plt.savefig(fn)
         plt.close()
@@ -1439,7 +1463,7 @@ def plot_phenotype_response(plotdir, pfo_list, n_to_plot=20, bundle_size=1, fnam
     addfn(fnames, fn)
     for itree in plt_indices:
         fn = plt_single_tree(itree, pfo_list[itree])
-        addfn(fnames, fn)
+        addfn(fnames, fn, force_column=add_fn_to_columns)
 
 # ----------------------------------------------------------------------------------------
 def memory_usage_fraction(

@@ -321,7 +321,7 @@ def wrap_fitness_bins(vlist, n_bins):
 final_ofn_strs = ['seqs', 'trees', 'meta', 'encoded-trees', 'encoded-fitnesses', 'encoded-fitness-bins', 'responses', 'summary-stats', 'slice-info']
 model_state_ofn_strs = ['model', 'per-node-train-scaler', 'per-tree-train-scaler', 'output-train-scaler', 'example-responses']
 sstat_fieldnames = ['tree', 'mean_branch_length', 'total_branch_length', 'carry_cap', 'init_population', 'time_to_sampling', 'death', 'final_capacity_fraction', 'mean_capacity_fraction']  # , 'n_final_nodes', 'n_mean_nodes'
-slice_headers = ['tree', 'time', 'n-nodes', 'affinities', 'birth-rates']
+slice_headers = ['tree', 'time', 'n-nodes', 'm_birth', 'm_death', 'affinities', 'lambda', 'mu']  # last three are per-cell (others are per-tree/per-slice)
 leaf_meta_fields = ['tree-index', 'name', 'affinity', 'n_muts', 'n_muts_aa', 'gc', 'is_leaf']
 
 # ----------------------------------------------------------------------------------------
@@ -396,6 +396,6 @@ def write_training_files(outdir, encoded_trees, responses, sstats, encoded_fitne
         dill.dump(responses, pfile)
     write_csv(output_fn(outdir, "summary-stats", None), sstats, sstat_fieldnames)
     if slice_info is not None:
-        write_csv(output_fn(outdir, "slice-info", None), slice_info, slice_headers, list_headers=['affinities', 'birth-rates'])
+        write_csv(output_fn(outdir, "slice-info", None), slice_info, slice_headers, list_headers=['affinities', 'lambda', 'mu'])
 
 # fmt: on

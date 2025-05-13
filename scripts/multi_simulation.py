@@ -89,6 +89,8 @@ def relabel_nodes(args, tree, itrial, only_internal=False, seqfos=None):
             seqdict[old_name]['name'] = node.name
 
 # ----------------------------------------------------------------------------------------
+# NOTE uses both old tree.slice() interface, which takes the properties of a node (which may be at a very different time to the slice) on every lineage,
+#   as well the newer cell_slice_values, which takes "cell" info that accounts e.g. for updated carry capacity factors
 def get_slicefo(tree, max_time, cell_slice_values, n_slices=None):
     if n_slices is None:
         n_slices = max_time
@@ -99,11 +101,13 @@ def get_slicefo(tree, max_time, cell_slice_values, n_slices=None):
         tslice = tree.slice(stime)  # by default, slice() returns a list of attribute 'x' values (see comment in slice() fcn definition re: difference to <cell_slice_values>)
         tdt['n-nodes'] = len(tslice)
         # tdt['affinities'] = [a for a in tslice]  # NOTE do *not* get affinity here -- we need each affinity to correspond to the birth rate (i.e. per-cell, not per-node) so get it from <cell_slice_values> below)
-        tmin, bvals, avals = sorted([(b['time'], b['rates'], b['x']) for b in cell_slice_values], key=lambda p: abs(p[0]-stime))[0]  # find value with time closest to <stime>
-        if abs(tmin - stime) > 0.1:  # if events are very rare in the tree, I guess the nearest node time won't be very close to stime
-            print('    %s tmin %.2f not very close to stime %.2f' % (utils.wrnstr(), tmin, stime))
-        tdt['birth-rates'] = bvals
-        tdt['affinities'] = avals
+        min_sfo = sorted([b for b in cell_slice_values], key=lambda b: abs(b['time']-stime))[0]  # find value with time closest to <stime>
+        if abs(min_sfo['time'] - stime) > 0.1:  # if events are very rare in the tree, I guess the nearest node time won't be very close to stime
+            print('    %s min time %.2f not very close to stime %.2f' % (utils.wrnstr(), min_sfo['time'], stime))
+        tdt['affinities'] = min_sfo['x']
+        tdt['m_birth'] = min_sfo['m_birth']
+        tdt['lambda'] = min_sfo['lambda']
+        tdt['mu'] = min_sfo['mu']
         slice_info.append(tdt)
 
     return slice_info
@@ -174,7 +178,7 @@ def generate_sequences_and_tree(
         print("      %s %d failures with message '%s'" % (utils.color("yellow", "warning"), err_strs[estr], estr))
     if not success:
         print("    %s exceeded maximum number of tries %d so giving up" % (utils.color("yellow", "warning"), args.n_max_tries))
-        return None, None, None
+        return None, None
 
     slice_info = get_slicefo(tree, params['time_to_sampling'], cell_slice_values)
 
@@ -726,23 +730,24 @@ def set_test_args(args):
 
 # ----------------------------------------------------------------------------------------
 def plot_params_responses(args, pcounts, all_trees=None, all_fns=None):
-    if all_fns is None:
-        all_fns = [[]]
-    if args.birth_response in ["sigmoid", 'sigmoid-ceil']:  # could plot other ones, but I think I need to modify some things, and I don't need it atm
-        if args.make_plots and all_trees is not None:
-            utils.plot_phenotype_response(args.outdir + "/plots/responses", all_trees, bundle_size=args.simu_bundle_size, fnames=all_fns)
-    # make summary param plots even if --make-plots isn't set (just cause atm i don't want to add another arg to make some-but-not-all plots)
-    utils.plot_chosen_params(args.outdir + "/plots/params", pcounts, {p: getattr(args, p.replace("-", "_") + "_range") for p in pcounts}, fnames=all_fns)
-    if args.make_plots and all_trees is not None:
-        for pfo in all_trees:
-            fnlist = utils.plot_tree_slices(args.outdir + "/plots/tree-slices", pfo['slice-info'], pfo['itrial'], nonsense_phenotype_value=args.nonsense_phenotype_value)
-            all_fns.append(fnlist)
-    utils.make_html(args.outdir + "/plots", fnames=all_fns)
-
     print("            sampled parameter values:               min      max")
     for pname, pvals in sorted(pcounts.items()):
         print("                      %27s  %7.2f  %7.2f" % (pname, min(pvals), max(pvals)))
 
+    if all_fns is None:
+        all_fns = [[]]
+    if args.make_plots and all_trees is not None:
+        if args.birth_response in ["sigmoid", 'sigmoid-ceil']:  # could plot other ones, but I think I need to modify some things, and I don't need it atm
+            utils.plot_phenotype_response(args.outdir + "/plots/responses", all_trees, bundle_size=args.simu_bundle_size, fnames=all_fns, add_fn_to_columns=True)
+        if len(all_trees) != len(all_fns) - 1:
+            print('    %s different number of phenotype response plots %d and trees %d' % (utils.wrnstr(), len(all_fns)-1, len(all_trees)))
+        for itree, pfo in enumerate(all_trees):
+            fnlist = utils.plot_tree_slices(args.outdir + "/plots/tree-slices", pfo['slice-info'], pfo['itrial'], nonsense_phenotype_value=args.nonsense_phenotype_value)
+            all_fns[itree+1] += fnlist
+        utils.make_html(args.outdir + "/plots", fnames=all_fns)
+
+    # make summary param plots even if --make-plots isn't set (just cause atm i don't want to add another arg to make some-but-not-all plots)
+    utils.plot_chosen_params(args.outdir + "/plots/params", pcounts, {p: getattr(args, p.replace("-", "_") + "_range") for p in pcounts}, fnames=all_fns)
 
 # ----------------------------------------------------------------------------------------
 def run_sub_procs(args):
@@ -882,9 +887,6 @@ def run_sub_procs(args):
     if args.tree_inference_method is not None:
         merge_subproc_outputs(subd=args.tree_inference_method)
 
-    if args.make_plots:
-        print("  note: can't make per-tree plots in main process when --n-sub-procs is set")
-
     # read merged files so we can make parameter count plots
     with open(outfn(args, 'responses'), "rb") as rfile:
         pklfos = pickle.load(rfile)
@@ -901,7 +903,15 @@ def run_sub_procs(args):
         for line in reader:
             for pname in [p for p in ['carry_cap', 'init_population', 'time_to_sampling', 'n_seqs'] if p in line]:  # old files don't have these
                 add_pval(pcounts, pname, float(line[pname]))
-    plot_params_responses(args, pcounts)
+    all_trees = None
+    if args.make_plots:  # gotta read original tree pkl files to make the non-param plots
+        all_trees = []
+        for iproc in range(args.n_sub_procs):
+            for itrial in range(iproc*n_per_proc, n_per_proc*(iproc+1)):
+                pfo = read_dill_file(outfn(args, None, subd="iproc-%d"%iproc, itrial=itrial) )
+                pfo['itrial'] = itrial
+                all_trees.append(pfo)
+    plot_params_responses(args, pcounts, all_trees=all_trees)
 
 
 # ----------------------------------------------------------------------------------------

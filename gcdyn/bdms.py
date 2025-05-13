@@ -226,7 +226,7 @@ class TreeNode(ete3.Tree):
             self._MUTATION_EVENT: mutation_response,
         }
 
-        cell_slice_values = []  # values of variables (e.g. binary birth rate) for every cell (not node, since this in general is *between* nodes on each lineage) alive at the time of each [update: some] event[s] NOTE do *not* make this a property of the tree, since we copy the tree during encoding and it's really fuckin slow if you do
+        cell_slice_values = []  # values of variables (e.g. x/affinity, lambda, etc) for every cell (not node, since the slices in general are *between* nodes on each lineage) alive at the time of each [update: some] event[s] NOTE do *not* make this a property of the tree, since we copy the tree during encoding and it's really fuckin slow if you do
 
         active_nodes, n_nodes = {}, {'active' : 0, 'nonsense' : 0}
         def add_actv_node(node):
@@ -313,11 +313,16 @@ class TreeNode(ete3.Tree):
                 raise Exception("current time %f exceeded end time %f by more than %e" % (current_time, end_time, 1e-8))
             if current_time < 0 or waiting_time < 0:
                 raise Exception('negative waiting time (response function probably has negative value): %.3f' % waiting_time)
-            def get_binary_brate(tnode):
-                return rate_multipliers[self._BIRTH_EVENT] * event_rates[self._BIRTH_EVENT].λ_phenotype(tnode.x) - event_rates[self._DEATH_EVENT].λ_phenotype(tnode.x)
-            # NOTE it's weird, but we want this (cell_slice_values) to be a separate structure to the tree because we want this info (especially birth rate) to be at a specific time for all cells, whereas each node exists only at the time of its event (secondarily, atm we .copy() the tree during encoding, which is *prohibitively* slow if this object is part of the tree)
+            # NOTE it's weird, but we want this (cell_slice_values) to be a separate structure to the tree because we want this info (especially birth rate) to be at a specific time for all cells (not all nodes), whereas each node exists only at the time of its event (secondarily, atm we .copy() the tree during encoding, which is *prohibitively* slow if this object is part of the tree)
             if len(cell_slice_values)==0 or current_time - cell_slice_values[-1]['time'] > slice_interval:  # use the first event that occurs more than <slice_interval> after the last time at which we sliced
-                cell_slice_values.append({'time' : current_time, 'x' : [n.x for n in active_nodes.values()], 'rates' : [get_binary_brate(n) for n in active_nodes.values()]})
+                cell_slice_values.append({
+                    'time' : current_time,
+                    'x' : [n.x for n in active_nodes.values()],
+                    'm_birth' : rate_multipliers[self._BIRTH_EVENT],
+                    'm_death' : rate_multipliers[self._DEATH_EVENT],
+                    'lambda' : [event_rates[self._BIRTH_EVENT].λ_phenotype(n.x) for n in active_nodes.values()],
+                    'mu' : [event_rates[self._DEATH_EVENT].λ_phenotype(n.x) for n in active_nodes.values()],
+                })
             for node in active_nodes.values():
                 node.dist += Δt
                 node.t = current_time
