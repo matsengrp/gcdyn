@@ -429,7 +429,7 @@ def read_tree_files(args):
             samples[tk] = samples[tk][:args.n_max_trees]
             assert len(samples[tk]) == args.n_max_trees
         print('    --n-max-trees: only using first %d / %d trees' % (len(samples[tk]), n_before))
-    if args.is_simu and args.resample_param is not None:
+    if args.action == 'train' and args.is_simu and args.resample_param is not None:
         n_max = 100  # max denominator in fraction to skip (just to make math easier below)
         def gpv(i): return getattr(samples['birth-responses'][i], args.resample_param)
         def gpvs(): return [gpv(i) for i in range(len(samples['trees']))]

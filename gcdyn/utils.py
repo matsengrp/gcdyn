@@ -425,7 +425,7 @@ def sns_xy_plot(ptype, smpl, tdf, xkey, ykey, all_xvals=None, true_x_eq_y=False,
     # ----------------------------------------------------------------------------------------
     if all_xvals is None:
         all_xvals = tdf[xkey]
-    if len(set(all_xvals)) == 1:
+    if len(set(all_xvals)) == 1 or ptype == 'box' and len(all_xvals) < 10:  # if all x values are the same, or if we're doing boxes and there's only a few x values
         return
     assert len(tdf[xkey]) == len(tdf[ykey])
     i_none = [i for (i, x, y, d) in zip(tdf.index, tdf[xkey], tdf[ykey], tdf['curve-diff-predicted']) if any(v is None or math.isnan(v) for v in [x, y, d])]
@@ -868,12 +868,13 @@ def plot_tree_slices(plotdir, slice_info, itrial, nonsense_phenotype_value=None)
             norm = mpl.colors.Normalize(vmin=min(ndata['time']), vmax=max(ndata['time']))
             # cmap = truncate_colormap(plt.cm.get_cmap('viridis'), minval=0, maxval=) #Blues  #cm.get_cmap('jet')
             smap = plt.cm.ScalarMappable(norm=norm, cmap='viridis_r')  # reverse the colormap so the vertical dashed lines (for last timepoints) aren't yellow
-            dtvals = [2, 3, 5, 10, 25]
-            delta_t = max([v for v in dtvals if max(ndata['time']) / v > 2])  # largest delta_t that gives more than 3 slices
+            dtvals = [2, 3, 5, 10, 15, 25]
+            delta_t = max([1] + [v for v in dtvals if max(ndata['time']) / v >= 3])  # largest delta_t that gives at least 3 slices
             if delta_t > max(ndata['time']) / 3:
                 print('    %s delta_t %.1f for slice plots too large (max time %.1f)' % (wrnstr(), delta_t, max(ndata['time'])))
-            for stime, avals, bvals in zip(ndata['time'], ndata['affinities'], ndata[svar]):
-                if stime % delta_t != 0:
+            assert delta_t >= 1
+            for stime, avals, bvals in zip(ndata['time'], ndata['affinities'], ndata[svar]):  # atm I think we have slices at every integer value, so this'll be fine unless you set delta_t to be smaller than 1
+                if stime % delta_t != 0 and stime != max(ndata['time']):
                     continue
                 # sns.lineplot(pd.DataFrame([{'affinity' : a, 'birth-rate' : b} for a, b in zip(avals, bvals)]), x='affinity', y='birth-rate', alpha=0.6)  # super fuckin slow
                 tcolor = rgb_to_hex(smap.to_rgba(stime)[:3])
@@ -922,8 +923,11 @@ def plot_tree_slices(plotdir, slice_info, itrial, nonsense_phenotype_value=None)
     mpl_init()
     if not os.path.exists(plotdir):
         os.makedirs(plotdir)
-    fnlist = []
     ndata = get_data()
+    fnlist = []
+    if max(ndata['time']) < 2:
+        print('    can\'t make slice plots with max time less than 2 (well, would need to make some changes)')
+        return fnlist
     make_slice_plot('n-nodes', ndata)
     make_slice_plot('m_lambda_mu', ndata)
     make_slice_plot('lambda_lambdabar', ndata)
@@ -1352,6 +1356,8 @@ def plot_all_diffs(plotdir, plotname, curve_diffs, n_bins=30, xbounds=[0, 1], n_
     fig, ax = plt.subplots()
     all_vals = [v for vlist in curve_diffs.values() for v in vlist if v is not None]
     range_list = (xbounds+all_vals) if max(all_vals)-min(all_vals)>0.1 else all_vals  # if all_vals has a very narrow spread, then a bug in sns causes a crash (when range of all_vals is too small compared to bin width) [kinda guessing on 0.1, it may need to be adjusted]
+    if len(range_list) < 2:
+        range_list += [0, 1]
     xmin, xmax = [mfn(range_list) for mfn in [min, max]]
     sns.histplot({s : vals for s, vals in curve_diffs.items() if len(vals)>0} if len(curve_diffs)>1 else all_vals, multiple='dodge', binwidth=(xmax - xmin) / n_bins)
     titlestr = ''
@@ -1361,7 +1367,7 @@ def plot_all_diffs(plotdir, plotname, curve_diffs, n_bins=30, xbounds=[0, 1], n_
         if n_skipped_diffs is not None and n_skipped_diffs[smpl] > 0:
             fig.text(0.475, 0.45-0.07*ism, '%s: skipped %d'%(smpl, n_skipped_diffs[smpl]), fontsize=20)
     ax.set(title=titlestr, xlabel='%scurve difference loss'%('signed ' if 'signed-' in plotname else ''))
-    ax.set_yscale('log')
+    # ax.set_yscale('log')
     fn = "%s/%s.svg" % (plotdir, plotname)
     plt.savefig(fn)
     plt.close()
