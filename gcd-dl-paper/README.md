@@ -21,16 +21,21 @@ Summary stat plots are in: `data-samples-combo-trees/model-type-sigmoid/carry-ca
 And inference result plots on these simulation samples is in: `data-samples-combo-trees/model-type-sigmoid/carry-cap-values-*/init-population-values-*/dl-infer/iqtree/plots.html`
 The sample with the summary stats that best matched data is: `carry-cap-values-500/init-population-values-128/death-values-0.2`.
 
+`mlm-test-v1-time-50.tgz`:
+
+Central data mimic simulation samples, but with time run out to 50 (rather than 20, as in the base analysis).
+
 # installation
 
 We recommend installing via Docker (quick start guide [here](https://docs.docker.com/get-started/)):
 
 ```
-sudo docker pull quay.io/matsengrp/gcdyn-dl
-sudo docker run -it --name container-1 -v ~:/home/mambauser/host quay.io/matsengrp/gcdyn-dl /bin/bash
+sudo docker pull quay.io/matsengrp/gcdyn:alt-encode
+sudo docker run --rm -it --user=root --name container-1 -v ~:/host/home quay.io/matsengrp/gcdyn:alt-encode /bin/bash
 ```
 The `-v` mounts your home directory on the host machine to the path `/home/mambauser/host` inside the container, so we can pass in files from the host machine and easily extract results.
 This mounted directory (whether it's your `$HOME` or not) should contain the REPLAYDIR and DATADIR paths (described below) with replay data files.
+The `--user=root` is a temporary fix: mamba uses the `mambauser` user inside docker, but it is difficult to mount the host filesystem in a way such that it is writeable by the mambauser.
 
 You can also install [gcdyn](https://matsengrp.github.io/gcdyn/developer.html) and [partis](https://github.com/psathyrella/partis/blob/main/docs/install.md) by hand.
 
