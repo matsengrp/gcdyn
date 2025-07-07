@@ -50,7 +50,7 @@ imtxs = {
 }
 
 # ----------------------------------------------------------------------------------------
-def encode_tree(intree, max_leaf_count=None, ladderize=True, dont_scale=False, mtype='tree', bresp=None):
+def encode_tree(intree, max_leaf_count=None, ladderize=True, dont_scale=False, mtype='tree', bresp=None, fill_val=None):
     """
     Returns the "Compact Bijective Ladderized Vector" form of the given
     tree. Does not modify input tree.
@@ -108,7 +108,7 @@ def encode_tree(intree, max_leaf_count=None, ladderize=True, dont_scale=False, m
     if max_leaf_count is None:
         max_leaf_count = len(worktree.get_leaves())
     assert len(worktree.get_leaves()) <= max_leaf_count
-    matrix = np.full((mtx_lens[mtype], max_leaf_count), empty_val)
+    matrix = np.full((mtx_lens[mtype], max_leaf_count), empty_val if fill_val is None else fill_val)
 
     leaf_index, ancestor_index = 0, 0
     previous_ancestor = worktree  # the root

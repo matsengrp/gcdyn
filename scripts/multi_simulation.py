@@ -660,7 +660,7 @@ def get_parser():
     parser.add_argument("--init-population-values", type=int, default=[2], nargs='+')
     parser.add_argument("--init-population-range", help='DO NOT USE (use --init-population-values instead)')
     parser.add_argument("--seed", default=0, type=int, help="random seed")
-    parser.add_argument("--outdir", default=os.getcwd())
+    parser.add_argument("--outdir", help='Output directory. Default set below.')
     parser.add_argument("--birth-response", default="sigmoid", choices=["constant", "soft-relu", "sigmoid", 'sigmoid-ceil'], help="birth rate response function")
     parser.add_argument("--death-response", default="constant-nonsense", choices=["constant", "constant-nonsense"], help="death rate response function")
     parser.add_argument("--death-values", default=[0.1], nargs='+', type=float, help="list of values from which to choose (constant) death response value")
@@ -951,6 +951,10 @@ def main():
     random.seed(args.seed)
     np.random.seed(args.seed)
     np.seterr(divide="ignore")
+
+    if args.outdir is None:
+        args.outdir = '%s/gcd-simulate-%d' % (os.getcwd(), random.randint(10000, 99999))
+        print('  --outdir not set, using default %s' % args.outdir)
 
     start = time.time()
     if args.test:

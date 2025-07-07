@@ -26,7 +26,7 @@ class TestDeepLearning(unittest.TestCase):
             node.t = node.up.t + node.dist
             node.x = node.up.x + 1
 
-        encoded_tree = encode.encode_tree(tree, max_leaf_count=10, dont_scale=True)
+        encoded_tree = encode.encode_tree(tree, max_leaf_count=10, dont_scale=True, fill_val=0)
 
         solution = np.array(
             [
@@ -62,10 +62,11 @@ class TestDeepLearning(unittest.TestCase):
             ttr.remove_mutation_events()
             init_trees.append(encode.encode_tree(ttr))
         init_trees = encode.pad_trees(
-            init_trees
+            init_trees,
+            'tree'
         )  # have to pad initial trees since they get padded in writing fcn
 
-        encode.write_trees("%s/test-tree.npy" % test_dir, init_trees)
+        encode.write_trees("%s/test-tree.npy" % test_dir, init_trees, 'tree')
         read_trees = encode.read_trees("%s/test-tree.npy" % test_dir)
 
         self.assertTrue(all(np.all(rt == it) for it, rt in zip(init_trees, read_trees)))

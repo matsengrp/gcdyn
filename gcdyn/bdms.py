@@ -35,6 +35,7 @@ from typing import Any, Optional, Union, Literal, Iterator
 import itertools
 import copy
 from collections import defaultdict
+import sys
 
 from gcdyn import mutators, poisson, utils
 
@@ -158,14 +159,14 @@ class TreeNode(ete3.Tree):
         self,
         t: float,
         birth_response: poisson.Response = poisson.ConstantResponse(1),
-        death_response: poisson.Response = poisson.ConstantResponse(0),
+        death_response: poisson.Response = poisson.ConstantResponse(0.0001),  # this was 0 (not sure why), but that crashes in its waiting time call
         mutation_response: poisson.Response = poisson.ConstantResponse(1),
         mutator: mutators.Mutator = mutators.GaussianMutator(shift=0, scale=1),
         birth_mutations: bool = False,
         min_survivors: int = 1,
         capacity: int = 1000,
         capacity_method: Optional[Literal["birth", "death", "hard"]] = None,
-        init_population: int = 1,
+        init_population: int = 2,
         seed: Optional[Union[int, np.random.Generator]] = None,
         debug: bool = False,
         print_progress: bool = False,
