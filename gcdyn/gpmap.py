@@ -4,6 +4,7 @@ r"""Genotype-phenotype map :py:class:`GPMap`
 Abstract base class for defining generic genotype-phenotype (GP) maps.
 Some concrete child classes are included.
 """
+
 from abc import ABC, abstractmethod
 from typing import Any
 import numpy as np
