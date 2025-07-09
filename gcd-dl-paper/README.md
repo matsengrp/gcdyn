@@ -30,8 +30,8 @@ Central data mimic simulation samples, but with time run out to 50 (rather than 
 We recommend installing via Docker (quick start guide [here](https://docs.docker.com/get-started/)):
 
 ```
-sudo docker pull quay.io/matsengrp/gcdyn:alt-encode
-sudo docker run --rm -it --user=root --name container-1 -v ~:/host/home quay.io/matsengrp/gcdyn:alt-encode /bin/bash
+sudo docker pull quay.io/matsengrp/gcdyn
+sudo docker run --rm -it --user=root --name container-1 -v ~:/host/home quay.io/matsengrp/gcdyn /bin/bash
 ```
 The `-v` mounts your home directory on the host machine to the path `/home/mambauser/host` inside the container, so we can pass in files from the host machine and easily extract results.
 This mounted directory (whether it's your `$HOME` or not) should contain the REPLAYDIR and DATADIR paths (described below) with replay data files.
