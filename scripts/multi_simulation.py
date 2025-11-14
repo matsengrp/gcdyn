@@ -20,7 +20,7 @@ from experiments import replay
 
 partis_dir = os.path.dirname(os.path.realpath(__file__)).replace('/projects/gcdyn/scripts', '')
 sys.path.insert(1, partis_dir) # + '/python')
-import python.treeutils as treeutils
+import partis.treeutils as treeutils
 
 # ----------------------------------------------------------------------------------------
 def outfn(args, ftype, itrial=None, subd=None):
@@ -741,9 +741,22 @@ def plot_params_responses(args, pcounts, all_trees=None, all_fns=None):
             utils.plot_phenotype_response(args.outdir + "/plots/responses", all_trees, bundle_size=args.simu_bundle_size, fnames=all_fns, add_fn_to_columns=True)
         if len(all_trees) != len(all_fns) - 1:
             print('    %s different number of phenotype response plots %d and trees %d' % (utils.wrnstr(), len(all_fns)-1, len(all_trees)))
+
+        # Collect slice info for all trees (for combined plot)
+        all_slice_info = []
         for itree, pfo in enumerate(all_trees):
+            all_slice_info.append((pfo['itrial'], pfo['slice-info']))
             fnlist = utils.plot_tree_slices(args.outdir + "/plots/tree-slices", pfo['slice-info'], pfo['itrial'], nonsense_phenotype_value=args.nonsense_phenotype_value)
             all_fns[itree+1] += fnlist
+            if itree + 1 >= len(all_fns) - 1:
+                print('    %s stopping after plotting %d trees' % (utils.wrnstr(), itree+1))
+                break
+
+        # Make combined GC plot
+        if len(all_slice_info) > 0:
+            combined_fnlist = utils.plot_combined_tree_slices(args.outdir + "/plots/tree-slices", all_slice_info, nonsense_phenotype_value=args.nonsense_phenotype_value)
+            all_fns[0] += combined_fnlist
+
         utils.make_html(args.outdir + "/plots", fnames=all_fns)
 
     # make summary param plots even if --make-plots isn't set (just cause atm i don't want to add another arg to make some-but-not-all plots)

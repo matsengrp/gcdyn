@@ -930,13 +930,132 @@ def plot_tree_slices(plotdir, slice_info, itrial, nonsense_phenotype_value=None)
         return fnlist
     make_slice_plot('n-nodes', ndata)
     make_slice_plot('m_lambda_mu', ndata)
-    make_slice_plot('lambda_lambdabar', ndata)
+    # make_slice_plot('lambda_lambdabar', ndata)  # this looks pretty darn similar to m_lambda_mu
     # make_slice_plot('affinities')  # NOTE doesn't work yet
     # # ugh i give up, this plot is ugly and not that useful
     # with warnings.catch_warnings():
     #     make_affy_joyplot(get_data('affinity', '5'))
 
     return fnlist
+
+# ----------------------------------------------------------------------------------------
+def plot_combined_tree_slices(plotdir, all_slice_info, target_mean_affinities=[0.1, 1.1, 2.0], nonsense_phenotype_value=None):
+    """
+    Plot combined data from all GCs, showing timepoints with specific mean affinity values.
+
+    Args:
+        plotdir: directory to save plot
+        all_slice_info: list of (itrial, slice_info) tuples for all GCs
+        target_mean_affinities: list of target mean affinity values to plot
+        nonsense_phenotype_value: phenotype value to skip
+    """
+    # ----------------------------------------------------------------------------------------
+    def subsample_points(avals, bvals, min_dx=0.1):  # NOTE copied from make_slice_plot
+        xvals, rvals, last_x = [], [], None  # discard points with x closer than <min_dx>
+        for xv, rv in sorted([[a, b] for a, b in zip(avals, bvals)], key=lambda p: p[0]):  # sort pairs by affinity value
+            if last_x is None or xv - last_x > min_dx:
+                xvals.append(xv)
+                rvals.append(rv)
+                last_x = xv
+        return xvals, rvals
+    # ----------------------------------------------------------------------------------------
+    def find_closest_timepoint(filtered_affinities, times, target_mean_affy, itrial, debug=False):
+        """Find the timepoint with mean affinity closest to target using filtered data."""
+        best_diff = float('inf')
+        best_idx = None
+        if debug:
+            print('      itrial %d: finding closest timepoint to target mean affinity %.2f' % (itrial, target_mean_affy))
+        for idx, (affy_list, time) in enumerate(zip(filtered_affinities, times)):
+            if len(affy_list) == 0:
+                continue
+            mean_affy = np.mean(affy_list)
+            diff = abs(mean_affy - target_mean_affy)
+            if debug:
+                print('        time %.1f: mean affy %.2f (diff %.3f)' % (time, mean_affy, diff))
+            if diff < best_diff:
+                best_diff = diff
+                best_idx = idx
+        return best_idx if best_idx is not None else None
+    # ----------------------------------------------------------------------------------------
+
+    mpl_init()
+    if not os.path.exists(plotdir):
+        os.makedirs(plotdir)
+
+    # Default pyplot colors: C0=blue, C1=orange, C2=green
+    color_map = {
+        target_mean_affinities[0]: 'C0',  # blue
+        target_mean_affinities[1]: 'C1',  # orange
+        target_mean_affinities[2]: 'C2',  # green
+    }
+
+    svar = 'm_lambda_mu'  # Plot m*lambda - mu
+    fig, ax = plt.subplots()
+
+    # Collect data from all GCs
+    for itrial, slice_info in all_slice_info:
+        # Process data similar to get_data() in plot_tree_slices - filter out nonsense values
+        tdata = {'affinities': [], svar: [], 'times': []}
+        n_skipped = 0
+        for tdt in slice_info:
+            tdata['affinities'].append([])
+            tdata[svar].append([])
+            tdata['times'].append(tdt['time'])
+            for aval, lambda_val, mu_val in zip(tdt['affinities'], tdt['lambda'], tdt['mu']):
+                if nonsense_phenotype_value is not None and aval == nonsense_phenotype_value:
+                    n_skipped += 1
+                    continue
+                tdata[svar][-1].append(tdt['m_birth'] * lambda_val - mu_val)
+                tdata['affinities'][-1].append(aval)
+
+        # For each target mean affinity, find closest timepoint and plot
+        for target_affy in target_mean_affinities:
+            idx = find_closest_timepoint(tdata['affinities'], tdata['times'], target_affy, itrial)
+            if idx is None:
+                print('    %s itrial %d: no timepoint found for target mean affinity %.1f' % (wrnstr(), itrial, target_affy))
+                continue
+
+            avals = tdata['affinities'][idx]
+            bvals = tdata[svar][idx]
+
+            if len(avals) == 0:
+                continue
+
+            # Calculate mean affinity BEFORE subsampling
+            mean_affy = np.mean(avals)
+            diff = abs(mean_affy - target_affy)
+            print('    itrial %d: target mean affinity %.2f, found %.2f (diff %.3f) at time %.1f' % (itrial, target_affy, mean_affy, diff, tdata['times'][idx]))
+
+            # Subsample points for plotting
+            xvals, rvals = subsample_points(avals, bvals)
+
+            # Convert to relative affinity (x - x_0) using mean from full (unsubsampled) data
+            xvals = [x - mean_affy for x in xvals]
+
+            # Plot with color corresponding to target mean affinity
+            tcolor = color_map[target_affy]
+            plt.scatter(xvals, rvals, alpha=0.4, color=tcolor, s=20)
+
+    # Add reference lines
+    ax.axhline(y=0, color='grey', linestyle='-', linewidth=1.5, alpha=0.5)
+    ax.axvline(x=0, color='grey', linestyle='-', linewidth=1.5, alpha=0.5)
+
+    # Create custom legend
+    legend_elements = [plt.Line2D([0], [0], marker='o', color='w',
+                                  markerfacecolor=color_map[affy], markersize=8,
+                                  label=f'{affy}')
+                      for affy in target_mean_affinities]
+    ax.legend(handles=legend_elements, title='Target mean\naffinity', loc=2)  # loc=2 is top left
+
+    ax.set_xlim(-2, 3)
+    ax.set_ylim(-0.6, 1.2)
+    ax.set(xlabel='relative affinity, $x-x_0(t)$', ylabel=pltlabels.get(svar, svar))
+
+    fn = "%s/combined-gc-%s.svg" % (plotdir, svar)
+    plt.savefig(fn)
+    plt.close()
+
+    return [fn]
 
 # ----------------------------------------------------------------------------------------
 def addfn(fnames, fn, n_columns=4, force_column=False):
