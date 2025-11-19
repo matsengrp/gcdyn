@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# create env without using anaconda:
+# micromamba create -n gcdyn \
+#   --override-channels \
+#   -c https://prefix.dev/conda-forge \
+#   python=3.9
 # zenodo dir: /fh/fast/matsen_e/dralph/partis/gcdyn/zenodo/
 # see also readme and scripts in gcdyn/gcd-dl-paper/
 
@@ -50,3 +55,10 @@ echo $bin --actions data:check-dl:replay-plot-ckdl:dl-infer $common --label $dla
 
 # param-degen: copied some input/output files and edited them by hand, then ran this (also modifed svgs by hand to remove title, extra legend, and righthand y axis):
 # gcd-dl infer --is-simu --indir /fh/fast/matsen_e/dralph/partis/gcdyn/param-degen-v0 --outdir $fs/partis/gcdyn/param-degen-v0/inferred-output --model-dir /fh/fast/matsen_e/dralph/partis/gcdyn/for-data/v6/n-trials-50000/model-type-sigmoid/dl-infer/iqtree --model-type sigmoid
+
+# # make simulation + plots for Fig 7 + 8
+# # fig 7:
+# bdir=/fh/fast/matsen_e/dralph/partis/gcdyn
+# gcd-simulate --outdir $bdir/mlm-test-v1-time-50 --debug 1 --tree-inference-method iqtree --dl-prediction-file $bdir/$dlabel/$dvsn/data-samples-combo-trees/model-type-sigmoid/carry-cap-values-500/init-population-values-128/death-values-0.2/data/plots/median-curve-infer.csv --n-trials 3 --n-sub-procs 3 --mutability-multiplier 0.5 --n-seqs-range 60 95 --seed 0 --make-plots --time-to-sampling-values 50 --carry-cap-values 500 --init-population-values 128 --death-values 0.2
+# # fig 8:
+# gcd-simulate --outdir $bdir/mlm-test-v2-time-70 --debug 1 --tree-inference-method iqtree --dl-prediction-file $bdir/$dlabel/$dvsn/data-samples-combo-trees/model-type-sigmoid/carry-cap-values-500/init-population-values-128/death-values-0.2/data/plots/median-curve-infer.csv --n-trials 25 --n-sub-procs 25 --mutability-multiplier 0.5 --n-seqs-range 60 95 --seed 0 --make-plots --time-to-sampling-values 70 --carry-cap-values 500 --init-population-values 128 --death-values 0.2
