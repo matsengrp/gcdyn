@@ -868,7 +868,7 @@ def plot_tree_slices(plotdir, slice_info, itrial, nonsense_phenotype_value=None)
             norm = mpl.colors.Normalize(vmin=min(ndata['time']), vmax=max(ndata['time']))
             # cmap = truncate_colormap(plt.cm.get_cmap('viridis'), minval=0, maxval=) #Blues  #cm.get_cmap('jet')
             smap = plt.cm.ScalarMappable(norm=norm, cmap='viridis_r')  # reverse the colormap so the vertical dashed lines (for last timepoints) aren't yellow
-            dtvals = [2, 3, 5, 10, 15, 25]
+            dtvals = [10] #[2, 3, 5, 10, 15, 25]
             delta_t = max([1] + [v for v in dtvals if max(ndata['time']) / v >= 3])  # largest delta_t that gives at least 3 slices
             if delta_t > max(ndata['time']) / 3:
                 print('    %s delta_t %.1f for slice plots too large (max time %.1f)' % (wrnstr(), delta_t, max(ndata['time'])))
@@ -880,9 +880,13 @@ def plot_tree_slices(plotdir, slice_info, itrial, nonsense_phenotype_value=None)
                 tcolor = rgb_to_hex(smap.to_rgba(stime)[:3])
                 xvals, rvals = subsample_points(avals, bvals)
                 _, x_ceil_start = find_x_ceil_start(xvals, rvals)
-                if x_ceil_start is not None:
-                    ax.axvline(x=x_ceil_start, color=tcolor, linestyle='--', linewidth=2, alpha=0.7)
                 plt.scatter(xvals, rvals, label='%d (%.1f)'%(stime, np.mean(avals)), alpha=0.6, color=tcolor) #, edgecolors='black')  # this np.mean() uses *all* values, not the subsampled ones
+                if x_ceil_start is not None:
+                    points_with_dist = sorted([(abs(x - x_ceil_start), r) for x, r in zip(xvals, rvals)])  # Find y-value of closest point to x_ceil_start to determine vertical extent
+                    _, closest_y_val = points_with_dist[0]
+                    y_extend = 0.05  # extend line by this amount above and below
+                    ax.plot([x_ceil_start, x_ceil_start], [closest_y_val - y_extend, closest_y_val + y_extend], color='white', linewidth=3.5, alpha=1)
+                    ax.plot([x_ceil_start, x_ceil_start], [closest_y_val - y_extend, closest_y_val + y_extend], color=tcolor, linewidth=3, alpha=0.7)
             ax.axhline(y=0, color='grey', linestyle='-', linewidth=1.5, alpha=0.5)
             ax.axvline(x=0, color='grey', linestyle='-', linewidth=1.5, alpha=0.5)
             plt.legend(title='time (mean aff.)')
@@ -992,6 +996,12 @@ def plot_combined_tree_slices(plotdir, all_slice_info, target_mean_affinities=[0
     svar = 'm_lambda_mu'  # Plot m*lambda - mu
     fig, ax = plt.subplots()
 
+    # Collect all points for each target affinity (for binned averaging)
+    all_points = {target_affy: {'x': [], 'y': []} for target_affy in target_mean_affinities}
+
+    # Track chosen times for each target affinity
+    chosen_times = {target_affy: [] for target_affy in target_mean_affinities}
+
     # Collect data from all GCs
     for itrial, slice_info in all_slice_info:
         # Process data similar to get_data() in plot_tree_slices - filter out nonsense values
@@ -1024,7 +1034,11 @@ def plot_combined_tree_slices(plotdir, all_slice_info, target_mean_affinities=[0
             # Calculate mean affinity BEFORE subsampling
             mean_affy = np.mean(avals)
             diff = abs(mean_affy - target_affy)
-            print('    itrial %d: target mean affinity %.2f, found %.2f (diff %.3f) at time %.1f' % (itrial, target_affy, mean_affy, diff, tdata['times'][idx]))
+            chosen_time = tdata['times'][idx]
+            print('    itrial %d: target mean affinity %.2f, found %.2f (diff %.3f) at time %.1f' % (itrial, target_affy, mean_affy, diff, chosen_time))
+
+            # Store chosen time for summary statistics
+            chosen_times[target_affy].append(chosen_time)
 
             # Subsample points for plotting
             xvals, rvals = subsample_points(avals, bvals)
@@ -1032,9 +1046,68 @@ def plot_combined_tree_slices(plotdir, all_slice_info, target_mean_affinities=[0
             # Convert to relative affinity (x - x_0) using mean from full (unsubsampled) data
             xvals = [x - mean_affy for x in xvals]
 
+            # Collect all points (before subsampling) for binned averaging
+            all_points[target_affy]['x'].extend([a - mean_affy for a in avals])
+            all_points[target_affy]['y'].extend(bvals)
+
             # Plot with color corresponding to target mean affinity
             tcolor = color_map[target_affy]
-            plt.scatter(xvals, rvals, alpha=0.4, color=tcolor, s=20)
+            plt.scatter(xvals, rvals, alpha=0.25, color=tcolor, s=20)
+
+    # Print summary statistics for chosen times
+    print('\n  Summary of chosen times for each target mean affinity:')
+    for target_affy in target_mean_affinities:
+        if len(chosen_times[target_affy]) > 0:
+            mean_time = np.mean(chosen_times[target_affy])
+            print('    target mean affinity %.2f: mean chosen time %.1f (from %d GCs)' % (target_affy, mean_time, len(chosen_times[target_affy])))
+        else:
+            print('    target mean affinity %.2f: no GCs found' % target_affy)
+
+    # Plot stacked histograms of relative affinity distributions in background
+    hist_base = -0.5  # Base y position for histograms
+    hist_height = 0.3  # Total height of stacked histogram area
+    n_bins = 30
+    bin_range = (-2, 3)
+
+    # First, compute all histograms
+    hist_data = {}
+    max_total_count = 0  # Track max total count across all bins for normalization
+    bin_edges = None
+
+    for target_affy in target_mean_affinities:
+        if len(all_points[target_affy]['x']) < 3:
+            continue
+        x_all = np.array(all_points[target_affy]['x'])
+        hist, bin_edges = np.histogram(x_all, bins=n_bins, range=bin_range)
+        hist_data[target_affy] = hist
+
+    # Calculate the maximum total count across all bins (for stacking normalization)
+    if len(hist_data) > 0:
+        bin_totals = np.zeros(n_bins)
+        for hist in hist_data.values():
+            bin_totals += hist
+        max_total_count = bin_totals.max()
+        bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+
+        # Plot stacked histograms
+        bottom = np.full(n_bins, hist_base)  # Start all bins at hist_base
+
+        for target_affy in target_mean_affinities:
+            if target_affy not in hist_data:
+                continue
+
+            tcolor = color_map[target_affy]
+            hist = hist_data[target_affy]
+
+            # Normalize to hist_height based on max total count
+            hist_normalized = (hist / max_total_count) * hist_height
+            top = bottom + hist_normalized
+
+            # Plot this layer
+            ax.fill_between(bin_centers, bottom, top, color=tcolor, alpha=0.5, step='mid')
+
+            # Update bottom for next layer
+            bottom = top
 
     # Add reference lines
     ax.axhline(y=0, color='grey', linestyle='-', linewidth=1.5, alpha=0.5)
