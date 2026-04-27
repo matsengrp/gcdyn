@@ -943,7 +943,7 @@ def plot_tree_slices(plotdir, slice_info, itrial, nonsense_phenotype_value=None)
     return fnlist
 
 # ----------------------------------------------------------------------------------------
-def plot_combined_tree_slices(plotdir, all_slice_info, target_mean_affinities=[0.1, 1.1, 2.0], nonsense_phenotype_value=None):
+def plot_combined_tree_slices(plotdir, all_slice_info, target_mean_affinities=[0.1, 1.0, 2.0], nonsense_phenotype_value=None):
     """
     Plot combined data from all GCs, showing timepoints with specific mean affinity values.
 
